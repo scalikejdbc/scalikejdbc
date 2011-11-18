@@ -4,7 +4,7 @@
 
 This library is very simply implemented (similar to SpringJDBC) and it's usage is also very simple.
 
-You just use PreparedStatement and map from java.sql.ResultSet to Option[A]/List[A] by yourself.
+You just use PreparedStatement and map from ResultSet to Option[A] or List[A] by yourself.
 
 ## sbt
 
@@ -22,13 +22,15 @@ libraryDependencies ++= Seq(
 
 ### DB accessor object
 
+Simply get Connection:
+
 ```scala
 import scalikejdbc._
 val conn = DriverManager.getConnection(url, user, password)
 val db = new DB(conn)
 ```
 
-or With Apache Commons DBCP:
+or use Apache Commons DBCP:
 
 ```scala
 import scalikejdbc._
@@ -200,7 +202,7 @@ class TxFilter extends Filter {
 Unfiltered example:
 
 ```scala
-class Hello extends Plan {
+class TxSample extends Plan {
 
   def intent = {
     case req @ GET(Path("/rollbackTest")) => {
@@ -216,9 +218,9 @@ class Hello extends Plan {
 object Server extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
-    .plan(new Hello)
+    .plan(new TxSample)
     .run { s => unfiltered.util.Browser.open(
-      "http://127.0.0.1:%d/hello".format(s.port))
+      "http://127.0.0.1:%d/rollbackTest".format(s.port))
     }
 }
 ```
