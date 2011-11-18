@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "0.1.0" withSources ()
+  "com.github.seratch" %% "scalikejdbc" % "0.1.1" withSources ()
 )
 ```
 
