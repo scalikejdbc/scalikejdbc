@@ -1,6 +1,6 @@
 # ScalikeJDBC - A thin JDBC wrapper in Scala
 
-## Just write SQL and start writing applications right now
+### Just write SQL and start writing applications right now
 
 This library is very simply implemented (similar to SpringJDBC) and it's usage is also very simple.
 
