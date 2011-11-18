@@ -114,14 +114,14 @@ class DB(conn: Connection) {
     }
     val session = new DBSession(conn, Some(tx))
     try {
-      execution(session)
+      val result = execution(session)
+      tx.commit()
+      result
     } catch {
       case e: Exception => {
         tx.rollback()
         throw e
       }
-    } finally {
-      tx.commit()
     }
   }
 

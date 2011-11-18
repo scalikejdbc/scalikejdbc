@@ -75,8 +75,13 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
     using(stmt) {
       stmt => {
         bindParams(stmt, params: _*)
-        val resultSet = stmt.executeQuery()
-        if (resultSet.next()) extract(resultSet) else None
+        val resultSet = new ResultSetIterator(stmt.executeQuery())
+        val rows = (resultSet flatMap (rs => extract(rs))).toList
+        rows match {
+          case Nil => None
+          case one :: Nil => Some(one)
+          case _ => throw new TooManyRowsException(1, rows.size)
+        }
       }
     }
   }
@@ -87,9 +92,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
       stmt => {
         bindParams(stmt, params: _*)
         val resultSet = new ResultSetIterator(stmt.executeQuery())
-        (resultSet flatMap {
-          rs => extract(rs)
-        }).toList
+        (resultSet flatMap (rs => extract(rs))).toList
       }
     }
   }

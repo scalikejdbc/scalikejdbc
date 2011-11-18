@@ -142,6 +142,18 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter {
     result.get should equal(1)
   }
 
+  test("asOne returns too many results in autoCommit block") {
+    val conn = DriverManager.getConnection(url, user, password)
+    val db = new DB(conn)
+    intercept[TooManyRowsException] {
+      db autoCommit {
+        _.asOne("select id from emp") {
+          rs => Some(rs.getInt("id"))
+        }
+      }
+    }
+  }
+
   test("asOne in autoCommit block 2") {
     val conn = DriverManager.getConnection(url, user, password)
     val db = new DB(conn)
