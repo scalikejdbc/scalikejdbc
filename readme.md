@@ -4,7 +4,7 @@
 
 This library is very simply implemented (similar to SpringJDBC) and it's usage is also very simple.
 
-You just use PreparedStatement and map from java.sql.ResultSet to Option[A] by yourself.
+You just use PreparedStatement and map from java.sql.ResultSet to Option[A]/List[A] by yourself.
 
 ## sbt
 
