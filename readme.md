@@ -164,7 +164,7 @@ val names = session.asList("select * from emp") {
 db.rollbackIfActive() // never throw Exception
 ```
 
-### TxFilter (Open Session in View)
+### TxFilter
 
 See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
 
