@@ -9,7 +9,15 @@ object ScalikeJDBCBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc",
-    version := "0.1.2",
+    version := "0.1.3-SNAPSHOT",
+    publishTo <<= (version) { version: String =>
+      Some(
+        Resolver.file("GitHub Pages", Path.userHome / "github" / "seratch.github.com" / "mvn-repo" / {
+          if (version.trim.endsWith("SNAPSHOT")) "snapshots" else "releases" 
+        })
+      )
+    },
+    /*
     publishTo := Some(
       Resolver.file(
         "Github Pages",
@@ -17,6 +25,7 @@ object ScalikeJDBCBuild extends Build {
       )
         (Patterns(true, Resolver.mavenStyleBasePattern))
     ),
+    */
     publishMavenStyle := true,
     scalacOptions ++= Seq("-deprecation", "-unchecked")
   )
