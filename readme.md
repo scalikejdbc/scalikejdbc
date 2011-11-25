@@ -166,7 +166,7 @@ val names = session.asList("select * from emp") {
 db.rollbackIfActive() // never throw Exception
 ```
 
-### Implicit DB
+## DB instance as an implicit parameter
 
 It's also possible to pass an instance of scalikejdbc.DB as an implicit parameter:
 
@@ -195,7 +195,7 @@ implicit val db = new DB(conn)
 val names = withinTx { s => s.asList("select * from emp") { rs => Some(rs.getString("name")) } }
 ```
 
-### TxFilter
+## TxFilter example
 
 See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
 
@@ -259,7 +259,7 @@ object Server1 extends App {
 }
 ```
 
-Using an implicit parameter:
+DB instance as an implicit parameter:
 
 ```scala
 trait TxSupport {
