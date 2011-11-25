@@ -173,37 +173,31 @@ See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snip
 ```scala
 class TxFilter extends Filter {
 
-  def init(filterConfig: FilterConfig) {
+  def init(filterConfig: FilterConfig) = {
     ConnectionPool.initialize(url, user, password)
   }
 
-  def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-
-    // simply using DriverManager
-    //    val conn = DriverManager.getConnection(url, user, password)
-
-    // using Commons DBCP
+  def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) = {
     import scalikejdbc.LoanPattern._
+    // using(java.sql.DriverManager.getConnection(url, user, password)) {
     using(ConnectionPool.borrow()) {
       conn => {
         val db = ThreadLocalDB.create(conn)
-        db.begin()
-        try {
-          chain.doFilter(req, res)
-          db.commit()
-        } catch {
+        handling(classOf[Throwable]) by {
           case e: Exception => {
             db.rollbackIfActive()
             throw e
           }
+        } apply {
+          db.begin()
+          chain.doFilter(req, res)
+          db.commit()
         }
       }
     }
-
   }
 
-  def destroy() {
-  }
+  def destroy() = {}
 
 }
 ```
@@ -211,13 +205,13 @@ class TxFilter extends Filter {
 Unfiltered example:
 
 ```scala
-class TxSample1 extends Plan {
+class PlanWithTx extends Plan {
   def intent = {
     case req @ GET(Path("/rollbackTest")) => {
       val db = ThreadLocalDB.load()
       db withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
       throw new RuntimeException("Rollback Test!")
-      // The transaction will rollback.
+      // will rollback
     }
   }
 }
@@ -225,7 +219,7 @@ class TxSample1 extends Plan {
 object Server1 extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
-    .plan(new TxSample1)
+    .plan(new PlanWithTx)
     .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
 }
 ```

@@ -1,12 +1,13 @@
 package snippet
 
-import unfiltered.request._
-import unfiltered.filter.Plan
-import unfiltered.response.ResponseString
-
 import javax.servlet._
 import java.sql.DriverManager
 
+import unfiltered.request._
+import unfiltered.filter._
+import unfiltered.response._
+
+import scala.util.control.Exception._
 import scalikejdbc._
 
 object Settings {
@@ -18,41 +19,35 @@ import Settings._
 
 class TxFilter extends Filter {
 
-  def init(filterConfig: FilterConfig) {
+  def init(filterConfig: FilterConfig) = {
     ConnectionPool.initialize(url, user, password)
   }
 
-  def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-
-    // simply using DriverManager
-    //    val conn = DriverManager.getConnection(url, user, password)
-
-    // using Commons DBCP
+  def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) = {
     import scalikejdbc.LoanPattern._
+    // using(java.sql.DriverManager.getConnection(url, user, password)) {
     using(ConnectionPool.borrow()) {
       conn => {
-        implicit val db = ThreadLocalDB.create(conn)
-        db.begin()
-        try {
-          chain.doFilter(req, res)
-          db.commit()
-        } catch {
+        val db = ThreadLocalDB.create(conn)
+        handling(classOf[Throwable]) by {
           case e: Exception => {
             db.rollbackIfActive()
             throw e
           }
+        } apply {
+          db.begin()
+          chain.doFilter(req, res)
+          db.commit()
         }
       }
     }
-
   }
 
-  def destroy() {
-  }
+  def destroy() = {}
 
 }
 
-class Hello extends Plan {
+class PlanWithTx extends Plan {
 
   def intent = {
     case req@GET(Path("/rollback")) => {
@@ -101,9 +96,8 @@ class Hello extends Plan {
 object Server extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
-    .plan(new Hello)
+    .plan(new PlanWithTx)
     .run {
-    s => unfiltered.util.Browser.open(
-      "http://127.0.0.1:%d/rollback".format(s.port))
+    s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollback".format(s.port))
   }
 }
