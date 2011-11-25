@@ -31,7 +31,7 @@ class TxFilter extends Filter {
     import scalikejdbc.LoanPattern._
     using(ConnectionPool.borrow()) {
       conn => {
-        val db = ThreadLocalDB.create(conn)
+        implicit val db = ThreadLocalDB.create(conn)
         db.begin()
         try {
           chain.doFilter(req, res)
@@ -108,30 +108,19 @@ object Server extends App {
   }
 }
 
-trait TxSupport {
-  implicit val db = ThreadLocalDB.load()
-}
-
 class Hello2 extends Plan {
-
-  this: TxSupport =>
 
   def intent = {
     case req@GET(Path("/rollback")) => {
-      try {
-        implicit val db = ThreadLocalDB.load()
-        withinTx {
-          session => {
-            println(session.asOne("select name from emp where id = ?", 1) {
-              rs => Some(rs.getString("name"))
-            }.get)
-            session.update("update emp set name = ? where id = ?", "rollback?", 1)
-          }
+      implicit val db = ThreadLocalDB.load()
+      withinTx {
+        session => {
+          println(session.asOne("select name from emp where id = ?", 1) {
+            rs => Some(rs.getString("name"))
+          }.get)
+          session.update("update emp set name = ? where id = ?", "rollback?", 1)
         }
-      } catch {
-        case e: Exception => e.printStackTrace()
       }
-
       throw new RuntimeException("rollback test")
       // will rollback.
     }
@@ -168,7 +157,7 @@ class Hello2 extends Plan {
 object Server2 extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
-    .plan(new Hello2 with TxSupport)
+    .plan(new Hello2)
     .run {
     s => unfiltered.util.Browser.open(
       "http://127.0.0.1:%d/rollback".format(s.port))
