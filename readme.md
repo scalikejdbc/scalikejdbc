@@ -190,7 +190,7 @@ val count = localTx {
 }
 ```
 
-``scala
+```scala
 implicit val db = new DB(conn)
 val names = withinTx { s => s.asList("select * from emp") { rs => Some(rs.getString("name")) } }
 ```
