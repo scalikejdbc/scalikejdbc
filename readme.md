@@ -262,14 +262,10 @@ object Server1 extends App {
 DB instance as an implicit parameter:
 
 ```scala
-trait TxSupport {
-  implicit val db = ThreadLocalDB.load()
-}
-
 class Hello2 extends Plan {
-  this: TxSupport =>
   def intent = {
     case req @ GET(Path("/rollbackTest")) => {
+      implicit val db = ThreadLocalDB.load()
       withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
       throw new RuntimeException("Rollback Test!")
       // The transaction will rollback.
