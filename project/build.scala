@@ -9,7 +9,7 @@ object ScalikeJDBCBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc",
-    version := "0.1.1",
+    version := "0.1.2",
     publishTo := Some(
       Resolver.file(
         "Github Pages",
