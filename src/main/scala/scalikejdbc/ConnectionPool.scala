@@ -67,9 +67,8 @@ class ConnectionPool(url: String,
 
   private val connFactory = new DriverManagerConnectionFactory(url, user, password)
 
-  // not read only
-  // auto commit
-  private val poolableConnectionFactory = new PoolableConnectionFactory(
+  // not read-only, auto-commit
+  val poolableConnectionFactory = new PoolableConnectionFactory(
     connFactory, pool, null, settings.validationQuery, false, true);
 
   val dataSource = new PoolingDataSource(pool)

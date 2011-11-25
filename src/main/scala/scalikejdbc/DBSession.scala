@@ -17,7 +17,7 @@ package scalikejdbc
 
 import java.sql._
 import java.net.URL
-import LoanPattern.using
+import scalikejdbc.LoanPattern.using
 
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)

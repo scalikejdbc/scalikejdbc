@@ -166,6 +166,35 @@ val names = session.asList("select * from emp") {
 db.rollbackIfActive() // never throw Exception
 ```
 
+### Implicit DB
+
+It's also possible to pass an instance of scalikejdbc.DB as an implicit parameter:
+
+```scala
+implicit val db = new DB(conn)
+val names = readOnly { session => session.asList("select * from emp") { rs => Some(rs.getString("name")) } }
+```
+
+```scala
+implicit val db = new DB(conn)
+val count = autoCommit { _.update("update emp set name = ? where id = ?", "foo", 1) }
+```
+
+```scala
+implicit val db = new DB(conn)
+val count = localTx {
+  s => {
+    s.update("update emp set name = ? where id = ?", "foo", 1)
+    s.update("update emp set name = ? where id = ?", "bar", 2)
+  }
+}
+```
+
+``scala
+implicit val db = new DB(conn)
+val names = withinTx { s => s.asList("select * from emp") { rs => Some(rs.getString("name")) } }
+```
+
 ### TxFilter
 
 See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
@@ -174,27 +203,36 @@ See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snip
 class TxFilter extends Filter {
 
   def init(filterConfig: FilterConfig) {
-    Class.forName("org.hsqldb.jdbc.JDBCDriver")
-    val (url, user, password) = ("jdbc:hsqldb:mem:hsqldb:TxFilter", "", "")
     ConnectionPool.initialize(url, user, password)
   }
 
   def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
-    val conn = ConnectionPool.borrow()
-    val db = ThreadLocalDB.create(conn)
-    db.begin()
-    try {
-      chain.doFilter(req, res)
-      db.commit()
-    } catch {
-      case e: Exception => {
-        db.rollbackIfActive()
-        throw e
+
+    // simply using DriverManager
+    //    val conn = DriverManager.getConnection(url, user, password)
+
+    // using Commons DBCP
+    import scalikejdbc.LoanPattern._
+    using(ConnectionPool.borrow()) {
+      conn => {
+        val db = ThreadLocalDB.create(conn)
+        db.begin()
+        try {
+          chain.doFilter(req, res)
+          db.commit()
+        } catch {
+          case e: Exception => {
+            db.rollbackIfActive()
+            throw e
+          }
+        }
       }
     }
+
   }
 
-  def destroy() {}
+  def destroy() {
+  }
 
 }
 ```
@@ -202,8 +240,7 @@ class TxFilter extends Filter {
 Unfiltered example:
 
 ```scala
-class TxSample extends Plan {
-
+class TxSample1 extends Plan {
   def intent = {
     case req @ GET(Path("/rollbackTest")) => {
       val db = ThreadLocalDB.load()
@@ -212,16 +249,38 @@ class TxSample extends Plan {
       // The transaction will rollback.
     }
   }
-
 }
 
-object Server extends App {
+object Server1 extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
-    .plan(new TxSample)
-    .run { s => unfiltered.util.Browser.open(
-      "http://127.0.0.1:%d/rollbackTest".format(s.port))
-    }
+    .plan(new TxSample1)
+    .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
 }
 ```
 
+Using an implicit parameter:
+
+```scala
+trait TxSupport {
+  implicit val db = ThreadLocalDB.load()
+}
+
+class Hello2 extends Plan {
+  this: TxSupport =>
+  def intent = {
+    case req @ GET(Path("/rollbackTest")) => {
+      withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
+      throw new RuntimeException("Rollback Test!")
+      // The transaction will rollback.
+    }
+  }
+}
+
+object Server2 extends App {
+  unfiltered.jetty.Http.anylocal
+    .filter(new TxFilter)
+    .plan(new TxSample2 with DBTxSupport)
+    .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
+}
+```

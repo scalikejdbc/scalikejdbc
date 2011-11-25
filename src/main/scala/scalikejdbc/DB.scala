@@ -16,6 +16,32 @@
 package scalikejdbc
 
 import java.sql.Connection
+import java.lang.IllegalStateException
+
+object DB {
+
+  private def ensureDBInstance(db: DB) {
+    if (db == null) {
+      throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
+    }
+  }
+
+  def autoCommit[A](execution: DBSession => A)(implicit db: DB): A = {
+    ensureDBInstance(db: DB)
+    db.autoCommit(execution)
+  }
+
+  def withinTx[A](execution: DBSession => A)(implicit db: DB): A = {
+    ensureDBInstance(db: DB)
+    db.withinTx(execution)
+  }
+
+  def localTx[A](execution: DBSession => A)(implicit db: DB): A = {
+    ensureDBInstance(db: DB)
+    db.localTx(execution)
+  }
+
+}
 
 /**
  * DB accessor

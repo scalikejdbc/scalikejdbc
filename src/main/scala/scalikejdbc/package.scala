@@ -1,5 +1,3 @@
-package scalikejdbc
-
 /*
  * Copyright 2011 Kazuhiro Sera
  *
@@ -15,17 +13,14 @@ package scalikejdbc
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-/**
- * Error messages
- */
-object ErrorMessage {
+package object scalikejdbc {
 
-  val CONNECTION_POOL_IS_NOT_YET_INITIALIZED = "Connection pool is not yet initialized."
+  import scalikejdbc.DB
 
-  val CANNOT_START_A_NEW_TRANSACTION = "Cannot start a new transaction."
+  def autoCommit[A](execution: DBSession => A)(implicit db: DB): A = DB.autoCommit(execution)
 
-  val TRANSACTION_IS_NOT_ACTIVE = "Transaction is not active."
+  def withinTx[A](execution: DBSession => A)(implicit db: DB): A = DB.withinTx(execution)
 
-  val IMPLICIT_DB_INSTANCE_REQUIRED = "An instance of scalikejdbc.DB is required implicitly."
+  def localTx[A](execution: DBSession => A)(implicit db: DB): A = DB.localTx(execution)
 
 }
