@@ -16,40 +16,35 @@
 package scalikejdbc
 
 import java.sql.{SQLException, Connection}
+import scala.util.control.Exception._
 
 /**
  * DB Transaction
  */
 class Tx(val conn: Connection) {
 
-  def begin() = conn.setAutoCommit(false)
+  def begin(): Unit = conn.setAutoCommit(false)
 
-  def commit() = {
+  def commit(): Unit = {
     conn.commit()
     conn.setAutoCommit(true)
   }
 
   def isActive(): Boolean = !conn.getAutoCommit
 
-  def rollback() = {
+  def rollback(): Unit = {
     conn.rollback()
-    try {
+    catching(classOf[SQLException]) opt {
       conn.setAutoCommit(true)
-    } catch {
-      case _: SQLException =>
     }
   }
 
-  def rollbackIfActive() = {
-    try {
+  def rollbackIfActive(): Unit = {
+    catching(classOf[SQLException]) opt {
       conn.rollback()
-    } catch {
-      case _: SQLException =>
     }
-    try {
+    catching(classOf[SQLException]) opt {
       conn.setAutoCommit(true)
-    } catch {
-      case _: SQLException =>
     }
   }
 

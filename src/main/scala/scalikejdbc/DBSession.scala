@@ -38,7 +38,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
 
   }
 
-  private def bindParams(stmt: PreparedStatement, params: Any*) = {
+  private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
     for ((param, idx) <- params.zipWithIndex; i = idx + 1) {
       param match {
         case p: Array => stmt.setArray(i, p)

@@ -166,35 +166,6 @@ val names = session.asList("select * from emp") {
 db.rollbackIfActive() // never throw Exception
 ```
 
-## DB instance as an implicit parameter
-
-It's also possible to pass an instance of scalikejdbc.DB as an implicit parameter:
-
-```scala
-implicit val db = new DB(conn)
-val names = readOnly { session => session.asList("select * from emp") { rs => Some(rs.getString("name")) } }
-```
-
-```scala
-implicit val db = new DB(conn)
-val count = autoCommit { _.update("update emp set name = ? where id = ?", "foo", 1) }
-```
-
-```scala
-implicit val db = new DB(conn)
-val count = localTx {
-  s => {
-    s.update("update emp set name = ? where id = ?", "foo", 1)
-    s.update("update emp set name = ? where id = ?", "bar", 2)
-  }
-}
-```
-
-```scala
-implicit val db = new DB(conn)
-val names = withinTx { s => s.asList("select * from emp") { rs => Some(rs.getString("name")) } }
-```
-
 ## TxFilter example
 
 See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
@@ -255,28 +226,6 @@ object Server1 extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
     .plan(new TxSample1)
-    .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
-}
-```
-
-DB instance as an implicit parameter:
-
-```scala
-class Hello2 extends Plan {
-  def intent = {
-    case req @ GET(Path("/rollbackTest")) => {
-      implicit val db = ThreadLocalDB.load()
-      withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
-      throw new RuntimeException("Rollback Test!")
-      // The transaction will rollback.
-    }
-  }
-}
-
-object Server2 extends App {
-  unfiltered.jetty.Http.anylocal
-    .filter(new TxFilter)
-    .plan(new TxSample2 with DBTxSupport)
     .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
 }
 ```

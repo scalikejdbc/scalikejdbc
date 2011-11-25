@@ -17,10 +17,12 @@ package scalikejdbc
 
 import java.sql.Connection
 import java.lang.IllegalStateException
+import scala.util.control.Exception._
+
 
 object DB {
 
-  private def ensureDBInstance(db: DB) {
+  private def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
       throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
     }
@@ -63,44 +65,36 @@ class DB(conn: Connection) {
 
   def newTx: Tx = newTx(conn)
 
-  def currentTx = {
+  def currentTx: Tx = {
     if (isTxNotActive || isTxNotYetStarted) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     new Tx(conn)
   }
 
-  def tx = {
-    try {
-      currentTx
-    } catch {
-      case (e: IllegalStateException) =>
-        throw new IllegalStateException(
-          "DB#tx is an alias of DB#currentTx. " +
-            "You cannot call this API before beginning a transaction"
-        )
-    }
+  def tx: Tx = {
+    handling(classOf[IllegalStateException]) by {
+      e => throw new IllegalStateException(
+        "DB#tx is an alias of DB#currentTx. " +
+          "You cannot call this API before beginning a transaction")
+    } apply currentTx
   }
 
   def begin() = newTx.begin()
 
-  def beginIfNotYet() = {
-    try {
+  def beginIfNotYet(): Unit = {
+    catching(classOf[IllegalStateException]) opt {
       begin()
-    } catch {
-      case (e: IllegalStateException) =>
     }
   }
 
-  def commit() = tx.commit()
+  def commit(): Unit = tx.commit()
 
-  def rollback() = tx.rollback()
+  def rollback(): Unit = tx.rollback()
 
-  def rollbackIfActive() = {
-    try {
+  def rollbackIfActive(): Unit = {
+    catching(classOf[IllegalStateException]) opt {
       tx.rollbackIfActive()
-    } catch {
-      case (e: IllegalStateException) =>
     }
   }
 
@@ -122,13 +116,14 @@ class DB(conn: Connection) {
   }
 
   def withinTxSession(tx: Tx = currentTx): DBSession = {
-    if (!tx.isActive) throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
+    if (!tx.isActive) {
+      throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
+    }
     new DBSession(conn, Some(tx))
   }
 
   def withinTx[A](execution: DBSession => A): A = {
-    val tx = currentTx
-    val session = withinTxSession(tx)
+    val session = withinTxSession(currentTx)
     execution(session)
   }
 
@@ -139,15 +134,16 @@ class DB(conn: Connection) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     val session = new DBSession(conn, Some(tx))
-    try {
-      val result = execution(session)
-      tx.commit()
-      result
-    } catch {
-      case e: Exception => {
+
+    handling(classOf[Throwable]) by {
+      e => {
         tx.rollback()
         throw e
       }
+    } apply {
+      val result = execution(session)
+      tx.commit()
+      result
     }
   }
 

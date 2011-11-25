@@ -17,6 +17,8 @@ package scalikejdbc
 
 import org.apache.commons.pool.impl.GenericObjectPool
 import org.apache.commons.dbcp.{PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory}
+import javax.sql.DataSource
+import java.sql.Connection
 
 object ConnectionPool {
 
@@ -24,24 +26,23 @@ object ConnectionPool {
 
   def isInitialized = SINGLETON != null
 
-  def ensureInitialized() = if (!isInitialized) {
+  def ensureInitialized(): Unit = if (!isInitialized) {
     throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
   }
 
   def initialize(url: String,
                  user: String,
                  password: String,
-                 settings: ConnectionPoolSettings = ConnectionPoolSettings()) = {
-
+                 settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
     SINGLETON = new ConnectionPool(url, user, password, settings)
   }
 
-  def dataSource() = {
+  def dataSource(): DataSource = {
     ensureInitialized()
     SINGLETON.dataSource
   }
 
-  def borrow() = {
+  def borrow(): Connection = {
     ensureInitialized()
     SINGLETON.borrow()
   }
@@ -71,8 +72,8 @@ class ConnectionPool(url: String,
   val poolableConnectionFactory = new PoolableConnectionFactory(
     connFactory, pool, null, settings.validationQuery, false, true);
 
-  val dataSource = new PoolingDataSource(pool)
+  val dataSource: DataSource = new PoolingDataSource(pool)
 
-  def borrow() = dataSource.getConnection()
+  def borrow(): Connection = dataSource.getConnection()
 
 }
