@@ -34,16 +34,16 @@ class Tx(val conn: Connection) {
 
   def rollback(): Unit = {
     conn.rollback()
-    catching(classOf[SQLException]) opt {
+    ignoring(classOf[SQLException]) apply {
       conn.setAutoCommit(true)
     }
   }
 
   def rollbackIfActive(): Unit = {
-    catching(classOf[SQLException]) opt {
+    ignoring(classOf[SQLException]) apply {
       conn.rollback()
     }
-    catching(classOf[SQLException]) opt {
+    ignoring(classOf[SQLException]) apply {
       conn.setAutoCommit(true)
     }
   }

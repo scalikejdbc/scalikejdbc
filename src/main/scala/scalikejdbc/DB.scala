@@ -133,15 +133,16 @@ class DB(conn: Connection) {
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    val session = new DBSession(conn, Some(tx))
 
-    handling(classOf[Throwable]) by {
-      e => {
+    val rollbackIfException = handling(classOf[Throwable]) by {
+      t => {
         tx.rollback()
-        throw e
+        throw t
       }
-    } apply {
-      val result = execution(session)
+    }
+    rollbackIfException[A] {
+      val session = new DBSession(conn, Some(tx))
+      val result: A = execution(session)
       tx.commit()
       result
     }

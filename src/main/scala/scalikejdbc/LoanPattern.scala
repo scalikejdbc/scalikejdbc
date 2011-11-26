@@ -15,6 +15,9 @@
  */
 package scalikejdbc
 
+import util.control.Exception._
+import java.sql.SQLException
+
 /**
  * Loan pattern implementation
  */
@@ -26,10 +29,8 @@ object LoanPattern {
     try {
       f(resource)
     } finally {
-      try {
+      ignoring(classOf[Throwable]) apply {
         resource.close()
-      } catch {
-        case _ =>
       }
     }
   }
