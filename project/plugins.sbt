@@ -7,3 +7,9 @@ addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "0.1")
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "0.11.0")
 
+resolvers ++= Seq(
+  "less is" at "http://repo.lessis.me",
+  "coda" at "http://repo.codahale.com")
+
+addSbtPlugin("me.lessis" % "ls-sbt" % "0.1.0")
+
