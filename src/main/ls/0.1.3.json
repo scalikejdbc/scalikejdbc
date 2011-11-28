@@ -8,7 +8,7 @@
  "tags":[],
  "docs":"",
  "licenses": [],
- "resolvers": ["http://scala-tools.org/repo-releases"],
+ "resolvers": ["http://seratch.github.com/mvn-repo/releases"],
  "dependencies": [{
    "organization":"commons-dbcp",
    "name": "commons-dbcp",
