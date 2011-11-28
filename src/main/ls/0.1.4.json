@@ -3,7 +3,7 @@
  "organization":"com.github.seratch",
  "name":"scalikejdbc",
  "version":"0.1.4",
- "description":"scalikejdbc",
+ "description":"A thin JDBC wrapper in Scala",
  "site":"",
  "tags":[],
  "docs":"",
