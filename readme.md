@@ -18,6 +18,15 @@ libraryDependencies ++= Seq(
 )
 ```
 
+via ls:
+
+http://ls.implicit.ly/seratch/scalikejdbc#scalikejdbc
+
+```
+ls -n scalikejdbc
+ls-install scalikejdbc
+```
+
 ## Operations
 
 ### DB accessor object
