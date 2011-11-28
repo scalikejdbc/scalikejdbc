@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
 
 via ls:
 
-http://ls.implicit.ly/seratch/scalikejdbc#scalikejdbc
+http://ls.implicit.ly/seratch/scalikejdbc
 
 ```
 ls -n scalikejdbc
