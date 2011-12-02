@@ -20,7 +20,7 @@ import org.apache.commons.dbcp.{PoolingDataSource, PoolableConnectionFactory, Dr
 import javax.sql.DataSource
 import java.sql.Connection
 
-object ConnectionPool {
+object ConnectionPool extends LogSupport {
 
   var SINGLETON: ConnectionPool = null
 
@@ -35,6 +35,7 @@ object ConnectionPool {
                  password: String,
                  settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
     SINGLETON = new ConnectionPool(url, user, password, settings)
+    log.debug("Initialized " + SINGLETON.toString())
   }
 
   def dataSource(): DataSource = {
@@ -44,6 +45,7 @@ object ConnectionPool {
 
   def borrow(): Connection = {
     ensureInitialized()
+    log.debug("Borrow a connection from " + SINGLETON.toString())
     SINGLETON.borrow()
   }
 
@@ -75,5 +77,7 @@ class ConnectionPool(url: String,
   val dataSource: DataSource = new PoolingDataSource(pool)
 
   def borrow(): Connection = dataSource.getConnection()
+
+  override def toString() = "ConnectionPool(url:" + url + ", user:" + user + ")"
 
 }

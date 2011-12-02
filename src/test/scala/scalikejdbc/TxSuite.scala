@@ -5,42 +5,50 @@ import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import java.sql._
+import util.control.Exception._
 
 @RunWith(classOf[JUnitRunner])
-class TxSuite extends FunSuite with ShouldMatchers {
+class TxSuite extends FunSuite with ShouldMatchers with Settings {
 
   type ? = this.type // for IntelliJ IDEA
 
-  Class.forName("org.hsqldb.jdbc.JDBCDriver")
-  val url = "jdbc:hsqldb:mem:hsqldb:LoanPatternSuite"
-  val user = ""
-  val password = ""
-
   test("available") {
-    val conn = DriverManager.getConnection(url, user, password)
-    val tx = new Tx(conn)
-    tx should not be null
+    val tx = new Tx(ConnectionPool.borrow())
+    ultimately {
+      tx.conn.close()
+    } apply {
+      tx should not be null
+    }
   }
 
   test("begin") {
-    val conn = DriverManager.getConnection(url, user, password)
-    val tx = new Tx(conn)
-    tx.begin()
-    tx.rollbackIfActive()
+    val tx = new Tx(ConnectionPool.borrow())
+    ultimately {
+      tx.conn.close()
+    } apply {
+      tx.begin()
+      tx.rollbackIfActive()
+    }
   }
 
   test("commit") {
-    val conn = DriverManager.getConnection(url, user, password)
-    val tx = new Tx(conn)
-    tx.begin()
-    tx.commit()
+    val tx = new Tx(ConnectionPool.borrow())
+    ultimately {
+      tx.conn.close()
+    } apply {
+      tx.begin()
+      tx.commit()
+    }
   }
 
   test("rollback") {
-    val conn = DriverManager.getConnection(url, user, password)
-    val tx = new Tx(conn)
-    tx.begin()
-    tx.rollback()
+    val tx = new Tx(ConnectionPool.borrow())
+    ultimately {
+      tx.conn.close()
+    } apply {
+      tx.begin()
+      tx.rollback()
+    }
   }
 
 }

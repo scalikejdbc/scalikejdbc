@@ -80,6 +80,8 @@ class DB(conn: Connection) {
     } apply currentTx
   }
 
+  def close() = conn.close()
+
   def begin() = newTx.begin()
 
   def beginIfNotYet(): Unit = {

@@ -7,14 +7,9 @@ import org.scalatest.junit.JUnitRunner
 import java.sql.DriverManager
 
 @RunWith(classOf[JUnitRunner])
-class LoanPatternSuite extends FunSuite with ShouldMatchers {
+class LoanPatternSuite extends FunSuite with ShouldMatchers with Settings {
 
   type ? = this.type // for IntelliJ IDEA
-
-  Class.forName("org.hsqldb.jdbc.JDBCDriver")
-  val url = "jdbc:hsqldb:mem:hsqldb:LoanPatternSuite"
-  val user = ""
-  val password = ""
 
   test("available") {
     LoanPattern.isInstanceOf[Singleton] should equal(true)

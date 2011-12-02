@@ -18,11 +18,12 @@ package scalikejdbc
 import java.sql._
 import java.net.URL
 import scalikejdbc.LoanPattern.using
+import org.slf4j.LoggerFactory
 
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
  */
-class DBSession(conn: Connection, tx: Option[Tx] = None) {
+class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
 
   tx match {
     case Some(transaction) if transaction.isActive() =>
@@ -36,6 +37,11 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
 
     def next(): ResultSet = rs
 
+  }
+
+  private def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
+    log.debug("template : " + template)
+    conn.prepareStatement(template)
   }
 
   private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
@@ -61,7 +67,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
   }
 
   def execute[A](template: String, params: Any*): Boolean = {
-    val stmt = conn.prepareStatement(template)
+    val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt => {
         bindParams(stmt, params: _*)
@@ -71,7 +77,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
   }
 
   def asOne[A](template: String, params: Any*)(extract: ResultSet => Option[A]): Option[A] = {
-    val stmt = conn.prepareStatement(template)
+    val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt => {
         bindParams(stmt, params: _*)
@@ -87,7 +93,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
   }
 
   def asList[A](template: String, params: Any*)(extract: ResultSet => Option[A]): List[A] = {
-    val stmt = conn.prepareStatement(template)
+    val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt => {
         bindParams(stmt, params: _*)
@@ -98,7 +104,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) {
   }
 
   def update(template: String, params: Any*): Int = {
-    val stmt = conn.prepareStatement(template)
+    val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt => {
         bindParams(stmt, params: _*)
