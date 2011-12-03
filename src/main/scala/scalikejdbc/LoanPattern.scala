@@ -16,7 +16,6 @@
 package scalikejdbc
 
 import util.control.Exception._
-import java.sql.SQLException
 
 /**
  * Loan pattern implementation
