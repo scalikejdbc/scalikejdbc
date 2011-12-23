@@ -2,9 +2,9 @@
 
 ### Just write SQL and start writing applications right now
 
-This library is very simply implemented (similar to SpringJDBC) and it's usage is also very simple.
+This library is a thin JDBC wrapper, so the usage is very simple. 
 
-You just use PreparedStatement and map from ResultSet to Option[A] or List[A] by yourself.
+Just use PreparedStatement, and map from ResultSet objects to Option[A] or List[A] objects by yourself.
 
 ## sbt
 
@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-via ls:
+### ls.implicit.ly
 
 http://ls.implicit.ly/seratch/scalikejdbc
 
@@ -27,11 +27,11 @@ ls -n scalikejdbc
 ls-install scalikejdbc
 ```
 
-## Operations
+## DB Access Object
 
-### DB accessor object
+### Connection
 
-Simply get Connection:
+DriverManager:
 
 ```scala
 import scalikejdbc._
@@ -39,7 +39,7 @@ val conn = DriverManager.getConnection(url, user, password)
 val db = new DB(conn)
 ```
 
-or use Apache Commons DBCP:
+ConnectionPool(using Apache Commons DBCP):
 
 ```scala
 import scalikejdbc._
@@ -50,7 +50,7 @@ val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 ```
 
-Store a DB instance as thread-local variable:
+### Thread-local connection:
 
 ```scala
 def init() = {
@@ -62,6 +62,8 @@ def doSomething() = {
   val db = ThreadLocalDB.load()
 }
 ```
+
+## Operations
 
 ### Query
 
