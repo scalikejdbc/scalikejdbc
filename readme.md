@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "0.1.4" withSources ()
+  "com.github.seratch" %% "scalikejdbc" % "0.2.0" withSources ()
 )
 ```
 
@@ -45,10 +45,23 @@ ConnectionPool(using Apache Commons DBCP):
 import scalikejdbc._
 
 Class.forName("org.hsqldb.jdbc.JDBCDriver")
-ConnectionPool.initialize(url, user, password)
+ConnectionPool.singleton(url, user, password)
 val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 ```
+
+If you need to connect several datasources:
+
+```scala
+import scalikejdbc._
+
+Class.forName("org.hsqldb.jdbc.JDBCDriver")
+ConnectionPool.add('db1, url1, user1, password1)
+ConnectionPool.add('db2, url2, user2, password2)
+val conn1 = ConnectionPool('db1).borrow()
+val db = new DB(conn1)
+```
+
 
 ### Thread-local connection:
 
@@ -67,13 +80,7 @@ def doSomething() = {
 
 ### Query
 
-```scala
-val names: List[String] = db readOnly {
-  session => session.asList("select * from emp") { rs =>
-    Some(rs.getString("name"))
-  }
-}
-```
+- asOne
 
 ```scala
 val extractName = (rs: java.sql.ResultSet) => Some(rs.getString("name"))
@@ -81,6 +88,37 @@ val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
 ```
+- asList
+
+```scala
+val names: List[String] = db readOnly { session =>
+  session.asList("select * from emp") { rs => Some(rs.getString("name")) }
+}
+val names: List[String] = db readOnly {
+  _.asList("select * from emp") { rs => Some(rs.getString("name")) }
+}
+```
+
+- asIterator
+
+```scala
+val db = new DB(conn)
+val iter: Iterator[String] = db readOnly {
+  _.asIterator("select * from emp") { rs => Some(rs.getString("name")) }
+}
+iter.next()
+iter.next()
+conn.close()
+```
+
+- foreach
+
+```scala
+val names: List[String] = db readOnly {
+  _.foreach("select * from emp") { rs => outout.write(rs.getString("name")) }
+}
+```
+
 
 ### Update
 
