@@ -112,7 +112,7 @@ iter.next()
 #### DBSession#foreach (Side-effect in Iterator)
 
 ```scala
-val names: List[String] = db readOnly {
+db readOnly {
   _.foreach("select * from emp") { rs => outout.write(rs.getString("name")) }
 }
 ```
@@ -121,7 +121,7 @@ val names: List[String] = db readOnly {
 ### Update
 
 ```scala
-val count: Int = db autoCommit {
+val updateCount: Int = db autoCommit {
    _.update("update emp set name = ? where id = ?", "foo", 1)
 }
 ```
