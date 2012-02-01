@@ -22,31 +22,45 @@ import java.sql.Connection
 
 object ConnectionPool extends LogSupport {
 
-  var SINGLETON: ConnectionPool = null
+  private val DEFAULT_NAME: Any = "default"
 
-  def isInitialized = SINGLETON != null
+  val pools = new collection.mutable.HashMap[Any, ConnectionPool]()
 
-  def ensureInitialized(): Unit = if (!isInitialized) {
-    throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
+  def isInitialized(name: Any = DEFAULT_NAME) = pools.get(DEFAULT_NAME).isDefined
+
+  def ensureInitialized(name: Any): Unit = {
+    if (!isInitialized(name)) {
+      val message = ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
+      throw new IllegalStateException(message)
+    }
   }
 
-  def initialize(url: String,
-                 user: String,
-                 password: String,
-                 settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
-    SINGLETON = new ConnectionPool(url, user, password, settings)
-    log.debug("Initialized " + SINGLETON.toString())
+  def apply(name: Any = DEFAULT_NAME) = get(name)
+
+  def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.get(name).orNull
+
+  def add(name: Any, url: String, user: String, password: String,
+          settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
+    pools.update(name, new ConnectionPool(url, user, password, settings))
+    log.debug("Registered connection pool : " + get(name).toString())
   }
 
-  def dataSource(): DataSource = {
-    ensureInitialized()
-    SINGLETON.dataSource
+  def singleton(url: String, user: String, password: String,
+                settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
+    add(DEFAULT_NAME, url, user, password, settings)
+    log.debug("Registered singleton connection pool : " + get().toString())
   }
 
-  def borrow(): Connection = {
-    ensureInitialized()
-    log.debug("Borrow a connection from " + SINGLETON.toString())
-    SINGLETON.borrow()
+  def dataSource(name: Any = DEFAULT_NAME): DataSource = {
+    ensureInitialized(name)
+    get(name).dataSource
+  }
+
+  def borrow(name: Any = DEFAULT_NAME): Connection = {
+    ensureInitialized(name)
+    val pool = get(name)
+    log.debug("Borrow a connection from " + pool.toString())
+    pool.borrow()
   }
 
 }

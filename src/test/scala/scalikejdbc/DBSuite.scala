@@ -13,8 +13,6 @@ import scalikejdbc.LoanPattern._
 @RunWith(classOf[JUnitRunner])
 class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Settings {
 
-  type ? = this.type // for IntelliJ IDEA
-
   val tableNamePrefix = "emp_DBSuite"
 
   test("available") {
@@ -37,7 +35,7 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   test("can call DB#beginIfNotYet several times") {
-    val conn = ConnectionPool.borrow()
+    val conn = ConnectionPool("default").borrow()
     val db = new DB(conn)
     db.begin()
     db.beginIfNotYet()
@@ -48,7 +46,7 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   test("before beginning tx, DB#tx is not available") {
-    val conn = ConnectionPool.borrow()
+    val conn = ConnectionPool('named).borrow()
     val db = new DB(conn)
     intercept[IllegalStateException] {
       db.tx.begin()
@@ -190,6 +188,20 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
         }
       }
       result.size should equal(2)
+    }
+  }
+
+  test("foreach in autoCommit block") {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_asIterInAutoCommitBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      db autoCommit {
+        _.foreach("select id from " + tableName + "") {
+          rs => println(rs.getInt("id"))
+        }
+      }
     }
   }
 

@@ -39,7 +39,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
 
   }
 
-  private def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
+  def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
     log.debug("template : " + template)
     conn.prepareStatement(template)
   }
@@ -101,6 +101,22 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
         (resultSet flatMap (rs => extract(rs))).toList
       }
     }
+  }
+
+  def foreach[A](template: String, params: Any*)(f: ResultSet => Unit) = {
+    val stmt = createPreparedStatement(conn, template)
+    using(stmt) {
+      stmt => {
+        bindParams(stmt, params: _*)
+        new ResultSetIterator(stmt.executeQuery()) foreach (rs => f(rs))
+      }
+    }
+  }
+
+  def asIterator[A](template: String, params: Any*)(extract: ResultSet => A): Iterator[A] = {
+    val stmt = createPreparedStatement(conn, template)
+    bindParams(stmt, params: _*)
+    new ResultSetIterator(stmt.executeQuery()) map (rs => extract(rs))
   }
 
   def update(template: String, params: Any*): Int = {

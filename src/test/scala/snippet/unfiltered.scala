@@ -20,7 +20,7 @@ import Settings._
 class TxFilter extends Filter {
 
   def init(filterConfig: FilterConfig) = {
-    ConnectionPool.initialize(url, user, password)
+    ConnectionPool.singleton(url, user, password)
   }
 
   def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) = {

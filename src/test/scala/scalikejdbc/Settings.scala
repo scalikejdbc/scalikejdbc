@@ -15,6 +15,7 @@ trait Settings {
   Class.forName(driverClassName)
 
   val poolSettings = new ConnectionPoolSettings(initialSize = 100, maxSize = 100)
-  ConnectionPool.initialize(url, user, password, poolSettings)
+  ConnectionPool.singleton(url, user, password, poolSettings)
+  ConnectionPool.add('named, url, user, password, poolSettings)
 
 }
