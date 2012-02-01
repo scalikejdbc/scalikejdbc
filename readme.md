@@ -169,7 +169,7 @@ session.update("update emp set name = ? where id = ?", "bar", 2)
 // cannot rollback
 ```
 
-### localTx block / session object
+### localTx block
 
 ```scala
 val count = db localTx {
