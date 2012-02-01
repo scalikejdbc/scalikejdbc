@@ -3,9 +3,9 @@ resolvers ++= Seq(
   "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
 )
 
-addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "0.1")
+addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "0.2")
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "0.11.0")
+addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
 resolvers ++= Seq(
   "less is" at "http://repo.lessis.me",
