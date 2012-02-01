@@ -146,23 +146,15 @@ val names = db readOnly {
     rs => Some(rs.getString("name"))
   }
 }
-```
 
-```scala
 val session = db.readOnlySession()
 val names = session.asList("select * from emp") {
   rs => Some(rs.getString("name"))
 }
-val myName = session.asOne("select * from emp where id = ?", 1) {
-  rs => Some(rs.getString("name"))
-}
-```
 
-```scala
-val count = db readOnly {
+val updateCount = db readOnly {
   _.update("update emp set name = ? where id = ?", "foo", 1)
-}
-// java.sql.SQLException!
+} // java.sql.SQLException!
 ```
 
 ### autoCommit
@@ -171,14 +163,12 @@ val count = db readOnly {
 val count = db autoCommit {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 }
-// cannot rollback
-```
+// cannot rollback!
 
-```scala
 val session = db.autoCommitSession()
 session.update("update emp set name = ? where id = ?", "foo", 1)
 session.update("update emp set name = ? where id = ?", "bar", 2)
-// cannot rollback
+// cannot rollback!
 ```
 
 ### localTx
@@ -204,9 +194,7 @@ val names = db withinTx {
   }
 }
 db.rollback() // might throw Exception
-```
 
-```scala
 db.begin()
 val session = db.withinTxSession()
 val names = session.asList("select * from emp") {
