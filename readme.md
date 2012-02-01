@@ -31,20 +31,20 @@ ls-install scalikejdbc
 
 ### Connection
 
-DriverManager:
+#### DriverManager
 
 ```scala
 import scalikejdbc._
+Class.forName(driverName)
 val conn = DriverManager.getConnection(url, user, password)
 val db = new DB(conn)
 ```
 
-ConnectionPool(using Apache Commons DBCP):
+#### ConnectionPool (Apache Commons DBCP)
 
 ```scala
 import scalikejdbc._
-
-Class.forName("org.hsqldb.jdbc.JDBCDriver")
+Class.forName(driverName)
 ConnectionPool.singleton(url, user, password)
 val conn = ConnectionPool.borrow()
 val db = new DB(conn)
@@ -54,16 +54,15 @@ If you need to connect several datasources:
 
 ```scala
 import scalikejdbc._
-
-Class.forName("org.hsqldb.jdbc.JDBCDriver")
+Class.forName(driverName)
 ConnectionPool.add('db1, url1, user1, password1)
 ConnectionPool.add('db2, url2, user2, password2)
-val conn1 = ConnectionPool('db1).borrow()
-val db = new DB(conn1)
+val conn = ConnectionPool('db1).borrow()
+val db = new DB(conn)
 ```
 
 
-### Thread-local connection:
+#### Thread-local Connection
 
 ```scala
 def init() = {
@@ -80,38 +79,37 @@ def doSomething() = {
 
 ### Query
 
-- asOne
+#### DBSession#asOne (Single Row)
 
 ```scala
+val name: Option[String] = db readOnly { session =>
+  session.asOne("select * from emp where id = ?", 1) { rs => Some(rs.getString("name")) }
+}
+
 val extractName = (rs: java.sql.ResultSet) => Some(rs.getString("name"))
 val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
 ```
-- asList
+#### DBSession#asList (Multiple Rows)
 
 ```scala
-val names: List[String] = db readOnly { session =>
-  session.asList("select * from emp") { rs => Some(rs.getString("name")) }
-}
 val names: List[String] = db readOnly {
   _.asList("select * from emp") { rs => Some(rs.getString("name")) }
 }
 ```
 
-- asIterator
+#### DBSession#asIterator (Handling Iterator)
 
 ```scala
-val db = new DB(conn)
 val iter: Iterator[String] = db readOnly {
   _.asIterator("select * from emp") { rs => Some(rs.getString("name")) }
 }
 iter.next()
 iter.next()
-conn.close()
 ```
 
-- foreach
+#### DBSession#foreach (Side-effect in Iterator)
 
 ```scala
 val names: List[String] = db readOnly {
@@ -138,7 +136,7 @@ db autoCommit {
 
 ## Transaction
 
-### readOnly
+### readOnly block / session object
 
 ```scala
 val names = db readOnly {
@@ -154,24 +152,24 @@ val names = session.asList("select * from emp") {
 
 val updateCount = db readOnly {
   _.update("update emp set name = ? where id = ?", "foo", 1)
-} // java.sql.SQLException!
+} // will throw java.sql.SQLException
 ```
 
-### autoCommit
+### autoCommit block / session object
 
 ```scala
 val count = db autoCommit {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 }
-// cannot rollback!
+// cannot rollback
 
 val session = db.autoCommitSession()
 session.update("update emp set name = ? where id = ?", "foo", 1)
 session.update("update emp set name = ? where id = ?", "bar", 2)
-// cannot rollback!
+// cannot rollback
 ```
 
-### localTx
+### localTx block / session object
 
 ```scala
 val count = db localTx {
@@ -183,7 +181,7 @@ val count = db localTx {
 // cannot rollback
 ```
 
-### withinTx
+### withinTx block / session object
 
 ```scala
 db.begin()
@@ -200,7 +198,7 @@ val session = db.withinTxSession()
 val names = session.asList("select * from emp") {
   rs => Some(rs.getString("name"))
 }
-db.rollbackIfActive() // never throw Exception
+db.rollbackIfActive() // NEVER throws Exception
 ```
 
 ## TxFilter example
