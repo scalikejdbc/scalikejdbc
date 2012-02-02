@@ -7,9 +7,9 @@ import scalikejdbc.LoanPattern._
 object TestUtils {
 
   def initializeEmpRecords(session: DBSession, tableName: String) {
-    session.execute("delete from " + tableName)
-    session.execute("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-    session.execute("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+    session.update("delete from " + tableName)
+    session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+    session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
   }
 
   def initialize(conn: Connection, tableName: String) {

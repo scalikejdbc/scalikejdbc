@@ -1,10 +1,14 @@
 # ScalikeJDBC - A thin JDBC wrapper in Scala
 
-### Just write SQL and start writing applications right now
 
-This library is a thin JDBC wrapper, so the usage is very simple. 
+## Just write SQL
 
-Just use PreparedStatement, and map from ResultSet objects to Option[A] or List[A] objects by yourself.
+This is a thin JDBC wrapper library which just uses `java.sql.PreparedStatement` internally.
+
+Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala objects.
+
+It's very simple.
+
 
 ## sbt
 
@@ -29,7 +33,7 @@ ls-install scalikejdbc
 
 ## DB Access Object
 
-### Connection
+### Connection Management
 
 #### DriverManager
 
@@ -79,7 +83,9 @@ def doSomething() = {
 
 ### Query
 
-#### DBSession#asOne (Single Row)
+#### asOne
+
+`asOne` returns optionally single row.
 
 ```scala
 val name: Option[String] = db readOnly { session =>
@@ -91,7 +97,9 @@ val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
 ```
-#### DBSession#asList (Multiple Rows)
+#### asList
+
+`asList` returns multiple rows as `scala.collection.immutable.List`.
 
 ```scala
 val names: List[String] = db readOnly {
@@ -99,7 +107,9 @@ val names: List[String] = db readOnly {
 }
 ```
 
-#### DBSession#asIterator (Handling Iterator)
+#### asIterator
+
+`asIterator` allows you to handle `scala.collection.Iterator` directly.
 
 ```scala
 val iter: Iterator[String] = db readOnly {
@@ -109,7 +119,9 @@ iter.next()
 iter.next()
 ```
 
-#### DBSession#foreach (Side-effect in Iterator)
+#### foreach
+
+`foreach` allows you to make some side-effect in the iteration with `scala.collection.Iterator`.
 
 ```scala
 db readOnly {
@@ -120,13 +132,19 @@ db readOnly {
 
 ### Update
 
+`update` executes `PreparedStatement#executeUpdate()`.
+
 ```scala
-val updateCount: Int = db autoCommit {
-   _.update("update emp set name = ? where id = ?", "foo", 1)
-}
+db.begin()
+val inserted: Int = db withinTx { _.update("insert into emp (id, name) values (?, ?)", 1, "foo") }
+val updated: Int  = db withinTx { _.update("update emp set name = ? where id = ?", "bar", 1) }
+val deleted: Int  = db withinTx { _.update("delete emp where id = ?", 1) }
+db.commit()
 ```
 
 ### Execute
+
+`execute` executes `PreparedStatement#execute()`.
 
 ```scala
 db autoCommit {
@@ -134,7 +152,8 @@ db autoCommit {
 }
 ```
 
-## Transaction
+
+## Transaction Control
 
 ### readOnly block / session object
 
