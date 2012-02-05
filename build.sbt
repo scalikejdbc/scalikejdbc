@@ -33,3 +33,6 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
 }
 
 seq(lsSettings :_*)
+
+seq(scalariformSettings: _*)
+
