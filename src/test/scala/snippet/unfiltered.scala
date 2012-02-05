@@ -27,19 +27,20 @@ class TxFilter extends Filter {
     import scalikejdbc.LoanPattern._
     // using(java.sql.DriverManager.getConnection(url, user, password)) {
     using(ConnectionPool.borrow()) {
-      conn => {
-        val db = ThreadLocalDB.create(conn)
-        handling(classOf[Throwable]) by {
-          case e: Exception => {
-            db.rollbackIfActive()
-            throw e
+      conn =>
+        {
+          val db = ThreadLocalDB.create(conn)
+          handling(classOf[Throwable]) by {
+            case e: Exception => {
+              db.rollbackIfActive()
+              throw e
+            }
+          } apply {
+            db.begin()
+            chain.doFilter(req, res)
+            db.commit()
           }
-        } apply {
-          db.begin()
-          chain.doFilter(req, res)
-          db.commit()
         }
-      }
     }
   }
 
@@ -50,29 +51,31 @@ class TxFilter extends Filter {
 class PlanWithTx extends Plan {
 
   def intent = {
-    case req@GET(Path("/rollback")) => {
+    case req @ GET(Path("/rollback")) => {
       val db = ThreadLocalDB.load()
       db withinTx {
-        session => {
-          println(session.asOne("select name from emp where id = ?", 1) {
-            rs => Some(rs.getString("name"))
-          }.get)
-          session.update("update emp set name = ? where id = ?", "rollback?", 1)
-        }
+        session =>
+          {
+            println(session.asOne("select name from emp where id = ?", 1) {
+              rs => Some(rs.getString("name"))
+            }.get)
+            session.update("update emp set name = ? where id = ?", "rollback?", 1)
+          }
       }
       throw new RuntimeException("rollback test")
       // will rollback.
     }
-    case req@GET(Path("/commit")) => {
+    case req @ GET(Path("/commit")) => {
       val db = ThreadLocalDB.load()
       db withinTx {
-        session => {
-          println(session.asOne("select name from emp where id = ?", 1) {
-            rs => Some(rs.getString("name"))
-          }.get)
-          val count = session.update("update emp set name = ? where id = ?", "commited", 1)
-          ResponseString(count.toString)
-        }
+        session =>
+          {
+            println(session.asOne("select name from emp where id = ?", 1) {
+              rs => Some(rs.getString("name"))
+            }.get)
+            val count = session.update("update emp set name = ? where id = ?", "commited", 1)
+            ResponseString(count.toString)
+          }
       }
     }
   }
@@ -80,15 +83,16 @@ class PlanWithTx extends Plan {
   val conn = DriverManager.getConnection(url, user, password)
   val ddl = new DB(conn)
   ddl autoCommit {
-    session => {
-      try {
-        session.execute("create table emp (id integer primary key, name varchar(30))")
-      } catch {
-        case _: Exception =>
+    session =>
+      {
+        try {
+          session.execute("create table emp (id integer primary key, name varchar(30))")
+        } catch {
+          case _: Exception =>
+        }
+        session.execute("insert into emp (id, name) values (?, ?)", 1, "name1")
+        session.execute("insert into emp (id, name) values (?, ?)", 2, "name2")
       }
-      session.execute("insert into emp (id, name) values (?, ?)", 1, "name1")
-      session.execute("insert into emp (id, name) values (?, ?)", 2, "name2")
-    }
   }
 
 }
@@ -98,6 +102,6 @@ object Server extends App {
     .filter(new TxFilter)
     .plan(new PlanWithTx)
     .run {
-    s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollback".format(s.port))
-  }
+      s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollback".format(s.port))
+    }
 }

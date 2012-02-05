@@ -12,13 +12,11 @@ import java.sql.Connection
 @RunWith(classOf[JUnitRunner])
 class ConnectionPoolSettingsSuite extends FunSuite with ShouldMatchers {
 
-  type ? = this.type // for IntelliJ IDEA
-
   test("available") {
     val initialSize: Int = 0
     val maxSize: Int = 0
     val validationQuery: String = ""
-    val instance = new ConnectionPoolSettings(initialSize,maxSize,validationQuery)
+    val instance = new ConnectionPoolSettings(initialSize, maxSize, validationQuery)
     instance should not be null
   }
 

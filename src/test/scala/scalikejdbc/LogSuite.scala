@@ -9,10 +9,8 @@ import org.slf4j._
 @RunWith(classOf[JUnitRunner])
 class LogSuite extends FunSuite with ShouldMatchers {
 
-  type ? = this.type // for IntelliJ IDEA
-
   test("available") {
-    val logger: Logger = null
+    val logger: Logger = LoggerFactory.getLogger(classOf[LogSuite])
     val instance = new Log(logger)
     instance should not be null
   }

@@ -31,32 +31,34 @@ class ThreadLocalDBSuite extends FunSuite with ShouldMatchers with BeforeAndAfte
         createdDB.begin();
         // ... do something
         using(ThreadLocalDB.load()) {
-          db => {
-            val session = db.withinTxSession()
-            session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-            Thread.sleep(1000L)
-            val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-              rs => Some(rs.getString("name"))
+          db =>
+            {
+              val session = db.withinTxSession()
+              session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+              Thread.sleep(1000L)
+              val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
+                rs => Some(rs.getString("name"))
+              }
+              assert(name.get == "foo")
+              db.rollback()
             }
-            assert(name.get == "foo")
-            db.rollback()
-          }
         }
       }
 
       spawn {
         ThreadLocalDB.create(ConnectionPool.borrow())
         using(ThreadLocalDB.load()) {
-          db => {
-            db.begin()
-            val session = db.withinTxSession()
-            Thread.sleep(200L)
-            val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-              rs => Some(rs.getString("name"))
+          db =>
+            {
+              db.begin()
+              val session = db.withinTxSession()
+              Thread.sleep(200L)
+              val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
+                rs => Some(rs.getString("name"))
+              }
+              assert(name.get == "name1")
+              db.rollback()
             }
-            assert(name.get == "name1")
-            db.rollback()
-          }
         }
       }
 
@@ -64,16 +66,18 @@ class ThreadLocalDBSuite extends FunSuite with ShouldMatchers with BeforeAndAfte
 
       ThreadLocalDB.create(ConnectionPool.borrow())
       using(ThreadLocalDB.load()) {
-        db => {
-          val name = db autoCommit {
-            session => {
-              session.asOne("select name from " + tableName + " where id = ?", 1) {
-                rs => Some(rs.getString("name"))
-              }
+        db =>
+          {
+            val name = db autoCommit {
+              session =>
+                {
+                  session.asOne("select name from " + tableName + " where id = ?", 1) {
+                    rs => Some(rs.getString("name"))
+                  }
+                }
             }
+            assert(name.get == "name1")
           }
-          assert(name.get == "name1")
-        }
       }
     }
 

@@ -13,7 +13,7 @@ class TooManyRowsExceptionSuite extends FunSuite with ShouldMatchers {
   test("available") {
     val expected: Int = 0
     val actual: Int = 0
-    val instance = new TooManyRowsException(expected,actual)
+    val instance = new TooManyRowsException(expected, actual)
     instance should not be null
   }
 

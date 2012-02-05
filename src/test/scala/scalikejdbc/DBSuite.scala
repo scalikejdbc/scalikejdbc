@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.ops._
-import java.sql.{SQLException, DriverManager}
+import java.sql.{ SQLException, DriverManager }
 import util.control.Exception._
 import scalikejdbc.LoanPattern._
 
@@ -64,9 +64,10 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       val result = db readOnly {
-        session => session.asList("select * from " + tableName + "") {
-          rs => Some(rs.getString("name"))
-        }
+        session =>
+          session.asList("select * from " + tableName + "") {
+            rs => Some(rs.getString("name"))
+          }
       }
       result.size should be > 0
     }
@@ -110,9 +111,10 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       val result = db autoCommit {
-        session => session.asList("select * from " + tableName + "") {
-          rs => Some(rs.getString("name"))
-        }
+        session =>
+          session.asList("select * from " + tableName + "") {
+            rs => Some(rs.getString("name"))
+          }
       }
       result.size should be > 0
     }
@@ -307,9 +309,10 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
       val db = new DB(ConnectionPool.borrow())
       intercept[IllegalStateException] {
         db withinTx {
-          session => session.asList("select * from " + tableName + "") {
-            rs => Some(rs.getString("name"))
-          }
+          session =>
+            session.asList("select * from " + tableName + "") {
+              rs => Some(rs.getString("name"))
+            }
         }
       }
     }
@@ -323,9 +326,10 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val result = db withinTx {
-        session => session.asList("select * from " + tableName + "") {
-          rs => Some(rs.getString("name"))
-        }
+        session =>
+          session.asList("select * from " + tableName + "") {
+            rs => Some(rs.getString("name"))
+          }
       }
       result.size should be > 0
       db.rollbackIfActive()
@@ -408,21 +412,22 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
     ultimately(TestUtils.deleteTable(ConnectionPool.borrow(), tableName)) {
       TestUtils.initialize(ConnectionPool.borrow(), tableName)
       using(new DB(ConnectionPool.borrow())) {
-        db => {
-          db.begin()
-          val count = db withinTx {
-            _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-          }
-          count should be === 1
-          db.rollback()
-          db.begin()
-          val name = (db withinTx {
-            _.asOne("select name from " + tableName + " where id = ?", 1) {
-              rs => Some(rs.getString("name"))
+        db =>
+          {
+            db.begin()
+            val count = db withinTx {
+              _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
             }
-          }).get
-          name should equal("name1")
-        }
+            count should be === 1
+            db.rollback()
+            db.begin()
+            val name = (db withinTx {
+              _.asOne("select name from " + tableName + " where id = ?", 1) {
+                rs => Some(rs.getString("name"))
+              }
+            }).get
+            name should equal("name1")
+          }
       }
     }
   }
@@ -461,11 +466,12 @@ class DBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Sett
       Thread.sleep(2000L)
 
       val name = new DB(ConnectionPool.borrow()) autoCommit {
-        session => {
-          session.asOne("select name from " + tableName + " where id = ?", 1) {
-            rs => Some(rs.getString("name"))
+        session =>
+          {
+            session.asOne("select name from " + tableName + " where id = ?", 1) {
+              rs => Some(rs.getString("name"))
+            }
           }
-        }
       }
       assert(name.get == "name1")
     }
