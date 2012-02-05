@@ -96,6 +96,13 @@ val extractName = (rs: java.sql.ResultSet) => Some(rs.getString("name"))
 val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
+
+case class Emp(id: String, name: String)
+val emp: Option[Emp] = db readOnly {
+  _.asOne("select * from emp where id = ?", 1) { 
+    rs => Emp(rs.getString("id"), rs.getString("name")) 
+  }
+}
 ```
 #### asList
 
