@@ -15,7 +15,7 @@
  */
 package scalikejdbc
 
-import java.sql.{SQLException, Connection}
+import java.sql.{ SQLException, Connection }
 import scala.util.control.Exception._
 
 /**

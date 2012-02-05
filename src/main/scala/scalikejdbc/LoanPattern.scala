@@ -22,7 +22,7 @@ import util.control.Exception._
  */
 object LoanPattern {
 
-  type Closable = {def close()}
+  type Closable = { def close() }
 
   def using[R <: Closable, A](resource: R)(f: R => A): A = {
     try {

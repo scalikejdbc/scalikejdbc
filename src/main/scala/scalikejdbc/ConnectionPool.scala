@@ -16,7 +16,7 @@
 package scalikejdbc
 
 import org.apache.commons.pool.impl.GenericObjectPool
-import org.apache.commons.dbcp.{PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory}
+import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
 import javax.sql.DataSource
 import java.sql.Connection
 
@@ -40,13 +40,13 @@ object ConnectionPool extends LogSupport {
   def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.get(name).orNull
 
   def add(name: Any, url: String, user: String, password: String,
-          settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
     pools.update(name, new ConnectionPool(url, user, password, settings))
     log.debug("Registered connection pool : " + get(name).toString())
   }
 
   def singleton(url: String, user: String, password: String,
-                settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)
     log.debug("Registered singleton connection pool : " + get().toString())
   }
@@ -66,13 +66,13 @@ object ConnectionPool extends LogSupport {
 }
 
 case class ConnectionPoolSettings(initialSize: Int = 0,
-                                  maxSize: Int = 8,
-                                  validationQuery: String = null)
+  maxSize: Int = 8,
+  validationQuery: String = null)
 
 class ConnectionPool(url: String,
-                     user: String,
-                     password: String,
-                     settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
+    user: String,
+    password: String,
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
 
   private val pool = new GenericObjectPool(null);
   pool.setMinIdle(settings.initialSize);

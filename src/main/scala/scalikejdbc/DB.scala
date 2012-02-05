@@ -19,7 +19,6 @@ import java.sql.Connection
 import java.lang.IllegalStateException
 import scala.util.control.Exception._
 
-
 object DB {
 
   private def ensureDBInstance(db: DB): Unit = {
@@ -74,9 +73,10 @@ class DB(conn: Connection) {
 
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by {
-      e => throw new IllegalStateException(
-        "DB#tx is an alias of DB#currentTx. " +
-          "You cannot call this API before beginning a transaction")
+      e =>
+        throw new IllegalStateException(
+          "DB#tx is an alias of DB#currentTx. " +
+            "You cannot call this API before beginning a transaction")
     } apply currentTx
   }
 
@@ -137,10 +137,11 @@ class DB(conn: Connection) {
     }
 
     val rollbackIfException = handling(classOf[Throwable]) by {
-      t => {
-        tx.rollback()
-        throw t
-      }
+      t =>
+        {
+          tx.rollback()
+          throw t
+        }
     }
     rollbackIfException[A] {
       val session = new DBSession(conn, Some(tx))

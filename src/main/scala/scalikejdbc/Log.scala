@@ -15,8 +15,7 @@
  */
 package scalikejdbc
 
-import org.slf4j.{LoggerFactory, Logger}
-
+import org.slf4j.{ LoggerFactory, Logger }
 
 class Log(logger: Logger) {
 
