@@ -7,7 +7,7 @@ This is a thin JDBC wrapper library which just uses `java.sql.PreparedStatement`
 
 Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala objects.
 
-It's very simple.
+It's pretty simple, really.
 
 
 ## Setup
@@ -36,12 +36,14 @@ ls-install scalikejdbc
 
 ## DB object
 
-`scalikejdbc.DB` is the basic Database access class. It manages DB connection and provides transaction operations and sessions.
+`scalikejdbc.DB` is the basic class in using this library. 
+
+`scalikejdbc.DB` object manages DB connection, and also provides active sessions and transaction operations.
 
 
 ### Connection Management
 
-There are two approach to manage DB connections.
+There are two approaches to manage DB connections.
 
 #### DriverManager
 
@@ -55,9 +57,11 @@ val db = new DB(conn)
 ```
 
 
-#### ConnectionPool (Apache Commons DBCP)
+#### ConnectionPool (with [Apache Commons DBCP](http://commons.apache.org/dbcp/))
 
-Using `scalikejdbc.ConnectionPool` is encouraged. Internally it uses Apache Commons DBCP.
+Using `scalikejdbc.ConnectionPool` is encouraged. 
+
+It uses [Apache Commons DBCP](http://commons.apache.org/dbcp/) internally.
 
 ```scala
 import scalikejdbc._
@@ -67,7 +71,7 @@ val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 ```
 
-If you need to connect several datasources:
+If you need to connect several data-sources:
 
 ```scala
 import scalikejdbc._
@@ -94,15 +98,18 @@ def doSomething() = {
 }
 ```
 
+
 ## Operations
 
-### Query
+### Query API
 
-Query has various APIs. `asOne`, `asList`, `asIterator` and `foreach`.
+ScalikeJDBC has various query APIs. 
+
+`asOne`, `asList`, `asIterator` and `foreach`. All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
 #### asOne
 
-`asOne` returns optionally single row.
+`asOne` returns single row optionally.
 
 ```scala
 val name: Option[String] = db readOnly { session =>
@@ -133,7 +140,7 @@ val names: List[String] = db readOnly {
 
 #### asIterator
 
-`asIterator` allows you to handle `scala.collection.Iterator` directly.
+`asIterator` allows you to handle `scala.collection.Iterator` objects directly.
 
 ```scala
 val iter: Iterator[String] = db readOnly {
@@ -145,7 +152,7 @@ iter.next()
 
 #### foreach
 
-`foreach` allows you to make some side-effect in the iteration with `scala.collection.Iterator`.
+`foreach` allows you to make some side-effect in iterations with `scala.collection.Iterator`.
 
 ```scala
 db readOnly {
@@ -154,9 +161,9 @@ db readOnly {
 ```
 
 
-### Update
+### Update API
 
-`update` executes `PreparedStatement#executeUpdate()`.
+`update` executes `java.sql.PreparedStatement#executeUpdate()`.
 
 ```scala
 db.begin()
@@ -166,9 +173,9 @@ val deleted: Int  = db withinTx { _.update("delete emp where id = ?", 1) }
 db.commit()
 ```
 
-### Execute
+### Execute API
 
-`execute` executes `PreparedStatement#execute()`.
+`execute` executes `java.sql.PreparedStatement#execute()`.
 
 ```scala
 db autoCommit {
@@ -192,7 +199,7 @@ val session = db.readOnlySession()
 val names = session.asList("select * from emp") { rs => rs.getString("name") }
 ```
 
-Of course, update in read-only mode will cause `SQLException`.
+Of course, updating in read-only mode will cause `java.sql.SQLException`.
 
 ```scala
 val updateCount = db readOnly {
@@ -203,7 +210,7 @@ val updateCount = db readOnly {
 
 ### autoCommit block / session
 
-Execute query / update in auto-commit mode
+Execute query / update in auto-commit mode.
 
 ```scala
 val count = db autoCommit {
@@ -221,7 +228,7 @@ session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
 
 ### localTx block
 
-Execute query / update in a block-scoped transaction. 
+Execute query / update in block-scoped transactions. 
 
 If an Exception was thrown in the block, the transaction will perform rollback automatically.
 
@@ -238,7 +245,7 @@ val count = db localTx {
 
 ### withinTx block / session
 
-Execute query / update in already existing transction.
+Execute query / update in already existing transctions.
 
 `Tx#begin()`, `Tx#rollback()` or `Tx#commit()` should be handled. 
 
@@ -250,25 +257,28 @@ val names = db withinTx {
     rs => rs.getString("name")
   }
 }
-db.rollback() // might throw Exception
+db.rollback() // it might throw Exception
 
 db.begin()
 val session = db.withinTxSession()
 val names = session.asList("select * from emp") {
   rs => rs.getString("name")
 }
-db.rollbackIfActive() // NEVER throws Exception
+db.rollbackIfActive() // it NEVER throws Exception
 ```
 
 
 ## Real World Example
 
-### TxFilter and Unfiltered Webapp
+### TxFilter Example
 
-@see: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
+The following is an example with `javax.servlet.Filter` which provides thread-local transactions.
+
+for details at https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
 
 ```scala
 class TxFilter extends Filter {
+
   def init(filterConfig: FilterConfig) = {
     ConnectionPool.singleton(url, user, password)
   }
@@ -293,10 +303,13 @@ class TxFilter extends Filter {
   }
 
   def destroy() = {}
+
 }
 ```
 
-Unfiltered example:
+### Unfiltered Example
+
+Using the `TxFilter` in [unfiltered](https://github.com/unfiltered/unfiltered) app:
 
 ```scala
 class PlanWithTx extends Plan {
