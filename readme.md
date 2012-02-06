@@ -10,7 +10,9 @@ Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala 
 It's very simple.
 
 
-## sbt
+## Setup
+
+### sbt
 
 ```scala
 resolvers ++= Seq(
@@ -31,11 +33,19 @@ ls -n scalikejdbc
 ls-install scalikejdbc
 ```
 
-## DB Access Object
+
+## DB object
+
+`scalikejdbc.DB` is the basic Database access class. It manages DB connection and provides transaction operations and sessions.
+
 
 ### Connection Management
 
+There are two approach to manage DB connections.
+
 #### DriverManager
+
+Using `java.sq.DriverManager` is the simplest approarch.
 
 ```scala
 import scalikejdbc._
@@ -44,7 +54,10 @@ val conn = DriverManager.getConnection(url, user, password)
 val db = new DB(conn)
 ```
 
+
 #### ConnectionPool (Apache Commons DBCP)
+
+Using `scalikejdbc.ConnectionPool` is encouraged. Internally it uses Apache Commons DBCP.
 
 ```scala
 import scalikejdbc._
@@ -66,7 +79,9 @@ val db = new DB(conn)
 ```
 
 
-#### Thread-local Connection
+### Thread-local Connection
+
+You can share DB connections as thread-local values.
 
 ```scala
 def init() = {
@@ -82,6 +97,8 @@ def doSomething() = {
 ## Operations
 
 ### Query
+
+Query has various APIs. `asOne`, `asList`, `asIterator` and `foreach`.
 
 #### asOne
 
@@ -132,7 +149,7 @@ iter.next()
 
 ```scala
 db readOnly {
-  _.foreach("select * from emp") { rs => outout.write(rs.getString("name")) }
+  _.foreach("select * from emp") { rs => out.write(rs.getString("name")) }
 }
 ```
 
@@ -160,54 +177,70 @@ db autoCommit {
 ```
 
 
-## Transaction Control
+## Transaction
 
-### readOnly block / session object
+### readOnly block / session
+
+Execute query in read-only mode.
 
 ```scala
 val names = db readOnly {
-  session => session.asList("select * from emp") {
-    rs => rs.getString("name")
-  }
+  session => session.asList("select * from emp") { rs => rs.getString("name") }
 }
 
 val session = db.readOnlySession()
-val names = session.asList("select * from emp") {
-  rs => rs.getString("name")
-}
+val names = session.asList("select * from emp") { rs => rs.getString("name") }
+```
 
+Of course, update in read-only mode will cause `SQLException`.
+
+```scala
 val updateCount = db readOnly {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 } // will throw java.sql.SQLException
 ```
 
-### autoCommit block / session object
+
+### autoCommit block / session
+
+Execute query / update in auto-commit mode
 
 ```scala
 val count = db autoCommit {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 }
-// cannot rollback
+```
 
+When using autoCommitSession, every operation will execute in auto-commit mode.
+
+```scala
 val session = db.autoCommitSession()
-session.update("update emp set name = ? where id = ?", "foo", 1)
-session.update("update emp set name = ? where id = ?", "bar", 2)
-// cannot rollback
+session.update("update emp set name = ? where id = ?", "foo", 1) // auto-commit
+session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
 ```
 
 ### localTx block
 
+Execute query / update in a block-scoped transaction. 
+
+If an Exception was thrown in the block, the transaction will perform rollback automatically.
+
 ```scala
-val count = db localTx {
+val count = db localTx { 
+  // --- transcation scope start ---
   session => {
     session.update("update emp set name = ? where id = ?", "foo", 1)
     session.update("update emp set name = ? where id = ?", "bar", 2)
-  }
+  } 
+  // --- transaction scope end ---
 }
-// cannot rollback
 ```
 
-### withinTx block / session object
+### withinTx block / session
+
+Execute query / update in already existing transction.
+
+`Tx#begin()`, `Tx#rollback()` or `Tx#commit()` should be handled. 
 
 ```scala
 db.begin()
@@ -227,20 +260,21 @@ val names = session.asList("select * from emp") {
 db.rollbackIfActive() // NEVER throws Exception
 ```
 
-## TxFilter example
 
-See also: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
+## Real World Example
+
+### TxFilter and Unfiltered Webapp
+
+@see: https://github.com/seratch/scalikejdbc/tree/master/src/test/scala/snippet/unfiltered.scala
 
 ```scala
 class TxFilter extends Filter {
-
   def init(filterConfig: FilterConfig) = {
     ConnectionPool.singleton(url, user, password)
   }
 
   def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) = {
     import scalikejdbc.LoanPattern._
-    // using(java.sql.DriverManager.getConnection(url, user, password)) {
     using(ConnectionPool.borrow()) {
       conn => {
         val db = ThreadLocalDB.create(conn)
@@ -259,7 +293,6 @@ class TxFilter extends Filter {
   }
 
   def destroy() = {}
-
 }
 ```
 
@@ -272,7 +305,7 @@ class PlanWithTx extends Plan {
       val db = ThreadLocalDB.load()
       db withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
       throw new RuntimeException("Rollback Test!")
-      // will rollback
+      // will perform rollback
     }
   }
 }
