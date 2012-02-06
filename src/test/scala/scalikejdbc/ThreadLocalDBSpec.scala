@@ -5,23 +5,22 @@ import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ops._
-import java.sql.DriverManager
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
 import scalikejdbc.LoanPattern._
 
 @RunWith(classOf[JUnitRunner])
-class ThreadLocalDBSuite extends FunSuite with ShouldMatchers with BeforeAndAfter with Settings {
+class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  type ? = this.type // for IntelliJ IDEA
+  val tableNamePrefix = "emp_ThreadLocalDBSpec" + System.currentTimeMillis()
 
-  val tableNamePrefix = "emp_ThreadLocalDBSuite"
+  behavior of "ThreadLocalDB"
 
-  test("available") {
+  it should "be available" in {
     ThreadLocalDB.isInstanceOf[Singleton] should equal(true)
   }
 
-  test("with multi threads") {
+  it should "work with multi threads" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
@@ -72,7 +71,7 @@ class ThreadLocalDBSuite extends FunSuite with ShouldMatchers with BeforeAndAfte
               session =>
                 {
                   session.asOne("select name from " + tableName + " where id = ?", 1) {
-                    rs => Some(rs.getString("name"))
+                    rs => rs.getString("name")
                   }
                 }
             }

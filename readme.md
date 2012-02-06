@@ -18,7 +18,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "0.2.0" withSources ()
+  "com.github.seratch" %% "scalikejdbc" % "0.3.0" withSources ()
 )
 ```
 
@@ -89,10 +89,10 @@ def doSomething() = {
 
 ```scala
 val name: Option[String] = db readOnly { session =>
-  session.asOne("select * from emp where id = ?", 1) { rs => Some(rs.getString("name")) }
+  session.asOne("select * from emp where id = ?", 1) { rs => rs.getString("name") }
 }
 
-val extractName = (rs: java.sql.ResultSet) => Some(rs.getString("name"))
+val extractName = (rs: java.sql.ResultSet) => rs.getString("name")
 val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
@@ -110,7 +110,7 @@ val emp: Option[Emp] = db readOnly {
 
 ```scala
 val names: List[String] = db readOnly {
-  _.asList("select * from emp") { rs => Some(rs.getString("name")) }
+  _.asList("select * from emp") { rs => rs.getString("name") }
 }
 ```
 
@@ -120,7 +120,7 @@ val names: List[String] = db readOnly {
 
 ```scala
 val iter: Iterator[String] = db readOnly {
-  _.asIterator("select * from emp") { rs => Some(rs.getString("name")) }
+  _.asIterator("select * from emp") { rs => rs.getString("name") }
 }
 iter.next()
 iter.next()
@@ -167,13 +167,13 @@ db autoCommit {
 ```scala
 val names = db readOnly {
   session => session.asList("select * from emp") {
-    rs => Some(rs.getString("name"))
+    rs => rs.getString("name")
   }
 }
 
 val session = db.readOnlySession()
 val names = session.asList("select * from emp") {
-  rs => Some(rs.getString("name"))
+  rs => rs.getString("name")
 }
 
 val updateCount = db readOnly {
@@ -214,7 +214,7 @@ db.begin()
 val names = db withinTx {
   // if a transaction has not been started, IllegalStateException will be thrown
   session => session.asList("select * from emp") {
-    rs => Some(rs.getString("name"))
+    rs => rs.getString("name")
   }
 }
 db.rollback() // might throw Exception
@@ -222,7 +222,7 @@ db.rollback() // might throw Exception
 db.begin()
 val session = db.withinTxSession()
 val names = session.asList("select * from emp") {
-  rs => Some(rs.getString("name"))
+  rs => rs.getString("name")
 }
 db.rollbackIfActive() // NEVER throws Exception
 ```

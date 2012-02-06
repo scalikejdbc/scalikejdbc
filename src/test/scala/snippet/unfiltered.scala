@@ -57,7 +57,7 @@ class PlanWithTx extends Plan {
         session =>
           {
             println(session.asOne("select name from emp where id = ?", 1) {
-              rs => Some(rs.getString("name"))
+              rs => rs.getString("name")
             }.get)
             session.update("update emp set name = ? where id = ?", "rollback?", 1)
           }
@@ -71,8 +71,8 @@ class PlanWithTx extends Plan {
         session =>
           {
             println(session.asOne("select name from emp where id = ?", 1) {
-              rs => Some(rs.getString("name"))
-            }.get)
+              rs => rs.getString("name")
+            })
             val count = session.update("update emp set name = ? where id = ?", "commited", 1)
             ResponseString(count.toString)
           }

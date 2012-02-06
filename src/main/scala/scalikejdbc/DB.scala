@@ -74,9 +74,11 @@ class DB(conn: Connection) {
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by {
       e =>
-        throw new IllegalStateException(
-          "DB#tx is an alias of DB#currentTx. " +
-            "You cannot call this API before beginning a transaction")
+        {
+          throw new IllegalStateException(
+            "DB#tx is an alias of DB#currentTx. " +
+              "You cannot call this API before beginning a transaction")
+        }
     } apply currentTx
   }
 

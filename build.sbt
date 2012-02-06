@@ -1,6 +1,4 @@
-name := "scalikejdbc"
-
-organization := "com.github.seratch"
+import testgen.TestgenKeys._
 
 crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
 
@@ -36,3 +34,10 @@ seq(lsSettings :_*)
 
 seq(scalariformSettings: _*)
 
+seq(testgenSettings: _*)
+
+testgenEncoding in Compile := "UTF-8"
+
+testgenTestTemplate in Compile := "scalatest.FlatSpec"
+
+testgenScalaTestMatchers in Compile := "ShouldMatchers"

@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import java.sql.{ Connection, DriverManager }
+import java.sql.Connection
 import util.control.Exception._
 import scalikejdbc.LoanPattern._
 
@@ -25,7 +25,7 @@ object TestUtils {
           }
           createTableAndInitializeIfNotExist {
             session.asOne("select count(1) from " + tableName) {
-              rs => Some(rs.getInt(1))
+              rs => rs.getInt(1)
             } match {
               case Some(2) =>
               case _ => createTableAndInitialize()

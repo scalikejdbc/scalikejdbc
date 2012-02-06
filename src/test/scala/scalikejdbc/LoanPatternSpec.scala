@@ -7,15 +7,15 @@ import org.scalatest.junit.JUnitRunner
 import java.sql.DriverManager
 
 @RunWith(classOf[JUnitRunner])
-class LoanPatternSuite extends FunSuite with ShouldMatchers with Settings {
+class LoanPatternSpec extends FlatSpec with ShouldMatchers with Settings {
 
-  type ? = this.type // for IntelliJ IDEA
+  behavior of "LoanPattern"
 
-  test("available") {
+  it should "be available" in {
     LoanPattern.isInstanceOf[Singleton] should equal(true)
   }
 
-  test("using") {
+  "using" should "be available" in {
     import LoanPattern._
     val conn = DriverManager.getConnection(url, user, password)
     using(conn) {

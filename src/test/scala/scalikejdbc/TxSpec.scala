@@ -4,15 +4,14 @@ import org.scalatest._
 import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import java.sql._
 import util.control.Exception._
 
 @RunWith(classOf[JUnitRunner])
-class TxSuite extends FunSuite with ShouldMatchers with Settings {
+class TxSpec extends FlatSpec with ShouldMatchers with Settings {
 
-  type ? = this.type // for IntelliJ IDEA
+  behavior of "Tx"
 
-  test("available") {
+  it should "be available" in {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
@@ -21,7 +20,7 @@ class TxSuite extends FunSuite with ShouldMatchers with Settings {
     }
   }
 
-  test("begin") {
+  "begin" should "be available" in {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
@@ -31,7 +30,7 @@ class TxSuite extends FunSuite with ShouldMatchers with Settings {
     }
   }
 
-  test("commit") {
+  "commit" should "be available" in {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
@@ -41,7 +40,7 @@ class TxSuite extends FunSuite with ShouldMatchers with Settings {
     }
   }
 
-  test("rollback") {
+  "rollback" should "be available" in {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()

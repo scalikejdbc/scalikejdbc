@@ -6,11 +6,11 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ErrorMessageSuite extends FunSuite with ShouldMatchers {
+class ErrorMessageSpec extends FlatSpec with ShouldMatchers {
 
-  type ? = this.type // for IntelliJ IDEA
+  behavior of "ErrorMessage"
 
-  test("available") {
+  it should "be available" in {
     ErrorMessage.isInstanceOf[Singleton] should equal(true)
   }
 

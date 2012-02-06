@@ -18,7 +18,6 @@ package scalikejdbc
 import java.sql._
 import java.net.URL
 import scalikejdbc.LoanPattern.using
-import org.slf4j.LoggerFactory
 
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
@@ -77,31 +76,31 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
-  def asOne[A](template: String, params: Any*)(extract: ResultSet => Option[A]): Option[A] = {
+  def asOne[A](template: String, params: Any*)(extract: ResultSet => A): Option[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
         {
           bindParams(stmt, params: _*)
           val resultSet = new ResultSetIterator(stmt.executeQuery())
-          val rows = (resultSet flatMap (rs => extract(rs))).toList
+          val rows = (resultSet map (rs => extract(rs))).toList
           rows match {
             case Nil => None
-            case one :: Nil => Some(one)
+            case one :: Nil => Option(one)
             case _ => throw new TooManyRowsException(1, rows.size)
           }
         }
     }
   }
 
-  def asList[A](template: String, params: Any*)(extract: ResultSet => Option[A]): List[A] = {
+  def asList[A](template: String, params: Any*)(extract: ResultSet => A): List[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
         {
           bindParams(stmt, params: _*)
           val resultSet = new ResultSetIterator(stmt.executeQuery())
-          (resultSet flatMap (rs => extract(rs))).toList
+          (resultSet map (rs => extract(rs))).toList
         }
     }
   }
