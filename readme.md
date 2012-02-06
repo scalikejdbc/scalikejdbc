@@ -57,7 +57,7 @@ val db = new DB(conn)
 ```
 
 
-#### ConnectionPool (with [Apache Commons DBCP](http://commons.apache.org/dbcp/))
+#### ConnectionPool
 
 Using `scalikejdbc.ConnectionPool` is encouraged. 
 
