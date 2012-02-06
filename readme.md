@@ -36,9 +36,9 @@ ls-install scalikejdbc
 
 ## DB object
 
-`scalikejdbc.DB` is the basic class in using this library. 
+`scalikejdbc.DB` is the basic class in using this library.
 
-`scalikejdbc.DB` object manages DB connection, and also provides active sessions and transaction operations.
+It manages DB connection and also provides active sessions and transaction operations.
 
 
 ### Connection Management
@@ -105,7 +105,10 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`asOne`, `asList`, `asIterator` and `foreach`. All of them executes `java.sql.PreparedStatement#executeUpdate()`.
+`asOne`, `asList`, `asIterator` and `foreach`. 
+
+All of them executes `java.sql.PreparedStatement#executeUpdate()`.
+
 
 #### asOne
 
