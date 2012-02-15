@@ -9,23 +9,12 @@ object ScalikeJDBCBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc",
-    version := "0.3.1-SNAPSHOT",
-    publishTo <<= (version) { version: String =>
-      Some(
-        Resolver.file("GitHub Pages", Path.userHome / "github" / "seratch.github.com" / "mvn-repo" / {
-          if (version.trim.endsWith("SNAPSHOT")) "snapshots" else "releases" 
-        })
-      )
+    version := "0.3.1",
+    publishTo <<= version { (v: String) =>
+      val nexus = "https://oss.sonatype.org/"
+        if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots") 
+        else Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
-    /*
-    publishTo := Some(
-      Resolver.file(
-        "Github Pages",
-        Path.userHome / "github" / "seratch.github.com" / "mvn-repo" / "releases" asFile
-      )
-        (Patterns(true, Resolver.mavenStyleBasePattern))
-    ),
-    */
     publishMavenStyle := true,
     scalacOptions ++= Seq("-deprecation", "-unchecked")
   )
