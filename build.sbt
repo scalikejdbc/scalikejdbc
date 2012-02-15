@@ -14,9 +14,10 @@ resolvers ++= Seq(
 libraryDependencies <++= (scalaVersion) { scalaVersion =>
   Seq(
     // scope: provided
-    "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "provided",
-    "ch.qos.logback"          %  "logback-classic"      % "1.0.0"    % "provided",
+    "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
+    "org.slf4j"               % "slf4j-api"             % "1.6.4"    % "compile",
     // scope: test
+    "ch.qos.logback"          %  "logback-classic"      % "1.0.0"    % "test",
     "net.databinder"          %% "unfiltered-filter"    % "0.5.1"    % "test",
     "net.databinder"          %% "unfiltered-jetty"     % "0.5.1"    % "test",
     "net.databinder"          %% "unfiltered-spec"      % "0.5.1"    % "test",
