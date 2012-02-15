@@ -15,13 +15,7 @@ It's pretty simple, really.
 ### sbt
 
 ```scala
-resolvers ++= Seq(
-  "seratch.github.com releases"  at "http://seratch.github.com/mvn-repo/releases"
-)
-
-libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "0.3.0" withSources ()
-)
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "0.3.1"
 ```
 
 ### ls.implicit.ly
