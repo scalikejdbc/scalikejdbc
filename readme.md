@@ -110,10 +110,10 @@ All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
 ```scala
 val name: Option[String] = db readOnly { session =>
-  session.asOne("select * from emp where id = ?", 1) { rs => rs.getString("name") }
+  session.asOne("select * from emp where id = ?", 1) { rs => rs.string("name") }
 }
 
-val extractName = (rs: java.sql.ResultSet) => rs.getString("name")
+val extractName = (rs: WrappedResultSet) => rs.string("name")
 val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
@@ -121,7 +121,7 @@ val name: Option[String] = db readOnly {
 case class Emp(id: String, name: String)
 val emp: Option[Emp] = db readOnly {
   _.asOne("select * from emp where id = ?", 1) { 
-    rs => Emp(rs.getString("id"), rs.getString("name")) 
+    rs => Emp(rs.string("id"), rs.string("name"))
   }
 }
 ```
@@ -131,7 +131,7 @@ val emp: Option[Emp] = db readOnly {
 
 ```scala
 val names: List[String] = db readOnly {
-  _.asList("select * from emp") { rs => rs.getString("name") }
+  _.asList("select * from emp") { rs => rs.string("name") }
 }
 ```
 
@@ -141,7 +141,7 @@ val names: List[String] = db readOnly {
 
 ```scala
 val iter: Iterator[String] = db readOnly {
-  _.asIterator("select * from emp") { rs => rs.getString("name") }
+  _.asIterator("select * from emp") { rs => rs.string("name") }
 }
 iter.next()
 iter.next()
@@ -153,7 +153,7 @@ iter.next()
 
 ```scala
 db readOnly {
-  _.foreach("select * from emp") { rs => out.write(rs.getString("name")) }
+  _.foreach("select * from emp") { rs => out.write(rs.string("name")) }
 }
 ```
 
@@ -189,11 +189,11 @@ Execute query in read-only mode.
 
 ```scala
 val names = db readOnly {
-  session => session.asList("select * from emp") { rs => rs.getString("name") }
+  session => session.asList("select * from emp") { rs => rs.string("name") }
 }
 
 val session = db.readOnlySession()
-val names = session.asList("select * from emp") { rs => rs.getString("name") }
+val names = session.asList("select * from emp") { rs => rs.string("name") }
 ```
 
 Of course, updating in read-only mode will cause `java.sql.SQLException`.
@@ -251,7 +251,7 @@ db.begin()
 val names = db withinTx {
   // if a transaction has not been started, IllegalStateException will be thrown
   session => session.asList("select * from emp") {
-    rs => rs.getString("name")
+    rs => rs.string("name")
   }
 }
 db.rollback() // it might throw Exception
@@ -259,7 +259,7 @@ db.rollback() // it might throw Exception
 db.begin()
 val session = db.withinTxSession()
 val names = session.asList("select * from emp") {
-  rs => rs.getString("name")
+  rs => rs.string("name")
 }
 db.rollbackIfActive() // it NEVER throws Exception
 ```

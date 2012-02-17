@@ -4,12 +4,7 @@ crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
 
 scalaVersion := "2.9.1"
 
-resolvers ++= Seq(
-  "scala-tools-snapshots" at "http://scala-tools.org/repo-snapshots",
-  "scala-tools-releases"  at "http://scala-tools.org/repo-releases",
-  "seratch-github-repo"   at "http://seratch.github.com/mvn-repo/releases",
-  "sbt-idea-repo"         at "http://mpeltonen.github.com/maven/"
-)
+resolvers += "sbt-idea-repo"         at "http://mpeltonen.github.com/maven/"
 
 libraryDependencies <++= (scalaVersion) { scalaVersion =>
   Seq(

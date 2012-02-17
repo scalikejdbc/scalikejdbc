@@ -1,5 +1,4 @@
 resolvers ++= Seq(
-  "seratch" at "http://seratch.github.com/mvn-repo/releases",
   "sbt-idea-repo" at "http://mpeltonen.github.com/maven/",
   "less is" at "http://repo.lessis.me",
   "coda" at "http://repo.codahale.com"
@@ -7,7 +6,7 @@ resolvers ++= Seq(
 
 resolvers += Classpaths.typesafeResolver
 
-addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "0.2")
+addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "0.3.0")
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
