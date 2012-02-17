@@ -109,17 +109,18 @@ All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 `asOne` returns single row optionally.
 
 ```scala
-val name: Option[String] = db readOnly { session =>
-  session.asOne("select * from emp where id = ?", 1) { rs => rs.string("name") }
+val name: Option[String] = db readOnly { session: DBSession =>
+  session.asOne("select * from emp where id = ?", 1) { _.string("name") }
 }
 
 val extractName = (rs: WrappedResultSet) => rs.string("name")
+
 val name: Option[String] = db readOnly {
   _.asOne("select * from emp where id = ?", 1)(extractName)
 }
 
 case class Emp(id: String, name: String)
-val emp: Option[Emp] = db readOnly {
+val emp: Option[Emp] = db readOnly { 
   _.asOne("select * from emp where id = ?", 1) { 
     rs => Emp(rs.string("id"), rs.string("name"))
   }
@@ -131,7 +132,7 @@ val emp: Option[Emp] = db readOnly {
 
 ```scala
 val names: List[String] = db readOnly {
-  _.asList("select * from emp") { rs => rs.string("name") }
+  _.asList("select * from emp") { _.string("name") }
 }
 ```
 
@@ -141,7 +142,7 @@ val names: List[String] = db readOnly {
 
 ```scala
 val iter: Iterator[String] = db readOnly {
-  _.asIterator("select * from emp") { rs => rs.string("name") }
+  _.asIterator("select * from emp") { _.string("name") }
 }
 iter.next()
 iter.next()
