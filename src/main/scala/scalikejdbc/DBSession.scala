@@ -30,11 +30,11 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
-  class ResultSetIterator(rs: ResultSet) extends Iterator[ResultSet] {
+  class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
 
     def hasNext: Boolean = rs.next
 
-    def next(): ResultSet = rs
+    def next(): WrappedResultSet = WrappedResultSet(rs)
 
   }
 
@@ -76,7 +76,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
-  def asOne[A](template: String, params: Any*)(extract: ResultSet => A): Option[A] = {
+  def asOne[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -93,7 +93,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
-  def asList[A](template: String, params: Any*)(extract: ResultSet => A): List[A] = {
+  def asList[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -105,7 +105,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
-  def foreach[A](template: String, params: Any*)(f: ResultSet => Unit) = {
+  def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit) = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -116,7 +116,7 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
-  def asIterator[A](template: String, params: Any*)(extract: ResultSet => A): Iterator[A] = {
+  def asIterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
     val stmt = createPreparedStatement(conn, template)
     bindParams(stmt, params: _*)
     new ResultSetIterator(stmt.executeQuery()) map (rs => extract(rs))

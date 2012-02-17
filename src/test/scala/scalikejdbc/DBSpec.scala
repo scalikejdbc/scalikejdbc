@@ -68,7 +68,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val result = db readOnly {
         session =>
           session.asList("select * from " + tableName + "") {
-            rs => Some(rs.getString("name"))
+            rs => Some(rs.string("name"))
           }
       }
       result.size should be > 0
@@ -83,7 +83,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       val session = db.readOnlySession()
       val result = session.asList("select * from " + tableName + "") {
-        rs => Some(rs.getString("name"))
+        rs => Some(rs.string("name"))
       }
       result.size should be > 0
     }
@@ -115,7 +115,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val result = db autoCommit {
         session =>
           session.asList("select * from " + tableName + "") {
-            rs => Some(rs.getString("name"))
+            rs => Some(rs.string("name"))
           }
       }
       result.size should be > 0
@@ -129,7 +129,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       val session = db.autoCommitSession()
-      val list = session.asList("select id from " + tableName + " order by id")(rs => rs.getInt("id"))
+      val list = session.asList("select id from " + tableName + " order by id")(rs => rs.int("id"))
       list(0) should equal(1)
       list(1) should equal(2)
     }
@@ -143,7 +143,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       val result = db autoCommit {
         _.asOne("select id from " + tableName + " where id = ?", 1) {
-          rs => rs.getInt("id")
+          rs => rs.int("id")
         }
       }
       result.get should equal(1)
@@ -159,7 +159,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       intercept[TooManyRowsException] {
         db autoCommit {
           _.asOne("select id from " + tableName + "") {
-            rs => Some(rs.getInt("id"))
+            rs => Some(rs.int("id"))
           }
         }
       }
@@ -172,7 +172,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val extractName = (rs: java.sql.ResultSet) => rs.getString("name")
+      val extractName = (rs: WrappedResultSet) => rs.string("name")
       val name: Option[String] = db readOnly {
         _.asOne("select * from " + tableName + " where id = ?", 1)(extractName)
       }
@@ -188,7 +188,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       val result = db autoCommit {
         _.asList("select id from " + tableName + "") {
-          rs => Some(rs.getInt("id"))
+          rs => Some(rs.int("id"))
         }
       }
       result.size should equal(2)
@@ -203,7 +203,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       db autoCommit {
         _.foreach("select id from " + tableName + "") {
-          rs => println(rs.getInt("id"))
+          rs => println(rs.int("id"))
         }
       }
     }
@@ -221,7 +221,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       count should equal(1)
       val name = (db autoCommit {
         _.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
       }).get
       name should equal("foo")
@@ -239,7 +239,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       val result = db localTx {
         _.asOne("select id from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("id")
+          rs => rs.string("id")
         }
       }
       result.get should equal("1")
@@ -254,7 +254,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       val result = db localTx {
         _.asList("select id from " + tableName + "") {
-          rs => Some(rs.getString("id"))
+          rs => Some(rs.string("id"))
         }
       }
       result.size should equal(2)
@@ -273,7 +273,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       count should be === 1
       val name = (db localTx {
         _.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
       }).getOrElse("---")
       name should equal("foo")
@@ -293,7 +293,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       db.rollbackIfActive()
       val name = (db localTx {
         _.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
       }).getOrElse("---")
       name should equal("foo")
@@ -313,7 +313,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         db withinTx {
           session =>
             session.asList("select * from " + tableName + "") {
-              rs => Some(rs.getString("name"))
+              rs => Some(rs.string("name"))
             }
         }
       }
@@ -330,7 +330,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val result = db withinTx {
         session =>
           session.asList("select * from " + tableName + "") {
-            rs => Some(rs.getString("name"))
+            rs => Some(rs.string("name"))
           }
       }
       result.size should be > 0
@@ -347,7 +347,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       db.begin()
       val session = db.withinTxSession()
       val result = session.asList("select * from " + tableName + "") {
-        rs => Some(rs.getString("name"))
+        rs => Some(rs.string("name"))
       }
       result.size should be > 0
       db.rollbackIfActive()
@@ -363,7 +363,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       db.begin()
       val result = db withinTx {
         _.asOne("select id from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("id")
+          rs => rs.string("id")
         }
       }
       result.get should equal("1")
@@ -380,7 +380,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       db.begin()
       val result = db withinTx {
         _.asList("select id from " + tableName + "") {
-          rs => Some(rs.getString("id"))
+          rs => Some(rs.string("id"))
         }
       }
       result.size should equal(2)
@@ -401,7 +401,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       count should be === 1
       val name = (db withinTx {
         _.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
       }).get
       name should equal("foo")
@@ -425,7 +425,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
             db.begin()
             val name = (db withinTx {
               _.asOne("select name from " + tableName + " where id = ?", 1) {
-                rs => rs.getString("name")
+                rs => rs.string("name")
               }
             }).get
             name should equal("name1")
@@ -448,7 +448,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         Thread.sleep(1000L)
         val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
         assert(name.get == "foo")
         db.rollback()
@@ -459,7 +459,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         val session = db.withinTxSession()
         Thread.sleep(200L)
         val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.getString("name")
+          rs => rs.string("name")
         }
         assert(name.get == "name1")
         db.rollback()
@@ -471,7 +471,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         session =>
           {
             session.asOne("select name from " + tableName + " where id = ?", 1) {
-              rs => rs.getString("name")
+              rs => rs.string("name")
             }
           }
       }

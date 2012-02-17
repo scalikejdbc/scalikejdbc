@@ -30,7 +30,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       TestUtils.initialize(conn, tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val result = session.asOne("select id from " + tableName + " where id = ?", 1)(rs => rs.getString("id"))
+      val result = session.asOne("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
       result.get should equal("1")
     }
   }
@@ -43,7 +43,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val db = new DB(conn)
       val session = db.autoCommitSession()
       val result = session.asList("select id from " + tableName) {
-        rs => rs.getString("id")
+        rs => rs.string("id")
       }
       result.size should equal(2)
     }
@@ -60,7 +60,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       db.rollbackIfActive()
       count should equal(1)
       val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.getString("name")
+        rs => rs.string("name")
       } getOrElse "---"
       name should equal("foo")
     }
@@ -80,7 +80,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
       val result = session.asOne("select id from " + tableName + " where id = ?", 1) {
-        rs => rs.getString("id")
+        rs => rs.string("id")
       }
       result.get should equal("1")
       db.rollbackIfActive()
@@ -97,7 +97,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
       val result = session.asList("select id from " + tableName + "") {
-        rs => rs.getString("id")
+        rs => rs.string("id")
       }
       result.size should equal(2)
       db.rollbackIfActive()
@@ -114,14 +114,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
       val nameBefore = session.asOne("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.getString("name")
+        rs => rs.string("name")
       }.get
       nameBefore should equal("name1")
       val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       count should equal(1)
       db.rollbackIfActive()
       val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.getString("name")
+        rs => rs.string("name")
       }.get
       name should equal("name1")
     }

@@ -36,7 +36,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
               Thread.sleep(1000L)
               val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-                rs => Some(rs.getString("name"))
+                rs => rs.string("name")
               }
               assert(name.get == "foo")
               db.rollback()
@@ -53,7 +53,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               val session = db.withinTxSession()
               Thread.sleep(200L)
               val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
-                rs => Some(rs.getString("name"))
+                rs => rs.string("name")
               }
               assert(name.get == "name1")
               db.rollback()
@@ -71,7 +71,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               session =>
                 {
                   session.asOne("select name from " + tableName + " where id = ?", 1) {
-                    rs => rs.getString("name")
+                    rs => rs.string("name")
                   }
                 }
             }
