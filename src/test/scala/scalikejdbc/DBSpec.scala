@@ -228,6 +228,21 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  it should "execute update in autoCommit block after readOnly" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      val name = (db readOnly { _.asOne("select name from " + tableName + " where id = ?", 1)(_.string("name")) }).get
+      name should equal("name1")
+      val count = db autoCommit {
+        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      }
+      count should equal(1)
+    }
+  }
+
   // --------------------
   // localTx
 

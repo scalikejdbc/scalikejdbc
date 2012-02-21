@@ -112,7 +112,11 @@ class DB(conn: Connection) {
     execution(session)
   }
 
-  def autoCommitSession(): DBSession = new DBSession(conn)
+  def autoCommitSession(): DBSession = {
+    conn.setReadOnly(false)
+    conn.setAutoCommit(true)
+    new DBSession(conn)
+  }
 
   def autoCommit[A](execution: DBSession => A): A = {
     val session = autoCommitSession()
