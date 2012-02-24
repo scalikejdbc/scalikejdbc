@@ -12,12 +12,32 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
 
   val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis()
 
-  behavior of "ConnectionPool"
+  behavior of "DBSession"
 
   it should "available" in {
     val conn = ConnectionPool.borrow()
     val session = new DBSession(conn)
     session should not be null
+  }
+
+  it should "exceute insert with nullable values" in {
+    val tableName = tableNamePrefix + "_insertWithNullableValues";
+    val conn = ConnectionPool.borrow()
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(conn)
+      val session = db.autoCommitSession()
+
+      session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+      val benOpt = session.asOne("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+      benOpt.get._1 should equal(3)
+      benOpt.get._2 should equal("Ben")
+
+      session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
+      val maybeNone = session.asOne("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+      maybeNone.get._1 should equal(4)
+      maybeNone.get._2 should equal(null)
+    }
   }
 
   // --------------------

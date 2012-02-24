@@ -44,8 +44,14 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
   }
 
   private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
-    for ((param, idx) <- params.zipWithIndex; i = idx + 1) {
+    for (
+      (param, idx) <- params.map {
+        case option: Option[_] => option.orNull[Any]
+        case other => other
+      }.zipWithIndex; i = idx + 1
+    ) {
       param match {
+        case null => stmt.setObject(i, null)
         case p: Array => stmt.setArray(i, p)
         case p: java.math.BigDecimal => stmt.setBigDecimal(i, p)
         case p: Boolean => stmt.setBoolean(i, p)
