@@ -18,6 +18,7 @@ package scalikejdbc
 import java.sql.Connection
 import java.lang.IllegalStateException
 import scala.util.control.Exception._
+import LoanPattern.using
 
 object DB {
 
@@ -27,20 +28,44 @@ object DB {
     }
   }
 
-  def autoCommit[A](execution: DBSession => A)(implicit db: DB): A = {
-    ensureDBInstance(db: DB)
-    db.autoCommit(execution)
+  /**
+   * Begins a readOnly block easily with ConnectionPool
+   */
+  def readOnly[A](execution: DBSession => A): A = {
+    using(ConnectionPool.borrow()) { conn => DB(conn).readOnly(execution) }
   }
 
+  /**
+   * Begins a autoCommit block easily with ConnectionPool
+   */
+  def autoCommit[A](execution: DBSession => A): A = {
+    using(ConnectionPool.borrow()) { conn => DB(conn).autoCommit(execution) }
+  }
+
+  /**
+   * Begins a localTx block easily with ConnectionPool
+   */
+  def localTx[A](execution: DBSession => A): A = {
+    using(ConnectionPool.borrow()) { conn => DB(conn).localTx(execution) }
+  }
+
+  /**
+   * Begins a withinTx block easily with a DB instance as an implicit parameter
+   */
   def withinTx[A](execution: DBSession => A)(implicit db: DB): A = {
     ensureDBInstance(db: DB)
     db.withinTx(execution)
   }
 
-  def localTx[A](execution: DBSession => A)(implicit db: DB): A = {
-    ensureDBInstance(db: DB)
-    db.localTx(execution)
-  }
+  /**
+   * Get a connection and returns a DB instance
+   */
+  def connect(conn: Connection = ConnectionPool.borrow()): DB = DB(conn)
+
+  /**
+   * Returns a DB instance by using an implicit Connection object
+   */
+  def connected(implicit conn: Connection) = DB(conn)
 
 }
 
