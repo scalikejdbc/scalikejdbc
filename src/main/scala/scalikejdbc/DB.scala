@@ -47,7 +47,7 @@ object DB {
 /**
  * DB accessor
  */
-class DB(conn: Connection) {
+case class DB(conn: Connection) {
 
   def isTxNotActive = conn == null || conn.isClosed || conn.isReadOnly
 
