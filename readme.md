@@ -27,6 +27,12 @@ ls -n scalikejdbc
 ls-install scalikejdbc
 ```
 
+## Basic Usage
+
+Please see this sample:
+
+https://github.com/seratch/scalikejdbc/blob/master/src/test/scala/scalikejdbc/BasicUsageSpec.scala
+
 
 ## DB object
 
