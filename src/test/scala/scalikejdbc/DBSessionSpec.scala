@@ -34,9 +34,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       benOpt.get._2 should equal("Ben")
 
       session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
-      val maybeNone = session.asOne("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
-      maybeNone.get._1 should equal(4)
-      maybeNone.get._2 should equal(null)
+      val noName = session.asOne("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+      noName.get._1 should equal(4)
+      noName.get._2 should equal(null)
     }
   }
 
