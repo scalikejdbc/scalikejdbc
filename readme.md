@@ -15,7 +15,7 @@ It's pretty simple, really.
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "0.4.2"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "0.5.0"
 ```
 
 ### ls.implicit.ly
@@ -105,50 +105,61 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`asOne`, `asList`, `asIterator` and `foreach`. 
+`single`, `first`, `list`, `iterator` and `foreach`. 
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
 
-#### asOne
+#### single
 
-`asOne` returns single row optionally.
+`single` returns single row optionally.
 
 ```scala
 val name: Option[String] = db readOnly { session: DBSession =>
-  session.asOne("select * from emp where id = ?", 1) { _.string("name") }
+  session.single("select * from emp where id = ?", 1) { _.string("name") }
 }
 
 val extractName = (rs: WrappedResultSet) => rs.string("name")
 
 val name: Option[String] = db readOnly {
-  _.asOne("select * from emp where id = ?", 1)(extractName)
+  _.single("select * from emp where id = ?", 1)(extractName)
 }
 
 case class Emp(id: String, name: String)
 val emp: Option[Emp] = db readOnly { 
-  _.asOne("select * from emp where id = ?", 1) { 
+  _.single("select * from emp where id = ?", 1) { 
     rs => Emp(rs.string("id"), rs.string("name"))
   }
 }
 ```
-#### asList
 
-`asList` returns multiple rows as `scala.collection.immutable.List`.
+#### first
+
+`first` returns the first row optionally.
 
 ```scala
-val names: List[String] = db readOnly {
-  _.asList("select * from emp") { _.string("name") }
+val name: Option[String] = db readOnly {
+  _.first("select * from emp") { _.string("name") }
 }
 ```
 
-#### asIterator
+#### list
 
-`asIterator` allows you to handle `scala.collection.Iterator` objects directly.
+`list` returns multiple rows as `scala.collection.immutable.List`.
+
+```scala
+val names: List[String] = db readOnly {
+  _.list("select * from emp") { _.string("name") }
+}
+```
+
+#### iterator
+
+`iterator` allows you to handle `scala.collection.Iterator` objects directly.
 
 ```scala
 val iter: Iterator[String] = db readOnly {
-  _.asIterator("select * from emp") { _.string("name") }
+  _.iterator("select * from emp") { _.string("name") }
 }
 iter.next()
 iter.next()
@@ -196,11 +207,11 @@ Execute query in read-only mode.
 
 ```scala
 val names = db readOnly {
-  session => session.asList("select * from emp") { rs => rs.string("name") }
+  session => session.list("select * from emp") { rs => rs.string("name") }
 }
 
 val session = db.readOnlySession()
-val names = session.asList("select * from emp") { rs => rs.string("name") }
+val names = session.list("select * from emp") { rs => rs.string("name") }
 ```
 
 Of course, updating in read-only mode will cause `java.sql.SQLException`.
@@ -257,7 +268,7 @@ Execute query / update in already existing transctions.
 db.begin()
 val names = db withinTx {
   // if a transaction has not been started, IllegalStateException will be thrown
-  session => session.asList("select * from emp") {
+  session => session.list("select * from emp") {
     rs => rs.string("name")
   }
 }
@@ -265,7 +276,7 @@ db.rollback() // it might throw Exception
 
 db.begin()
 val session = db.withinTxSession()
-val names = session.asList("select * from emp") {
+val names = session.list("select * from emp") {
   rs => rs.string("name")
 }
 db.rollbackIfActive() // it NEVER throws Exception

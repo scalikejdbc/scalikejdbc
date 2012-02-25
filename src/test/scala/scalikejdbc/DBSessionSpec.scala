@@ -29,12 +29,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val session = db.autoCommitSession()
 
       session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
-      val benOpt = session.asOne("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+      val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
       benOpt.get._1 should equal(3)
       benOpt.get._2 should equal("Ben")
 
       session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
-      val noName = session.asOne("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+      val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
       noName.get._1 should equal(4)
       noName.get._2 should equal(null)
     }
@@ -43,26 +43,28 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   // --------------------
   // auto commit
 
-  it should "execute asOne in auto commit mode" in {
-    val tableName = tableNamePrefix + "_asOneInAutoCommit";
+  it should "execute single in auto commit mode" in {
+    val tableName = tableNamePrefix + "_singleInAutoCommit";
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val result = session.asOne("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
-      result.get should equal("1")
+      val singleResult = session.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+      val firstResult = session.first("select id from " + tableName)(rs => rs.string("id"))
+      singleResult.get should equal("1")
+      firstResult.get should equal("1")
     }
   }
 
-  it should "execute asList in auto commit mode" in {
-    val tableName = tableNamePrefix + "_asListInAutoCommit";
+  it should "execute list in auto commit mode" in {
+    val tableName = tableNamePrefix + "_listInAutoCommit";
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val result = session.asList("select id from " + tableName) {
+      val result = session.list("select id from " + tableName) {
         rs => rs.string("id")
       }
       result.size should equal(2)
@@ -79,7 +81,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       db.rollbackIfActive()
       count should equal(1)
-      val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
+      val name = session.single("select name from " + tableName + " where id = ?", 1) {
         rs => rs.string("name")
       } getOrElse "---"
       name should equal("foo")
@@ -90,16 +92,16 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   // --------------------
   // within tx mode
 
-  it should "execute asOne in within tx mode" in {
+  it should "execute single in within tx mode" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_asOneInWithinTx";
+    val tableName = tableNamePrefix + "_singleInWithinTx";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
-      val result = session.asOne("select id from " + tableName + " where id = ?", 1) {
+      val result = session.single("select id from " + tableName + " where id = ?", 1) {
         rs => rs.string("id")
       }
       result.get should equal("1")
@@ -107,16 +109,16 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
-  it should "execute asList in within tx mode" in {
+  it should "execute list in within tx mode" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_asListInWithinTx";
+    val tableName = tableNamePrefix + "_listInWithinTx";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
-      val result = session.asList("select id from " + tableName + "") {
+      val result = session.list("select id from " + tableName + "") {
         rs => rs.string("id")
       }
       result.size should equal(2)
@@ -133,14 +135,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       db.begin()
       val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
-      val nameBefore = session.asOne("select name from " + tableName + " where id = ?", 1) {
+      val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
         rs => rs.string("name")
       }.get
       nameBefore should equal("name1")
       val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       count should equal(1)
       db.rollbackIfActive()
-      val name = session.asOne("select name from " + tableName + " where id = ?", 1) {
+      val name = session.single("select name from " + tableName + " where id = ?", 1) {
         rs => rs.string("name")
       }.get
       name should equal("name1")

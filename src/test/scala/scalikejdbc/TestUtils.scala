@@ -24,7 +24,7 @@ object TestUtils {
             t => createTableAndInitialize()
           }
           createTableAndInitializeIfNotExist {
-            session.asOne("select count(1) from " + tableName) {
+            session.single("select count(1) from " + tableName) {
               rs => rs.int(1)
             } match {
               case Some(2) =>

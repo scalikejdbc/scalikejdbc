@@ -56,7 +56,7 @@ class PlanWithTx extends Plan {
       db withinTx {
         session =>
           {
-            println(session.asOne("select name from emp where id = ?", 1) {
+            println(session.single("select name from emp where id = ?", 1) {
               rs => rs.string("name")
             }.get)
             session.update("update emp set name = ? where id = ?", "rollback?", 1)
@@ -70,7 +70,7 @@ class PlanWithTx extends Plan {
       db withinTx {
         session =>
           {
-            println(session.asOne("select name from emp where id = ?", 1) {
+            println(session.single("select name from emp where id = ?", 1) {
               rs => rs.string("name")
             })
             val count = session.update("update emp set name = ? where id = ?", "commited", 1)

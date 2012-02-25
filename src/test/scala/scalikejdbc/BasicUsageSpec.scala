@@ -132,19 +132,19 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       TestUtils.initialize(conn, tableName)
 
       val emp: Option[Emp] = DB readOnly {
-        _.asOne("select * from " + tableName + " where id = ?", 1) { rs =>
+        _.single("select * from " + tableName + " where id = ?", 1) { rs =>
           Emp(rs.int("id"), rs.string("name"))
         }
       }
 
       val emps: List[Emp] = DB readOnly {
-        _.asList("select * from " + tableName) { rs =>
+        _.list("select * from " + tableName) { rs =>
           Emp(rs.int("id"), rs.string("name"))
         }
       }
 
       val session = DB(conn).readOnlySession
-      val emps2: List[Emp2] = session.asList("select * from " + tableName) { rs =>
+      val emps2: List[Emp2] = session.list("select * from " + tableName) { rs =>
         Emp2(rs.int("id"), Option(rs.string("name")))
       }
     }
@@ -159,11 +159,11 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       TestUtils.initialize(conn, tableName)
 
       DB localTx { session =>
-        val emp: Option[Emp] = session.asOne("select * from " + tableName + " where id = ?", 1) { rs =>
+        val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1) { rs =>
           Emp(rs.int("id"), rs.string("name"))
         }
         val emps: List[Emp] =
-          session.asList("select * from " + tableName) { rs => Emp(rs.int("id"), rs.string("name")) }
+          session.list("select * from " + tableName) { rs => Emp(rs.int("id"), rs.string("name")) }
       }
     }
   }
@@ -182,10 +182,10 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
         // with implicit DB instnace
         DB withinTx { session =>
-          val emp: Option[Emp] = session.asOne("select * from " + tableName + " where id = ?", 1)(rs =>
+          val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1)(rs =>
             Emp(rs.int("id"), rs.string("name"))
           )
-          val emps: List[Emp] = session.asList("select * from " + tableName) { rs =>
+          val emps: List[Emp] = session.list("select * from " + tableName) { rs =>
             Emp(rs.int("id"), rs.string("name"))
           }
         }

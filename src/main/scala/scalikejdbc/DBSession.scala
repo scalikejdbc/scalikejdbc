@@ -83,7 +83,12 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
+  @deprecated(message = "use #single instead", since = "0.5.0")
   def asOne[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
+    single(template, params: _*)(extract)
+  }
+
+  def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -100,7 +105,16 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
+  def first[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
+    list(template, params: _*)(extract).headOption
+  }
+
+  @deprecated(message = "use #list instead", since = "0.5.0")
   def asList[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
+    list(template, params: _*)(extract)
+  }
+
+  def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -123,7 +137,12 @@ class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
     }
   }
 
+  @deprecated(message = "use #iterator instead", since = "0.5.0")
   def asIterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
+    iterator(template, params: _*)(extract)
+  }
+
+  def iterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
     val stmt = createPreparedStatement(conn, template)
     bindParams(stmt, params: _*)
     new ResultSetIterator(stmt.executeQuery()) map (rs => extract(rs))
