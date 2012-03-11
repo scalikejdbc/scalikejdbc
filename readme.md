@@ -15,7 +15,7 @@ It's pretty simple, really.
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "0.5.0"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[0.5,)"
 ```
 
 ### ls.implicit.ly
