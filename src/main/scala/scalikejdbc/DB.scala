@@ -160,21 +160,22 @@ case class DB(conn: Connection) {
     execution(session)
   }
 
-  def localTx[A](execution: DBSession => A): A = {
-    val tx = newTx
+  private def begin(tx: Tx) {
     tx.begin()
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
+  }
 
-    val rollbackIfException = handling(classOf[Throwable]) by {
-      t =>
-        {
-          tx.rollback()
-          throw t
-        }
-    }
-    rollbackIfException[A] {
+  private val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
+    tx.rollback()
+    throw t
+  }
+
+  def localTx[A](execution: DBSession => A): A = {
+    val tx = newTx
+    begin(tx)
+    rollbackIfThrowable[A] {
       val session = new DBSession(conn, Some(tx))
       val result: A = execution(session)
       tx.commit()

@@ -22,7 +22,9 @@ import scalikejdbc.LoanPattern.using
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
  */
-class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
+case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
+
+  def connection: Connection = conn
 
   tx match {
     case Some(transaction) if transaction.isActive() =>
