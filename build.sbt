@@ -4,7 +4,9 @@ crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
 
 scalaVersion := "2.9.1"
 
-resolvers += "sbt-idea-repo"         at "http://mpeltonen.github.com/maven/"
+resolvers += "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
+
+resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 
 libraryDependencies <++= (scalaVersion) { scalaVersion =>
   Seq(
@@ -22,6 +24,7 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.scala-tools.testing" %% "scalacheck"           % "1.9"      % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
     "mysql"                   %  "mysql-connector-java" % "5.1.18"   % "test",
+    "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test"
   )
 }
