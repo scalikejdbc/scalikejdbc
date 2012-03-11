@@ -76,12 +76,9 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def execute[A](template: String, params: Any*): Boolean = {
     val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        {
-          bindParams(stmt, params: _*)
-          stmt.execute()
-        }
+    using(stmt) { stmt =>
+      bindParams(stmt, params: _*)
+      stmt.execute()
     }
   }
 
@@ -92,18 +89,15 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        {
-          bindParams(stmt, params: _*)
-          val resultSet = new ResultSetIterator(stmt.executeQuery())
-          val rows = (resultSet map (rs => extract(rs))).toList
-          rows match {
-            case Nil => None
-            case one :: Nil => Option(one)
-            case _ => throw new TooManyRowsException(1, rows.size)
-          }
-        }
+    using(stmt) { stmt =>
+      bindParams(stmt, params: _*)
+      val resultSet = new ResultSetIterator(stmt.executeQuery())
+      val rows = (resultSet map (rs => extract(rs))).toList
+      rows match {
+        case Nil => None
+        case one :: Nil => Option(one)
+        case _ => throw new TooManyRowsException(1, rows.size)
+      }
     }
   }
 
@@ -118,24 +112,18 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
     val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        {
-          bindParams(stmt, params: _*)
-          val resultSet = new ResultSetIterator(stmt.executeQuery())
-          (resultSet map (rs => extract(rs))).toList
-        }
+    using(stmt) { stmt =>
+      bindParams(stmt, params: _*)
+      val resultSet = new ResultSetIterator(stmt.executeQuery())
+      (resultSet map (rs => extract(rs))).toList
     }
   }
 
   def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit) = {
     val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        {
-          bindParams(stmt, params: _*)
-          new ResultSetIterator(stmt.executeQuery()) foreach (rs => f(rs))
-        }
+    using(stmt) { stmt =>
+      bindParams(stmt, params: _*)
+      new ResultSetIterator(stmt.executeQuery()) foreach (rs => f(rs))
     }
   }
 
@@ -152,12 +140,9 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def update(template: String, params: Any*): Int = {
     val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        {
-          bindParams(stmt, params: _*)
-          stmt.executeUpdate()
-        }
+    using(stmt) { stmt =>
+      bindParams(stmt, params: _*)
+      stmt.executeUpdate()
     }
   }
 

@@ -18,7 +18,6 @@ package scalikejdbc
 import java.sql.Connection
 import java.lang.IllegalStateException
 import scala.util.control.Exception._
-import LoanPattern.using
 
 object DB {
 
@@ -99,11 +98,8 @@ case class DB(conn: Connection) {
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by {
       e =>
-        {
-          throw new IllegalStateException(
-            "DB#tx is an alias of DB#currentTx. " +
-              "You cannot call this API before beginning a transaction")
-        }
+        throw new IllegalStateException(
+          "DB#tx is an alias of DB#currentTx. You cannot call this API before beginning a transaction")
     } apply currentTx
   }
 
@@ -112,7 +108,7 @@ case class DB(conn: Connection) {
   def begin() = newTx.begin()
 
   def beginIfNotYet(): Unit = {
-    catching(classOf[IllegalStateException]) opt {
+    ignoring(classOf[IllegalStateException]) apply {
       begin()
     }
   }
@@ -122,7 +118,7 @@ case class DB(conn: Connection) {
   def rollback(): Unit = tx.rollback()
 
   def rollbackIfActive(): Unit = {
-    catching(classOf[IllegalStateException]) opt {
+    ignoring(classOf[IllegalStateException]) apply {
       tx.rollbackIfActive()
     }
   }
@@ -176,7 +172,7 @@ case class DB(conn: Connection) {
     val tx = newTx
     begin(tx)
     rollbackIfThrowable[A] {
-      val session = new DBSession(conn, Some(tx))
+      val session = new DBSession(conn, Option(tx))
       val result: A = execution(session)
       tx.commit()
       result
