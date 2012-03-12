@@ -24,8 +24,8 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.scala-tools.testing" %% "scalacheck"           % "1.9"      % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
     "mysql"                   %  "mysql-connector-java" % "5.1.18"   % "test",
-    "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test",
-    "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test"
+    "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
+    "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
   )
 }
 
