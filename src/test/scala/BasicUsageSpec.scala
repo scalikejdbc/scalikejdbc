@@ -80,12 +80,14 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val tableName = tableNamePrefix + "_autoCommit"
 
     // get a connection and create DB instance
-    using(ConnectionPool.borrow()) { conn =>
-      DB(conn) autoCommit { session =>
-        ignoring(classOf[Throwable]) {
-          session.execute("drop table " + tableName)
+    using(ConnectionPool.borrow()) {
+      conn =>
+        DB(conn) autoCommit {
+          session =>
+            ignoring(classOf[Throwable]) {
+              session.execute("drop table " + tableName)
+            }
         }
-      }
     }
 
     // connect and begin a block (ConnectionPool required)
@@ -101,14 +103,16 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     }
 
     // connect and begin a block (ConnectionPool required)
-    DB.connect().autoCommit { session =>
-      session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
+    DB.connect().autoCommit {
+      session =>
+        session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
     }
 
     // passing a connection as an implicit parameter
     implicit val conn: Connection = ConnectionPool.borrow()
-    DB.connected.autoCommit { session =>
-      session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
+    DB.connected.autoCommit {
+      session =>
+        session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
     }
 
     // creating a session instance without a block
@@ -119,6 +123,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   case class Emp(id: Int, name: String)
+
   case class Emp2(id: Int, name: Option[String])
 
   "readOnly" should "execute only queries" in {
@@ -130,20 +135,23 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       TestUtils.initialize(conn, tableName)
 
       val emp: Option[Emp] = DB readOnly {
-        _.single("select * from " + tableName + " where id = ?", 1) { rs =>
-          Emp(rs.int("id"), rs.string("name"))
+        _.single("select * from " + tableName + " where id = ?", 1) {
+          rs =>
+            Emp(rs.int("id"), rs.string("name"))
         }
       }
 
       val emps: List[Emp] = DB readOnly {
-        _.list("select * from " + tableName) { rs =>
-          Emp(rs.int("id"), rs.string("name"))
+        _.list("select * from " + tableName) {
+          rs =>
+            Emp(rs.int("id"), rs.string("name"))
         }
       }
 
       val session = DB(conn).readOnlySession
-      val emps2: List[Emp2] = session.list("select * from " + tableName) { rs =>
-        Emp2(rs.int("id"), Option(rs.string("name")))
+      val emps2: List[Emp2] = session.list("select * from " + tableName) {
+        rs =>
+          Emp2(rs.int("id"), Option(rs.string("name")))
       }
     }
   }
@@ -156,12 +164,14 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
 
-      DB localTx { session =>
-        val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1) { rs =>
-          Emp(rs.int("id"), rs.string("name"))
-        }
-        val emps: List[Emp] =
-          session.list("select * from " + tableName) { rs => Emp(rs.int("id"), rs.string("name")) }
+      DB localTx {
+        session =>
+          val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1) {
+            rs => Emp(rs.int("id"), rs.string("name"))
+          }
+          val emps: List[Emp] = session.list("select * from " + tableName) {
+            rs => Emp(rs.int("id"), rs.string("name"))
+          }
       }
     }
   }
@@ -179,13 +189,14 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         db.begin()
 
         // with implicit DB instnace
-        DB withinTx { session =>
-          val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1)(rs =>
-            Emp(rs.int("id"), rs.string("name"))
-          )
-          val emps: List[Emp] = session.list("select * from " + tableName) { rs =>
-            Emp(rs.int("id"), rs.string("name"))
-          }
+        DB withinTx {
+          session =>
+            val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1)(rs =>
+              Emp(rs.int("id"), rs.string("name"))
+            )
+            val emps: List[Emp] = session.list("select * from " + tableName) { rs =>
+              Emp(rs.int("id"), rs.string("name"))
+            }
         }
       }
     }
@@ -198,16 +209,20 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      DB localTx { session =>
-        implicit val conn = session.connection
+      DB localTx {
+        session =>
+          implicit val conn = session.connection
 
-        import anorm._
-        import anorm.SqlParser._
-        case class Emp(id: Int, name: Option[String])
+          import anorm._
+          import anorm.SqlParser._
 
-        val allColumns = get[Int]("id") ~ get[Option[String]]("name") map { case id ~ name => Emp(id, name) }
-        val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(allColumns.singleOpt)
-        val emps: List[Emp] = SQL("select * from " + tableName).as(allColumns.*)
+          case class Emp(id: Int, name: Option[String])
+
+          val allColumns = get[Int]("id") ~ get[Option[String]]("name") map {
+            case id ~ name => Emp(id, name)
+          }
+          val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(allColumns.singleOpt)
+          val emps: List[Emp] = SQL("select * from " + tableName).as(allColumns.*)
       }
     }
 

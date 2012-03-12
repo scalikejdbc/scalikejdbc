@@ -31,21 +31,31 @@ object DB {
    * Begins a readOnly block easily with ConnectionPool
    */
   def readOnly[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) { conn => DB(conn).readOnly(execution) }
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).readOnly(execution)
+    }
   }
+
+  def readOnlySession(): DBSession = DB(ConnectionPool.borrow()).readOnlySession()
 
   /**
    * Begins a autoCommit block easily with ConnectionPool
    */
   def autoCommit[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) { conn => DB(conn).autoCommit(execution) }
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).autoCommit(execution)
+    }
   }
+
+  def autoCommitSession(): DBSession = DB(ConnectionPool.borrow()).autoCommitSession()
 
   /**
    * Begins a localTx block easily with ConnectionPool
    */
   def localTx[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) { conn => DB(conn).localTx(execution) }
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).localTx(execution)
+    }
   }
 
   /**
@@ -55,6 +65,8 @@ object DB {
     ensureDBInstance(db: DB)
     db.withinTx(execution)
   }
+
+  def withinTxSession(): DBSession = DB(ConnectionPool.borrow()).withinTxSession()
 
   /**
    * Get a connection and returns a DB instance
@@ -163,9 +175,10 @@ case class DB(conn: Connection) {
     }
   }
 
-  private val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
-    tx.rollback()
-    throw t
+  private val rollbackIfThrowable = handling(classOf[Throwable]) by {
+    t =>
+      tx.rollback()
+      throw t
   }
 
   def localTx[A](execution: DBSession => A): A = {

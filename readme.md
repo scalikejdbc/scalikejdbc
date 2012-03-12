@@ -31,7 +31,7 @@ ls-install scalikejdbc
 
 Please see this sample:
 
-https://github.com/seratch/scalikejdbc/blob/master/src/test/scala/scalikejdbc/BasicUsageSpec.scala
+https://github.com/seratch/scalikejdbc/blob/master/src/test/scala/BasicUsageSpec.scala
 
 
 ## DB object
@@ -54,6 +54,9 @@ import scalikejdbc._
 Class.forName(driverName)
 val conn = DriverManager.getConnection(url, user, password)
 val db = new DB(conn)
+val name: Option[String] = db readOnly { session =>
+  session.single("select * from emp where id = ?", 1) { _.string("name") }
+}
 ```
 
 
@@ -80,6 +83,15 @@ ConnectionPool.add('db1, url1, user1, password1)
 ConnectionPool.add('db2, url2, user2, password2)
 val conn = ConnectionPool('db1).borrow()
 val db = new DB(conn)
+```
+
+With the singleton `ConnectionPool`, it's  much simpler.
+
+```scala
+// DB.readOnly will borrow a new connection automatically
+val name: Option[String] = DB readOnly { session =>
+  session.single("select * from emp where id = ?", 1) { _.string("name") }
+}
 ```
 
 
@@ -115,18 +127,18 @@ All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 `single` returns single row optionally.
 
 ```scala
-val name: Option[String] = db readOnly { session: DBSession =>
+val name: Option[String] = DB readOnly { session: DBSession =>
   session.single("select * from emp where id = ?", 1) { _.string("name") }
 }
 
 val extractName = (rs: WrappedResultSet) => rs.string("name")
 
-val name: Option[String] = db readOnly {
+val name: Option[String] = DB readOnly {
   _.single("select * from emp where id = ?", 1)(extractName)
 }
 
 case class Emp(id: String, name: String)
-val emp: Option[Emp] = db readOnly { 
+val emp: Option[Emp] = DB readOnly { 
   _.single("select * from emp where id = ?", 1) { 
     rs => Emp(rs.string("id"), rs.string("name"))
   }
@@ -138,7 +150,7 @@ val emp: Option[Emp] = db readOnly {
 `first` returns the first row optionally.
 
 ```scala
-val name: Option[String] = db readOnly {
+val name: Option[String] = DB readOnly {
   _.first("select * from emp") { _.string("name") }
 }
 ```
@@ -148,7 +160,7 @@ val name: Option[String] = db readOnly {
 `list` returns multiple rows as `scala.collection.immutable.List`.
 
 ```scala
-val names: List[String] = db readOnly {
+val names: List[String] = DB readOnly {
   _.list("select * from emp") { _.string("name") }
 }
 ```
@@ -158,7 +170,7 @@ val names: List[String] = db readOnly {
 `iterator` allows you to handle `scala.collection.Iterator` objects directly.
 
 ```scala
-val iter: Iterator[String] = db readOnly {
+val iter: Iterator[String] = DB readOnly {
   _.iterator("select * from emp") { _.string("name") }
 }
 iter.next()
@@ -170,7 +182,7 @@ iter.next()
 `foreach` allows you to make some side-effect in iterations with `scala.collection.Iterator`.
 
 ```scala
-db readOnly {
+DB readOnly {
   _.foreach("select * from emp") { rs => out.write(rs.string("name")) }
 }
 ```
@@ -181,6 +193,8 @@ db readOnly {
 `update` executes `java.sql.PreparedStatement#executeUpdate()`.
 
 ```scala
+val conn = ConnectionPool.borrow()
+val db = new DB(conn)
 db.begin()
 val inserted: Int = db withinTx { _.update("insert into emp (id, name) values (?, ?)", 1, "foo") }
 val updated: Int  = db withinTx { _.update("update emp set name = ? where id = ?", "bar", 1) }
@@ -193,7 +207,7 @@ db.commit()
 `execute` executes `java.sql.PreparedStatement#execute()`.
 
 ```scala
-db autoCommit {
+DB autoCommit {
   _.execute("create table emp (id integer primary key, name varchar(30))")
 }
 ```
@@ -206,18 +220,18 @@ db autoCommit {
 Execute query in read-only mode.
 
 ```scala
-val names = db readOnly {
+val names = DB readOnly {
   session => session.list("select * from emp") { rs => rs.string("name") }
 }
 
-val session = db.readOnlySession()
+val session = DB.readOnlySession
 val names = session.list("select * from emp") { rs => rs.string("name") }
 ```
 
 Of course, updating in read-only mode will cause `java.sql.SQLException`.
 
 ```scala
-val updateCount = db readOnly {
+val updateCount = DB readOnly {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 } // will throw java.sql.SQLException
 ```
@@ -228,7 +242,7 @@ val updateCount = db readOnly {
 Execute query / update in auto-commit mode.
 
 ```scala
-val count = db autoCommit {
+val count = DB autoCommit {
   _.update("update emp set name = ? where id = ?", "foo", 1)
 }
 ```
@@ -236,7 +250,7 @@ val count = db autoCommit {
 When using autoCommitSession, every operation will execute in auto-commit mode.
 
 ```scala
-val session = db.autoCommitSession()
+val session = DB.autoCommitSession
 session.update("update emp set name = ? where id = ?", "foo", 1) // auto-commit
 session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
 ```
@@ -248,7 +262,7 @@ Execute query / update in block-scoped transactions.
 If an Exception was thrown in the block, the transaction will perform rollback automatically.
 
 ```scala
-val count = db localTx { 
+val count = DB localTx { 
   // --- transcation scope start ---
   session => {
     session.update("update emp set name = ? where id = ?", "foo", 1)
@@ -265,6 +279,7 @@ Execute query / update in already existing transctions.
 `Tx#begin()`, `Tx#rollback()` or `Tx#commit()` should be handled. 
 
 ```scala
+val db = new DB(conn)
 db.begin()
 val names = db withinTx {
   // if a transaction has not been started, IllegalStateException will be thrown
@@ -345,3 +360,4 @@ object Server1 extends App {
     .run { s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollbackTest".format(s.port))}
 }
 ```
+
