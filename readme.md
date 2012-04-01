@@ -353,6 +353,7 @@ class PlanWithTx extends Plan {
   }
 }
 
+// Thread-based server
 object Server1 extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
@@ -361,3 +362,22 @@ object Server1 extends App {
 }
 ```
 
+### With Anorm 2.0
+
+ScalikeJDBC works fine with Anorm API.
+
+https://github.com/playframework/Play20
+
+```scala
+DB localTx { session =>
+  implicit val conn: java.sql.Connection = session.connection
+
+  import anorm._
+  import anorm.SqlParser._
+
+  case class Emp(id: Int, name: Option[String])
+  val allColumns = get[Int]("id") ~ get[Option[String]]("name") map { case id ~ name => Emp(id, name) }
+  val empOpt: Option[Emp] = SQL("select * from emp where id = {id}").on('id -> 1).as(allColumns.singleOpt)
+  val emps: List[Emp] = SQL("select * from emp").as(allColumns.*)
+}
+```
