@@ -369,13 +369,12 @@ ScalikeJDBC works fine with Anorm API.
 https://github.com/playframework/Play20
 
 ```scala
-DB localTx { session =>
-  implicit val conn: java.sql.Connection = session.connection
+import anorm._
+import anorm.SqlParser._
 
-  import anorm._
-  import anorm.SqlParser._
+case class Emp(id: Int, name: Option[String])
 
-  case class Emp(id: Int, name: Option[String])
+DB localTxWithConnection { implicit conn =>
   val allColumns = get[Int]("id") ~ get[Option[String]]("name") map { case id ~ name => Emp(id, name) }
   val empOpt: Option[Emp] = SQL("select * from emp where id = {id}").on('id -> 1).as(allColumns.singleOpt)
   val emps: List[Emp] = SQL("select * from emp").as(allColumns.*)

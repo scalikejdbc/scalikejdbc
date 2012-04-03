@@ -8,7 +8,6 @@ import org.scalatest.BeforeAndAfter
 import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
-import scalikejdbc.LoanPattern._
 
 @RunWith(classOf[JUnitRunner])
 class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
@@ -73,6 +72,21 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  it should "execute query in readOnlyWithConnection block" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_queryInReadOnlyWithConnectionBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      val result = db readOnlyWithConnection {
+        implicit conn =>
+          import anorm._
+          SQL("select * from " + tableName)().toList
+      }
+      result.size should be > 0
+    }
+  }
+
   it should "execute query in readOnly session" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_queryInReadOnlySession";
@@ -85,7 +99,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
-  it should "execute update in readOnly block" in {
+  it should "not execute update in readOnly block" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_cannotUpdateInReadOnlyBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
@@ -111,6 +125,21 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val result = db autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      }
+      result.size should be > 0
+    }
+  }
+
+  it should "execute query in autoCommitWithConnection block" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_queryInAutoCommitWithConnectionBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      val result = db autoCommitWithConnection {
+        implicit conn =>
+          import anorm._
+          SQL("select * from " + tableName)().toList
       }
       result.size should be > 0
     }
@@ -212,6 +241,25 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  it should "execute update in autoCommitWithConnection block" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_updateInAutoCommitBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      val count = db autoCommitWithConnection {
+        implicit conn =>
+          import anorm._
+          SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
+      }
+      count should equal(1)
+      val name = (db autoCommit {
+        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      }).get
+      name should equal("foo")
+    }
+  }
+
   it should "execute update in autoCommit block after readOnly" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly";
@@ -275,6 +323,25 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  it should "execute update in localTxWithConnection block" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_updateInLocalTxWithConnectionBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      val count = db localTxWithConnection {
+        implicit conn =>
+          import anorm._
+          SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
+      }
+      count should be === 1
+      val name = (db localTx {
+        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      }).getOrElse("---")
+      name should equal("foo")
+    }
+  }
+
   it should "rollback in localTx block" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock";
@@ -296,7 +363,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
   // --------------------
   // withinTx
 
-  it should "not execute query in withinTx block  before beginning tx" in {
+  it should "not execute query in withinTx block before beginning tx" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_queryInWithinTxBeforeBeginningTx";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
@@ -321,6 +388,23 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val result = db withinTx {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      }
+      result.size should be > 0
+      db.rollbackIfActive()
+    }
+  }
+
+  it should "execute query in withinTxWithConnection block" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock";
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(ConnectionPool.borrow())
+      db.begin()
+      val result = db withinTxWithConnection {
+        implicit conn =>
+          import anorm._
+          SQL("select * from " + tableName)().toList
       }
       result.size should be > 0
       db.rollbackIfActive()
@@ -445,6 +529,46 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val name = new DB(ConnectionPool.borrow()) autoCommit {
         session =>
           session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      }
+      assert(name.get == "name1")
+    }
+  }
+
+  it should "work with multi threads when using Anorm API" in {
+    import anorm._
+    import anorm.SqlParser._
+    val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
+    ultimately(TestUtils.deleteTable(ConnectionPool.borrow(), tableName)) {
+      TestUtils.initialize(ConnectionPool.borrow(), tableName)
+      spawn {
+        val db = new DB(ConnectionPool.borrow())
+        db.begin()
+        db.withinTxWithConnection {
+          implicit conn =>
+            SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
+            Thread.sleep(1000L)
+            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
+            assert(name.get == "foo")
+        }
+        db.rollback()
+      }
+      spawn {
+        val db = new DB(ConnectionPool.borrow())
+        db.begin()
+        db.withinTxWithConnection {
+          implicit conn =>
+            Thread.sleep(200L)
+            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
+            assert(name.get == "name1")
+        }
+        db.rollback()
+      }
+
+      Thread.sleep(2000L)
+
+      val name = new DB(ConnectionPool.borrow()) autoCommitWithConnection {
+        implicit conn =>
+          SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
       }
       assert(name.get == "name1")
     }

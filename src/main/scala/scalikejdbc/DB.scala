@@ -36,6 +36,12 @@ object DB {
     }
   }
 
+  def readOnlyWithConnection[A](execution: Connection => A): A = {
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).readOnlyWithConnection(execution)
+    }
+  }
+
   def readOnlySession(): DBSession = DB(ConnectionPool.borrow()).readOnlySession()
 
   /**
@@ -44,6 +50,12 @@ object DB {
   def autoCommit[A](execution: DBSession => A): A = {
     using(ConnectionPool.borrow()) {
       conn => DB(conn).autoCommit(execution)
+    }
+  }
+
+  def autoCommitWithConnection[A](execution: Connection => A): A = {
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).autoCommitWithConnection(execution)
     }
   }
 
@@ -58,12 +70,23 @@ object DB {
     }
   }
 
+  def localTxWithConnection[A](execution: Connection => A): A = {
+    using(ConnectionPool.borrow()) {
+      conn => DB(conn).localTxWithConnection(execution)
+    }
+  }
+
   /**
    * Begins a withinTx block easily with a DB instance as an implicit parameter
    */
   def withinTx[A](execution: DBSession => A)(implicit db: DB): A = {
     ensureDBInstance(db: DB)
     db.withinTx(execution)
+  }
+
+  def withinTxWithConnection[A](execution: Connection => A)(implicit db: DB): A = {
+    ensureDBInstance(db: DB)
+    db.withinTxWithConnection(execution)
   }
 
   def withinTxSession(): DBSession = DB(ConnectionPool.borrow()).withinTxSession()
@@ -141,8 +164,11 @@ case class DB(conn: Connection) {
   }
 
   def readOnly[A](execution: DBSession => A): A = {
-    val session = readOnlySession()
-    execution(session)
+    execution(readOnlySession())
+  }
+
+  def readOnlyWithConnection[A](execution: Connection => A): A = {
+    execution(readOnlySession().conn)
   }
 
   def autoCommitSession(): DBSession = {
@@ -152,8 +178,11 @@ case class DB(conn: Connection) {
   }
 
   def autoCommit[A](execution: DBSession => A): A = {
-    val session = autoCommitSession()
-    execution(session)
+    execution(autoCommitSession())
+  }
+
+  def autoCommitWithConnection[A](execution: Connection => A): A = {
+    execution(autoCommitSession().conn)
   }
 
   def withinTxSession(tx: Tx = currentTx): DBSession = {
@@ -164,8 +193,11 @@ case class DB(conn: Connection) {
   }
 
   def withinTx[A](execution: DBSession => A): A = {
-    val session = withinTxSession(currentTx)
-    execution(session)
+    execution(withinTxSession(currentTx))
+  }
+
+  def withinTxWithConnection[A](execution: Connection => A): A = {
+    execution(withinTxSession(currentTx).conn)
   }
 
   private def begin(tx: Tx) {
@@ -187,6 +219,17 @@ case class DB(conn: Connection) {
     rollbackIfThrowable[A] {
       val session = new DBSession(conn, Option(tx))
       val result: A = execution(session)
+      tx.commit()
+      result
+    }
+  }
+
+  def localTxWithConnection[A](execution: Connection => A): A = {
+    val tx = newTx
+    begin(tx)
+    rollbackIfThrowable[A] {
+      val session = new DBSession(conn, Option(tx))
+      val result: A = execution(session.conn)
       tx.commit()
       result
     }
