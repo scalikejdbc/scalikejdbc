@@ -19,13 +19,13 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "net.databinder"          %% "unfiltered-jetty"     % "0.5.1"    % "test",
     "net.databinder"          %% "unfiltered-spec"      % "0.5.1"    % "test",
     "net.databinder"          %% "unfiltered-scalate"   % "0.5.1"    % "test",
-    "junit"                   %  "junit"                % "4.9"      % "test",
-    "org.scalatest"           %% "scalatest"            % "1.6.1"    % "test",
+    "junit"                   %  "junit"                % "4.10"     % "test",
+    "org.scalatest"           %% "scalatest"            % "1.7.1"    % "test",
     "org.scala-tools.testing" %% "scalacheck"           % "1.9"      % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
     "mysql"                   %  "mysql-connector-java" % "5.1.18"   % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
-    "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
+    "play"                    %% "anorm"                % "[2,)"     % "test"
   )
 }
 
