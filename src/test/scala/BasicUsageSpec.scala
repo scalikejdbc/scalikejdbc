@@ -209,18 +209,18 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
+
+      import anorm._
+      import anorm.SqlParser._
+
+      case class Emp(id: Int, name: Option[String])
+      val empAllColumns = get[Int]("id") ~ get[Option[String]]("name") map {
+        case id ~ name => Emp(id, name)
+      }
+
       DB localTxWithConnection { implicit conn =>
-
-        import anorm._
-        import anorm.SqlParser._
-
-        case class Emp(id: Int, name: Option[String])
-
-        val allColumns = get[Int]("id") ~ get[Option[String]]("name") map {
-          case id ~ name => Emp(id, name)
-        }
-        val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(allColumns.singleOpt)
-        val emps: List[Emp] = SQL("select * from " + tableName).as(allColumns.*)
+        val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(empAllColumns.singleOpt)
+        val empList: List[Emp] = SQL("select * from " + tableName).as(empAllColumns.*)
       }
     }
 
