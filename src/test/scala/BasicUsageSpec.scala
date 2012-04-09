@@ -136,8 +136,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
       val emp: Option[Emp] = DB readOnly {
         _.single("select * from " + tableName + " where id = ?", 1) {
-          rs =>
-            Emp(rs.int("id"), rs.string("name"))
+          rs => Emp(rs.int("id"), rs.string("name"))
         }
       }
 

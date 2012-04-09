@@ -20,7 +20,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     session should not be null
   }
 
-  it should "exceute insert with nullable values" in {
+  it should "execute insert with nullable values" in {
     val tableName = tableNamePrefix + "_insertWithNullableValues";
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {

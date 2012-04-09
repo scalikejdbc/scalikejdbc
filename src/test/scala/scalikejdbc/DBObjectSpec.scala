@@ -26,10 +26,7 @@ class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val result = DB readOnly {
-        session =>
-          session.list("select * from " + tableName + "") {
-            rs => Some(rs.string("name"))
-          }
+        session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
       }
       result.size should be > 0
     }
@@ -41,9 +38,7 @@ class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val session = DB.readOnlySession()
-      val result = session.list("select * from " + tableName + "") {
-        rs => Some(rs.string("name"))
-      }
+      val result = session.list("select * from " + tableName + "")(rs => rs.string("name"))
       result.size should be > 0
     }
   }

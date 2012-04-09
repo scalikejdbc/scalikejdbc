@@ -7,7 +7,6 @@ import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ops._
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
-import scalikejdbc.LoanPattern._
 
 @RunWith(classOf[JUnitRunner])
 class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
@@ -32,16 +31,12 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
         // ... do something
         using(ThreadLocalDB.load()) {
           db =>
-            {
-              val session = db.withinTxSession()
-              session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-              Thread.sleep(1000L)
-              val name = session.single("select name from " + tableName + " where id = ?", 1) {
-                rs => rs.string("name")
-              }
-              assert(name.get == "foo")
-              db.rollback()
-            }
+            val session = db.withinTxSession()
+            session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+            Thread.sleep(1000L)
+            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            assert(name.get == "foo")
+            db.rollback()
         }
       }
 
@@ -49,16 +44,12 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
         ThreadLocalDB.create(ConnectionPool.borrow())
         using(ThreadLocalDB.load()) {
           db =>
-            {
-              db.begin()
-              val session = db.withinTxSession()
-              Thread.sleep(200L)
-              val name = session.single("select name from " + tableName + " where id = ?", 1) {
-                rs => rs.string("name")
-              }
-              assert(name.get == "name1")
-              db.rollback()
-            }
+            db.begin()
+            val session = db.withinTxSession()
+            Thread.sleep(200L)
+            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            assert(name.get == "name1")
+            db.rollback()
         }
       }
 
@@ -70,11 +61,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
           {
             val name = db autoCommit {
               session =>
-                {
-                  session.single("select name from " + tableName + " where id = ?", 1) {
-                    rs => rs.string("name")
-                  }
-                }
+                session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
             }
             assert(name.get == "name1")
           }

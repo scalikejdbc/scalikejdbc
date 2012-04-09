@@ -31,14 +31,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
-  class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
-
-    def hasNext: Boolean = rs.next
-
-    def next(): WrappedResultSet = WrappedResultSet(rs)
-
-  }
-
   def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
     log.debug("template : " + template)
     conn.prepareStatement(template)
