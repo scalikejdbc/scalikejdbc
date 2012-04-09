@@ -380,3 +380,9 @@ DB localTxWithConnection { implicit conn =>
   val emps: List[Emp] = SQL("select * from emp").as(allColumns.*)
 }
 ```
+
+
+## Travis CI
+
+[![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
+
