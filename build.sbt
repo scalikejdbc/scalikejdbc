@@ -15,17 +15,16 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.slf4j"               % "slf4j-api"             % "1.6.4"    % "compile",
     // scope: test
     "ch.qos.logback"          %  "logback-classic"      % "1.0.0"    % "test",
-    "net.databinder"          %% "unfiltered-filter"    % "0.5.1"    % "test",
-    "net.databinder"          %% "unfiltered-jetty"     % "0.5.1"    % "test",
-    "net.databinder"          %% "unfiltered-spec"      % "0.5.1"    % "test",
-    "net.databinder"          %% "unfiltered-scalate"   % "0.5.1"    % "test",
+    "net.databinder"          %% "unfiltered-filter"    % "0.6.1"    % "test",
+    "net.databinder"          %% "unfiltered-jetty"     % "0.6.1"    % "test",
+    "net.databinder"          %% "unfiltered-spec"      % "0.6.1"    % "test",
     "junit"                   %  "junit"                % "4.10"     % "test",
     "org.scalatest"           %% "scalatest"            % "1.7.1"    % "test",
     "org.scala-tools.testing" %% "scalacheck"           % "1.9"      % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
     "mysql"                   %  "mysql-connector-java" % "5.1.18"   % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
-    "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
+    "play"                    %  "anorm_2.9.1"          % "2.0"      % "test"
   )
 }
 
@@ -43,6 +42,7 @@ testgenTestTemplate in Compile := "scalatest.FlatSpec"
 
 testgenScalaTestMatchers in Compile := "ShouldMatchers"
 
+testgenLineBreak in Compile := "LF"
 // publish
 
 publishMavenStyle := true
