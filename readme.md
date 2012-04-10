@@ -117,7 +117,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list`, `iterator` and `foreach`. 
+`single`, `first`, `list` and `foreach`. 
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
@@ -163,18 +163,6 @@ val name: Option[String] = DB readOnly {
 val names: List[String] = DB readOnly {
   _.list("select * from emp") { _.string("name") }
 }
-```
-
-#### iterator
-
-`iterator` allows you to handle `scala.collection.Iterator` objects directly.
-
-```scala
-val iter: Iterator[String] = DB readOnly {
-  _.iterator("select * from emp") { _.string("name") }
-}
-iter.next()
-iter.next()
 ```
 
 #### foreach
