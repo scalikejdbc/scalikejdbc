@@ -84,7 +84,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        val resultSet = new ResultSetIterator(stmt.executeQuery())
+        val resultSet = new ResultSetTraversable(stmt.executeQuery())
         val rows = (resultSet map (rs => extract(rs))).toList
         rows match {
           case Nil => None
@@ -108,7 +108,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        val resultSet = new ResultSetIterator(stmt.executeQuery())
+        val resultSet = new ResultSetTraversable(stmt.executeQuery())
         (resultSet map (rs => extract(rs))).toList
     }
   }
@@ -118,7 +118,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        new ResultSetIterator(stmt.executeQuery()) foreach (rs => f(rs))
+        new ResultSetTraversable(stmt.executeQuery()) foreach (rs => f(rs))
     }
   }
 
@@ -127,10 +127,17 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     iterator(template, params: _*)(extract)
   }
 
+  @deprecated(message = "use #traversable instead", since = "0.5.5")
   def iterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
     val stmt = createPreparedStatement(conn, template)
     bindParams(stmt, params: _*)
     new ResultSetIterator(stmt.executeQuery()) map (rs => extract(rs))
+  }
+
+  def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
+    val stmt = createPreparedStatement(conn, template)
+    bindParams(stmt, params: _*)
+    new ResultSetTraversable(stmt.executeQuery()) map (rs => extract(rs))
   }
 
   def update(template: String, params: Any*): Int = {

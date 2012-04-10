@@ -1,3 +1,5 @@
+package scalikejdbc
+
 /*
  * Copyright 2011 Kazuhiro Sera
  *
@@ -13,27 +15,18 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package scalikejdbc
 
 import java.sql.ResultSet
 
 /**
- * ResultSet Iterator
+ * ResultSet Stream
  */
-@deprecated(message = "use ResultSetTraversable instead", since = "0.5.5")
-class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
+class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
 
-  private var _hasNext = true
-
-  def hasNext: Boolean = {
-    // avoiding infinite loop if no rows
-    if (!_hasNext) false
-    else !rs.isLast && !rs.isAfterLast
-  }
-
-  def next(): WrappedResultSet = {
-    _hasNext = rs.next()
-    WrappedResultSet(rs)
+  def foreach[U](f: (WrappedResultSet) => U): Unit = {
+    while (rs.next()) {
+      f.apply(new WrappedResultSet(rs))
+    }
   }
 
 }

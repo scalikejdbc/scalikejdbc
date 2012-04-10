@@ -8,11 +8,11 @@ import org.scalatest.junit.JUnitRunner
 import java.sql.ResultSet
 
 @RunWith(classOf[JUnitRunner])
-class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
+class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Settings {
 
-  val tableNamePrefix = "emp_ResultSetIteratorSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_ResultSetTraversableSpec" + System.currentTimeMillis()
 
-  behavior of "ResultSetIterator"
+  behavior of "ResultSetTraversable"
 
   it should "be available (result size 0)" in {
     val conn = ConnectionPool.borrow()
@@ -20,10 +20,7 @@ class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-      val iterator = new ResultSetIterator(rs)
-      1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
-      1 to 5 foreach (_ => iterator.hasNext should equal(false))
+      new ResultSetTraversable(rs).foreach(rs => rs.int("id") should not be null)
     }
   }
 
@@ -32,11 +29,8 @@ class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize1";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " limit 1").executeQuery()
-      val iterator = new ResultSetIterator(rs)
-      1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
-      1 to 5 foreach (_ => iterator.hasNext should equal(false))
+      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+      new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }
 
@@ -45,15 +39,8 @@ class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize2";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " limit 2").executeQuery()
-      val iterator = new ResultSetIterator(rs)
-      1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
-      1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
-      1 to 5 foreach (_ => iterator.hasNext should equal(false))
+      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+      new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }
-
 }
-
