@@ -1,8 +1,8 @@
 import testgen.TestgenKeys._
 
-crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0")
+scalaVersion := "2.9.2"
 
-scalaVersion := "2.9.1"
+crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0")
 
 resolvers += "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
 
