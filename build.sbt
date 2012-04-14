@@ -1,6 +1,6 @@
 import testgen.TestgenKeys._
 
-crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0")
 
 scalaVersion := "2.9.1"
 
@@ -9,18 +9,26 @@ resolvers += "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 
 libraryDependencies <++= (scalaVersion) { scalaVersion =>
+  val _scalaVersion = "_" + (scalaVersion match {
+    case "2.9.2" => "2.9.1"
+    case version => version
+  })
+  val unfilteredFilter = "unfiltered-filter" + _scalaVersion
+  val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
+  val unfilteredSpec = "unfiltered-spec" + _scalaVersion
+  val scalacheck = "scalacheck" + _scalaVersion
   Seq(
     // scope: provided
     "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
     "org.slf4j"               % "slf4j-api"             % "1.6.4"    % "compile",
     // scope: test
     "ch.qos.logback"          %  "logback-classic"      % "1.0.0"    % "test",
-    "net.databinder"          %% "unfiltered-filter"    % "0.6.1"    % "test",
-    "net.databinder"          %% "unfiltered-jetty"     % "0.6.1"    % "test",
-    "net.databinder"          %% "unfiltered-spec"      % "0.6.1"    % "test",
+    "net.databinder"          %  unfilteredFilter       % "0.6.1" % "test",
+    "net.databinder"          %  unfilteredJetty        % "0.6.1" % "test",
+    "net.databinder"          %  unfilteredSpec         % "0.6.1" % "test",
     "junit"                   %  "junit"                % "4.10"     % "test",
     "org.scalatest"           %% "scalatest"            % "1.7.1"    % "test",
-    "org.scala-tools.testing" %% "scalacheck"           % "1.9"      % "test",
+    "org.scala-tools.testing" %  scalacheck             % "1.9"      % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
     "mysql"                   %  "mysql-connector-java" % "5.1.18"   % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
