@@ -51,3 +51,4 @@ build.log
 
 #SHITTY output not in target directory
 build.log
+.DS_Store
