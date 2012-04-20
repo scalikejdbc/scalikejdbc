@@ -1,7 +1,7 @@
 package scalikejdbc
 
 /*
- * Copyright 2011 Kazuhiro Sera
+ * Copyright 2012 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package scalikejdbc
 import java.sql.ResultSet
 
 /**
- * ResultSet Stream
+ * ResultSet Traversable
  */
 class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
 
