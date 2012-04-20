@@ -300,8 +300,8 @@ val name: Option[String] = DB readOnly { implicit session =>
 When you call the `#apply` method, the specified SQL statement will be executed and the result will be extracted from the `ResultSet` object, and finally the statement will be closed.
 
 ```scala
-case class Emp(id: Int, name: Option[Name])
-val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
+case class Emp(id: Int, name: Option[String])
+val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), Option(rs.string("name")))
 
 val tenEmps: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
 val tenEmpsAsList: SQLToList[Emp] = tenEmps.list // or #toList
