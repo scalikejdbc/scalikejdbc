@@ -1,6 +1,7 @@
 import org.scalatest._
 import org.scalatest.matchers._
 import java.sql.SQLException
+import scala.Option
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
@@ -223,6 +224,78 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
+  }
+
+  "SQL" should "be available" in {
+
+    val conn: Connection = ConnectionPool.borrow()
+    ultimately(TestUtils.deleteTable(conn, "emp_BasicUsageSpec_ActiveSql")) {
+      TestUtils.initialize(conn, "emp_BasicUsageSpec_ActiveSql")
+
+      val eopt: Option[Emp] = DB readOnly { implicit session =>
+        SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1)
+          .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
+      }
+      eopt.isDefined should be(true)
+
+      val ehead: Option[Emp] = DB readOnly { implicit session =>
+        SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
+      }
+      ehead.isDefined should be(true)
+
+      val es: List[Emp] = DB readOnly { implicit session =>
+        SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
+      }
+      es.size should equal(2)
+
+      val tr: Traversable[Emp] = DB readOnly { implicit session =>
+        SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
+      }
+      tr.foreach { case e: Emp => e should not be (null) }
+
+      {
+        implicit val session = DB(conn).readOnlySession
+        val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
+        e2s.size should equal(2)
+      }
+    }
+  }
+
+  "An example of SQL" should "be available" in {
+
+    val conn: Connection = ConnectionPool.borrow()
+    ultimately(TestUtils.deleteTable(conn, "emp")) {
+      TestUtils.initialize(conn, "emp")
+
+      val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
+
+      val get10EmpSQL: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
+      val get10EmpAllSQL: SQLToList[Emp] = get10EmpSQL.list // or #toList
+
+      DB readOnly { implicit s =>
+
+        val emps: List[Emp] = get10EmpAllSQL.apply()
+        emps.size should be <= 10
+
+        val getFirstOf10Emp: SQLToOption[Emp] = get10EmpSQL.first // or #headOption
+        val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
+        firstEmp.isDefined should be(true)
+
+        val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
+        single.isDefined should be(true)
+
+        val trv: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or #toTraversable
+        trv.foreach { emp: Emp =>
+          // do something...
+        }
+
+        // Furthermore, #executeUpdate.apply() and #execute.apply()
+      }
+    }
   }
 
 }

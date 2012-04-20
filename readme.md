@@ -15,7 +15,7 @@ It's pretty simple, really.
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[0.5,)"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[0.6,)"
 ```
 
 ### ls.implicit.ly
@@ -283,6 +283,45 @@ val names = session.list("select * from emp") {
   rs => rs.string("name")
 }
 db.rollbackIfActive() // it NEVER throws Exception
+```
+
+
+## Yet Another API: SQL
+
+Not only using `DBSession` directly, but also using `SQL(String).xxx.apply()` API is useful.
+
+```scala
+val name: Option[String] = DB readOnly { implicit session =>
+  SQL("select * from emp where id = ?").bind(1)
+    .map { rs => rs.string("name") }.single.apply()
+}
+```
+
+When you call the `#apply` method, the specified SQL statement will be executed and the result will be extracted from the `ResultSet` object, and finally the statement will be closed.
+
+```scala
+case class Emp(id: Int, name: Option[Name])
+val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
+
+val tenEmps: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
+val tenEmpsAsList: SQLToList[Emp] = tenEmps.list // or #toList
+
+DB readOnly { implicit session =>
+
+  val emps: List[Emp] = tenEmpsAsList.apply()
+
+  val firstOfTenEmps: SQLToOption[Emp] = tenEmps.first // or #headOption
+  val firstEmp: Option[Emp] = firstOfTenEmps.apply()
+
+  val aEmp: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
+
+  val trv: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or #toTraversable
+  trv.foreach { emp: Emp =>
+    // do something...
+  }
+
+  // Furthermore, #executeUpdate.apply() and #execute.apply()
+}
 ```
 
 
