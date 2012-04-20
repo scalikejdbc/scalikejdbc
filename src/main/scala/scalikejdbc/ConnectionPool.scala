@@ -65,10 +65,6 @@ object ConnectionPool extends LogSupport {
 
 }
 
-case class ConnectionPoolSettings(initialSize: Int = 0,
-  maxSize: Int = 8,
-  validationQuery: String = null)
-
 class ConnectionPool(url: String,
     user: String,
     password: String,
