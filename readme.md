@@ -198,6 +198,7 @@ val inserted: Int = db withinTx { _.update("insert into emp (id, name) values (?
 val updated: Int  = db withinTx { _.update("update emp set name = ? where id = ?", "bar", 1) }
 val deleted: Int  = db withinTx { _.update("delete emp where id = ?", 1) }
 db.commit()
+db.close()
 ```
 
 ### Execute API
