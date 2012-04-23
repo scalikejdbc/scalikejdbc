@@ -117,7 +117,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list` and `foreach`. 
+`single`, `first`, `list`, `traversable` and `foreach`.
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
@@ -165,9 +165,19 @@ val names: List[String] = DB readOnly {
 }
 ```
 
+#### traversable
+
+`traversable` returns multiple rows as `scala.collection.Traversable`.
+
+```scala
+val names: Traversable[String] = DB readOnly {
+  _.traversable("select * from emp") { _.string("name") }
+}
+```
+
 #### foreach
 
-`foreach` allows you to make some side-effect in iterations with `scala.collection.Iterator`.
+`foreach` allows you to make some side-effect in iterations with `scala.collection.Traversable`.
 
 ```scala
 DB readOnly {
@@ -214,6 +224,7 @@ val names = DB readOnly {
 
 val session = DB.readOnlySession
 val names = session.list("select * from emp") { rs => rs.string("name") }
+session.close()
 ```
 
 Of course, updating in read-only mode will cause `java.sql.SQLException`.
@@ -241,6 +252,7 @@ When using autoCommitSession, every operation will execute in auto-commit mode.
 val session = DB.autoCommitSession
 session.update("update emp set name = ? where id = ?", "foo", 1) // auto-commit
 session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
+session.close()
 ```
 
 ### localTx block
@@ -283,6 +295,7 @@ val names = session.list("select * from emp") {
   rs => rs.string("name")
 }
 db.rollbackIfActive() // it NEVER throws Exception
+db.close()
 ```
 
 
@@ -300,27 +313,25 @@ val name: Option[String] = DB readOnly { implicit session =>
 When you call the `#apply` method, the specified SQL statement will be executed and the result will be extracted from the `ResultSet` object, and finally the statement will be closed.
 
 ```scala
-case class Emp(id: Int, name: Option[String])
-val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), Option(rs.string("name")))
-
-val tenEmps: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
-val tenEmpsAsList: SQLToList[Emp] = tenEmps.list // or #toList
+import scalikejdbc._
+import scala.Option
 
 DB readOnly { implicit session =>
 
-  val emps: List[Emp] = tenEmpsAsList.apply()
+  case class Emp(id: Int, name: Option[String])
+  val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), Option(rs.string("name")))
 
-  val firstOfTenEmps: SQLToOption[Emp] = tenEmps.first // or #headOption
-  val firstEmp: Option[Emp] = firstOfTenEmps.apply()
-
-  val aEmp: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
-
-  val trv: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or #toTraversable
-  trv.foreach { emp: Emp =>
+  val emps: List[Emp] = SQL("select * from emp order by id limit 10").map(empMapper).list.apply() // or toList.apply()
+  val firstEmp: Option[Emp] = SQL("select * from emp order by id limit 10").map(empMapper).first.apply() // or headOption.apply()
+  val andy: Option[Emp] = SQL("select * from emp where id = ? and name = ?").bind(1, "Andy").map(empMapper).single.apply() // or toOption.apply()
+  val traversable: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or toTraversable.apply()
+  traversable.foreach { emp: Emp =>
     // do something...
   }
 
-  // Furthermore, #executeUpdate.apply() and #execute.apply()
+  val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+  val count: Int = SQL("insert into company values (?, ?)").bind(1,"Typesafe").executeUpdate.apply()
+
 }
 ```
 
