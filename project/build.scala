@@ -9,7 +9,7 @@ object ScalikeJDBCBuild extends Build {
     sbtPlugin := false,
     organization := "com.github.seratch",
     name := "scalikejdbc",
-    version := "0.6.0",
+    version := "0.6.1",
     publishTo <<= version { (v: String) =>
       val nexus = "https://oss.sonatype.org/"
         if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots") 
