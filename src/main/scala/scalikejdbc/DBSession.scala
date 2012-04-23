@@ -149,4 +149,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     }
   }
 
+  def close(): Unit = conn.close()
+
 }
