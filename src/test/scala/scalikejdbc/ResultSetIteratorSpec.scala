@@ -21,9 +21,11 @@ class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
       TestUtils.initialize(conn, tableName)
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
       val iterator = new ResultSetIterator(rs)
-      1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
       1 to 5 foreach (_ => iterator.hasNext should equal(false))
+      try {
+        iterator.next()
+        fail("NoSuchElementException is expected.")
+      } catch { case e: NoSuchElementException => }
     }
   }
 
