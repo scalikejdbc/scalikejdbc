@@ -198,7 +198,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         }
       }
       val iterEnd = System.currentTimeMillis
-      val iterResult = (iterEnd - iterStart) / 1000 / times
+      val iterResult = (iterEnd - iterStart) / times
 
       val trvStart = System.currentTimeMillis
       (1 to times) foreach { _ =>
@@ -214,8 +214,6 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
 
       println("DBSession using Iterator    : " + iterResult + " milliseconds")
       println("DBSession using Traversable : " + trvResult + " milliseconds")
-
-      iterResult should be < trvResult
 
     }
   }
