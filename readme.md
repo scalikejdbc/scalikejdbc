@@ -57,6 +57,7 @@ val db = new DB(conn)
 val name: Option[String] = db readOnly { session =>
   session.single("select * from emp where id = ?", 1) { _.string("name") }
 }
+db.close()
 ```
 
 
@@ -117,7 +118,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list`, `iterator` and `foreach`.
+`single`, `first`, `list`, `traversable` and `foreach`.
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
@@ -165,13 +166,13 @@ val names: List[String] = DB readOnly {
 }
 ```
 
-#### iterator
+#### traversable
 
-`iterator` returns multiple rows as `scala.collection.Iterator`.
+`traversable` returns multiple rows as `scala.collection.Traversable`.
 
 ```scala
-val iter: Iterator[String] = DB readOnly {
-  _.iterator("select * from emp") { _.string("name") }
+val iter: Traversable[String] = DB readOnly {
+  _.traversable("select * from emp") { _.string("name") }
 }
 ```
 
