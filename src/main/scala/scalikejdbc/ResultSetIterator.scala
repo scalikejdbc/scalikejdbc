@@ -20,7 +20,6 @@ import java.sql.ResultSet
 /**
  * ResultSet Iterator
  */
-@deprecated(message = "use ResultSetTraversable instead", since = "0.5.5")
 class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
 
   private var alreadyTried = false
