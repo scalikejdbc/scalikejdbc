@@ -80,6 +80,23 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "execute executeUpdate in auto commit mode" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_updateInAutoCommit";
+    val db = new DB(conn)
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
+      val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
+      db.rollbackIfActive()
+      count should equal(1)
+      val name = SQL("select name from " + tableName + " where id = ?").bind(1)
+        .map(rs => rs.string("name")).toOption().apply().getOrElse("---")
+      name should equal("foo")
+    }
+
+  }
+
   it should "execute update in auto commit mode" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommit";
@@ -87,7 +104,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
       db.rollbackIfActive()
       count should equal(1)
       val name = SQL("select name from " + tableName + " where id = ?").bind(1)

@@ -65,6 +65,8 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
 
   def executeUpdate(): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)
 
+  def update(): SQLUpdateExecution = executeUpdate()
+
 }
 
 class SQLExecution(sql: String)(params: Any*) {

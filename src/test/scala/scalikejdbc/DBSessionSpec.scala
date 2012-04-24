@@ -118,6 +118,24 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
 
   }
 
+  it should "execute executeUpdate in auto commit mode" in {
+    val conn = ConnectionPool.borrow()
+    val tableName = tableNamePrefix + "_executeUpdateInAutoCommit";
+    val db = new DB(conn)
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val session = new DB(ConnectionPool.borrow()).autoCommitSession()
+      val count = session.executeUpdate("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      db.rollbackIfActive()
+      count should equal(1)
+      val name = session.single("select name from " + tableName + " where id = ?", 1) {
+        rs => rs.string("name")
+      } getOrElse "---"
+      name should equal("foo")
+    }
+
+  }
+
   // --------------------
   // within tx mode
 

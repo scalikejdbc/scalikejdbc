@@ -140,6 +140,8 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     new ResultSetTraversable(stmt.executeQuery()) map (rs => extract(rs))
   }
 
+  def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
+
   def update(template: String, params: Any*): Int = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {

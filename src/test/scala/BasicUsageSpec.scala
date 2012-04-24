@@ -276,7 +276,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       val get10EmpSQL: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
       val get10EmpAllSQL: SQLToList[Emp] = get10EmpSQL.list // or #toList
 
-      DB readOnly { implicit s =>
+      DB autoCommit { implicit s =>
 
         val emps: List[Emp] = get10EmpAllSQL.apply()
         emps.size should be <= 10
@@ -288,12 +288,9 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
         single.isDefined should be(true)
 
-        val trv: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or #toTraversable
-        trv.foreach { emp: Emp =>
-          // do something...
-        }
+        val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+        val count: Int = SQL("insert into company values (?, ?)").bind(1, "Typesafe").update.apply()
 
-        // Furthermore, #executeUpdate.apply() and #execute.apply()
       }
     }
   }
