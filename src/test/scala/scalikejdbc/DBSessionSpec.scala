@@ -178,44 +178,4 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
-  it should "work faster than DBSessionWithTraversable" in {
-    val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_Benchmark";
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      DB autoCommit { session =>
-        (3 until 100000) foreach { i =>
-          session.update("insert into " + tableName + " values (?, ?)", i, Option("user_" + i))
-        }
-      }
-      val times = 20
-      val iterStart = System.currentTimeMillis
-      (1 to times) foreach { _ =>
-        using(ConnectionPool.borrow()) { conn =>
-          DB(conn) readOnly { session =>
-            session.list("select * from " + tableName) { rs => rs.int("id") }
-          }
-        }
-      }
-      val iterEnd = System.currentTimeMillis
-      val iterResult = (iterEnd - iterStart) / times
-
-      val trvStart = System.currentTimeMillis
-      (1 to times) foreach { _ =>
-        using(ConnectionPool.borrow()) { conn =>
-          DB(conn) readOnlyWithConnection { conn =>
-            val session = new DBSessionWithTraversable(conn)
-            session.list("select * from " + tableName) { rs => rs.int("id") }
-          }
-        }
-      }
-      val trvEnd = System.currentTimeMillis
-      val trvResult = (trvEnd - trvStart) / times
-
-      println("DBSession using Iterator    : " + iterResult + " milliseconds")
-      println("DBSession using Traversable : " + trvResult + " milliseconds")
-
-    }
-  }
-
 }
