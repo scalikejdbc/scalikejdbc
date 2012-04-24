@@ -127,6 +127,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     iterator(template, params: _*)(extract)
   }
 
+  @deprecated(message = "Use #traversable or #foreach instead.", since = "0.6.3")
   def iterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
     val stmt = createPreparedStatement(conn, template)
     bindParams(stmt, params: _*)
