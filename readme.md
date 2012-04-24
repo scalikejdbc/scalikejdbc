@@ -118,7 +118,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list`, `traversable` and `foreach`.
+`single`, `first`, `list` and `foreach`.
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
@@ -163,16 +163,6 @@ val name: Option[String] = DB readOnly {
 ```scala
 val names: List[String] = DB readOnly {
   _.list("select * from emp") { _.string("name") }
-}
-```
-
-#### traversable
-
-`traversable` returns multiple rows as `scala.collection.Traversable`.
-
-```scala
-val iter: Traversable[String] = DB readOnly {
-  _.traversable("select * from emp") { _.string("name") }
 }
 ```
 
@@ -318,7 +308,7 @@ When you call the `#apply` method, the specified SQL statement will be executed 
 import scalikejdbc._
 import scala.Option
 
-DB readOnly { implicit session =>
+DB autoCommit { implicit session =>
 
   case class Emp(id: Int, name: Option[String])
   val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), Option(rs.string("name")))
@@ -328,7 +318,7 @@ DB readOnly { implicit session =>
   val andy: Option[Emp] = SQL("select * from emp where id = ? and name = ?").bind(1, "Andy").map(empMapper).single.apply() // or toOption.apply()
 
   val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
-  val count: Int = SQL("insert into company values (?, ?)").bind(1,"Typesafe").executeUpdate.apply()
+  val count: Int = SQL("insert into company values (?, ?)").bind(1,"Typesafe").update.apply()
 
 }
 ```
@@ -382,7 +372,7 @@ class PlanWithTx extends Plan {
   def intent = {
     case req @ GET(Path("/rollbackTest")) => {
       val db = ThreadLocalDB.load()
-      db withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) }
+      db withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) } // or _.executeUpdate
       throw new RuntimeException("Rollback Test!")
       // will perform rollback
     }
