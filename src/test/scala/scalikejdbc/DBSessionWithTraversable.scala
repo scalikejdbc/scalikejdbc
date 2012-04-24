@@ -19,9 +19,9 @@ import java.sql._
 import java.net.URL
 
 /**
- * DB Session (readOnly/autoCommit/localTx/withinTx)
+ * DB SessionWithTraversable (readOnly/autoCommit/localTx/withinTx)
  */
-case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
+case class DBSessionWithTraversable(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
 
   def connection: Connection = conn
 
@@ -84,7 +84,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        val resultSet = new ResultSetIterator(stmt.executeQuery())
+        val resultSet = new ResultSetTraversable(stmt.executeQuery())
         val rows = (resultSet map (rs => extract(rs))).toList
         rows match {
           case Nil => None
@@ -108,7 +108,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        val resultSet = new ResultSetIterator(stmt.executeQuery())
+        val resultSet = new ResultSetTraversable(stmt.executeQuery())
         (resultSet map (rs => extract(rs))).toList
     }
   }
@@ -118,7 +118,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
-        new ResultSetIterator(stmt.executeQuery()) foreach (rs => f(rs))
+        new ResultSetTraversable(stmt.executeQuery()) foreach (rs => f(rs))
     }
   }
 

@@ -117,7 +117,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list`, `traversable` and `foreach`.
+`single`, `first`, `list`, `iterator` and `foreach`.
 
 All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 
@@ -165,13 +165,13 @@ val names: List[String] = DB readOnly {
 }
 ```
 
-#### traversable
+#### iterator
 
-`traversable` returns multiple rows as `scala.collection.Traversable`.
+`iterator` returns multiple rows as `scala.collection.Iterator`.
 
 ```scala
-val names: Traversable[String] = DB readOnly {
-  _.traversable("select * from emp") { _.string("name") }
+val iter: Iterator[String] = DB readOnly {
+  _.iterator("select * from emp") { _.string("name") }
 }
 ```
 
@@ -325,10 +325,6 @@ DB readOnly { implicit session =>
   val emps: List[Emp] = SQL("select * from emp order by id limit 10").map(empMapper).list.apply() // or toList.apply()
   val firstEmp: Option[Emp] = SQL("select * from emp order by id limit 10").map(empMapper).first.apply() // or headOption.apply()
   val andy: Option[Emp] = SQL("select * from emp where id = ? and name = ?").bind(1, "Andy").map(empMapper).single.apply() // or toOption.apply()
-  val traversable: Traversable[Emp] = SQL("select * from emp").map(empMapper).traversable.apply() // or toTraversable.apply()
-  traversable.foreach { emp: Emp =>
-    // do something...
-  }
 
   val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
   val count: Int = SQL("insert into company values (?, ?)").bind(1,"Typesafe").executeUpdate.apply()
