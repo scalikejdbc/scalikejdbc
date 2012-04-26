@@ -1,5 +1,3 @@
-package scalikejdbc
-
 /*
  * Copyright 2012 Kazuhiro Sera
  *
@@ -15,21 +13,6 @@ package scalikejdbc
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+package scalikejdbc
 
-import java.sql.ResultSet
-
-/**
- * ResultSet Traversable
- */
-class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
-
-  private val cursor: ResultSetCursor = new ResultSetCursor(0)
-
-  def foreach[U](f: (WrappedResultSet) => U): Unit = {
-    while (rs.next()) {
-      cursor.index += 1
-      f.apply(new WrappedResultSet(rs, cursor, cursor.index))
-    }
-  }
-
-}
+class ResultSetCursor(var index: Int)

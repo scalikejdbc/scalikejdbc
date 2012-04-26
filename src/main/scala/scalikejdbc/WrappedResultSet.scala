@@ -22,149 +22,366 @@ import collection.JavaConverters._
 /**
  * {@link java.sql.ResultSet} wrapper
  */
-case class WrappedResultSet(underlying: ResultSet) {
-
-  def array(columnIndex: Int) = underlying.getArray(columnIndex)
-
-  def array(columnLabel: String) = underlying.getArray(columnLabel)
-
-  def asciiStream(columnIndex: Int) = underlying.getAsciiStream(columnIndex)
-
-  def asciiStream(columnLabel: String) = underlying.getAsciiStream(columnLabel)
-
-  def bigDecimal(columnIndex: Int) = underlying.getBigDecimal(columnIndex)
-
-  def bigDecimal(columnLabel: String) = underlying.getBigDecimal(columnLabel)
-
-  def binaryStream(columnIndex: Int) = underlying.getBinaryStream(columnIndex)
-
-  def binaryStream(columnLabel: String) = underlying.getBinaryStream(columnLabel)
-
-  def blob(columnIndex: Int) = underlying.getBlob(columnIndex)
-
-  def blob(columnLabel: String) = underlying.getBlob(columnLabel)
-
-  def boolean(columnIndex: Int) = underlying.getBoolean(columnIndex)
-
-  def boolean(columnLabel: String) = underlying.getBoolean(columnLabel)
-
-  def byte(columnIndex: Int) = underlying.getByte(columnIndex)
-
-  def byte(columnLabel: String) = underlying.getByte(columnLabel)
-
-  def bytes(columnIndex: Int) = underlying.getBytes(columnIndex)
-
-  def bytes(columnLabel: String) = underlying.getBytes(columnLabel)
-
-  def characterStream(columnIndex: Int) = underlying.getCharacterStream(columnIndex)
-
-  def characterStream(columnLabel: String) = underlying.getCharacterStream(columnLabel)
-
-  def clob(columnIndex: Int) = underlying.getClob(columnIndex)
-
-  def clob(columnLabel: String) = underlying.getClob(columnLabel)
-
-  def concurrency = underlying.getConcurrency
-
-  def cursorName = underlying.getCursorName
-
-  def date(columnIndex: Int) = underlying.getDate(columnIndex)
-
-  def date(columnLabel: String) = underlying.getDate(columnLabel)
-
-  def date(columnIndex: Int, cal: Calendar) = underlying.getDate(columnIndex, cal)
-
-  def date(columnLabel: String, cal: Calendar) = underlying.getDate(columnLabel, cal)
-
-  def double(columnIndex: Int) = underlying.getDouble(columnIndex)
-
-  def double(columnLabel: String) = underlying.getDouble(columnLabel)
-
-  def fetchDirection = underlying.getFetchDirection
-
-  def fetchSize = underlying.getFetchSize
-
-  def float(columnIndex: Int) = underlying.getFloat(columnIndex)
-
-  def float(columnLabel: String) = underlying.getFloat(columnLabel)
-
-  def holdability = underlying.getHoldability
-
-  def int(columnIndex: Int) = underlying.getInt(columnIndex)
-
-  def int(columnLabel: String) = underlying.getInt(columnLabel)
-
-  def long(columnIndex: Int) = underlying.getLong(columnIndex)
-
-  def long(columnLabel: String) = underlying.getLong(columnLabel)
-
-  def metaData = underlying.getMetaData
-
-  def nCharacterStream(columnIndex: Int) = underlying.getNCharacterStream(columnIndex)
-
-  def nCharacterStream(columnLabel: String) = underlying.getNCharacterStream(columnLabel)
-
-  def nClob(columnIndex: Int) = underlying.getNClob(columnIndex)
-
-  def nClob(columnLabel: String) = underlying.getNClob(columnLabel)
-
-  def nString(columnIndex: Int) = underlying.getNString(columnIndex)
-
-  def nString(columnLabel: String) = underlying.getNString(columnLabel)
-
-  def any(columnIndex: Int) = underlying.getObject(columnIndex)
-
-  def any(columnLabel: String) = underlying.getObject(columnLabel)
-
-  def any(columnIndex: Int, map: Map[String, Class[_]]) = underlying.getObject(columnIndex.asInstanceOf[java.lang.Integer], map.asJava)
-
-  def any(columnLabel: String, map: Map[String, Class[_]]) = underlying.getObject(columnLabel, map.asJava)
-
-  def ref(columnIndex: Int) = underlying.getRef(columnIndex)
-
-  def ref(columnLabel: String) = underlying.getRef(columnLabel)
-
-  def row = underlying.getRow
-
-  def rowId(columnIndex: Int) = underlying.getRowId(columnIndex)
-
-  def rowId(columnLabel: String) = underlying.getRowId(columnLabel)
-
-  def short(columnIndex: Int) = underlying.getShort(columnIndex)
-
-  def short(columnLabel: String) = underlying.getShort(columnLabel)
-
-  def sqlXml(columnIndex: Int) = underlying.getSQLXML(columnIndex)
-
-  def sqlXml(columnLabel: String) = underlying.getSQLXML(columnLabel)
-
-  def statement = underlying.getStatement
-
-  def string(columnIndex: Int) = underlying.getString(columnIndex)
-
-  def string(columnLabel: String) = underlying.getString(columnLabel)
-
-  def time(columnIndex: Int) = underlying.getTime(columnIndex)
-
-  def time(columnLabel: String) = underlying.getTime(columnLabel)
-
-  def time(columnIndex: Int, cal: Calendar) = underlying.getTime(columnIndex, cal)
-
-  def time(columnLabel: String, cal: Calendar) = underlying.getTime(columnLabel, cal)
-
-  def timestamp(columnIndex: Int) = underlying.getTimestamp(columnIndex)
-
-  def timestamp(columnLabel: String) = underlying.getTimestamp(columnLabel)
-
-  def timestamp(columnIndex: Int, cal: Calendar) = underlying.getTimestamp(columnIndex, cal)
-
-  def timestamp(columnLabel: String, cal: Calendar) = underlying.getTimestamp(columnLabel, cal)
-
-  def url(columnIndex: Int) = underlying.getURL(columnIndex)
-
-  def url(columnLabel: String) = underlying.getURL(columnLabel)
-
-  def warnings = underlying.getWarnings
+case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
+
+  def ensureCursor(): Unit = {
+    if (cursor.index != index) {
+      throw new IllegalStateException("Invalid cursor position (actual:" + cursor.index + ",expected:" + index + ")")
+    }
+  }
+
+  def array(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getArray(columnIndex)
+  }
+  def array(columnLabel: String) = {
+    ensureCursor()
+    underlying.getArray(columnLabel)
+  }
+
+  def asciiStream(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getAsciiStream(columnIndex)
+  }
+
+  def asciiStream(columnLabel: String) = {
+    ensureCursor()
+    underlying.getAsciiStream(columnLabel)
+  }
+  def bigDecimal(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getBigDecimal(columnIndex)
+  }
+
+  def bigDecimal(columnLabel: String) = {
+    ensureCursor()
+    underlying.getBigDecimal(columnLabel)
+  }
+
+  def binaryStream(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getBinaryStream(columnIndex)
+  }
+
+  def binaryStream(columnLabel: String) = {
+    ensureCursor()
+    underlying.getBinaryStream(columnLabel)
+  }
+
+  def blob(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getBlob(columnIndex)
+  }
+
+  def blob(columnLabel: String) = {
+    ensureCursor()
+    underlying.getBlob(columnLabel)
+  }
+
+  def boolean(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getBoolean(columnIndex)
+  }
+
+  def boolean(columnLabel: String) = {
+    ensureCursor()
+    underlying.getBoolean(columnLabel)
+  }
+
+  def byte(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getByte(columnIndex)
+  }
+
+  def byte(columnLabel: String) = {
+    ensureCursor()
+    underlying.getByte(columnLabel)
+  }
+
+  def bytes(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getBytes(columnIndex)
+  }
+
+  def bytes(columnLabel: String) = {
+    ensureCursor()
+    underlying.getBytes(columnLabel)
+  }
+
+  def characterStream(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getCharacterStream(columnIndex)
+  }
+
+  def characterStream(columnLabel: String) = {
+    ensureCursor()
+    underlying.getCharacterStream(columnLabel)
+  }
+
+  def clob(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getClob(columnIndex)
+  }
+
+  def clob(columnLabel: String) = {
+    ensureCursor()
+    underlying.getClob(columnLabel)
+  }
+
+  def concurrency = {
+    ensureCursor()
+    underlying.getConcurrency
+  }
+
+  def cursorName = {
+    ensureCursor()
+    underlying.getCursorName
+  }
+
+  def date(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getDate(columnIndex)
+  }
+
+  def date(columnLabel: String) = {
+    ensureCursor()
+    underlying.getDate(columnLabel)
+  }
+
+  def date(columnIndex: Int, cal: Calendar) = {
+    ensureCursor()
+    underlying.getDate(columnIndex, cal)
+  }
+
+  def date(columnLabel: String, cal: Calendar) = {
+    ensureCursor()
+    underlying.getDate(columnLabel, cal)
+  }
+
+  def double(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getDouble(columnIndex)
+  }
+
+  def double(columnLabel: String) = {
+    ensureCursor()
+    underlying.getDouble(columnLabel)
+  }
+
+  def fetchDirection = {
+    ensureCursor()
+    underlying.getFetchDirection
+  }
+
+  def fetchSize = {
+    ensureCursor()
+    underlying.getFetchSize
+  }
+
+  def float(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getFloat(columnIndex)
+  }
+
+  def float(columnLabel: String) = {
+    ensureCursor()
+    underlying.getFloat(columnLabel)
+  }
+
+  def holdability = {
+    ensureCursor()
+    underlying.getHoldability
+  }
+
+  def int(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getInt(columnIndex)
+  }
+
+  def int(columnLabel: String) = {
+    ensureCursor()
+    underlying.getInt(columnLabel)
+  }
+
+  def long(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getLong(columnIndex)
+  }
+
+  def long(columnLabel: String) = {
+    ensureCursor()
+    underlying.getLong(columnLabel)
+  }
+
+  def metaData = {
+    ensureCursor()
+    underlying.getMetaData
+  }
+
+  def nCharacterStream(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getNCharacterStream(columnIndex)
+  }
+
+  def nCharacterStream(columnLabel: String) = {
+    ensureCursor()
+    underlying.getNCharacterStream(columnLabel)
+  }
+
+  def nClob(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getNClob(columnIndex)
+  }
+
+  def nClob(columnLabel: String) = {
+    ensureCursor()
+    underlying.getNClob(columnLabel)
+  }
+
+  def nString(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getNString(columnIndex)
+  }
+
+  def nString(columnLabel: String) = {
+    ensureCursor()
+    underlying.getNString(columnLabel)
+  }
+
+  def any(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getObject(columnIndex)
+  }
+
+  def any(columnLabel: String) = {
+    ensureCursor()
+    underlying.getObject(columnLabel)
+  }
+
+  def any(columnIndex: Int, map: Map[String, Class[_]]) = {
+    ensureCursor()
+    underlying.getObject(columnIndex.asInstanceOf[java.lang.Integer], map.asJava)
+  }
+
+  def any(columnLabel: String, map: Map[String, Class[_]]) = {
+    ensureCursor()
+    underlying.getObject(columnLabel, map.asJava)
+  }
+
+  def ref(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getRef(columnIndex)
+  }
+
+  def ref(columnLabel: String) = {
+    ensureCursor()
+    underlying.getRef(columnLabel)
+  }
+
+  def row = {
+    ensureCursor()
+    underlying.getRow
+  }
+
+  def rowId(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getRowId(columnIndex)
+  }
+
+  def rowId(columnLabel: String) = {
+    ensureCursor()
+    underlying.getRowId(columnLabel)
+  }
+
+  def short(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getShort(columnIndex)
+  }
+
+  def short(columnLabel: String) = {
+    ensureCursor()
+    underlying.getShort(columnLabel)
+  }
+
+  def sqlXml(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getSQLXML(columnIndex)
+  }
+
+  def sqlXml(columnLabel: String) = {
+    ensureCursor()
+    underlying.getSQLXML(columnLabel)
+  }
+
+  def statement = {
+    ensureCursor()
+    underlying.getStatement
+  }
+
+  def string(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getString(columnIndex)
+  }
+
+  def string(columnLabel: String) = {
+    ensureCursor()
+    underlying.getString(columnLabel)
+  }
+
+  def time(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getTime(columnIndex)
+  }
+
+  def time(columnLabel: String) = {
+    ensureCursor()
+    underlying.getTime(columnLabel)
+  }
+
+  def time(columnIndex: Int, cal: Calendar) = {
+    ensureCursor()
+    underlying.getTime(columnIndex, cal)
+  }
+
+  def time(columnLabel: String, cal: Calendar) = {
+    ensureCursor()
+    underlying.getTime(columnLabel, cal)
+  }
+
+  def timestamp(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getTimestamp(columnIndex)
+  }
+
+  def timestamp(columnLabel: String) = {
+    ensureCursor()
+    underlying.getTimestamp(columnLabel)
+  }
+
+  def timestamp(columnIndex: Int, cal: Calendar) = {
+    ensureCursor()
+    underlying.getTimestamp(columnIndex, cal)
+  }
+
+  def timestamp(columnLabel: String, cal: Calendar) = {
+    ensureCursor()
+    underlying.getTimestamp(columnLabel, cal)
+  }
+
+  def url(columnIndex: Int) = {
+    ensureCursor()
+    underlying.getURL(columnIndex)
+  }
+
+  def url(columnLabel: String) = {
+    ensureCursor()
+    underlying.getURL(columnLabel)
+  }
+
+  def warnings = {
+    ensureCursor()
+    underlying.getWarnings
+  }
 
 }
 

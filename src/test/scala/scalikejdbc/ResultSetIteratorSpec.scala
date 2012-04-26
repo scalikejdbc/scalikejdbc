@@ -50,9 +50,24 @@ class ResultSetIteratorSpec extends FlatSpec with ShouldMatchers with Settings {
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " limit 2").executeQuery()
       val iterator = new ResultSetIterator(rs)
       1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
+
+      val rs1 = iterator.next()
+      rs1.string("name") should not be (null)
+
       1 to 5 foreach (_ => iterator.hasNext should equal(true))
-      iterator.next()
+
+      val rs2 = iterator.next()
+
+      try {
+        rs1.string("name")
+        fail("IllegalStateException is expected here.")
+      } catch {
+        case e: IllegalStateException =>
+          e.getMessage should equal("Invalid cursor position (actual:2,expected:1)")
+      }
+
+      rs2.string("name") should not be (null)
+
       1 to 5 foreach (_ => iterator.hasNext should equal(false))
     }
   }

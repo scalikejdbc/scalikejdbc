@@ -23,12 +23,14 @@ import java.sql.ResultSet
 @deprecated(message = "Use ResultSetTraversable instead.", since = "0.6.3")
 class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
 
+  private val cursor: ResultSetCursor = new ResultSetCursor(0)
   private var alreadyTried = false
   private var _hasNext = false
 
   def hasNext: Boolean = {
     if (!alreadyTried) {
       _hasNext = rs.next()
+      cursor.index += 1
       alreadyTried = true;
     }
     _hasNext
@@ -37,7 +39,7 @@ class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
   def next(): WrappedResultSet = {
     if (hasNext) {
       alreadyTried = false
-      WrappedResultSet(rs)
+      WrappedResultSet(rs, cursor, cursor.index)
     } else Iterator.empty.next()
   }
 
