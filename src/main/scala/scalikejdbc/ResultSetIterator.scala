@@ -31,7 +31,7 @@ class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
     if (!alreadyTried) {
       _hasNext = rs.next()
       cursor.index += 1
-      alreadyTried = true;
+      alreadyTried = true
     }
     _hasNext
   }

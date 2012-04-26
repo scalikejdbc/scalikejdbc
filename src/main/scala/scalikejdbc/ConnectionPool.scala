@@ -70,8 +70,8 @@ class ConnectionPool(url: String,
     password: String,
     settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
 
-  private val pool = new GenericObjectPool(null);
-  pool.setMinIdle(settings.initialSize);
+  private val pool = new GenericObjectPool(null)
+  pool.setMinIdle(settings.initialSize)
   pool.setMaxIdle(settings.maxSize)
   pool.setMaxActive(settings.maxSize)
   pool.setMaxWait(5000)
@@ -82,7 +82,7 @@ class ConnectionPool(url: String,
 
   // not read-only, auto-commit
   val poolableConnectionFactory = new PoolableConnectionFactory(
-    connFactory, pool, null, settings.validationQuery, false, true);
+    connFactory, pool, null, settings.validationQuery, false, true)
 
   val dataSource: DataSource = new PoolingDataSource(pool)
 

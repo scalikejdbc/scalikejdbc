@@ -16,7 +16,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
 
   it should "be available (result size 0)" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_fetchSize0";
+    val tableName = tableNamePrefix + "_fetchSize0"
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
@@ -26,7 +26,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
 
   it should "be available (result size 1)" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_fetchSize1";
+    val tableName = tableNamePrefix + "_fetchSize1"
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
@@ -36,7 +36,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
 
   it should "be available (result size 2)" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_fetchSize2";
+    val tableName = tableNamePrefix + "_fetchSize2"
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
