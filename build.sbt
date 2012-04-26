@@ -4,6 +4,8 @@ scalaVersion := "2.9.2"
 
 crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0")
 
+externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository"))
+
 resolvers += "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
 
 resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
