@@ -20,6 +20,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val conn = ConnectionPool.borrow()
     val db = new DB(conn)
     db should not be null
+    db.close()
   }
 
   // --------------------
@@ -33,6 +34,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       db.begin()
     }
     db.rollback()
+    db.close()
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
@@ -44,6 +46,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     db.beginIfNotYet()
     db.rollback()
     db.rollbackIfActive()
+    db.close()
   }
 
   "#tx" should "not be available before beginning tx" in {
@@ -53,6 +56,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       db.tx.begin()
     }
     db.rollbackIfActive()
+    db.close()
   }
 
   // --------------------
@@ -63,7 +67,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db readOnly {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
@@ -77,7 +81,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInReadOnlyWithConnectionBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db readOnlyWithConnection {
         implicit conn =>
           import anorm._
@@ -92,7 +96,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInReadOnlySession";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val session = db.readOnlySession()
       val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
       result.size should be > 0
@@ -104,7 +108,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_cannotUpdateInReadOnlyBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       intercept[SQLException] {
         db readOnly {
           session => session.update("update " + tableName + " set name = ?", "xxx")
@@ -121,7 +125,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
@@ -135,7 +139,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInAutoCommitWithConnectionBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db autoCommitWithConnection {
         implicit conn =>
           import anorm._
@@ -150,7 +154,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInAutoCommitSession";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val session = db.autoCommitSession()
       val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
       list(0) should equal(1)
@@ -163,7 +167,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db autoCommit {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
       }
@@ -176,7 +180,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_tooManyResultsInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       intercept[TooManyRowsException] {
         db autoCommit {
           _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
@@ -190,7 +194,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock2";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
       val name: Option[String] = db readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
@@ -204,7 +208,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_listInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db autoCommit {
         _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
       }
@@ -217,7 +221,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db autoCommit {
         _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
       }
@@ -229,7 +233,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val count = db autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
@@ -246,7 +250,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val count = db autoCommitWithConnection {
         implicit conn =>
           import anorm._
@@ -265,7 +269,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val name = (db readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
       }).get
@@ -285,7 +289,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_singleInLocalTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db localTx {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
       }
@@ -298,7 +302,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_listInLocalTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val result = db localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
@@ -311,7 +315,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInLocalTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val count = db localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
@@ -328,7 +332,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInLocalTxWithConnectionBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val count = db localTxWithConnection {
         implicit conn =>
           import anorm._
@@ -347,7 +351,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       val count = db localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
@@ -368,7 +372,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInWithinTxBeforeBeginningTx";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       intercept[IllegalStateException] {
         db withinTx {
           session =>
@@ -383,7 +387,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInWithinTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val result = db withinTx {
         session =>
@@ -399,7 +403,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val result = db withinTxWithConnection {
         implicit conn =>
@@ -416,7 +420,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_queryInWithinTxSession";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val session = db.withinTxSession()
       val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
@@ -430,7 +434,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_singleInWithinTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val result = db withinTx {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
@@ -445,7 +449,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_listInWithinTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val result = db withinTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
@@ -460,7 +464,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     val tableName = tableNamePrefix + "_updateInWithinTxBlock";
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
-      val db = new DB(ConnectionPool.borrow())
+      val db = new DB(conn)
       db.begin()
       val count = db withinTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -475,25 +479,22 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   }
 
   it should "rollback in withinTx block" in {
+    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock";
-    ultimately(TestUtils.deleteTable(ConnectionPool.borrow(), tableName)) {
-      TestUtils.initialize(ConnectionPool.borrow(), tableName)
-      using(new DB(ConnectionPool.borrow())) {
-        db =>
-          {
-            db.begin()
-            val count = db withinTx {
-              _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-            }
-            count should be === 1
-            db.rollback()
-            db.begin()
-            val name = (db withinTx {
-              _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-            }).get
-            name should equal("name1")
-          }
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
+      val db = new DB(conn)
+      db.begin()
+      val count = db withinTx {
+        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
+      count should be === 1
+      db.rollback()
+      db.begin()
+      val name = (db withinTx {
+        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      }).get
+      name should equal("name1")
     }
   }
 
@@ -501,11 +502,12 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   // multi threads
 
   it should "work with multi threads" in {
+    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
-    ultimately(TestUtils.deleteTable(ConnectionPool.borrow(), tableName)) {
-      TestUtils.initialize(ConnectionPool.borrow(), tableName)
+    ultimately(TestUtils.deleteTable(conn, tableName)) {
+      TestUtils.initialize(conn, tableName)
       spawn {
-        val db = new DB(ConnectionPool.borrow())
+        val db = new DB(conn)
         db.begin()
         val session = db.withinTxSession()
         session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -515,7 +517,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
         db.rollback()
       }
       spawn {
-        val db = new DB(ConnectionPool.borrow())
+        val db = new DB(conn)
         db.begin()
         val session = db.withinTxSession()
         Thread.sleep(200L)
@@ -526,7 +528,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
 
       Thread.sleep(2000L)
 
-      val name = new DB(ConnectionPool.borrow()) autoCommit {
+      val name = new DB(conn) autoCommit {
         session =>
           session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }
@@ -537,11 +539,12 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   it should "work with multi threads when using Anorm API" in {
     import anorm._
     import anorm.SqlParser._
+    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
     ultimately(TestUtils.deleteTable(ConnectionPool.borrow(), tableName)) {
       TestUtils.initialize(ConnectionPool.borrow(), tableName)
       spawn {
-        val db = new DB(ConnectionPool.borrow())
+        val db = new DB(conn)
         db.begin()
         db.withinTxWithConnection {
           implicit conn =>
@@ -553,7 +556,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
         db.rollback()
       }
       spawn {
-        val db = new DB(ConnectionPool.borrow())
+        val db = new DB(conn)
         db.begin()
         db.withinTxWithConnection {
           implicit conn =>
@@ -566,7 +569,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
 
       Thread.sleep(2000L)
 
-      val name = new DB(ConnectionPool.borrow()) autoCommitWithConnection {
+      val name = new DB(conn) autoCommitWithConnection {
         implicit conn =>
           SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
       }
