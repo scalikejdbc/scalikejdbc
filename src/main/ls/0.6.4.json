@@ -10,7 +10,7 @@
    "name": "Apache License, Version 2.0",
    "url":"http://www.apache.org/licenses/LICENSE-2.0"
   }],
- "resolvers": [ "http://oss.sonatype.org/content/repositories/releases" ],
+ "resolvers": [],
  "dependencies": [
    { "organization":"org.slf4j",    "name": "slf4j-api",    "version": "1.6.4" },
    { "organization":"commons-dbcp", "name": "commons-dbcp", "version": "1.4" }
