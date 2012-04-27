@@ -121,6 +121,11 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val session = db.autoCommitSession
     session.update("update " + tableName + " set name = ? where id = ?", "name2", 2)
 
+    // named datasources
+    NamedDB('named) autoCommit {
+      session => session.list("select * from " + tableName) { rs => rs.int("id") }
+    }
+
   }
 
   case class Emp(id: Int, name: String)

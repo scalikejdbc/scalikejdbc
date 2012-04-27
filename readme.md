@@ -86,11 +86,14 @@ val conn = ConnectionPool('db1).borrow()
 val db = new DB(conn)
 ```
 
-With the singleton `ConnectionPool`, it's  much simpler.
+Using DB/NamedDB object is  much simpler.
 
 ```scala
-// DB.readOnly will borrow a new connection automatically
+// borrow a new connection automatically
 val name: Option[String] = DB readOnly { session =>
+  session.single("select * from emp where id = ?", 1) { _.string("name") }
+}
+val name: Option[String] = NamedDB('named) readOnly { session =>
   session.single("select * from emp where id = ?", 1) { _.string("name") }
 }
 ```
