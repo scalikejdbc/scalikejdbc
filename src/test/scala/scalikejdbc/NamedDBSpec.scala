@@ -12,7 +12,7 @@ import util.control.Exception._
 @RunWith(classOf[JUnitRunner])
 class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DBSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis()
 
   behavior of "DB"
 
