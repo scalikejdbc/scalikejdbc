@@ -196,4 +196,15 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
+  it should "bind java.util.Date as java.sql.Timestamp" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsessionspec_judate (id integer primary key, date timestamp)").execute.apply()
+        SQL("insert into dbsessionspec_judate values (?, ?)").bind(1, new java.util.Date()).update.apply()
+      } finally {
+        SQL("drop table dbsessionspec_judate").execute.apply()
+      }
+    }
+  }
+
 }

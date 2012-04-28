@@ -59,6 +59,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         case p: String => stmt.setString(i, p)
         case p: Time => stmt.setTime(i, p)
         case p: Timestamp => stmt.setTimestamp(i, p)
+        case p: java.util.Date => stmt.setTimestamp(i, new Timestamp(p.getTime))
         case p: URL => stmt.setURL(i, p)
         case p => throw new IllegalArgumentException(p.toString)
       }
