@@ -10,6 +10,11 @@ Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala 
 It's pretty simple, really.
 
 
+But if you want simple mappers, please also try scalikejdbc-mapper-generator.
+
+https://github.com/seratch/scalikejdbc-mapper-generator
+
+
 ## Setup
 
 ### sbt
@@ -390,11 +395,15 @@ object Server1 extends App {
 }
 ```
 
-### With Anorm 2.0
+### With Play framework 2.x
 
-ScalikeJDBC works fine with Anorm API.
+ScalikeJDBC works with Play framewrok(2.x).
 
 https://github.com/playframework/Play20
+https://github.com/seratch/scalikejdbc-play-plugin
+
+
+ScalikeJDBC works fine with Anorm API.
 
 ```scala
 import anorm._
