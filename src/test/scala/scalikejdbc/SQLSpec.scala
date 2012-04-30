@@ -6,6 +6,7 @@ import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
+import java.sql.PreparedStatement
 
 @RunWith(classOf[JUnitRunner])
 class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
@@ -45,6 +46,11 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
       noName.get._1 should equal(4)
       noName.get._2 should equal(null)
+
+      val before = (s: PreparedStatement) => println("before")
+      val after = (s: PreparedStatement) => println("before")
+      SQL("insert into " + tableName + " values (?, ?)").bind(5, Option(null)).executeWithFilters(before, after).apply()
+
     }
   }
 
@@ -88,6 +94,11 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
       TestUtils.initialize(conn, tableName)
       implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
+
+      val before = (s: PreparedStatement) => println("before")
+      val after = (s: PreparedStatement) => println("before")
+      SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdateWithFilters(before, after).apply()
+
       db.rollbackIfActive()
       count should equal(1)
       val name = SQL("select name from " + tableName + " where id = ?").bind(1)
@@ -105,6 +116,11 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
       TestUtils.initialize(conn, tableName)
       implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
+
+      val before = (s: PreparedStatement) => println("before")
+      val after = (s: PreparedStatement) => println("before")
+      SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).updateWithFilters(before, after).apply()
+
       db.rollbackIfActive()
       count should equal(1)
       val name = SQL("select name from " + tableName + " where id = ?").bind(1)

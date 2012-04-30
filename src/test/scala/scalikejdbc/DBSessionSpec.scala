@@ -6,6 +6,7 @@ import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
+import java.sql.PreparedStatement
 
 @RunWith(classOf[JUnitRunner])
 class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
@@ -20,7 +21,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     session should not be null
   }
 
-  it should "be able to close java.sql.Connection" in {
+  it should "be able to close java.sql.Connection with filters" in {
     val tableName = tableNamePrefix + "_closeConnection"
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(conn, tableName)) {
@@ -30,7 +31,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val db = new DB(ConnectionPool.borrow())
       val session = db.autoCommitSession()
 
-      session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+      val before = (stmt: PreparedStatement) => println("before")
+      val after = (stmt: PreparedStatement) => println("after")
+      session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
       val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
       benOpt.get._1 should equal(3)
       benOpt.get._2 should equal("Ben")
@@ -100,14 +103,16 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
-  it should "execute update in auto commit mode" in {
+  it should "execute update in auto commit mode with filters" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommit"
     val db = new DB(conn)
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      val before = (stmt: PreparedStatement) => println("before")
+      val after = (stmt: PreparedStatement) => println("after")
+      val count = session.updateWithFilters(before, after, "update " + tableName + " set name = ? where id = ?", "foo", 1)
       db.rollbackIfActive()
       count should equal(1)
       val name = session.single("select name from " + tableName + " where id = ?", 1) {
@@ -203,6 +208,41 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         SQL("insert into dbsessionspec_judate values (?, ?)").bind(1, new java.util.Date()).update.apply()
       } finally {
         SQL("drop table dbsessionspec_judate").execute.apply()
+      }
+    }
+  }
+
+  it should "be able to get a generated key" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsessionspec_genkey (id integer generated always as identity, name varchar(30))").execute.apply()
+        var id = -1L
+        val before = (stmt: PreparedStatement) => {}
+        val after = (stmt: PreparedStatement) => {
+          val rs = stmt.getGeneratedKeys
+          rs.next()
+          id = rs.getLong(1)
+        }
+        SQL("insert into dbsessionspec_genkey (name) values (?)").bind("xxx").updateWithFilters(before, after).apply()
+        id should equal(0)
+        SQL("insert into dbsessionspec_genkey (name) values (?)").bind("xxx").updateWithFilters(before, after).apply()
+        id should equal(1)
+      } finally {
+        SQL("drop table dbsessionspec_genkey").execute.apply()
+      }
+    }
+  }
+
+  it should "be able to updateAndReturnGeneratedKey" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsessionspec_updateAndReturnGeneratedKey (id integer generated always as identity, name varchar(30))").execute.apply()
+        val id1 = SQL("insert into dbsessionspec_updateAndReturnGeneratedKey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+        id1 should equal(0)
+        val id2 = SQL("insert into dbsessionspec_updateAndReturnGeneratedKey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+        id2 should equal(1)
+      } finally {
+        SQL("drop table dbsessionspec_updateAndReturnGeneratedKey").execute.apply()
       }
     }
   }

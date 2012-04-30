@@ -16,6 +16,7 @@
 package scalikejdbc
 
 import scalikejdbc.SQL.Output
+import java.sql.PreparedStatement
 
 object SQL {
 
@@ -61,23 +62,37 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
 
   def traversable(): SQLToTraversable[A] = toTraversable()
 
-  def execute(): SQLExecution = new SQLExecution(sql)(params: _*)
+  def execute(): SQLExecution = new SQLExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
 
-  def executeUpdate(): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)
+  def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = new SQLExecution(sql)(params: _*)(before)(after)
 
-  def update(): SQLUpdateExecution = executeUpdate()
+  def executeUpdate(): SQLUpdateExecution = update()
+
+  def executeUpdateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdateExecution = updateWithFilters(before, after)
+
+  def update(): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+
+  def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)(before)(after)
+
+  def updateAndReturnGeneratedKey(): SQLUpdateExecutionReturnGeneratedKey = new SQLUpdateExecutionReturnGeneratedKey(sql)(params: _*)
 
 }
 
-class SQLExecution(sql: String)(params: Any*) {
+class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
-  def apply()(implicit session: DBSession): Boolean = session.execute(sql, params: _*)
+  def apply()(implicit session: DBSession): Boolean = session.executeWithFilters(before, after, sql, params: _*)
 
 }
 
-class SQLUpdateExecution(sql: String)(params: Any*) {
+class SQLUpdateExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
-  def apply()(implicit session: DBSession): Int = session.update(sql, params: _*)
+  def apply()(implicit session: DBSession): Int = session.updateWithFilters(before, after, sql, params: _*)
+
+}
+
+class SQLUpdateExecutionReturnGeneratedKey(sql: String)(params: Any*) {
+
+  def apply()(implicit session: DBSession): Long = session.updateAndReturnGeneratedKey(sql, params: _*)
 
 }
 
@@ -87,6 +102,7 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
   def apply()(implicit session: DBSession): Traversable[A] = session.traversable(sql, params: _*)(extractor)
 
 }
+
 class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 

@@ -33,7 +33,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
     log.debug("template : " + template)
-    conn.prepareStatement(template)
+    conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
   }
 
   private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
@@ -63,15 +63,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         case p: URL => stmt.setURL(i, p)
         case p => throw new IllegalArgumentException(p.toString)
       }
-    }
-  }
-
-  def execute[A](template: String, params: Any*): Boolean = {
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        stmt.execute()
     }
   }
 
@@ -143,6 +134,30 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
 
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
 
+  def execute[A](template: String, params: Any*): Boolean = {
+    val stmt = createPreparedStatement(conn, template)
+    using(stmt) {
+      stmt =>
+        bindParams(stmt, params: _*)
+        stmt.execute()
+    }
+  }
+
+  def executeWithFilters[A](before: (PreparedStatement) => Unit,
+    after: (PreparedStatement) => Unit,
+    template: String,
+    params: Any*): Boolean = {
+    val stmt = createPreparedStatement(conn, template)
+    using(stmt) {
+      stmt =>
+        bindParams(stmt, params: _*)
+        before(stmt)
+        val result = stmt.execute()
+        after(stmt)
+        result
+    }
+  }
+
   def update(template: String, params: Any*): Int = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
@@ -150,6 +165,37 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         bindParams(stmt, params: _*)
         stmt.executeUpdate()
     }
+  }
+
+  def updateWithFilters(before: (PreparedStatement) => Unit,
+    after: (PreparedStatement) => Unit,
+    template: String,
+    params: Any*): Int = {
+    val stmt = createPreparedStatement(conn, template)
+    using(stmt) {
+      stmt =>
+        bindParams(stmt, params: _*)
+        before(stmt)
+        val count = stmt.executeUpdate()
+        after(stmt)
+        count
+    }
+  }
+
+  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
+    var generatedKey: Long = -1
+    val before = (stmt: PreparedStatement) => {}
+    val after = (stmt: PreparedStatement) => {
+      val rs = stmt.getGeneratedKeys
+      while (rs.next()) {
+        generatedKey = rs.getLong(1)
+      }
+    }
+    updateWithFilters(before, after, template, params: _*)
+    if (generatedKey == -1) {
+      throw new IllegalStateException("Failed to retrieve the generated key (template:" + template + ")")
+    }
+    generatedKey
   }
 
   def close(): Unit = conn.close()

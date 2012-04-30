@@ -188,7 +188,9 @@ DB readOnly {
 val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 db.begin()
+
 val inserted: Int = db withinTx { _.update("insert into emp (id, name) values (?, ?)", 1, "foo") }
+val id: Long = db withTx { _.updateAndReturnGeneratedKey("insert into emp (name) values (?)", "bar") }
 val updated: Int  = db withinTx { _.update("update emp set name = ? where id = ?", "bar", 1) }
 val deleted: Int  = db withinTx { _.update("delete emp where id = ?", 1) }
 db.commit()
@@ -294,9 +296,9 @@ db.close()
 ```
 
 
-## Yet Another API: SQL
+## SQL, bind params, map, specify output type and apply
 
-Not only using `DBSession` directly, but also using `SQL(String).xxx.apply()` API is useful.
+Not only using `DBSession` directly, but also using `SQL(String).map(f).{output}.apply()` API is useful.
 
 ```scala
 val name: Option[String] = DB readOnly { implicit session =>
@@ -322,6 +324,7 @@ DB autoCommit { implicit session =>
 
   val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
   val count: Int = SQL("insert into company values (?, ?)").bind(1,"Typesafe").update.apply()
+  val id: Long = SQL("insert into company (name) values (?)").bind("Oracle").updateAndReturnGeneratedKey.apply()
 
 }
 ```
@@ -343,21 +346,18 @@ class TxFilter extends Filter {
   }
 
   def doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) = {
-    import scalikejdbc.LoanPattern._
     using(ConnectionPool.borrow()) {
-      conn => {
+      conn =>
         val db = ThreadLocalDB.create(conn)
         handling(classOf[Throwable]) by {
-          case e: Exception => {
+          case e: Exception =>
             db.rollbackIfActive()
             throw e
-          }
         } apply {
           db.begin()
           chain.doFilter(req, res)
           db.commit()
         }
-      }
     }
   }
 
@@ -373,12 +373,11 @@ Using the `TxFilter` in [unfiltered](https://github.com/unfiltered/unfiltered) a
 ```scala
 class PlanWithTx extends Plan {
   def intent = {
-    case req @ GET(Path("/rollbackTest")) => {
+    case req @ GET(Path("/rollbackTest")) =>
       val db = ThreadLocalDB.load()
       db withinTx { _.update("update emp set name = ? where id = ?", "foo", 1) } // or _.executeUpdate
       throw new RuntimeException("Rollback Test!")
       // will perform rollback
-    }
   }
 }
 
