@@ -4,6 +4,8 @@ import util.control.Exception._
 import org.scalatest._
 import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
+import org.joda.time.DateTime
+import java.util.Calendar
 import java.sql.PreparedStatement
 
 class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
@@ -245,6 +247,82 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           SQL("drop table dbsessionspec_updateAndReturnGeneratedKey").execute.apply()
         }
     }
+  }
+
+  it should "work with datatime values" in {
+
+    val date = new DateTime(2012, 5, 3, 13, 40, 0, 0).toDate
+    execute(date, date, date)
+    execute(date.toDateTime, date.toDateTime, date.toDateTime)
+    execute(date.toLocalDateTime, date.toLocalDateTime, date.toLocalDateTime)
+    execute(date.toLocalDate, date.toLocalTime, date.toLocalDateTime)
+    execute(date.toSqlTimestamp, date.toSqlTimestamp, date.toSqlTimestamp)
+    execute(date.toSqlDate, date.toSqlTime, date)
+
+    def execute(date: Any, time: Any, timestamp: Any) {
+      DB autoCommit {
+        implicit session =>
+          try {
+            SQL("""
+            create table dbsessionspec_dateTimeValues (
+              id integer generated always as identity,
+              date_value date not null,
+              time_value time not null,
+              timestamp_value timestamp not null
+            )
+          """).execute.apply()
+
+            SQL("""
+            insert into dbsessionspec_dateTimeValues
+              (date_value, time_value, timestamp_value)
+              values
+              (?, ?, ?)
+          """).bind(
+              date,
+              time,
+              timestamp
+            ).update.apply()
+
+            val c = Calendar.getInstance()
+            SQL("select * from dbsessionspec_dateTimeValues").map {
+              rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
+            }.first().apply().map {
+              case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
+
+                // java.sql.Date
+                d.toLocalDate.getYear should equal(2012)
+                d.toLocalDate.getMonthOfYear should equal(5)
+                d.toLocalDate.getDayOfMonth should equal(3)
+
+                // java.sql.Time
+                t.toLocalTime.getHourOfDay should equal(13)
+                t.toLocalTime.getMinuteOfHour should equal(40)
+                t.toLocalTime.getSecondOfMinute should equal(0)
+                t.toLocalTime.getMillisOfSecond should equal(0)
+
+                // java.sql.Timestamp
+                ts.toDateTime.getYear should equal(2012)
+                ts.toDateTime.getMonthOfYear should equal(5)
+                ts.toDateTime.getDayOfMonth should equal(3)
+                ts.toDateTime.getHourOfDay should equal(13)
+                ts.toDateTime.getMinuteOfHour should equal(40)
+                ts.toDateTime.getSecondOfMinute should equal(0)
+                ts.toDateTime.getMillisOfSecond should equal(0)
+
+            } orElse {
+              fail("Expected value is not found.")
+            }
+
+          } finally {
+            try {
+              SQL("drop table dbsessionspec_dateTimeValues").execute.apply()
+            } catch {
+              case e =>
+            }
+          }
+      }
+    }
+
   }
 
 }

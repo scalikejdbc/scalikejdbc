@@ -93,5 +93,5 @@ object Server extends App {
   unfiltered.jetty.Http.anylocal
     .filter(new TxFilter)
     .plan(new PlanWithTx)
-    .run(s => unfiltered.util.Browser.open("http://127.0.0.1:%d/rollback".format(s.port)))
+    .run(s => unfiltered.util.Browser.open("http://127.0.0.1:%t/rollback".format(s.port)))
 }

@@ -1,3 +1,4 @@
+import org.joda.time.DateTime
 import org.scalatest._
 import org.scalatest.matchers._
 import java.sql.SQLException
@@ -94,12 +95,12 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     // connect and begin a block (ConnectionPool required)
     DB autoCommit {
       session =>
-        session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
-        session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-        session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+        session.execute("create table " + tableName + " (id integer primary key, name varchar(30),created_at timestamp not null)")
+        session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 1, Some("name1"), new DateTime)
+        session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 2, Some("name2"), new DateTime)
 
         intercept[SQLException] {
-          session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          session.update("insert into " + tableName + " (id, name, created_at) values (?, ?, ?)", 2, Some("name2"), new DateTime)
         }
     }
 
@@ -123,7 +124,10 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
     // named datasources
     NamedDB('named) autoCommit {
-      session => session.list("select * from " + tableName) { rs => rs.int("id") }
+      session =>
+        session.list("select * from " + tableName) {
+          rs => rs.int("id")
+        }
     }
 
   }
@@ -199,8 +203,9 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1)(rs =>
               Emp(rs.int("id"), rs.string("name"))
             )
-            val emps: List[Emp] = session.list("select * from " + tableName) { rs =>
-              Emp(rs.int("id"), rs.string("name"))
+            val emps: List[Emp] = session.list("select * from " + tableName) {
+              rs =>
+                Emp(rs.int("id"), rs.string("name"))
             }
         }
       }
@@ -223,9 +228,10 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         case id ~ name => Emp(id, name)
       }
 
-      DB localTxWithConnection { implicit conn =>
-        val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(empAllColumns.singleOpt)
-        val empList: List[Emp] = SQL("select * from " + tableName).as(empAllColumns.*)
+      DB localTxWithConnection {
+        implicit conn =>
+          val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(empAllColumns.singleOpt)
+          val empList: List[Emp] = SQL("select * from " + tableName).as(empAllColumns.*)
       }
     }
 
@@ -237,29 +243,35 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     ultimately(TestUtils.deleteTable(conn, "emp_BasicUsageSpec_ActiveSql")) {
       TestUtils.initialize(conn, "emp_BasicUsageSpec_ActiveSql")
 
-      val eopt: Option[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1)
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
+      val eopt: Option[Emp] = DB readOnly {
+        implicit session =>
+          SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1)
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
       }
       eopt.isDefined should be(true)
 
-      val ehead: Option[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_ActiveSql")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
+      val ehead: Option[Emp] = DB readOnly {
+        implicit session =>
+          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
       }
       ehead.isDefined should be(true)
 
-      val es: List[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_ActiveSql")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
+      val es: List[Emp] = DB readOnly {
+        implicit session =>
+          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
       }
       es.size should equal(2)
 
-      val tr: Traversable[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_ActiveSql")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
+      val tr: Traversable[Emp] = DB readOnly {
+        implicit session =>
+          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
       }
-      tr.foreach { case e: Emp => e should not be (null) }
+      tr.foreach {
+        case e: Emp => e should not be (null)
+      }
 
       {
         implicit val session = DB(conn).readOnlySession
@@ -281,20 +293,21 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       val get10EmpSQL: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
       val get10EmpAllSQL: SQLToList[Emp] = get10EmpSQL.list // or #toList
 
-      DB autoCommit { implicit s =>
+      DB autoCommit {
+        implicit s =>
 
-        val emps: List[Emp] = get10EmpAllSQL.apply()
-        emps.size should be <= 10
+          val emps: List[Emp] = get10EmpAllSQL.apply()
+          emps.size should be <= 10
 
-        val getFirstOf10Emp: SQLToOption[Emp] = get10EmpSQL.first // or #headOption
-        val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
-        firstEmp.isDefined should be(true)
+          val getFirstOf10Emp: SQLToOption[Emp] = get10EmpSQL.first // or #headOption
+          val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
+          firstEmp.isDefined should be(true)
 
-        val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
-        single.isDefined should be(true)
+          val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
+          single.isDefined should be(true)
 
-        val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
-        val count: Int = SQL("insert into company values (?, ?)").bind(1, "Typesafe").update.apply()
+          val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+          val count: Int = SQL("insert into company values (?, ?)").bind(1, "Typesafe").update.apply()
 
       }
     }

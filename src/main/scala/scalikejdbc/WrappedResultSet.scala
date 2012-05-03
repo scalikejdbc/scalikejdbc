@@ -35,6 +35,7 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getArray(columnIndex)
   }
+
   def array(columnLabel: String) = {
     ensureCursor()
     underlying.getArray(columnLabel)
@@ -49,6 +50,7 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getAsciiStream(columnLabel)
   }
+
   def bigDecimal(columnIndex: Int) = {
     ensureCursor()
     underlying.getBigDecimal(columnIndex)
