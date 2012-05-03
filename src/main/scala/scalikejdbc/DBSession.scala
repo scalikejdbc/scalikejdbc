@@ -66,11 +66,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     }
   }
 
-  @deprecated(message = "use #single instead", since = "0.5.0")
-  def asOne[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
-    single(template, params: _*)(extract)
-  }
-
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
@@ -90,11 +85,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     list(template, params: _*)(extract).headOption
   }
 
-  @deprecated(message = "use #list instead", since = "0.5.0")
-  def asList[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
-    list(template, params: _*)(extract)
-  }
-
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
@@ -112,18 +102,6 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         bindParams(stmt, params: _*)
         new ResultSetTraversable(stmt.executeQuery()) foreach (rs => f(rs))
     }
-  }
-
-  @deprecated(message = "use #iterator instead", since = "0.5.0")
-  def asIterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
-    iterator(template, params: _*)(extract)
-  }
-
-  @deprecated(message = "Use #traversable or #foreach instead.", since = "0.6.3")
-  def iterator[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterator[A] = {
-    val stmt = createPreparedStatement(conn, template)
-    bindParams(stmt, params: _*)
-    new ResultSetIterator(stmt.executeQuery()) map (rs => extract(rs))
   }
 
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {

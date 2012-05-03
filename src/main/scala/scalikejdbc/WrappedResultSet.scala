@@ -26,7 +26,8 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def ensureCursor(): Unit = {
     if (cursor.index != index) {
-      throw new IllegalStateException("Invalid cursor position (actual:" + cursor.index + ",expected:" + index + ")")
+      throw new IllegalStateException(
+        ErrorMessage.INVALID_CURSOR_POSITION + " (actual:" + cursor.index + ",expected:" + index + ")")
     }
   }
 

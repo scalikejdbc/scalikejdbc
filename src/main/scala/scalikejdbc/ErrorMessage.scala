@@ -28,4 +28,6 @@ object ErrorMessage {
 
   val IMPLICIT_DB_INSTANCE_REQUIRED = "An instance of scalikejdbc.DB is required implicitly."
 
+  val INVALID_CURSOR_POSITION = "Invalid cursor position."
+
 }

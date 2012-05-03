@@ -15,4 +15,7 @@
  */
 package scalikejdbc
 
+/**
+ * Cursor position
+ */
 class ResultSetCursor(var index: Int)
