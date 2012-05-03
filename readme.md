@@ -19,8 +19,13 @@ https://github.com/seratch/scalikejdbc-mapper-generator
 
 ### sbt
 
+ScalikeJDBC 1.0.0 will be released soon.
+
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[0.6,)"
+//resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
+resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/snapshots"
+
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.0-SNAPSHOT"
 ```
 
 ### ls.implicit.ly
@@ -194,10 +199,24 @@ val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 db.begin()
 
-val inserted: Int = db withinTx { _.update("insert into emp (id, name) values (?, ?)", 1, "foo") }
-val id: Long = db withTx { _.updateAndReturnGeneratedKey("insert into emp (name) values (?)", "bar") }
-val updated: Int  = db withinTx { _.update("update emp set name = ? where id = ?", "bar", 1) }
-val deleted: Int  = db withinTx { _.update("delete emp where id = ?", 1) }
+val inserted: Int = db withinTx { session =>
+  session.update("""insert into emp (id, name, created_at) values (?, ?)""",
+    123, "foo", new org.joda.time.DateTime) 
+    // java.util.Date, java.sql.* are also available
+}
+val id: Long = db withTx { 
+  _.updateAndReturnGeneratedKey("insert into emp (name, created_at) values (?, ?)", 
+    "bar", new java.util.Date) 
+}
+
+val updated: Int  = db withinTx { 
+  _.update("update emp set name = ? where id = ?", "bar", 1) 
+}
+
+val deleted: Int  = db withinTx { 
+  _.update("delete emp where id = ?", 1) 
+}
+
 db.commit()
 db.close()
 ```
