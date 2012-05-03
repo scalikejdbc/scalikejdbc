@@ -2,14 +2,11 @@ package scalikejdbc
 
 import org.scalatest._
 import org.scalatest.matchers._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
 
-@RunWith(classOf[JUnitRunner])
 class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DB_SQLOperationSpec" + System.currentTimeMillis()
@@ -101,8 +98,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val result = db autoCommit { implicit session =>
-        SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.int("id")).toOption().apply()
+      val result = db autoCommit {
+        implicit session =>
+          SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.int("id")).toOption().apply()
       }
       result.get should equal(1)
     }
@@ -115,8 +113,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       intercept[TooManyRowsException] {
-        db autoCommit { implicit session =>
-          SQL("select id from " + tableName + "").map(rs => Some(rs.int("id"))).toOption().apply()
+        db autoCommit {
+          implicit session =>
+            SQL("select id from " + tableName + "").map(rs => Some(rs.int("id"))).toOption().apply()
         }
       }
     }
@@ -129,8 +128,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = db readOnly { implicit session =>
-        SQL("select * from " + tableName + " where id = ?").bind(1).map(extractName).toOption().apply()
+      val name: Option[String] = db readOnly {
+        implicit session =>
+          SQL("select * from " + tableName + " where id = ?").bind(1).map(extractName).toOption().apply()
       }
       name.get should be === "name1"
     }
@@ -142,8 +142,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val result = db autoCommit { implicit session =>
-        SQL("select id from " + tableName + "").map(rs => Some(rs.int("id"))).toList().apply()
+      val result = db autoCommit {
+        implicit session =>
+          SQL("select id from " + tableName + "").map(rs => Some(rs.int("id"))).toList().apply()
       }
       result.size should equal(2)
     }
@@ -155,9 +156,12 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      db autoCommit { implicit session =>
-        SQL("select id from " + tableName + "").map(rs => rs.int("id")).toTraversable().apply()
-          .foreach { case (id) => println(id) }
+      db autoCommit {
+        implicit session =>
+          SQL("select id from " + tableName + "").map(rs => rs.int("id")).toTraversable().apply()
+            .foreach {
+              case (id) => println(id)
+            }
       }
     }
   }
@@ -168,12 +172,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val count = db autoCommit { implicit session =>
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = db autoCommit {
+        implicit session =>
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
       count should equal(1)
-      val name = (db autoCommit { implicit session =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).toOption().apply()
+      val name = (db autoCommit {
+        implicit session =>
+          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).toOption().apply()
       }).get
       name should equal("foo")
     }
@@ -185,12 +191,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val name = (db readOnly { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).toOption().apply()
+      val name = (db readOnly {
+        implicit s =>
+          SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).toOption().apply()
       }).get
       name should equal("name1")
-      val count = db autoCommit { implicit s =>
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = db autoCommit {
+        implicit s =>
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
       count should equal(1)
     }
@@ -205,8 +213,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val result = db localTx { implicit s =>
-        SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).toOption().apply()
+      val result = db localTx {
+        implicit s =>
+          SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).toOption().apply()
       }
       result.get should equal("1")
     }
@@ -218,8 +227,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val result = db localTx { implicit s =>
-        SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).toList().apply()
+      val result = db localTx {
+        implicit s =>
+          SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).toList().apply()
       }
       result.size should equal(2)
     }
@@ -231,12 +241,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val count = db localTx { implicit s =>
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = db localTx {
+        implicit s =>
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
       count should be === 1
-      val name = (db localTx { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).toOption().apply()
+      val name = (db localTx {
+        implicit s =>
+          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).toOption().apply()
       }).getOrElse("---")
       name should equal("foo")
     }
@@ -248,13 +260,15 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(conn, tableName)) {
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
-      val count = db localTx { implicit s =>
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = db localTx {
+        implicit s =>
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
       count should be === 1
       db.rollbackIfActive()
-      val name = (db localTx { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+      val name = (db localTx {
+        implicit s =>
+          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
       }).getOrElse("---")
       name should equal("foo")
     }
@@ -315,8 +329,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
-      val result = db withinTx { implicit s =>
-        SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).single().apply()
+      val result = db withinTx {
+        implicit s =>
+          SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).single().apply()
       }
       result.get should equal("1")
       db.rollbackIfActive()
@@ -330,8 +345,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
-      val result = db withinTx { implicit s =>
-        SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).list().apply()
+      val result = db withinTx {
+        implicit s =>
+          SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).list().apply()
       }
       result.size should equal(2)
       db.rollbackIfActive()
@@ -345,12 +361,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(conn, tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
-      val count = db withinTx { implicit s =>
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+      val count = db withinTx {
+        implicit s =>
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
       count should be === 1
-      val name = (db withinTx { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+      val name = (db withinTx {
+        implicit s =>
+          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
       }).get
       name should equal("foo")
       db.rollback()
@@ -364,14 +382,16 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       using(new DB(ConnectionPool.borrow())) {
         db =>
           db.begin()
-          val count = db withinTx { implicit s =>
-            SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+          val count = db withinTx {
+            implicit s =>
+              SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
           }
           count should be === 1
           db.rollback()
           db.begin()
-          val name = (db withinTx { implicit s =>
-            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+          val name = (db withinTx {
+            implicit s =>
+              SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
           }).get
           name should equal("name1")
       }

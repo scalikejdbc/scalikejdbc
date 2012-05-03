@@ -2,11 +2,8 @@ package scalikejdbc
 
 import org.scalatest._
 import org.scalatest.matchers._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import java.sql.DriverManager
 
-@RunWith(classOf[JUnitRunner])
 class LoanPatternSpec extends FlatSpec with ShouldMatchers with Settings {
 
   behavior of "LoanPattern"

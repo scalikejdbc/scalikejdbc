@@ -2,15 +2,11 @@ package scalikejdbc
 
 import org.scalatest._
 import org.scalatest.matchers._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
-import scalikejdbc.LoanPattern._
 
-@RunWith(classOf[JUnitRunner])
 class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis()

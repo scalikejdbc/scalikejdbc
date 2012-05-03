@@ -3,12 +3,9 @@ package scalikejdbc
 import util.control.Exception._
 import org.scalatest._
 import org.scalatest.matchers._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.BeforeAndAfter
 import java.sql.PreparedStatement
 
-@RunWith(classOf[JUnitRunner])
 class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_SQLSpec" + System.currentTimeMillis()

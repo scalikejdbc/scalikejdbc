@@ -3,11 +3,8 @@ package scalikejdbc
 import util.control.Exception._
 import org.scalatest._
 import org.scalatest.matchers._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import java.sql.ResultSet
 
-@RunWith(classOf[JUnitRunner])
 class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Settings {
 
   val tableNamePrefix = "emp_ResultSetTraversableSpec" + System.currentTimeMillis()
