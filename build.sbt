@@ -15,6 +15,7 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     case "2.9.2" => "2.9.1"
     case version => version
   })
+  val time = "time" + _scalaVersion
   val unfilteredFilter = "unfiltered-filter" + _scalaVersion
   val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
   val unfilteredSpec = "unfiltered-spec" + _scalaVersion
@@ -22,8 +23,11 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
   Seq(
     // scope: provided
     "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
-    "org.slf4j"               % "slf4j-api"             % "1.6.4"    % "compile",
+    "org.slf4j"               %  "slf4j-api"            % "1.6.4"    % "compile",
+    "joda-time"               %  "joda-time"            % "2.1"      % "compile",
+    "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
     // scope: test
+    "org.scala-tools.time"    %  time                   % "0.5"      % "test",
     "ch.qos.logback"          %  "logback-classic"      % "1.0.0"    % "test",
     "net.databinder"          %  unfilteredFilter       % "0.6.1" % "test",
     "net.databinder"          %  unfilteredJetty        % "0.6.1" % "test",
