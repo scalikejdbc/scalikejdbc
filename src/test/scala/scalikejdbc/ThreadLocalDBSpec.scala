@@ -19,9 +19,9 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
   it should "work with multi threads" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_workWithMultiThreads"
-    TestUtils.deleteTable(ConnectionPool.borrow(), tableName)
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    TestUtils.deleteTable(tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       spawn {
         val createdDB = ThreadLocalDB.create(ConnectionPool.borrow())
         createdDB.begin()

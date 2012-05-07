@@ -11,8 +11,8 @@ object TestUtils {
     session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
   }
 
-  def initialize(conn: Connection, tableName: String) {
-    new DB(conn) autoCommit {
+  def initialize(tableName: String) {
+    DB autoCommit {
       session =>
         handling(classOf[Throwable]) by {
           t =>
@@ -30,15 +30,9 @@ object TestUtils {
     }
   }
 
-  def deleteTable(conn: Connection, tableName: String): Unit = {
-    using(conn) {
-      conn =>
-        new DB(conn) autoCommit {
-          session =>
-            ignoring(classOf[Throwable]) {
-              session.execute("drop table " + tableName)
-            }
-        }
+  def deleteTable(tableName: String): Unit = {
+    ignoring(classOf[Throwable]) {
+      DB autoCommit { _.execute("drop table " + tableName) }
     }
   }
 

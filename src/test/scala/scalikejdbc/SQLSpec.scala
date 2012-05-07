@@ -20,9 +20,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
   it should "execute insert with nullable values" in {
     val tableName = tableNamePrefix + "_insertWithNullableValues"
-    val conn = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val conn = ConnectionPool.borrow()
       val db = new DB(conn)
       implicit val session = db.autoCommitSession()
 
@@ -56,9 +56,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
   it should "execute single in auto commit mode" in {
     val tableName = tableNamePrefix + "_singleInAutoCommit"
-    val conn = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val conn = ConnectionPool.borrow()
       val db = new DB(conn)
       implicit val session = db.autoCommitSession()
 
@@ -73,9 +73,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
   it should "execute list in auto commit mode" in {
     val tableName = tableNamePrefix + "_listInAutoCommit"
-    val conn = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val conn = ConnectionPool.borrow()
       val db = new DB(conn)
       implicit val session = db.autoCommitSession()
       val result = SQL("select id from " + tableName).map(rs => rs.string("id")).toList().apply()
@@ -84,12 +84,12 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   it should "execute executeUpdate in auto commit mode" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommit"
-    val db = new DB(conn)
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val conn = ConnectionPool.borrow()
+      val db = new DB(conn)
+      implicit val session = db.autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
 
       val before = (s: PreparedStatement) => println("before")
@@ -106,12 +106,12 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   it should "execute update in auto commit mode" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommit"
-    val db = new DB(conn)
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      implicit val session = new DB(ConnectionPool.borrow()).autoCommitSession()
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val conn = ConnectionPool.borrow()
+      val db = new DB(conn)
+      implicit val session = db.autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
 
       val before = (s: PreparedStatement) => println("before")
@@ -131,10 +131,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
   // within tx mode
 
   it should "execute single in within tx mode" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_singleInWithinTx"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
@@ -146,10 +145,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   it should "execute list in within tx mode" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_listInWithinTx"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
@@ -163,10 +161,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
   }
 
   it should "execute update in within tx mode" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInWithinTx"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()

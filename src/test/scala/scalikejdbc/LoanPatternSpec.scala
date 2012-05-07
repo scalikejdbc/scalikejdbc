@@ -13,7 +13,6 @@ class LoanPatternSpec extends FlatSpec with ShouldMatchers with Settings {
   }
 
   "using" should "be available" in {
-    import LoanPattern._
     val conn = DriverManager.getConnection(url, user, password)
     using(conn) {
       conn => println("do something with " + conn.toString)

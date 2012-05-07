@@ -118,9 +118,10 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     }
 
     // creating a session instance without a block
-    val db = DB(conn)
+    val db = DB(ConnectionPool.borrow())
     val session = db.autoCommitSession
     session.update("update " + tableName + " set name = ? where id = ?", "name2", 2)
+    session.close()
 
     // named datasources
     NamedDB('named) autoCommit {
@@ -141,8 +142,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val tableName = tableNamePrefix + "_readOnly"
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
 
       val emp: Option[Emp] = DB readOnly {
         _.single("select * from " + tableName + " where id = ?", 1) {
@@ -170,8 +171,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val tableName = tableNamePrefix + "_localTx"
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
 
       DB localTx {
         session =>
@@ -190,8 +191,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val tableName = tableNamePrefix + "_withinTx"
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
 
       implicit val db = DB(conn)
       ultimately(db.rollbackIfActive()) {
@@ -217,8 +218,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     val tableName = tableNamePrefix + "_anorm20"
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
 
       import anorm._
       import anorm.SqlParser._
@@ -240,8 +241,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   "SQL" should "be available" in {
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, "emp_BasicUsageSpec_ActiveSql")) {
-      TestUtils.initialize(conn, "emp_BasicUsageSpec_ActiveSql")
+    ultimately(TestUtils.deleteTable("emp_BasicUsageSpec_ActiveSql")) {
+      TestUtils.initialize("emp_BasicUsageSpec_ActiveSql")
 
       val eopt: Option[Emp] = DB readOnly {
         implicit session =>
@@ -285,8 +286,8 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   "An example of SQL" should "be available" in {
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable(conn, "emp")) {
-      TestUtils.initialize(conn, "emp")
+    ultimately(TestUtils.deleteTable("emp")) {
+      TestUtils.initialize("emp")
 
       val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
 

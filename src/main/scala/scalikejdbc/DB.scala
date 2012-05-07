@@ -164,12 +164,16 @@ case class DB(conn: Connection) {
   }
 
   def readOnly[A](execution: DBSession => A): A = {
-    execution(readOnlySession())
+    using(conn) { conn =>
+      execution(readOnlySession())
+    }
   }
 
   def readOnlyWithConnection[A](execution: Connection => A): A = {
     // cannot control if jdbc drivers ignore the readOnly attribute.
-    execution(readOnlySession().conn)
+    using(conn) { conn =>
+      execution(readOnlySession().conn)
+    }
   }
 
   def autoCommitSession(): DBSession = {
@@ -179,11 +183,15 @@ case class DB(conn: Connection) {
   }
 
   def autoCommit[A](execution: DBSession => A): A = {
-    execution(autoCommitSession())
+    using(conn) { conn =>
+      execution(autoCommitSession())
+    }
   }
 
   def autoCommitWithConnection[A](execution: Connection => A): A = {
-    execution(autoCommitSession().conn)
+    using(conn) { conn =>
+      execution(autoCommitSession().conn)
+    }
   }
 
   def withinTxSession(tx: Tx = currentTx): DBSession = {
@@ -215,24 +223,28 @@ case class DB(conn: Connection) {
   }
 
   def localTx[A](execution: DBSession => A): A = {
-    val tx = newTx
-    begin(tx)
-    rollbackIfThrowable[A] {
-      val session = new DBSession(conn, Option(tx))
-      val result: A = execution(session)
-      tx.commit()
-      result
+    using(conn) { conn =>
+      val tx = newTx
+      begin(tx)
+      rollbackIfThrowable[A] {
+        val session = new DBSession(conn, Option(tx))
+        val result: A = execution(session)
+        tx.commit()
+        result
+      }
     }
   }
 
   def localTxWithConnection[A](execution: Connection => A): A = {
-    val tx = newTx
-    begin(tx)
-    rollbackIfThrowable[A] {
-      val session = new DBSession(conn, Option(tx))
-      val result: A = execution(session.conn)
-      tx.commit()
-      result
+    using(conn) { conn =>
+      val tx = newTx
+      begin(tx)
+      rollbackIfThrowable[A] {
+        val session = new DBSession(conn, Option(tx))
+        val result: A = execution(session.conn)
+        tx.commit()
+        result
+      }
     }
   }
 

@@ -34,10 +34,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   // readOnly
 
   it should "execute query in readOnly block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       val result = db readOnly {
         session =>
@@ -48,10 +47,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in readOnlyWithConnection block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInReadOnlyWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) readOnlyWithConnection {
         implicit conn =>
           import anorm._
@@ -62,10 +60,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in readOnly session" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val session = NamedDB('named).readOnlySession()
       val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
       result.size should be > 0
@@ -73,10 +70,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "not execute update in readOnly block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_cannotUpdateInReadOnlyBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       intercept[SQLException] {
         NamedDB('named) readOnly {
           session => session.update("update " + tableName + " set name = ?", "xxx")
@@ -89,10 +85,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   // autoCommit
 
   it should "execute query in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
@@ -102,10 +97,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in autoCommitWithConnection block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInAutoCommitWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) autoCommitWithConnection {
         implicit conn =>
           import anorm._
@@ -116,10 +110,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in autoCommit session" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInAutoCommitSession"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val session = NamedDB('named).autoCommitSession()
       val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
       list(0) should equal(1)
@@ -128,10 +121,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute single in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) autoCommit {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
       }
@@ -140,10 +132,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   "single" should "return too many results in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_tooManyResultsInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       intercept[TooManyRowsException] {
         NamedDB('named) autoCommit {
           _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
@@ -153,10 +144,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute single in autoCommit block 2" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock2"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
       val name: Option[String] = NamedDB('named) readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
@@ -166,10 +156,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute list in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) autoCommit {
         _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
       }
@@ -178,10 +167,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute foreach in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       NamedDB('named) autoCommit {
         _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
       }
@@ -189,10 +177,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in autoCommit block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       val count = NamedDB('named) autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -206,18 +193,16 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in autoCommitWithConnection block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      val db = NamedDB('named)
-      val count = db autoCommitWithConnection {
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val count = NamedDB('named) autoCommitWithConnection {
         implicit conn =>
           import anorm._
           SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
       }
       count should equal(1)
-      val name = (db autoCommit {
+      val name = (NamedDB('named) autoCommit {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).get
       name should equal("foo")
@@ -225,16 +210,14 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      val db = NamedDB('named)
-      val name = (db readOnly {
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val name = (NamedDB('named) readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
       }).get
       name should equal("name1")
-      val count = db autoCommit {
+      val count = NamedDB('named) autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -245,10 +228,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   // localTx
 
   it should "execute single in localTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) localTx {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
       }
@@ -257,10 +239,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute list in localTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val result = NamedDB('named) localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
@@ -269,16 +250,14 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in localTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      val db = NamedDB('named)
-      val count = db localTx {
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val count = NamedDB('named) localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should be === 1
-      val name = (db localTx {
+      val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
       name should equal("foo")
@@ -286,18 +265,16 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in localTxWithConnection block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInLocalTxWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
-      val db = NamedDB('named)
-      val count = db localTxWithConnection {
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val count = NamedDB('named) localTxWithConnection {
         implicit conn =>
           import anorm._
           SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
       }
       count should be === 1
-      val name = (db localTx {
+      val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
       name should equal("foo")
@@ -305,17 +282,16 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "rollback in localTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       val count = db localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should be === 1
       db.rollbackIfActive()
-      val name = (db localTx {
+      val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
       name should equal("foo")
@@ -326,10 +302,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   // withinTx
 
   it should "not execute query in withinTx block before beginning tx" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInWithinTxBeforeBeginningTx"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
         NamedDB('named) withinTx {
           session =>
@@ -340,10 +315,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in withinTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val result = db withinTx {
@@ -356,10 +330,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in withinTxWithConnection block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val result = db withinTxWithConnection {
@@ -373,10 +346,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute query in withinTx session" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val session = db.withinTxSession()
@@ -387,10 +359,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute single in withinTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val result = db withinTx {
@@ -402,10 +373,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute list in withinTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val result = db withinTx {
@@ -417,10 +387,9 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in withinTx block" in {
-    val conn = ConnectionPool.borrow('named)
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(conn, tableName)) {
-      TestUtils.initialize(conn, tableName)
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
       val db = NamedDB('named)
       db.begin()
       val count = db withinTx {
@@ -437,8 +406,31 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
 
   it should "rollback in withinTx block" in {
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(ConnectionPool.borrow('named), tableName)) {
-      TestUtils.initialize(ConnectionPool.borrow('named), tableName)
+    ultimately({
+      ignoring(classOf[Throwable]) {
+        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+      }
+    }) {
+      NamedDB('named) autoCommit {
+        session =>
+          handling(classOf[Throwable]) by {
+            t =>
+              try {
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              } catch {
+                case e =>
+                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              }
+              session.update("delete from " + tableName)
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          } apply {
+            session.single("select count(1) from " + tableName)(rs => rs.int(1))
+            session.update("delete from " + tableName)
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          }
+      }
       using(NamedDB('named)) {
         db =>
           {
@@ -463,8 +455,31 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
 
   it should "work with multi threads" in {
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
-    ultimately(TestUtils.deleteTable(ConnectionPool.borrow('named), tableName)) {
-      TestUtils.initialize(ConnectionPool.borrow('named), tableName)
+    ultimately({
+      ignoring(classOf[Throwable]) {
+        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+      }
+    }) {
+      NamedDB('named) autoCommit {
+        session =>
+          handling(classOf[Throwable]) by {
+            t =>
+              try {
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              } catch {
+                case e =>
+                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              }
+              session.update("delete from " + tableName)
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          } apply {
+            session.single("select count(1) from " + tableName)(rs => rs.int(1))
+            session.update("delete from " + tableName)
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          }
+      }
       spawn {
         val db = NamedDB('named)
         db.begin()
@@ -499,8 +514,31 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     import anorm._
     import anorm.SqlParser._
     val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
-    ultimately(TestUtils.deleteTable(ConnectionPool.borrow('named), tableName)) {
-      TestUtils.initialize(ConnectionPool.borrow('named), tableName)
+    ultimately({
+      ignoring(classOf[Throwable]) {
+        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+      }
+    }) {
+      NamedDB('named) autoCommit {
+        session =>
+          handling(classOf[Throwable]) by {
+            t =>
+              try {
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              } catch {
+                case e =>
+                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              }
+              session.update("delete from " + tableName)
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          } apply {
+            session.single("select count(1) from " + tableName)(rs => rs.int(1))
+            session.update("delete from " + tableName)
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          }
+      }
       spawn {
         val db = NamedDB('named)
         db.begin()
