@@ -47,7 +47,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
       param match {
         case null => stmt.setObject(i, null)
         case p: Array => stmt.setArray(i, p)
-        case p: java.math.BigDecimal => stmt.setBigDecimal(i, p)
+        case p: BigDecimal => stmt.setBigDecimal(i, p.bigDecimal)
         case p: Boolean => stmt.setBoolean(i, p)
         case p: Byte => stmt.setByte(i, p)
         case p: Date => stmt.setDate(i, p)

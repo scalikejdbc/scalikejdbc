@@ -340,4 +340,34 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
+  it should "work with Scala BigDecimal values" in {
+    val conn = ConnectionPool.borrow()
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+        val s: BigDecimal = BigDecimal(123)
+        SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update.apply()
+      } finally {
+        try {
+          SQL("drop table dbsession_work_with_scala_big_decimal_values").execute.apply()
+        } catch { case e => e.printStackTrace }
+      }
+    }
+  }
+
+  it should "work with Java BigDecimal values" in {
+    val conn = ConnectionPool.borrow()
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+        val s: BigDecimal = BigDecimal(123)
+        SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update.apply()
+      } finally {
+        try {
+          SQL("drop table dbsession_work_with_java_big_decimal_values").execute.apply()
+        } catch { case e => e.printStackTrace }
+      }
+    }
+  }
+
 }
