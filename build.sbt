@@ -27,16 +27,18 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "joda-time"               %  "joda-time"            % "2.1"      % "compile",
     "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
     // scope: test
-    "org.scala-tools.time"    %  time                   % "0.5"      % "test",
-    "ch.qos.logback"          %  "logback-classic"      % "1.0.2"    % "test",
-    "net.databinder"          %  unfilteredFilter       % "0.6.1"    % "test",
-    "net.databinder"          %  unfilteredJetty        % "0.6.1"    % "test",
-    "net.databinder"          %  unfilteredSpec         % "0.6.1"    % "test",
-    "org.scalatest"           %% "scalatest"            % "1.7.2"    % "test",
-    "org.scala-tools.testing" %  scalacheck             % "1.9"      % "test",
-    "org.hsqldb"              %  "hsqldb"               % "[2,)"     % "test",
-    "mysql"                   %  "mysql-connector-java" % "[5.1,)"   % "test",
-    "postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
+    "org.scala-tools.time"    %  time                   % "0.5"       % "test",
+    "ch.qos.logback"          %  "logback-classic"      % "1.0.2"     % "test",
+    "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
+    "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
+    "net.databinder"          %  unfilteredSpec         % "0.6.1"     % "test",
+    "org.scalatest"           %% "scalatest"            % "1.7.2"     % "test",
+    "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
+    "com.h2database"          % "h2"                    % "[1.3,)"    % "test",
+    //"org.apache.derby"        % "derby"                 % "[10.8.2,)" % "test",
+    //"org.hsqldb"              %  "hsqldb"               % "[2,)"      % "test",
+    //"mysql"                   %  "mysql-connector-java" % "[5.1,)"    % "test",
+    //"postgresql"              %  "postgresql"           % "9.1-901.jdbc3"  % "test",
     "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
   )
 }
