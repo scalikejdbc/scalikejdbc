@@ -325,4 +325,19 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
 
   }
 
+  it should "work with short values" in {
+    val conn = ConnectionPool.borrow()
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
+        val s: Short = 123
+        SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update.apply()
+      } finally {
+        try {
+          SQL("drop table dbsession_work_with_short_values").execute.apply()
+        } catch { case e => e.printStackTrace }
+      }
+    }
+  }
+
 }

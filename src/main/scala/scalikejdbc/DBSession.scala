@@ -55,16 +55,17 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         case p: Float => stmt.setFloat(i, p)
         case p: Int => stmt.setInt(i, p)
         case p: Long => stmt.setLong(i, p)
+        case p: Short => stmt.setShort(i, p)
         case p: SQLXML => stmt.setSQLXML(i, p)
         case p: String => stmt.setString(i, p)
         case p: Time => stmt.setTime(i, p)
         case p: Timestamp => stmt.setTimestamp(i, p)
+        case p: URL => stmt.setURL(i, p)
         case p: java.util.Date => stmt.setTimestamp(i, p.toSqlTimestamp)
         case p: org.joda.time.DateTime => stmt.setTimestamp(i, p.toDate.toSqlTimestamp)
         case p: org.joda.time.LocalDateTime => stmt.setTimestamp(i, p.toDate.toSqlTimestamp)
         case p: org.joda.time.LocalDate => stmt.setDate(i, p.toDate.toSqlDate)
         case p: org.joda.time.LocalTime => stmt.setTime(i, p.toSqlTime)
-        case p: URL => stmt.setURL(i, p)
         case p => throw new IllegalArgumentException(p.toString)
       }
     }
