@@ -13,4 +13,13 @@ class PackageObjectSpec extends FlatSpec with ShouldMatchers {
     timestamp.toJavaUtilDate should not be (null)
   }
 
+  it should "convert java.math.BigDecimal" in {
+    import scalikejdbc._
+    val decimal = new java.math.BigDecimal("123")
+    decimal.toScalaBigDecimal.isInstanceOf[scala.math.BigDecimal] should be(true)
+    val nullDecimal: java.math.BigDecimal = null
+    val nullScalaBigDecimal: scala.math.BigDecimal = nullDecimal.toScalaBigDecimal
+    nullScalaBigDecimal should be(null)
+  }
+
 }

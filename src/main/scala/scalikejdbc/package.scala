@@ -75,4 +75,15 @@ package object scalikejdbc {
 
   implicit def convertLocalTime(t: LocalTime): FromLocalTime = new FromLocalTime(t)
 
+  class ToScalaBigDecimal(bd: java.math.BigDecimal) {
+
+    def toScalaBigDecimal: scala.math.BigDecimal = {
+      if (bd == null) null.asInstanceOf[scala.math.BigDecimal]
+      else new scala.math.BigDecimal(bd)
+    }
+
+  }
+
+  implicit def convertBigDecimal(bd: java.math.BigDecimal): ToScalaBigDecimal = new ToScalaBigDecimal(bd)
+
 }
