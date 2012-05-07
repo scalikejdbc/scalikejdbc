@@ -104,7 +104,8 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val db = new DB(ConnectionPool.borrow())
       intercept[SQLException] {
         db readOnly {
-          session => session.update("update " + tableName + " set name = ?", "xxx")
+          session =>
+            session.update("update " + tableName + " set name = ?", "xxxxx")
         }
       }
     }

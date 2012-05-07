@@ -160,7 +160,7 @@ case class DB(conn: Connection) {
 
   def readOnlySession(): DBSession = {
     conn.setReadOnly(true)
-    new DBSession(conn)
+    new DBSession(conn = conn, isReadOnly = true)
   }
 
   def readOnly[A](execution: DBSession => A): A = {
@@ -168,6 +168,7 @@ case class DB(conn: Connection) {
   }
 
   def readOnlyWithConnection[A](execution: Connection => A): A = {
+    // cannot control if jdbc drivers ignore the readOnly attribute.
     execution(readOnlySession().conn)
   }
 

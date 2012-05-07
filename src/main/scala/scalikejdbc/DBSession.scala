@@ -21,7 +21,7 @@ import java.net.URL
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
  */
-case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport {
+case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
 
   def connection: Connection = conn
 
@@ -46,7 +46,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     for ((param, idx) <- paramsWithIndices; i = idx + 1) {
       param match {
         case null => stmt.setObject(i, null)
-        case p: Array => stmt.setArray(i, p)
+        case p: java.sql.Array => stmt.setArray(i, p)
         case p: BigDecimal => stmt.setBigDecimal(i, p.bigDecimal)
         case p: Boolean => stmt.setBoolean(i, p)
         case p: Byte => stmt.setByte(i, p)
@@ -66,7 +66,10 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
         case p: org.joda.time.LocalDateTime => stmt.setTimestamp(i, p.toDate.toSqlTimestamp)
         case p: org.joda.time.LocalDate => stmt.setDate(i, p.toDate.toSqlDate)
         case p: org.joda.time.LocalTime => stmt.setTime(i, p.toSqlTime)
-        case p => throw new IllegalArgumentException(p.toString)
+        case p => {
+          log.debug("The parameter(" + p + ") is bound as java.lang.Objet.")
+          stmt.setObject(i, p)
+        }
       }
     }
 
@@ -119,6 +122,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
 
   def execute[A](template: String, params: Any*): Boolean = {
+    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -131,6 +135,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Boolean = {
+    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -143,6 +148,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
   }
 
   def update(template: String, params: Any*): Int = {
+    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -155,6 +161,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None) extends LogSupport
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Int = {
+    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>

@@ -216,7 +216,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     DB autoCommit {
       implicit session =>
         try {
-          SQL("create table dbsessionspec_genkey (id integer generated always as identity, name varchar(30))").execute.apply()
+          SQL("create table dbsessionspec_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
           var id = -1L
           val before = (stmt: PreparedStatement) => {}
           val after = (stmt: PreparedStatement) => {
@@ -238,7 +238,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     DB autoCommit {
       implicit session =>
         try {
-          SQL("create table dbsessionspec_updateAndReturnGeneratedKey (id integer generated always as identity, name varchar(30))").execute.apply()
+          SQL("create table dbsessionspec_updateAndReturnGeneratedKey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
           val id1 = SQL("insert into dbsessionspec_updateAndReturnGeneratedKey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
           id1 should equal(0)
           val id2 = SQL("insert into dbsessionspec_updateAndReturnGeneratedKey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
