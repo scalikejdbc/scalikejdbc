@@ -67,12 +67,16 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
         case p: org.joda.time.LocalDate => stmt.setDate(i, p.toDate.toSqlDate)
         case p: org.joda.time.LocalTime => stmt.setTime(i, p.toSqlTime)
         case p => {
-          log.debug("The parameter(" + p + ") is bound as java.lang.Objet.")
+          log.debug("The parameter(" + p + ") is bound as java.lang.Object.")
           stmt.setObject(i, p)
         }
       }
     }
 
+  }
+
+  private def ensureNotReadOnlySession(template: String): Unit = {
+    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
   }
 
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
@@ -122,7 +126,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
 
   def execute[A](template: String, params: Any*): Boolean = {
-    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
+    ensureNotReadOnlySession(template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -135,7 +139,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Boolean = {
-    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
+    ensureNotReadOnlySession(template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -148,7 +152,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
   def update(template: String, params: Any*): Int = {
-    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
+    ensureNotReadOnlySession(template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -161,7 +165,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Int = {
-    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
+    ensureNotReadOnlySession(template)
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
