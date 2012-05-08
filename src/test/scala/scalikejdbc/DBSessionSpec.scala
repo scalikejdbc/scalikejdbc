@@ -219,7 +219,10 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               println(e.getMessage)
               try {
                 SQL("create table dbsessionspec_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute.apply()
-              } catch { case e => e.printStackTrace }
+              } catch {
+                case e =>
+                  SQL("create table dbsessionspec_genkey (id serial not null, name varchar(30), primary key(id))").execute.apply()
+              }
           }
           var id = -1L
           val before = (stmt: PreparedStatement) => {}
@@ -249,7 +252,10 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               println(e.getMessage)
               try {
                 SQL("create table dbsessionspec_update_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute.apply()
-              } catch { case e => e.printStackTrace }
+              } catch {
+                case e =>
+                  SQL("create table dbsessionspec_update_genkey (id serial not null, name varchar(30), primary key(id))").execute.apply()
+              }
           }
 
           val id1 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
@@ -291,7 +297,8 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           """).execute.apply()
             } catch {
               case e =>
-                SQL("""
+                try {
+                  SQL("""
             create table dbsessionspec_dateTimeValues (
               id integer auto_increment,
               date_value date not null,
@@ -300,6 +307,19 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               primary key(id)
             )
           """).execute.apply()
+                } catch {
+                  case e =>
+                    SQL("""
+            create table dbsessionspec_dateTimeValues (
+              id serial not null,
+              date_value date not null,
+              time_value time not null,
+              timestamp_value timestamp not null,
+              primary key(id)
+            )
+          """).execute.apply()
+
+                }
 
             }
 
@@ -363,7 +383,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
         } catch {
           case e =>
-            SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
+            try {
+              SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
+            } catch {
+              case e =>
+                SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute.apply()
+            }
         }
         val s: Short = 123
         SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update.apply()
@@ -383,7 +408,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
         } catch {
           case e =>
-            SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+            try {
+              SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+            } catch {
+              case e =>
+                SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+            }
         }
         val s: BigDecimal = BigDecimal(123)
         SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update.apply()
@@ -402,7 +432,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
         } catch {
           case e =>
-            SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+            try {
+              SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+            } catch {
+              case e =>
+                SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+            }
         }
         val s: BigDecimal = BigDecimal(123)
         SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update.apply()
@@ -433,7 +468,8 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         """).execute.apply()
         } catch {
           case e =>
-            SQL("""
+            try {
+              SQL("""
           create table dbsession_work_with_optional_values (
             id bigint auto_increment,
             v_boolean boolean, 
@@ -447,6 +483,24 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             primary key(id)
           )
         """).execute.apply()
+            } catch {
+              case e =>
+                SQL("""
+          create table dbsession_work_with_optional_values (
+            id serial not null,
+            v_boolean boolean, 
+            v_byte smallint, 
+            v_double double precision, 
+            v_float real, 
+            v_int int, 
+            v_long bigint, 
+            v_short smallint,
+            v_timestamp timestamp,
+            primary key(id)
+          )
+        """).execute.apply()
+
+            }
 
         }
         val id = SQL("""

@@ -33,8 +33,8 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
 
   def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
     log.debug("template : " + template)
-    // TODO does not work for PostgreSQL, need to fix
     conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
+    // TODO does not work for PostgreSQL, need to fix
     //conn.prepareStatement(template, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)
   }
 
