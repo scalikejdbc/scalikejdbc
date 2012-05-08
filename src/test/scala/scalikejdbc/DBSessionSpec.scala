@@ -364,15 +364,6 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
-  /*
-  def boolean(columnIndex: Int): java.lang.Boolean = {
-  def byte(columnIndex: Int): java.lang.Byte = {
-  def double(columnIndex: Int): java.lang.Double = {
-  def float(columnIndex: Int): java.lang.Float = {
-  def int(columnIndex: Int): java.lang.Integer = {
-  def long(columnLabel: String): java.lang.Long = {
-  def short(columnIndex: Int): java.lang.Short = {
-*/
   it should "work with optional wrapper class values" in {
     DB autoCommit { implicit session =>
       try {
@@ -385,21 +376,36 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             v_float real, 
             v_int int, 
             v_long bigint, 
-            v_short smallint
+            v_short smallint,
+            v_timestamp timestamp,
           )
         """).execute.apply()
         val id = SQL("""
           insert into dbsession_work_with_optional_values 
-          (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short) values 
-          (?,?,?,?,?,?,?)
+          (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short, v_timestamp) values 
+          (?,?,?,?,?,?,?,?)
         """).bind(
-          None, None, None, None, None, None, None
+          None, None, None, None, None, None, None, None
         ).updateAndReturnGeneratedKey.apply()
 
         case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
-          vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short])
+          vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short],
+          vTimestamp: Option[DateTime])
 
-        val resultOpt = SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+        def assert(resultOpt: Option[Result]): Unit = {
+          resultOpt.isDefined should be(true)
+          val result = resultOpt.get
+          result.vBoolean.isDefined should be(false)
+          result.vByte.isDefined should be(false)
+          result.vDouble.isDefined should be(false)
+          result.vFloat.isDefined should be(false)
+          result.vInt.isDefined should be(false)
+          result.vLong.isDefined should be(false)
+          result.vShort.isDefined should be(false)
+          result.vTimestamp.isDefined should be(false)
+        }
+
+        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
           rs =>
             Result(
               vBoolean = Option(rs.boolean("v_boolean").asInstanceOf[Boolean]),
@@ -408,19 +414,25 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               vFloat = Option(rs.float("v_float").asInstanceOf[Float]),
               vInt = Option(rs.int("v_int").asInstanceOf[Int]),
               vLong = Option(rs.long("v_long").asInstanceOf[Long]),
-              vShort = Option(rs.short("v_short").asInstanceOf[Short])
+              vShort = Option(rs.short("v_short").asInstanceOf[Short]),
+              vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
             )
-        }.single.apply()
+        }.single.apply())
 
-        resultOpt.isDefined should be(true)
-        val result = resultOpt.get
-        result.vBoolean.isDefined should be(false)
-        result.vByte.isDefined should be(false)
-        result.vDouble.isDefined should be(false)
-        result.vFloat.isDefined should be(false)
-        result.vInt.isDefined should be(false)
-        result.vLong.isDefined should be(false)
-        result.vShort.isDefined should be(false)
+        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          rs =>
+            Result(
+              vBoolean = opt[Boolean](rs.boolean("v_boolean")),
+              vByte = opt[Byte](rs.byte("v_byte")),
+              vDouble = opt[Double](rs.double("v_double")),
+              vFloat = opt[Float](rs.float("v_float")),
+              vInt = opt[Int](rs.int("v_int")),
+              vLong = opt[Long](rs.long("v_long")),
+              vShort = opt[Short](rs.short("v_short")),
+              vTimestamp = opt[DateTime](rs.timestamp("v_timestamp")).map(_.toDateTime)
+            )
+        }.single.apply())
+
       } finally {
         try {
           SQL("drop table dbsession_work_with_optional_values").execute.apply()

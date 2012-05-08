@@ -86,4 +86,6 @@ package object scalikejdbc {
 
   implicit def convertBigDecimal(bd: java.math.BigDecimal): ToScalaBigDecimal = new ToScalaBigDecimal(bd)
 
+  def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
+
 }
