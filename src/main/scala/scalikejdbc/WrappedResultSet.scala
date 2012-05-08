@@ -31,357 +31,385 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     }
   }
 
-  def array(columnIndex: Int) = {
+  def array(columnIndex: Int): java.sql.Array = {
     ensureCursor()
     underlying.getArray(columnIndex)
   }
 
-  def array(columnLabel: String) = {
+  def array(columnLabel: String): java.sql.Array = {
     ensureCursor()
     underlying.getArray(columnLabel)
   }
 
-  def asciiStream(columnIndex: Int) = {
+  def asciiStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
     underlying.getAsciiStream(columnIndex)
   }
 
-  def asciiStream(columnLabel: String) = {
+  def asciiStream(columnLabel: String): java.io.InputStream = {
     ensureCursor()
     underlying.getAsciiStream(columnLabel)
   }
 
-  def bigDecimal(columnIndex: Int) = {
+  def bigDecimal(columnIndex: Int): java.math.BigDecimal = {
     ensureCursor()
     underlying.getBigDecimal(columnIndex)
   }
 
-  def bigDecimal(columnLabel: String) = {
+  def bigDecimal(columnLabel: String): java.math.BigDecimal = {
     ensureCursor()
     underlying.getBigDecimal(columnLabel)
   }
 
-  def binaryStream(columnIndex: Int) = {
+  def binaryStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
     underlying.getBinaryStream(columnIndex)
   }
 
-  def binaryStream(columnLabel: String) = {
+  def binaryStream(columnLabel: String): java.io.InputStream = {
     ensureCursor()
     underlying.getBinaryStream(columnLabel)
   }
 
-  def blob(columnIndex: Int) = {
+  def blob(columnIndex: Int): java.sql.Blob = {
     ensureCursor()
     underlying.getBlob(columnIndex)
   }
 
-  def blob(columnLabel: String) = {
+  def blob(columnLabel: String): java.sql.Blob = {
     ensureCursor()
     underlying.getBlob(columnLabel)
   }
 
-  def boolean(columnIndex: Int) = {
+  def boolean(columnIndex: Int): java.lang.Boolean = {
     ensureCursor()
-    underlying.getBoolean(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Boolean.valueOf(v.toString))
+      .orNull[java.lang.Boolean]
   }
 
-  def boolean(columnLabel: String) = {
+  def boolean(columnLabel: String): java.lang.Boolean = {
     ensureCursor()
-    underlying.getBoolean(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Boolean.valueOf(v.toString))
+      .orNull[java.lang.Boolean]
   }
 
-  def byte(columnIndex: Int) = {
+  def byte(columnIndex: Int): java.lang.Byte = {
     ensureCursor()
-    underlying.getByte(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Byte.valueOf(v.toString))
+      .orNull[java.lang.Byte]
   }
 
-  def byte(columnLabel: String) = {
+  def byte(columnLabel: String): java.lang.Byte = {
     ensureCursor()
-    underlying.getByte(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Byte.valueOf(v.toString))
+      .orNull[java.lang.Byte]
   }
 
-  def bytes(columnIndex: Int) = {
+  def bytes(columnIndex: Int): Array[Byte] = {
     ensureCursor()
     underlying.getBytes(columnIndex)
   }
 
-  def bytes(columnLabel: String) = {
+  def bytes(columnLabel: String): Array[Byte] = {
     ensureCursor()
     underlying.getBytes(columnLabel)
   }
 
-  def characterStream(columnIndex: Int) = {
+  def characterStream(columnIndex: Int): java.io.Reader = {
     ensureCursor()
     underlying.getCharacterStream(columnIndex)
   }
 
-  def characterStream(columnLabel: String) = {
+  def characterStream(columnLabel: String): java.io.Reader = {
     ensureCursor()
     underlying.getCharacterStream(columnLabel)
   }
 
-  def clob(columnIndex: Int) = {
+  def clob(columnIndex: Int): java.sql.Clob = {
     ensureCursor()
     underlying.getClob(columnIndex)
   }
 
-  def clob(columnLabel: String) = {
+  def clob(columnLabel: String): java.sql.Clob = {
     ensureCursor()
     underlying.getClob(columnLabel)
   }
 
-  def concurrency = {
+  def concurrency: Int = {
     ensureCursor()
     underlying.getConcurrency
   }
 
-  def cursorName = {
+  def cursorName: String = {
     ensureCursor()
     underlying.getCursorName
   }
 
-  def date(columnIndex: Int) = {
+  def date(columnIndex: Int): java.sql.Date = {
     ensureCursor()
     underlying.getDate(columnIndex)
   }
 
-  def date(columnLabel: String) = {
+  def date(columnLabel: String): java.sql.Date = {
     ensureCursor()
     underlying.getDate(columnLabel)
   }
 
-  def date(columnIndex: Int, cal: Calendar) = {
+  def date(columnIndex: Int, cal: Calendar): java.sql.Date = {
     ensureCursor()
     underlying.getDate(columnIndex, cal)
   }
 
-  def date(columnLabel: String, cal: Calendar) = {
+  def date(columnLabel: String, cal: Calendar): java.sql.Date = {
     ensureCursor()
     underlying.getDate(columnLabel, cal)
   }
 
-  def double(columnIndex: Int) = {
+  def double(columnIndex: Int): java.lang.Double = {
     ensureCursor()
-    underlying.getDouble(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Double.valueOf(v.toString))
+      .orNull[java.lang.Double]
   }
 
-  def double(columnLabel: String) = {
+  def double(columnLabel: String): java.lang.Double = {
     ensureCursor()
-    underlying.getDouble(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Double.valueOf(v.toString))
+      .orNull[java.lang.Double]
   }
 
-  def fetchDirection = {
+  def fetchDirection: Int = {
     ensureCursor()
     underlying.getFetchDirection
   }
 
-  def fetchSize = {
+  def fetchSize: Int = {
     ensureCursor()
     underlying.getFetchSize
   }
 
-  def float(columnIndex: Int) = {
+  def float(columnIndex: Int): java.lang.Float = {
     ensureCursor()
-    underlying.getFloat(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Float.valueOf(v.toString))
+      .orNull[java.lang.Float]
   }
 
-  def float(columnLabel: String) = {
+  def float(columnLabel: String): java.lang.Float = {
     ensureCursor()
-    underlying.getFloat(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Float.valueOf(v.toString))
+      .orNull[java.lang.Float]
   }
 
-  def holdability = {
+  def holdability: Int = {
     ensureCursor()
     underlying.getHoldability
   }
 
-  def int(columnIndex: Int) = {
+  def int(columnIndex: Int): java.lang.Integer = {
     ensureCursor()
-    underlying.getInt(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Integer.valueOf(v.toString))
+      .orNull[java.lang.Integer]
   }
 
-  def int(columnLabel: String) = {
+  def int(columnLabel: String): java.lang.Integer = {
     ensureCursor()
-    underlying.getInt(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Integer.valueOf(v.toString))
+      .orNull[java.lang.Integer]
   }
 
-  def long(columnIndex: Int) = {
+  def long(columnIndex: Int): java.lang.Long = {
     ensureCursor()
-    underlying.getLong(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Long.valueOf(v.toString))
+      .orNull[java.lang.Long]
   }
 
-  def long(columnLabel: String) = {
+  def long(columnLabel: String): java.lang.Long = {
     ensureCursor()
-    underlying.getLong(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Long.valueOf(v.toString))
+      .orNull[java.lang.Long]
   }
 
-  def metaData = {
+  def metaData: java.sql.ResultSetMetaData = {
     ensureCursor()
     underlying.getMetaData
   }
 
-  def nCharacterStream(columnIndex: Int) = {
+  def nCharacterStream(columnIndex: Int): java.io.Reader = {
     ensureCursor()
     underlying.getNCharacterStream(columnIndex)
   }
 
-  def nCharacterStream(columnLabel: String) = {
+  def nCharacterStream(columnLabel: String): java.io.Reader = {
     ensureCursor()
     underlying.getNCharacterStream(columnLabel)
   }
 
-  def nClob(columnIndex: Int) = {
+  def nClob(columnIndex: Int): java.sql.NClob = {
     ensureCursor()
     underlying.getNClob(columnIndex)
   }
 
-  def nClob(columnLabel: String) = {
+  def nClob(columnLabel: String): java.sql.NClob = {
     ensureCursor()
     underlying.getNClob(columnLabel)
   }
 
-  def nString(columnIndex: Int) = {
+  def nString(columnIndex: Int): String = {
     ensureCursor()
     underlying.getNString(columnIndex)
   }
 
-  def nString(columnLabel: String) = {
+  def nString(columnLabel: String): String = {
     ensureCursor()
     underlying.getNString(columnLabel)
   }
 
-  def any(columnIndex: Int) = {
+  def any(columnIndex: Int): Any = {
     ensureCursor()
     underlying.getObject(columnIndex)
   }
 
-  def any(columnLabel: String) = {
+  def any(columnLabel: String): Any = {
     ensureCursor()
     underlying.getObject(columnLabel)
   }
 
-  def any(columnIndex: Int, map: Map[String, Class[_]]) = {
+  def any(columnIndex: Int, map: Map[String, Class[_]]): Any = {
     ensureCursor()
     underlying.getObject(columnIndex.asInstanceOf[java.lang.Integer], map.asJava)
   }
 
-  def any(columnLabel: String, map: Map[String, Class[_]]) = {
+  def any(columnLabel: String, map: Map[String, Class[_]]): Any = {
     ensureCursor()
     underlying.getObject(columnLabel, map.asJava)
   }
 
-  def ref(columnIndex: Int) = {
+  def ref(columnIndex: Int): java.sql.Ref = {
     ensureCursor()
     underlying.getRef(columnIndex)
   }
 
-  def ref(columnLabel: String) = {
+  def ref(columnLabel: String): java.sql.Ref = {
     ensureCursor()
     underlying.getRef(columnLabel)
   }
 
-  def row = {
+  def row: Int = {
     ensureCursor()
     underlying.getRow
   }
 
-  def rowId(columnIndex: Int) = {
+  def rowId(columnIndex: Int): java.sql.RowId = {
     ensureCursor()
     underlying.getRowId(columnIndex)
   }
 
-  def rowId(columnLabel: String) = {
+  def rowId(columnLabel: String): java.sql.RowId = {
     ensureCursor()
     underlying.getRowId(columnLabel)
   }
 
-  def short(columnIndex: Int) = {
+  def short(columnIndex: Int): java.lang.Short = {
     ensureCursor()
-    underlying.getShort(columnIndex)
+    Option(any(columnIndex))
+      .map(v => java.lang.Short.valueOf(v.toString))
+      .orNull[java.lang.Short]
   }
 
-  def short(columnLabel: String) = {
+  def short(columnLabel: String): java.lang.Short = {
     ensureCursor()
-    underlying.getShort(columnLabel)
+    Option(any(columnLabel))
+      .map(v => java.lang.Short.valueOf(v.toString))
+      .orNull[java.lang.Short]
   }
 
-  def sqlXml(columnIndex: Int) = {
+  def sqlXml(columnIndex: Int): java.sql.SQLXML = {
     ensureCursor()
     underlying.getSQLXML(columnIndex)
   }
 
-  def sqlXml(columnLabel: String) = {
+  def sqlXml(columnLabel: String): java.sql.SQLXML = {
     ensureCursor()
     underlying.getSQLXML(columnLabel)
   }
 
-  def statement = {
+  def statement: java.sql.Statement = {
     ensureCursor()
     underlying.getStatement
   }
 
-  def string(columnIndex: Int) = {
+  def string(columnIndex: Int): String = {
     ensureCursor()
     underlying.getString(columnIndex)
   }
 
-  def string(columnLabel: String) = {
+  def string(columnLabel: String): String = {
     ensureCursor()
     underlying.getString(columnLabel)
   }
 
-  def time(columnIndex: Int) = {
+  def time(columnIndex: Int): java.sql.Time = {
     ensureCursor()
     underlying.getTime(columnIndex)
   }
 
-  def time(columnLabel: String) = {
+  def time(columnLabel: String): java.sql.Time = {
     ensureCursor()
     underlying.getTime(columnLabel)
   }
 
-  def time(columnIndex: Int, cal: Calendar) = {
+  def time(columnIndex: Int, cal: Calendar): java.sql.Time = {
     ensureCursor()
     underlying.getTime(columnIndex, cal)
   }
 
-  def time(columnLabel: String, cal: Calendar) = {
+  def time(columnLabel: String, cal: Calendar): java.sql.Time = {
     ensureCursor()
     underlying.getTime(columnLabel, cal)
   }
 
-  def timestamp(columnIndex: Int) = {
+  def timestamp(columnIndex: Int): java.sql.Timestamp = {
     ensureCursor()
     underlying.getTimestamp(columnIndex)
   }
 
-  def timestamp(columnLabel: String) = {
+  def timestamp(columnLabel: String): java.sql.Timestamp = {
     ensureCursor()
     underlying.getTimestamp(columnLabel)
   }
 
-  def timestamp(columnIndex: Int, cal: Calendar) = {
+  def timestamp(columnIndex: Int, cal: Calendar): java.sql.Timestamp = {
     ensureCursor()
     underlying.getTimestamp(columnIndex, cal)
   }
 
-  def timestamp(columnLabel: String, cal: Calendar) = {
+  def timestamp(columnLabel: String, cal: Calendar): java.sql.Timestamp = {
     ensureCursor()
     underlying.getTimestamp(columnLabel, cal)
   }
 
-  def url(columnIndex: Int) = {
+  def url(columnIndex: Int): java.net.URL = {
     ensureCursor()
     underlying.getURL(columnIndex)
   }
 
-  def url(columnLabel: String) = {
+  def url(columnLabel: String): java.net.URL = {
     ensureCursor()
     underlying.getURL(columnLabel)
   }
 
-  def warnings = {
+  def warnings: java.sql.SQLWarning = {
     ensureCursor()
     underlying.getWarnings
   }

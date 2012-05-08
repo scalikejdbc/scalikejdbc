@@ -15,4 +15,7 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers {
     instance should not be null
   }
 
+  // [NOTICE]
+  // most of test cases at scalikejdbc.DBSessionSpec
+
 }

@@ -364,4 +364,63 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     }
   }
 
+  /*
+  def boolean(columnIndex: Int): java.lang.Boolean = {
+  def byte(columnIndex: Int): java.lang.Byte = {
+  def double(columnIndex: Int): java.lang.Double = {
+  def float(columnIndex: Int): java.lang.Float = {
+  def int(columnIndex: Int): java.lang.Integer = {
+  def long(columnLabel: String): java.lang.Long = {
+  def short(columnIndex: Int): java.lang.Short = {
+*/
+  it should "work with optional wrapper class values" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("""
+          create table dbsession_work_with_optional_values (
+            id bigint generated always as identity, 
+            v_boolean boolean, 
+            v_byte tinyint, 
+            v_double double, 
+            v_float real, 
+            v_int int, 
+            v_long bigint, 
+            v_short smallint
+          )
+        """).execute.apply()
+        val id = SQL("""
+          insert into dbsession_work_with_optional_values 
+          (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short) values 
+          (?,?,?,?,?,?,?)
+        """).bind(
+          None, None, None, None, None, None, None
+        ).updateAndReturnGeneratedKey.apply()
+        val result = SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          rs =>
+            (
+              rs.long("id"),
+              Option(rs.boolean("v_boolean")),
+              Option(rs.byte("v_byte")),
+              Option(rs.double("v_double")),
+              Option(rs.float("v_float")),
+              Option(rs.int("v_int")),
+              Option(rs.long("v_long")),
+              Option(rs.short("v_short"))
+            )
+        }.single.apply()
+        result.get._2.isDefined should be(false)
+        result.get._3.isDefined should be(false)
+        result.get._4.isDefined should be(false)
+        result.get._5.isDefined should be(false)
+        result.get._6.isDefined should be(false)
+        result.get._7.isDefined should be(false)
+        result.get._8.isDefined should be(false)
+      } finally {
+        try {
+          SQL("drop table dbsession_work_with_optional_values").execute.apply()
+        } catch { case e => e.printStackTrace }
+      }
+    }
+  }
+
 }
