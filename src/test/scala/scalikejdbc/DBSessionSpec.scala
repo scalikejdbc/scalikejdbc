@@ -395,26 +395,32 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         """).bind(
           None, None, None, None, None, None, None
         ).updateAndReturnGeneratedKey.apply()
-        val result = SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+
+        case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
+          vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short])
+
+        val resultOpt = SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
           rs =>
-            (
-              rs.long("id"),
-              Option(rs.boolean("v_boolean")),
-              Option(rs.byte("v_byte")),
-              Option(rs.double("v_double")),
-              Option(rs.float("v_float")),
-              Option(rs.int("v_int")),
-              Option(rs.long("v_long")),
-              Option(rs.short("v_short"))
+            Result(
+              vBoolean = Option(rs.boolean("v_boolean").asInstanceOf[Boolean]),
+              vByte = Option(rs.byte("v_byte").asInstanceOf[Byte]),
+              vDouble = Option(rs.double("v_double").asInstanceOf[Double]),
+              vFloat = Option(rs.float("v_float").asInstanceOf[Float]),
+              vInt = Option(rs.int("v_int").asInstanceOf[Int]),
+              vLong = Option(rs.long("v_long").asInstanceOf[Long]),
+              vShort = Option(rs.short("v_short").asInstanceOf[Short])
             )
         }.single.apply()
-        result.get._2.isDefined should be(false)
-        result.get._3.isDefined should be(false)
-        result.get._4.isDefined should be(false)
-        result.get._5.isDefined should be(false)
-        result.get._6.isDefined should be(false)
-        result.get._7.isDefined should be(false)
-        result.get._8.isDefined should be(false)
+
+        resultOpt.isDefined should be(true)
+        val result = resultOpt.get
+        result.vBoolean.isDefined should be(false)
+        result.vByte.isDefined should be(false)
+        result.vDouble.isDefined should be(false)
+        result.vFloat.isDefined should be(false)
+        result.vInt.isDefined should be(false)
+        result.vLong.isDefined should be(false)
+        result.vShort.isDefined should be(false)
       } finally {
         try {
           SQL("drop table dbsession_work_with_optional_values").execute.apply()
