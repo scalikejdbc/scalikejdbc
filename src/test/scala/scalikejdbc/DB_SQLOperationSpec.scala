@@ -9,7 +9,7 @@ import util.control.Exception._
 
 class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DB_SQLOperationSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_DB_SQLOperationSpec" + System.currentTimeMillis().toString.substring(0, 4)
 
   behavior of "DB(SQL Operation)"
 

@@ -9,7 +9,7 @@ import util.control.Exception._
 
 class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DB_SessionOperationSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_DB_SessionOperationSpec" + System.currentTimeMillis().toString.substring(0, 4)
 
   behavior of "DB(Session operation)"
 
@@ -75,7 +75,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
 
   it should "execute query in readOnlyWithConnection block" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_queryInReadOnlyWithConnectionBlock"
+    val tableName = tableNamePrefix + "_queryReadOnlyConn"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val db = new DB(conn)
@@ -133,7 +133,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
 
   it should "execute query in autoCommitWithConnection block" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_queryInAutoCommitWithConnectionBlock"
+    val tableName = tableNamePrefix + "_queryAutoCommitConn"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val db = new DB(conn)
@@ -258,7 +258,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly"
+    val tableName = tableNamePrefix + "_updateAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val name = (DB readOnly {
@@ -313,7 +313,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   }
 
   it should "execute update in localTxWithConnection block" in {
-    val tableName = tableNamePrefix + "_updateInLocalTxWithConnectionBlock"
+    val tableName = tableNamePrefix + "_updateLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val count = DB localTxWithConnection {
@@ -380,7 +380,7 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
   }
 
   it should "execute query in withinTxWithConnection block" in {
-    val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock"
+    val tableName = tableNamePrefix + "_queryWithinConnBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val conn = ConnectionPool.borrow()

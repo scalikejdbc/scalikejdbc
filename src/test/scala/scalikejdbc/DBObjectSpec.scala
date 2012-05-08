@@ -9,7 +9,7 @@ import util.control.Exception._
 
 class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(0, 4)
 
   behavior of "DB object"
 
@@ -159,7 +159,7 @@ class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with
 
   it should "execute update in autoCommit block after readOnly" in {
     val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly"
+    val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val name = (DB readOnly {

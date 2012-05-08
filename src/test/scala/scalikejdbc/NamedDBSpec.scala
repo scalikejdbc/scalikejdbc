@@ -9,7 +9,7 @@ import util.control.Exception._
 
 class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(0, 4)
 
   behavior of "DB"
 
@@ -210,7 +210,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly"
+    val tableName = tableNamePrefix + "_updatInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val name = (NamedDB('named) readOnly {

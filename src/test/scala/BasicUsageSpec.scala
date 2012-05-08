@@ -75,7 +75,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   // Operations
   // ---------------------------
 
-  val tableNamePrefix = "emp_BasicUsageSpec" + System.currentTimeMillis()
+  val tableNamePrefix = "emp_BasicUsageSpec" + System.currentTimeMillis().toString.substring(0, 4)
 
   "autoCommit" should "excute without a transaction" in {
 
@@ -306,8 +306,10 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
           val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
           single.isDefined should be(true)
-
-          val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+          try {
+            val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+          } catch { case e => }
+          val result: Boolean = SQL("truncate table company").execute.apply()
           val count: Int = SQL("insert into company values (?, ?)").bind(1, "Typesafe").update.apply()
 
       }
