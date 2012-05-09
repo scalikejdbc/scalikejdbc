@@ -10,32 +10,31 @@ Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala 
 It's pretty simple, really.
 
 
-But if you want simple mappers, please also try scalikejdbc-mapper-generator.
+If you want simple mappers, please also try scalikejdbc-mapper-generator.
 
 https://github.com/seratch/scalikejdbc-mapper-generator
 
 
 ## Supported RDBMS
 
-This library passed all the unit tests with the following RDBMS.
+Passed all the unit tests with the following RDBMS.
 
 - PostgreSQL
 - MySQL 
 - H2 Database Engine
 - HSQLDB
 
+[![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
+
 
 ## Setup
 
 ### sbt
 
-ScalikeJDBC 1.0.0 will be released soon.
-
 ```scala
-//resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
-resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/snapshots"
+resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.0-SNAPSHOT"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.0"
 ```
 
 ### ls.implicit.ly
@@ -72,12 +71,12 @@ Using `java.sq.DriverManager` is the simplest approarch.
 ```scala
 import scalikejdbc._
 Class.forName(driverName)
-val conn = DriverManager.getConnection(url, user, password)
-val db = new DB(conn)
-val name: Option[String] = db readOnly { session =>
-  session.single("select * from emp where id = ?", 1) { _.string("name") }
-}
-db.close()
+val db = new DB(DriverManager.getConnection(url, user, password))
+try {
+  val name: Option[String] = db readOnly { 
+    session => session.single("select * from emp where id = ?", 1) { _.string("name") } 
+  }
+} finally { db.close() }
 ```
 
 
@@ -91,8 +90,10 @@ It uses [Apache Commons DBCP](http://commons.apache.org/dbcp/) internally.
 import scalikejdbc._
 Class.forName(driverName)
 ConnectionPool.singleton(url, user, password)
-val conn = ConnectionPool.borrow()
-val db = new DB(conn)
+val db = new DB(ConnectionPool.borrow())
+try {
+  // ...
+} finally { db.close() }
 ```
 
 If you need to connect several data-sources:
@@ -102,20 +103,23 @@ import scalikejdbc._
 Class.forName(driverName)
 ConnectionPool.add('db1, url1, user1, password1)
 ConnectionPool.add('db2, url2, user2, password2)
-val conn = ConnectionPool('db1).borrow()
-val db = new DB(conn)
+val db = new DB(ConnectionPool('db1).borrow())
+try {
+  // ...
+} finally { db.close() }
 ```
 
-Using DB/NamedDB object is  much simpler.
+Using DB/NamedDB object is much simpler.
 
 ```scala
 // borrow a new connection automatically
-val name: Option[String] = DB readOnly { session =>
+val name: Option[String] = DB readOnly { session => 
   session.single("select * from emp where id = ?", 1) { _.string("name") }
-}
-val name: Option[String] = NamedDB('named) readOnly { session =>
+} // Already the borrowed connection closed
+
+val name: Option[String] = NamedDB('named) readOnly { session => 
   session.single("select * from emp where id = ?", 1) { _.string("name") }
-}
+} // Already the borrowed connection closed
 ```
 
 
@@ -132,6 +136,10 @@ def init() = {
 def doSomething() = {
   val db = ThreadLocalDB.load()
 }
+def finalize() = {
+  val db = ThreadLocalDB.load()
+  db.close()
+}
 ```
 
 
@@ -141,9 +149,7 @@ def doSomething() = {
 
 ScalikeJDBC has various query APIs. 
 
-`single`, `first`, `list` and `foreach`.
-
-All of them executes `java.sql.PreparedStatement#executeUpdate()`.
+`single`, `first`, `list` and `foreach`. All of them executes `java.sql.PreparedStatement#executeQuery()`.
 
 
 #### single
@@ -151,19 +157,23 @@ All of them executes `java.sql.PreparedStatement#executeUpdate()`.
 `single` returns single row optionally.
 
 ```scala
-val name: Option[String] = DB readOnly { session: DBSession =>
+// simple example
+val name: Option[String] = DB readOnly { session =>
   session.single("select * from emp where id = ?", 1) { _.string("name") }
 }
 
+// defined mapper as a function
 val extractName = (rs: WrappedResultSet) => rs.string("name")
 
 val name: Option[String] = DB readOnly {
   _.single("select * from emp where id = ?", 1)(extractName)
 }
 
+// define a class to map the result
 case class Emp(id: String, name: String)
-val emp: Option[Emp] = DB readOnly { 
-  _.single("select * from emp where id = ?", 1) { 
+
+val emp: Option[Emp] = DB readOnly { session =>
+  session.single("select * from emp where id = ?", 1) { 
     rs => Emp(rs.string("id"), rs.string("name"))
   }
 }
@@ -174,8 +184,8 @@ val emp: Option[Emp] = DB readOnly {
 `first` returns the first row optionally.
 
 ```scala
-val name: Option[String] = DB readOnly {
-  _.first("select * from emp") { _.string("name") }
+val name: Option[String] = DB readOnly { session =>
+  session.first("select * from emp") { _.string("name") }
 }
 ```
 
@@ -184,18 +194,18 @@ val name: Option[String] = DB readOnly {
 `list` returns multiple rows as `scala.collection.immutable.List`.
 
 ```scala
-val names: List[String] = DB readOnly {
-  _.list("select * from emp") { _.string("name") }
+val names: List[String] = DB readOnly { session =>
+  session.list("select * from emp") { _.string("name") }
 }
 ```
 
 #### foreach
 
-`foreach` allows you to make some side-effect in iterations with `scala.collection.Traversable`.
+`foreach` allows you to make some side-effect in iterations.
 
 ```scala
-DB readOnly {
-  _.foreach("select * from emp") { rs => out.write(rs.string("name")) }
+DB readOnly { session =>
+  session.foreach("select * from emp") { rs => out.write(rs.string("name")) }
 }
 ```
 
@@ -209,22 +219,22 @@ val conn = ConnectionPool.borrow()
 val db = new DB(conn)
 db.begin()
 
-val inserted: Int = db withinTx { session =>
+db withinTx { session =>
   session.update("""insert into emp (id, name, created_at) values (?, ?)""",
     123, "foo", new org.joda.time.DateTime) 
     // java.util.Date, java.sql.* are also available
 }
-val id: Long = db withTx { 
-  _.updateAndReturnGeneratedKey("insert into emp (name, created_at) values (?, ?)", 
+val id: Long = db withTx { session =>
+  session.updateAndReturnGeneratedKey("insert into emp (name, created_at) values (?, ?)", 
     "bar", new java.util.Date) 
 }
 
-val updated: Int  = db withinTx { 
-  _.update("update emp set name = ? where id = ?", "bar", 1) 
+db withinTx { session => 
+  session.update("update emp set name = ? where id = ?", "bar", 1) 
 }
 
-val deleted: Int  = db withinTx { 
-  _.update("delete emp where id = ?", 1) 
+db withinTx { session =>
+  session.update("delete emp where id = ?", 1) 
 }
 
 db.commit()
@@ -236,8 +246,8 @@ db.close()
 `execute` executes `java.sql.PreparedStatement#execute()`.
 
 ```scala
-DB autoCommit {
-  _.execute("create table emp (id integer primary key, name varchar(30))")
+DB autoCommit { session =>
+  session.execute("create table emp (id integer primary key, name varchar(30))")
 }
 ```
 
@@ -249,8 +259,8 @@ DB autoCommit {
 Execute query in read-only mode.
 
 ```scala
-val names = DB readOnly {
-  session => session.list("select * from emp") { rs => rs.string("name") }
+val names = DB readOnly { session => 
+  session.list("select * from emp") { rs => rs.string("name") }
 }
 
 val session = DB.readOnlySession
@@ -261,8 +271,8 @@ session.close()
 Of course, updating in read-only mode will cause `java.sql.SQLException`.
 
 ```scala
-val updateCount = DB readOnly {
-  _.update("update emp set name = ? where id = ?", "foo", 1)
+DB readOnly { session =>
+  session.update("update emp set name = ? where id = ?", "foo", 1)
 } // will throw java.sql.SQLException
 ```
 
@@ -272,8 +282,8 @@ val updateCount = DB readOnly {
 Execute query / update in auto-commit mode.
 
 ```scala
-val count = DB autoCommit {
-  _.update("update emp set name = ? where id = ?", "foo", 1)
+val count = DB autoCommit { session =>
+  session.update("update emp set name = ? where id = ?", "foo", 1)
 }
 ```
 
@@ -281,9 +291,10 @@ When using autoCommitSession, every operation will execute in auto-commit mode.
 
 ```scala
 val session = DB.autoCommitSession
-session.update("update emp set name = ? where id = ?", "foo", 1) // auto-commit
-session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
-session.close()
+try {
+  session.update("update emp set name = ? where id = ?", "foo", 1) // auto-commit
+  session.update("update emp set name = ? where id = ?", "bar", 2) // auto-commit
+} finally { session.close() }
 ```
 
 ### localTx block
@@ -293,12 +304,10 @@ Execute query / update in block-scoped transactions.
 If an Exception was thrown in the block, the transaction will perform rollback automatically.
 
 ```scala
-val count = DB localTx { 
+val count = DB localTx { session =>
   // --- transcation scope start ---
-  session => {
-    session.update("update emp set name = ? where id = ?", "foo", 1)
-    session.update("update emp set name = ? where id = ?", "bar", 2)
-  } 
+  session.update("update emp set name = ? where id = ?", "foo", 1)
+  session.update("update emp set name = ? where id = ?", "bar", 2)
   // --- transaction scope end ---
 }
 ```
@@ -311,22 +320,22 @@ Execute query / update in already existing transctions.
 
 ```scala
 val db = new DB(conn)
-db.begin()
-val names = db withinTx {
-  // if a transaction has not been started, IllegalStateException will be thrown
-  session => session.list("select * from emp") {
-    rs => rs.string("name")
+try {
+  db.begin()
+  val names = db withinTx { session => 
+    // if a transaction has not been started, IllegalStateException will be thrown
+    session.list("select * from emp") { rs => rs.string("name") }
   }
-}
-db.rollback() // it might throw Exception
+  db.rollback() // it might throw Exception
+} finally { db.close() }
 
-db.begin()
-val session = db.withinTxSession()
-val names = session.list("select * from emp") {
-  rs => rs.string("name")
-}
-db.rollbackIfActive() // it NEVER throws Exception
-db.close()
+val db = new DB(conn)
+try {
+  db.begin()
+  val session = db.withinTxSession()
+  val names = session.list("select * from emp") { rs => rs.string("name") }
+  db.rollbackIfActive() // it NEVER throws Exception
+} finally { db.close() }
 ```
 
 
@@ -336,8 +345,11 @@ Not only using `DBSession` directly, but also using `SQL(String).map(f).{output}
 
 ```scala
 val name: Option[String] = DB readOnly { implicit session =>
-  SQL("select * from emp where id = ?").bind(1)
-    .map { rs => rs.string("name") }.single.apply()
+  SQL("select * from emp where id = ?")
+    .bind(1)
+    .map { rs => rs.string("name") }
+    .single
+    .apply()
 }
 ```
 
@@ -424,11 +436,12 @@ object Server1 extends App {
 }
 ```
 
-### With Play framework 2.x
+### Working with Play framework 2.x
 
 ScalikeJDBC works with Play framewrok(2.x).
 
 https://github.com/playframework/Play20
+
 https://github.com/seratch/scalikejdbc-play-plugin
 
 
@@ -447,8 +460,4 @@ DB localTxWithConnection { implicit conn =>
 }
 ```
 
-
-## Travis CI
-
-[![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
 
