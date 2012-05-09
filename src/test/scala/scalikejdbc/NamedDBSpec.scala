@@ -14,9 +14,12 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   behavior of "DB"
 
   it should "be available" in {
-    val conn = ConnectionPool.borrow('named)
-    val db = new DB(conn)
-    db should not be null
+    using(ConnectionPool.borrow('named)) { conn =>
+      val db = new DB(conn)
+      try {
+        db should not be null
+      } finally { db.close() }
+    }
   }
 
   // --------------------
@@ -24,10 +27,12 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
 
   "#tx" should "not be available before beginning tx" in {
     val db = NamedDB('named)
-    intercept[IllegalStateException] {
-      db.tx.begin()
-    }
-    db.rollbackIfActive()
+    try {
+      intercept[IllegalStateException] {
+        db.tx.begin()
+      }
+      db.rollbackIfActive()
+    } finally { db.close() }
   }
 
   // --------------------
@@ -64,8 +69,10 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val session = NamedDB('named).readOnlySession()
-      val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-      result.size should be > 0
+      try {
+        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        result.size should be > 0
+      } finally { session.close() }
     }
   }
 
@@ -114,9 +121,11 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val session = NamedDB('named).autoCommitSession()
-      val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
-      list(0) should equal(1)
-      list(1) should equal(2)
+      try {
+        val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
+        list(0) should equal(1)
+        list(1) should equal(2)
+      } finally { session.close() }
     }
   }
 
@@ -468,7 +477,11 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               } catch {
                 case e =>
-                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+                  try {
+                    session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
+                  } catch {
+                    case e =>
+                  }
               }
               session.update("delete from " + tableName)
               session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
@@ -516,7 +529,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
     ultimately({
       ignoring(classOf[Throwable]) {
-        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+        NamedDB('named) autoCommit { _.execute("drop table " + tableName) }
       }
     }) {
       NamedDB('named) autoCommit {
@@ -527,7 +540,11 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               } catch {
                 case e =>
-                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+                  try {
+                    session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
+                  } catch {
+                    case e =>
+                  }
               }
               session.update("delete from " + tableName)
               session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
@@ -541,26 +558,30 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       }
       spawn {
         val db = NamedDB('named)
-        db.begin()
-        db.withinTxWithConnection {
-          implicit conn =>
-            SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
-            Thread.sleep(1000L)
-            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-            assert(name.get == "foo")
-        }
-        db.rollback()
+        try {
+          db.begin()
+          db.withinTxWithConnection {
+            implicit conn =>
+              SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
+              Thread.sleep(1000L)
+              val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
+              assert(name.get == "foo")
+          }
+          db.rollback()
+        } finally { db.close() }
       }
       spawn {
         val db = NamedDB('named)
-        db.begin()
-        db.withinTxWithConnection {
-          implicit conn =>
-            Thread.sleep(200L)
-            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-            assert(name.get == "name1")
-        }
-        db.rollback()
+        try {
+          db.begin()
+          db.withinTxWithConnection {
+            implicit conn =>
+              Thread.sleep(200L)
+              val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
+              assert(name.get == "name1")
+          }
+          db.rollback()
+        } finally { db.close() }
       }
 
       Thread.sleep(2000L)

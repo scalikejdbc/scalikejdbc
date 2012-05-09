@@ -95,8 +95,10 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       TestUtils.initialize(tableName)
       val db = new DB(conn)
       val session = db.readOnlySession()
-      val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-      result.size should be > 0
+      try {
+        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        result.size should be > 0
+      } finally { session.close() }
     }
   }
 
@@ -153,9 +155,11 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       TestUtils.initialize(tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
-      list(0) should equal(1)
-      list(1) should equal(2)
+      try {
+        val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
+        list(0) should equal(1)
+        list(1) should equal(2)
+      } finally { session.close() }
     }
   }
 
@@ -404,9 +408,11 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       val db = new DB(conn)
       db.begin()
       val session = db.withinTxSession()
-      val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-      result.size should be > 0
-      db.rollbackIfActive()
+      try {
+        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        result.size should be > 0
+        db.rollbackIfActive()
+      } finally { session.close() }
     }
   }
 
@@ -491,21 +497,25 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
         val db = new DB(conn)
         db.begin()
         val session = db.withinTxSession()
-        session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-        Thread.sleep(1000L)
-        val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-        assert(name.get == "foo")
-        db.rollback()
+        try {
+          session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          Thread.sleep(1000L)
+          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          assert(name.get == "foo")
+          db.rollback()
+        } finally { session.close() }
       }
       spawn {
         val conn = ConnectionPool.borrow()
         val db = new DB(conn)
         db.begin()
         val session = db.withinTxSession()
-        Thread.sleep(200L)
-        val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-        assert(name.get == "name1")
-        db.rollback()
+        try {
+          Thread.sleep(200L)
+          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          assert(name.get == "name1")
+          db.rollback()
+        } finally { session.close() }
       }
 
       Thread.sleep(2000L)

@@ -41,8 +41,10 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(tableName)
       val db = new DB(ConnectionPool.borrow())
       implicit val session = db.readOnlySession()
-      val result = SQL("select * from " + tableName + "") map (rs => Some(rs.string("name"))) toList () apply ()
-      result.size should be > 0
+      try {
+        val result = SQL("select * from " + tableName + "") map (rs => Some(rs.string("name"))) toList () apply ()
+        result.size should be > 0
+      } finally { session.close() }
     }
   }
 
@@ -81,9 +83,11 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(tableName)
       val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
-      val list = SQL("select id from " + tableName + " order by id").map(rs => rs.int("id")).toList().apply()
-      list(0) should equal(1)
-      list(1) should equal(2)
+      try {
+        val list = SQL("select id from " + tableName + " order by id").map(rs => rs.int("id")).toList().apply()
+        list(0) should equal(1)
+        list(1) should equal(2)
+      } finally { session.close() }
     }
   }
 
@@ -294,9 +298,11 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
-      val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
-      result.size should be > 0
-      db.rollbackIfActive()
+      try {
+        val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+        result.size should be > 0
+        db.rollbackIfActive()
+      } finally { session.close() }
     }
   }
 
@@ -384,20 +390,24 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         val db = new DB(ConnectionPool.borrow())
         db.begin()
         implicit val session = db.withinTxSession()
-        SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate()
-        Thread.sleep(1000L)
-        val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-        name.get should equal("foo")
-        db.rollback()
+        try {
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate()
+          Thread.sleep(1000L)
+          val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+          name.get should equal("foo")
+          db.rollback()
+        } finally { session.close() }
       }
       spawn {
         val db = new DB(ConnectionPool.borrow())
         db.begin()
         implicit val session = db.withinTxSession()
-        Thread.sleep(200L)
-        val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-        name.get should equal("name1")
-        db.rollback()
+        try {
+          Thread.sleep(200L)
+          val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+          name.get should equal("name1")
+          db.rollback()
+        } finally { session.close() }
       }
 
       Thread.sleep(2000L)

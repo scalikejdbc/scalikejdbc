@@ -17,7 +17,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   it should "be available" in {
     val conn = ConnectionPool.borrow()
     val session = new DBSession(conn)
-    session should not be null
+    try {
+      session should not be null
+    } finally { session.close() }
   }
 
   it should "be able to close java.sql.Connection with filters" in {
@@ -28,15 +30,15 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       // new Connection for testing close
       val db = new DB(ConnectionPool.borrow())
       val session = db.autoCommitSession()
+      try {
 
-      val before = (stmt: PreparedStatement) => println("before")
-      val after = (stmt: PreparedStatement) => println("after")
-      session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
-      val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
-      benOpt.get._1 should equal(3)
-      benOpt.get._2 should equal("Ben")
-
-      session.close()
+        val before = (stmt: PreparedStatement) => println("before")
+        val after = (stmt: PreparedStatement) => println("after")
+        session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+        val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+        benOpt.get._1 should equal(3)
+        benOpt.get._2 should equal("Ben")
+      } finally { session.close() }
 
       try {
         session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
@@ -57,16 +59,17 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
+      try {
+        session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+        val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+        benOpt.get._1 should equal(3)
+        benOpt.get._2 should equal("Ben")
 
-      session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
-      val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
-      benOpt.get._1 should equal(3)
-      benOpt.get._2 should equal("Ben")
-
-      session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
-      val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
-      noName.get._1 should equal(4)
-      noName.get._2 should equal(null)
+        session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
+        val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+        noName.get._1 should equal(4)
+        noName.get._2 should equal(null)
+      } finally { session.close() }
     }
   }
 
@@ -80,10 +83,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val singleResult = session.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
-      val firstResult = session.first("select id from " + tableName)(rs => rs.string("id"))
-      singleResult.get should equal("1")
-      firstResult.get should equal("1")
+      try {
+        val singleResult = session.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+        val firstResult = session.first("select id from " + tableName)(rs => rs.string("id"))
+        singleResult.get should equal("1")
+        firstResult.get should equal("1")
+      } finally { session.close() }
     }
   }
 
@@ -94,10 +99,12 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       val db = new DB(conn)
       val session = db.autoCommitSession()
-      val result = session.list("select id from " + tableName) {
-        rs => rs.string("id")
-      }
-      result.size should equal(2)
+      try {
+        val result = session.list("select id from " + tableName) {
+          rs => rs.string("id")
+        }
+        result.size should equal(2)
+      } finally { session.close() }
     }
   }
 
@@ -108,15 +115,17 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      val before = (stmt: PreparedStatement) => println("before")
-      val after = (stmt: PreparedStatement) => println("after")
-      val count = session.updateWithFilters(before, after, "update " + tableName + " set name = ? where id = ?", "foo", 1)
-      db.rollbackIfActive()
-      count should equal(1)
-      val name = session.single("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.string("name")
-      } getOrElse "---"
-      name should equal("foo")
+      try {
+        val before = (stmt: PreparedStatement) => println("before")
+        val after = (stmt: PreparedStatement) => println("after")
+        val count = session.updateWithFilters(before, after, "update " + tableName + " set name = ? where id = ?", "foo", 1)
+        db.rollbackIfActive()
+        count should equal(1)
+        val name = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        } getOrElse "---"
+        name should equal("foo")
+      } finally { session.close() }
     }
 
   }
@@ -128,13 +137,15 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      val count = session.executeUpdate("update " + tableName + " set name = ? where id = ?", "foo", 1)
-      db.rollbackIfActive()
-      count should equal(1)
-      val name = session.single("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.string("name")
-      } getOrElse "---"
-      name should equal("foo")
+      try {
+        val count = session.executeUpdate("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        db.rollbackIfActive()
+        count should equal(1)
+        val name = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        } getOrElse "---"
+        name should equal("foo")
+      } finally { session.close() }
     }
 
   }
@@ -149,12 +160,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val session = db.withinTxSession()
-      TestUtils.initializeEmpRecords(session, tableName)
-      val result = session.single("select id from " + tableName + " where id = ?", 1) {
-        rs => rs.string("id")
-      }
-      result.get should equal("1")
-      db.rollbackIfActive()
+      try {
+        TestUtils.initializeEmpRecords(session, tableName)
+        val result = session.single("select id from " + tableName + " where id = ?", 1) {
+          rs => rs.string("id")
+        }
+        result.get should equal("1")
+        db.rollbackIfActive()
+      } finally { session.close() }
     }
   }
 
@@ -165,12 +178,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val session = db.withinTxSession()
-      TestUtils.initializeEmpRecords(session, tableName)
-      val result = session.list("select id from " + tableName + "") {
-        rs => rs.string("id")
-      }
-      result.size should equal(2)
-      db.rollbackIfActive()
+      try {
+        TestUtils.initializeEmpRecords(session, tableName)
+        val result = session.list("select id from " + tableName + "") {
+          rs => rs.string("id")
+        }
+        result.size should equal(2)
+        db.rollbackIfActive()
+      } finally { session.close() }
     }
   }
 
@@ -181,18 +196,20 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val db = new DB(ConnectionPool.borrow())
       db.begin()
       val session = db.withinTxSession()
-      TestUtils.initializeEmpRecords(session, tableName)
-      val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.string("name")
-      }.get
-      nameBefore should equal("name1")
-      val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-      count should equal(1)
-      db.rollbackIfActive()
-      val name = session.single("select name from " + tableName + " where id = ?", 1) {
-        rs => rs.string("name")
-      }.get
-      name should equal("name1")
+      try {
+        TestUtils.initializeEmpRecords(session, tableName)
+        val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        }.get
+        nameBefore should equal("name1")
+        val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        count should equal(1)
+        db.rollbackIfActive()
+        val name = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        }.get
+        name should equal("name1")
+      } finally { session.close() }
     }
   }
 
