@@ -1,7 +1,7 @@
 externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository"))
 
 resolvers ++= Seq(
-  Classpaths.typesafeResolver,
+  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
   "sbt-idea-repo" at "http://mpeltonen.github.com/maven/",
   "less is" at "http://repo.lessis.me",
   "coda" at "http://repo.codahale.com"
