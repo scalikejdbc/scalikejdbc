@@ -573,6 +573,20 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             )
         }.single.apply())
 
+        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          rs =>
+            Result(
+              vBoolean = rs.booleanOpt("v_boolean"),
+              vByte = rs.byteOpt("v_byte"),
+              vDouble = rs.doubleOpt("v_double"),
+              vFloat = rs.floatOpt("v_float"),
+              vInt = rs.intOpt("v_int"),
+              vLong = rs.longOpt("v_long"),
+              vShort = rs.shortOpt("v_short"),
+              vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+            )
+        }.single.apply())
+
       } finally {
         try {
           SQL("drop table dbsession_work_with_optional_values").execute.apply()

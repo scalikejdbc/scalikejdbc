@@ -95,6 +95,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .orNull[java.lang.Boolean]
   }
 
+  def booleanOpt(columnIndex: Int): Option[Boolean] = opt[Boolean](boolean(columnIndex))
+
+  def booleanOpt(columnLabel: String): Option[Boolean] = opt[Boolean](boolean(columnLabel))
+
   def byte(columnIndex: Int): java.lang.Byte = {
     ensureCursor()
     Option(any(columnIndex))
@@ -108,6 +112,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .map(v => java.lang.Byte.valueOf(v.toString))
       .orNull[java.lang.Byte]
   }
+
+  def byteOpt(columnIndex: Int): Option[Byte] = opt[Byte](byte(columnIndex))
+
+  def byteOpt(columnLabel: String): Option[Byte] = opt[Byte](byte(columnLabel))
 
   def bytes(columnIndex: Int): Array[Byte] = {
     ensureCursor()
@@ -183,6 +191,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .orNull[java.lang.Double]
   }
 
+  def doubleOpt(columnIndex: Int): Option[Double] = opt[Double](double(columnIndex))
+
+  def doubleOpt(columnLabel: String): Option[Double] = opt[Double](double(columnLabel))
+
   def fetchDirection: Int = {
     ensureCursor()
     underlying.getFetchDirection
@@ -207,6 +219,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .orNull[java.lang.Float]
   }
 
+  def floatOpt(columnIndex: Int): Option[Float] = opt[Float](float(columnIndex))
+
+  def floatOpt(columnLabel: String): Option[Float] = opt[Float](float(columnLabel))
+
   def holdability: Int = {
     ensureCursor()
     underlying.getHoldability
@@ -226,6 +242,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .orNull[java.lang.Integer]
   }
 
+  def intOpt(columnIndex: Int): Option[Int] = opt[Int](int(columnIndex))
+
+  def intOpt(columnLabel: String): Option[Int] = opt[Int](int(columnLabel))
+
   def long(columnIndex: Int): java.lang.Long = {
     ensureCursor()
     Option(any(columnIndex))
@@ -239,6 +259,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .map(v => java.lang.Long.valueOf(v.toString))
       .orNull[java.lang.Long]
   }
+
+  def longOpt(columnIndex: Int): Option[Long] = opt[Long](long(columnIndex))
+
+  def longOpt(columnLabel: String): Option[Long] = opt[Long](long(columnLabel))
 
   def metaData: java.sql.ResultSetMetaData = {
     ensureCursor()
@@ -333,6 +357,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       .map(v => java.lang.Short.valueOf(v.toString))
       .orNull[java.lang.Short]
   }
+
+  def shortOpt(columnIndex: Int): Option[Short] = opt[Short](short(columnIndex))
+
+  def shortOpt(columnLabel: String): Option[Short] = opt[Short](short(columnLabel))
 
   def sqlXml(columnIndex: Int): java.sql.SQLXML = {
     ensureCursor()
