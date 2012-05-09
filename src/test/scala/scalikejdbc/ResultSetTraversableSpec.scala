@@ -26,7 +26,14 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val conn = ConnectionPool.borrow()
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+      val rs: ResultSet = {
+        try {
+          conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+        } catch {
+          case e =>
+            conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+        }
+      }
       new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }
@@ -36,7 +43,14 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val conn = ConnectionPool.borrow()
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+      val rs: ResultSet = {
+        try {
+          conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+        } catch {
+          case e =>
+            conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+        }
+      }
       new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }

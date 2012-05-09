@@ -291,7 +291,21 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
       val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
 
-      val get10EmpSQL: SQL[Emp] = SQL("select * from emp order by id limit 10").map(empMapper)
+      val get10EmpSQL: SQL[Emp] = {
+        DB autoCommit { implicit s =>
+          try {
+            val sql = SQL("select * from emp order by id limit 10").map(empMapper)
+            sql.list.apply()
+            sql
+          } catch {
+            case e =>
+              val sql = SQL("select * from emp order by id fetch fist 10 rows only").map(empMapper)
+              sql.list.apply()
+              sql
+          }
+        }
+      }
+
       val get10EmpAllSQL: SQLToList[Emp] = get10EmpSQL.list // or #toList
 
       DB autoCommit {

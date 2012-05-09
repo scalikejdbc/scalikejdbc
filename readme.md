@@ -15,6 +15,16 @@ But if you want simple mappers, please also try scalikejdbc-mapper-generator.
 https://github.com/seratch/scalikejdbc-mapper-generator
 
 
+## Supported RDBMS
+
+This library passed all the unit tests with the following RDBMS.
+
+- PostgreSQL
+- MySQL 
+- H2 Database Engine
+- HSQLDB
+
+
 ## Setup
 
 ### sbt

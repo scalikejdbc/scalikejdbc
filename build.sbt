@@ -35,7 +35,7 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.scalatest"           %% "scalatest"            % "1.7.2"     % "test",
     "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
     "com.h2database"          % "h2"                    % "[1.3,)"    % "test",
-    //"org.apache.derby"        % "derby"                 % "[10.8.2,)" % "test",
+    "org.apache.derby"        % "derby"                 % "[10.8.2,)" % "test",
     "org.hsqldb"              %  "hsqldb"               % "[2,)"      % "test",
     "mysql"                   %  "mysql-connector-java" % "[5.1,)"    % "test",
     //"postgresql"              %  "postgresql"           % "9.0-801.jdbc3"  % "test",
