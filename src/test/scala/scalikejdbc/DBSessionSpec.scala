@@ -479,7 +479,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             v_int int, 
             v_long bigint, 
             v_short smallint,
-            v_timestamp timestamp,
+            v_timestamp datetime,
             primary key(id)
           )
         """).execute.apply()
@@ -525,7 +525,6 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           result.vInt.isDefined should be(false)
           result.vLong.isDefined should be(false)
           result.vShort.isDefined should be(false)
-          // TODO fail when using MySQL
           result.vTimestamp.isDefined should be(false)
         }
 
