@@ -31,11 +31,13 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
-  def createPreparedStatement(con: Connection, template: String): PreparedStatement = {
+  def createPreparedStatement(con: Connection, template: String, returnGeneratedKeys: Boolean = false): PreparedStatement = {
     log.debug("template : " + template)
-    conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
-    // TODO does not work for PostgreSQL, need to fix
-    //conn.prepareStatement(template, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)
+    if (returnGeneratedKeys) {
+      conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
+    } else {
+      conn.prepareStatement(template, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)
+    }
   }
 
   private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
@@ -155,7 +157,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
 
   def update(template: String, params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template)
+    val stmt = createPreparedStatement(conn, template, true)
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
@@ -168,7 +170,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     template: String,
     params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template)
+    val stmt = createPreparedStatement(conn, template, true)
     using(stmt) {
       stmt =>
         bindParams(stmt, params: _*)
