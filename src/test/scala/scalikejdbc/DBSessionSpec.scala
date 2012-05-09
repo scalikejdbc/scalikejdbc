@@ -10,7 +10,7 @@ import java.sql.PreparedStatement
 
 class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis().toString.substring(0, 4)
+  val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "DBSession"
 

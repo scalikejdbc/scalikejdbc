@@ -9,7 +9,7 @@ import util.control.Exception._
 
 class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(0, 4)
+  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "DB"
 

@@ -75,7 +75,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   // Operations
   // ---------------------------
 
-  val tableNamePrefix = "emp_BasicUsageSpec" + System.currentTimeMillis().toString.substring(0, 4)
+  val tableNamePrefix = "emp_BasicUsageSpec" + System.currentTimeMillis().toString.substring(8)
 
   "autoCommit" should "excute without a transaction" in {
 
