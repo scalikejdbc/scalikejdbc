@@ -15,7 +15,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
 
   it should "be available" in {
     using(ConnectionPool.borrow('named)) { conn =>
-      val db = new DB(conn)
+      val db = new DB(() => conn)
       try {
         db should not be null
       } finally { db.close() }

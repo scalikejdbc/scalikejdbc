@@ -21,6 +21,8 @@ import scala.util.control.Exception._
 
 object DB {
 
+  def apply(conn: => Connection): DB = new DB(connect = () => conn)
+
   private def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
       throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
@@ -106,7 +108,9 @@ object DB {
 /**
  * DB accessor
  */
-case class DB(conn: Connection) {
+class DB(connect: () => Connection) {
+
+  lazy val conn: Connection = connect()
 
   def isTxNotActive = conn == null || conn.isClosed || conn.isReadOnly
 
@@ -114,7 +118,7 @@ case class DB(conn: Connection) {
 
   def isTxAlreadyStarted = conn != null && !conn.getAutoCommit
 
-  def newTx(conn: Connection): Tx = {
+  private def newTx(conn: Connection): Tx = {
     if (isTxNotActive || isTxAlreadyStarted) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
@@ -160,7 +164,7 @@ case class DB(conn: Connection) {
 
   def readOnlySession(): DBSession = {
     conn.setReadOnly(true)
-    new DBSession(conn = conn, isReadOnly = true)
+    new DBSession(connect = () => conn, isReadOnly = true)
   }
 
   def readOnly[A](execution: DBSession => A): A = {
@@ -179,7 +183,7 @@ case class DB(conn: Connection) {
   def autoCommitSession(): DBSession = {
     conn.setReadOnly(false)
     conn.setAutoCommit(true)
-    new DBSession(conn)
+    new DBSession(connect = () => conn)
   }
 
   def autoCommit[A](execution: DBSession => A): A = {
@@ -198,7 +202,7 @@ case class DB(conn: Connection) {
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    new DBSession(conn, Some(tx))
+    new DBSession(connect = () => conn, tx = Some(tx))
   }
 
   def withinTx[A](execution: DBSession => A): A = {
@@ -227,7 +231,7 @@ case class DB(conn: Connection) {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(conn, Option(tx))
+        val session = new DBSession(connect = () => conn, tx = Option(tx))
         val result: A = execution(session)
         tx.commit()
         result
@@ -240,7 +244,7 @@ case class DB(conn: Connection) {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(conn, Option(tx))
+        val session = new DBSession(connect = () => conn, tx = Option(tx))
         val result: A = execution(session.conn)
         tx.commit()
         result

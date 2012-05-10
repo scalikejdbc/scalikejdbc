@@ -22,7 +22,7 @@ import java.sql.Connection
  */
 case class NamedDB(name: Any) {
 
-  private val db: DB = DB(ConnectionPool.borrow(name))
+  private lazy val db: DB = new DB(connect = () => ConnectionPool.borrow(name))
 
   def isTxNotActive = db.isTxNotActive
 
@@ -30,9 +30,7 @@ case class NamedDB(name: Any) {
 
   def isTxAlreadyStarted = db.isTxAlreadyStarted
 
-  def newTx(conn: Connection): Tx = db.newTx(conn)
-
-  def newTx: Tx = newTx(db.conn)
+  def newTx: Tx = db.newTx
 
   def currentTx: Tx = db.currentTx
 

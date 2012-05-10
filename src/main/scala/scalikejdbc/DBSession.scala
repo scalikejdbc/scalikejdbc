@@ -18,15 +18,24 @@ package scalikejdbc
 import java.sql._
 import java.net.URL
 
+object DBSession {
+
+  def apply(conn: => Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false): DBSession = {
+    new DBSession(() => conn, tx, isReadOnly)
+  }
+
+}
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
  */
-case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
+class DBSession(connect: () => Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
 
-  def connection: Connection = conn
+  lazy val conn: Connection = connect()
+
+  lazy val connection: Connection = conn
 
   tx match {
-    case Some(transaction) if transaction.isActive() =>
+    case Some(tx) if tx.isActive() => // nothing to do
     case None => conn.setAutoCommit(true)
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }

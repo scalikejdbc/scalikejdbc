@@ -75,7 +75,7 @@ class PlanWithTx extends Plan {
   }
 
   val conn = DriverManager.getConnection(url, user, password)
-  val ddl = new DB(conn)
+  val ddl = new DB(() => conn)
   ddl autoCommit {
     session =>
       try {
