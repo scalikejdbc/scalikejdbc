@@ -22,7 +22,7 @@ import java.sql.Connection
  */
 case class NamedDB(name: Any) {
 
-  private lazy val db: DB = new DB(connect = () => ConnectionPool.borrow(name))
+  private lazy val db: DB = DB(ConnectionPool.borrow(name))
 
   def isTxNotActive = db.isTxNotActive
 

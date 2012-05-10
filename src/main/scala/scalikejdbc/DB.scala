@@ -21,7 +21,7 @@ import scala.util.control.Exception._
 
 object DB {
 
-  def apply(conn: => Connection): DB = new DB(connect = () => conn)
+  def apply(conn: => Connection): DB = new DB(conn)
 
   private def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
@@ -108,9 +108,7 @@ object DB {
 /**
  * DB accessor
  */
-class DB(connect: () => Connection) {
-
-  lazy val conn: Connection = connect()
+case class DB(conn: Connection) {
 
   def isTxNotActive: Boolean = conn == null || conn.isClosed || conn.isReadOnly
 
@@ -166,7 +164,7 @@ class DB(connect: () => Connection) {
 
   def readOnlySession(): DBSession = {
     conn.setReadOnly(true)
-    new DBSession(connect = () => conn, isReadOnly = true)
+    new DBSession(conn, isReadOnly = true)
   }
 
   def readOnly[A](execution: DBSession => A): A = {
@@ -185,7 +183,7 @@ class DB(connect: () => Connection) {
   def autoCommitSession(): DBSession = {
     conn.setReadOnly(false)
     conn.setAutoCommit(true)
-    new DBSession(connect = () => conn)
+    new DBSession(conn)
   }
 
   def autoCommit[A](execution: DBSession => A): A = {
@@ -204,7 +202,7 @@ class DB(connect: () => Connection) {
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    new DBSession(connect = () => conn, tx = Some(tx))
+    new DBSession(conn, tx = Some(tx))
   }
 
   def withinTx[A](execution: DBSession => A): A = {
@@ -233,7 +231,7 @@ class DB(connect: () => Connection) {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(connect = () => conn, tx = Option(tx))
+        val session = new DBSession(conn, tx = Option(tx))
         val result: A = execution(session)
         tx.commit()
         result
@@ -246,7 +244,7 @@ class DB(connect: () => Connection) {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(connect = () => conn, tx = Option(tx))
+        val session = new DBSession(conn, tx = Option(tx))
         val result: A = execution(session.conn)
         tx.commit()
         result

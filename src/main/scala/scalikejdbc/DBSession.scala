@@ -18,19 +18,10 @@ package scalikejdbc
 import java.sql._
 import java.net.URL
 
-object DBSession {
-
-  def apply(conn: => Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false): DBSession = {
-    new DBSession(() => conn, tx, isReadOnly)
-  }
-
-}
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
  */
-class DBSession(connect: () => Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
-
-  lazy val conn: Connection = connect()
+case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
 
   lazy val connection: Connection = conn
 

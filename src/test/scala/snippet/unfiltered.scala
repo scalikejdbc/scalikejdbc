@@ -75,8 +75,7 @@ class PlanWithTx extends Plan {
   }
 
   val conn = DriverManager.getConnection(url, user, password)
-  val ddl = new DB(() => conn)
-  ddl autoCommit {
+  DB(conn) autoCommit {
     session =>
       try {
         session.execute("create table emp (id integer primary key, name varchar(30))")

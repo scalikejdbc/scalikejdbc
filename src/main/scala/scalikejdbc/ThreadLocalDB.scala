@@ -26,7 +26,7 @@ object ThreadLocalDB {
   private val _db = new DynamicVariable[DB](null)
 
   def create(conn: => Connection): DB = {
-    _db.value = new DB(connect = () => conn)
+    _db.value = DB(conn)
     _db.value
   }
 

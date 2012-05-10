@@ -16,7 +16,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_insertWithNullableValues"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
 
       SQL("insert into " + tableName + " values (?, ?)").bind(3, Option("Ben")).execute().apply()
@@ -51,7 +51,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_singleInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
 
       val singleResult = SQL("select id from " + tableName + " where id = ?").bind(1)
@@ -67,7 +67,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_listInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
       val result = SQL("select id from " + tableName).map(rs => rs.string("id")).toList().apply()
       result.size should equal(2)
@@ -78,7 +78,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_updateInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
 
@@ -99,7 +99,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_updateInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       implicit val session = db.autoCommitSession()
       val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
 
@@ -123,7 +123,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_singleInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
@@ -137,7 +137,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_listInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
@@ -153,7 +153,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_updateInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(() => ConnectionPool.borrow())
+      val db = new DB(ConnectionPool.borrow())
       db.begin()
       implicit val session = db.withinTxSession()
       TestUtils.initializeEmpRecords(session, tableName)
