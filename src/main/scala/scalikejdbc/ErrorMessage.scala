@@ -24,10 +24,14 @@ object ErrorMessage {
 
   val CANNOT_START_A_NEW_TRANSACTION = "Cannot start a new transaction."
 
+  val CANNOT_EXECUTE_IN_READ_ONLY_SESSION = "Cannot execute this operation in a readOnly session."
+
   val TRANSACTION_IS_NOT_ACTIVE = "Transaction is not active."
 
   val IMPLICIT_DB_INSTANCE_REQUIRED = "An instance of scalikejdbc.DB is required implicitly."
 
   val INVALID_CURSOR_POSITION = "Invalid cursor position."
+
+  val FAILED_TO_RETRIEVE_GENERATED_KEY = "Failed to retrieve the generated key."
 
 }

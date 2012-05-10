@@ -19,6 +19,7 @@ import org.slf4j.Logger
 
 class Log(logger: Logger) {
 
+  // use var consciously to enable squeezing later
   var isDebugEnabled: Boolean = logger.isDebugEnabled
   var isInfoEnabled: Boolean = logger.isInfoEnabled
   var isWarnEnabled: Boolean = logger.isWarnEnabled

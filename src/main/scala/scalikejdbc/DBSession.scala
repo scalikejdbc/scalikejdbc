@@ -89,7 +89,9 @@ class DBSession(connect: () => Connection, tx: Option[Tx] = None, isReadOnly: Bo
   }
 
   private def ensureNotReadOnlySession(template: String): Unit = {
-    if (isReadOnly) throw new java.sql.SQLException("Cannot execute this operation in a readOnly session (SQL:" + template)
+    if (isReadOnly) {
+      throw new java.sql.SQLException(ErrorMessage.CANNOT_EXECUTE_IN_READ_ONLY_SESSION + " (template:" + template + ")")
+    }
   }
 
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
@@ -121,7 +123,7 @@ class DBSession(connect: () => Connection, tx: Option[Tx] = None, isReadOnly: Bo
     }
   }
 
-  def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit) = {
+  def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
     val stmt = createPreparedStatement(conn, template)
     using(stmt) {
       stmt =>
@@ -201,7 +203,7 @@ class DBSession(connect: () => Connection, tx: Option[Tx] = None, isReadOnly: Bo
     }
     updateWithFilters(before, after, template, params: _*)
     if (generatedKey == -1) {
-      throw new IllegalStateException("Failed to retrieve the generated key (template:" + template + ")")
+      throw new IllegalStateException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + " (template:" + template + ")")
     }
     generatedKey
   }

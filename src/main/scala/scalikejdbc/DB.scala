@@ -112,11 +112,11 @@ class DB(connect: () => Connection) {
 
   lazy val conn: Connection = connect()
 
-  def isTxNotActive = conn == null || conn.isClosed || conn.isReadOnly
+  def isTxNotActive: Boolean = conn == null || conn.isClosed || conn.isReadOnly
 
-  def isTxNotYetStarted = conn != null && conn.getAutoCommit
+  def isTxNotYetStarted: Boolean = conn != null && conn.getAutoCommit
 
-  def isTxAlreadyStarted = conn != null && !conn.getAutoCommit
+  def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
 
   private def newTx(conn: Connection): Tx = {
     if (isTxNotActive || isTxAlreadyStarted) {
@@ -138,13 +138,15 @@ class DB(connect: () => Connection) {
     handling(classOf[IllegalStateException]) by {
       e =>
         throw new IllegalStateException(
-          "DB#tx is an alias of DB#currentTx. You cannot call this API before beginning a transaction")
+          ErrorMessage.TRANSACTION_IS_NOT_ACTIVE +
+            " If you want to start a new transaction, use #newTx instead."
+        )
     } apply currentTx
   }
 
-  def close() = conn.close()
+  def close(): Unit = conn.close()
 
-  def begin() = newTx.begin()
+  def begin(): Unit = newTx.begin()
 
   def beginIfNotYet(): Unit = {
     ignoring(classOf[IllegalStateException]) apply {
@@ -213,7 +215,7 @@ class DB(connect: () => Connection) {
     execution(withinTxSession(currentTx).conn)
   }
 
-  private def begin(tx: Tx) {
+  private def begin(tx: Tx): Unit = {
     tx.begin()
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)

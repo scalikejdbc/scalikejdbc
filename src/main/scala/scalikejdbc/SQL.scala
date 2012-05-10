@@ -30,7 +30,10 @@ object SQL {
 
 private[scalikejdbc] object createSQL {
 
-  def apply[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => throw new IllegalStateException("The extractor isn't specified yet."))(output: Output.Value = Output.traversable): SQL[A] = output match {
+  def apply[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
+    throw new IllegalStateException(
+      "No extractor is specified. You need to add #map((WrappedResultSet) => A) before #apply().")
+  })(output: Output.Value = Output.traversable): SQL[A] = output match {
     case Output.single | Output.first => new SQLToOption(sql)(params: _*)(extractor)(output)
     case Output.list => new SQLToList(sql)(params: _*)(extractor)(output)
     case Output.traversable => new SQLToTraversable(sql)(params: _*)(extractor)(output)
