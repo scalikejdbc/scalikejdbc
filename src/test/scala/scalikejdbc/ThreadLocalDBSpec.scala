@@ -23,8 +23,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       spawn {
-        val createdDB = ThreadLocalDB.create(ConnectionPool.borrow())
-        createdDB.begin()
+        ThreadLocalDB.create(ConnectionPool.borrow()).begin()
         // ... do something
         using(ThreadLocalDB.load()) {
           db =>
@@ -55,13 +54,11 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
       ThreadLocalDB.create(ConnectionPool.borrow())
       using(ThreadLocalDB.load()) {
         db =>
-          {
-            val name = db autoCommit {
-              session =>
-                session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-            }
-            assert(name.get == "name1")
+          val name = db autoCommit {
+            session =>
+              session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
           }
+          assert(name.get == "name1")
       }
     }
 

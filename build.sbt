@@ -20,8 +20,9 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
   val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
   val unfilteredSpec = "unfiltered-spec" + _scalaVersion
   val scalacheck = "scalacheck" + _scalaVersion
+  val anorm = "anorm" + _scalaVersion
   Seq(
-    // scope: provided
+    // scope: compile
     "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
     "org.slf4j"               %  "slf4j-api"            % "1.6.4"    % "compile",
     "joda-time"               %  "joda-time"            % "2.1"      % "compile",
@@ -36,11 +37,10 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
     "com.h2database"          % "h2"                    % "[1.3,)"    % "test",
     "org.apache.derby"        % "derby"                 % "[10.8.2,)" % "test",
-    "org.hsqldb"              %  "hsqldb"               % "[2,)"      % "test",
-    "mysql"                   %  "mysql-connector-java" % "[5.1,)"    % "test",
-    //"postgresql"              %  "postgresql"           % "9.0-801.jdbc3"  % "test",
+    "org.xerial"              % "sqlite-jdbc"           % "3.6.16"    % "test",
+    "org.hsqldb"              %  "hsqldb"               % "2.2.8"     % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc4"  % "test",
-    "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
+    "play"                    %  anorm                  % "[2,)"      % "test"
   )
 }
 
@@ -59,6 +59,7 @@ testgenTestTemplate in Compile := "scalatest.FlatSpec"
 testgenScalaTestMatchers in Compile := "ShouldMatchers"
 
 testgenLineBreak in Compile := "LF"
+
 // publish
 
 publishMavenStyle := true

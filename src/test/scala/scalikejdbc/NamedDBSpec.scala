@@ -25,13 +25,12 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
   // tx
 
   "#tx" should "not be available before beginning tx" in {
-    val db = NamedDB('named)
-    try {
+    using(NamedDB('named)) { db =>
       intercept[IllegalStateException] {
         db.tx.begin()
       }
       db.rollbackIfActive()
-    } finally { db.close() }
+    }
   }
 
   // --------------------
@@ -41,12 +40,13 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      val result = db readOnly {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(NamedDB('named)) { db =>
+        val result = db readOnly {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        }
+        result.size should be > 0
       }
-      result.size should be > 0
     }
   }
 
@@ -188,15 +188,16 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      val count = NamedDB('named) autoCommit {
-        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      using(NamedDB('named)) { db =>
+        val count = NamedDB('named) autoCommit {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        count should equal(1)
+        val name = (db autoCommit {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }).get
+        name should equal("foo")
       }
-      count should equal(1)
-      val name = (db autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).get
-      name should equal("foo")
     }
   }
 
@@ -293,8 +294,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         val count = db localTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
@@ -304,7 +304,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).getOrElse("---")
         name should equal("foo")
-      } finally { db.close() }
+      }
     }
   }
 
@@ -328,8 +328,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           session =>
@@ -337,7 +336,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         }
         result.size should be > 0
         db.rollbackIfActive()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -345,8 +344,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTxWithConnection {
           implicit conn =>
@@ -355,7 +353,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         }
         result.size should be > 0
         db.rollbackIfActive()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -363,14 +361,13 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val session = db.withinTxSession()
         val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
         result.size should be > 0
         db.rollbackIfActive()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -378,15 +375,14 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
         }
         result.get should equal("1")
         db.rollbackIfActive()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -394,15 +390,14 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
         }
         result.size should equal(2)
         db.rollbackIfActive()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -410,8 +405,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = NamedDB('named)
-      try {
+      using(NamedDB('named)) { db =>
         db.begin()
         val count = db withinTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -422,7 +416,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         }).get
         name should equal("foo")
         db.rollback()
-      } finally { db.close() }
+      }
     }
   }
 
@@ -455,19 +449,17 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       }
       using(NamedDB('named)) {
         db =>
-          {
-            db.begin()
-            val count = db withinTx {
-              _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-            }
-            count should be === 1
-            db.rollback()
-            db.begin()
-            val name = (db withinTx {
-              _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-            }).get
-            name should equal("name1")
+          db.begin()
+          val count = db withinTx {
+            _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
           }
+          count should be === 1
+          db.rollback()
+          db.begin()
+          val name = (db withinTx {
+            _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          }).get
+          name should equal("name1")
       }
     }
   }

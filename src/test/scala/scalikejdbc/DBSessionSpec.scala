@@ -239,8 +239,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           val before = (stmt: PreparedStatement) => {}
           val after = (stmt: PreparedStatement) => {
             val rs = stmt.getGeneratedKeys
-            rs.next()
-            id = rs.getLong(1)
+            while (rs.next()) {
+              id = rs.getLong(1)
+            }
           }
           SQL("insert into dbsessionspec_genkey (name) values (?)").bind("xxx").updateWithFilters(before, after).apply()
           id should be <= 1L
