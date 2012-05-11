@@ -23,6 +23,7 @@ Passed all the unit tests with the following RDBMS.
 - MySQL 
 - H2 Database Engine
 - HSQLDB
+- Apache Derby
 
 [![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
 
