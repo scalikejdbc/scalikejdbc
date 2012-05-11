@@ -320,6 +320,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
           val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
           single.isDefined should be(true)
+          try { SQL("drop table company").execute.apply() } catch { case e => }
           try {
             val result: Boolean = SQL("""
               create table company (
