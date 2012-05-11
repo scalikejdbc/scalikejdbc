@@ -31,7 +31,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
-  def createStatementExecutor(con: Connection, template: String, params: Seq[Any],
+  private def createStatementExecutor(conn: Connection, template: String, params: Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
     val statement = if (returnGeneratedKeys) {
       conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
@@ -69,11 +69,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
-    using(createStatementExecutor(conn, template, params)) {
-      executor =>
-        val resultSet = new ResultSetTraversable(executor.executeQuery())
-        (resultSet map (rs => extract(rs))).toList
-    }
+    traversable(template, params: _*)(extract).toList
   }
 
   def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
@@ -84,8 +80,9 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
-    val executor = createStatementExecutor(conn, template, params)
-    new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
+    using(createStatementExecutor(conn, template, params)) { executor =>
+      new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
+    }
   }
 
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
@@ -123,9 +120,19 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   def updateWithFilters(before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
     template: String,
+    params: Any*): Int = _updateWithFilters(false, before, after, template, params: _*)
+
+  private def _updateWithFilters(returnGeneratedKeys: Boolean,
+    before: (PreparedStatement) => Unit,
+    after: (PreparedStatement) => Unit,
+    template: String,
     params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    using(createStatementExecutor(conn, template, params)) {
+    using(createStatementExecutor(
+      conn = conn,
+      template = template,
+      params = params,
+      returnGeneratedKeys = returnGeneratedKeys)) {
       executor =>
         before(executor.underlying)
         val count = executor.executeUpdate()
@@ -135,16 +142,18 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
   def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
+    var generatedKeyFound = false
     var generatedKey: Long = -1
     val before = (stmt: PreparedStatement) => {}
     val after = (stmt: PreparedStatement) => {
       val rs = stmt.getGeneratedKeys
       while (rs.next()) {
+        generatedKeyFound = true
         generatedKey = rs.getLong(1)
       }
     }
-    updateWithFilters(before, after, template, params: _*)
-    if (generatedKey == -1) {
+    _updateWithFilters(true, before, after, template, params: _*)
+    if (!generatedKeyFound) {
       throw new IllegalStateException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + " (template:" + template + ")")
     }
     generatedKey
