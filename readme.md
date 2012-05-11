@@ -84,6 +84,10 @@ If you need more information(connection management, transaction, CRUD), please c
 https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 
+## Logging SQL And Timing
+
+https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
+
 ## Mapper Generator 
 
 https://github.com/seratch/scalikejdbc-mapper-generator
