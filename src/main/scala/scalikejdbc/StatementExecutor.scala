@@ -124,7 +124,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
         if (loggingSQLAndTIme.warningEnabled &&
           spentMillis >= loggingSQLAndTIme.warningThresholdMillis) {
           log.withLevel(loggingSQLAndTIme.warningLogLevel) {
-            "A SLOW SQL EXECUTION IS DECTECTED." + eol +
+            "SQL execution completed" + eol +
               eol +
               "  [Executed SQL]" + eol +
               "   " + sqlString + "; (" + spentMillis + " ms)" + eol +
@@ -133,7 +133,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
           }
         } else {
           log.withLevel(loggingSQLAndTIme.logLevel) {
-            "A SQL execution completed." + eol +
+            "SQL execution completed" + eol +
               eol +
               "  [Executed SQL]" + eol +
               "   " + sqlString + "; (" + spentMillis + " ms)" + eol +

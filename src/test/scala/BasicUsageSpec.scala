@@ -299,7 +299,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             sql
           } catch {
             case e =>
-              val sql = SQL("select * from emp order by id fetch fist 10 rows only").map(empMapper)
+              val sql = SQL("select * from emp order by id fetch first 10 rows only").map(empMapper)
               sql.list.apply()
               sql
           }
