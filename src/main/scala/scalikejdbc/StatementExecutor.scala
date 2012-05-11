@@ -18,7 +18,7 @@ package scalikejdbc
 import java.sql.PreparedStatement
 
 /**
- * @{link PreparedStatement} Executor
+ * Statement Executor
  */
 case class StatementExecutor(underlying: PreparedStatement, template: String, params: Seq[Any]) extends LogSupport {
 
