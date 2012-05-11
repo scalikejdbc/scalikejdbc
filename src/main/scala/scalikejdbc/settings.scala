@@ -19,7 +19,7 @@ package scalikejdbc
  * GlobalSettings for this library
  */
 object GlobalSettings {
-  var loggingSQLAndTIme: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
+  var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
 }
 
 /**

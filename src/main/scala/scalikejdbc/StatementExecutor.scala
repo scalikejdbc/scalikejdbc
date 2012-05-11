@@ -113,17 +113,17 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
     def apply[A](execute: () => A): A = execute()
   }
 
-  private trait Timing extends NakedExecutor with LogSupport {
+  private trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
     abstract override def apply[A](execute: () => A): A = {
-      import GlobalSettings.loggingSQLAndTIme
-      if (loggingSQLAndTIme.enabled) {
+      import GlobalSettings.loggingSQLAndTime
+      if (loggingSQLAndTime.enabled) {
         val before = System.currentTimeMillis
         val result = super.apply(execute)
         val after = System.currentTimeMillis
         val spentMillis = after - before
-        if (loggingSQLAndTIme.warningEnabled &&
-          spentMillis >= loggingSQLAndTIme.warningThresholdMillis) {
-          log.withLevel(loggingSQLAndTIme.warningLogLevel) {
+        if (loggingSQLAndTime.warningEnabled &&
+          spentMillis >= loggingSQLAndTime.warningThresholdMillis) {
+          log.withLevel(loggingSQLAndTime.warningLogLevel) {
             "SQL execution completed" + eol +
               eol +
               "  [Executed SQL]" + eol +
@@ -132,7 +132,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
               stackTraceInformation
           }
         } else {
-          log.withLevel(loggingSQLAndTIme.logLevel) {
+          log.withLevel(loggingSQLAndTime.logLevel) {
             "SQL execution completed" + eol +
               eol +
               "  [Executed SQL]" + eol +
@@ -148,7 +148,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
     }
   }
 
-  private val statementExecute = new NakedExecutor with Timing
+  private val statementExecute = new NakedExecutor with LoggingSQLAndTiming
 
   def execute(): Boolean = statementExecute(() => underlying.execute())
 

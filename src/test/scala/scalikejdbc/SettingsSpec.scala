@@ -15,7 +15,7 @@ class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         1 to 100000 foreach { i =>
           SQL("insert into settings_example values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
         }
-        GlobalSettings.loggingSQLAndTIme = new LoggingSQLAndTimeSettings(
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
           warningLogLevel = 'INFO,
@@ -23,7 +23,7 @@ class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         )
         SQL("select * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
-        GlobalSettings.loggingSQLAndTIme = new LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
           SQL("drop table settings_example")
             .execute.apply()
