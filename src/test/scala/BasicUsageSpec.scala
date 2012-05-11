@@ -345,4 +345,29 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  "Logging SQL and timing" should "be available" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)")
+          .execute.apply()
+        1 to 100000 foreach { i =>
+          SQL("insert into logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
+        }
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+          enabled = true,
+          warningEnabled = true,
+          warningLogLevel = 'INFO,
+          warningThresholdMillis = 10L
+        )
+        SQL("select * from logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
+      } finally {
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        try {
+          SQL("drop table logging_sql_and_timing")
+            .execute.apply()
+        } catch { case e => }
+      }
+    }
+  }
+
 }
