@@ -80,11 +80,14 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
       .replaceAll("\n", "\\\\n")
 
     var i = 0
-    template
+    def trimSpaces(s: String, i: Int = 0): String = i match {
+      case i if i > 10 => s
+      case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
+    }
+    trimSpaces(template
       .replaceAll("\r", " ")
       .replaceAll("\n", " ")
-      .replaceAll("\t", " ")
-      .replaceAll("  ", "")
+      .replaceAll("\t", " "))
       .map {
         c =>
           if (c == '?') {

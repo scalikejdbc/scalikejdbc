@@ -21,7 +21,7 @@ class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
           warningLogLevel = 'INFO,
           warningThresholdMillis = 10L
         )
-        SQL("select * from settings_example").map(rs => rs.int("id")).list.apply()
+        SQL("select  * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
