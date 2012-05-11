@@ -243,9 +243,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               id = rs.getLong(1)
             }
           }
-          SQL("insert into dbsessionspec_genkey (name) values (?)").bind("xxx").updateWithFilters(before, after).apply()
+          session.updateWithFilters(true, before, after, "insert into dbsessionspec_genkey (name) values (?)", "xxx")
           id should be <= 1L
-          SQL("insert into dbsessionspec_genkey (name) values (?)").bind("xxx").updateWithFilters(before, after).apply()
+          session.updateWithFilters(true, before, after, "insert into dbsessionspec_genkey (name) values (?)", "xxx")
           id should be <= 2L
         } finally {
           SQL("drop table dbsessionspec_genkey").execute.apply()

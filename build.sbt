@@ -39,6 +39,7 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.apache.derby"        % "derby"                 % "[10.8.2,)" % "test",
     "org.xerial"              % "sqlite-jdbc"           % "3.6.16"    % "test",
     "org.hsqldb"              %  "hsqldb"               % "2.2.8"     % "test",
+    "mysql"                   %  "mysql-connector-java" % "[5.1,)"    % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc4"  % "test",
     "play"                    %  anorm                  % "[2,)"      % "test"
   )

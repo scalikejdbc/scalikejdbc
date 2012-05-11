@@ -10,6 +10,9 @@ class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
   it should "be available" in {
     DB autoCommit { implicit session =>
       try {
+        try {
+          SQL("drop table settings_example").execute.apply()
+        } catch { case e => }
         SQL("create table settings_example (id int primary key, name varchar(13) not null)")
           .execute.apply()
         1 to 100000 foreach { i =>
@@ -25,8 +28,7 @@ class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
       } finally {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
-          SQL("drop table settings_example")
-            .execute.apply()
+          SQL("drop table settings_example").execute.apply()
         } catch { case e => }
       }
     }

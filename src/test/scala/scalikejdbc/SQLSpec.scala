@@ -169,7 +169,9 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         nameBefore.get should equal("name1")
         val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
         count should equal(1)
-        db.rollbackIfActive()
+        db.rollback()
+      }
+      DB readOnly { implicit session =>
         val name = SQL("select name from " + tableName + " where id = ?").bind(1).map {
           rs => rs.string("name")
         }.toOption().apply()

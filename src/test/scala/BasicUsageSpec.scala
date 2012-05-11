@@ -348,6 +348,9 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   "Logging SQL and timing" should "be available" in {
     DB autoCommit { implicit session =>
       try {
+        try {
+          SQL("drop table logging_sql_and_timing").execute.apply()
+        } catch { case e => }
         SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)")
           .execute.apply()
         1 to 100000 foreach { i =>

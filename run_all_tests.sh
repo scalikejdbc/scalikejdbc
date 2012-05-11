@@ -5,5 +5,5 @@ if [ $# -ne 1 ]; then
 fi
 cp -p src/test/resources/jdbc_$1.properties src/test/resources/jdbc.properties
 sbt test
-cp -p src/test/resources/jdbc_h2.properties src/test/resources/jdbc.properties
+cp -p src/test/resources/jdbc_hsqldb.properties src/test/resources/jdbc.properties
 

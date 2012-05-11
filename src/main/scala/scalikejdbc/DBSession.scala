@@ -36,7 +36,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     val statement = if (returnGeneratedKeys) {
       conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
     } else {
-      conn.prepareStatement(template, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)
+      conn.prepareStatement(template)
     }
     StatementExecutor(
       underlying = statement,
@@ -120,9 +120,9 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   def updateWithFilters(before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
     template: String,
-    params: Any*): Int = _updateWithFilters(false, before, after, template, params: _*)
+    params: Any*): Int = updateWithFilters(false, before, after, template, params: _*)
 
-  private def _updateWithFilters(returnGeneratedKeys: Boolean,
+  def updateWithFilters(returnGeneratedKeys: Boolean,
     before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
     template: String,
@@ -152,7 +152,7 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
         generatedKey = rs.getLong(1)
       }
     }
-    _updateWithFilters(true, before, after, template, params: _*)
+    updateWithFilters(true, before, after, template, params: _*)
     if (!generatedKeyFound) {
       throw new IllegalStateException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + " (template:" + template + ")")
     }
