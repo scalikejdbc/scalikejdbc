@@ -34,7 +34,7 @@ Passed all the unit tests with the following RDBMS.
 ```scala
 resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.0"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.1"
 ```
 
 ### ls.implicit.ly
