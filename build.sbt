@@ -20,7 +20,6 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
   val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
   val unfilteredSpec = "unfiltered-spec" + _scalaVersion
   val scalacheck = "scalacheck" + _scalaVersion
-  val anorm = "anorm" + _scalaVersion
   Seq(
     // scope: compile
     "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
@@ -41,7 +40,7 @@ libraryDependencies <++= (scalaVersion) { scalaVersion =>
     "org.hsqldb"              %  "hsqldb"               % "2.2.8"     % "test",
     "mysql"                   %  "mysql-connector-java" % "[5.1,)"    % "test",
     "postgresql"              %  "postgresql"           % "9.1-901.jdbc4"  % "test",
-    "play"                    %  anorm                  % "[2,)"      % "test"
+    "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
   )
 }
 
