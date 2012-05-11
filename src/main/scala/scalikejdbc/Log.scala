@@ -25,6 +25,16 @@ class Log(logger: Logger) {
   var isWarnEnabled: Boolean = logger.isWarnEnabled
   var isErrorEnabled: Boolean = logger.isErrorEnabled
 
+  def withLevel(level: Symbol)(msg: => String, e: Throwable = null): Unit = {
+    level match {
+      case 'debug | 'DEBUG => debug(msg)
+      case 'info | 'INFO => info(msg)
+      case 'warn | 'WARN => warn(msg)
+      case 'error | 'ERROR => error(msg)
+      case _ => // nothing to do
+    }
+  }
+
   def debug(msg: => String): Unit = {
     if (isDebugEnabled && logger.isDebugEnabled) {
       logger.debug(msg)

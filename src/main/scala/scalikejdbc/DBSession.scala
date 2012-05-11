@@ -16,7 +16,7 @@
 package scalikejdbc
 
 import java.sql._
-import java.net.URL
+import util.control.Exception._
 
 /**
  * DB Session (readOnly/autoCommit/localTx/withinTx)
@@ -31,66 +31,30 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
-  def createPreparedStatement(con: Connection, template: String, returnGeneratedKeys: Boolean = false): PreparedStatement = {
-    log.debug("template : " + template)
-    if (returnGeneratedKeys) {
+  def createStatementExecutor(con: Connection, template: String, params: Seq[Any],
+    returnGeneratedKeys: Boolean = false): StatementExecutor = {
+    val statement = if (returnGeneratedKeys) {
       conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
     } else {
       conn.prepareStatement(template, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)
     }
-  }
-
-  private def bindParams(stmt: PreparedStatement, params: Any*): Unit = {
-
-    val paramsWithIndices = params.map {
-      case option: Option[_] => option.orNull[Any]
-      case other => other
-    }.zipWithIndex
-
-    for ((param, idx) <- paramsWithIndices; i = idx + 1) {
-      param match {
-        case null => stmt.setObject(i, null)
-        case p: java.sql.Array => stmt.setArray(i, p)
-        case p: BigDecimal => stmt.setBigDecimal(i, p.bigDecimal)
-        case p: Boolean => stmt.setBoolean(i, p)
-        case p: Byte => stmt.setByte(i, p)
-        case p: Date => stmt.setDate(i, p)
-        case p: Double => stmt.setDouble(i, p)
-        case p: Float => stmt.setFloat(i, p)
-        case p: Int => stmt.setInt(i, p)
-        case p: Long => stmt.setLong(i, p)
-        case p: Short => stmt.setShort(i, p)
-        case p: SQLXML => stmt.setSQLXML(i, p)
-        case p: String => stmt.setString(i, p)
-        case p: Time => stmt.setTime(i, p)
-        case p: Timestamp => stmt.setTimestamp(i, p)
-        case p: URL => stmt.setURL(i, p)
-        case p: java.util.Date => stmt.setTimestamp(i, p.toSqlTimestamp)
-        case p: org.joda.time.DateTime => stmt.setTimestamp(i, p.toDate.toSqlTimestamp)
-        case p: org.joda.time.LocalDateTime => stmt.setTimestamp(i, p.toDate.toSqlTimestamp)
-        case p: org.joda.time.LocalDate => stmt.setDate(i, p.toDate.toSqlDate)
-        case p: org.joda.time.LocalTime => stmt.setTime(i, p.toSqlTime)
-        case p => {
-          log.debug("The parameter(" + p + ") is bound as java.lang.Object.")
-          stmt.setObject(i, p)
-        }
-      }
-    }
-
+    StatementExecutor(
+      underlying = statement,
+      template = template,
+      params = params)
   }
 
   private def ensureNotReadOnlySession(template: String): Unit = {
     if (isReadOnly) {
-      throw new java.sql.SQLException(ErrorMessage.CANNOT_EXECUTE_IN_READ_ONLY_SESSION + " (template:" + template + ")")
+      throw new java.sql.SQLException(
+        ErrorMessage.CANNOT_EXECUTE_IN_READ_ONLY_SESSION + " (template:" + template + ")")
     }
   }
 
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        val resultSet = new ResultSetTraversable(stmt.executeQuery())
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        val resultSet = new ResultSetTraversable(executor.executeQuery())
         val rows = (resultSet map (rs => extract(rs))).toList
         rows match {
           case Nil => None
@@ -105,39 +69,32 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        val resultSet = new ResultSetTraversable(stmt.executeQuery())
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        val resultSet = new ResultSetTraversable(executor.executeQuery())
         (resultSet map (rs => extract(rs))).toList
     }
   }
 
   def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        new ResultSetTraversable(stmt.executeQuery()) foreach (rs => f(rs))
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        new ResultSetTraversable(executor.executeQuery()) foreach (rs => f(rs))
     }
   }
 
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
-    val stmt = createPreparedStatement(conn, template)
-    bindParams(stmt, params: _*)
-    new ResultSetTraversable(stmt.executeQuery()) map (rs => extract(rs))
+    val executor = createStatementExecutor(conn, template, params)
+    new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
   }
 
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
 
   def execute[A](template: String, params: Any*): Boolean = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        stmt.execute()
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        executor.execute()
     }
   }
 
@@ -146,24 +103,20 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     template: String,
     params: Any*): Boolean = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        before(stmt)
-        val result = stmt.execute()
-        after(stmt)
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        before(executor.underlying)
+        val result = executor.execute()
+        after(executor.underlying)
         result
     }
   }
 
   def update(template: String, params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template, true)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        stmt.executeUpdate()
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        executor.executeUpdate()
     }
   }
 
@@ -172,13 +125,11 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     template: String,
     params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    val stmt = createPreparedStatement(conn, template, true)
-    using(stmt) {
-      stmt =>
-        bindParams(stmt, params: _*)
-        before(stmt)
-        val count = stmt.executeUpdate()
-        after(stmt)
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        before(executor.underlying)
+        val count = executor.executeUpdate()
+        after(executor.underlying)
         count
     }
   }
@@ -199,6 +150,11 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     generatedKey
   }
 
-  def close(): Unit = conn.close()
+  def close(): Unit = {
+    ignoring(classOf[Throwable]) {
+      conn.close()
+    }
+    log.debug("A Connection is closed.")
+  }
 
 }

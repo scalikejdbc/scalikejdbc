@@ -24,7 +24,7 @@ object ConnectionPool extends LogSupport {
 
   private val DEFAULT_NAME: Any = "default"
 
-  val pools = new collection.mutable.HashMap[Any, ConnectionPool]()
+  private val pools = new collection.mutable.HashMap[Any, ConnectionPool]()
 
   def isInitialized(name: Any = DEFAULT_NAME) = pools.get(DEFAULT_NAME).isDefined
 
@@ -59,7 +59,7 @@ object ConnectionPool extends LogSupport {
   def borrow(name: Any = DEFAULT_NAME): Connection = {
     ensureInitialized(name)
     val pool = get(name)
-    log.debug("Borrow a connection from " + pool.toString())
+    log.debug("Borrowed a new connection from " + pool.toString())
     pool.borrow()
   }
 

@@ -108,7 +108,7 @@ object DB {
 /**
  * DB accessor
  */
-case class DB(conn: Connection) {
+case class DB(conn: Connection) extends LogSupport {
 
   def isTxNotActive: Boolean = conn == null || conn.isClosed || conn.isReadOnly
 
@@ -142,7 +142,12 @@ case class DB(conn: Connection) {
     } apply currentTx
   }
 
-  def close(): Unit = conn.close()
+  def close(): Unit = {
+    ignoring(classOf[Throwable]) {
+      conn.close()
+    }
+    log.debug("A Connection is closed.")
+  }
 
   def begin(): Unit = newTx.begin()
 

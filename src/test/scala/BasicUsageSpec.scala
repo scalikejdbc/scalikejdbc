@@ -321,10 +321,25 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
           val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
           single.isDefined should be(true)
           try {
-            val result: Boolean = SQL("create table company (id integer primary key, name varchar(30))").execute.apply()
+            val result: Boolean = SQL("""
+              create table company (
+                id integer primary key,
+                name varchar(30) not null,
+                description varchar(1000),
+                created_at timestamp
+              )
+            """).execute.apply()
           } catch { case e => }
           val result: Boolean = SQL("truncate table company").execute.apply()
-          val count: Int = SQL("insert into company values (?, ?)").bind(1, "Typesafe").update.apply()
+          val count: Int = SQL("insert into company values (?, ?, ?, ?)")
+            .bind(
+              1,
+              "Typesafe",
+              """
+            Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
+            From multicore to cloud computing, it's purpose built for scale.
+            """,
+              new DateTime).update.apply()
 
       }
     }
