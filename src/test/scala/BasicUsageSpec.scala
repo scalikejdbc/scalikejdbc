@@ -292,17 +292,18 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
       val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
 
       val get10EmpSQL: SQL[Emp] = {
-        DB autoCommit { implicit s =>
-          try {
-            val sql = SQL("select * from emp order by id limit 10").map(empMapper)
-            sql.list.apply()
-            sql
-          } catch {
-            case e =>
-              val sql = SQL("select * from emp order by id fetch first 10 rows only").map(empMapper)
+        DB autoCommit {
+          implicit s =>
+            try {
+              val sql = SQL("select * from emp order by id limit 10").map(empMapper)
               sql.list.apply()
               sql
-          }
+            } catch {
+              case e =>
+                val sql = SQL("select * from emp order by id fetch first 10 rows only").map(empMapper)
+                sql.list.apply()
+                sql
+            }
         }
       }
 
@@ -320,7 +321,11 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
           val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
           single.isDefined should be(true)
-          try { SQL("drop table company").execute.apply() } catch { case e => }
+          try {
+            SQL("drop table company").execute.apply()
+          } catch {
+            case e =>
+          }
           try {
             val result: Boolean = SQL("""
               create table company (
@@ -329,48 +334,76 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
                 description varchar(1000),
                 created_at timestamp
               )
-            """).execute.apply()
-          } catch { case e => }
-          val result: Boolean = SQL("truncate table company").execute.apply()
-          val count: Int = SQL("insert into company values (?, ?, ?, ?)")
+                                       """).execute.apply()
+          } catch {
+            case e =>
+          }
+          SQL("truncate table company").execute.apply()
+
+          SQL("""
+            insert into company values (
+              ?,
+              ?,
+              ?,
+              ?
+            )
+          """)
             .bind(
               1,
               "Typesafe",
-              """
-            Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
-            From multicore to cloud computing, it's purpose built for scale.
-            """,
+              """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
+               From multicore to cloud computing, it's purpose built for scale.""",
               new DateTime).update.apply()
+
+          SQL("""
+            insert into company values (
+              /*'id */123,
+              /*'name */'Alice',
+              /*'description */'xxxx',
+              /*'createdAt */''
+            )
+              """)
+            .bindByName(
+              'id -> 2,
+              'name -> "Typesafe",
+              'description -> "xxx",
+              'createdAt -> new DateTime).update.apply()
 
       }
     }
   }
 
   "Logging SQL and timing" should "be available" in {
-    DB autoCommit { implicit session =>
-      try {
+    DB autoCommit {
+      implicit session =>
         try {
-          SQL("drop table logging_sql_and_timing").execute.apply()
-        } catch { case e => }
-        SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)")
-          .execute.apply()
-        1 to 100000 foreach { i =>
-          SQL("insert                into  logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
-        }
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
-          enabled = true,
-          warningEnabled = true,
-          warningLogLevel = 'INFO,
-          warningThresholdMillis = 10L
-        )
-        SQL("select                                   *  from     logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
-      } finally {
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
-        try {
-          SQL("drop table logging_sql_and_timing")
+          try {
+            SQL("drop table logging_sql_and_timing").execute.apply()
+          } catch {
+            case e =>
+          }
+          SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)")
             .execute.apply()
-        } catch { case e => }
-      }
+          1 to 100000 foreach {
+            i =>
+              SQL("insert into  logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
+          }
+          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+            enabled = true,
+            warningEnabled = true,
+            warningLogLevel = 'INFO,
+            warningThresholdMillis = 10L
+          )
+          SQL("select  *  from logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
+        } finally {
+          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+          try {
+            SQL("drop table logging_sql_and_timing")
+              .execute.apply()
+          } catch {
+            case e =>
+          }
+        }
     }
   }
 

@@ -34,4 +34,8 @@ object ErrorMessage {
 
   val FAILED_TO_RETRIEVE_GENERATED_KEY = "Failed to retrieve the generated key."
 
+  val NO_EXTRACTOR_SPECIFIED = "No extractor is specified. You need to add #map((WrappedResultSet) => A) before #apply()."
+
+  val BINDING_PARAMETER_IS_MISSING = "The binding parameter is missing."
+
 }

@@ -31,8 +31,7 @@ object SQL {
 private[scalikejdbc] object createSQL {
 
   def apply[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
-    throw new IllegalStateException(
-      "No extractor is specified. You need to add #map((WrappedResultSet) => A) before #apply().")
+    throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
   })(output: Output.Value = Output.traversable): SQL[A] = output match {
     case Output.single | Output.first => new SQLToOption(sql)(params: _*)(extractor)(output)
     case Output.list => new SQLToList(sql)(params: _*)(extractor)(output)
@@ -41,9 +40,40 @@ private[scalikejdbc] object createSQL {
 
 }
 
+private[scalikejdbc] object createNameBindingSQL {
+
+  private def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+    (ExecutableSQLParser.convertToSQLWithPlaceHolders(sql), ExecutableSQLParser.extractAllParameters(sql).map { name =>
+      params.find(_._1 == name).orElse {
+        throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
+      }.map(_._2).orNull[Any]
+    })
+  }
+
+  def apply[A](sql: String)(params: (Symbol, Any)*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
+    throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
+  })(output: Output.Value = Output.traversable): SQL[A] = output match {
+    case Output.single | Output.first => {
+      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
+      new SQLToOption(_sql)(_params: _*)(extractor)(output)
+    }
+    case Output.list => {
+      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
+      new SQLToList(_sql)(_params: _*)(extractor)(output)
+    }
+    case Output.traversable => {
+      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
+      new SQLToTraversable(_sql)(_params: _*)(extractor)(output)
+    }
+  }
+
+}
+
 abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable) {
 
   def bind(params: Any*): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
+
+  def bindByName(paramsByName: (Symbol, Any)*): SQL[A] = createNameBindingSQL[A](sql)(paramsByName: _*)(extractor)(output)
 
   def map[A](extractor: (WrappedResultSet => A)): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
 
