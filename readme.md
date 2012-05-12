@@ -86,9 +86,11 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 ## Executable SQL Template Support
 
-Instead of place holder `?`, you can specify executable SQL as template. You can validate SQL before building into application. 
+Instead of embedding `?`(place holder), you can specify executable SQL as template. 
 
-Scala symbol literal in comments with dummy value in template and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`.
+Using this API, it's possibel to validate SQL before building into application. 
+
+Usage is simple. Just use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`.
 
 ```scala
 SQL("""
@@ -101,13 +103,13 @@ insert into user (
   /* 'id */123,
   /* 'email */'xxx@example.com',
   /* 'name */'Alice',
-  /* 'encrypted_password */'xfewSZe2sd3w#x8L'
+  /* 'encryptedPassword */'xfewSZe2sd3w#x8L'
 )
 """).bindByName(
   'id -> 132430,
   'emal -> "bob@example.com",
   'name -> "Bob",
-  'encrypted_password -> "xxxxxx"
+  'encryptedPassword -> "xxxxxx"
 ).update.apply()
 ```
 
