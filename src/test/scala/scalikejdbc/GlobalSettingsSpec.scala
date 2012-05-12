@@ -3,9 +3,9 @@ package scalikejdbc
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
 
-class SettingsSpec extends FlatSpec with ShouldMatchers with Settings {
+class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
 
-  behavior of "Settings"
+  behavior of "GlobalSettings"
 
   it should "be available" in {
     DB autoCommit { implicit session =>

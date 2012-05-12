@@ -7,11 +7,11 @@ import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
 
-class DBObjectSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(8)
 
-  behavior of "DB object"
+  behavior of "DB"
 
   // --------------------
   // readOnly
