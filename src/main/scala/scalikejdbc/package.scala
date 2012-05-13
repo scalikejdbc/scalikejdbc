@@ -2,6 +2,66 @@ import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
 import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
 
+/**
+ * ScalikeJDBC - A thin JDBC wrapper in Scala
+ *
+ * Just write SQL:
+ *
+ * This is a thin JDBC wrapper library which just uses java.sql.PreparedStatement internally.
+ * Users only need to write SQL and map from java.sql.ResultSet objects to Scala objects.
+ * It's pretty simple, really.
+ *
+ * Basic Usage:
+ *
+ * Using [[scalikejdbc.DBSession]]:
+ *
+ * {{{
+ * import scalikejdbc._
+ * import org.joda.time.DateTime
+ * case class User(id: Long, name: String, birthday: Option[DateTime])
+ *
+ * val activeUsers: List[User] = DB readOnly { session =>
+ *   session.list("select * from user where active = ?", true) { rs =>
+ *     User(
+ *       id = rs.long("id"),
+ *       name = rs.string("name"),
+ *       birthday = Option(rs.date("birthday")).map(_.toDateTime)
+ *     )
+ *   }
+ * }
+ * }}}
+ *
+ * Using [[scalikejdbc.SQL]]:
+ *
+ * {{{
+ * import scalikejdbc._
+ * import org.joda.time.DateTime
+ * case class User(id: Long, name: String, birthday: Option[DateTime])
+ *
+ * val activeUsers: List[User] = DB readOnly { implicit session =>
+ *   SQL("select * from user where active = ?").bind(true)
+ *     .map { rs => User(
+ *       id = rs.long("id"),
+ *       name = rs.string("name"),
+ *       birthday = Option(rs.date("birthday")).map(_.toDateTime))
+ *     }.list.apply()
+ * }
+ * }}}
+ *
+ * or
+ *
+ * {{{
+ * val activeUsers: List[User] = DB readOnly { implicit session =>
+ *   SQL("select * from user where active = /*'active*/true")
+ *     .bindByName('active -> true)
+ *     .map { rs => User(
+ *       id = rs.long("id"),
+ *       name = rs.string("name"),
+ *       birthday = Option(rs.date("birthday")).map(_.toDateTime))
+ *     }.list.apply()
+ * }
+ * }}}
+ */
 package object scalikejdbc {
 
   // -----
@@ -14,7 +74,12 @@ package object scalikejdbc {
   // -----
   // enable implicit conversions for date/time
 
-  class TimeInMillis(t: { def getTime(): Long }) {
+  /**
+   * Unix Time Converter to several types.
+   *
+   * @param t something has #getTime(): Long
+   */
+  class UnixTimeInMillisConverter(t: { def getTime(): Long }) {
 
     def toJavaUtilDate: utilDate = new java.util.Date(t.getTime)
 
@@ -57,15 +122,19 @@ package object scalikejdbc {
 
   }
 
-  implicit def convertJavaUtilDate(t: utilDate): TimeInMillis = new TimeInMillis(t)
+  implicit def convertJavaUtilDateToConverter(t: utilDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
 
-  implicit def convertJavaSqlDate(t: sqlDate): TimeInMillis = new TimeInMillis(t)
+  implicit def convertJavaSqlDateToConverter(t: sqlDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
 
-  implicit def convertJavaSqlTime(t: sqlTime): TimeInMillis = new TimeInMillis(t)
+  implicit def convertJavaSqlTimeToConverter(t: sqlTime): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
 
-  implicit def convertJavaSqlTimestamp(t: sqlTimestamp): TimeInMillis = new TimeInMillis(t)
+  implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
 
-  class FromLocalTime(t: LocalTime) {
+  /**
+   * [[org.joda.time.LocalTime]] converter.
+   * @param t LocalTime object
+   */
+  class LocalTimeConverter(t: LocalTime) {
 
     def toSqlTime: sqlTime = new java.sql.Time(t.toDateTimeToday.getMillis)
 
@@ -73,9 +142,13 @@ package object scalikejdbc {
 
   }
 
-  implicit def convertLocalTime(t: LocalTime): FromLocalTime = new FromLocalTime(t)
+  implicit def convertLocalTimeToConverter(t: LocalTime): LocalTimeConverter = new LocalTimeConverter(t)
 
-  class ToScalaBigDecimal(bd: java.math.BigDecimal) {
+  /**
+   * BigDecimal converter.
+   * @param bd big decimal value
+   */
+  class ScalaBigDecimalConverter(bd: java.math.BigDecimal) {
 
     def toScalaBigDecimal: scala.math.BigDecimal = {
       if (bd == null) null.asInstanceOf[scala.math.BigDecimal]
@@ -84,8 +157,16 @@ package object scalikejdbc {
 
   }
 
-  implicit def convertBigDecimal(bd: java.math.BigDecimal): ToScalaBigDecimal = new ToScalaBigDecimal(bd)
+  implicit def convertBigDecimal(bd: java.math.BigDecimal): ScalaBigDecimalConverter = {
+    new ScalaBigDecimalConverter(bd)
+  }
 
+  /**
+   * [[scala.Option]] value converter.
+   * @param v nullable raw value
+   * @tparam A raw type
+   * @return optional value
+   */
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
 }

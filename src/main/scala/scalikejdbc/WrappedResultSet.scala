@@ -25,9 +25,9 @@ import collection.JavaConverters._
 case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
 
   def ensureCursor(): Unit = {
-    if (cursor.index != index) {
+    if (cursor.position != index) {
       throw new IllegalStateException(
-        ErrorMessage.INVALID_CURSOR_POSITION + " (actual:" + cursor.index + ",expected:" + index + ")")
+        ErrorMessage.INVALID_CURSOR_POSITION + " (actual:" + cursor.position + ",expected:" + index + ")")
     }
   }
 

@@ -17,8 +17,14 @@ package scalikejdbc
 
 import org.slf4j.LoggerFactory
 
-trait LogSupport {
+/**
+ * Simple [[scalikejdbc.Log]] adaptor.
+ */
+private[scalikejdbc] trait LogSupport {
 
-  val log = new Log(LoggerFactory.getLogger(this.getClass))
+  /**
+   * Logger
+   */
+  protected val log = new Log(LoggerFactory.getLogger(this.getClass))
 
 }

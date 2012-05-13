@@ -19,8 +19,86 @@ import java.sql.Connection
 import java.lang.IllegalStateException
 import scala.util.control.Exception._
 
+/**
+ * Basic Database Accessor
+ *
+ * You can start with DB and blocks if using [[scalikejdbc.ConnectionPool.singleton()]].
+ *
+ * Using DBSession:
+ *
+ * {{{
+ *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   case class User(id: Int, name: String)
+ *
+ *   val users = DB readOnly { session =>
+ *     session.list("select * from user") { rs =>
+ *       User(rs.int("id"), rs.string("name"))
+ *     }
+ *   }
+ *
+ *   DB autoCommit { session =>
+ *     session.update("insert into user values (?,?)", 123, "Alice")
+ *   }
+ *
+ *   DB localTx { session =>
+ *     session.update("insert into user values (?,?)", 123, "Alice")
+ *   }
+ *
+ *   using(DB(ConnectionPool.borrow())) { db =>
+ *     db.begin()
+ *     try {
+ *       DB withTx { session =>
+ *         session.update("update user set name = ? where id = ?", "Alice", 123)
+ *       }
+ *       db.commit()
+ *     } catch { case e =>
+ *       db.rollbackIfActive()
+ *       throw e
+ *     }
+ *   }
+ * }}}
+ *
+ * Using SQL:
+ *
+ * {{{
+ *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   case class User(id: Int, name: String)
+ *
+ *   val users = DB readOnly { session =>
+ *     SQL("select * from user").map { rs =>
+ *       User(rs.int("id"), rs.string("name"))
+ *     }.list.apply()
+ *   }
+ *
+ *   DB autoCommit { session =>
+ *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *   }
+ *
+ *   DB localTx { session =>
+ *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *   }
+ *
+ *   using(DB(ConnectionPool.borrow())) { db =>
+ *     db.begin()
+ *     try {
+ *       DB withTx { session =>
+ *         SQL("update user set name = ? where id = ?").bind("Alice", 123).update.apply()
+ *       }
+ *       db.commit()
+ *     } catch { case e =>
+ *       db.rollbackIfActive()
+ *       throw e
+ *     }
+ *   }
+ * }}}
+ */
 object DB {
 
+  /**
+   * Returns DB instance.
+   * @param conn  connection
+   * @return  DB instance
+   */
   def apply(conn: => Connection): DB = new DB(conn)
 
   private def ensureDBInstance(db: DB): Unit = {
@@ -30,7 +108,11 @@ object DB {
   }
 
   /**
-   * Begins a readOnly block easily with ConnectionPool
+   * Begins a read-only block easily with ConnectionPool.
+   *
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
    */
   def readOnly[A](execution: DBSession => A): A = {
     using(ConnectionPool.borrow()) {
@@ -38,16 +120,31 @@ object DB {
     }
   }
 
+  /**
+   * Begins a read-only block easily with ConnectionPool
+   * and pass not session but connection to execution block.
+   *
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
+   */
   def readOnlyWithConnection[A](execution: Connection => A): A = {
     using(ConnectionPool.borrow()) {
       conn => DB(conn).readOnlyWithConnection(execution)
     }
   }
 
+  /**
+   * Returns read-only session instance. You SHOULD close this instance by yourself.
+   * @return session
+   */
   def readOnlySession(): DBSession = DB(ConnectionPool.borrow()).readOnlySession()
 
   /**
-   * Begins a autoCommit block easily with ConnectionPool
+   * Begins a auto-commit block easily with ConnectionPool.
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
    */
   def autoCommit[A](execution: DBSession => A): A = {
     using(ConnectionPool.borrow()) {
@@ -55,16 +152,31 @@ object DB {
     }
   }
 
+  /**
+   * Begins a auto-commit block easily with ConnectionPool
+   * and pass not session but connection to execution block.
+   *
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
+   */
   def autoCommitWithConnection[A](execution: Connection => A): A = {
     using(ConnectionPool.borrow()) {
       conn => DB(conn).autoCommitWithConnection(execution)
     }
   }
 
+  /**
+   * Returns auto-commit session instance. You SHOULD close this instance by yourself.
+   * @return session
+   */
   def autoCommitSession(): DBSession = DB(ConnectionPool.borrow()).autoCommitSession()
 
   /**
-   * Begins a localTx block easily with ConnectionPool
+   * Begins a local-tx block easily with ConnectionPool.
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
    */
   def localTx[A](execution: DBSession => A): A = {
     using(ConnectionPool.borrow()) {
@@ -72,6 +184,14 @@ object DB {
     }
   }
 
+  /**
+   * Begins a local-tx block easily with ConnectionPool
+   * and pass not session but connection to execution block.
+   *
+   * @param execution execution
+   * @tparam A return type
+   * @return result value
+   */
   def localTxWithConnection[A](execution: Connection => A): A = {
     using(ConnectionPool.borrow()) {
       conn => DB(conn).localTxWithConnection(execution)
@@ -79,41 +199,128 @@ object DB {
   }
 
   /**
-   * Begins a withinTx block easily with a DB instance as an implicit parameter
+   * Begins a within-tx block easily with a DB instance as an implicit parameter.
+   *
+   * @param execution execution
+   * @param db DB instance as an implicit parameter
+   * @tparam A return type
+   * @return result value
    */
   def withinTx[A](execution: DBSession => A)(implicit db: DB): A = {
     ensureDBInstance(db: DB)
     db.withinTx(execution)
   }
 
+  /**
+   * Begins a within-tx block easily with a DB instance as an implicit parameter
+   * and pass not session but connection to execution block.
+   *
+   * @param execution execution
+   * @param db DB instance as an implicit parameter
+   * @tparam A return type
+   * @return result value
+   */
   def withinTxWithConnection[A](execution: Connection => A)(implicit db: DB): A = {
     ensureDBInstance(db: DB)
     db.withinTxWithConnection(execution)
   }
 
+  /**
+   * Returns within-tx session instance. You SHOULD close this instance by yourself.
+   *
+   * @return session
+   */
   def withinTxSession(): DBSession = DB(ConnectionPool.borrow()).withinTxSession()
 
   /**
-   * Get a connection and returns a DB instance
+   * Get a connection and returns a DB instance.
+   *
+   * @param conn connection
+   * @return DB instance
    */
   def connect(conn: Connection = ConnectionPool.borrow()): DB = DB(conn)
 
   /**
-   * Returns a DB instance by using an implicit Connection object
+   * Returns a DB instance by using an implicit Connection object.
+   *
+   * @param conn connection
+   * @return  DB instance
    */
   def connected(implicit conn: Connection) = DB(conn)
 
 }
 
 /**
- * DB accessor
+ * Basic Database Accessor
+ *
+ * Using DBSession:
+ *
+ * {{{
+ *   import scalikejdbc._
+ *   case class User(id: Int, name: String)
+ *
+ *   using(ConnectionPool.borrow()) { conn =>
+ *
+ *     val users = DB(conn) readOnly { session =>
+ *       session.list("select * from user") { rs =>
+ *         User(rs.int("id"), rs.string("name"))
+ *       }
+ *     }
+ *
+ *     DB(conn) autoCommit { session =>
+ *       session.update("insert into user values (?,?)", 123, "Alice")
+ *     }
+ *
+ *     DB(conn) localTx { session =>
+ *       session.update("insert into user values (?,?)", 123, "Alice")
+ *     }
+ *
+ *   }
+ * }}}
+ *
+ * Using SQL:
+ *
+ * {{{
+ *   import scalikejdbc._
+ *   case class User(id: Int, name: String)
+ *
+ *   using(ConnectionPool.borrow()) { conn =>
+ *
+ *     val users = DB(conn) readOnly { session =>
+ *       SQL("select * from user").map { rs =>
+ *         User(rs.int("id"), rs.string("name"))
+ *       }.list.apply()
+ *     }
+ *
+ *     DB(conn) autoCommit { session =>
+ *       SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *     }
+ *
+ *     DB(conn) localTx { session =>
+ *       SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *     }
+ *
+ *   }
+ * }}}
  */
 case class DB(conn: Connection) extends LogSupport {
 
+  /**
+   * Returns is the current transaction is active.
+   * @return result
+   */
   def isTxNotActive: Boolean = conn == null || conn.isClosed || conn.isReadOnly
 
+  /**
+   * Returns is the current transaction hasn't started yet.
+   * @return result
+   */
   def isTxNotYetStarted: Boolean = conn != null && conn.getAutoCommit
 
+  /**
+   * Returns is the current transaction already started.
+   * @return result
+   */
   def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
 
   private def newTx(conn: Connection): Tx = {
@@ -123,8 +330,17 @@ case class DB(conn: Connection) extends LogSupport {
     new Tx(conn)
   }
 
+  /**
+   * Starts a new transaction and returns it.
+   * @return tx
+   */
   def newTx: Tx = newTx(conn)
 
+  /**
+   * Returns the current transaction.
+   * If the transaction has not started yet, IllegalStateException will be thrown.
+   * @return tx
+   */
   def currentTx: Tx = {
     if (isTxNotActive || isTxNotYetStarted) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
@@ -132,6 +348,11 @@ case class DB(conn: Connection) extends LogSupport {
     new Tx(conn)
   }
 
+  /**
+   * Returns the current transaction.
+   * If the transaction has not started yet, IllegalStateException will be thrown.
+   * @return tx
+   */
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by {
       e =>
@@ -142,6 +363,9 @@ case class DB(conn: Connection) extends LogSupport {
     } apply currentTx
   }
 
+  /**
+   * Close the connection.
+   */
   def close(): Unit = {
     ignoring(classOf[Throwable]) {
       conn.close()
@@ -149,35 +373,66 @@ case class DB(conn: Connection) extends LogSupport {
     log.debug("A Connection is closed.")
   }
 
+  /**
+   * Begins a new transaction.
+   */
   def begin(): Unit = newTx.begin()
 
+  /**
+   * Begins a new transaction if the other one does not already start.
+   */
   def beginIfNotYet(): Unit = {
     ignoring(classOf[IllegalStateException]) apply {
       begin()
     }
   }
 
+  /**
+   * Commits the current transaction.
+   */
   def commit(): Unit = tx.commit()
 
+  /**
+   * Rolls back the current transaction.
+   */
   def rollback(): Unit = tx.rollback()
 
+  /**
+   * Rolls back the current transaction if the transaction is still active.
+   */
   def rollbackIfActive(): Unit = {
     ignoring(classOf[IllegalStateException]) apply {
       tx.rollbackIfActive()
     }
   }
 
+  /**
+   * Returns read-only session.
+   * @return session
+   */
   def readOnlySession(): DBSession = {
     conn.setReadOnly(true)
     new DBSession(conn, isReadOnly = true)
   }
 
+  /**
+   * Provides read-only session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def readOnly[A](execution: DBSession => A): A = {
     using(conn) { conn =>
       execution(readOnlySession())
     }
   }
 
+  /**
+   * Provides read-only session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def readOnlyWithConnection[A](execution: Connection => A): A = {
     // cannot control if jdbc drivers ignore the readOnly attribute.
     using(conn) { conn =>
@@ -185,24 +440,44 @@ case class DB(conn: Connection) extends LogSupport {
     }
   }
 
+  /**
+   * Returns auto-commit session.
+   * @return session
+   */
   def autoCommitSession(): DBSession = {
     conn.setReadOnly(false)
     conn.setAutoCommit(true)
     new DBSession(conn)
   }
 
+  /**
+   * Provides auto-commit session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def autoCommit[A](execution: DBSession => A): A = {
     using(conn) { conn =>
       execution(autoCommitSession())
     }
   }
 
+  /**
+   * Provides auto-commit session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def autoCommitWithConnection[A](execution: Connection => A): A = {
     using(conn) { conn =>
       execution(autoCommitSession().conn)
     }
   }
 
+  /**
+   * Returns within-tx session.
+   * @return session
+   */
   def withinTxSession(tx: Tx = currentTx): DBSession = {
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
@@ -210,10 +485,22 @@ case class DB(conn: Connection) extends LogSupport {
     new DBSession(conn, tx = Some(tx))
   }
 
+  /**
+   * Provides within-tx session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def withinTx[A](execution: DBSession => A): A = {
     execution(withinTxSession(currentTx))
   }
 
+  /**
+   * Provides within-tx session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def withinTxWithConnection[A](execution: Connection => A): A = {
     execution(withinTxSession(currentTx).conn)
   }
@@ -231,6 +518,12 @@ case class DB(conn: Connection) extends LogSupport {
       throw t
   }
 
+  /**
+   * Provides local-tx session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def localTx[A](execution: DBSession => A): A = {
     using(conn) { conn =>
       val tx = newTx
@@ -244,6 +537,12 @@ case class DB(conn: Connection) extends LogSupport {
     }
   }
 
+  /**
+   * Provides local-tx session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
   def localTxWithConnection[A](execution: Connection => A): A = {
     using(conn) { conn =>
       val tx = newTx

@@ -18,7 +18,7 @@ package scalikejdbc
 /**
  * Error messages
  */
-object ErrorMessage {
+private[scalikejdbc] object ErrorMessage {
 
   val CONNECTION_POOL_IS_NOT_YET_INITIALIZED = "Connection pool is not yet initialized."
 

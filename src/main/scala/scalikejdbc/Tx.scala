@@ -19,19 +19,33 @@ import java.sql.{ SQLException, Connection }
 import scala.util.control.Exception._
 
 /**
- * DB Transaction
+ * DB Transaction abstraction.
+ * @param conn connection
  */
 class Tx(val conn: Connection) {
 
+  /**
+   * Begins this transaction.
+   */
   def begin(): Unit = conn.setAutoCommit(false)
 
+  /**
+   * Commits this transaction.
+   */
   def commit(): Unit = {
     conn.commit()
     conn.setAutoCommit(true)
   }
 
+  /**
+   * Returns is this transaction active.
+   * @return active
+   */
   def isActive(): Boolean = !conn.getAutoCommit
 
+  /**
+   * Rolls this transaction back.
+   */
   def rollback(): Unit = {
     conn.rollback()
     ignoring(classOf[SQLException]) apply {
@@ -39,6 +53,9 @@ class Tx(val conn: Connection) {
     }
   }
 
+  /**
+   * Rolls this transaction back if this transaction is still active.
+   */
   def rollbackIfActive(): Unit = {
     ignoring(classOf[SQLException]) apply {
       conn.rollback()

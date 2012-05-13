@@ -19,10 +19,23 @@ import java.sql._
 import util.control.Exception._
 
 /**
- * DB Session (readOnly/autoCommit/localTx/withinTx)
+ * DB Session
+ *
+ * This class provides readOnly/autoCommit/localTx/withinTx blocks and session objects.
+ *
+ * {{{
+ * import scalikejdbc._
+ *
+ * val userIdList = DB autoCommit { session: DBSession =>
+ *   session.list("select * from user") { rs => rs.int("id") }
+ * }
+ * }}}
  */
 case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
 
+  /**
+   * Connection
+   */
   lazy val connection: Connection = conn
 
   tx match {
@@ -31,6 +44,15 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
+  /**
+   * Create [[java.sql.Statement]] executor.
+   *
+   * @param conn connection
+   * @param template SQL template
+   * @param params parameters
+   * @param returnGeneratedKeys is generated keys required
+   * @return statement executor
+   */
   private def createStatementExecutor(conn: Connection, template: String, params: Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
     val statement = if (returnGeneratedKeys) {
@@ -44,6 +66,10 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
       params = params)
   }
 
+  /**
+   * Ensures the current session is not in read-only mode.
+   * @param template
+   */
   private def ensureNotReadOnlySession(template: String): Unit = {
     if (isReadOnly) {
       throw new java.sql.SQLException(
@@ -51,6 +77,16 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
+  /**
+   * Returns single result optionally.
+   * If the result is not single, [[scalikejdbc.TooManyRowsException]] will be thrown.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param extract extract function
+   * @tparam A return type
+   * @return result optionally
+   */
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
@@ -64,30 +100,70 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
+  /**
+   * Returns the first row optionally.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param extract extract function
+   * @tparam A return type
+   * @return result optionally
+   */
   def first[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     list(template, params: _*)(extract).headOption
   }
 
+  /**
+   * Returns query result as [[scala.collection.immutable.List]] object.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param extract extract function
+   * @tparam A return type
+   * @return result as list
+   */
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
     traversable(template, params: _*)(extract).toList
   }
 
-  def foreach[A](template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
+  /**
+   * Applies side-effect to each row iteratively.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param f function
+   * @return result as list
+   */
+  def foreach(template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         new ResultSetTraversable(executor.executeQuery()) foreach (rs => f(rs))
     }
   }
 
+  /**
+   * Returns query result as [[scala.collection.Traversable]] object.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param extract extract function
+   * @tparam A return type
+   * @return result as traversable
+   */
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
     using(createStatementExecutor(conn, template, params)) { executor =>
       new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
     }
   }
 
-  def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
-
-  def execute[A](template: String, params: Any*): Boolean = {
+  /**
+   * Executes [[java.sql.PreparedStatement#execute()]].
+   *
+   * @param template SQL template
+   * @param params  parameters
+   * @return flag
+   */
+  def execute(template: String, params: Any*): Boolean = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(conn, template, params)) {
       executor =>
@@ -95,7 +171,16 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
-  def executeWithFilters[A](before: (PreparedStatement) => Unit,
+  /**
+   * Executes [[java.sql.PreparedStatement#execute()]].
+   *
+   * @param before before filter
+   * @param after after filter
+   * @param template SQL template
+   * @param params parameters
+   * @return flag
+   */
+  def executeWithFilters(before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Boolean = {
@@ -109,6 +194,22 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   *
+   * @param template SQL template
+   * @param params  parameters
+   * @return result count
+   */
+  def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
+
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @return result count
+   */
   def update(template: String, params: Any*): Int = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(conn, template, params)) {
@@ -117,11 +218,30 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   *
+   * @param before before filter
+   * @param after after filter
+   * @param template SQL template
+   * @param params parameters
+   * @return  result count
+   */
   def updateWithFilters(before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
     template: String,
     params: Any*): Int = updateWithFilters(false, before, after, template, params: _*)
 
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   *
+   * @param returnGeneratedKeys is generated keys required
+   * @param before before filter
+   * @param after after filter
+   * @param template SQL template
+   * @param params parameters
+   * @return  result count
+   */
   def updateWithFilters(returnGeneratedKeys: Boolean,
     before: (PreparedStatement) => Unit,
     after: (PreparedStatement) => Unit,
@@ -141,6 +261,13 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     }
   }
 
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
+   *
+   * @param template SQL template
+   * @param params paramters
+   * @return generated key as a long value
+   */
   def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
     var generatedKeyFound = false
     var generatedKey: Long = -1
@@ -159,6 +286,9 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
     generatedKey
   }
 
+  /**
+   * Close the connection.
+   */
   def close(): Unit = {
     ignoring(classOf[Throwable]) {
       conn.close()

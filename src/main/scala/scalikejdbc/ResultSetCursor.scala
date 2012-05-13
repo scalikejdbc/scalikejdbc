@@ -16,6 +16,6 @@
 package scalikejdbc
 
 /**
- * Cursor position
+ * [[java.sql.ResultSet]] cursor
  */
-class ResultSetCursor(var index: Int)
+class ResultSetCursor(var position: Int)

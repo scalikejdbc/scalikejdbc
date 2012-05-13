@@ -19,16 +19,21 @@ package scalikejdbc
 import java.sql.ResultSet
 
 /**
- * ResultSet Traversable
+ * [[scala.collection.Traversable]] object which wraps [[java.sql.ResultSet]]
  */
 class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
 
   private val cursor: ResultSetCursor = new ResultSetCursor(0)
 
+  /**
+   * Applies a function.
+   * @param f function
+   * @tparam U type
+   */
   def foreach[U](f: (WrappedResultSet) => U): Unit = {
     while (rs.next()) {
-      cursor.index += 1
-      f.apply(new WrappedResultSet(rs, cursor, cursor.index))
+      cursor.position += 1
+      f.apply(new WrappedResultSet(rs, cursor, cursor.position))
     }
   }
 

@@ -11,7 +11,7 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers {
   it should "be available" in {
     val underlying: ResultSet = null
     val cursor: ResultSetCursor = new ResultSetCursor(0)
-    val instance = new WrappedResultSet(underlying, cursor, cursor.index)
+    val instance = new WrappedResultSet(underlying, cursor, cursor.position)
     instance should not be null
   }
 

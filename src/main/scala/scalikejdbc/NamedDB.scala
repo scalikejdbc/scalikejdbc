@@ -18,7 +18,16 @@ package scalikejdbc
 import java.sql.Connection
 
 /**
- * Named DB accessor
+ * Named Basic DB Accessor
+ *
+ * It's easier to use named ConnectionPool with this class.
+ *
+ * {{{
+ * ConnectionPool.add('named, "jdbc:...", "user", "password")
+ * val users = NamedDB('named) readOnly { session =>
+ *   session.list("select * from user")
+ * }
+ * }}}
  */
 case class NamedDB(name: Any) {
 

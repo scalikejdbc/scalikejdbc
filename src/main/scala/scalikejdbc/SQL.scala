@@ -18,9 +18,44 @@ package scalikejdbc
 import scalikejdbc.SQL.Output
 import java.sql.PreparedStatement
 
+/**
+ * SQL abstraction's companion object.
+ *
+ * {{{
+ *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   case class User(id: Int, name: String)
+ *
+ *   val users = DB readOnly { session =>
+ *     SQL("select * from user").map { rs =>
+ *       User(rs.int("id"), rs.string("name"))
+ *     }.list.apply()
+ *   }
+ *
+ *   DB autoCommit { session =>
+ *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *   }
+ *
+ *   DB localTx { session =>
+ *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
+ *   }
+ *
+ *   using(DB(ConnectionPool.borrow())) { db =>
+ *     db.begin()
+ *     try {
+ *       DB withTx { session =>
+ *         SQL("update user set name = ? where id = ?").bind("Alice", 123).update.apply()
+ *       }
+ *       db.commit()
+ *     } catch { case e =>
+ *       db.rollbackIfActive()
+ *       throw e
+ *     }
+ *   }
+ * }}}
+ */
 object SQL {
 
-  object Output extends Enumeration {
+  private[scalikejdbc] object Output extends Enumeration {
     val single, first, list, traversable = Value
   }
 
@@ -28,8 +63,20 @@ object SQL {
 
 }
 
+/**
+ * Simple [[scalikejdbc.SQL]] instance factory.
+ */
 private[scalikejdbc] object createSQL {
 
+  /**
+   * Provides a [[scalikejdbc.SQL]] instance.
+   * @param sql SQL template
+   * @param params   parameters
+   * @param extractor extractor function
+   * @param output output type
+   * @tparam A return type
+   * @return SQL instance
+   */
   def apply[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
     throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
   })(output: Output.Value = Output.traversable): SQL[A] = output match {
@@ -40,6 +87,9 @@ private[scalikejdbc] object createSQL {
 
 }
 
+/**
+ * Name binding [[scalikejdbc.SQL]] instance factory.
+ */
 private[scalikejdbc] object createNameBindingSQL {
 
   private def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
@@ -58,6 +108,15 @@ private[scalikejdbc] object createNameBindingSQL {
     })
   }
 
+  /**
+   * Provides a [[scalikejdbc.SQL]] instance.
+   * @param sql SQL template
+   * @param params named parameters
+   * @param extractor extractor function
+   * @param output output type
+   * @tparam A return type
+   * @return SQL instance
+   */
   def apply[A](sql: String)(params: (Symbol, Any)*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
     throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
   })(output: Output.Value = Output.traversable): SQL[A] = output match {
@@ -77,66 +136,185 @@ private[scalikejdbc] object createNameBindingSQL {
 
 }
 
+/**
+ * SQL abstraction.
+ *
+ * @param sql SQL template
+ * @param params parameters
+ * @param extractor  extractor function
+ * @param output output type
+ * @tparam A return type
+ */
 abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable) {
 
+  /**
+   * Bind parameters to SQL template in order.
+   * @param params parameters
+   * @return SQL instance
+   */
   def bind(params: Any*): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
 
+  /**
+   * Bind named parameters to SQL template.
+   * @param paramsByName named parameters
+   * @return SQL instance
+   */
   def bindByName(paramsByName: (Symbol, Any)*): SQL[A] = createNameBindingSQL[A](sql)(paramsByName: _*)(extractor)(output)
 
+  /**
+   * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
+   * @param extractor extractor function
+   * @tparam A return type
+   * @return SQL instance
+   */
   def map[A](extractor: (WrappedResultSet => A)): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
 
+  /**
+   * Same as #single.
+   * @return SQL instance
+   */
   def toOption(): SQLToOption[A] = createSQL(sql)(params: _*)(extractor)(Output.single).asInstanceOf[SQLToOption[A]]
 
+  /**
+   * Set execution type as single.
+   * @return SQL instance
+   */
   def single(): SQLToOption[A] = toOption()
 
+  /**
+   * Same as #first.
+   * @return SQL instance
+   */
   def headOption(): SQLToOption[A] = createSQL(sql)(params: _*)(extractor)(Output.first).asInstanceOf[SQLToOption[A]]
 
+  /**
+   * Set execution type as first.
+   * @return SQL instance
+   */
   def first(): SQLToOption[A] = headOption()
 
+  /**
+   * Same as #list
+   * @return SQL instance
+   */
   def toList(): SQLToList[A] = createSQL(sql)(params: _*)(extractor)(Output.list).asInstanceOf[SQLToList[A]]
 
+  /**
+   * Set execution type as list.
+   * @return SQL instance
+   */
   def list(): SQLToList[A] = toList()
 
+  /**
+   * Same as #traversable.
+   * @return SQL instance
+   */
   def toTraversable(): SQLToTraversable[A] = {
     createSQL[A](sql)(params: _*)(extractor)(Output.traversable).asInstanceOf[SQLToTraversable[A]]
   }
 
+  /**
+   * Set execution type as traversable.
+   * @return SQL instance
+   */
   def traversable(): SQLToTraversable[A] = toTraversable()
 
+  /**
+   * Set execution type as execute
+   * @return SQL instance
+   */
   def execute(): SQLExecution = new SQLExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
 
+  /**
+   * Set execution type as execute with filters
+   * @param before before filter
+   * @param after after filter
+   * @return SQL instance
+   */
   def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = new SQLExecution(sql)(params: _*)(before)(after)
 
-  def executeUpdate(): SQLUpdateExecution = update()
+  /**
+   * Set execution type as executeUpdate
+   * @return SQL instance
+   */
+  def executeUpdate(): SQLUpdate = update()
 
-  def executeUpdateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdateExecution = updateWithFilters(before, after)
+  /**
+   * Set execution type as executeUpdate with filters
+   * @param before before filter
+   * @param after after filter
+   * @return SQL instance
+   */
+  def executeUpdateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = updateWithFilters(before, after)
 
-  def update(): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+  /**
+   * Set execution type as executeUpdate
+   * @return SQL instance
+   */
+  def update(): SQLUpdate = new SQLUpdate(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
 
-  def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdateExecution = new SQLUpdateExecution(sql)(params: _*)(before)(after)
+  /**
+   * Set execution type as executeUpdate with filters
+   * @param before before filter
+   * @param after after filter
+   * @return SQL instance
+   */
+  def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = new SQLUpdate(sql)(params: _*)(before)(after)
 
-  def updateAndReturnGeneratedKey(): SQLUpdateExecutionReturnGeneratedKey = new SQLUpdateExecutionReturnGeneratedKey(sql)(params: _*)
+  /**
+   * Set execution type as updateAndreturnGeneratedKey
+   * @return SQL instance
+   */
+  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)
 
 }
 
+/**
+ * SQL which execute [[java.sql.Statement#execute()]].
+ * @param sql SQL template
+ * @param params parameters
+ * @param before before filter
+ * @param after after filter
+ */
 class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Boolean = session.executeWithFilters(before, after, sql, params: _*)
 
 }
 
-class SQLUpdateExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
+/**
+ * SQL which execute [[java.sql.Statement#executeUpdate()]].
+ * @param sql SQL template
+ * @param params parameters
+ * @param before before filter
+ * @param after after filter
+ */
+class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Int = session.updateWithFilters(before, after, sql, params: _*)
 
 }
 
-class SQLUpdateExecutionReturnGeneratedKey(sql: String)(params: Any*) {
+/**
+ * SQL which execute [[java.sql.Statement#executeUpdate()]] and get generated key value.
+ * @param sql SQL template
+ * @param params parameters
+ */
+class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 
   def apply()(implicit session: DBSession): Long = session.updateAndReturnGeneratedKey(sql, params: _*)
 
 }
 
+/**
+ * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * and returns the result as [[scala.collection.Traversable]] value.
+ * @param sql SQL template
+ * @param params parameters
+ * @param extractor  extractor function
+ * @param output output type
+ * @tparam A return type
+ */
 class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
@@ -144,6 +322,15 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
 
 }
 
+/**
+ * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * and returns the result as [[scala.collection.immutable.List]] value.
+ * @param sql SQL template
+ * @param params parameters
+ * @param extractor  extractor function
+ * @param output output type
+ * @tparam A return type
+ */
 class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
@@ -151,6 +338,15 @@ class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(
 
 }
 
+/**
+ * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * and returns the result as [[scala.Option]] value.
+ * @param sql SQL template
+ * @param params parameters
+ * @param extractor  extractor function
+ * @param output output type
+ * @tparam A return type
+ */
 class SQLToOption[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.single)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 

@@ -100,16 +100,16 @@ insert into user (
   name,
   encrypted_password
 ) values (
-  /* 'id */123,
-  /* 'email */'xxx@example.com',
-  /* 'name */'Alice',
-  /* 'encryptedPassword */'xfewSZe2sd3w#x8L'
+  /*'id*/123,
+  /*'email*/'xxx@example.com',
+  /*'name*/'Alice',
+  /*'encryptedPassword*/'123456789012'
 )
 """).bindByName(
   'id -> 132430,
   'emal -> "bob@example.com",
   'name -> "Bob",
-  'encryptedPassword -> "xxxxxx"
+  'encryptedPassword -> "xfewSZe2sd3w"
 ).update.apply()
 ```
 

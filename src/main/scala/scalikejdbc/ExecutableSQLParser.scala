@@ -26,16 +26,23 @@ import scala.util.parsing.combinator.JavaTokenParsers
  * For example,
  *
  * Normal SQL Template:
- * {{ select * from user where id = ? and user_name = ? }}
+ * {{{
+ * select * from user where id = ? and user_name = ?
+ * }}}
  *
  * ExecutableSQL Template:
- * {{ select * from user where id = /* :id */123 and user_name = /* :userName */'Alice' }}
+ * {{{
+ * select * from user where id = /*'id*/123 and user_name = /*'userName*/\'Alice'
+ * }}}
  *
  */
 object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
 
   /**
    * Extracts binding names from the SQL template.
+   *
+   * @param input input SQL
+   * @return extracted parameter names
    */
   def extractAllParameters(input: String): List[Symbol] = {
     parse(mainParser, simplifySQL(input)).getOrElse(Nil)
@@ -43,6 +50,9 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
 
   /**
    * Converts the SQL template to SQL template with place holders.
+   *
+   * @param input input SQL
+   * @return simplified SQL
    */
   def convertToSQLWithPlaceHolders(input: String): String = {
     simplifySQL(input).replaceAll("\\{.+?\\}", "?")
@@ -90,7 +100,7 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
   /**
    * Simplify the SQL template.
    *
-   * input: select * /* comment */ from user where id = /* :id */123 and name = 'Alice'
+   * input: select * /* comment */ from user where id = /*'id*/123 and name = 'Alice'
    * output: select * from user where id = {id} and name = 'Alice'
    */
   private def simplifySQL(input: String): String = SimplifySQL(input).convert()
