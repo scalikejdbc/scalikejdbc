@@ -35,7 +35,7 @@ Passed all the unit tests with the following RDBMS.
 ```scala
 resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.0.3"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.1.0"
 ```
 
 ### ls.implicit.ly
@@ -88,7 +88,7 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 Instead of embedding `?`(place holder), you can specify executable SQL as template. 
 
-Using this API, it's possibel to validate SQL before building into application. 
+Using this API, it's possible to validate SQL before building into application. 
 
 Usage is simple. Just use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`.
 
