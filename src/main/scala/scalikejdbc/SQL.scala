@@ -43,7 +43,15 @@ private[scalikejdbc] object createSQL {
 private[scalikejdbc] object createNameBindingSQL {
 
   private def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
-    (ExecutableSQLParser.convertToSQLWithPlaceHolders(sql), ExecutableSQLParser.extractAllParameters(sql).map { name =>
+    val names = ExecutableSQLParser.extractAllParameters(sql)
+    // check all the paramters passed by #bindByName are actually used
+    params.map { param =>
+      names.find(_ == param._1).orElse {
+        throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+      }
+    }
+    val sqlWithPlaceHolders = ExecutableSQLParser.convertToSQLWithPlaceHolders(sql)
+    (sqlWithPlaceHolders, names.map { name =>
       params.find(_._1 == name).orElse {
         throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
       }.map(_._2).orNull[Any]

@@ -38,6 +38,11 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with ShouldMatchers with Be
       DB readOnly {
         implicit session =>
           intercept[IllegalArgumentException] {
+            SQL("select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'")
+              .bindByName('id -> 1)
+              .map(rs => rs.int("id")).toOption().apply()
+          }
+          intercept[IllegalStateException] {
             SQL("select id from " + tableName + " where id = /*'id*/123")
               .bindByName('idd -> 1)
               .map(rs => rs.int("id")).toOption().apply()
