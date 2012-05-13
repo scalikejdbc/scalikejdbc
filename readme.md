@@ -28,6 +28,11 @@ Passed all the unit tests with the following RDBMS.
 [![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
 
 
+## Scaladoc
+
+http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
+
+
 ## Setup
 
 ### sbt
@@ -80,9 +85,12 @@ val activeUsers: List[User] = DB readOnly { implicit session =>
 }
 ```
 
-If you need more information(connection management, transaction, CRUD), please check the following wiki page in detail.
+If you need more information(connection management, transaction, CRUD), please check the following wiki page or scaladoc in detail.
 
 https://github.com/seratch/scalikejdbc/wiki/GettingStarted
+
+http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
+
 
 ## Executable SQL Template Support
 
