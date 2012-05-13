@@ -92,13 +92,11 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 
 
-## Executable SQL Template Support
+## Executable SQL template
 
-Instead of embedding `?`(place holder), you can specify executable SQL as template. 
+Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
 
-Using this API, it's possible to validate SQL before building into application. 
-
-Usage is simple. Just use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`.
+Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
 
 ```scala
 SQL("""
