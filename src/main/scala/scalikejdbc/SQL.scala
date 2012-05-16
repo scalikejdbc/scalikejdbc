@@ -281,7 +281,7 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
 class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Boolean = session match {
-    case AutoSession => DB autoCommit (implicit s => s.executeWithFilters(before, after, sql, params: _*))
+    case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
     case _ => session.executeWithFilters(before, after, sql, params: _*)
   }
 
@@ -311,7 +311,7 @@ class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(
 class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 
   def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession => DB autoCommit (implicit s => s.updateAndReturnGeneratedKey(sql, params: _*))
+    case AutoSession => DB autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
     case _ => session.updateAndReturnGeneratedKey(sql, params: _*)
   }
 
@@ -330,7 +330,7 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
   def apply()(implicit session: DBSession): Traversable[A] = session match {
-    case AutoSession => DB readOnly (implicit s => s.traversable(sql, params: _*)(extractor))
+    case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
     case _ => session.traversable(sql, params: _*)(extractor)
   }
 
@@ -349,7 +349,7 @@ class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
   def apply()(implicit session: DBSession): List[A] = session match {
-    case AutoSession => DB readOnly (implicit s => s.list(sql, params: _*)(extractor))
+    case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
     case _ => session.list(sql, params: _*)(extractor)
   }
 
@@ -370,12 +370,12 @@ class SQLToOption[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A
   def apply()(implicit session: DBSession): Option[A] = output match {
     case Output.single =>
       session match {
-        case AutoSession => DB readOnly (implicit s => s.single(sql, params: _*)(extractor))
+        case AutoSession => DB readOnly (s => s.single(sql, params: _*)(extractor))
         case _ => session.single(sql, params: _*)(extractor)
       }
     case Output.first =>
       session match {
-        case AutoSession => DB readOnly (implicit s => s.first(sql, params: _*)(extractor))
+        case AutoSession => DB readOnly (s => s.first(sql, params: _*)(extractor))
         case _ => session.first(sql, params: _*)(extractor)
       }
   }
