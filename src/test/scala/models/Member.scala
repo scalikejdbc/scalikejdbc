@@ -38,42 +38,42 @@ object Member {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
-  def find(id: Long)(implicit session: DBSession = NoDBSession()): Option[Member] = {
+  def find(id: Long)(implicit session: DBSession = NoDBSession): Option[Member] = {
     val sql = SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""").bindByName('id -> id).map(*).single
     session match {
-      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case NoDBSession => DB readOnly (implicit session => sql.apply())
       case _ => sql.apply()
     }
   }
 
-  def findAll()(implicit session: DBSession = NoDBSession()): List[Member] = {
+  def findAll()(implicit session: DBSession = NoDBSession): List[Member] = {
     val sql = SQL("""SELECT * FROM MEMBER""").map(*).list
     session match {
-      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case NoDBSession => DB readOnly (implicit session => sql.apply())
       case _ => sql.apply()
     }
   }
 
-  def countAll()(implicit session: DBSession = NoDBSession()): Long = {
+  def countAll()(implicit session: DBSession = NoDBSession): Long = {
     val sql = SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single
     session match {
-      case _: NoDBSession => DB readOnly (implicit session => sql.apply().get)
+      case NoDBSession => DB readOnly (implicit session => sql.apply().get)
       case _ => sql.apply().get
     }
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession()): List[Member] = {
+  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession): List[Member] = {
     val sql = SQL("""SELECT * FROM MEMBER WHERE """ + where).bindByName(params: _*).map(*).list
     session match {
-      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case NoDBSession => DB readOnly (implicit session => sql.apply())
       case _ => sql.apply()
     }
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession()): Long = {
+  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession): Long = {
     val sql = SQL("""SELECT count(1) FROM MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single
     session match {
-      case _: NoDBSession => DB readOnly (implicit session => sql.apply().get)
+      case NoDBSession => DB readOnly (implicit session => sql.apply().get)
       case _ => sql.apply().get
     }
   }
@@ -83,7 +83,7 @@ object Member {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = NoDBSession()): Member = {
+    createdAt: DateTime)(implicit session: DBSession = NoDBSession): Member = {
     val sql = SQL("""
         INSERT INTO MEMBER (
           ID,
@@ -108,7 +108,7 @@ object Member {
       ).update
 
     session match {
-      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case NoDBSession => DB localTx (implicit session => sql.apply())
       case _ => sql.apply()
     }
     Member(
@@ -120,7 +120,7 @@ object Member {
     )
   }
 
-  def save(m: Member)(implicit session: DBSession = NoDBSession()): Member = {
+  def save(m: Member)(implicit session: DBSession = NoDBSession): Member = {
     val sql = SQL("""
         UPDATE
           MEMBER
@@ -141,17 +141,17 @@ object Member {
         'createdAt -> m.createdAt
       ).update
     session match {
-      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case NoDBSession => DB localTx (implicit session => sql.apply())
       case _ => sql.apply()
     }
     m
   }
 
-  def delete(m: Member)(implicit session: DBSession = NoDBSession()): Unit = {
+  def delete(m: Member)(implicit session: DBSession = NoDBSession): Unit = {
     val sql = SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
       .bindByName('id -> m.id).update
     session match {
-      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case NoDBSession => DB localTx (implicit session => sql.apply())
       case _ => sql.apply()
     }
   }

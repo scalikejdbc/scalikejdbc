@@ -312,6 +312,11 @@ case class ActiveDBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: 
 
 }
 
-case class NoDBSession(conn: Connection = null,
-  tx: Option[Tx] = None,
-  isReadOnly: Boolean = false) extends DBSession
+case object NoDBSession extends DBSession {
+
+  val conn: Connection = null
+  val tx: Option[Tx] = None
+  val isReadOnly: Boolean = false
+
+}
+
