@@ -95,16 +95,18 @@ private[scalikejdbc] object createNameBindingSQL {
   private def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = ExecutableSQLParser.extractAllParameters(sql)
     // check all the paramters passed by #bindByName are actually used
-    params.map { param =>
-      names.find(_ == param._1).orElse {
-        throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
-      }
+    params.map {
+      param =>
+        names.find(_ == param._1).orElse {
+          throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+        }
     }
     val sqlWithPlaceHolders = ExecutableSQLParser.convertToSQLWithPlaceHolders(sql)
-    (sqlWithPlaceHolders, names.map { name =>
-      params.find(_._1 == name).orElse {
-        throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
-      }.map(_._2).orNull[Any]
+    (sqlWithPlaceHolders, names.map {
+      name =>
+        params.find(_._1 == name).orElse {
+          throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
+        }.map(_._2).orNull[Any]
     })
   }
 
@@ -278,12 +280,15 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
  */
 class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
-  def apply()(implicit session: DBSession): Boolean = session.executeWithFilters(before, after, sql, params: _*)
+  def apply()(implicit session: DBSession): Boolean = session match {
+    case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
+    case _ => session.executeWithFilters(before, after, sql, params: _*)
+  }
 
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeUpdate()]].
+ * SQL which execute [[java.sql.Statement# exeuteUpdate()]].
  * @param sql SQL template
  * @param params parameters
  * @param before before filter
@@ -291,18 +296,24 @@ class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Uni
  */
 class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
-  def apply()(implicit session: DBSession): Int = session.updateWithFilters(before, after, sql, params: _*)
+  def apply()(implicit session: DBSession): Int = session match {
+    case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
+    case _ => session.updateWithFilters(before, after, sql, params: _*)
+  }
 
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeUpdate()]] and get generated key value.
+ * SQL which execute [[java.sql.Statement# exeuteUpdate()]] and get generated key value.
  * @param sql SQL template
  * @param params parameters
  */
 class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 
-  def apply()(implicit session: DBSession): Long = session.updateAndReturnGeneratedKey(sql, params: _*)
+  def apply()(implicit session: DBSession): Long = session match {
+    case AutoSession => DB autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
+    case _ => session.updateAndReturnGeneratedKey(sql, params: _*)
+  }
 
 }
 
@@ -318,12 +329,15 @@ class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
-  def apply()(implicit session: DBSession): Traversable[A] = session.traversable(sql, params: _*)(extractor)
+  def apply()(implicit session: DBSession): Traversable[A] = session match {
+    case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
+    case _ => session.traversable(sql, params: _*)(extractor)
+  }
 
 }
 
 /**
- * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * SQL which exeute [[java.sql.Statement# executeQuery()]]
  * and returns the result as [[scala.collection.immutable.List]] value.
  * @param sql SQL template
  * @param params parameters
@@ -334,12 +348,15 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
 class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
-  def apply()(implicit session: DBSession): List[A] = session.list(sql, params: _*)(extractor)
+  def apply()(implicit session: DBSession): List[A] = session match {
+    case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
+    case _ => session.list(sql, params: _*)(extractor)
+  }
 
 }
 
 /**
- * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * SQL which exeute [[java.sql.Statement# executeQuery()]]
  * and returns the result as [[scala.Option]] value.
  * @param sql SQL template
  * @param params parameters
@@ -351,8 +368,16 @@ class SQLToOption[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A
     extends SQL[A](sql)(params: _*)(extractor)(output) {
 
   def apply()(implicit session: DBSession): Option[A] = output match {
-    case Output.single => session.single(sql, params: _*)(extractor)
-    case Output.first => session.first(sql, params: _*)(extractor)
+    case Output.single =>
+      session match {
+        case AutoSession => DB readOnly (s => s.single(sql, params: _*)(extractor))
+        case _ => session.single(sql, params: _*)(extractor)
+      }
+    case Output.first =>
+      session match {
+        case AutoSession => DB readOnly (s => s.first(sql, params: _*)(extractor))
+        case _ => session.first(sql, params: _*)(extractor)
+      }
   }
 
 }

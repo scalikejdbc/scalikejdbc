@@ -297,11 +297,11 @@ trait DBSession extends LogSupport {
 
 object DBSession {
 
-  def apply(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) = ActiveDBSession(conn, tx, isReadOnly)
+  def apply(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) = ActiveSession(conn, tx, isReadOnly)
 
 }
 
-case class ActiveDBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
+case class ActiveSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
     extends DBSession {
 
   tx match {
@@ -312,7 +312,7 @@ case class ActiveDBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: 
 
 }
 
-case object NoDBSession extends DBSession {
+case object NoSession extends DBSession {
 
   val conn: Connection = null
   val tx: Option[Tx] = None
@@ -320,3 +320,10 @@ case object NoDBSession extends DBSession {
 
 }
 
+case object AutoSession extends DBSession {
+
+  val conn: Connection = null
+  val tx: Option[Tx] = None
+  val isReadOnly: Boolean = false
+
+}
