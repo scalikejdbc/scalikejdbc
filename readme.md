@@ -61,12 +61,12 @@ The first one is just using `DBSession` methods:
 
 ```scala
 import scalikejdbc._
-import org.joda.time.DateTime
-case class User(id: Long, name: String, birthday: Option[DateTime])
+import org.joda.time.LocalDate
+case class User(id: Long, name: String, birthday: Option[LocalDate])
 
 val activeUsers: List[User] = DB readOnly { session =>
   session.list("select * from user where active = ?", true) { 
-    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toDateTime))
+    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
   }
 }
 ```
@@ -75,12 +75,12 @@ The other is using API which starts with `SQL.apply`:
 
 ```scala
 import scalikejdbc._
-import org.joda.time.DateTime
-case class User(id: Long, name: String, birthday: Option[DateTime])
+import org.joda.time.LocalDate
+case class User(id: Long, name: String, birthday: Option[LocalDate])
 
 val activeUsers: List[User] = DB readOnly { implicit session =>
   SQL("select * from user where active = ?").bind(true).map { 
-    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toDateTime))
+    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
   }.list.apply()
 }
 ```
