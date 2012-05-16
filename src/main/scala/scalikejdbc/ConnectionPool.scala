@@ -15,8 +15,6 @@
  */
 package scalikejdbc
 
-import org.apache.commons.pool.impl.GenericObjectPool
-import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
 import javax.sql.DataSource
 import java.sql.Connection
 
@@ -29,16 +27,22 @@ import java.sql.Connection
  */
 object ConnectionPool extends LogSupport {
 
+  type MutableMap[A, B] = scala.collection.mutable.HashMap[A, B]
+  type CPSettings = ConnectionPoolSettings
+  type CPFactory = ConnectionPoolFactory
+
   private val DEFAULT_NAME: Any = "default"
 
-  private val pools = new collection.mutable.HashMap[Any, ConnectionPool]()
+  private val pools = new MutableMap[Any, ConnectionPool]()
 
   /**
    * Returns true when the specified Connection pool is already initialized.
    * @param name pool name
    * @return is initialized
    */
-  def isInitialized(name: Any = DEFAULT_NAME) = pools.get(DEFAULT_NAME).isDefined
+  def isInitialized(name: Any = DEFAULT_NAME) = pools.synchronized {
+    pools.get(DEFAULT_NAME).isDefined
+  }
 
   private def ensureInitialized(name: Any): Unit = {
     if (!isInitialized(name)) {
@@ -51,7 +55,7 @@ object ConnectionPool extends LogSupport {
    * Returns Connection pool. If the specified Connection pool does not exist, returns null.
    *
    * @param name pool name
-   * @return              connection pool
+   * @return connection pool
    */
   def apply(name: Any = DEFAULT_NAME): ConnectionPool = get(name)
 
@@ -59,36 +63,40 @@ object ConnectionPool extends LogSupport {
    * Returns Connection pool. If the specified Connection pool does not exist, returns null.
    *
    * @param name pool name
-   * @return              connection pool
+   * @return connection pool
    */
-  def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.get(name).orNull
+  def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
+    pools.get(name).orNull
+  }
 
   /**
    * Register new named Connection pool.
    *
-   * @param name  pool name
-   * @param url   JDBC URL
-   * @param user          JDBC username
-   * @param password  JDBC password
-   * @param settings  Settings
+   * @param name pool name
+   * @param url JDBC URL
+   * @param user JDBC username
+   * @param password JDBC password
+   * @param settings Settings
    */
   def add(name: Any, url: String, user: String, password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
-    pools.update(name, new ConnectionPool(url, user, password, settings))
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
+    pools.synchronized {
+      pools.update(name, factory.apply(url, user, password, settings))
+    }
     log.debug("Registered connection pool : " + get(name).toString())
   }
 
   /**
    * Register the default Connection pool.
    *
-   * @param url   JDBC URL
-   * @param user          JDBC username
-   * @param password  JDBC password
-   * @param settings  Settings
+   * @param url JDBC URL
+   * @param user JDBC username
+   * @param password JDBC password
+   * @param settings Settings
    */
   def singleton(url: String, user: String, password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()): Unit = {
-    add(DEFAULT_NAME, url, user, password, settings)
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory): Unit = {
+    add(DEFAULT_NAME, url, user, password, settings)(factory)
     log.debug("Registered singleton connection pool : " + get().toString())
   }
 
@@ -118,42 +126,47 @@ object ConnectionPool extends LogSupport {
 
 /**
  * Connection Pool
- *
- * Using Commons DBCP internally.
- *
- * @see http://commons.apache.org/dbcp/
  */
-class ConnectionPool(url: String,
+abstract class ConnectionPool(url: String,
     user: String,
     password: String,
     settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
-
-  private val pool = new GenericObjectPool(null)
-
-  pool.setMinIdle(settings.initialSize)
-  pool.setMaxIdle(settings.maxSize)
-  pool.setMaxActive(settings.maxSize)
-  pool.setMaxWait(5000)
-  pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL)
-  pool.setTestOnBorrow(true)
-
-  // Initialize Connection Factory
-  // (not read-only, auto-commit)
-  new PoolableConnectionFactory(
-    new DriverManagerConnectionFactory(url, user, password),
-    pool,
-    null,
-    settings.validationQuery,
-    false,
-    true)
-
-  private val dataSource: DataSource = new PoolingDataSource(pool)
 
   /**
    * Borrows [[java.sql.Connection]] from pool.
    * @return connection
    */
-  def borrow(): Connection = dataSource.getConnection()
+  def borrow(): Connection
+
+  /**
+   * Returns [[javax.sql.DataSource]] object.
+   * @return datasource
+   */
+  def dataSource: DataSource
+
+  /**
+   * Returns num of active connections.
+   * @return num
+   */
+  def numActive: Int = throw new UnsupportedOperationException
+
+  /**
+   * Returns num of idle connections.
+   * @return num
+   */
+  def numIdle: Int = throw new UnsupportedOperationException
+
+  /**
+   * Returns max limit of active connections.
+   * @return num
+   */
+  def maxActive: Int = throw new UnsupportedOperationException
+
+  /**
+   * Returns max limit of idle connections.
+   * @return num
+   */
+  def maxIdle: Int = throw new UnsupportedOperationException
 
   /**
    * Returns self as a String value.
@@ -162,3 +175,52 @@ class ConnectionPool(url: String,
   override def toString() = "ConnectionPool(url:" + url + ", user:" + user + ")"
 
 }
+
+/**
+ * Commons DBCP Connection Pool
+ *
+ * @see http://commons.apache.org/dbcp/
+ */
+class CommonsConnectionPool(url: String,
+  user: String,
+  password: String,
+  settings: ConnectionPoolSettings = ConnectionPoolSettings())
+    extends ConnectionPool(url, user, password, settings) {
+
+  import org.apache.commons.pool.impl.GenericObjectPool
+  import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
+
+  private[this] val _pool = new GenericObjectPool(null)
+  _pool.setMinIdle(settings.initialSize)
+  _pool.setMaxIdle(settings.maxSize)
+  _pool.setMaxActive(settings.maxSize)
+  _pool.setMaxWait(5000)
+  _pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL)
+  _pool.setTestOnBorrow(true)
+
+  // Initialize Connection Factory
+  // (not read-only, auto-commit)
+  new PoolableConnectionFactory(
+    new DriverManagerConnectionFactory(url, user, password),
+    _pool,
+    null,
+    settings.validationQuery,
+    false,
+    true)
+
+  private[this] val _dataSource: DataSource = new PoolingDataSource(_pool)
+
+  override def dataSource: DataSource = _dataSource
+
+  override def borrow(): Connection = dataSource.getConnection()
+
+  override def numActive: Int = _pool.getNumActive
+
+  override def numIdle: Int = _pool.getNumIdle
+
+  override def maxActive: Int = _pool.getMaxActive
+
+  override def maxIdle: Int = _pool.getMaxIdle
+
+}
+
