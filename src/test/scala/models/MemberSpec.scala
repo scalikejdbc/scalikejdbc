@@ -46,6 +46,21 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
     Member.findBy("name = /*'name*/'Alice'", 'name -> "ALICE").size should equal(1)
     newAlice.destroy()
 
+    try {
+      DB localTx { implicit session =>
+        Member.create(
+          id = 999,
+          name = "Rollback",
+          description = Option("rollback test"),
+          birthday = Option(new LocalDate(1980, 1, 2)),
+          createdAt = new DateTime
+        )
+        Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
+        throw new RuntimeException
+      }
+    } catch { case e => }
+    Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
+
     // execute SQL directly
     MemberSQLTemplate.find().map(m => Member.delete(m))
     MemberSQLTemplate.create().id should equal(123)

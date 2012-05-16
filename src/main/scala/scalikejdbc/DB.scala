@@ -412,7 +412,7 @@ case class DB(conn: Connection) extends LogSupport {
    */
   def readOnlySession(): DBSession = {
     conn.setReadOnly(true)
-    new DBSession(conn, isReadOnly = true)
+    DBSession(conn, isReadOnly = true)
   }
 
   /**
@@ -447,7 +447,7 @@ case class DB(conn: Connection) extends LogSupport {
   def autoCommitSession(): DBSession = {
     conn.setReadOnly(false)
     conn.setAutoCommit(true)
-    new DBSession(conn)
+    DBSession(conn)
   }
 
   /**
@@ -482,7 +482,7 @@ case class DB(conn: Connection) extends LogSupport {
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    new DBSession(conn, tx = Some(tx))
+    DBSession(conn, tx = Some(tx))
   }
 
   /**
@@ -529,7 +529,7 @@ case class DB(conn: Connection) extends LogSupport {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(conn, tx = Option(tx))
+        val session = DBSession(conn, tx = Option(tx))
         val result: A = execution(session)
         tx.commit()
         result
@@ -548,7 +548,7 @@ case class DB(conn: Connection) extends LogSupport {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
-        val session = new DBSession(conn, tx = Option(tx))
+        val session = DBSession(conn, tx = Option(tx))
         val result: A = execution(session.conn)
         tx.commit()
         result

@@ -31,18 +31,15 @@ import util.control.Exception._
  * }
  * }}}
  */
-case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) extends LogSupport {
+trait DBSession extends LogSupport {
 
   /**
    * Connection
    */
+  val conn: Connection
   lazy val connection: Connection = conn
 
-  tx match {
-    case Some(tx) if tx.isActive() => // nothing to do
-    case None => conn.setAutoCommit(true)
-    case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
-  }
+  val isReadOnly: Boolean
 
   /**
    * Create [[java.sql.Statement]] executor.
@@ -297,3 +294,24 @@ case class DBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolea
   }
 
 }
+
+object DBSession {
+
+  def apply(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) = ActiveDBSession(conn, tx, isReadOnly)
+
+}
+
+case class ActiveDBSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
+    extends DBSession {
+
+  tx match {
+    case Some(tx) if tx.isActive() => // nothing to do
+    case None => conn.setAutoCommit(true)
+    case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
+  }
+
+}
+
+case class NoDBSession(conn: Connection = null,
+  tx: Option[Tx] = None,
+  isReadOnly: Boolean = false) extends DBSession

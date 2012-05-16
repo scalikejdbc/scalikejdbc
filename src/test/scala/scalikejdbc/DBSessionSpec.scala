@@ -15,7 +15,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   behavior of "DBSession"
 
   it should "be available" in {
-    using(new DBSession(ConnectionPool.borrow())) { session =>
+    using(DBSession(ConnectionPool.borrow())) { session =>
       session.conn should not be (null)
       session.connection should not be (null)
       session should not be null

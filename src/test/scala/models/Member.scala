@@ -3,8 +3,7 @@ package models
 import scalikejdbc._
 import org.joda.time.{ LocalDate, DateTime }
 
-case class Member(
-    id: Long,
+case class Member(id: Long,
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
@@ -39,37 +38,43 @@ object Member {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
-  def find(id: Long): Option[Member] = {
-    DB readOnly { implicit session =>
-      SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/123""")
-        .bindByName('id -> id).map(*).single.apply()
+  def find(id: Long)(implicit session: DBSession = NoDBSession()): Option[Member] = {
+    val sql = SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""").bindByName('id -> id).map(*).single
+    session match {
+      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case _ => sql.apply()
     }
   }
 
-  def findAll(): List[Member] = {
-    DB readOnly { implicit session =>
-      SQL("""SELECT * FROM MEMBER""").map(*).list.apply()
+  def findAll()(implicit session: DBSession = NoDBSession()): List[Member] = {
+    val sql = SQL("""SELECT * FROM MEMBER""").map(*).list
+    session match {
+      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case _ => sql.apply()
     }
   }
 
-  def countAll(): Long = {
-    DB readOnly { implicit session =>
-      SQL("""SELECT COUNT(1) FROM MEMBER""")
-        .map(rs => rs.long(1)).single.apply().get
+  def countAll()(implicit session: DBSession = NoDBSession()): Long = {
+    val sql = SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single
+    session match {
+      case _: NoDBSession => DB readOnly (implicit session => sql.apply().get)
+      case _ => sql.apply().get
     }
   }
 
-  def findBy(where: String, params: (Symbol, Any)*): List[Member] = {
-    DB readOnly { implicit session =>
-      SQL("""SELECT * FROM MEMBER WHERE """ + where)
-        .bindByName(params: _*).map(*).list.apply()
+  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession()): List[Member] = {
+    val sql = SQL("""SELECT * FROM MEMBER WHERE """ + where).bindByName(params: _*).map(*).list
+    session match {
+      case _: NoDBSession => DB readOnly (implicit session => sql.apply())
+      case _ => sql.apply()
     }
   }
 
-  def countBy(where: String, params: (Symbol, Any)*): Long = {
-    DB readOnly { implicit session =>
-      SQL("""SELECT count(1) FROM MEMBER WHERE """ + where)
-        .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
+  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NoDBSession()): Long = {
+    val sql = SQL("""SELECT count(1) FROM MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single
+    session match {
+      case _: NoDBSession => DB readOnly (implicit session => sql.apply().get)
+      case _ => sql.apply().get
     }
   }
 
@@ -78,9 +83,8 @@ object Member {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime): Member = {
-    DB localTx { implicit session =>
-      SQL("""
+    createdAt: DateTime)(implicit session: DBSession = NoDBSession()): Member = {
+    val sql = SQL("""
         INSERT INTO MEMBER (
           ID,
           NAME,
@@ -90,57 +94,65 @@ object Member {
         ) VALUES (
           /*'id*/123,
           /*'name*/'abc',
-          /*'description*/'xxx',
-          /*'birthday*/'1980-04-06',
-          /*'createdAt*/'2012-05-06 12:34:56' 
+          /*'description*/'abc',
+          /*'birthday*/'1958-09-06',
+          /*'createdAt*/'1958-09-06 12:00:00'
         )
-      """)
-        .bindByName(
-          'id -> id,
-          'name -> name,
-          'description -> description,
-          'birthday -> birthday,
-          'createdAt -> createdAt
-        ).update.apply()
-      Member(
-        id = id,
-        name = name,
-        description = description,
-        birthday = birthday,
-        createdAt = createdAt
-      )
+                  """)
+      .bindByName(
+        'id -> id,
+        'name -> name,
+        'description -> description,
+        'birthday -> birthday,
+        'createdAt -> createdAt
+      ).update
+
+    session match {
+      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case _ => sql.apply()
     }
+    Member(
+      id = id,
+      name = name,
+      description = description,
+      birthday = birthday,
+      createdAt = createdAt
+    )
   }
 
-  def save(m: Member): Member = {
-    DB localTx { implicit session =>
-      SQL("""
-        UPDATE 
+  def save(m: Member)(implicit session: DBSession = NoDBSession()): Member = {
+    val sql = SQL("""
+        UPDATE
           MEMBER
-        SET 
-          ID = /*'id*/123,
-          NAME = /*'name*/'xxx',
-          DESCRIPTION = /*'description*/'yyyy',
-          BIRTHDAY = /*'birthday*/'1980-12-30',
-          CREATED_AT = /*'createdAt*/'2012-05-04 12:23:34' 
-        WHERE 
-          ID = /*'id*/123
-      """)
-        .bindByName(
-          'id -> m.id,
-          'name -> m.name,
-          'description -> m.description,
-          'birthday -> m.birthday,
-          'createdAt -> m.createdAt
-        ).update.apply()
-      m
+        SET
+          ID = /*'id*/1,
+          NAME = /*'name*/'abc',
+          DESCRIPTION = /*'description*/'abc',
+          BIRTHDAY = /*'birthday*/'1958-09-06',
+          CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
+        WHERE
+          ID = /*'id*/1
+                  """)
+      .bindByName(
+        'id -> m.id,
+        'name -> m.name,
+        'description -> m.description,
+        'birthday -> m.birthday,
+        'createdAt -> m.createdAt
+      ).update
+    session match {
+      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case _ => sql.apply()
     }
+    m
   }
 
-  def delete(m: Member): Unit = {
-    DB localTx { implicit session =>
-      SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/123""")
-        .bindByName('id -> m.id).update.apply()
+  def delete(m: Member)(implicit session: DBSession = NoDBSession()): Unit = {
+    val sql = SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
+      .bindByName('id -> m.id).update
+    session match {
+      case _: NoDBSession => DB localTx (implicit session => sql.apply())
+      case _ => sql.apply()
     }
   }
 
