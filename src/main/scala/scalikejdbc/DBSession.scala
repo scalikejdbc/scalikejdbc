@@ -301,6 +301,23 @@ object DBSession {
 
 }
 
+/**
+ * Active session implementation of [[scalikejdbc.DBSession]].
+ *
+ * This class provides readOnly/autoCommit/localTx/withinTx blocks and session objects.
+ *
+ * {{{
+ * import scalikejdbc._
+ *
+ * val userIdList = DB autoCommit { session: DBSession =>
+ *   session.list("select * from user") { rs => rs.int("id") }
+ * }
+ * }}}
+ *
+ * @param conn connection
+ * @param tx transaction
+ * @param isReadOnly is read only
+ */
 case class ActiveSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
     extends DBSession {
 
@@ -312,6 +329,9 @@ case class ActiveSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Bo
 
 }
 
+/**
+ * Represents that there is no active session.
+ */
 case object NoSession extends DBSession {
 
   val conn: Connection = null
@@ -320,6 +340,9 @@ case object NoSession extends DBSession {
 
 }
 
+/**
+ * Represents that already existing session will be used or a new session will be started.
+ */
 case object AutoSession extends DBSession {
 
   val conn: Connection = null
