@@ -350,3 +350,15 @@ case object AutoSession extends DBSession {
   val isReadOnly: Boolean = false
 
 }
+
+/**
+ * Represents that already existing session will be used or a new session which is retrieved from named connection pool will be started.
+ */
+case class NamedAutoSession(name: Any) extends DBSession {
+
+  val conn: Connection = null
+  val tx: Option[Tx] = None
+  val isReadOnly: Boolean = false
+
+}
+

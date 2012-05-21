@@ -282,6 +282,7 @@ class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Uni
 
   def apply()(implicit session: DBSession): Boolean = session match {
     case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
     case _ => session.executeWithFilters(before, after, sql, params: _*)
   }
 
@@ -298,6 +299,7 @@ class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(
 
   def apply()(implicit session: DBSession): Int = session match {
     case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
     case _ => session.updateWithFilters(before, after, sql, params: _*)
   }
 
@@ -312,6 +314,7 @@ class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 
   def apply()(implicit session: DBSession): Long = session match {
     case AutoSession => DB autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
     case _ => session.updateAndReturnGeneratedKey(sql, params: _*)
   }
 
@@ -331,6 +334,7 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
 
   def apply()(implicit session: DBSession): Traversable[A] = session match {
     case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
+    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(sql, params: _*)(extractor))
     case _ => session.traversable(sql, params: _*)(extractor)
   }
 
@@ -350,6 +354,7 @@ class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(
 
   def apply()(implicit session: DBSession): List[A] = session match {
     case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
+    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(sql, params: _*)(extractor))
     case _ => session.list(sql, params: _*)(extractor)
   }
 
@@ -371,11 +376,13 @@ class SQLToOption[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A
     case Output.single =>
       session match {
         case AutoSession => DB readOnly (s => s.single(sql, params: _*)(extractor))
+        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.single(sql, params: _*)(extractor))
         case _ => session.single(sql, params: _*)(extractor)
       }
     case Output.first =>
       session match {
         case AutoSession => DB readOnly (s => s.first(sql, params: _*)(extractor))
+        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.first(sql, params: _*)(extractor))
         case _ => session.first(sql, params: _*)(extractor)
       }
   }

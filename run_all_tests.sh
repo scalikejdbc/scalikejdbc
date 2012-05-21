@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 if [ $# -ne 1 ]; then
   echo "Please specify db name (i.e. postgresql)"
   exit 1
