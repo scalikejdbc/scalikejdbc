@@ -41,7 +41,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ```scala
 resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.1.1"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.2.0"
 ```
 
 ### ls.implicit.ly
