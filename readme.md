@@ -42,6 +42,9 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
 libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.2.2"
+
+// slf4j binding you like
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
 ```
 
 ### ls.implicit.ly
