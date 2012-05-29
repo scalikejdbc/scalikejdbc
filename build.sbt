@@ -1,4 +1,4 @@
-import testgen.TestgenKeys._
+import testgenerator.SbtKeys._
 
 scalaVersion := "2.9.2"
 
@@ -48,17 +48,17 @@ seq(lsSettings :_*)
 
 seq(scalariformSettings: _*)
 
-// testgen
+// testgenerator
 
-seq(testgenSettings: _*)
+seq(testgeneratorSettings: _*)
 
-testgenEncoding in Compile := "UTF-8"
+testgeneratorEncoding in Compile := "UTF-8"
 
-testgenTestTemplate in Compile := "scalatest.FlatSpec"
+testgeneratorTestTemplate in Compile := "scalatest.FlatSpec"
 
-testgenScalaTestMatchers in Compile := "ShouldMatchers"
+testgeneratorScalaTestMatchers in Compile := "ShouldMatchers"
 
-testgenLineBreak in Compile := "LF"
+testgeneratorLineBreak in Compile := "LF"
 
 // publish
 

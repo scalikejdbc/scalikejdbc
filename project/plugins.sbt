@@ -7,7 +7,7 @@ resolvers ++= Seq(
   "coda" at "http://repo.codahale.com"
 )
 
-addSbtPlugin("com.github.seratch" %% "testgen-sbt" % "1.0.0")
+addSbtPlugin("com.github.seratch" %% "testgenerator" % "1.1.0")
 
 //addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 libraryDependencies += Defaults.sbtPluginExtra("com.github.mpeltonen" % "sbt-idea" % "1.0.0", "0.11.2", "2.9.1")

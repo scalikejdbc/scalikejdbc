@@ -41,7 +41,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ```scala
 resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
 
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.2.2"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.2.3"
 
 // slf4j binding you like
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
@@ -94,6 +94,32 @@ If you need more information(connection management, transaction, CRUD), please c
 https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
+
+
+## Anorm SQL template
+
+Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
+
+```scala
+SQL("""
+insert into user (
+  id,
+  email,
+  name,
+  encrypted_password
+) values (
+  {id},
+  {email},
+  {name},
+  {encryptedPassword}
+)
+""").bindByName(
+  'id -> 132430,
+  'emal -> "bob@example.com",
+  'name -> "Bob",
+  'encryptedPassword -> "xfewSZe2sd3w"
+).update.apply()
+```
 
 
 ## Executable SQL template
