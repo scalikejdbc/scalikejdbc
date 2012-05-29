@@ -7,9 +7,9 @@ import util.control.Exception._
 
 class DB_AnormSQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
-  val tableNamePrefix = "emp_DB_ExecSQLOp" + System.currentTimeMillis().toString.substring(8)
+  val tableNamePrefix = "emp_DB_AnromSQLOp" + System.currentTimeMillis().toString.substring(8)
 
-  behavior of "DB(Executable SQL Operation)"
+  behavior of "DB(Anorm like SQL Operation)"
 
   it should "be available" in {
     val db = DB(ConnectionPool.borrow())
