@@ -64,23 +64,28 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
 
   private lazy val sqlString: String = {
 
-    def toPrintable(param: Any): String = ((param match {
-      case None => null
-      case Some(p) => toPrintable(p)
-      case p: String => p
-      case p: java.util.Date => p.toSqlTimestamp.toString
-      case p: org.joda.time.DateTime => p.toDate.toSqlTimestamp.toString
-      case p: org.joda.time.LocalDateTime => p.toDate.toSqlTimestamp
-      case p: org.joda.time.LocalDate => p.toDate.toSqlDate
-      case p: org.joda.time.LocalTime => p.toSqlTime
-      case p => p
-    }) match {
-      case null => "null"
-      case result: String if result.size > 100 => "'" + result.take(100) + "... (" + result.size + ")" + "'"
-      case result: String => "'" + result + "'"
-      case result => result.toString
-    }).replaceAll("\r", "\\\\r")
-      .replaceAll("\n", "\\\\n")
+    def toPrintable(param: Any): String = {
+      def normalize(param: Any): Any = {
+        param match {
+          case None => null
+          case Some(p) => normalize(p)
+          case p: String => p
+          case p: java.util.Date => p.toSqlTimestamp.toString
+          case p: org.joda.time.DateTime => p.toDate.toSqlTimestamp.toString
+          case p: org.joda.time.LocalDateTime => p.toDate.toSqlTimestamp
+          case p: org.joda.time.LocalDate => p.toDate.toSqlDate
+          case p: org.joda.time.LocalTime => p.toSqlTime
+          case p => p
+        }
+      }
+      (normalize(param) match {
+        case null => "null"
+        case result: String if result.size > 100 => "'" + result.take(100) + "... (" + result.size + ")" + "'"
+        case result: String => "'" + result + "'"
+        case result => result.toString
+      }).replaceAll("\r", "\\\\r")
+        .replaceAll("\n", "\\\\n")
+    }
 
     var i = 0
     def trimSpaces(s: String, i: Int = 0): String = i match {
