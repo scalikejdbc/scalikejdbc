@@ -59,7 +59,9 @@ object SQL {
     val single, first, list, traversable = Value
   }
 
-  def apply[A](sql: String): SQL[A] = createSQL(sql)(Seq(): _*)()()
+  def apply[A](sql: String): SQL[A, NoExtractor] = createSQL(sql)(Seq(): _*)({ (rs: WrappedResultSet) =>
+    throw new IllegalStateException("If you see this message, it's a ScalikeJDBC's bug. Please report us.")
+  })()
 
 }
 
@@ -77,12 +79,10 @@ private[scalikejdbc] object createSQL {
    * @tparam A return type
    * @return SQL instance
    */
-  def apply[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
-    throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
-  })(output: Output.Value = Output.traversable): SQL[A] = output match {
-    case Output.single | Output.first => new SQLToOption(sql)(params: _*)(extractor)(output)
-    case Output.list => new SQLToList(sql)(params: _*)(extractor)(output)
-    case Output.traversable => new SQLToTraversable(sql)(params: _*)(extractor)(output)
+  def apply[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
+    case Output.single | Output.first => new SQLToOption[A, E](sql)(params: _*)(extractor)(output)
+    case Output.list => new SQLToList[A, E](sql)(params: _*)(extractor)(output)
+    case Output.traversable => new SQLToTraversable[A, E](sql)(params: _*)(extractor)(output)
   }
 
 }
@@ -119,24 +119,37 @@ private[scalikejdbc] object createNameBindingSQL {
    * @tparam A return type
    * @return SQL instance
    */
-  def apply[A](sql: String)(params: (Symbol, Any)*)(extractor: WrappedResultSet => A = (rs: WrappedResultSet) => {
-    throw new IllegalStateException(ErrorMessage.NO_EXTRACTOR_SPECIFIED)
-  })(output: Output.Value = Output.traversable): SQL[A] = output match {
+  def apply[A, E <: WithExtractor](sql: String)(params: (Symbol, Any)*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
     case Output.single | Output.first => {
       val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToOption(_sql)(_params: _*)(extractor)(output)
+      new SQLToOption[A, E](_sql)(_params: _*)(extractor)(output)
     }
     case Output.list => {
       val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToList(_sql)(_params: _*)(extractor)(output)
+      new SQLToList[A, E](_sql)(_params: _*)(extractor)(output)
     }
     case Output.traversable => {
       val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToTraversable(_sql)(_params: _*)(extractor)(output)
+      new SQLToTraversable[A, E](_sql)(_params: _*)(extractor)(output)
     }
   }
 
 }
+
+/**
+ * Represents an extractor is already specified or not
+ */
+sealed trait WithExtractor
+
+/**
+ * Represents that this SQL already has an extractor
+ */
+trait HasExtractor extends WithExtractor
+
+/**
+ * Represents that this SQL doesn't have an extractor yet
+ */
+trait NoExtractor extends WithExtractor
 
 /**
  * SQL abstraction.
@@ -147,21 +160,26 @@ private[scalikejdbc] object createNameBindingSQL {
  * @param output output type
  * @tparam A return type
  */
-abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable) {
+abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable) {
+
+  type ThisSQL = SQL[A, E]
+  type SQLWithExtractor = SQL[A, HasExtractor]
 
   /**
    * Bind parameters to SQL template in order.
    * @param params parameters
    * @return SQL instance
    */
-  def bind(params: Any*): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
+  def bind(params: Any*): SQL[A, E] = createSQL[A, E](sql)(params: _*)(extractor)(output)
 
   /**
    * Bind named parameters to SQL template.
    * @param paramsByName named parameters
    * @return SQL instance
    */
-  def bindByName(paramsByName: (Symbol, Any)*): SQL[A] = createNameBindingSQL[A](sql)(paramsByName: _*)(extractor)(output)
+  def bindByName(paramsByName: (Symbol, Any)*): SQL[A, E] = {
+    createNameBindingSQL(sql)(paramsByName: _*)(extractor)(output)
+  }
 
   /**
    * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
@@ -169,63 +187,73 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
    * @tparam A return type
    * @return SQL instance
    */
-  def map[A](extractor: (WrappedResultSet => A)): SQL[A] = createSQL[A](sql)(params: _*)(extractor)(output)
+  def map[A](extractor: (WrappedResultSet => A)): SQL[A, HasExtractor] = {
+    createSQL[A, HasExtractor](sql)(params: _*)(extractor)(output)
+  }
 
   /**
    * Same as #single.
    * @return SQL instance
    */
-  def toOption(): SQLToOption[A] = createSQL(sql)(params: _*)(extractor)(Output.single).asInstanceOf[SQLToOption[A]]
+  def toOption(): SQLToOption[A, E] = {
+    createSQL(sql)(params: _*)(extractor)(Output.single).asInstanceOf[SQLToOption[A, E]]
+  }
 
   /**
    * Set execution type as single.
    * @return SQL instance
    */
-  def single(): SQLToOption[A] = toOption()
+  def single(): SQLToOption[A, E] = toOption()
 
   /**
    * Same as #first.
    * @return SQL instance
    */
-  def headOption(): SQLToOption[A] = createSQL(sql)(params: _*)(extractor)(Output.first).asInstanceOf[SQLToOption[A]]
+  def headOption(): SQLToOption[A, E] = {
+    createSQL(sql)(params: _*)(extractor)(Output.first).asInstanceOf[SQLToOption[A, E]]
+  }
 
   /**
    * Set execution type as first.
    * @return SQL instance
    */
-  def first(): SQLToOption[A] = headOption()
+  def first(): SQLToOption[A, E] = headOption()
 
   /**
    * Same as #list
    * @return SQL instance
    */
-  def toList(): SQLToList[A] = createSQL(sql)(params: _*)(extractor)(Output.list).asInstanceOf[SQLToList[A]]
+  def toList(): SQLToList[A, E] = {
+    createSQL(sql)(params: _*)(extractor)(Output.list).asInstanceOf[SQLToList[A, E]]
+  }
 
   /**
    * Set execution type as list.
    * @return SQL instance
    */
-  def list(): SQLToList[A] = toList()
+  def list(): SQLToList[A, E] = toList()
 
   /**
    * Same as #traversable.
    * @return SQL instance
    */
-  def toTraversable(): SQLToTraversable[A] = {
-    createSQL[A](sql)(params: _*)(extractor)(Output.traversable).asInstanceOf[SQLToTraversable[A]]
+  def toTraversable(): SQLToTraversable[A, E] = {
+    createSQL[A, E](sql)(params: _*)(extractor)(Output.traversable).asInstanceOf[SQLToTraversable[A, E]]
   }
 
   /**
    * Set execution type as traversable.
    * @return SQL instance
    */
-  def traversable(): SQLToTraversable[A] = toTraversable()
+  def traversable(): SQLToTraversable[A, E] = toTraversable()
 
   /**
    * Set execution type as execute
    * @return SQL instance
    */
-  def execute(): SQLExecution = new SQLExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+  def execute(): SQLExecution = {
+    new SQLExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+  }
 
   /**
    * Set execution type as execute with filters
@@ -233,7 +261,9 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
    * @param after after filter
    * @return SQL instance
    */
-  def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = new SQLExecution(sql)(params: _*)(before)(after)
+  def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = {
+    new SQLExecution(sql)(params: _*)(before)(after)
+  }
 
   /**
    * Set execution type as executeUpdate
@@ -247,13 +277,17 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
    * @param after after filter
    * @return SQL instance
    */
-  def executeUpdateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = updateWithFilters(before, after)
+  def executeUpdateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = {
+    updateWithFilters(before, after)
+  }
 
   /**
    * Set execution type as executeUpdate
    * @return SQL instance
    */
-  def update(): SQLUpdate = new SQLUpdate(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+  def update(): SQLUpdate = {
+    new SQLUpdate(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+  }
 
   /**
    * Set execution type as executeUpdate with filters
@@ -261,7 +295,9 @@ abstract class SQL[A](sql: String)(params: Any*)(extractor: WrappedResultSet => 
    * @param after after filter
    * @return SQL instance
    */
-  def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = new SQLUpdate(sql)(params: _*)(before)(after)
+  def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = {
+    new SQLUpdate(sql)(params: _*)(before)(after)
+  }
 
   /**
    * Set execution type as updateAndreturnGeneratedKey
@@ -329,10 +365,10 @@ class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
  * @param output output type
  * @tparam A return type
  */
-class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
-    extends SQL[A](sql)(params: _*)(extractor)(output) {
+class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+    extends SQL[A, E](sql)(params: _*)(extractor)(output) {
 
-  def apply()(implicit session: DBSession): Traversable[A] = session match {
+  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
     case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(sql, params: _*)(extractor))
     case _ => session.traversable(sql, params: _*)(extractor)
@@ -349,10 +385,10 @@ class SQLToTraversable[A](sql: String)(params: Any*)(extractor: WrappedResultSet
  * @param output output type
  * @tparam A return type
  */
-class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
-    extends SQL[A](sql)(params: _*)(extractor)(output) {
+class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+    extends SQL[A, E](sql)(params: _*)(extractor)(output) {
 
-  def apply()(implicit session: DBSession): List[A] = session match {
+  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
     case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(sql, params: _*)(extractor))
     case _ => session.list(sql, params: _*)(extractor)
@@ -369,10 +405,10 @@ class SQLToList[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(
  * @param output output type
  * @tparam A return type
  */
-class SQLToOption[A](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.single)
-    extends SQL[A](sql)(params: _*)(extractor)(output) {
+class SQLToOption[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.single)
+    extends SQL[A, E](sql)(params: _*)(extractor)(output) {
 
-  def apply()(implicit session: DBSession): Option[A] = output match {
+  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
     case Output.single =>
       session match {
         case AutoSession => DB readOnly (s => s.single(sql, params: _*)(extractor))

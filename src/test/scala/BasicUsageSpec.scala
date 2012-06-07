@@ -246,6 +246,11 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
       val eopt: Option[Emp] = DB readOnly {
         implicit session =>
+          // [error] /Users/sera/dev/scalikejdbc/src/test/scala/BasicUsageSpec.scala:249: Cannot prove that scalikejdbc.SQL[Nothing,scalikejdbc.NoExtractor] =:= scalikejdbc.SQL[Nothing,scalikejdbc.HasExtractor].
+          // [error]           SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1).single.apply()
+          // [error]                                                                                              ^
+          // SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1).single.apply()
+
           SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1)
             .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
       }
@@ -291,7 +296,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
       val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
 
-      val get10EmpSQL: SQL[Emp] = {
+      val get10EmpSQL: SQL[Emp, HasExtractor] = {
         DB autoCommit {
           implicit s =>
             try {
@@ -307,7 +312,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         }
       }
 
-      val get10EmpAllSQL: SQLToList[Emp] = get10EmpSQL.list // or #toList
+      val get10EmpAllSQL: SQLToList[Emp, HasExtractor] = get10EmpSQL.list // or #toList
 
       DB autoCommit {
         implicit s =>
@@ -315,7 +320,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
           val emps: List[Emp] = get10EmpAllSQL.apply()
           emps.size should be <= 10
 
-          val getFirstOf10Emp: SQLToOption[Emp] = get10EmpSQL.first // or #headOption
+          val getFirstOf10Emp: SQLToOption[Emp, HasExtractor] = get10EmpSQL.first // or #headOption
           val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
           firstEmp.isDefined should be(true)
 
