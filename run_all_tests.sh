@@ -1,9 +1,9 @@
-#!/bin/sh -x
-if [ $# -ne 1 ]; then
-  echo "Please specify db name (i.e. postgresql)"
-  exit 1
-fi
-cp -p src/test/resources/jdbc_$1.properties src/test/resources/jdbc.properties
-sbt test
-cp -p src/test/resources/jdbc_hsqldb.properties src/test/resources/jdbc.properties
+#!/bin/sh
+
+./run_tests.sh hsqldb
+./run_tests.sh derby
+./run_tests.sh mysql
+./run_tests.sh postgresql
+./run_tests.sh sqlite
+
 
