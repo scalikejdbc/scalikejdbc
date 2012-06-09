@@ -1,5 +1,4 @@
-# ScalikeJDBC - A thin JDBC wrapper in Scala
-
+# ScalikeJDBC - Wrapped JDBC for Scala
 
 ## Just write SQL
 
@@ -39,9 +38,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ### sbt
 
 ```scala
-resolvers += "sonatype" at "http://oss.sonatype.org/content/repositories/releases"
-
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.2.3"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.3.0"
 
 // slf4j binding you like
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
