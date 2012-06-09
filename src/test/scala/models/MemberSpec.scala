@@ -17,7 +17,8 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
         SQL("drop table member").execute.apply()
       } catch {
         case e =>
-          SQL("""
+      }
+      SQL("""
             create table member (
               id bigint primary key,
               name varchar(30) not null,
@@ -25,8 +26,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
               birthday date,
               created_at timestamp not null
             )
-            """).execute.apply()
-      }
+          """).execute.apply()
     }
 
     // use model
@@ -80,7 +80,8 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
         SQL("drop table named_member").execute.apply()
       } catch {
         case e =>
-          SQL("""
+      }
+      SQL("""
             create table named_member (
               id bigint primary key,
               name varchar(30) not null,
@@ -88,8 +89,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
               birthday date,
               created_at timestamp not null
             )
-            """).execute.apply()
-      }
+          """).execute.apply()
     }
 
     // use model
