@@ -41,7 +41,7 @@ object ConnectionPool extends LogSupport {
    * @return is initialized
    */
   def isInitialized(name: Any = DEFAULT_NAME) = pools.synchronized {
-    pools.get(DEFAULT_NAME).isDefined
+    pools.get(name).isDefined
   }
 
   private def ensureInitialized(name: Any): Unit = {
