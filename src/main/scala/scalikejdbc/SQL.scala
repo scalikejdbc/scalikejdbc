@@ -152,6 +152,21 @@ trait HasExtractor extends WithExtractor
 trait NoExtractor extends WithExtractor
 
 /**
+ * Generalized type constraints for WithExtractor
+ */
+object GeneralizedTypeConstraintsForWithExtractor {
+
+  // customized error message
+  @annotation.implicitNotFound(msg = "No extractor is specified. You need to call #map((WrappedResultSet) => A) before #apply().")
+  sealed abstract class =:=[From, To] extends (From => To) with Serializable
+  private[this] final val singleton_=:= = new =:=[WithExtractor, WithExtractor] { def apply(x: WithExtractor): WithExtractor = x }
+  object =:= {
+    implicit def tpEquals[A]: A =:= A = singleton_=:=.asInstanceOf[A =:= A]
+  }
+
+}
+
+/**
  * SQL abstraction.
  *
  * @param sql SQL template
@@ -368,6 +383,8 @@ class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
 class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A, E](sql)(params: _*)(extractor)(output) {
 
+  import GeneralizedTypeConstraintsForWithExtractor._
+
   def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
     case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(sql, params: _*)(extractor))
@@ -388,6 +405,8 @@ class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(extract
 class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A, E](sql)(params: _*)(extractor)(output) {
 
+  import GeneralizedTypeConstraintsForWithExtractor._
+
   def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
     case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(sql, params: _*)(extractor))
@@ -407,6 +426,8 @@ class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: Wra
  */
 class SQLToOption[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.single)
     extends SQL[A, E](sql)(params: _*)(extractor)(output) {
+
+  import GeneralizedTypeConstraintsForWithExtractor._
 
   def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
     case Output.single =>
