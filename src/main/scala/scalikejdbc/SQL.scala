@@ -181,19 +181,29 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
   type SQLWithExtractor = SQL[A, HasExtractor]
 
   /**
-   * Bind parameters to SQL template in order.
+   * Binds parameters to SQL template in order.
    * @param params parameters
    * @return SQL instance
    */
   def bind(params: Any*): SQL[A, E] = createSQL[A, E](sql)(params: _*)(extractor)(output)
 
   /**
-   * Bind named parameters to SQL template.
+   * Binds named parameters to SQL template.
    * @param paramsByName named parameters
    * @return SQL instance
    */
   def bindByName(paramsByName: (Symbol, Any)*): SQL[A, E] = {
     createNameBindingSQL(sql)(paramsByName: _*)(extractor)(output)
+  }
+
+  /**
+   * Aplly the operation to all elements of result set
+   * @param op operation
+   */
+  def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
+    case AutoSession => DB autoCommit (s => s.foreach(sql, params: _*)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foreach(sql, params: _*)(op))
+    case _ => session.foreach(sql, params: _*)(op)
   }
 
   /**

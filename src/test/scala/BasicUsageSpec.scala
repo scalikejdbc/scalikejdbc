@@ -241,38 +241,38 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   "SQL" should "be available" in {
 
     val conn: Connection = ConnectionPool.borrow()
-    ultimately(TestUtils.deleteTable("emp_BasicUsageSpec_ActiveSql")) {
-      TestUtils.initialize("emp_BasicUsageSpec_ActiveSql")
+    ultimately(TestUtils.deleteTable("emp_BasicUsageSpec_SQL")) {
+      TestUtils.initialize("emp_BasicUsageSpec_SQL")
 
       val eopt: Option[Emp] = DB readOnly {
         implicit session =>
           // [error] /Users/sera/dev/scalikejdbc/src/test/scala/BasicUsageSpec.scala:249: Cannot prove that scalikejdbc.SQL[Nothing,scalikejdbc.NoExtractor] =:= scalikejdbc.SQL[Nothing,scalikejdbc.HasExtractor].
-          // [error]           SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1).single.apply()
+          // [error]           SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1).single.apply()
           // [error]                                                                                              ^
-          // SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1).single.apply()
+          // SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1).single.apply()
 
-          SQL("select * from emp_BasicUsageSpec_ActiveSql where id = ?").bind(1)
+          SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1)
             .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
       }
       eopt.isDefined should be(true)
 
       val ehead: Option[Emp] = DB readOnly {
         implicit session =>
-          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
       }
       ehead.isDefined should be(true)
 
       val es: List[Emp] = DB readOnly {
         implicit session =>
-          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
       }
       es.size should equal(2)
 
       val tr: Traversable[Emp] = DB readOnly {
         implicit session =>
-          SQL("select * from emp_BasicUsageSpec_ActiveSql")
+          SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
       }
       tr.foreach {
@@ -281,9 +281,14 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
       {
         implicit val session = DB(conn).readOnlySession
-        val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_ActiveSql")
+        val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
           .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
         e2s.size should equal(2)
+        var sum: Long = 0L
+        SQL("select id from emp_BasicUsageSpec_SQL").foreach { rs =>
+          sum += rs.long("id")
+        }
+        sum should equal(3L)
       }
     }
   }
