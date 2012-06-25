@@ -64,6 +64,19 @@ trait DBSession extends LogSupport {
   }
 
   /**
+   * Create [[java.sql.Statement]] executor.
+   * @param conn connection
+   * @param template SQL template
+   * @return statement executor
+   */
+  private def createBatchStatementExecutor(conn: Connection, template: String): StatementExecutor = {
+    StatementExecutor(
+      underlying = conn.prepareStatement(template),
+      template = template,
+      params = Nil)
+  }
+
+  /**
    * Ensures the current session is not in read-only mode.
    * @param template
    */
@@ -148,8 +161,9 @@ trait DBSession extends LogSupport {
    * @return result as traversable
    */
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
-    using(createStatementExecutor(conn, template, params)) { executor =>
-      new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
     }
   }
 
@@ -262,7 +276,7 @@ trait DBSession extends LogSupport {
    * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
    *
    * @param template SQL template
-   * @param params paramters
+   * @param params parameters
    * @return generated key as a long value
    */
   def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
@@ -281,6 +295,42 @@ trait DBSession extends LogSupport {
       throw new IllegalStateException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + " (template:" + template + ")")
     }
     generatedKey
+  }
+
+  /**
+   * Executes [[java.sql.PreparedStatement#executeBatch()]]
+   * @param template SQL template
+   * @param paramsList list of parameters
+   * @return count list
+   */
+  def batch(template: String, paramsList: Seq[Any]*): Seq[Int] = {
+    ensureNotReadOnlySession(template)
+    using(createBatchStatementExecutor(conn = conn, template = template)) {
+      executor =>
+        paramsList.foreach {
+          params =>
+            executor.bindParams(params)
+            executor.addBatch()
+        }
+        executor.executeBatch().toSeq
+    }
+  }
+
+  /**
+   * Executes [[java.sql.PreparedStatement#executeBatch()]]
+   * @param sqlList SQL list
+   * @return count list
+   */
+  def batch(sqlList: Seq[String]): Seq[Int] = {
+    ensureNotReadOnlySession(null)
+    using(createBatchStatementExecutor(conn = conn, template = sqlList.head)) {
+      executor =>
+        sqlList.tail.foreach {
+          sql =>
+            executor.addBatch(sql)
+        }
+        executor.executeBatch().toSeq
+    }
   }
 
   /**

@@ -6,7 +6,7 @@ import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
 import org.joda.time.DateTime
 import java.util.Calendar
-import java.sql.PreparedStatement
+import java.sql._
 
 class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
@@ -15,10 +15,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   behavior of "DBSession"
 
   it should "be available" in {
-    using(DBSession(ConnectionPool.borrow())) { session =>
-      session.conn should not be (null)
-      session.connection should not be (null)
-      session should not be null
+    using(DBSession(ConnectionPool.borrow())) {
+      session =>
+        session.conn should not be (null)
+        session.connection should not be (null)
+        session should not be null
     }
   }
 
@@ -28,26 +29,27 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
 
       // new Connection for testing close
-      using(new DB(ConnectionPool.borrow())) { db =>
-        val session = db.autoCommitSession()
-        val before = (stmt: PreparedStatement) => println("before")
-        val after = (stmt: PreparedStatement) => println("after")
-        session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
-        val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
-        benOpt.get._1 should equal(3)
-        benOpt.get._2 should equal("Ben")
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          val session = db.autoCommitSession()
+          val before = (stmt: PreparedStatement) => println("before")
+          val after = (stmt: PreparedStatement) => println("after")
+          session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+          val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+          benOpt.get._1 should equal(3)
+          benOpt.get._2 should equal("Ben")
 
-        session.close()
+          session.close()
 
-        try {
-          session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
-          fail("Exception should be thrown")
-        } catch {
-          case e: java.sql.SQLException =>
-        }
+          try {
+            session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+            fail("Exception should be thrown")
+          } catch {
+            case e: java.sql.SQLException =>
+          }
 
-        session.close()
-        session.close()
+          session.close()
+          session.close()
       }
     }
   }
@@ -56,17 +58,18 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_insertWithNullableValues"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(new DB(ConnectionPool.borrow())) { db =>
-        val session = db.autoCommitSession()
-        session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
-        val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
-        benOpt.get._1 should equal(3)
-        benOpt.get._2 should equal("Ben")
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          val session = db.autoCommitSession()
+          session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+          val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
+          benOpt.get._1 should equal(3)
+          benOpt.get._2 should equal("Ben")
 
-        session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
-        val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
-        noName.get._1 should equal(4)
-        noName.get._2 should equal(null)
+          session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
+          val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+          noName.get._1 should equal(4)
+          noName.get._2 should equal(null)
       }
     }
   }
@@ -79,12 +82,13 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(new DB(ConnectionPool.borrow())) { db =>
-        val session = db.autoCommitSession()
-        val singleResult = session.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
-        val firstResult = session.first("select id from " + tableName)(rs => rs.string("id"))
-        singleResult.get should equal("1")
-        firstResult.get should equal("1")
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          val session = db.autoCommitSession()
+          val singleResult = session.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+          val firstResult = session.first("select id from " + tableName)(rs => rs.string("id"))
+          singleResult.get should equal("1")
+          firstResult.get should equal("1")
       }
     }
   }
@@ -94,12 +98,13 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(new DB(ConnectionPool.borrow())) { db =>
-        val session = db.autoCommitSession()
-        val result = session.list("select id from " + tableName) {
-          rs => rs.string("id")
-        }
-        result.size should equal(2)
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          val session = db.autoCommitSession()
+          val result = session.list("select id from " + tableName) {
+            rs => rs.string("id")
+          }
+          result.size should equal(2)
       }
     }
   }
@@ -121,7 +126,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           rs => rs.string("name")
         } getOrElse "---"
         name should equal("foo")
-      } finally { session.close() }
+      } finally {
+        session.close()
+      }
     }
 
   }
@@ -140,7 +147,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           rs => rs.string("name")
         } getOrElse "---"
         name should equal("foo")
-      } finally { session.close() }
+      } finally {
+        session.close()
+      }
     }
 
   }
@@ -162,7 +171,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         }
         result.get should equal("1")
         db.rollbackIfActive()
-      } finally { session.close() }
+      } finally {
+        session.close()
+      }
     }
   }
 
@@ -180,7 +191,84 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         }
         result.size should equal(2)
         db.rollbackIfActive()
-      } finally { session.close() }
+      } finally {
+        session.close()
+      }
+    }
+  }
+
+  it should "execute batch in local tx mode" in {
+    val tableName = tableNamePrefix + "_batchInLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val batchTime: Long = DB localTx {
+        session =>
+          val before = System.currentTimeMillis()
+          val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
+          session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
+          System.currentTimeMillis() - before
+      }
+      val loopTime: Long = DB localTx {
+        session =>
+          val before = System.currentTimeMillis()
+          (20001 to 30000) foreach {
+            i =>
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
+          }
+          System.currentTimeMillis() - before
+      }
+      batchTime should be < loopTime
+    }
+  }
+
+  it should "be rolled back when BatchUpdasteException occurred" in {
+    val tableName = tableNamePrefix + "_batchInLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      try {
+        DB localTx {
+          session =>
+            val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
+            session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
+            throw new RuntimeException
+        }
+      } catch {
+        case e =>
+      }
+      val result = DB localTx {
+        implicit session =>
+          SQL("select id from " + tableName + " where id = ?").bind(10001).map(_.long("id")).toOption().apply()
+      }
+      result.isDefined should not be (true)
+    }
+  }
+
+  it should "execute several batch in local tx mode" in {
+    val tableName = tableNamePrefix + "_batchInLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val batchTime: Long = DB localTx {
+        session =>
+          val before = System.currentTimeMillis()
+          val sqlList = (10001 to 20000).map {
+            i =>
+              "insert into " + tableName + " (id, name) values (" + i + ", 'Name" + i + "')"
+          }
+          try {
+            session.batch(sqlList)
+          } catch { case e: SQLFeatureNotSupportedException => }
+          System.currentTimeMillis() - before
+      }
+      val loopTime: Long = DB localTx {
+        session =>
+          val before = System.currentTimeMillis()
+          (20001 to 30000) foreach {
+            i =>
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
+          }
+          System.currentTimeMillis() - before
+      }
+      batchTime should be < loopTime
     }
   }
 
@@ -188,21 +276,22 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_updateInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(new DB(ConnectionPool.borrow())) { db =>
-        db.begin()
-        val session = db.withinTxSession()
-        TestUtils.initializeEmpRecords(session, tableName)
-        val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.string("name")
-        }.get
-        nameBefore should equal("name1")
-        val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-        count should equal(1)
-        db.rollbackIfActive()
-        val name = session.single("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.string("name")
-        }.get
-        name should equal("name1")
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          db.begin()
+          val session = db.withinTxSession()
+          TestUtils.initializeEmpRecords(session, tableName)
+          val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
+            rs => rs.string("name")
+          }.get
+          nameBefore should equal("name1")
+          val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          count should equal(1)
+          db.rollbackIfActive()
+          val name = session.single("select name from " + tableName + " where id = ?", 1) {
+            rs => rs.string("name")
+          }.get
+          name should equal("name1")
       }
     }
   }
@@ -306,7 +395,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               time_value time not null,
               timestamp_value timestamp not null
             )
-          """).execute.apply()
+                   """).execute.apply()
             } catch {
               case e =>
                 try {
@@ -318,7 +407,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               timestamp_value timestamp not null,
               primary key(id)
             )
-          """).execute.apply()
+                       """).execute.apply()
                 } catch {
                   case e =>
                     SQL("""
@@ -329,7 +418,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               timestamp_value timestamp not null,
               primary key(id)
             )
-          """).execute.apply()
+                         """).execute.apply()
 
                 }
 
@@ -340,7 +429,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               (date_value, time_value, timestamp_value)
               values
               (?, ?, ?)
-          """).bind(
+                 """).bind(
               date,
               time,
               timestamp
@@ -389,83 +478,92 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   }
 
   it should "work with short values" in {
-    DB autoCommit { implicit session =>
-      try {
+    DB autoCommit {
+      implicit session =>
         try {
-          SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
-        } catch {
-          case e =>
-            try {
-              SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
-            } catch {
-              case e =>
-                SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute.apply()
-            }
+          try {
+            SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
+          } catch {
+            case e =>
+              try {
+                SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
+              } catch {
+                case e =>
+                  SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute.apply()
+              }
+          }
+          val s: Short = 123
+          SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_short_values").execute.apply()
+          } catch {
+            case e => e.printStackTrace
+          }
         }
-        val s: Short = 123
-        SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update.apply()
-      } finally {
-        try {
-          SQL("drop table dbsession_work_with_short_values").execute.apply()
-        } catch { case e => e.printStackTrace }
-      }
     }
   }
 
   it should "work with Scala BigDecimal values" in {
-    val conn = ConnectionPool.borrow()
-    DB autoCommit { implicit session =>
-      try {
+    DB autoCommit {
+      implicit session =>
         try {
-          SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
-        } catch {
-          case e =>
-            try {
-              SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
-            } catch {
-              case e =>
-                SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
-            }
+          try {
+            SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+          } catch {
+            case e =>
+              try {
+                SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+              } catch {
+                case e =>
+                  SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+              }
+          }
+          val s: BigDecimal = BigDecimal(123)
+          SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_scala_big_decimal_values").execute.apply()
+          } catch {
+            case e => e.printStackTrace
+          }
         }
-        val s: BigDecimal = BigDecimal(123)
-        SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update.apply()
-      } finally {
-        try {
-          SQL("drop table dbsession_work_with_scala_big_decimal_values").execute.apply()
-        } catch { case e => e.printStackTrace }
-      }
     }
   }
 
   it should "work with Java BigDecimal values" in {
-    DB autoCommit { implicit session =>
-      try {
+    DB autoCommit {
+      implicit session =>
         try {
-          SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
-        } catch {
-          case e =>
-            try {
-              SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
-            } catch {
-              case e =>
-                SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
-            }
+          try {
+            SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+          } catch {
+            case e =>
+              try {
+                SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+              } catch {
+                case e =>
+                  SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+              }
+          }
+          val s: BigDecimal = BigDecimal(123)
+          SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_java_big_decimal_values").execute.apply()
+          } catch {
+            case e => e.printStackTrace
+          }
         }
-        val s: BigDecimal = BigDecimal(123)
-        SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update.apply()
-      } finally {
-        try {
-          SQL("drop table dbsession_work_with_java_big_decimal_values").execute.apply()
-        } catch { case e => e.printStackTrace }
-      }
     }
   }
 
   it should "work with optional wrapper class values" in {
-    DB autoCommit { implicit session =>
-      try {
+    DB autoCommit {
+      implicit session =>
         try {
-          SQL("""
+          try {
+            SQL("""
           create table dbsession_work_with_optional_values (
             id bigint generated always as identity, 
             v_boolean boolean, 
@@ -477,11 +575,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             v_short smallint,
             v_timestamp timestamp
           )
-        """).execute.apply()
-        } catch {
-          case e =>
-            try {
-              SQL("""
+                 """).execute.apply()
+          } catch {
+            case e =>
+              try {
+                SQL("""
           create table dbsession_work_with_optional_values (
             id bigint auto_increment,
             v_boolean boolean, 
@@ -494,10 +592,10 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             v_timestamp datetime,
             primary key(id)
           )
-        """).execute.apply()
-            } catch {
-              case e =>
-                SQL("""
+                     """).execute.apply()
+              } catch {
+                case e =>
+                  SQL("""
           create table dbsession_work_with_optional_values (
             id serial not null,
             v_boolean boolean, 
@@ -510,83 +608,85 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             v_timestamp timestamp,
             primary key(id)
           )
-        """).execute.apply()
+                       """).execute.apply()
 
-            }
+              }
 
-        }
-        val id = SQL("""
+          }
+          val id = SQL("""
           insert into dbsession_work_with_optional_values 
           (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short, v_timestamp) values 
           (?,?,?,?,?,?,?,?)
-        """).bind(
-          None, None, None, None, None, None, None, None
-        ).updateAndReturnGeneratedKey.apply()
+                        """).bind(
+            None, None, None, None, None, None, None, None
+          ).updateAndReturnGeneratedKey.apply()
 
-        case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
-          vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short],
-          vTimestamp: Option[DateTime])
+          case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
+            vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short],
+            vTimestamp: Option[DateTime])
 
-        def assert(resultOpt: Option[Result]): Unit = {
-          resultOpt.isDefined should be(true)
-          val result = resultOpt.get
-          result.vBoolean.isDefined should be(false)
-          result.vByte.isDefined should be(false)
-          result.vDouble.isDefined should be(false)
-          result.vFloat.isDefined should be(false)
-          result.vInt.isDefined should be(false)
-          result.vLong.isDefined should be(false)
-          result.vShort.isDefined should be(false)
-          result.vTimestamp.isDefined should be(false)
+          def assert(resultOpt: Option[Result]): Unit = {
+            resultOpt.isDefined should be(true)
+            val result = resultOpt.get
+            result.vBoolean.isDefined should be(false)
+            result.vByte.isDefined should be(false)
+            result.vDouble.isDefined should be(false)
+            result.vFloat.isDefined should be(false)
+            result.vInt.isDefined should be(false)
+            result.vLong.isDefined should be(false)
+            result.vShort.isDefined should be(false)
+            result.vTimestamp.isDefined should be(false)
+          }
+
+          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+            rs =>
+              Result(
+                vBoolean = Option(rs.boolean("v_boolean").asInstanceOf[Boolean]),
+                vByte = Option(rs.byte("v_byte").asInstanceOf[Byte]),
+                vDouble = Option(rs.double("v_double").asInstanceOf[Double]),
+                vFloat = Option(rs.float("v_float").asInstanceOf[Float]),
+                vInt = Option(rs.int("v_int").asInstanceOf[Int]),
+                vLong = Option(rs.long("v_long").asInstanceOf[Long]),
+                vShort = Option(rs.short("v_short").asInstanceOf[Short]),
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+              )
+          }.single.apply())
+
+          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+            rs =>
+              Result(
+                vBoolean = opt[Boolean](rs.boolean("v_boolean")),
+                vByte = opt[Byte](rs.byte("v_byte")),
+                vDouble = opt[Double](rs.double("v_double")),
+                vFloat = opt[Float](rs.float("v_float")),
+                vInt = opt[Int](rs.int("v_int")),
+                vLong = opt[Long](rs.long("v_long")),
+                vShort = opt[Short](rs.short("v_short")),
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+              )
+          }.single.apply())
+
+          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+            rs =>
+              Result(
+                vBoolean = rs.booleanOpt("v_boolean"),
+                vByte = rs.byteOpt("v_byte"),
+                vDouble = rs.doubleOpt("v_double"),
+                vFloat = rs.floatOpt("v_float"),
+                vInt = rs.intOpt("v_int"),
+                vLong = rs.longOpt("v_long"),
+                vShort = rs.shortOpt("v_short"),
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+              )
+          }.single.apply())
+
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_optional_values").execute.apply()
+          } catch {
+            case e => e.printStackTrace
+          }
         }
-
-        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
-          rs =>
-            Result(
-              vBoolean = Option(rs.boolean("v_boolean").asInstanceOf[Boolean]),
-              vByte = Option(rs.byte("v_byte").asInstanceOf[Byte]),
-              vDouble = Option(rs.double("v_double").asInstanceOf[Double]),
-              vFloat = Option(rs.float("v_float").asInstanceOf[Float]),
-              vInt = Option(rs.int("v_int").asInstanceOf[Int]),
-              vLong = Option(rs.long("v_long").asInstanceOf[Long]),
-              vShort = Option(rs.short("v_short").asInstanceOf[Short]),
-              vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
-            )
-        }.single.apply())
-
-        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
-          rs =>
-            Result(
-              vBoolean = opt[Boolean](rs.boolean("v_boolean")),
-              vByte = opt[Byte](rs.byte("v_byte")),
-              vDouble = opt[Double](rs.double("v_double")),
-              vFloat = opt[Float](rs.float("v_float")),
-              vInt = opt[Int](rs.int("v_int")),
-              vLong = opt[Long](rs.long("v_long")),
-              vShort = opt[Short](rs.short("v_short")),
-              vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
-            )
-        }.single.apply())
-
-        assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
-          rs =>
-            Result(
-              vBoolean = rs.booleanOpt("v_boolean"),
-              vByte = rs.byteOpt("v_byte"),
-              vDouble = rs.doubleOpt("v_double"),
-              vFloat = rs.floatOpt("v_float"),
-              vInt = rs.intOpt("v_int"),
-              vLong = rs.longOpt("v_long"),
-              vShort = rs.shortOpt("v_short"),
-              vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
-            )
-        }.single.apply())
-
-      } finally {
-        try {
-          SQL("drop table dbsession_work_with_optional_values").execute.apply()
-        } catch { case e => e.printStackTrace }
-      }
     }
   }
 

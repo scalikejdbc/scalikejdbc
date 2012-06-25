@@ -27,40 +27,48 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
 
   private val eol = System.getProperty("line.separator")
 
-  private val paramsWithIndices = params.map {
-    case option: Option[_] => option.orNull[Any]
-    case other => other
-  }.zipWithIndex
+  /**
+   * Binds parameters to the underlying [[java.sql.PreparedStatement]] object
+   * @param params parameters
+   */
+  def bindParams(params: Seq[Any]): Unit = {
 
-  for ((param, idx) <- paramsWithIndices; i = idx + 1) {
-    param match {
-      case null => underlying.setObject(i, null)
-      case p: java.sql.Array => underlying.setArray(i, p)
-      case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
-      case p: Boolean => underlying.setBoolean(i, p)
-      case p: Byte => underlying.setByte(i, p)
-      case p: java.sql.Date => underlying.setDate(i, p)
-      case p: Double => underlying.setDouble(i, p)
-      case p: Float => underlying.setFloat(i, p)
-      case p: Int => underlying.setInt(i, p)
-      case p: Long => underlying.setLong(i, p)
-      case p: Short => underlying.setShort(i, p)
-      case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
-      case p: String => underlying.setString(i, p)
-      case p: java.sql.Time => underlying.setTime(i, p)
-      case p: java.sql.Timestamp => underlying.setTimestamp(i, p)
-      case p: java.net.URL => underlying.setURL(i, p)
-      case p: java.util.Date => underlying.setTimestamp(i, p.toSqlTimestamp)
-      case p: org.joda.time.DateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-      case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-      case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
-      case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
-      case p => {
-        log.debug("The parameter(" + p + ") is bound as Object.")
-        underlying.setObject(i, p)
+    val paramsWithIndices = params.map {
+      case option: Option[_] => option.orNull[Any]
+      case other => other
+    }.zipWithIndex
+
+    for ((param, idx) <- paramsWithIndices; i = idx + 1) {
+      param match {
+        case null => underlying.setObject(i, null)
+        case p: java.sql.Array => underlying.setArray(i, p)
+        case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
+        case p: Boolean => underlying.setBoolean(i, p)
+        case p: Byte => underlying.setByte(i, p)
+        case p: java.sql.Date => underlying.setDate(i, p)
+        case p: Double => underlying.setDouble(i, p)
+        case p: Float => underlying.setFloat(i, p)
+        case p: Int => underlying.setInt(i, p)
+        case p: Long => underlying.setLong(i, p)
+        case p: Short => underlying.setShort(i, p)
+        case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
+        case p: String => underlying.setString(i, p)
+        case p: java.sql.Time => underlying.setTime(i, p)
+        case p: java.sql.Timestamp => underlying.setTimestamp(i, p)
+        case p: java.net.URL => underlying.setURL(i, p)
+        case p: java.util.Date => underlying.setTimestamp(i, p.toSqlTimestamp)
+        case p: org.joda.time.DateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
+        case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
+        case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
+        case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
+        case p => {
+          log.debug("The parameter(" + p + ") is bound as an Object.")
+          underlying.setObject(i, p)
+        }
       }
     }
   }
+  bindParams(params)
 
   private lazy val sqlString: String = {
 
@@ -160,6 +168,10 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
   }
 
   private val statementExecute = new NakedExecutor with LoggingSQLAndTiming
+
+  def addBatch(): Unit = underlying.addBatch()
+
+  def addBatch(sql: String): Unit = underlying.addBatch(sql)
 
   def execute(): Boolean = statementExecute(() => underlying.execute())
 

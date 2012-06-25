@@ -196,6 +196,10 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
     createNameBindingSQL(sql)(paramsByName: _*)(extractor)(output)
   }
 
+  def batch(params: Seq[Any]*): SQLBatch = {
+    new SQLBatch(sql)(params: _*)
+  }
+
   /**
    * Aplly the operation to all elements of result set
    * @param op operation
@@ -332,6 +336,20 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
 
 }
 
+/**
+ * SQL which execute [[java.sql.Statement#executeBatch()]].
+ * @param sql SQL template
+ * @param params parameters
+ */
+class SQLBatch(sql: String)(params: Seq[Any]*) {
+
+  def apply()(implicit session: DBSession): Seq[Int] = session match {
+    case AutoSession => DB autoCommit (s => s.batch(sql, params: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.batch(sql, params: _*))
+    case _ => session.batch(sql, params: _*)
+  }
+
+}
 /**
  * SQL which execute [[java.sql.Statement#execute()]].
  * @param sql SQL template

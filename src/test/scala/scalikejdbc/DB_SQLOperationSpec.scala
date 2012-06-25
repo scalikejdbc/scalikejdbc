@@ -378,6 +378,22 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     }
   }
 
+  it should "execute batch in withinTx block" in {
+    val tableName = tableNamePrefix + "_batch"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val db = DB(ConnectionPool.borrow())
+      db.begin()
+      val count = db withinTx {
+        implicit s =>
+          val params: Seq[Seq[Any]] = (10001 to 20000).map { i => Seq(i, "name" + i) }
+          SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params: _*).apply()
+      }
+      count.size should equal(10000)
+      db.rollback()
+    }
+  }
+
   // --------------------
   // multi threads
 
