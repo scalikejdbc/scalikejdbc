@@ -119,10 +119,8 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
     .dropWhile {
       trace =>
         trace.getClassName != getClass.toString &&
-          (trace.getMethodName != "execute" &&
-            trace.getMethodName != "executeBatch" &&
-            trace.getMethodName != "executeUpdate" &&
-            trace.getMethodName != "executeQuery")
+          (trace.getClassName.startsWith("java.lang.") ||
+            trace.getClassName.startsWith("scalikejdbc."))
     }.take(15).map {
       trace =>
         "    " + trace.toString
