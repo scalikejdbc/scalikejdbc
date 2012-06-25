@@ -8,7 +8,7 @@ object ScalikeJDBCBuild extends Build {
   lazy val mainSettings: Seq[Project.Setting[_]] = Defaults.defaultSettings ++ Seq(
     organization := "com.github.seratch",
     name := "scalikejdbc",
-    version := "1.3.1",
+    version := "1.3.2",
     scalaVersion := "2.9.2",
     crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0"),
     externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository")),
