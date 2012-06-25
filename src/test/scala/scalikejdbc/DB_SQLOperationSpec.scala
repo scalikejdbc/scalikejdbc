@@ -433,7 +433,8 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       try {
         val count2 = SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(params2: _*).apply()
         count2.size should equal(1000)
-      } catch { case e =>
+      } catch {
+        case e =>
         // Exception should be catched here. It's not a bug.
       }
       db.rollback()
