@@ -92,11 +92,12 @@ private[scalikejdbc] object createSQL {
  */
 private[scalikejdbc] object createNameBindingSQL {
 
-  private def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = ExecutableSQLParser.extractAllParameters(sql)
-    // check all the paramters passed by #bindByName are actually used
-    params.map {
+    // check all the parameters passed by #bindByName are actually used
+    params.foreach {
       param =>
+        // TODO checking Exception handling
         names.find(_ == param._1).orElse {
           throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
         }
@@ -196,8 +197,26 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
     createNameBindingSQL(sql)(paramsByName: _*)(extractor)(output)
   }
 
+  /**
+   * Binds params for batch
+   * @param params params
+   * @return SQL for batch
+   */
   def batch(params: Seq[Any]*): SQLBatch = {
     new SQLBatch(sql)(params: _*)
+  }
+
+  /**
+   * Binds params for batch
+   * @param params params
+   * @return SQL for batch
+   */
+  def batchByName(params: Seq[(Symbol, Any)]*): SQLBatch = {
+    val _sql = createNameBindingSQL.validateAndConvertToNormalStatement(sql, params.head)._1
+    val _params: Seq[Seq[Any]] = params.map { p =>
+      createNameBindingSQL.validateAndConvertToNormalStatement(sql, p)._2
+    }
+    new SQLBatch(_sql)(_params: _*)
   }
 
   /**
@@ -350,6 +369,7 @@ class SQLBatch(sql: String)(params: Seq[Any]*) {
   }
 
 }
+
 /**
  * SQL which execute [[java.sql.Statement#execute()]].
  * @param sql SQL template

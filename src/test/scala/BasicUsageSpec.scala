@@ -78,9 +78,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   val tableNamePrefix = "emp_BasicUsageSpec" + System.currentTimeMillis().toString.substring(8)
 
   "autoCommit" should "excute without a transaction" in {
-
     val tableName = tableNamePrefix + "_autoCommit"
-
     // get a connection and create DB instance
     using(ConnectionPool.borrow()) {
       conn =>
@@ -91,46 +89,37 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             }
         }
     }
-
     // connect and begin a block (ConnectionPool required)
     DB autoCommit {
       session =>
         session.execute("create table " + tableName + " (id integer primary key, name varchar(30),created_at timestamp not null)")
         session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 1, Some("name1"), new DateTime)
         session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 2, Some("name2"), new DateTime)
-
         intercept[SQLException] {
           session.update("insert into " + tableName + " (id, name, created_at) values (?, ?, ?)", 2, Some("name2"), new DateTime)
         }
     }
-
     // connect and begin a block (ConnectionPool required)
     DB.connect().autoCommit {
       session =>
         session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
     }
-
     // passing a connection as an implicit parameter
     implicit val conn: Connection = ConnectionPool.borrow()
     DB.connected.autoCommit {
       session =>
         session.update("update " + tableName + " set name = ? where id = ?", "updated2", 2)
     }
-
     // creating a session instance without a block
     val db = DB(ConnectionPool.borrow())
     val session = db.autoCommitSession
     session.update("update " + tableName + " set name = ? where id = ?", "name2", 2)
     session.close()
-
     // named datasources
     NamedDB('named) autoCommit {
       session =>
-        session.list("select * from " + tableName) {
-          rs => rs.int("id")
-        }
+        session.list("select * from " + tableName)(rs => rs.int("id"))
     }
-
   }
 
   case class Emp(id: Int, name: String)
@@ -138,27 +127,21 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   case class Emp2(id: Int, name: Option[String])
 
   "readOnly" should "execute only queries" in {
-
     val tableName = tableNamePrefix + "_readOnly"
-
-    val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-
       val emp: Option[Emp] = DB readOnly {
         _.single("select * from " + tableName + " where id = ?", 1) {
           rs => Emp(rs.int("id"), rs.string("name"))
         }
       }
-
       val emps: List[Emp] = DB readOnly {
         _.list("select * from " + tableName) {
           rs =>
             Emp(rs.int("id"), rs.string("name"))
         }
       }
-
-      val session = DB(conn).readOnlySession
+      val session = DB.readOnlySession
       val emps2: List[Emp2] = session.list("select * from " + tableName) {
         rs =>
           Emp2(rs.int("id"), Option(rs.string("name")))
@@ -167,13 +150,9 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   "localTx" should "execute in the same transation" in {
-
     val tableName = tableNamePrefix + "_localTx"
-
-    val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-
       DB localTx {
         session =>
           val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1) {
@@ -187,17 +166,12 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   "withinTx" should "execute in the tx which already has started" in {
-
     val tableName = tableNamePrefix + "_withinTx"
-
-    val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-
-      implicit val db = DB(conn)
+      implicit val db = DB(ConnectionPool.borrow())
       ultimately(db.rollbackIfActive()) {
         db.begin()
-
         // with implicit DB instnace
         DB withinTx {
           session =>
@@ -214,79 +188,59 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   "Anorm 2.0" should "be availabe with scalikejdbc seamlessly" in {
-
     val tableName = tableNamePrefix + "_anorm20"
-
-    val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-
       import anorm._
       import anorm.SqlParser._
-
       case class Emp(id: Int, name: Option[String])
       val empAllColumns = get[Int]("id") ~ get[Option[String]]("name") map {
         case id ~ name => Emp(id, name)
       }
-
       DB localTxWithConnection {
         implicit conn =>
           val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(empAllColumns.singleOpt)
           val empList: List[Emp] = SQL("select * from " + tableName).as(empAllColumns.*)
       }
     }
-
   }
 
   "SQL" should "be available" in {
-
     val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable("emp_BasicUsageSpec_SQL")) {
       TestUtils.initialize("emp_BasicUsageSpec_SQL")
-
       val eopt: Option[Emp] = DB readOnly {
         implicit session =>
-          // [error] /Users/sera/dev/scalikejdbc/src/test/scala/BasicUsageSpec.scala:249: Cannot prove that scalikejdbc.SQL[Nothing,scalikejdbc.NoExtractor] =:= scalikejdbc.SQL[Nothing,scalikejdbc.HasExtractor].
-          // [error]           SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1).single.apply()
-          // [error]                                                                                              ^
-          // SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1).single.apply()
-
           SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1)
             .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
       }
       eopt.isDefined should be(true)
-
       val ehead: Option[Emp] = DB readOnly {
         implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
       }
       ehead.isDefined should be(true)
-
       val es: List[Emp] = DB readOnly {
         implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
       }
       es.size should equal(2)
-
       val tr: Traversable[Emp] = DB readOnly {
         implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
       }
-      tr.foreach {
-        case e: Emp => e should not be (null)
-      }
-
       {
         implicit val session = DB(conn).readOnlySession
         val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
           .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
         e2s.size should equal(2)
         var sum: Long = 0L
-        SQL("select id from emp_BasicUsageSpec_SQL").foreach { rs =>
-          sum += rs.long("id")
+        SQL("select id from emp_BasicUsageSpec_SQL").foreach {
+          rs =>
+            sum += rs.long("id")
         }
         sum should equal(3L)
       }
@@ -294,13 +248,9 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   "An example of SQL" should "be available" in {
-
-    val conn: Connection = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable("emp")) {
       TestUtils.initialize("emp")
-
       val empMapper = (rs: WrappedResultSet) => Emp(rs.int("id"), rs.string("name"))
-
       val get10EmpSQL: SQL[Emp, HasExtractor] = {
         DB autoCommit {
           implicit s =>
@@ -316,19 +266,14 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             }
         }
       }
-
       val get10EmpAllSQL: SQLToList[Emp, HasExtractor] = get10EmpSQL.list // or #toList
-
       DB autoCommit {
         implicit s =>
-
           val emps: List[Emp] = get10EmpAllSQL.apply()
           emps.size should be <= 10
-
           val getFirstOf10Emp: SQLToOption[Emp, HasExtractor] = get10EmpSQL.first // or #headOption
           val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
           firstEmp.isDefined should be(true)
-
           val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
           single.isDefined should be(true)
           try {
@@ -349,7 +294,6 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             case e =>
           }
           SQL("truncate table company").execute.apply()
-
           SQL("""
             insert into company values (
               ?,
@@ -357,14 +301,13 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
               ?,
               ?
             )
-          """)
+               """)
             .bind(
               1,
               "Typesafe",
               """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
                From multicore to cloud computing, it's purpose built for scale.""",
               new DateTime).update.apply()
-
           SQL("""
             insert into company values (
               /*'id */123,
@@ -372,7 +315,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
               /*'description */'xxxx',
               /*'createdAt */''
             )
-              """)
+               """)
             .bindByName(
               'id -> 2,
               'name -> "Typesafe",
@@ -414,6 +357,33 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             case e =>
           }
         }
+    }
+  }
+
+  it should "execute batch" in {
+    val tableName = tableNamePrefix + "_batch"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      DB localTx {
+        implicit session =>
+          val params1: Seq[Seq[Any]] = (1001 to 2000).map {
+            i => Seq(i, "name" + i)
+          }
+          session.batch("insert into " + tableName + " (id, name) values (?, ?)", params1: _*)
+          val params2: Seq[Seq[Any]] = (2001 to 3000).map {
+            i => Seq(i, "name" + i)
+          }
+          SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params2: _*).apply()
+          val params3: Seq[Seq[(Symbol, Any)]] = (3001 to 4000).map {
+            i => Seq('id -> i, 'name -> ("name" + i))
+          }
+          SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params3: _*).apply()
+      }
+      DB readOnly {
+        implicit s =>
+          val count: Long = SQL("select count(1) from " + tableName).map(_.long(1)).single().apply().get
+          count should be > 3000L
+      }
     }
   }
 

@@ -384,12 +384,23 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       TestUtils.initialize(tableName)
       val db = DB(ConnectionPool.borrow())
       db.begin()
-      val count = db withinTx {
+      val count1 = db withinTx {
         implicit s =>
-          val params: Seq[Seq[Any]] = (10001 to 20000).map { i => Seq(i, "name" + i) }
+          val params: Seq[Seq[Any]] = (1001 to 2000).map { i => Seq(i, "name" + i.toString) }
           SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params: _*).apply()
       }
-      count.size should equal(10000)
+      count1.size should equal(1000)
+      val count2 = db withinTx {
+        implicit s =>
+          val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map { i =>
+            Seq[(Symbol, Any)](
+              'id -> i,
+              'name -> ("name" + i.toString)
+            )
+          }
+          SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params: _*).apply()
+      }
+      count2.size should equal(1000)
       db.rollback()
     }
   }

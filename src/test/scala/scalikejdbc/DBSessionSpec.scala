@@ -228,7 +228,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       try {
         DB localTx {
           session =>
-            val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
+            val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i))
             session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
             throw new RuntimeException
         }
@@ -237,20 +237,20 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       }
       val result = DB localTx {
         implicit session =>
-          SQL("select id from " + tableName + " where id = ?").bind(10001).map(_.long("id")).toOption().apply()
+          SQL("select id from " + tableName + " where id = ?").bind(1001).map(_.long("id")).toOption().apply()
       }
       result.isDefined should not be (true)
     }
   }
 
   it should "execute several batch in local tx mode" in {
-    val tableName = tableNamePrefix + "_batchInLocalTx"
+    val tableName = tableNamePrefix + "_severalBatchInLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val sqlList = (10001 to 20000).map {
+          val sqlList = (1001 to 2000).map {
             i =>
               "insert into " + tableName + " (id, name) values (" + i + ", 'Name" + i + "')"
           }
@@ -262,7 +262,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (20001 to 30000) foreach {
+          (2001 to 3000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }
