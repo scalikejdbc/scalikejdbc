@@ -97,7 +97,6 @@ private[scalikejdbc] object createNameBindingSQL {
     // check all the parameters passed by #bindByName are actually used
     params.foreach {
       param =>
-        // TODO checking Exception handling
         names.find(_ == param._1).orElse {
           throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
         }
