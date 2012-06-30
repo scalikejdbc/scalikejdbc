@@ -201,22 +201,26 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_batchInLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
+      GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+        enabled = false
+      )
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
+          val paramsList = (100001 to 200000).map(i => Seq(i, "Name" + i))
           session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (20001 to 30000) foreach {
+          (200001 to 300000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }
           System.currentTimeMillis() - before
       }
+      println("batch: " + batchTime + ", loop: " + loopTime)
       batchTime should be < loopTime
     }
   }
@@ -240,35 +244,6 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           SQL("select id from " + tableName + " where id = ?").bind(1001).map(_.long("id")).toOption().apply()
       }
       result.isDefined should not be (true)
-    }
-  }
-
-  it should "execute several batch in local tx mode" in {
-    val tableName = tableNamePrefix + "_severalBatchInLocalTx"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      val batchTime: Long = DB localTx {
-        session =>
-          val before = System.currentTimeMillis()
-          val sqlList = (1001 to 2000).map {
-            i =>
-              "insert into " + tableName + " (id, name) values (" + i + ", 'Name" + i + "')"
-          }
-          try {
-            session.batch(sqlList)
-          } catch { case e: SQLFeatureNotSupportedException => }
-          System.currentTimeMillis() - before
-      }
-      val loopTime: Long = DB localTx {
-        session =>
-          val before = System.currentTimeMillis()
-          (2001 to 3000) foreach {
-            i =>
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
-          }
-          System.currentTimeMillis() - before
-      }
-      batchTime should be < loopTime
     }
   }
 

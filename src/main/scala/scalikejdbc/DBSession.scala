@@ -60,7 +60,7 @@ trait DBSession extends LogSupport {
     StatementExecutor(
       underlying = statement,
       template = template,
-      params = params)
+      singleParams = params)
   }
 
   /**
@@ -73,7 +73,7 @@ trait DBSession extends LogSupport {
     StatementExecutor(
       underlying = conn.prepareStatement(template),
       template = template,
-      params = Nil)
+      isBatch = true)
   }
 
   /**
@@ -311,23 +311,6 @@ trait DBSession extends LogSupport {
           params =>
             executor.bindParams(params)
             executor.addBatch()
-        }
-        executor.executeBatch().toSeq
-    }
-  }
-
-  /**
-   * Executes [[java.sql.PreparedStatement#executeBatch()]]
-   * @param sqlList SQL list
-   * @return count list
-   */
-  def batch(sqlList: Seq[String]): Seq[Int] = {
-    ensureNotReadOnlySession(null)
-    using(createBatchStatementExecutor(conn = conn, template = sqlList.head)) {
-      executor =>
-        sqlList.tail.foreach {
-          sql =>
-            executor.addBatch(sql)
         }
         executor.executeBatch().toSeq
     }

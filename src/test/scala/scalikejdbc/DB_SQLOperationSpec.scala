@@ -423,7 +423,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       db.begin()
       implicit val session = db.withinTxSession()
 
-      val params1: Seq[Seq[Any]] = (1001 to 2000).map { i => Seq(i, "name" + i.toString) }
+      val params1: Seq[Seq[Any]] = (1001 to 2000).map {
+        i => Seq(i, "name" + i.toString)
+      }
       val count1 = SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params1: _*).apply()
       count1.size should equal(1000)
 
@@ -479,6 +481,35 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
           SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single.apply()
       }
       name.get should equal("name1")
+    }
+  }
+
+  it should "solve issue #30" in {
+    GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+      enabled = true,
+      logLevel = 'info
+    )
+    try {
+      DB autoCommit { implicit session =>
+        SQL("drop table issue30 if exists;").execute.apply()
+        SQL("""
+        create table issue30 (
+          id bigint not null,
+          data1 varchar(255) not null,
+          data2 varchar(255) not null
+        );""").execute.apply()
+        SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
+          (101 to 121) map { i => Seq(i, "a", "b") }: _*
+        ).apply()
+        SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
+          (201 to 205) map { i => Seq(i, "a", "b") }: _*
+        ).apply()
+      }
+    } finally {
+      DB autoCommit { implicit s =>
+        SQL("drop table issue30 if exists;").execute.apply()
+      }
+      GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
     }
   }
 

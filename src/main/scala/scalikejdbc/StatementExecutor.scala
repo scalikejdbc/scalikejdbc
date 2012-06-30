@@ -21,11 +21,17 @@ import java.sql.PreparedStatement
  * [[java.sql.Statement]] Executor
  * @param underlying preparedStatement
  * @param template SQL template
- * @param params parameters
+ * @param singleParams parameters for single execution (= not batch execution)
+ * @param isBatch is batch flag
  */
-case class StatementExecutor(underlying: PreparedStatement, template: String, params: Seq[Any]) extends LogSupport {
+case class StatementExecutor(underlying: PreparedStatement, template: String,
+    singleParams: Seq[Any] = Nil, isBatch: Boolean = false) extends LogSupport {
 
   private val eol = System.getProperty("line.separator")
+
+  type MutableList[A] = collection.mutable.MutableList[A]
+
+  private lazy val batchParamsList = new MutableList[Seq[Any]]
 
   /**
    * Binds parameters to the underlying [[java.sql.PreparedStatement]] object
@@ -67,50 +73,74 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
         }
       }
     }
+
+    if (isBatch) {
+      batchParamsList += params
+    }
   }
-  bindParams(params)
+
+  bindParams(singleParams)
+  if (isBatch) {
+    batchParamsList.clear()
+  }
 
   private lazy val sqlString: String = {
 
-    def toPrintable(param: Any): String = {
-      def normalize(param: Any): Any = {
-        param match {
-          case None => null
-          case Some(p) => normalize(p)
-          case p: String => p
-          case p: java.util.Date => p.toSqlTimestamp.toString
-          case p: org.joda.time.DateTime => p.toDate.toSqlTimestamp.toString
-          case p: org.joda.time.LocalDateTime => p.toDate.toSqlTimestamp
-          case p: org.joda.time.LocalDate => p.toDate.toSqlDate
-          case p: org.joda.time.LocalTime => p.toSqlTime
-          case p => p
+    def singleSqlString(params: Seq[Any]): String = {
+
+      def toPrintable(param: Any): String = {
+        def normalize(param: Any): Any = {
+          param match {
+            case None => null
+            case Some(p) => normalize(p)
+            case p: String => p
+            case p: java.util.Date => p.toSqlTimestamp.toString
+            case p: org.joda.time.DateTime => p.toDate.toSqlTimestamp.toString
+            case p: org.joda.time.LocalDateTime => p.toDate.toSqlTimestamp
+            case p: org.joda.time.LocalDate => p.toDate.toSqlDate
+            case p: org.joda.time.LocalTime => p.toSqlTime
+            case p => p
+          }
         }
+        (normalize(param) match {
+          case null => "null"
+          case result: String if result.size > 100 => "'" + result.take(100) + "... (" + result.size + ")" + "'"
+          case result: String => "'" + result + "'"
+          case result => result.toString
+        }).replaceAll("\r", "\\\\r")
+          .replaceAll("\n", "\\\\n")
       }
-      (normalize(param) match {
-        case null => "null"
-        case result: String if result.size > 100 => "'" + result.take(100) + "... (" + result.size + ")" + "'"
-        case result: String => "'" + result + "'"
-        case result => result.toString
-      }).replaceAll("\r", "\\\\r")
-        .replaceAll("\n", "\\\\n")
+
+      var i = 0
+      def trimSpaces(s: String, i: Int = 0): String = i match {
+        case i if i > 10 => s
+        case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
+      }
+
+      trimSpaces(template
+        .replaceAll("\r", " ")
+        .replaceAll("\n", " ")
+        .replaceAll("\t", " "))
+        .map {
+          c =>
+            if (c == '?') {
+              i += 1
+              toPrintable(params(i - 1))
+            } else c
+        }.mkString
     }
 
-    var i = 0
-    def trimSpaces(s: String, i: Int = 0): String = i match {
-      case i if i > 10 => s
-      case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
+    if (isBatch) {
+      if (batchParamsList.size > 20) {
+        batchParamsList.take(20).map(params => singleSqlString(params)).mkString(";" + eol + "   ") + ";" + eol +
+          "   ... (total: " + batchParamsList.size + " times)"
+      } else {
+        batchParamsList.map(params => singleSqlString(params)).mkString(";" + eol + "   ")
+      }
+    } else {
+      singleSqlString(singleParams)
     }
-    trimSpaces(template
-      .replaceAll("\r", " ")
-      .replaceAll("\n", " ")
-      .replaceAll("\t", " "))
-      .map {
-        c =>
-          if (c == '?') {
-            i += 1
-            toPrintable(params(i - 1))
-          } else c
-      }.mkString
+
   }
 
   private def stackTraceInformation: String = "  [Stack Trace]" + eol +
@@ -131,6 +161,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
   }
 
   private trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
+
     abstract override def apply[A](execute: () => A): A = {
       import GlobalSettings.loggingSQLAndTime
       if (loggingSQLAndTime.enabled) {
@@ -168,8 +199,6 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, pa
   private val statementExecute = new NakedExecutor with LoggingSQLAndTiming
 
   def addBatch(): Unit = underlying.addBatch()
-
-  def addBatch(sql: String): Unit = underlying.addBatch(sql)
 
   def execute(): Boolean = statementExecute(() => underlying.execute())
 
