@@ -38,7 +38,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.3.2"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.3.3"
 
 // slf4j binding you like
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
