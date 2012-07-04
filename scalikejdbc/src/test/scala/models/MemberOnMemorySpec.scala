@@ -12,6 +12,7 @@ class MemberOnMemorySpec extends FlatSpec with ShouldMatchers {
 
   it should "be available" in {
 
+    Class.forName("org.h2.Driver")
     ConnectionPool.add('MemberSpec, "jdbc:h2:mem:MemberSpec", "", "")
     NamedDB('MemberSpec) autoCommit {
       implicit session =>

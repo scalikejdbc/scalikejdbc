@@ -1,0 +1,19 @@
+{
+ "organization":"com.github.seratch",
+ "name":"scalikejdbc-mapper-generator",
+ "version":"1.3.1",
+ "description":"ScalikeJDBC Mapper Generator",
+ "site":"https://github.com/seratch/scalikejdbc-mapper-generator",
+ "tags":["DB", "JDBC", "Database", "MySQL", "PostgreSQL", "Oracle"],
+ "docs":"https://github.com/seratch/scalikejdbc-mapper-generator",
+ "licenses": [{
+   "name": "Apache License, Version 2.0",
+   "url":"http://www.apache.org/licenses/LICENSE-2.0"
+  }],
+ "resolvers": [],
+ "dependencies": [
+   { "organization":"com.github.seratch", "name": "scalikejdbc", "version": "1.3.1" }
+ ],
+ "scalas": ["2.9.1"],
+ "sbt": true
+}

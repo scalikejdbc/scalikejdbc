@@ -1,0 +1,14 @@
+{
+ "organization":"com.example",
+ "name":"testing-scalikejdbc-sbt",
+ "version":"0.0.1",
+ "description":"testing-scalikejdbc-sbt",
+ "site":"https://github.com/seratch/testing-scalikejdbc-sbt",
+ "tags":[],
+ "docs":"https://github.com/seratch/testing-scalikejdbc-sbt",
+ "licenses": [],
+ "resolvers": [],
+ "dependencies": [],
+ "scalas": ["2.9.2","2.9.1","2.9.0"],
+ "sbt": false
+}

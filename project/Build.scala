@@ -1,13 +1,13 @@
 import sbt._
 import Keys._
 
-object ScalikeJDBCBuild extends Build {
+object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
   lazy val _version = "1.3.3"
 
   lazy val scalikejdbc = Project(
-    id = "scalikejdbc", 
+    id = "library", 
     base = file("scalikejdbc"), 
     settings = Defaults.defaultSettings ++ Seq(
       organization := _organization,
@@ -51,6 +51,58 @@ object ScalikeJDBCBuild extends Build {
       publishArtifact in Test := false,
       pomIncludeRepository := { x => false },
       pomExtra := _pomExtra
+    )
+  )
+
+  lazy val scalikejdbcMapperGenerator = Project(
+    id = "mapper-generator", 
+    base = file("scalikejdbc-mapper-generator"), 
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := true,
+      organization := _organization,
+      name := "scalikejdbc-mapper-generator",
+      version := _version,
+      scalaVersion := "2.9.1",
+      resolvers ++= _resolvers,
+      libraryDependencies ++= Seq(
+        _organization %% "scalikejdbc" % _version,
+        "ch.qos.logback" % "logback-classic" % "1.0.2",
+        "com.h2database" % "h2" % "[1.3,)" % "test",
+        "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
+      ),
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  )
+
+  lazy val scalikejdbcPlayPlugin = Project(
+    id = "play-plugin", 
+    base = file("scalikejdbc-play-plugin"), 
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-play-plugin",
+      version := _version,
+      scalaVersion := "2.9.1",
+      crossScalaVersions := Seq("2.9.2", "2.9.1"),
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          _organization %% "scalikejdbc" % _version,
+          "play" % "play_2.9.1" % "2.0.2" % "provided",
+          "play" % "play-test_2.9.1" % "2.0.2" % "test"
+        )
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
     )
   )
 
