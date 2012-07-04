@@ -29,7 +29,7 @@ g8 seratch/play-with-scalikejdbc
 
 See Zentasks example in detail.
 
-https://github.com/seratch/scalikejdbc-play-plugin/tree/master/test/zentasks
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin/test/zentasks
 
 ### project/Build.scala
 
@@ -78,7 +78,7 @@ evolutionplugin=disabled
 ### conf/play.plugins
 
 ```
-777:scalikejdbc.PlayPlugin
+9999:scalikejdbc.PlayPlugin
 ```
 
 ### app/models/Project.scala
@@ -107,6 +107,7 @@ object Project {
 
 See also:
 
-https://github.com/seratch/scalikejdbc-mapper-generator
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
+
 
 
