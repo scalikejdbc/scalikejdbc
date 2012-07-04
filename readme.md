@@ -4,14 +4,12 @@
 
 This is a thin JDBC wrapper library which just uses `java.sql.PreparedStatement` internally.
 
-Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala objects.
-
-It's pretty simple, really.
+Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala objects. It's pretty simple, really.
 
 
 If you want simple mappers, please also try scalikejdbc-mapper-generator.
 
-https://github.com/seratch/scalikejdbc-mapper-generator
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
 ## Supported RDBMS
@@ -152,12 +150,11 @@ https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
 
 ## Mapper Generator 
 
-https://github.com/seratch/scalikejdbc-mapper-generator
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
 ## Play framework 2.x support
 
-https://github.com/seratch/scalikejdbc-play-plugin
-
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
 
