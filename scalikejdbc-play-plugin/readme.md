@@ -2,7 +2,7 @@
 
 ## ScalikeJDBC
 
-Wrapped JDBC for Scala.
+SQL-Based DB Access Library for Scala
 
 https://github.com/seratch/scalikejdbc
 

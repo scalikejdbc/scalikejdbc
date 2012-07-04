@@ -1,20 +1,17 @@
-# ScalikeJDBC - Wrapped JDBC for Scala
+# ScalikeJDBC - SQL-Based DB Access Library for Scala
 
 ## Just write SQL
 
-This is a thin JDBC wrapper library which just uses `java.sql.PreparedStatement` internally.
+ScalikeJDBC is a SQL-based DB access library for Scala developers. This library just wraps operations using `java.sql.PreparedStatement` internally and provides you easy-to-use APIs.
 
-Users only need to write SQL and map from `java.sql.ResultSet` objects to Scala objects. It's pretty simple, really.
-
-
-If you want simple mappers, please also try scalikejdbc-mapper-generator.
+Users do nothing other than writing SQL and mapping from `java.sql.ResultSet` objects to Scala values. If you want to create mapper modules easily, also take a look at scalikejdbc-mapper-generator.
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
 ## Supported RDBMS
 
-Passed all the unit tests with the following RDBMS.
+We never release without passing all the unit tests with the following RDBMS.
 
 - PostgreSQL
 - MySQL 
@@ -27,6 +24,8 @@ Passed all the unit tests with the following RDBMS.
 
 
 ## Scaladoc
+
+Here is the scaladoc:
 
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 
@@ -144,17 +143,31 @@ insert into user (
 ).update.apply()
 ```
 
+
 ## Logging SQL And Timing
+
+Using LogginSQLAndTime feature, you can check the actual SQL(not exactly) and time.
 
 https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
 
+
 ## Mapper Generator 
+
+If you want to create mapper modules easily, also take a look at this sbt plugin. 
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
 ## Play framework 2.x support
 
+You can use ScalikeJDBC with Play framework 2.x seamlessly.
+
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
+
+## License
+
+Apache License, Version 2.0
+
+http://www.apache.org/licenses/LICENSE-2.0.html
 
