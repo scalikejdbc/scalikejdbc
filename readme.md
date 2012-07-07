@@ -41,15 +41,6 @@ libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.3.3"
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
 ```
 
-### ls.implicit.ly
-
-http://ls.implicit.ly/seratch/scalikejdbc
-
-```
-ls -n scalikejdbc
-ls-install scalikejdbc
-```
-
 
 ## Basic Usage
 

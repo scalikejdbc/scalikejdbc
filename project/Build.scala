@@ -8,7 +8,7 @@ object ScalikeJDBCProjects extends Build {
 
   lazy val scalikejdbc = Project(
     id = "library", 
-    base = file("scalikejdbc"), 
+    base = file("scalikejdbc-library"), 
     settings = Defaults.defaultSettings ++ Seq(
       organization := _organization,
       name := "scalikejdbc",
