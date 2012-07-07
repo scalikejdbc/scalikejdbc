@@ -1,7 +1,5 @@
 import testgenerator.SbtKeys._
 
-seq(lsSettings :_*)
-
 seq(scalariformSettings: _*)
 
 seq(testgeneratorSettings: _*)
