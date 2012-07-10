@@ -16,7 +16,8 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         } catch { case e => }
         SQL("create table settings_example (id int primary key, name varchar(13) not null)")
           .execute.apply()
-        1 to 100000 foreach { i =>
+        1 to 20000 foreach { i =>
+          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
           SQL("insert into settings_example values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
         }
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(

@@ -491,7 +491,9 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     )
     try {
       DB autoCommit { implicit session =>
-        SQL("drop table issue30 if exists;").execute.apply()
+        try {
+          SQL("drop table issue30;").execute.apply()
+        } catch { case e => }
         SQL("""
         create table issue30 (
           id bigint not null,
@@ -506,9 +508,11 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         ).apply()
       }
     } finally {
-      DB autoCommit { implicit s =>
-        SQL("drop table issue30 if exists;").execute.apply()
-      }
+      try {
+        DB autoCommit { implicit s =>
+          SQL("drop table issue30;").execute.apply()
+        }
+      } catch { case e => }
       GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
     }
   }
