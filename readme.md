@@ -2,9 +2,13 @@
 
 ## Just write SQL
 
-ScalikeJDBC is a SQL-based DB access library for Scala developers. This library just wraps operations using `java.sql.PreparedStatement` internally and provides you easy-to-use APIs.
+ScalikeJDBC is a SQL-based DB access library for Scala developers. 
 
-Users do nothing other than writing SQL and mapping from `java.sql.ResultSet` objects to Scala values. If you want to create mapper modules easily, also take a look at scalikejdbc-mapper-generator.
+This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
+
+Users do nothing other than writing SQL and mapping from `java.sql.ResultSet` objects to Scala values. 
+
+If you want to create mapper modules easily, also take a look at scalikejdbc-mapper-generator.
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
@@ -146,6 +150,10 @@ https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
 
 If you want to create mapper modules easily, also take a look at this sbt plugin. 
 
+```sh
+sbt "scalikejdbc-gen [table-name]"
+```
+
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
@@ -154,6 +162,8 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 You can use ScalikeJDBC with Play framework 2.x seamlessly.
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
+
+We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
 
 
 ## License
