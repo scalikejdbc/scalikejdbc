@@ -207,14 +207,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
+          val paramsList = (10001 to 40000).map(i => Seq(i, "Name" + i))
           session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (30001 to 50000) foreach {
+          (40001 to 70000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }
@@ -223,7 +223,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       println("")
       println("batch: " + batchTime + ", loop: " + loopTime)
       println("")
-      (batchTime.toDouble * 0.8D) should be < loopTime.toDouble
+      (batchTime.toDouble * 0.75D) should be < loopTime.toDouble
     }
   }
 
@@ -692,6 +692,44 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       } finally {
         try {
           SQL("drop table image_data;").execute.apply()
+        } catch { case e => }
+      }
+    }
+  }
+
+  it should "execute insert with byte array values" in {
+    DB autoCommit { implicit s =>
+      try {
+        SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
+        using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
+          using(new java.io.ByteArrayOutputStream) { bos =>
+            var next: Int = stream.read()
+            while (next > -1) {
+              bos.write(next)
+              next = stream.read()
+            }
+            bos.flush()
+            SQL("insert into image_data2 (name, data) values ({name}, {data});")
+              .bindByName(
+                'name -> "logo",
+                'data -> bos.toByteArray)
+              .update.apply()
+          }
+        }
+        SQL("select * from image_data2").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
+          using(new java.io.ByteArrayOutputStream) { bos =>
+            var next: Int = bs.read()
+            while (next > -1) {
+              bos.write(next)
+              next = bs.read()
+            }
+            bos.flush()
+            bos.toByteArray().size should equal(7007)
+          }
+        }
+      } finally {
+        try {
+          SQL("drop table image_data2").execute.apply()
         } catch { case e => }
       }
     }
