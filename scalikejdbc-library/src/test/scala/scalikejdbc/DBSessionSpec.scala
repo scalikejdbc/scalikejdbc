@@ -207,21 +207,23 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (100001 to 200000).map(i => Seq(i, "Name" + i))
+          val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
           session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (200001 to 300000) foreach {
+          (30001 to 50000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }
           System.currentTimeMillis() - before
       }
+      println("")
       println("batch: " + batchTime + ", loop: " + loopTime)
-      batchTime should be < loopTime
+      println("")
+      (batchTime.toDouble * 0.8D) should be < loopTime.toDouble
     }
   }
 
@@ -662,6 +664,36 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             case e => e.printStackTrace
           }
         }
+    }
+  }
+
+  it should "execute insert with InputStream values" in {
+    DB autoCommit { implicit s =>
+      try {
+        SQL("create table image_data (name varchar(255), data blob);").execute.apply()
+        using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
+          SQL("insert into image_data (name, data) values ({name}, {data});")
+            .bindByName(
+              'name -> "logo",
+              'data -> stream)
+            .update.apply()
+        }
+        SQL("select * from image_data;").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
+          using(new java.io.ByteArrayOutputStream) { bos =>
+            var next: Int = bs.read()
+            while (next > -1) {
+              bos.write(next)
+              next = bs.read()
+            }
+            bos.flush()
+            bos.toByteArray().size should equal(7007)
+          }
+        }
+      } finally {
+        try {
+          SQL("drop table image_data;").execute.apply()
+        } catch { case e => }
+      }
     }
   }
 

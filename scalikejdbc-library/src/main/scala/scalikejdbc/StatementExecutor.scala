@@ -67,6 +67,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
         case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
         case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
+        case p: java.io.InputStream => underlying.setBinaryStream(i, p)
         case p => {
           log.debug("The parameter(" + p + ") is bound as an Object.")
           underlying.setObject(i, p)
