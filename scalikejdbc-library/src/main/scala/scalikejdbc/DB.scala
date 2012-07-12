@@ -228,9 +228,10 @@ object DB {
   /**
    * Returns within-tx session instance. You SHOULD close this instance by yourself.
    *
+   * @param db DB instance as an implicit parameter
    * @return session
    */
-  def withinTxSession(): DBSession = DB(ConnectionPool.borrow()).withinTxSession()
+  def withinTxSession()(implicit db: DB): DBSession = db.withinTxSession()
 
   /**
    * Get a connection and returns a DB instance.
