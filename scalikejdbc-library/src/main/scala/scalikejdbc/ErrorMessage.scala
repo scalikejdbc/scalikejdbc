@@ -38,4 +38,8 @@ private[scalikejdbc] object ErrorMessage {
 
   val BINDING_IS_IGNORED = "Passed named parameter is ignored."
 
+  val NO_CONNECTION_POOL_CONTEXT = "No connection pool context exists."
+
+  val UNKNOWN_CONNECTION_POOL_CONTEXT = "Unknown connection pool context is specified."
+
 }

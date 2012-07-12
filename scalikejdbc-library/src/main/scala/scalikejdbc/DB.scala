@@ -94,6 +94,9 @@ import scala.util.control.Exception._
  */
 object DB {
 
+  type CPContext = ConnectionPoolContext
+  val NoCPContext = NoConnectionPoolContext
+
   /**
    * Returns DB instance.
    * @param conn  connection
@@ -107,15 +110,23 @@ object DB {
     }
   }
 
+  private def connectionPool(context: CPContext): ConnectionPool = context match {
+    case NoCPContext => ConnectionPool()
+    case DefaultConnectionPoolContext => context.connectionPool
+    case _: NamedConnectionPoolContext => context.connectionPool
+    case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
+  }
+
   /**
    * Begins a read-only block easily with ConnectionPool.
    *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def readOnly[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) {
+  def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).readOnly(execution)
     }
   }
@@ -125,29 +136,36 @@ object DB {
    * and pass not session but connection to execution block.
    *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def readOnlyWithConnection[A](execution: Connection => A): A = {
-    using(ConnectionPool.borrow()) {
+  def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).readOnlyWithConnection(execution)
     }
   }
 
   /**
    * Returns read-only session instance. You SHOULD close this instance by yourself.
+   *
+   * @param context connection pool context
    * @return session
    */
-  def readOnlySession(): DBSession = DB(ConnectionPool.borrow()).readOnlySession()
+  def readOnlySession()(implicit context: CPContext = NoCPContext): DBSession = {
+    DB(connectionPool(context).borrow()).readOnlySession()
+  }
 
   /**
    * Begins a auto-commit block easily with ConnectionPool.
+   *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def autoCommit[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) {
+  def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).autoCommit(execution)
     }
   }
@@ -157,29 +175,36 @@ object DB {
    * and pass not session but connection to execution block.
    *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def autoCommitWithConnection[A](execution: Connection => A): A = {
-    using(ConnectionPool.borrow()) {
+  def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).autoCommitWithConnection(execution)
     }
   }
 
   /**
    * Returns auto-commit session instance. You SHOULD close this instance by yourself.
+   *
+   * @param context connection pool context
    * @return session
    */
-  def autoCommitSession(): DBSession = DB(ConnectionPool.borrow()).autoCommitSession()
+  def autoCommitSession()(implicit context: CPContext = NoCPContext): DBSession = {
+    DB(connectionPool(context).borrow()).autoCommitSession()
+  }
 
   /**
    * Begins a local-tx block easily with ConnectionPool.
+   *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def localTx[A](execution: DBSession => A): A = {
-    using(ConnectionPool.borrow()) {
+  def localTx[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).localTx(execution)
     }
   }
@@ -189,11 +214,12 @@ object DB {
    * and pass not session but connection to execution block.
    *
    * @param execution execution
+   * @param context connection pool context
    * @tparam A return type
    * @return result value
    */
-  def localTxWithConnection[A](execution: Connection => A): A = {
-    using(ConnectionPool.borrow()) {
+  def localTxWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    using(connectionPool(context).borrow()) {
       conn => DB(conn).localTxWithConnection(execution)
     }
   }
@@ -260,7 +286,7 @@ object DB {
  *   import scalikejdbc._
  *   case class User(id: Int, name: String)
  *
- *   using(ConnectionPool.borrow()) { conn =>
+ *   using(connectionPool(context).borrow()) { conn =>
  *
  *     val users = DB(conn) readOnly { session =>
  *       session.list("select * from user") { rs =>
