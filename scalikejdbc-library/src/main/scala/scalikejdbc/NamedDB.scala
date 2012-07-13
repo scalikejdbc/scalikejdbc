@@ -29,9 +29,15 @@ import java.sql.Connection
  * }
  * }}}
  */
-case class NamedDB(name: Any) {
+case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) {
 
-  private lazy val db: DB = DB(ConnectionPool.borrow(name))
+  private def connectionPool(): ConnectionPool = context match {
+    case NoConnectionPoolContext => ConnectionPool(name)
+    case _: MultipleConnectionPoolContext => context.get(name)
+    case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
+  }
+
+  private lazy val db: DB = DB(connectionPool().borrow())
 
   def isTxNotActive = db.isTxNotActive
 

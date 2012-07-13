@@ -15,12 +15,31 @@
  */
 package scalikejdbc
 
+import scala.collection.mutable
+
 /**
- * Connection Pool Context
+ * Connection pool context
  */
 trait ConnectionPoolContext {
 
-  lazy val connectionPool: ConnectionPool = ConnectionPool()
+  def put(name: Any, pool: ConnectionPool): Unit
+
+  def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool
+
+}
+
+/**
+ * Multiple connection pool context
+ */
+class MultipleConnectionPoolContext extends ConnectionPoolContext {
+
+  private lazy val pools = new mutable.HashMap[Any, ConnectionPool]
+
+  override def put(name: Any, pool: ConnectionPool): Unit = pools.update(name, pool)
+
+  override def get(name: Any = "deafult"): ConnectionPool = pools.get(name).getOrElse {
+    throw new IllegalStateException("No connection context for " + name + ".")
+  }
 
 }
 
@@ -29,21 +48,9 @@ trait ConnectionPoolContext {
  */
 object NoConnectionPoolContext extends ConnectionPoolContext {
 
-  override lazy val connectionPool: ConnectionPool = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
+  override def put(name: Any, pool: ConnectionPool): Unit = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
 
-}
-
-/**
- * Default Connection Pool Context
- */
-object DefaultConnectionPoolContext extends ConnectionPoolContext
-
-/**
- * Named Connection Pool Context
- */
-case class NamedConnectionPoolContext(name: Any) extends ConnectionPoolContext {
-
-  override lazy val connectionPool: ConnectionPool = ConnectionPool(name)
+  override def get(name: Any = "deafult"): ConnectionPool = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
 
 }
 

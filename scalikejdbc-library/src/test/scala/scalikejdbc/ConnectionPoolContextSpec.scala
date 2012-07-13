@@ -33,7 +33,8 @@ object ConnectionPoolContextSpecUtils {
 }
 
 trait NamedCPContextAsDefault {
-  implicit val context = NamedConnectionPoolContext('named)
+  implicit val context = new MultipleConnectionPoolContext
+  context.put('named, ConnectionPool())
 }
 
 class ConnectionPoolContextMixinSpec extends FlatSpec with ShouldMatchers with Settings {
@@ -55,7 +56,13 @@ class ConnectionPoolContextMixinSpec extends FlatSpec with ShouldMatchers with S
       }
       result1.size should equal(6)
 
-      val result2 = NamedDB('named) readOnly { implicit s =>
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly { implicit s =>
+        SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
+      }
+      result11.size should equal(6)
+      result1.zip(result11).foreach { case (a, b) => a should equal(b) }
+
+      val result2 = NamedDB('named)(NoConnectionPoolContext) readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(6)
@@ -87,7 +94,13 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
       }
       result1.size should equal(4)
 
-      val result2 = NamedDB("default") readOnly { implicit s =>
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly { implicit s =>
+        SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
+      }
+      result11.size should equal(4)
+      result1.zip(result11).foreach { case (a, b) => a should equal(b) }
+
+      val result2 = NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(4)
@@ -100,7 +113,8 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
 
   it should "work with DefaultConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withDefaultCPContext"
-    implicit val context = DefaultConnectionPoolContext
+    implicit val context = new MultipleConnectionPoolContext
+    context.put(ConnectionPool.DEFAULT_NAME, ConnectionPool())
     try {
       createTable(tableName)
       insertData(tableName, 5)
@@ -110,7 +124,13 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
       }
       result1.size should equal(5)
 
-      val result2 = NamedDB("default") readOnly { implicit s =>
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly { implicit s =>
+        SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
+      }
+      result11.size should equal(5)
+      result1.zip(result11).foreach { case (a, b) => a should equal(b) }
+
+      val result2 = NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(5)
@@ -123,7 +143,8 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
 
   it should "work with NamedConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withNamedCPContext"
-    implicit val context = NamedConnectionPoolContext('named)
+    implicit val context = new MultipleConnectionPoolContext
+    context.put(ConnectionPool.DEFAULT_NAME, ConnectionPool())
     try {
       createTable(tableName)
       insertData(tableName, 6)
@@ -133,7 +154,13 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
       }
       result1.size should equal(6)
 
-      val result2 = NamedDB('named) readOnly { implicit s =>
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly { implicit s =>
+        SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
+      }
+      result11.size should equal(6)
+      result1.zip(result11).foreach { case (a, b) => a should equal(b) }
+
+      val result2 = NamedDB('named)(NoConnectionPoolContext) readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(6)

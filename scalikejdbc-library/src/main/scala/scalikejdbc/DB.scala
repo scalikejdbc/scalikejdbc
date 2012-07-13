@@ -112,8 +112,7 @@ object DB {
 
   private def connectionPool(context: CPContext): ConnectionPool = context match {
     case NoCPContext => ConnectionPool()
-    case DefaultConnectionPoolContext => context.connectionPool
-    case _: NamedConnectionPoolContext => context.connectionPool
+    case _: MultipleConnectionPoolContext => context.get(ConnectionPool.DEFAULT_NAME)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
   }
 
