@@ -34,7 +34,7 @@ object ConnectionPoolContextSpecUtils {
 
 trait NamedCPContextAsDefault {
   implicit val context = new MultipleConnectionPoolContext
-  context.put('named, ConnectionPool())
+  context.set('named, ConnectionPool())
 }
 
 class ConnectionPoolContextMixinSpec extends FlatSpec with ShouldMatchers with Settings {
@@ -114,7 +114,7 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
   it should "work with DefaultConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withDefaultCPContext"
     implicit val context = new MultipleConnectionPoolContext
-    context.put(ConnectionPool.DEFAULT_NAME, ConnectionPool())
+    context.set(ConnectionPool.DEFAULT_NAME, ConnectionPool())
     try {
       createTable(tableName)
       insertData(tableName, 5)
@@ -144,7 +144,7 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
   it should "work with NamedConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withNamedCPContext"
     implicit val context = new MultipleConnectionPoolContext
-    context.put(ConnectionPool.DEFAULT_NAME, ConnectionPool())
+    context.set(ConnectionPool.DEFAULT_NAME, ConnectionPool())
     try {
       createTable(tableName)
       insertData(tableName, 6)

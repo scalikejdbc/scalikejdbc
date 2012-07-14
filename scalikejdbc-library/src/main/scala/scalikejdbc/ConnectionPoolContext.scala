@@ -22,7 +22,7 @@ import scala.collection.mutable
  */
 trait ConnectionPoolContext {
 
-  def put(name: Any, pool: ConnectionPool): Unit
+  def set(name: Any, pool: ConnectionPool): Unit
 
   def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool
 
@@ -35,9 +35,9 @@ class MultipleConnectionPoolContext extends ConnectionPoolContext {
 
   private lazy val pools = new mutable.HashMap[Any, ConnectionPool]
 
-  override def put(name: Any, pool: ConnectionPool): Unit = pools.update(name, pool)
+  override def set(name: Any, pool: ConnectionPool): Unit = pools.update(name, pool)
 
-  override def get(name: Any = "deafult"): ConnectionPool = pools.get(name).getOrElse {
+  override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool = pools.get(name).getOrElse {
     throw new IllegalStateException("No connection context for " + name + ".")
   }
 
@@ -48,9 +48,9 @@ class MultipleConnectionPoolContext extends ConnectionPoolContext {
  */
 object NoConnectionPoolContext extends ConnectionPoolContext {
 
-  override def put(name: Any, pool: ConnectionPool): Unit = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
+  override def set(name: Any, pool: ConnectionPool): Unit = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
 
-  override def get(name: Any = "deafult"): ConnectionPool = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
+  override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool = throw new IllegalStateException(ErrorMessage.NO_CONNECTION_POOL_CONTEXT)
 
 }
 
