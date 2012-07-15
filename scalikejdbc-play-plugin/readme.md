@@ -35,8 +35,8 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin/test/
 
 ```scala
 val appDependencies = Seq(
-  "com.github.seratch" %% "scalikejdbc"             % "1.3.3",
-  "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.3.3"
+  "com.github.seratch" %% "scalikejdbc"             % "[1.3,)",
+  "com.github.seratch" %% "scalikejdbc-play-plugin" % "[1.3,)"
 )
 
 val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(

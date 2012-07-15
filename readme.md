@@ -21,7 +21,6 @@ We never release without passing all the unit tests with the following RDBMS.
 - MySQL 
 - H2 Database Engine
 - HSQLDB
-- Apache Derby
 - SQLite
 
 [![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
@@ -39,7 +38,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "1.3.3"
+libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.3,)"
 
 // slf4j binding you like
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
@@ -73,6 +72,12 @@ case class User(id: Long, name: String, birthday: Option[LocalDate])
 
 val activeUsers: List[User] = DB readOnly { implicit session =>
   SQL("select * from user where active = ?").bind(true).map { 
+    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
+  }.list.apply()
+}
+
+val activeUsers: List[User] = DB readOnly { implicit session =>
+  SQL("select * from user where active = {active}").bindByName('active -> true).map { 
     rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
   }.list.apply()
 }
@@ -126,7 +131,7 @@ insert into user (
   encrypted_password
 ) values (
   /*'id*/123,
-  /*'email*/'xxx@example.com',
+  /*'email*/'alice@example.com',
   /*'name*/'Alice',
   /*'encryptedPassword*/'123456789012'
 )
