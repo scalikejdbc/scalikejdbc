@@ -27,10 +27,14 @@ case class Model(url: String, username: String, password: String) {
 
   private def columnDataType(implicit rs: WrappedResultSet): Int = rs.string("DATA_TYPE").toInt
 
-  private def isNotNull(implicit rs: WrappedResultSet): Boolean = rs.string("IS_NULLABLE") == "NO"
+  private def isNotNull(implicit rs: WrappedResultSet): Boolean = {
+    val isNullable = rs.string("IS_NULLABLE")
+    isNullable == "NO" || isNullable == "N"
+  }
 
   private def isAutoIncrement(implicit rs: WrappedResultSet): Boolean = try {
-    rs.string("IS_AUTOINCREMENT") == "YES"
+    val isAutoIncrement = rs.string("IS_AUTOINCREMENT")
+    isAutoIncrement == "YES" || isAutoIncrement == "Y"
   } catch { case e => false }
 
   def table(schema: String = null, tableName: String): Option[Table] = {

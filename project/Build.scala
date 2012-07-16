@@ -68,9 +68,8 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
         "ch.qos.logback" % "logback-classic" % "1.0.2",
-        "com.h2database" % "h2" % "[1.3,)" % "test",
         "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
-      ),
+      ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       publishArtifact in Test := false,
