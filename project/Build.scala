@@ -4,7 +4,7 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
-  lazy val _version = "1.3.4"
+  lazy val _version = "1.3.5-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -63,6 +63,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-mapper-generator",
       version := _version,
       scalaVersion := "2.9.1",
+      crossScalaVersions := Seq("2.9.2", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
