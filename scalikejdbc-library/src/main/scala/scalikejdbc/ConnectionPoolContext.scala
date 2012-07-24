@@ -31,9 +31,18 @@ trait ConnectionPoolContext {
 /**
  * Multiple connection pool context
  */
-class MultipleConnectionPoolContext extends ConnectionPoolContext {
+case class MultipleConnectionPoolContext(contexts: (Any, ConnectionPool)*) extends ConnectionPoolContext {
+
+  def this() {
+    this(Nil: _*)
+  }
 
   private lazy val pools = new mutable.HashMap[Any, ConnectionPool]
+
+  contexts foreach {
+    case (name, pool) =>
+      pools.put(name, pool)
+  }
 
   override def set(name: Any, pool: ConnectionPool): Unit = pools.update(name, pool)
 

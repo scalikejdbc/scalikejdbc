@@ -113,8 +113,9 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
 
   it should "work with DefaultConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withDefaultCPContext"
-    implicit val context = new MultipleConnectionPoolContext
-    context.set(ConnectionPool.DEFAULT_NAME, ConnectionPool())
+    implicit val context = MultipleConnectionPoolContext(
+      ConnectionPool.DEFAULT_NAME -> ConnectionPool()
+    )
     try {
       createTable(tableName)
       insertData(tableName, 5)
@@ -143,8 +144,9 @@ class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settin
 
   it should "work with NamedConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withNamedCPContext"
-    implicit val context = new MultipleConnectionPoolContext
-    context.set(ConnectionPool.DEFAULT_NAME, ConnectionPool())
+    implicit val context = MultipleConnectionPoolContext(
+      ConnectionPool.DEFAULT_NAME -> ConnectionPool()
+    )
     try {
       createTable(tableName)
       insertData(tableName, 6)
