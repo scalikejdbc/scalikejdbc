@@ -71,9 +71,9 @@ case class Member(
     birthday: Option[LocalDate] = None,
     createdAt: DateTime) {
 
-  def save()(implicit session: DBSession = AutoSession): Member = Member.save(this)(session)
+  def save()(implicit session: DBSession = Member.autoSession): Member = Member.save(this)(session)
 
-  def destroy()(implicit session: DBSession = AutoSession): Unit = Member.delete(this)(session)
+  def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.delete(this)(session)
 
 }
 
@@ -100,25 +100,27 @@ object Member {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
+  val autoSession = AutoSession
+
+  def find(id: Long)(implicit session: DBSession = autoSession): Option[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""")
       .bindByName('id -> id).map(*).single.apply()
   }
 
-  def findAll()(implicit session: DBSession = AutoSession): List[Member] = {
+  def findAll()(implicit session: DBSession = autoSession): List[Member] = {
     SQL("""SELECT * FROM MEMBER""").map(*).list.apply()
   }
 
-  def countAll()(implicit session: DBSession = AutoSession): Long = {
+  def countAll()(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): List[Member] = {
+  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): Long = {
+  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT count(1) FROM MEMBER WHERE """ + where)
       .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
@@ -127,7 +129,7 @@ object Member {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = AutoSession): Member = {
+    createdAt: DateTime)(implicit session: DBSession = autoSession): Member = {
     val generatedKey = SQL("""
       INSERT INTO MEMBER (
         NAME,
@@ -155,7 +157,7 @@ object Member {
       createdAt = createdAt)
   }
 
-  def save(m: Member)(implicit session: DBSession = AutoSession): Member = {
+  def save(m: Member)(implicit session: DBSession = autoSession): Member = {
     SQL("""
       UPDATE 
         MEMBER
@@ -178,7 +180,7 @@ object Member {
     m
   }
 
-  def delete(m: Member)(implicit session: DBSession = AutoSession): Unit = {
+  def delete(m: Member)(implicit session: DBSession = autoSession): Unit = {
     SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
       .bindByName('id -> m.id).update.apply()
   }
