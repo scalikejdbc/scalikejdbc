@@ -4,7 +4,7 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
-  lazy val _version = "1.3.5-SNAPSHOT"
+  lazy val _version = "1.3.5"
 
   lazy val scalikejdbc = Project(
     id = "library", 
