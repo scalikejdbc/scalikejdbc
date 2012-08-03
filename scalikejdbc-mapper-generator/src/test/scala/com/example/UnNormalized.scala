@@ -159,25 +159,27 @@ object UnNormalized {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[UnNormalized] = {
+  val autoSession = AutoSession
+
+  def find(id: Long)(implicit session: DBSession = autoSession): Option[UnNormalized] = {
     SQL("""SELECT * FROM UN_NORMALIZED WHERE ID = /*'id*/1""")
       .bindByName('id -> id).map(*).single.apply()
   }
 
-  def findAll()(implicit session: DBSession = AutoSession): List[UnNormalized] = {
+  def findAll()(implicit session: DBSession = autoSession): List[UnNormalized] = {
     SQL("""SELECT * FROM UN_NORMALIZED""").map(*).list.apply()
   }
 
-  def countAll()(implicit session: DBSession = AutoSession): Long = {
+  def countAll()(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT COUNT(1) FROM UN_NORMALIZED""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): List[UnNormalized] = {
+  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[UnNormalized] = {
     SQL("""SELECT * FROM UN_NORMALIZED WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): Long = {
+  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT count(1) FROM UN_NORMALIZED WHERE """ + where)
       .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
@@ -207,7 +209,7 @@ object UnNormalized {
     v22: Boolean,
     v23: Float,
     v24: Double,
-    createdAt: DateTime)(implicit session: DBSession = AutoSession): UnNormalized = {
+    createdAt: DateTime)(implicit session: DBSession = autoSession): UnNormalized = {
     val generatedKey = SQL("""
       INSERT INTO UN_NORMALIZED (
         V_01,
@@ -319,7 +321,7 @@ object UnNormalized {
       createdAt = createdAt)
   }
 
-  def save(m: UnNormalized)(implicit session: DBSession = AutoSession): UnNormalized = {
+  def save(m: UnNormalized)(implicit session: DBSession = autoSession): UnNormalized = {
     SQL("""
       UPDATE 
         UN_NORMALIZED
@@ -384,7 +386,7 @@ object UnNormalized {
     m
   }
 
-  def delete(m: UnNormalized)(implicit session: DBSession = AutoSession): Unit = {
+  def delete(m: UnNormalized)(implicit session: DBSession = autoSession): Unit = {
     SQL("""DELETE FROM UN_NORMALIZED WHERE ID = /*'id*/1""")
       .bindByName('id -> m.id).update.apply()
   }

@@ -1,5 +1,5 @@
 import org.scalatest._
-import org.scalatest.matchers._
+import org.scalatest.matchers.ShouldMatchers
 
 import org.joda.time._
 import scalikejdbc._
@@ -9,7 +9,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
 
   Class.forName("org.h2.Driver")
 
-  val url = "jdbc:h2:file:db/test"
+  val url = "jdbc:h2:file:db/mapper-generator-h2"
   val username = "sa"
   val password = ""
   ConnectionPool.singleton(url, username, password)

@@ -8,9 +8,9 @@ case class WithoutPk(
     bbb: Option[Int] = None,
     createdAt: DateTime) {
 
-  def save()(implicit session: DBSession = AutoSession): WithoutPk = WithoutPk.save(this)(session)
+  def save()(implicit session: DBSession = WithoutPk.autoSession): WithoutPk = WithoutPk.save(this)(session)
 
-  def destroy()(implicit session: DBSession = AutoSession): Unit = WithoutPk.delete(this)(session)
+  def destroy()(implicit session: DBSession = WithoutPk.autoSession): Unit = WithoutPk.delete(this)(session)
 
 }
 
@@ -33,25 +33,27 @@ object WithoutPk {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
-  def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = AutoSession): Option[WithoutPk] = {
+  val autoSession = AutoSession
+
+  def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = autoSession): Option[WithoutPk] = {
     SQL("""SELECT * FROM WITHOUT_PK WHERE AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> aaa, 'bbb -> bbb, 'createdAt -> createdAt).map(*).single.apply()
   }
 
-  def findAll()(implicit session: DBSession = AutoSession): List[WithoutPk] = {
+  def findAll()(implicit session: DBSession = autoSession): List[WithoutPk] = {
     SQL("""SELECT * FROM WITHOUT_PK""").map(*).list.apply()
   }
 
-  def countAll()(implicit session: DBSession = AutoSession): Long = {
+  def countAll()(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT COUNT(1) FROM WITHOUT_PK""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): List[WithoutPk] = {
+  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[WithoutPk] = {
     SQL("""SELECT * FROM WITHOUT_PK WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): Long = {
+  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): Long = {
     SQL("""SELECT count(1) FROM WITHOUT_PK WHERE """ + where)
       .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
@@ -59,7 +61,7 @@ object WithoutPk {
   def create(
     aaa: String,
     bbb: Option[Int] = None,
-    createdAt: DateTime)(implicit session: DBSession = AutoSession): WithoutPk = {
+    createdAt: DateTime)(implicit session: DBSession = autoSession): WithoutPk = {
     SQL("""
       INSERT INTO WITHOUT_PK (
         AAA,
@@ -82,7 +84,7 @@ object WithoutPk {
       createdAt = createdAt)
   }
 
-  def save(m: WithoutPk)(implicit session: DBSession = AutoSession): WithoutPk = {
+  def save(m: WithoutPk)(implicit session: DBSession = autoSession): WithoutPk = {
     SQL("""
       UPDATE 
         WITHOUT_PK
@@ -101,7 +103,7 @@ object WithoutPk {
     m
   }
 
-  def delete(m: WithoutPk)(implicit session: DBSession = AutoSession): Unit = {
+  def delete(m: WithoutPk)(implicit session: DBSession = autoSession): Unit = {
     SQL("""DELETE FROM WITHOUT_PK WHERE AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> m.aaa, 'bbb -> m.bbb, 'createdAt -> m.createdAt).update.apply()
   }

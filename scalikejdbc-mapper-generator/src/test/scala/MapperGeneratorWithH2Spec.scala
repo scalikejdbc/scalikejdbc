@@ -1,5 +1,5 @@
 import org.scalatest._
-import org.scalatest.matchers._
+import org.scalatest.matchers.ShouldMatchers
 
 import scalikejdbc._
 import mapper.{ GeneratorTemplate, GeneratorConfig, ARLikeTemplateGenerator, Model }

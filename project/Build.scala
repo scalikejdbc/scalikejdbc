@@ -40,7 +40,7 @@ object ScalikeJDBCProjects extends Build {
           "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredSpec         % "0.6.1"     % "test",
-          "org.scalatest"           %% "scalatest"            % "1.7.2"     % "test",
+          "org.scalatest"           %% "scalatest"            % "1.8"       % "test",
           "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
           "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
