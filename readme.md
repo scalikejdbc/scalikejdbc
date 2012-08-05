@@ -45,105 +45,9 @@ libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
 ```
 
 
-## Basic Usage
-
-There are two ways.
-
-The first one is just using `DBSession` methods:
-
-```scala
-import scalikejdbc._
-import org.joda.time.LocalDate
-case class User(id: Long, name: String, birthday: Option[LocalDate])
-
-val activeUsers: List[User] = DB readOnly { session =>
-  session.list("select * from user where active = ?", true) { 
-    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
-  }
-}
-```
-
-The other is using API which starts with `SQL.apply`: 
-
-```scala
-import scalikejdbc._
-import org.joda.time.LocalDate
-case class User(id: Long, name: String, birthday: Option[LocalDate])
-
-val activeUsers: List[User] = DB readOnly { implicit session =>
-  SQL("select * from user where active = ?").bind(true).map { 
-    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
-  }.list.apply()
-}
-
-val activeUsers: List[User] = DB readOnly { implicit session =>
-  SQL("select * from user where active = {active}").bindByName('active -> true).map { 
-    rs => User(rs.long("id"), rs.string("name"), Option(rs.date("birthday")).map(_.toLocalDate))
-  }.list.apply()
-}
-```
-
-If you need more information(connection management, transaction, CRUD), please check the following wiki page or scaladoc in detail.
-
-https://github.com/seratch/scalikejdbc/wiki/GettingStarted
-
-http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
-
-
-## Anorm SQL template
-
-Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
-
-```scala
-SQL("""
-insert into user (
-  id,
-  email,
-  name,
-  encrypted_password
-) values (
-  {id},
-  {email},
-  {name},
-  {encryptedPassword}
-)
-""").bindByName(
-  'id -> 132430,
-  'emal -> "bob@example.com",
-  'name -> "Bob",
-  'encryptedPassword -> "xfewSZe2sd3w"
-).update.apply()
-```
-
-
-## Executable SQL template
-
-Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
-
-Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
-
-```scala
-SQL("""
-insert into user (
-  id,
-  email,
-  name,
-  encrypted_password
-) values (
-  /*'id*/123,
-  /*'email*/'alice@example.com',
-  /*'name*/'Alice',
-  /*'encryptedPassword*/'123456789012'
-)
-""").bindByName(
-  'id -> 132430,
-  'emal -> "bob@example.com",
-  'name -> "Bob",
-  'encryptedPassword -> "xfewSZe2sd3w"
-).update.apply()
-```
-
 ## Try it now
+
+Try ScalikeJDBC right now!
 
 ```sh
 
@@ -156,9 +60,74 @@ sbt console
 
 ```scala
 case class User(id: Long, name: String)
+
 val users = DB readOnly { implicit s => 
-  SQL("select * from users").map(rs => User(rs.long("id"), rs.string("name"))).list.apply()
+  SQL("select * from users")
+    .map(rs => User(rs.long("id"), rs.string("name")))
+    .list.apply()
 }
+
+DB localTx { implicit s => 
+  SQL("insert into users (id, name) values ({id}, {name})")
+    .bindByName('id -> 3, 'name -> "Charles")
+    .update.apply() 
+}
+```
+
+If you need more information(connection management, transaction, CRUD), please check the following wiki page or scaladoc in detail.
+
+https://github.com/seratch/scalikejdbc/wiki/GettingStarted
+
+http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
+
+
+## Basic SQL template
+
+The most basic way is just using prepared statement as follows.
+
+```scala
+SQL("""insert into user values (?, ?, ?, ?)""")
+  .bind(132430, "bob@example.com", "Bob", "xfewSZe2sd3w")
+  .update.apply()
+```
+
+
+## Anorm SQL template
+
+Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
+
+```scala
+SQL("""insert into user values ({id}, {email}, {name}, {encryptedPassword})""")
+  .bindByName(
+    'id -> 132430,
+    'emal -> "bob@example.com",
+    'name -> "Bob",
+    'encryptedPassword -> "xfewSZe2sd3w")
+  .update.apply()
+```
+
+
+## Executable SQL template
+
+Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
+
+Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
+
+```scala
+SQL("""
+insert into user values (
+  /*'id*/123,
+  /*'email*/'alice@example.com',
+  /*'name*/'Alice',
+  /*'encryptedPassword*/'123456789012'
+)
+""")
+  .bindByName(
+    'id -> 132430,
+    'emal -> "bob@example.com",
+    'name -> "Bob",
+    'encryptedPassword -> "xfewSZe2sd3w")
+  .update.apply()
 ```
 
 
