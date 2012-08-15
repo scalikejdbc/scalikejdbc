@@ -2,7 +2,7 @@
 
 No changes.
 
-### mapper-generator
+## mapper-generator
 
 * Null constraint for SQLite is ignored [(GH-36)](https://github.com/seratch/scalikejdbc/issues/36)
 * AutoSession parameter improvement [(GH-40)](https://github.com/seratch/scalikejdbc/issues/40)
