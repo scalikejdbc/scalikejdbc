@@ -26,11 +26,18 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val db = DB(ConnectionPool.borrow())
-      val result = db readOnly {
+      db readOnly {
         implicit session =>
-          SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).toList.apply()
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+            enabled = true,
+            logLevel = 'info
+          )
+          val result = SQL("select * from " + tableName + " where name = 'name1' and id = /*'id*/123;")
+            .bindByName('id -> 1)
+            .map(rs => Some(rs.string("name"))).toList.apply()
+          result.size should equal(1)
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
       }
-      result.size should be > 0
     }
   }
 

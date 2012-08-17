@@ -118,16 +118,21 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
       }
 
-      trimSpaces(template
+      var isInsideOfText = false
+      ExecutableSQLParser.trimComments(trimSpaces(template
         .replaceAll("\r", " ")
         .replaceAll("\n", " ")
-        .replaceAll("\t", " "))
-        .map {
-          c =>
-            if (c == '?') {
-              i += 1
-              toPrintable(params(i - 1))
-            } else c
+        .replaceAll("\t", " ")))
+        .map { c =>
+          if (c == '\'') {
+            isInsideOfText = !isInsideOfText
+            c
+          } else if (!isInsideOfText && c == '?') {
+            i += 1
+            toPrintable(params(i - 1))
+          } else {
+            c
+          }
         }.mkString
     }
 

@@ -341,6 +341,33 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  it should "fix issue #41 [library] LoggingSQLAndTime raises IndexOutOfBoundsException when '?' is included in SQL templates" in {
+    val tableName = tableNamePrefix + "_issue41"
+    ultimately({
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
+      TestUtils.deleteTable(tableName)
+    }) {
+      TestUtils.initialize(tableName)
+      DB localTx { implicit s =>
+        SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update.apply()
+      }
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+        enabled = true,
+        logLevel = 'info
+      )
+      DB readOnly { implicit s =>
+        val res1 = SQL("select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?")
+          .bind(3)
+          .map(rs => rs.string("name")).list.apply()
+        res1.size should equal(1)
+        val res2 = SQL("select * from " + tableName + " where name = /* why? */ 'so what?' and id = /*'id*/123 /* really? */ -- line?")
+          .bindByName('id -> 3)
+          .map(rs => rs.string("name")).list.apply()
+        res2.size should equal(1)
+      }
+    }
+  }
+
   // --------------------
   // multi threads
 

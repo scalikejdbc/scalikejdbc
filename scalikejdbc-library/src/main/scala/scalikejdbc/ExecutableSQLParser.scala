@@ -58,6 +58,8 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
     simplifySQL(input).replaceAll("\\{.+?\\}", "?")
   }
 
+  def trimComments(input: String): String = SimplifySQL(input).trimComments()
+
   /**
    * SimplifySQL
    */
@@ -83,7 +85,7 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
 
     def trimParameterDummyValues() = {
       // because literals might have whitespace
-      val paramComment = "(/\\*\\s*.+?\\s*\\*/\\s*)"
+      val paramComment = "(/\\*\\s*'.+?\\s*\\*/\\s*)"
       str.replaceAll(paramComment + "'[^']+'", "$1''")
         .replaceAll(paramComment + "\"[^\"]+\"", "$1\"\"")
     }
@@ -92,6 +94,11 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
       .removeLineComments()
       .trimParameterDummyValues()
       .simplifyParameters()
+      .removeMultipleLineComments()
+      .trimSpaces()
+
+    def trimComments(): String = str.standardizeLineBreaks()
+      .removeLineComments()
       .removeMultipleLineComments()
       .trimSpaces()
 
