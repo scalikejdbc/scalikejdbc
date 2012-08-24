@@ -152,7 +152,9 @@ object ScalikeJDBCProjects extends Build {
     "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
+  // TODO Travis CI cannot work with -feature option
+  // val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
+  val _scalacOptions = Seq("-deprecation", "-unchecked")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>
