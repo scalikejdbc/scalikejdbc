@@ -20,7 +20,38 @@ libraryDependencies ++= Seq(
 
 Invoke `sbt console` and try the following example.
 
+- Without Interpolation
+
+```scala
+import scalikejdbc._
+
+Class.forName("org.hsqldb.jdbc.JDBCDriver")
+ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
+
+case class User(id: Int, name: String)
+
+DB localTx { implicit session =>
+
+  SQL("create table users (id int, name varchar(256));").execute.apply()
+
+  Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
+    SQL("insert into users values ({id}, {name})")
+      .bindByName('id -> id, 'name -> name)
+      .update.apply()
+  }
+
+  val id = 3
+  val user = SQL("select * from users where id = {id}")
+    .bindByName('id -> id)
+    .map { rs => User(id = rs.int("id"), name = rs.string("name")) }
+    .single.apply()
+  println(user)
+}
 ```
+
+- With Interpolation
+
+```scala
 import scalikejdbc._
 import scalikejdbc.SQLInterpolation._
 
@@ -29,14 +60,18 @@ ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
 case class User(id: Int, name: String)
 
-DB localTx { implicit s =>
+DB localTx { implicit session =>
+
   sql"create table users (id int, name varchar(256));".execute.apply()
-  sql"insert into users values (${1}, ${"foo"})".update.apply()
-  sql"insert into users values (${2}, ${"bar"})".update.apply()
-  sql"insert into users values (${3}, ${"baz"})".update.apply()
+
+  Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
+    sql"insert into users values (${id}, ${name})".update.apply()
+  }
+
   val id = 3
-  val user = sql"select * from users where id = ${id}".map {
-    rs => User(id = rs.int("id"), name = rs.string("name"))
-  }.single.apply()
+  val user = sql"select * from users where id = ${id}"
+    .map { rs => User(id = rs.int("id"), name = rs.string("name")) }
+    .single.apply()
+  println(user)
 }
 ```
