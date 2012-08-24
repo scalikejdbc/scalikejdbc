@@ -4,7 +4,7 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
-  lazy val _version = "1.3.5"
+  lazy val _version = "1.3.6-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -13,13 +13,14 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc",
       version := _version,
-      scalaVersion := "2.9.2",
+      scalaVersion := "2.10.0-M7",
       crossScalaVersions := _crossScalaVersions,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
+          case "2.10.0-M7" => "2.9.1"
           case "2.9.2" => "2.9.1"
           case version => version
         })
@@ -28,6 +29,7 @@ object ScalikeJDBCProjects extends Build {
         val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
         val unfilteredSpec = "unfiltered-spec" + _scalaVersion
         val scalacheck = "scalacheck" + _scalaVersion
+        val scalatest = "scalatest" + _scalaVersion
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
@@ -40,7 +42,7 @@ object ScalikeJDBCProjects extends Build {
           "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredSpec         % "0.6.1"     % "test",
-          "org.scalatest"           %% "scalatest"            % "1.8"       % "test",
+          "org.scalatest"           %  scalatest              % "1.8"       % "test",
           "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
           "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
@@ -51,6 +53,31 @@ object ScalikeJDBCProjects extends Build {
       publishArtifact in Test := false,
       pomIncludeRepository := { x => false },
       pomExtra := _pomExtra
+    )
+  )
+
+  lazy val scalikejdbcInterpolation = Project(
+    id = "interpolation",
+    base = file("scalikejdbc-interpolation"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-interpolation",
+      version := _version,
+      scalaVersion := "2.10.0-M7",
+      crossScalaVersions := Seq("2.10.0-M7"),
+      resolvers ++= _resolvers,
+      libraryDependencies ++= Seq(
+        _organization %% "scalikejdbc" % _version,
+        "ch.qos.logback" % "logback-classic" % "1.0.2",
+        "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
+      ) ++ jdbcDriverDependenciesInTestScope,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
     )
   )
 
@@ -114,7 +141,8 @@ object ScalikeJDBCProjects extends Build {
   }
   val _resolvers = Seq(
     "typesafe releases" at "http://repo.typesafe.com/typesafe/releases",
-    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases/"
+    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
+    "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % "[1.3,)"        % "test",
@@ -124,7 +152,7 @@ object ScalikeJDBCProjects extends Build {
     "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  val _scalacOptions = Seq("-deprecation", "-unchecked")
+  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>

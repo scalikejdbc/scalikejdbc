@@ -16,4 +16,3 @@ case class User(val id: Long, val name: String)
 val * = (rs: WrappedResultSet) => new User(rs.long("id"), rs.string("name"))
 """
 
-
