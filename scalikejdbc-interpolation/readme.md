@@ -80,6 +80,6 @@ DB localTx { implicit session =>
 
 Of course, this code is safely protected from SQL injection attacks. 
 
-Unfortunately, there is a known limitation that the number of parameters should be less than 23 due to Scala tuple specification.
+Unfortunately, there is a known limitation that the number of parameters should be less than 23 due to Scala tuple limit...
 
 
