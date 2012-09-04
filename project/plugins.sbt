@@ -1,6 +1,7 @@
 resolvers ++= Seq(
   "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
-  "sbt-idea repository" at "http://mpeltonen.github.com/maven/"
+  "sbt-idea repository" at "http://mpeltonen.github.com/maven/",
+  "sbt-plugin-releases-for-travis-ci" at "http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/" // for Travis CI with sbt 0.11.3
 )
 
 addSbtPlugin("com.github.seratch" % "testgenerator" % "1.1.0")
