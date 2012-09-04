@@ -4,7 +4,7 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
-  lazy val _version = "1.3.6-SNAPSHOT"
+  lazy val _version = "1.3.6"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -14,7 +14,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc",
       version := _version,
       scalaVersion := "2.9.2",
-      crossScalaVersions := _crossScalaVersions,
+      crossScalaVersions := "2.10.0-M7" :: _crossScalaVersions.toList,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       resolvers ++= _resolvers,
@@ -115,13 +115,13 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-play-plugin",
       version := _version,
       scalaVersion := "2.9.1",
-      crossScalaVersions := Seq("2.9.2", "2.9.1"),
+      crossScalaVersions := Seq("2.9.2", "2.9.1"), // 2.0.x -> Scala 2.9.1, 2.1.x -> Scala 2.9.2
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           _organization %% "scalikejdbc" % _version,
-          "play" % "play_2.9.1" % "2.0.2" % "provided",
-          "play" % "play-test_2.9.1" % "2.0.2" % "test"
+          "play" % "play_2.9.1" % "2.0.3" % "provided",
+          "play" % "play-test_2.9.1" % "2.0.3" % "test"
         )
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
