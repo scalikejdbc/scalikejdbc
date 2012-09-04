@@ -20,13 +20,13 @@ import scalikejdbc._
 /**
  * Active Record like template generator
  */
-case class ARLikeTemplateGenerator(table: Table)(implicit config: GeneratorConfig = GeneratorConfig()) {
+case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
 
   import java.sql.{ Types => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
   private val packageName = config.packageName
-  private val className = toClassName(table)
+  private val className = specifiedClassName.getOrElse(toClassName(table))
   private val comma = ","
   private val eol = config.lineBreak.value
 
