@@ -65,7 +65,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-interpolation",
       version := _version,
       scalaVersion := "2.10.0-M7",
-      scalaBinaryVersion := "2.10",
+      // scalaBinaryVersion := "2.10", // TODO Travis CI failure
       crossScalaVersions := Seq("2.10.0-M7"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
