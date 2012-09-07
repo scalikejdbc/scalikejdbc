@@ -1,5 +1,7 @@
 # ScalikeJDBC Interpolation
 
+This is a SQL template using [SIP-11](http://docs.scala-lang.org/sips/pending/string-interpolation.html).
+
 ## How to use
 
 ### build.sbt
@@ -10,8 +12,8 @@ scalaVersion := "2.10.0-M7"
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "1.3.6-SNAPSHOT",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.3.6-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc" % "[1.3,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.3,)",
   "org.hsqldb" % "hsqldb" % "[2,)"
 )
 

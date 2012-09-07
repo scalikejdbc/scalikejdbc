@@ -65,13 +65,16 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-interpolation",
       version := _version,
       scalaVersion := "2.10.0-M7",
+      scalaBinaryVersion := "2.10",
       crossScalaVersions := Seq("2.10.0-M7"),
       resolvers ++= _resolvers,
-      libraryDependencies ++= Seq(
-        _organization %% "scalikejdbc" % _version,
-        "ch.qos.logback" % "logback-classic" % "1.0.2",
-        "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
-      ) ++ jdbcDriverDependenciesInTestScope,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          _organization %% "scalikejdbc" % _version,
+          "ch.qos.logback" % "logback-classic" % "1.0.2",
+          "org.scalatest" % "scalatest_2.10.0-M7" % "[1.8,)" % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
+      },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       publishArtifact in Test := false,

@@ -58,4 +58,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  it should "be available with option values" in {
+   DB localTx {
+      implicit s =>
+        try {
+          sql"create table users (id int not null, name varchar(256))".execute.apply()
+
+          Seq((1, Some("foo")),(2, None)) foreach { case (id, name) =>
+            sql"insert into users values (${id}, ${name})".update.apply()
+          }
+
+          val id = 2 
+          val user = sql"select * from users where id = ${id}".map {
+            rs => User(id = rs.int("id"), name = rs.string("name"))
+          }.single.apply()
+          user.isDefined should equal(true)
+          user.get.id should equal(2)
+          user.get.name should be(null)
+        } finally {
+          sql"drop table users".execute.apply()
+        }
+    }
+  }
+
 }

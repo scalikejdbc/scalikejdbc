@@ -13,3 +13,5 @@ resolvers += Resolver.url("sbt-plugin-releases for Travis CI", new URL("http://s
 
 addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")
 
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.6.0")
+
