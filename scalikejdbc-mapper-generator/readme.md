@@ -38,7 +38,7 @@ seq(scalikejdbcSettings: _*)
 ### Sbt command
 
 ```
-sbt "scalikejdbc-gen [table-name]"
+sbt "scalikejdbc-gen [table-name (class-name)]"
 ```
 
 ### Output example

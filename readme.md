@@ -131,6 +131,20 @@ insert into user values (
 ```
 
 
+## SQLInterpolation for Scala 2.10
+
+This feature is still experimental, but you can try it now.
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
+
+```scala
+def create(id: Long, email: String, name: String, encryptedPassword: Sting) {
+  sql"insert into user values (${id}, ${email}, ${name}, ${encryptedPassword})"
+    .update.apply()
+}
+```
+
+
 ## Logging SQL And Timing
 
 Using LogginSQLAndTime feature, you can check the actual SQL(not exactly) and time.
@@ -143,7 +157,7 @@ https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
 If you want to create mapper modules easily, also take a look at this sbt plugin. 
 
 ```sh
-sbt "scalikejdbc-gen [table-name]"
+sbt "scalikejdbc-gen [table-name (class-name)]"
 ```
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
