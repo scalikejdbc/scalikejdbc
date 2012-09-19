@@ -115,12 +115,11 @@ Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL tem
 
 ```scala
 SQL("""
-insert into user values (
-  /*'id*/123,
-  /*'email*/'alice@example.com',
-  /*'name*/'Alice',
-  /*'encryptedPassword*/'123456789012'
-)
+  insert into user values (
+    /*'id*/123,
+    /*'email*/'alice@example.com',
+    /*'name*/'Alice',
+    /*'encryptedPassword*/'123456789012')
 """)
   .bindByName(
     'id -> 132430,
