@@ -15,19 +15,19 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
   ConnectionPool.singleton(url, username, password)
 
   it should "work fine with Member" in {
-    Member.create("Alice" + System.currentTimeMillis, Some("Example"), None, new org.joda.time.DateTime)
+    Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     Member.findAll() foreach println
     Member.findBy(Member.columnNames.description + " = /*'description*/'aaa'", 'description -> "Example") foreach println
   }
 
   it should "work fine with placeholder.Member" in {
-    placeholder.Member.create("Alice" + System.currentTimeMillis, Some("Example"), None, new org.joda.time.DateTime)
+    placeholder.Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     placeholder.Member.findAll() foreach println
     placeholder.Member.findBy(Member.columnNames.description + " = ?", "Example") foreach println
   }
 
   it should "work fine with anorm.Member" in {
-    anorm.Member.create("Alice" + System.currentTimeMillis, Some("Example"), None, new org.joda.time.DateTime)
+    anorm.Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     anorm.Member.findAll() foreach println
     anorm.Member.findBy(Member.columnNames.description + " = {description}", 'description -> "Example") foreach println
   }
@@ -38,7 +38,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     }
     try {
       DB localTx { implicit session =>
-        Member.create("Rollback", Some("Rollback test"), None, new DateTime)
+        Member.create("Rollback", None, Some("Rollback test"), None, new DateTime)
         Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
@@ -79,6 +79,38 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     one.save()
     println(WithoutPk.countAll())
     one.destroy()
+  }
+
+  it should "work with join queries" in {
+    DB localTx { implicit s =>
+      val group = MemberGroup.create("group1")
+      Member.findBy("name = {name}", 'name -> "WithGroup") match {
+        case Nil => Member.create("WithGroup", Some(group.id), Some("xxx"), None, new org.joda.time.DateTime)
+        case _ =>
+      }
+      Member.findBy("name = {name}", 'name -> "WithoutGroup") match {
+        case Nil => Member.create("WithoutGroup", None, Some("xxx"), None, new org.joda.time.DateTime)
+        case _ =>
+      }
+    }
+    val members = DB readOnly { implicit s =>
+      val memberWithGroup = (rs: WrappedResultSet) => {
+        val member: Member = Member.joined(rs)
+        val group: Option[MemberGroup] = rs.longOpt(MemberGroup.joinedColumnNames.id).map(_ => MemberGroup.joined(rs))
+        (member, group)
+      }
+      val columnsInSQL = Seq(Member.joinedColumnNames.inSQL, MemberGroup.joinedColumnNames.inSQL).mkString(", ")
+      SQL("select " + columnsInSQL + " from member left outer join member_group on member.member_group_id = member_group.id "
+        + "where member.name in ({n1}, {n2}) order by member.id")
+        .bindByName('n1 -> "WithGroup", 'n2 -> "WithoutGroup")
+        .map(memberWithGroup)
+        .list.apply()
+    }
+    members.size should equal(2)
+    members(0)._1.name should equal("WithGroup")
+    members(0)._2.isDefined should equal(true)
+    members(1)._1.name should equal("WithoutGroup")
+    members(1)._2.isDefined should equal(false)
   }
 
 }

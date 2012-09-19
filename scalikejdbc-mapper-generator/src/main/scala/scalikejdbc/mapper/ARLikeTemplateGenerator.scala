@@ -304,15 +304,66 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }
      * }}}
      */
-    val mapper = {
-      1.indent + "val * = {" + eol +
-        2.indent + "import columnNames._" + eol +
-        2.indent + "(rs: WrappedResultSet) => " + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
+
+    val _mapper = {
+      2.indent + "(rs: WrappedResultSet) => " + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
         allColumns.map {
           c =>
             if (c.isNotNull) 3.indent + c.nameInScala + " = rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, false)
             else 3.indent + c.nameInScala + " = " + toOption(c) + "(rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, true) + ")"
-        }.mkString(comma + eol) + ")" + eol +
+        }.mkString(comma + eol) + ")" + eol
+    }
+
+    val mapper = {
+      1.indent + "val * = {" + eol +
+        2.indent + "import columnNames._" + eol +
+        _mapper +
+        1.indent + "}" + eol
+    }
+
+    /**
+     * {{{
+     * object joinedColumnNames {
+     *   val delimiter = "__ON__"
+     *   def as(name: String) = name + delimiter + tableName
+     *   val id = as(columnNames.id)
+     *   val name = as(columnNames.name)
+     *   val birthday = as(columnNames.birthday)
+     *   val all = Seq(id, name, birthday)
+     *   val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
+     * }
+     * }}}
+     */
+    val joinedColumnNames = {
+      1.indent + "object joinedColumnNames {" + eol +
+        2.indent + "val delimiter = \"__ON__\"" + eol +
+        2.indent + "def as(name: String) = name + delimiter + tableName" + eol +
+        allColumns.map {
+          c => 2.indent + "val " + c.nameInScala + " = as(columnNames." + c.nameInScala + ")"
+        }.mkString(eol) + eol +
+        2.indent + "val all = Seq(" + allColumns.map {
+          c => c.nameInScala
+        }.mkString(", ") + ")" + eol +
+        2.indent + "val inSQL = columnNames.all.map(name => tableName + \".\" + name + \" AS \" + as(name)).mkString(\", \")" + eol +
+        1.indent + "}" + eol
+    }
+
+    /**
+     * {{{
+     * val joined = {
+     *   import joinedColumnNames._
+     *   (rs: WrappedResultSet) => Member(
+     *     rs.long(id),
+     *     rs.string(name),
+     *     Option(rs.date(birthday)).map(_.toLocalDate)
+     *   )
+     * }
+     * }}}
+     */
+    val joinedMapper = {
+      1.indent + "val joined = {" + eol +
+        2.indent + "import joinedColumnNames._" + eol +
+        _mapper +
         1.indent + "}" + eol
     }
 
@@ -621,6 +672,10 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       columnNames +
       eol +
       mapper +
+      eol +
+      joinedColumnNames +
+      eol +
+      joinedMapper +
       eol +
       autoSession +
       eol +

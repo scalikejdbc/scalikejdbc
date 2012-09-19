@@ -6,6 +6,7 @@ import mapper.{ GeneratorTemplate, GeneratorConfig, ARLikeTemplateGenerator, Mod
 
 class MapperGeneratorWithSQLiteSpec extends FlatSpec with ShouldMatchers {
 
+  /*
   Class.forName("org.sqlite.JDBC")
 
   val url = "jdbc:sqlite:db/mapper-generator-sqlite"
@@ -150,5 +151,6 @@ class MapperGeneratorWithSQLiteSpec extends FlatSpec with ShouldMatchers {
     }
     Thread.sleep(500)
   }
+*/
 
 }

@@ -159,6 +159,70 @@ object UnNormalized {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
+  object joinedColumnNames {
+    val delimiter = "__ON__"
+    def as(name: String) = name + delimiter + tableName
+    val id = as(columnNames.id)
+    val v01 = as(columnNames.v01)
+    val v02 = as(columnNames.v02)
+    val v03 = as(columnNames.v03)
+    val v04 = as(columnNames.v04)
+    val v05 = as(columnNames.v05)
+    val v06 = as(columnNames.v06)
+    val v07 = as(columnNames.v07)
+    val v08 = as(columnNames.v08)
+    val v09 = as(columnNames.v09)
+    val v10 = as(columnNames.v10)
+    val v11 = as(columnNames.v11)
+    val v12 = as(columnNames.v12)
+    val v13 = as(columnNames.v13)
+    val v14 = as(columnNames.v14)
+    val v15 = as(columnNames.v15)
+    val v16 = as(columnNames.v16)
+    val v17 = as(columnNames.v17)
+    val v18 = as(columnNames.v18)
+    val v19 = as(columnNames.v19)
+    val v20 = as(columnNames.v20)
+    val v21 = as(columnNames.v21)
+    val v22 = as(columnNames.v22)
+    val v23 = as(columnNames.v23)
+    val v24 = as(columnNames.v24)
+    val createdAt = as(columnNames.createdAt)
+    val all = Seq(id, v01, v02, v03, v04, v05, v06, v07, v08, v09, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, createdAt)
+    val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
+  }
+
+  val joined = {
+    import joinedColumnNames._
+    (rs: WrappedResultSet) => new UnNormalized(
+      id = rs.long(id),
+      v01 = rs.byte(v01),
+      v02 = rs.short(v02),
+      v03 = rs.int(v03),
+      v04 = rs.long(v04),
+      v05 = rs.bigDecimal(v05).toScalaBigDecimal,
+      v06 = rs.bigDecimal(v06).toScalaBigDecimal,
+      v07 = rs.double(v07),
+      v08 = opt[Boolean](rs.boolean(v08)),
+      v09 = Option(rs.string(v09)),
+      v10 = rs.string(v10),
+      v11 = opt[Byte](rs.byte(v11)),
+      v12 = opt[Short](rs.short(v12)),
+      v13 = opt[Int](rs.int(v13)),
+      v14 = opt[Long](rs.long(v14)),
+      v15 = Option(rs.bigDecimal(v15).toScalaBigDecimal),
+      v16 = opt[Boolean](rs.boolean(v16)),
+      v17 = rs.date(v17).toLocalDate,
+      v18 = rs.time(v18).toLocalTime,
+      v19 = rs.time(v19).toLocalTime,
+      v20 = rs.timestamp(v20).toDateTime,
+      v21 = Option(rs.any(v21)),
+      v22 = rs.boolean(v22),
+      v23 = rs.float(v23),
+      v24 = rs.double(v24),
+      createdAt = rs.timestamp(createdAt).toDateTime)
+  }
+
   val autoSession = AutoSession
 
   def find(id: Long)(implicit session: DBSession = autoSession): Option[UnNormalized] = {

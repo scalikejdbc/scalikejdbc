@@ -13,6 +13,50 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
   val password = ""
   ConnectionPool.singleton(url, username, password)
 
+  it should "work fine with member_group" in {
+    DB autoCommit { implicit session =>
+      try {
+        SQL("select count(1) from member_group").map(rs => rs).list.apply()
+      } catch {
+        case e =>
+          SQL("""
+            create table member_group (
+              id int generated always as identity,
+              name varchar(30) not null,
+              primary key(id)
+            )
+            """).execute.apply()
+      }
+    }
+    Model(url, username, password).table(null, "MEMBER_GROUP").map {
+      table =>
+        val generator1 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate("executableSQL"),
+          packageName = "com.example"
+        ))
+        println(generator1.generateAll())
+        generator1.writeFileIfNotExist()
+        val generator2 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate("placeHolderSQL"),
+          packageName = "com.example.placeholder"
+        ))
+        println(generator2.generateAll())
+        generator2.writeFileIfNotExist()
+        val generator3 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate("anormSQL"),
+          packageName = "com.example.anorm"
+        ))
+        println(generator3.generateAll())
+        generator3.writeFileIfNotExist()
+    } getOrElse {
+      fail("The table is not found.")
+    }
+    Thread.sleep(500)
+  }
+
   it should "work fine with member" in {
     DB autoCommit { implicit session =>
       try {
@@ -23,6 +67,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
             create table member (
               id int generated always as identity,
               name varchar(30) not null,
+              member_group_id int,
               description varchar(1000),
               birthday date,
               created_at timestamp not null,

@@ -33,6 +33,24 @@ object WithoutPk {
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
+  object joinedColumnNames {
+    val delimiter = "__ON__"
+    def as(name: String) = name + delimiter + tableName
+    val aaa = as(columnNames.aaa)
+    val bbb = as(columnNames.bbb)
+    val createdAt = as(columnNames.createdAt)
+    val all = Seq(aaa, bbb, createdAt)
+    val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
+  }
+
+  val joined = {
+    import joinedColumnNames._
+    (rs: WrappedResultSet) => WithoutPk(
+      aaa = rs.string(aaa),
+      bbb = opt[Int](rs.int(bbb)),
+      createdAt = rs.timestamp(createdAt).toDateTime)
+  }
+
   val autoSession = AutoSession
 
   def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = autoSession): Option[WithoutPk] = {
