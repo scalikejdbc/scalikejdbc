@@ -4,7 +4,7 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
-  lazy val _version = "1.3.7-SNAPSHOT"
+  lazy val _version = "1.3.7"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -33,7 +33,7 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
-          "org.slf4j"               %  "slf4j-api"            % "1.6.4"    % "compile",
+          "org.slf4j"               %  "slf4j-api"            % "1.6.6"    % "compile",
           "joda-time"               %  "joda-time"            % "2.1"      % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
           // scope: test
@@ -93,7 +93,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-mapper-generator",
       version := _version,
       scalaVersion := "2.9.2",
-      crossScalaVersions := Seq("2.9.2"),
+      crossScalaVersions := Seq("2.9.2", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,

@@ -41,7 +41,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.3,)"
 
 // slf4j binding you like
-libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
+libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.6"
 ```
 
 
