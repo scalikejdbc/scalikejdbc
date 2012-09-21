@@ -177,6 +177,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getDate(columnLabel, cal)
   }
 
+  def dateOpt(columnIndex: Int): Option[java.sql.Date] = opt[java.sql.Date](date(columnIndex))
+
+  def dateOpt(columnLabel: String): Option[java.sql.Date] = opt[java.sql.Date](date(columnLabel))
+
+  def dateOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Date] = opt[java.sql.Date](date(columnIndex, cal))
+
+  def dateOpt(columnLabel: String, cal: Calendar): Option[java.sql.Date] = opt[java.sql.Date](date(columnLabel, cal))
+
   def double(columnIndex: Int): java.lang.Double = {
     ensureCursor()
     Option(any(columnIndex))
@@ -407,6 +415,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getTime(columnLabel, cal)
   }
 
+  def timeOpt(columnIndex: Int): Option[java.sql.Time] = opt[java.sql.Time](time(columnIndex))
+
+  def timeOpt(columnLabel: String): Option[java.sql.Time] = opt[java.sql.Time](time(columnLabel))
+
+  def timeOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Time] = opt[java.sql.Time](time(columnIndex, cal))
+
+  def timeOpt(columnLabel: String, cal: Calendar): Option[java.sql.Time] = opt[java.sql.Time](time(columnLabel, cal))
+
   def timestamp(columnIndex: Int): java.sql.Timestamp = {
     ensureCursor()
     underlying.getTimestamp(columnIndex)
@@ -426,6 +442,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getTimestamp(columnLabel, cal)
   }
+
+  def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex))
+
+  def timestampOpt(columnLabel: String): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnLabel))
+
+  def timestampOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex, cal))
+
+  def timestampOpt(columnLabel: String, cal: Calendar): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnLabel, cal))
 
   def url(columnIndex: Int): java.net.URL = {
     ensureCursor()
