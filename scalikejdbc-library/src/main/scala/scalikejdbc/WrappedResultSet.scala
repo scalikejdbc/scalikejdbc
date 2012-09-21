@@ -41,6 +41,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getArray(columnLabel)
   }
 
+  def arrayOpt(columnIndex: Int): Option[java.sql.Array] = opt[java.sql.Array](array(columnIndex))
+
+  def arrayOpt(columnLabel: String): Option[java.sql.Array] = opt[java.sql.Array](array(columnLabel))
+
   def asciiStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
     underlying.getAsciiStream(columnIndex)
@@ -50,6 +54,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getAsciiStream(columnLabel)
   }
+
+  def asciiStreamOpt(columnIndex: Int): Option[java.io.InputStream] = opt[java.io.InputStream](asciiStream(columnIndex))
+
+  def asciiStreamOpt(columnLabel: String): Option[java.io.InputStream] = opt[java.io.InputStream](asciiStream(columnLabel))
 
   def bigDecimal(columnIndex: Int): java.math.BigDecimal = {
     ensureCursor()
@@ -61,6 +69,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getBigDecimal(columnLabel)
   }
 
+  def bigDecimalOpt(columnIndex: Int): Option[java.math.BigDecimal] = opt[java.math.BigDecimal](bigDecimal(columnIndex))
+
+  def bigDecimalOpt(columnLabel: String): Option[java.math.BigDecimal] = opt[java.math.BigDecimal](bigDecimal(columnLabel))
+
   def binaryStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
     underlying.getBinaryStream(columnIndex)
@@ -71,6 +83,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getBinaryStream(columnLabel)
   }
 
+  def binaryStreamOpt(columnIndex: Int): Option[java.io.InputStream] = opt[java.io.InputStream](binaryStream(columnIndex))
+
+  def binaryStreamOpt(columnLabel: String): Option[java.io.InputStream] = opt[java.io.InputStream](binaryStream(columnLabel))
+
   def blob(columnIndex: Int): java.sql.Blob = {
     ensureCursor()
     underlying.getBlob(columnIndex)
@@ -80,6 +96,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getBlob(columnLabel)
   }
+
+  def blobOpt(columnIndex: Int): Option[java.sql.Blob] = opt[java.sql.Blob](blob(columnIndex))
+
+  def blobOpt(columnLabel: String): Option[java.sql.Blob] = opt[java.sql.Blob](blob(columnLabel))
 
   def boolean(columnIndex: Int): java.lang.Boolean = {
     ensureCursor()
@@ -127,6 +147,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getBytes(columnLabel)
   }
 
+  def bytesOpt(columnIndex: Int): Option[Array[Byte]] = opt[Array[Byte]](bytes(columnIndex))
+
+  def bytesOpt(columnLabel: String): Option[Array[Byte]] = opt[Array[Byte]](bytes(columnLabel))
+
   def characterStream(columnIndex: Int): java.io.Reader = {
     ensureCursor()
     underlying.getCharacterStream(columnIndex)
@@ -137,6 +161,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getCharacterStream(columnLabel)
   }
 
+  def characterStreamOpt(columnIndex: Int): Option[java.io.Reader] = opt[java.io.Reader](characterStream(columnIndex))
+
+  def characterStreamOpt(columnLabel: String): Option[java.io.Reader] = opt[java.io.Reader](characterStream(columnLabel))
+
   def clob(columnIndex: Int): java.sql.Clob = {
     ensureCursor()
     underlying.getClob(columnIndex)
@@ -146,6 +174,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getClob(columnLabel)
   }
+
+  def clobOpt(columnIndex: Int): Option[java.sql.Clob] = opt[java.sql.Clob](clob(columnIndex))
+
+  def clobOpt(columnLabel: String): Option[java.sql.Clob] = opt[java.sql.Clob](clob(columnLabel))
 
   def concurrency: Int = {
     ensureCursor()
@@ -287,6 +319,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getNCharacterStream(columnLabel)
   }
 
+  def nCharacterStreamOpt(columnIndex: Int): Option[java.io.Reader] = opt[java.io.Reader](nCharacterStream(columnIndex))
+
+  def nCharacterStreamOpt(columnLabel: String): Option[java.io.Reader] = opt[java.io.Reader](nCharacterStream(columnLabel))
+
   def nClob(columnIndex: Int): java.sql.NClob = {
     ensureCursor()
     underlying.getNClob(columnIndex)
@@ -297,6 +333,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getNClob(columnLabel)
   }
 
+  def nClobOpt(columnIndex: Int): Option[java.sql.NClob] = opt[java.sql.NClob](nClob(columnIndex))
+
+  def nClobOpt(columnLabel: String): Option[java.sql.NClob] = opt[java.sql.NClob](nClob(columnLabel))
+
   def nString(columnIndex: Int): String = {
     ensureCursor()
     underlying.getNString(columnIndex)
@@ -306,6 +346,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getNString(columnLabel)
   }
+
+  def nStringOpt(columnIndex: Int): Option[String] = opt[String](nString(columnIndex))
+
+  def nStringOpt(columnLabel: String): Option[String] = opt[String](nString(columnLabel))
 
   def any(columnIndex: Int): Any = {
     ensureCursor()
@@ -327,6 +371,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getObject(columnLabel, map.asJava)
   }
 
+  def anyOpt(columnIndex: Int): Option[Any] = opt[Any](any(columnIndex))
+
+  def anyOpt(columnLabel: String): Option[Any] = opt[Any](any(columnLabel))
+
+  def anyOpt(columnIndex: Int, map: Map[String, Class[_]]): Option[Any] = opt[Any](any(columnIndex, map))
+
+  def anyOpt(columnLabel: String, map: Map[String, Class[_]]): Option[Any] = opt[Any](any(columnLabel, map))
+
   def ref(columnIndex: Int): java.sql.Ref = {
     ensureCursor()
     underlying.getRef(columnIndex)
@@ -336,6 +388,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getRef(columnLabel)
   }
+
+  def refOpt(columnIndex: Int): Option[java.sql.Ref] = opt[java.sql.Ref](ref(columnIndex))
+
+  def refOpt(columnLabel: String): Option[java.sql.Ref] = opt[java.sql.Ref](ref(columnLabel))
 
   def row: Int = {
     ensureCursor()
@@ -380,6 +436,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getSQLXML(columnLabel)
   }
 
+  def sqlXmlOpt(columnIndex: Int): Option[java.sql.SQLXML] = opt[java.sql.SQLXML](sqlXml(columnIndex))
+
+  def sqlXmlOpt(columnLabel: String): Option[java.sql.SQLXML] = opt[java.sql.SQLXML](sqlXml(columnLabel))
+
   def statement: java.sql.Statement = {
     ensureCursor()
     underlying.getStatement
@@ -394,6 +454,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getString(columnLabel)
   }
+
+  def stringOpt(columnIndex: Int): Option[String] = opt[String](string(columnIndex))
+
+  def stringOpt(columnLabel: String): Option[String] = opt[String](string(columnLabel))
 
   def time(columnIndex: Int): java.sql.Time = {
     ensureCursor()
@@ -460,6 +524,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getURL(columnLabel)
   }
+
+  def urlOpt(columnIndex: Int): Option[java.net.URL] = opt[java.net.URL](url(columnIndex))
+
+  def urlOpt(columnLabel: String): Option[java.net.URL] = opt[java.net.URL](url(columnLabel))
 
   def warnings: java.sql.SQLWarning = {
     ensureCursor()
