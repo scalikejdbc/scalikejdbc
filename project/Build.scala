@@ -27,7 +27,6 @@ object ScalikeJDBCProjects extends Build {
         val time = "time" + _scalaVersion
         val unfilteredFilter = "unfiltered-filter" + _scalaVersion
         val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
-        val unfilteredSpec = "unfiltered-spec" + _scalaVersion
         val scalacheck = "scalacheck" + _scalaVersion
         val scalatest = "scalatest" + _scalaVersion
         Seq(
@@ -41,7 +40,6 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback"          %  "logback-classic"      % "1.0.7"     % "test",
           "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
-          "net.databinder"          %  unfilteredSpec         % "0.6.1"     % "test",
           "org.scalatest"           %  scalatest              % "1.8"       % "test",
           "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.0"     % "test",
