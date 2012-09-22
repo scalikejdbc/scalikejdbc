@@ -1,16 +1,8 @@
-import testgenerator.SbtKeys._
-
 seq(scalariformSettings: _*)
 
 seq(testgeneratorSettings: _*)
 
-testgeneratorEncoding in Compile := "UTF-8"
+ScriptedPlugin.scriptedSettings
 
-testgeneratorTestTemplate in Compile := "scalatest.FlatSpec"
-
-testgeneratorScalaTestMatchers in Compile := "ShouldMatchers"
-
-testgeneratorWithJUnitRunner in Compile := false
-
-testgeneratorLineBreak in Compile := "LF"
+ScriptedPlugin.scriptedBufferLog := false
 

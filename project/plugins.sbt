@@ -15,3 +15,11 @@ addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.6.0")
 
+libraryDependencies <+= (sbtVersion){ sv =>
+  sv.split('.') match { case Array("0", a, b, _@_*) =>
+    if (a.toInt <= 10 || a.toInt <= 11 && b.toInt <= 2) "org.scala-tools.sbt" %% "scripted-plugin" % sv
+    else if (a.toInt == 11) "org.scala-sbt" %% "scripted-plugin" % sv
+    else "org.scala-sbt" % "scripted-plugin" % sv
+  }
+}
+

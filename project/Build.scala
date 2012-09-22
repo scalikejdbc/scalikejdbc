@@ -95,7 +95,8 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
-        "ch.qos.logback" % "logback-classic" % "1.0.7",
+        "org.slf4j" % "slf4j-simple" % "1.6.6",
+        //"ch.qos.logback" % "logback-classic" % "1.0.7" % "test",
         "org.scalatest"  %% "scalatest"      % "[1.7,)" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },

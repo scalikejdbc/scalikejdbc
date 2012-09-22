@@ -1,0 +1,15 @@
+> prepare
+
+> scalikejdbc-gen-echo users
+-$ exists src/main/scala/app/models/Users.scala
+> scalikejdbc-gen-echo users User
+-$ exists src/main/scala/app/models/User.scala
+
+> scalikejdbc-gen users
+$ exists src/main/scala/app/models/Users.scala
+> scalikejdbc-gen users User
+$ exists src/main/scala/app/models/User.scala
+
+> scalikejdbc-gen users
+$ newer src/main/scala/app/models/User.scala src/main/scala/app/models/Users.scala
+
