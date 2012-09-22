@@ -19,13 +19,15 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         SQL("select count(1) from member_group").map(rs => rs).list.apply()
       } catch {
         case e =>
-          SQL("""
+          try {
+            SQL("""
             create table member_group (
               id int generated always as identity,
               name varchar(30) not null,
               primary key(id)
             )
             """).execute.apply()
+          } catch { case e => }
       }
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map {
@@ -63,7 +65,8 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         SQL("select count(1) from member").map(rs => rs).list.apply()
       } catch {
         case e =>
-          SQL("""
+          try {
+            SQL("""
             create table member (
               id int generated always as identity,
               name varchar(30) not null,
@@ -74,6 +77,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
               primary key(id)
             )
             """).execute.apply()
+          } catch { case e => }
       }
     }
 
@@ -113,7 +117,8 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         SQL("select count(1) from un_normalized").map(rs => rs).list.apply()
       } catch {
         case e =>
-          SQL("""
+          try {
+            SQL("""
           create table un_normalized (
             id bigint generated always as identity,
             v_01 TINYINT not null,
@@ -151,6 +156,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
             primary key(id)
           )
           """).execute.apply()
+          } catch { case e => }
       }
     }
 
@@ -174,13 +180,15 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         SQL("select count(1) from without_pk").map(rs => rs).list.apply()
       } catch {
         case e =>
-          SQL("""
+          try {
+            SQL("""
             create table without_pk (
               aaa varchar(30) not null,
               bbb int,
               created_at timestamp not null
             )
             """).execute.apply()
+          } catch { case e => }
       }
     }
 
