@@ -55,3 +55,6 @@ build.log
 derby.log
 
 db
+
+.lib
+sbt
