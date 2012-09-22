@@ -11,8 +11,6 @@ addSbtPlugin("com.typesafe.sbtscalariform" % "sbtscalariform" % "0.5.1")
 
 resolvers += Resolver.url("sbt-plugin-releases for Travis CI", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.jsuereth" % "xsbt-gpg-plugin" % "0.6")
-
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.6.0")
 
 libraryDependencies <+= (sbtVersion){ sv =>
