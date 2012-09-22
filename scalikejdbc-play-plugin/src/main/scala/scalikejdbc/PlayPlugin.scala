@@ -24,12 +24,14 @@ class PlayPlugin(app: Application) extends Plugin {
 
   import PlayPlugin._
 
-  private lazy val dbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
+  // Play DB configuration
 
-  dbConfig.subKeys map {
+  private[this] lazy val playDbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
+
+  playDbConfig.subKeys map {
     name =>
       def load(name: String): (String, String, String, ConnectionPoolSettings) = {
-        implicit val config = dbConfig
+        implicit val config = playDbConfig
         Class.forName(require(name, "driver"))
         val default = new ConnectionPoolSettings
         val settings = new ConnectionPoolSettings(
@@ -40,30 +42,33 @@ class PlayPlugin(app: Application) extends Plugin {
         (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
       }
 
-      state.synchronized {
+      registeredPoolNames.synchronized {
         name match {
           case "global" =>
-            Logger(classOf[PlayPlugin]).warn(
-              "Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
+            // because "db.global" was used as "scalikejdbc.global" previously
+            Logger(classOf[PlayPlugin]).warn("Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
           case "default" =>
-            if (!state.initialized.contains("default")) {
+            if (!registeredPoolNames.contains("default")) {
               val (url, user, password, settings) = load(name)
               ConnectionPool.singleton(url, user, password, settings)
-              state.initialized.append("default")
+              registeredPoolNames.append("default")
             }
           case _ =>
-            if (!state.initialized.contains(name)) {
+            if (!registeredPoolNames.contains(name)) {
               val (url, user, password, settings) = load(name)
               ConnectionPool.add(Symbol(name), url, user, password, settings)
-              state.initialized.append(name)
+              registeredPoolNames.append(name)
             }
         }
       }
   }
 
-  private lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
+  // ScalikeJDBC global configuration
 
-  private val loggingSQLAndTime = "loggingSQLAndTime"
+  private[this] lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
+
+  private[this] val loggingSQLAndTime = "loggingSQLAndTime"
+
   opt(loggingSQLAndTime, "enabled")(globalConfig).map(_.toBoolean).foreach {
     enabled =>
       implicit val config = globalConfig
@@ -81,8 +86,7 @@ class PlayPlugin(app: Application) extends Plugin {
 
 object PlayPlugin {
 
-  case class ConnectionPoolState(initialized: collection.mutable.ListBuffer[String])
-  private val state: ConnectionPoolState = ConnectionPoolState(initialized = new collection.mutable.ListBuffer[String])
+  private val registeredPoolNames = new scala.collection.mutable.ListBuffer[String]
 
   def opt(name: String, key: String)(implicit config: Configuration): Option[String] = {
     config.getString(name + "." + key)

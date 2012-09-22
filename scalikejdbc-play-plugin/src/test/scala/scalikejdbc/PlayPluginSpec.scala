@@ -24,10 +24,15 @@ object PlayPluginSpec extends Specification {
       "dbplugin" -> "disabled",
       "evolutionplugin" -> "disabled",
       "db.default.driver" -> "org.h2.Driver",
-      "db.default.url" -> "jdbc:h2:mem:play",
+      "db.default.url" -> "jdbc:h2:mem:default",
       "db.default.user" -> "sa",
       "db.default.password" -> "sa",
       "db.default.schema" -> "",
+      "db.legacydb.driver" -> "org.h2.Driver",
+      "db.legacydb.url" -> "jdbc:h2:mem:legacy",
+      "db.legacydb.user" -> "l",
+      "db.legacydb.password" -> "g",
+      "db.legacydb.schema" -> "",
       "db.global.loggingSQLAndTime.enabled" -> "true",
       "db.global.loggingSQLAndTime.logLevel" -> "debug",
       "db.global.loggingSQLAndTime.warningEnabled" -> "true",
@@ -46,10 +51,15 @@ object PlayPluginSpec extends Specification {
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
     additionalConfiguration = Map(
       "db.default.driver" -> "org.h2.Driver",
-      "db.default.url" -> "jdbc:h2:mem:play",
+      "db.default.url" -> "jdbc:h2:mem:default",
       "db.default.user" -> "sa",
       "db.default.password" -> "sa",
       "db.default.schema" -> "",
+      "db.legacydb.driver" -> "org.h2.Driver",
+      "db.legacydb.url" -> "jdbc:h2:mem:legacy",
+      "db.legacydb.user" -> "l",
+      "db.legacydb.password" -> "g",
+      "db.legacydb.schema" -> "",
       "scalikejdbc.global.loggingSQLAndTime.enabled" -> "true",
       "scalikejdbc.global.loggingSQLAndTime.logLevel" -> "debug",
       "scalikejdbc.global.loggingSQLAndTime.warningEnabled" -> "true",
@@ -61,8 +71,9 @@ object PlayPluginSpec extends Specification {
   def plugin = fakeApp.plugin[PlayPlugin].get
 
   def simpleTest(table: String) = {
+
     try {
-      case class User(id: Long, name: Option[String])
+
       DB autoCommit { implicit s =>
         SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
         SQL("CREATE TABLE " + table + " (ID BIGINT PRIMARY KEY NOT NULL, NAME VARCHAR(256))").execute.apply()
@@ -71,15 +82,38 @@ object PlayPluginSpec extends Specification {
         insert.bindByName('id -> 2, 'name -> "Bob").update.apply()
         insert.bindByName('id -> 3, 'name -> "Eve").update.apply()
       }
+
+      NamedDB('legacydb) autoCommit { implicit s =>
+        SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
+        SQL("CREATE TABLE " + table + " (ID BIGINT PRIMARY KEY NOT NULL, NAME VARCHAR(256))").execute.apply()
+        val insert = SQL("INSERT INTO " + table + " (ID, NAME) VALUES (/*'id*/123, /*'name*/'Alice')")
+        insert.bindByName('id -> 1, 'name -> "Alice").update.apply()
+        insert.bindByName('id -> 2, 'name -> "Bob").update.apply()
+        insert.bindByName('id -> 3, 'name -> "Eve").update.apply()
+        insert.bindByName('id -> 4, 'name -> "Fred").update.apply()
+      }
+
+      case class User(id: Long, name: Option[String])
+
       val users = DB readOnly { implicit s =>
         SQL("SELECT * FROM " + table).map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
       }
       users.size should equalTo(3)
+
+      val usersInLegacy = NamedDB('legacydb) readOnly { implicit s =>
+        SQL("SELECT * FROM " + table).map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
+      }
+      usersInLegacy.size should equalTo(4)
+
     } finally {
       DB autoCommit { implicit s =>
         SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
       }
+      NamedDB('legacydb) autoCommit { implicit s =>
+        SQL("DROP TABLE " + table + " IF EXISTS").execute.apply()
+      }
     }
+
   }
 
   "Play plugin" should {
