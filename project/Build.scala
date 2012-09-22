@@ -38,8 +38,8 @@ object ScalikeJDBCProjects extends Build {
           // scope: test
           "org.scala-tools.time"    %  time                   % "0.5"       % "test",
           "ch.qos.logback"          %  "logback-classic"      % "1.0.7"     % "test",
-          "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
-          "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
+          "net.databinder"          %  unfilteredFilter       % "[0.6,)"     % "test",
+          "net.databinder"          %  unfilteredJetty        % "[0.6,)"     % "test",
           "org.scalatest"           %  scalatest              % "1.8"       % "test",
           "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.0"     % "test",
