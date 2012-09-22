@@ -12,6 +12,8 @@ import play.api.Play.current
 
 object PlayPluginSpec extends Specification {
 
+  Class.forName("org.h2.Driver")
+
   def fakeApp = FakeApplication(
     withoutPlugins = Seq("play.api.cache.EhCachePlugin"),
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
