@@ -38,12 +38,13 @@ object ScalikeJDBCProjects extends Build {
           "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
           // scope: test
           "org.scala-tools.time"    %  time                   % "0.5"       % "test",
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.2"     % "test",
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"     % "test",
           "net.databinder"          %  unfilteredFilter       % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredJetty        % "0.6.1"     % "test",
           "net.databinder"          %  unfilteredSpec         % "0.6.1"     % "test",
           "org.scalatest"           %  scalatest              % "1.8"       % "test",
           "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.0"     % "test",
           "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
@@ -71,8 +72,9 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           _organization %% "scalikejdbc" % _version,
-          "ch.qos.logback" % "logback-classic" % "1.0.2",
-          "org.scalatest" % "scalatest_2.10.0-M7" % "[1.8,)" % "test"
+          "org.slf4j"      % "slf4j-api"           % "1.6.6"  % "compile",
+          "ch.qos.logback" % "logback-classic"     % "1.0.7"  % "test",
+          "org.scalatest"  % "scalatest_2.10.0-M7" % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -92,13 +94,11 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-mapper-generator",
       version := _version,
-      scalaVersion := "2.9.2",
-      crossScalaVersions := Seq("2.9.2", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
-        "ch.qos.logback" % "logback-classic" % "1.0.2",
-        "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
+        "ch.qos.logback" % "logback-classic" % "1.0.7",
+        "org.scalatest"  %% "scalatest"      % "[1.7,)" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
