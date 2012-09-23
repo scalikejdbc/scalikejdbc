@@ -4,6 +4,9 @@ import Keys._
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
+
+  // [NOTE] Execute the following to bump version
+  // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "1.3.8-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
@@ -96,8 +99,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
         "org.slf4j" % "slf4j-simple" % "1.6.6",
-        //"ch.qos.logback" % "logback-classic" % "1.0.7" % "test",
-        "org.scalatest"  %% "scalatest"      % "[1.7,)" % "test"
+        "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -109,14 +111,13 @@ object ScalikeJDBCProjects extends Build {
   )
 
   lazy val scalikejdbcPlayPlugin = Project(
-    id = "play-plugin", 
-    base = file("scalikejdbc-play-plugin"), 
+    id = "play-plugin",
+    base = file("scalikejdbc-play-plugin"),
     settings = Defaults.defaultSettings ++ Seq(
       sbtPlugin := false,
       organization := _organization,
       name := "scalikejdbc-play-plugin",
       version := _version,
-      scalaVersion := "2.9.1",
       crossScalaVersions := Seq("2.9.2", "2.9.1"), // 2.0.x -> Scala 2.9.1, 2.1.x -> Scala 2.9.2
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
