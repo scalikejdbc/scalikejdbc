@@ -534,5 +534,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getWarnings
   }
 
+  def toMap(): Map[String, Any] = {
+    (1 to metaData.getColumnCount).foldLeft(Map[String, Any]()) { (result, i) =>
+      val label = metaData.getColumnLabel(i)
+      Option(any(label)).map { value => result + (label -> value) }.getOrElse(result)
+    }
+  }
+
+  def toSymbolMap(): Map[Symbol, Any] = toMap().map { case (k, v) => Symbol(k) -> v }
+
 }
 

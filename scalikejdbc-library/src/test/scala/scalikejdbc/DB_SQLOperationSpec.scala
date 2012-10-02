@@ -524,4 +524,34 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     }
   }
 
+  it should "have #toMap" in {
+    val tableName = tableNamePrefix + "_toMap"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result = DB localTx { implicit s =>
+        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap).single.apply()
+      }
+      result.isDefined should equal(true)
+      result.get.get("ID") should equal(Some(4))
+      result.get.get("Name") should equal(None)
+      result.get.keys should equal(Set("ID"))
+    }
+  }
+
+  it should "have #toSymbolMap" in {
+    val tableName = tableNamePrefix + "_toMap"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result = DB localTx { implicit s =>
+        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
+      }
+      result.isDefined should equal(true)
+      result.get.get('ID) should equal(Some(4))
+      result.get.get('Name) should equal(None)
+      result.get.keys should equal(Set('ID))
+    }
+  }
+
 }
