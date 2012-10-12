@@ -101,41 +101,49 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def blobOpt(columnLabel: String): Option[java.sql.Blob] = opt[java.sql.Blob](blob(columnLabel))
 
-  def boolean(columnIndex: Int): java.lang.Boolean = {
+  def nullableBoolean(columnIndex: Int): java.lang.Boolean = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Boolean.valueOf(v.toString))
       .orNull[java.lang.Boolean]
   }
 
-  def boolean(columnLabel: String): java.lang.Boolean = {
+  def nullableBoolean(columnLabel: String): java.lang.Boolean = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Boolean.valueOf(v.toString))
       .orNull[java.lang.Boolean]
   }
 
-  def booleanOpt(columnIndex: Int): Option[Boolean] = opt[Boolean](boolean(columnIndex))
+  def boolean(columnIndex: Int): Boolean = nullableBoolean(columnIndex).asInstanceOf[Boolean]
 
-  def booleanOpt(columnLabel: String): Option[Boolean] = opt[Boolean](boolean(columnLabel))
+  def boolean(columnLabel: String): Boolean = nullableBoolean(columnLabel).asInstanceOf[Boolean]
 
-  def byte(columnIndex: Int): java.lang.Byte = {
+  def booleanOpt(columnIndex: Int): Option[Boolean] = opt[Boolean](nullableBoolean(columnIndex))
+
+  def booleanOpt(columnLabel: String): Option[Boolean] = opt[Boolean](nullableBoolean(columnLabel))
+
+  def nullableByte(columnIndex: Int): java.lang.Byte = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Byte.valueOf(v.toString))
       .orNull[java.lang.Byte]
   }
 
-  def byte(columnLabel: String): java.lang.Byte = {
+  def nullableByte(columnLabel: String): java.lang.Byte = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Byte.valueOf(v.toString))
       .orNull[java.lang.Byte]
   }
 
-  def byteOpt(columnIndex: Int): Option[Byte] = opt[Byte](byte(columnIndex))
+  def byte(columnIndex: Int): Byte = nullableByte(columnIndex).asInstanceOf[Byte]
 
-  def byteOpt(columnLabel: String): Option[Byte] = opt[Byte](byte(columnLabel))
+  def byte(columnLabel: String): Byte = nullableByte(columnLabel).asInstanceOf[Byte]
+
+  def byteOpt(columnIndex: Int): Option[Byte] = opt[Byte](nullableByte(columnIndex))
+
+  def byteOpt(columnLabel: String): Option[Byte] = opt[Byte](nullableByte(columnLabel))
 
   def bytes(columnIndex: Int): Array[Byte] = {
     ensureCursor()
@@ -217,23 +225,27 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def dateOpt(columnLabel: String, cal: Calendar): Option[java.sql.Date] = opt[java.sql.Date](date(columnLabel, cal))
 
-  def double(columnIndex: Int): java.lang.Double = {
+  def nullableDouble(columnIndex: Int): java.lang.Double = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Double.valueOf(v.toString))
       .orNull[java.lang.Double]
   }
 
-  def double(columnLabel: String): java.lang.Double = {
+  def nullableDouble(columnLabel: String): java.lang.Double = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Double.valueOf(v.toString))
       .orNull[java.lang.Double]
   }
 
-  def doubleOpt(columnIndex: Int): Option[Double] = opt[Double](double(columnIndex))
+  def double(columnIndex: Int): Double = nullableDouble(columnIndex).asInstanceOf[Double]
 
-  def doubleOpt(columnLabel: String): Option[Double] = opt[Double](double(columnLabel))
+  def double(columnLabel: String): Double = nullableDouble(columnLabel).asInstanceOf[Double]
+
+  def doubleOpt(columnIndex: Int): Option[Double] = opt[Double](nullableDouble(columnIndex))
+
+  def doubleOpt(columnLabel: String): Option[Double] = opt[Double](nullableDouble(columnLabel))
 
   def fetchDirection: Int = {
     ensureCursor()
@@ -245,64 +257,76 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getFetchSize
   }
 
-  def float(columnIndex: Int): java.lang.Float = {
+  def nullableFloat(columnIndex: Int): java.lang.Float = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Float.valueOf(v.toString))
       .orNull[java.lang.Float]
   }
 
-  def float(columnLabel: String): java.lang.Float = {
+  def nullableFloat(columnLabel: String): java.lang.Float = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Float.valueOf(v.toString))
       .orNull[java.lang.Float]
   }
 
-  def floatOpt(columnIndex: Int): Option[Float] = opt[Float](float(columnIndex))
+  def float(columnIndex: Int): Float = nullableFloat(columnIndex).asInstanceOf[Float]
 
-  def floatOpt(columnLabel: String): Option[Float] = opt[Float](float(columnLabel))
+  def float(columnLabel: String): Float = nullableFloat(columnLabel).asInstanceOf[Float]
+
+  def floatOpt(columnIndex: Int): Option[Float] = opt[Float](nullableFloat(columnIndex))
+
+  def floatOpt(columnLabel: String): Option[Float] = opt[Float](nullableFloat(columnLabel))
 
   def holdability: Int = {
     ensureCursor()
     underlying.getHoldability
   }
 
-  def int(columnIndex: Int): java.lang.Integer = {
+  def nullableInt(columnIndex: Int): java.lang.Integer = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Integer.valueOf(v.toString))
       .orNull[java.lang.Integer]
   }
 
-  def int(columnLabel: String): java.lang.Integer = {
+  def nullableInt(columnLabel: String): java.lang.Integer = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Integer.valueOf(v.toString))
       .orNull[java.lang.Integer]
   }
 
-  def intOpt(columnIndex: Int): Option[Int] = opt[Int](int(columnIndex))
+  def int(columnIndex: Int): Int = nullableInt(columnIndex).asInstanceOf[Int]
 
-  def intOpt(columnLabel: String): Option[Int] = opt[Int](int(columnLabel))
+  def int(columnLabel: String): Int = nullableInt(columnLabel).asInstanceOf[Int]
 
-  def long(columnIndex: Int): java.lang.Long = {
+  def intOpt(columnIndex: Int): Option[Int] = opt[Int](nullableInt(columnIndex))
+
+  def intOpt(columnLabel: String): Option[Int] = opt[Int](nullableInt(columnLabel))
+
+  def nullableLong(columnIndex: Int): java.lang.Long = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Long.valueOf(v.toString))
       .orNull[java.lang.Long]
   }
 
-  def long(columnLabel: String): java.lang.Long = {
+  def nullableLong(columnLabel: String): java.lang.Long = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Long.valueOf(v.toString))
       .orNull[java.lang.Long]
   }
 
-  def longOpt(columnIndex: Int): Option[Long] = opt[Long](long(columnIndex))
+  def long(columnIndex: Int): Long = nullableLong(columnIndex).asInstanceOf[Long]
 
-  def longOpt(columnLabel: String): Option[Long] = opt[Long](long(columnLabel))
+  def long(columnLabel: String): Long = nullableLong(columnLabel).asInstanceOf[Long]
+
+  def longOpt(columnIndex: Int): Option[Long] = opt[Long](nullableLong(columnIndex))
+
+  def longOpt(columnLabel: String): Option[Long] = opt[Long](nullableLong(columnLabel))
 
   def metaData: java.sql.ResultSetMetaData = {
     ensureCursor()
@@ -408,23 +432,27 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getRowId(columnLabel)
   }
 
-  def short(columnIndex: Int): java.lang.Short = {
+  def nullableShort(columnIndex: Int): java.lang.Short = {
     ensureCursor()
     Option(any(columnIndex))
       .map(v => java.lang.Short.valueOf(v.toString))
       .orNull[java.lang.Short]
   }
 
-  def short(columnLabel: String): java.lang.Short = {
+  def nullableShort(columnLabel: String): java.lang.Short = {
     ensureCursor()
     Option(any(columnLabel))
       .map(v => java.lang.Short.valueOf(v.toString))
       .orNull[java.lang.Short]
   }
 
-  def shortOpt(columnIndex: Int): Option[Short] = opt[Short](short(columnIndex))
+  def short(columnIndex: Int): Short = nullableShort(columnIndex).asInstanceOf[Short]
 
-  def shortOpt(columnLabel: String): Option[Short] = opt[Short](short(columnLabel))
+  def short(columnLabel: String): Short = nullableShort(columnLabel).asInstanceOf[Short]
+
+  def shortOpt(columnIndex: Int): Option[Short] = opt[Short](nullableShort(columnIndex))
+
+  def shortOpt(columnLabel: String): Option[Short] = opt[Short](nullableShort(columnLabel))
 
   def sqlXml(columnIndex: Int): java.sql.SQLXML = {
     ensureCursor()
@@ -535,13 +563,18 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   }
 
   def toMap(): Map[String, Any] = {
-    (1 to metaData.getColumnCount).foldLeft(Map[String, Any]()) { (result, i) =>
-      val label = metaData.getColumnLabel(i)
-      Option(any(label)).map { value => result + (label -> value) }.getOrElse(result)
+    (1 to metaData.getColumnCount).foldLeft(Map[String, Any]()) {
+      (result, i) =>
+        val label = metaData.getColumnLabel(i)
+        Option(any(label)).map {
+          value => result + (label -> value)
+        }.getOrElse(result)
     }
   }
 
-  def toSymbolMap(): Map[Symbol, Any] = toMap().map { case (k, v) => Symbol(k) -> v }
+  def toSymbolMap(): Map[Symbol, Any] = toMap().map {
+    case (k, v) => Symbol(k) -> v
+  }
 
 }
 

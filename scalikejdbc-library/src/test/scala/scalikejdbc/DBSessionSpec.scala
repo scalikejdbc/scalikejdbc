@@ -615,21 +615,50 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             result.vTimestamp.isDefined should be(false)
           }
 
-          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          def assertUnexpected(resultOpt: Option[Result]): Unit = {
+            resultOpt.isDefined should be(true)
+            val result = resultOpt.get
+            result.vBoolean.isDefined should be(true)
+            result.vByte.isDefined should be(true)
+            result.vDouble.isDefined should be(true)
+            result.vFloat.isDefined should be(true)
+            result.vInt.isDefined should be(true)
+            result.vLong.isDefined should be(true)
+            result.vShort.isDefined should be(true)
+            result.vTimestamp.isDefined should be(false)
+          }
+
+          // should use nullable*** methods
+          assertUnexpected(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
               Result(
-                vBoolean = Option(rs.boolean("v_boolean").asInstanceOf[Boolean]),
-                vByte = Option(rs.byte("v_byte").asInstanceOf[Byte]),
-                vDouble = Option(rs.double("v_double").asInstanceOf[Double]),
-                vFloat = Option(rs.float("v_float").asInstanceOf[Float]),
-                vInt = Option(rs.int("v_int").asInstanceOf[Int]),
-                vLong = Option(rs.long("v_long").asInstanceOf[Long]),
-                vShort = Option(rs.short("v_short").asInstanceOf[Short]),
+                vBoolean = Option(rs.boolean("v_boolean")),
+                vByte = Option(rs.byte("v_byte")),
+                vDouble = Option(rs.double("v_double")),
+                vFloat = Option(rs.float("v_float")),
+                vInt = Option(rs.int("v_int")),
+                vLong = Option(rs.long("v_long")),
+                vShort = Option(rs.short("v_short")),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
               )
           }.single.apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+            rs =>
+              Result(
+                vBoolean = Option(rs.nullableBoolean("v_boolean").asInstanceOf[Boolean]),
+                vByte = Option(rs.nullableByte("v_byte").asInstanceOf[Byte]),
+                vDouble = Option(rs.nullableDouble("v_double").asInstanceOf[Double]),
+                vFloat = Option(rs.nullableFloat("v_float").asInstanceOf[Float]),
+                vInt = Option(rs.nullableInt("v_int").asInstanceOf[Int]),
+                vLong = Option(rs.nullableLong("v_long").asInstanceOf[Long]),
+                vShort = Option(rs.nullableShort("v_short").asInstanceOf[Short]),
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+              )
+          }.single.apply())
+
+          // should use nullable*** methods
+          assertUnexpected(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
               Result(
                 vBoolean = opt[Boolean](rs.boolean("v_boolean")),
@@ -639,6 +668,20 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
                 vInt = opt[Int](rs.int("v_int")),
                 vLong = opt[Long](rs.long("v_long")),
                 vShort = opt[Short](rs.short("v_short")),
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+              )
+          }.single.apply())
+
+          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+            rs =>
+              Result(
+                vBoolean = opt[Boolean](rs.nullableBoolean("v_boolean")),
+                vByte = opt[Byte](rs.nullableByte("v_byte")),
+                vDouble = opt[Double](rs.nullableDouble("v_double")),
+                vFloat = opt[Float](rs.nullableFloat("v_float")),
+                vInt = opt[Int](rs.nullableInt("v_int")),
+                vLong = opt[Long](rs.nullableLong("v_long")),
+                vShort = opt[Short](rs.nullableShort("v_short")),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
               )
           }.single.apply())
