@@ -33,7 +33,7 @@ object AppBuild extends Build {
     ),
     libraryDependencies <++= (scalaVersion) { scalaVersion =>
       Seq(
-        "com.github.seratch" %% "scalikejdbc" % "1.3.8-SNAPSHOT",
+        "com.github.seratch" %% "scalikejdbc" % "1.4.0-SNAPSHOT",
         "org.slf4j" % "slf4j-simple" % "1.6.4",
         "org.hsqldb" % "hsqldb" % "[2,)",
         "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
