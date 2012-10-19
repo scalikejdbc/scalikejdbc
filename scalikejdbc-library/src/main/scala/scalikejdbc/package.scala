@@ -169,4 +169,7 @@ package object scalikejdbc {
    */
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
+  @deprecated(message = "ExecutableSQLParser renamed ifself SQLTemplateParser", since = "1.4.0")
+  val ExecutableSQLParser = SQLTemplateParser
+
 }

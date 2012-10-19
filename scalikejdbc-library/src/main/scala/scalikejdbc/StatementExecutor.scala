@@ -119,7 +119,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
       }
 
       var isInsideOfText = false
-      ExecutableSQLParser.trimComments(trimSpaces(template
+      SQLTemplateParser.trimComments(trimSpaces(template
         .replaceAll("\r", " ")
         .replaceAll("\n", " ")
         .replaceAll("\t", " ")))

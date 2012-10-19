@@ -18,25 +18,31 @@ package scalikejdbc
 import scala.util.parsing.combinator.JavaTokenParsers
 
 /**
- * ExecutableSQL Parser.
+ * SQL Template Parser.
  *
- * `ExecutableSQL` is the template which contains parameter names just as comments with dummy values without specific syntax.
- * The template is a valid SQL, so you can check it is correct before building into app.
+ * This parser supports following templates.
  *
- * For example,
+ * Basic SQL Template:
  *
- * Normal SQL Template:
  * {{{
  * select * from user where id = ? and user_name = ?
  * }}}
  *
- * ExecutableSQL Template:
+ * Anorm-like SQL Template:
+ *
+ * {{{
+ * select * from user where id = {id} and user_name = {userName}
+ * }}}
+ *
+ * Executable SQL Template:
  * {{{
  * select * from user where id = /*'id*/123 and user_name = /*'userName*/\'Alice'
  * }}}
  *
+ * `ExecutableSQL` is the template which contains parameter names just as comments with dummy values without specific syntax.
+ * The template is a valid SQL, so you can check it is correct before building into app.
  */
-object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
+object SQLTemplateParser extends JavaTokenParsers with LogSupport {
 
   /**
    * Extracts binding names from the SQL template.
@@ -45,7 +51,7 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
    * @return extracted parameter names
    */
   def extractAllParameters(input: String): List[Symbol] = {
-    parse(mainParser, simplifySQL(input)).getOrElse(Nil)
+    parse(mainParser, convertExecutableToAnorm(input)).getOrElse(Nil)
   }
 
   /**
@@ -55,17 +61,23 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
    * @return simplified SQL
    */
   def convertToSQLWithPlaceHolders(input: String): String = {
-    simplifySQL(input).replaceAll("\\{.+?\\}", "?")
+    convertExecutableToAnorm(input).replaceAll("\\{.+?\\}", "?")
   }
 
-  def trimComments(input: String): String = SimplifySQL(input).trimComments()
+  /**
+   * Trims comments
+   *
+   * @param input SQL tempalte
+   * @return SQL template without comments
+   */
+  def trimComments(input: String): String = ExecutableToAnormConverter(input).trimComments()
 
   /**
-   * SimplifySQL
+   * Converts Executable SQL template to Anorm SQL template.
    */
-  private case class SimplifySQL(str: String) {
+  private case class ExecutableToAnormConverter(str: String) {
 
-    implicit def convertStringToSimplifySQL(sql: String) = SimplifySQL(sql)
+    implicit def toStringWithMethodsInternally(sql: String) = ExecutableToAnormConverter(sql)
 
     def standardizeLineBreaks(): String = str.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
 
@@ -104,13 +116,7 @@ object ExecutableSQLParser extends JavaTokenParsers with LogSupport {
 
   }
 
-  /**
-   * Simplify the SQL template.
-   *
-   * input: select * /* comment */ from user where id = /*'id*/123 and name = 'Alice'
-   * output: select * from user where id = {id} and name = 'Alice'
-   */
-  private def simplifySQL(input: String): String = SimplifySQL(input).convert()
+  private def convertExecutableToAnorm(input: String): String = ExecutableToAnormConverter(input).convert()
 
   // ----
   // Parser
