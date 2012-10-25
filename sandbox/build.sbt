@@ -6,12 +6,13 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.3,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
   "org.slf4j" % "slf4j-simple" % "1.6.4",
   "org.hsqldb" % "hsqldb" % "[2,)"
 )
 
 initialCommands := """import scalikejdbc._
+import scalikejdbc.StringSQLRunner._
 Class.forName("org.hsqldb.jdbc.JDBCDriver")
 ConnectionPool.singleton("jdbc:hsqldb:file:db/test", "", "")
 DB autoCommit { implicit s =>
