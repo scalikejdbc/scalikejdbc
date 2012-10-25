@@ -17,13 +17,13 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc",
       version := _version,
       scalaVersion := "2.9.2",
-      crossScalaVersions := "2.10.0-M7" :: _crossScalaVersions.toList,
+      crossScalaVersions := "2.10.0-RC1" :: _crossScalaVersions.toList,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
-          case "2.10.0-M7" => "2.9.1"
+          case "2.10.0-RC1" => "2.9.1"
           case "2.9.2" => "2.9.1"
           case version => version
         })
@@ -35,18 +35,18 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
-          "org.slf4j"               %  "slf4j-api"            % "1.6.6"    % "compile",
+          "org.slf4j"               %  "slf4j-api"            % "1.7.2"    % "compile",
           "joda-time"               %  "joda-time"            % "2.1"      % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
           // scope: test
-          "org.scala-tools.time"    %  time                   % "0.5"       % "test",
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"     % "test",
-          "net.databinder"          %  unfilteredFilter       % "[0.6,)"     % "test",
-          "net.databinder"          %  unfilteredJetty        % "[0.6,)"     % "test",
-          "org.scalatest"           %  scalatest              % "1.8"       % "test",
-          "org.scala-tools.testing" %  scalacheck             % "1.9"       % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.0"     % "test",
-          "play"                    %  "anorm_2.9.1"          % "[2,)"      % "test"
+          "org.scala-tools.time"    %  time                   % "0.5"      % "test",
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
+          "net.databinder"          %  unfilteredFilter       % "[0.6,)"   % "test",
+          "net.databinder"          %  unfilteredJetty        % "[0.6,)"   % "test",
+          "org.scalatest"           %  scalatest              % "1.8"      % "test",
+          "org.scala-tools.testing" %  scalacheck             % "1.9"      % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.0"    % "test",
+          "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -66,16 +66,16 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation",
       version := _version,
-      scalaVersion := "2.10.0-M7",
+      scalaVersion := "2.10.0-RC1",
       // scalaBinaryVersion := "2.10", // TODO Travis CI failure
-      crossScalaVersions := Seq("2.10.0-M7"),
+      crossScalaVersions := Seq("2.10.0-RC1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          _organization %% "scalikejdbc" % _version,
-          "org.slf4j"      % "slf4j-api"           % "1.6.6"  % "compile",
-          "ch.qos.logback" % "logback-classic"     % "1.0.7"  % "test",
-          "org.scalatest"  % "scalatest_2.10.0-M7" % "[1.8,)" % "test"
+          _organization    %% "scalikejdbc"          % _version,
+          "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
+          "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
+          "org.scalatest"  %  "scalatest_2.10.0-RC1" % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -98,7 +98,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         _organization %% "scalikejdbc" % _version,
-        "org.slf4j" % "slf4j-simple" % "1.6.6",
+        "org.slf4j" % "slf4j-simple" % "1.7.2" % "compile",
         "org.scalatest" %% "scalatest" % "[1.7,)" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -118,13 +118,13 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-play-plugin",
       version := _version,
-      crossScalaVersions := Seq("2.9.2", "2.9.1"), // 2.0.x -> Scala 2.9.1, 2.1.x -> Scala 2.9.2
+      crossScalaVersions := Seq("2.9.2", "2.9.1"), 
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           _organization %% "scalikejdbc" % _version,
-          "play" % "play_2.9.1" % "2.0.3" % "provided",
-          "play" % "play-test_2.9.1" % "2.0.3" % "test"
+          "play" % "play_2.9.1" % "2.0.4" % "provided",
+          "play" % "play-test_2.9.1" % "2.0.4" % "test"
         )
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
