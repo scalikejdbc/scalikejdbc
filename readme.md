@@ -45,6 +45,22 @@ libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.6"
 ```
 
 
+### Maven
+
+```xml
+<dependency>
+  <groupId>com.github.seratch</groupId>
+  <artifactId>scalikejdbc_2.9.2</artifactId>
+  <version>[1.3,)</version>
+</dependency>
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-simple</artifactId>
+  <version>1.6.6</version>
+</dependency>
+```
+
+
 ## Try it now
 
 Try ScalikeJDBC right now!
