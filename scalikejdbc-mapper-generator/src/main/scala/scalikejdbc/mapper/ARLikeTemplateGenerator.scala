@@ -623,7 +623,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
 
     /**
      * {{{
-     * def findBy(where: String, params:(Symbol, Any)*): List[Member] = {
+     * def findAllBy(where: String, params:(Symbol, Any)*): List[Member] = {
      *   DB readOnly { implicit session =>
      *     SQL("""SELECT * FROM MEMBER """ + where)
      *       .bindByName(params:_*).map(*).list.apply()
@@ -631,8 +631,8 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }
      * }}}
      */
-    val findByMethod =
-      1.indent + "def findBy(where: String, " + (config.template match {
+    val findAllByMethod =
+      1.indent + "def findAllBy(where: String, " + (config.template match {
         case GeneratorTemplate.placeHolderSQL => "params: Any*"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => "params: (Symbol, Any)*"
       }) + ")(implicit session: DBSession = autoSession): List[" + className + "] = {" + eol +
@@ -685,7 +685,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       eol +
       countAllMethod +
       eol +
-      findByMethod +
+      findAllByMethod +
       eol +
       countByMethod +
       eol +
