@@ -18,6 +18,7 @@ package scalikejdbc.mapper
 import sbt._
 import sbt.Keys._
 import util.control.Exception._
+import java.io.FileNotFoundException
 
 object SbtPlugin extends Plugin {
 
@@ -25,12 +26,21 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSetings(packageName: String, template: String, lineBreak: String, encoding: String)
+  case class GeneratorSetings(packageName: String, template: String, testTemplate: String, lineBreak: String, encoding: String)
 
   def loadSettings(): (JDBCSettings, GeneratorSetings) = {
     val props = new java.util.Properties
-    using(new java.io.FileInputStream("project/scalikejdbc-mapper-generator.properties")) {
-      inputStream => props.load(inputStream)
+    try {
+      using(new java.io.FileInputStream("project/scalikejdbc-mapper-generator.properties")) {
+        inputStream => props.load(inputStream)
+      }
+    } catch {
+      case e: FileNotFoundException =>
+    }
+    if (props.isEmpty) {
+      using(new java.io.FileInputStream("project/scalikejdbc.properties")) {
+        inputStream => props.load(inputStream)
+      }
     }
     (JDBCSettings(
       driver = Option(props.get("jdbc.driver")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
@@ -41,12 +51,13 @@ object SbtPlugin extends Plugin {
     ), GeneratorSetings(
         packageName = Option(props.get("generator.packageName")).map(_.toString).getOrElse("models"),
         template = Option(props.get("generator.template")).map(_.toString).getOrElse("executableSQL"),
+        testTemplate = Option(props.get("generator.testTemplate")).map(_.toString).getOrElse("specs2unit"),
         lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse("LF"),
         encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse("UTF-8")
       ))
   }
 
-  def generator(tableName: String, className: Option[String] = None, srcDir: File, testDir: File): Option[ARLikeTemplateGenerator] = {
+  def generator(tableName: String, className: Option[String] = None, srcDir: File, testDir: File): Option[CodeGenerator] = {
     val (jdbc, generatorSettings) = loadSettings()
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
@@ -54,14 +65,16 @@ object SbtPlugin extends Plugin {
       .orElse(model.table(jdbc.schema, tableName.toUpperCase))
       .orElse(model.table(jdbc.schema, tableName.toLowerCase))
       .map { table =>
-        Option(ARLikeTemplateGenerator(table, className)(GeneratorConfig(
+        val config = GeneratorConfig(
           srcDir = srcDir.getAbsolutePath,
           testDir = testDir.getAbsolutePath,
           packageName = generatorSettings.packageName,
           template = GeneratorTemplate(generatorSettings.template),
+          testTemplate = GeneratorTestTemplate(generatorSettings.testTemplate),
           lineBreak = LineBreak(generatorSettings.lineBreak),
           encoding = generatorSettings.encoding
-        )))
+        )
+        Option(CodeGenerator(table, className)(config))
       } getOrElse {
         println("The table is not found.")
         None
@@ -76,10 +89,12 @@ object SbtPlugin extends Plugin {
             case Nil => println("Usage: scalikejdbc-gen [table-name (class-name)]")
             case tableName :: Nil =>
               val gen = generator(tableName = tableName, srcDir = srcDir, testDir = testDir)
-              gen.foreach(_.writeFileIfNotExist())
+              gen.foreach(_.writeModelIfNotExist())
+              gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
             case tableName :: className :: Nil =>
               val gen = generator(tableName = tableName, className = Some(className), srcDir = srcDir, testDir = testDir)
-              gen.foreach(_.writeFileIfNotExist())
+              gen.foreach(_.writeModelIfNotExist())
+              gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
             case _ => println("Usage: scalikejdbc-gen [table-name (class-name)]")
           }
       }
@@ -93,10 +108,12 @@ object SbtPlugin extends Plugin {
             case Nil => println("Usage: scalikejdbc-gen-echo [table-name (class-name)]")
             case tableName :: Nil =>
               val gen = generator(tableName = tableName, srcDir = srcDir, testDir = testDir)
-              gen.foreach(g => println(g.generateAll()))
+              gen.foreach(g => println(g.modelAll()))
+              gen.foreach(g => g.specAll().foreach(spec => println(spec)))
             case tableName :: className :: Nil =>
               val gen = generator(tableName = tableName, className = Some(className), srcDir = srcDir, testDir = testDir)
-              gen.foreach(g => println(g.generateAll()))
+              gen.foreach(g => println(g.modelAll()))
+              gen.foreach(g => g.specAll().foreach(spec => println(spec)))
             case _ => println("Usage: scalikejdbc-gen-echo [table-name (class-name)]")
           }
       }

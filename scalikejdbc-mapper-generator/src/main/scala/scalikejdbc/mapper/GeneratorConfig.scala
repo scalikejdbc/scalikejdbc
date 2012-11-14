@@ -19,6 +19,7 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   testDir: String = "src/test/scala",
   packageName: String = "models",
   template: GeneratorTemplate = GeneratorTemplate("executableSQL"),
+  testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
   encoding: String = "UTF-8")
 
@@ -29,6 +30,13 @@ object GeneratorTemplate {
 }
 
 case class GeneratorTemplate(name: String)
+
+object GeneratorTestTemplate {
+  val ScalaTestFlatSpec = GeneratorTestTemplate("ScalaTestFlatSpec")
+  val specs2unit = GeneratorTestTemplate("specs2unit")
+  val specs2acceptance = GeneratorTestTemplate("specs2acceptance")
+}
+case class GeneratorTestTemplate(name: String)
 
 object LineBreak {
   def value(name: String) = name match {

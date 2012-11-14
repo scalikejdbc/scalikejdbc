@@ -11,7 +11,7 @@ case class Member(
     birthday: Option[LocalDate] = None,
     createdAt: DateTime) {
 
-  def save()(implicit session: DBSession = Member.autoSession): Member = Member.save(this)(session)
+  def save()(implicit session: DBSession = Member.autoSession): Member = Member.update(this)(session)
 
   def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.delete(this)(session)
 
@@ -36,10 +36,11 @@ object Member {
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
       name = rs.string(name),
-      memberGroupId = opt[Int](rs.int(memberGroupId)),
-      description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toLocalDate),
+      memberGroupId = rs.intOpt(memberGroupId),
+      description = rs.stringOpt(description),
+      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
+
   }
 
   object joinedColumnNames {
@@ -60,10 +61,11 @@ object Member {
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
       name = rs.string(name),
-      memberGroupId = opt[Int](rs.int(memberGroupId)),
-      description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toLocalDate),
+      memberGroupId = rs.intOpt(memberGroupId),
+      description = rs.stringOpt(description),
+      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
+
   }
 
   val autoSession = AutoSession
@@ -81,7 +83,7 @@ object Member {
     SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: Any*)(implicit session: DBSession = autoSession): List[Member] = {
+  def findAllBy(where: String, params: Any*)(implicit session: DBSession = autoSession): List[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE """ + where)
       .bind(params: _*).map(*).list.apply()
   }
@@ -119,6 +121,7 @@ object Member {
         birthday,
         createdAt
       ).updateAndReturnGeneratedKey.apply()
+
     Member(
       id = generatedKey.toInt,
       name = name,
@@ -128,18 +131,18 @@ object Member {
       createdAt = createdAt)
   }
 
-  def save(m: Member)(implicit session: DBSession = autoSession): Member = {
+  def update(m: Member)(implicit session: DBSession = autoSession): Member = {
     SQL("""
-      UPDATE 
+      UPDATE
         MEMBER
-      SET 
+      SET
         ID = ?,
         NAME = ?,
         MEMBER_GROUP_ID = ?,
         DESCRIPTION = ?,
         BIRTHDAY = ?,
         CREATED_AT = ?
-      WHERE 
+      WHERE
         ID = ?
       """)
       .bind(

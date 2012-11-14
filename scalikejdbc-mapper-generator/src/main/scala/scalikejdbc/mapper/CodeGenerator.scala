@@ -20,7 +20,7 @@ import scalikejdbc._
 /**
  * Active Record like template generator
  */
-case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
+case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
 
   import java.sql.{ Types => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
@@ -144,7 +144,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       case JavaSqlTypes.BINARY => "1"
       case JavaSqlTypes.BIT => "false"
       case JavaSqlTypes.BLOB => "null"
-      case JavaSqlTypes.BOOLEAN => "boolean"
+      case JavaSqlTypes.BOOLEAN => "true"
       case JavaSqlTypes.CHAR => "'abc'"
       case JavaSqlTypes.CLOB => "null"
       case JavaSqlTypes.DATALINK => "null"
@@ -172,6 +172,31 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       case _ => "null"
     }
 
+    lazy val defaultValueInScala: String = underlying.typeInScala match {
+      case TypeName.AnyArray => "Array[Any]()"
+      case TypeName.Long => "1L"
+      case TypeName.ByteArray => "Array[Byte]()"
+      case TypeName.Boolean => "false"
+      case TypeName.String => "\"MyString\""
+      case TypeName.LocalDate => "LocalTime.now"
+      case TypeName.BigDecimal => "new java.math.BigDecimal(\"1\")"
+      case TypeName.Double => "0.1D"
+      case TypeName.Float => "0.1F"
+      case TypeName.Int => "123"
+      case TypeName.Short => "123"
+      case TypeName.DateTime => "DateTime.now"
+      case TypeName.Byte => "1"
+      case _ => "null"
+    }
+
+  }
+
+  /**
+   * Create directory to put the source code file if it does not exist yet.
+   */
+  def mkdirRecursively(file: File): Unit = {
+    if (!file.getParentFile.exists) mkdirRecursively(file.getParentFile)
+    if (!file.exists) file.mkdir()
   }
 
   implicit def convertColumnToColumnInScala(column: Column): ColumnInScala = ColumnInScala(column)
@@ -179,7 +204,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
   /**
    * Write the source code to file.
    */
-  def writeFileIfNotExist(): Unit = {
+  def writeModelIfNotExist(): Unit = {
     val file = new File(config.srcDir + "/" + packageName.replaceAll("\\.", "/") + "/" + className + ".scala")
     if (file.exists) {
       println("\"" + packageName + "." + className + "\"" + " already exists.")
@@ -189,19 +214,11 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
         fos =>
           using(new OutputStreamWriter(fos)) {
             writer =>
-              writer.write(generateAll())
+              writer.write(modelAll())
               println("\"" + packageName + "." + className + "\"" + " created.")
           }
       }
     }
-  }
-
-  /**
-   * Create directory to put the source code file if it does not exist yet.
-   */
-  def mkdirRecursively(file: File): Unit = {
-    if (!file.getParentFile.exists) mkdirRecursively(file.getParentFile)
-    if (!file.exists) file.mkdir()
   }
 
   /**
@@ -216,39 +233,46 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
    */
   def classPart: String = {
     if (table.allColumns.size <= 22) {
-      "case class " + className + "(" + eol +
-        table.allColumns.map {
+      """case class %className%(
+        |%constructorArgs%) {
+        |
+        |  def save()(implicit session: DBSession = %className%.autoSession): %className% = %className%.update(this)(session)
+        |
+        |  def destroy()(implicit session: DBSession = %className%.autoSession): Unit = %className%.delete(this)(session)
+        |
+        |}
+      """.stripMargin
+        .replaceAll("%className%", className)
+        .replaceFirst("%constructorArgs%", table.allColumns.map {
           c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
-        }.mkString(", " + eol) + ") { " + eol +
-        eol +
-        1.indent + "def save()(implicit session: DBSession = " + className + ".autoSession): " + className + " = " + className + ".save(this)(session)" + eol +
-        eol +
-        1.indent + "def destroy()(implicit session: DBSession = " + className + ".autoSession): Unit = " + className + ".delete(this)(session)" + eol +
-        eol +
-        "}"
+        }.mkString(", " + eol))
+
     } else {
-      "class " + className + " (" + eol +
-        table.allColumns.map {
-          c =>
-            1.indent + "val " + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
-        }.mkString(comma + eol) + ") { " + eol +
-        eol +
-        1.indent + "def copy(" + eol +
-        table.allColumns.map {
+      """class %className%(
+        |%constructorArgs1%) {
+        |
+        |  def copy(
+        |%copyArgs%): %className% = {
+        |    new %className%(
+        |%constructorArgs3%)
+        |  }
+        |
+        |  def save()(implicit session: DBSession = %className%.autoSession): %className% = %className%.update(this)(session)
+        |
+        |  def destroy()(implicit session: DBSession = %className%.autoSession): Unit = %className%.delete(this)(session)
+        |
+        |}
+      """.stripMargin
+        .replaceAll("%className%", className)
+        .replaceFirst("%constructorArgs1%", table.allColumns.map {
+          c => 1.indent + "val " + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
+        }.mkString(comma + eol))
+        .replaceFirst("%copyArgs%", table.allColumns.map {
           c => 2.indent + c.nameInScala + ": " + c.typeInScala + " = this." + c.nameInScala
-        }.mkString(comma + eol) + "): " + className + " = {" + eol +
-        2.indent + "new " + className + "(" + eol +
-        table.allColumns.map {
+        }.mkString(comma + eol))
+        .replaceFirst("%constructorArgs3%", table.allColumns.map {
           c => 3.indent + c.nameInScala + " = " + c.nameInScala
-        }.mkString(comma + eol) + eol +
-        2.indent + ")" + eol +
-        1.indent + "}" + eol +
-        eol +
-        1.indent + "def save(): " + className + " = " + className + ".save(this)" + eol +
-        eol +
-        1.indent + "def destroy(): Unit = " + className + ".delete(this)" + eol +
-        eol +
-        "}"
+        }.mkString(comma + eol))
     }
   }
 
@@ -269,7 +293,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * val tableName = "MEMBER"
      * }}}
      */
-    val tableName = 1.indent + "val tableName = \"" + table.name + "\"" + eol
+    val tableName = "  val tableName = \"" + table.name + "\"" + eol
 
     /**
      * {{{
@@ -282,14 +306,17 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }}}
      */
     val columnNames = {
-      1.indent + "object columnNames {" + eol +
-        allColumns.map {
+      """  object columnNames {
+        |%valueDefinitions%
+        |    val all = Seq(%valueNames%)
+        |  }
+      """.stripMargin
+        .replaceAll("%valueDefinitions%", allColumns.map {
           c => 2.indent + "val " + c.nameInScala + " = \"" + c.name + "\""
-        }.mkString(eol) + eol +
-        2.indent + "val all = Seq(" + allColumns.map {
+        }.mkString(eol))
+        .replaceAll("%valueNames%", allColumns.map {
           c => c.nameInScala
-        }.mkString(", ") + ")" + eol +
-        1.indent + "}" + eol
+        }.mkString(", "))
     }
 
     /**
@@ -310,15 +337,16 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
         allColumns.map {
           c =>
             if (c.isNotNull) 3.indent + c.nameInScala + " = rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, false)
-            else 3.indent + c.nameInScala + " = " + toOption(c) + "(rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, true) + ")"
+            else 3.indent + c.nameInScala + " = " + "rs." + c.extractorName + "Opt(" + c.nameInScala + ")" + cast(c, true)
         }.mkString(comma + eol) + ")" + eol
     }
 
     val mapper = {
-      1.indent + "val * = {" + eol +
-        2.indent + "import columnNames._" + eol +
-        _mapper +
-        1.indent + "}" + eol
+      """  val * = {
+        |    import columnNames._
+        |%mapper%
+        |  }
+      """.stripMargin.replaceFirst("%mapper%", _mapper)
     }
 
     /**
@@ -335,17 +363,20 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }}}
      */
     val joinedColumnNames = {
-      1.indent + "object joinedColumnNames {" + eol +
-        2.indent + "val delimiter = \"__ON__\"" + eol +
-        2.indent + "def as(name: String) = name + delimiter + tableName" + eol +
-        allColumns.map {
+      """  object joinedColumnNames {
+        |    val delimiter = "__ON__"
+        |    def as(name: String) = name + delimiter + tableName
+        |%valueDefinitions%
+        |    val all = Seq(%valueNames%)
+        |    val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
+        |  }
+      """.stripMargin
+        .replaceAll("%valueDefinitions%", allColumns.map {
           c => 2.indent + "val " + c.nameInScala + " = as(columnNames." + c.nameInScala + ")"
-        }.mkString(eol) + eol +
-        2.indent + "val all = Seq(" + allColumns.map {
+        }.mkString(eol))
+        .replaceAll("%valueNames%", allColumns.map {
           c => c.nameInScala
-        }.mkString(", ") + ")" + eol +
-        2.indent + "val inSQL = columnNames.all.map(name => tableName + \".\" + name + \" AS \" + as(name)).mkString(\", \")" + eol +
-        1.indent + "}" + eol
+        }.mkString(", "))
     }
 
     /**
@@ -361,10 +392,11 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }}}
      */
     val joinedMapper = {
-      1.indent + "val joined = {" + eol +
-        2.indent + "import joinedColumnNames._" + eol +
-        _mapper +
-        1.indent + "}" + eol
+      """  val joined = {
+        |    import joinedColumnNames._
+        |%mapper%
+        |  }
+      """.stripMargin.replaceFirst("%mapper%", _mapper)
     }
 
     /**
@@ -372,14 +404,11 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * val autoSession = AutoSession
      * }}}
      */
-    val autoSession = 1.indent + "val autoSession = AutoSession" + eol
+    val autoSession = "  val autoSession = AutoSession" + eol
 
     /**
      * {{{
-     * def create(
-     *   name: String,
-     *   birthday: Option[LocalDate])
-     *   (implicit session: DBSession = autoSession): Member = {
+     * def create(name: String, birthday: Option[LocalDate])(implicit session: DBSession = autoSession): Member = {
      *   val generatedKey = SQL("""
      *     INSERT INTO MEMBER (
      *       NAME,
@@ -388,11 +417,11 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      *       /*'name*/'abc',
      *       /*'birthday*/'1958-09-06'
      *     )
-     *   """)
-     *     .bindByName(
-     *       'name -> name,
-     *       'birthday -> birthday
-     *     ).updateAndReturnGeneratedKey.apply()
+     *   """).bindByName(
+     *     'name -> name,
+     *     'birthday -> birthday
+     *   ).updateAndReturnGeneratedKey.apply()
+     *
      *   Member(
      *     id = generatedKey,
      *     name = name,
@@ -425,7 +454,6 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
               c => 4.indent + "'" + c.nameInScala + " -> " + c.nameInScala
             }.mkString(comma + eol)
       }
-
       1.indent + "def create(" + eol +
         createColumns.map {
           c => 2.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
@@ -441,6 +469,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
         bindingPart + eol +
         3.indent +
         table.autoIncrementColumns.headOption.map(_ => ").updateAndReturnGeneratedKey.apply()").getOrElse(").update.apply()") +
+        eol +
         eol +
         2.indent + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
         table.autoIncrementColumns.headOption.map {
@@ -465,7 +494,7 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
 
     /**
      * {{{
-     * def save(m: Member)(implicit session: DBSession = autoSession): Member = {
+     * def update(m: Member)(implicit session: DBSession = autoSession): Member = {
      *   SQL("""
      *     UPDATE
      *       MEMBER
@@ -475,17 +504,16 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      *       BIRTHDAY = /*'birthday*/'1958-09-06'
      *     WHERE
      *       ID = /*'id*/123
-     *   """)
-     *     .bindByName(
-     *       'id -> m.id,
-     *       'name -> m.name,
-     *       'birthday -> m.birthday
-     *     ).update.apply()
+     * """).bindByName(
+     *     'id -> m.id,
+     *     'name -> m.name,
+     *     'birthday -> m.birthday
+     *   ).update.apply()
      *   m
      * }
      * }}}
      */
-    val saveMethod = {
+    val updateMethod = {
 
       val placeHolderPart: String = config.template match {
         case GeneratorTemplate.placeHolderSQL =>
@@ -509,25 +537,33 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
         case GeneratorTemplate.placeHolderSQL =>
           3.indent + ".bind(" + eol +
             allColumns.map(c => 4.indent + "m." + c.nameInScala).mkString(comma + eol) + ", " + eol +
-            pkColumns.map(pk => 4.indent + "m." + pk.nameInScala).mkString(comma + eol)
+            pkColumns.map(pk => 4.indent + "m." + pk.nameInScala).mkString(comma + eol) + eol +
+            3.indent + ")"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL =>
           3.indent + ".bindByName(" + eol +
-            allColumns.map(c => 4.indent + "'" + c.nameInScala + " -> m." + c.nameInScala).mkString(comma + eol)
+            allColumns.map(c => 4.indent + "'" + c.nameInScala + " -> m." + c.nameInScala).mkString(comma + eol) + eol +
+            3.indent + ")"
       }
 
-      1.indent + "def save(m: " + className + ")(implicit session: DBSession = autoSession): " + className + " = {" + eol +
-        2.indent + "SQL(\"\"\"" + eol +
-        3.indent + "UPDATE " + eol +
-        4.indent + table.name + eol +
-        3.indent + "SET " + eol +
-        placeHolderPart + eol +
-        3.indent + "WHERE " + eol +
-        wherePart + eol +
-        3.indent + "\"\"\")" + eol +
-        bindingPart + eol +
-        3.indent + ").update.apply()" + eol +
-        2.indent + "m" + eol +
-        1.indent + "}" + eol
+      """  def update(m: %className%)(implicit session: DBSession = autoSession): %className% = {
+        |    SQL(%3quotes%
+        |      UPDATE
+        |        %tableName%
+        |      SET
+        |%placeHolderPart%
+        |      WHERE
+        |%wherePart%
+        |      %3quotes%)
+        |%bindingPart%.update.apply()
+        |    m
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
+        .replaceAll("%placeHolderPart%", placeHolderPart)
+        .replaceAll("%wherePart%", wherePart)
+        .replaceAll("%bindingPart%", bindingPart)
     }
 
     /**
@@ -552,15 +588,21 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
 
       val bindingPart: String = config.template match {
         case GeneratorTemplate.placeHolderSQL =>
-          ".bind(" + pkColumns.map(pk => "m." + pk.nameInScala).mkString(", ")
+          ".bind(" + pkColumns.map(pk => "m." + pk.nameInScala).mkString(", ") + ")"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL =>
-          ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> m." + pk.nameInScala).mkString(", ")
+          ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> m." + pk.nameInScala).mkString(", ") + ")"
       }
 
-      1.indent + "def delete(m: " + className + ")(implicit session: DBSession = autoSession): Unit = {" + eol +
-        2.indent + "SQL(\"\"\"DELETE FROM " + table.name + " WHERE " + wherePart + "\"\"\")" + eol +
-        3.indent + bindingPart + ").update.apply()" + eol +
-        1.indent + "}" + eol
+      """  def delete(m: %className%)(implicit session: DBSession = autoSession): Unit = {
+        |    SQL(%3quotes%DELETE FROM %tableName% WHERE %wherePart%%3quotes%)
+        |      %bindingPart%.update.apply()
+        |}
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
+        .replaceAll("%wherePart%", wherePart)
+        .replaceAll("%bindingPart%", bindingPart)
     }
 
     /**
@@ -573,24 +615,35 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }
      * }}}
      */
-    val findMethod =
-      1.indent + "def find(" + pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ") +
-        ")(implicit session: DBSession = autoSession): Option[" + className + "] = {" + eol +
-        2.indent + "SQL(\"\"\"SELECT * FROM " + table.name + " WHERE " + (config.template match {
-          case GeneratorTemplate.placeHolderSQL =>
-            pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
-          case GeneratorTemplate.anormSQL =>
-            pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
-          case GeneratorTemplate.execautableSQL =>
-            pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
-        }) + "\"\"\")" + eol +
-        3.indent + (config.template match {
-          case GeneratorTemplate.placeHolderSQL =>
-            ".bind(" + pkColumns.map(pk => pk.nameInScala).mkString(", ")
-          case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL =>
-            ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> " + pk.nameInScala).mkString(", ")
-        }) + ").map(*).single.apply()" + eol +
-        1.indent + "}" + eol
+    val findMethod = {
+      val argsPart = pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ")
+      val wherePart = (config.template match {
+        case GeneratorTemplate.placeHolderSQL =>
+          pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
+        case GeneratorTemplate.anormSQL =>
+          pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
+        case GeneratorTemplate.execautableSQL =>
+          pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
+      })
+      val bindingPart = (config.template match {
+        case GeneratorTemplate.placeHolderSQL =>
+          ".bind(" + pkColumns.map(pk => pk.nameInScala).mkString(", ")
+        case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL =>
+          ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> " + pk.nameInScala).mkString(", ")
+      }) + ")"
+
+      """  def find(%argsPart%)(implicit session: DBSession = autoSession): Option[%className%] = {
+        |    SQL(%3quotes%SELECT * FROM %tableName% WHERE %wherePart%%3quotes%)
+        |      %bindingPart%.map(*).single.apply()
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%argsPart%", argsPart)
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
+        .replaceAll("%wherePart%", wherePart)
+        .replaceAll("%bindingPart%", bindingPart)
+    }
 
     /**
      * {{{
@@ -603,9 +656,12 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }}}
      */
     val countAllMethod =
-      1.indent + "def countAll()(implicit session: DBSession = autoSession): Long = {" + eol +
-        2.indent + "SQL(\"\"\"SELECT COUNT(1) FROM " + table.name + "\"\"\").map(rs => rs.long(1)).single.apply().get" + eol +
-        1.indent + "}" + eol
+      """  def countAll()(implicit session: DBSession = autoSession): Long = {
+        |    SQL(%3quotes%SELECT COUNT(1) FROM %tableName%%3quotes%).map(rs => rs.long(1)).single.apply().get
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%tableName%", table.name)
 
     /**
      * {{{
@@ -617,9 +673,13 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }}}
      */
     val findAllMethod =
-      1.indent + "def findAll()(implicit session: DBSession = autoSession): List[" + className + "] = {" + eol +
-        2.indent + "SQL(\"\"\"SELECT * FROM " + table.name + "\"\"\").map(*).list.apply()" + eol +
-        1.indent + "}" + eol
+      """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
+        |    SQL(%3quotes%SELECT * FROM %tableName%%3quotes%).map(*).list.apply()
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
 
     /**
      * {{{
@@ -631,17 +691,27 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }
      * }}}
      */
-    val findAllByMethod =
-      1.indent + "def findAllBy(where: String, " + (config.template match {
+    val findAllByMethod = {
+      val paramsPart = (config.template match {
         case GeneratorTemplate.placeHolderSQL => "params: Any*"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => "params: (Symbol, Any)*"
-      }) + ")(implicit session: DBSession = autoSession): List[" + className + "] = {" + eol +
-        2.indent + "SQL(\"\"\"SELECT * FROM " + table.name + " WHERE \"\"\" + where)" + eol +
-        3.indent + (config.template match {
-          case GeneratorTemplate.placeHolderSQL => ".bind"
-          case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => ".bindByName"
-        }) + "(params:_*).map(*).list.apply()" + eol +
-        1.indent + "}" + eol
+      })
+      val bindingPart = (config.template match {
+        case GeneratorTemplate.placeHolderSQL => ".bind"
+        case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => ".bindByName"
+      }) + "(params: _*)"
+
+      """  def findAllBy(where: String, %paramsPart%)(implicit session: DBSession = autoSession): List[%className%] = {
+        |    SQL(%3quotes%SELECT * FROM %tableName% WHERE %3quotes% + where)
+        |      %bindingPart%.map(*).list.apply()
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%paramsPart%", paramsPart)
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
+        .replaceAll("%bindingPart%", bindingPart)
+    }
 
     /**
      * {{{
@@ -653,17 +723,27 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
      * }
      * }}}
      */
-    val countByMethod =
-      1.indent + "def countBy(where: String, " + (config.template match {
+    val countByMethod = {
+      val paramsPart = (config.template match {
         case GeneratorTemplate.placeHolderSQL => "params: Any*"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => "params: (Symbol, Any)*"
-      }) + ")(implicit session: DBSession = autoSession): Long = {" + eol +
-        2.indent + "SQL(\"\"\"SELECT count(1) FROM " + table.name + " WHERE \"\"\" + where)" + eol +
-        3.indent + (config.template match {
-          case GeneratorTemplate.placeHolderSQL => ".bind"
-          case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => ".bindByName"
-        }) + "(params:_*).map(rs => rs.long(1)).single.apply().get" + eol +
-        1.indent + "}" + eol
+      })
+      val bindingPart = (config.template match {
+        case GeneratorTemplate.placeHolderSQL => ".bind"
+        case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => ".bindByName"
+      }) + "(params:_*)"
+
+      """  def countBy(where: String, %paramsPart%)(implicit session: DBSession = autoSession): Long = {
+        |    SQL(%3quotes%SELECT count(1) FROM %tableName% WHERE %3quotes% + where)
+        |      %bindingPart%.map(rs => rs.long(1)).single.apply().get
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%paramsPart%", paramsPart)
+        .replaceAll("%className%", className)
+        .replaceAll("%tableName%", table.name)
+        .replaceAll("%bindingPart%", bindingPart)
+    }
 
     "object " + className + " {" + eol +
       eol +
@@ -691,14 +771,14 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       eol +
       createMethod +
       eol +
-      saveMethod +
+      updateMethod +
       eol +
       deleteMethod +
       eol +
       "}"
   }
 
-  def generateAll(): String = {
+  def modelAll(): String = {
     val jodaTimeImport = table.allColumns.flatMap {
       c =>
         c.rawTypeInScala match {
@@ -735,26 +815,14 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
       objectPart + eol
   }
 
-  private def toOption(column: Column): String = column.dataType match {
-    case JavaSqlTypes.BIGINT |
-      JavaSqlTypes.BIT |
-      JavaSqlTypes.BOOLEAN |
-      JavaSqlTypes.DOUBLE |
-      JavaSqlTypes.FLOAT |
-      JavaSqlTypes.REAL |
-      JavaSqlTypes.INTEGER |
-      JavaSqlTypes.SMALLINT |
-      JavaSqlTypes.TINYINT => "opt[" + column.rawTypeInScala + "]"
-    case _ => "Option"
-  }
-
   private def cast(column: Column, optional: Boolean): String = column.dataType match {
-    case JavaSqlTypes.DATE if optional => ").map(_.toLocalDate"
+    case JavaSqlTypes.DATE if optional => ".map(_.toLocalDate)"
     case JavaSqlTypes.DATE => ".toLocalDate"
+    case JavaSqlTypes.DECIMAL if optional => ".map(_.toScalaBigDecimal)"
     case JavaSqlTypes.DECIMAL => ".toScalaBigDecimal"
-    case JavaSqlTypes.TIME if optional => ").map(_.toLocalTime"
+    case JavaSqlTypes.TIME if optional => ".map(_.toLocalTime)"
     case JavaSqlTypes.TIME => ".toLocalTime"
-    case JavaSqlTypes.TIMESTAMP if optional => ").map(_.toDateTime"
+    case JavaSqlTypes.TIMESTAMP if optional => ".map(_.toDateTime)"
     case JavaSqlTypes.TIMESTAMP => ".toDateTime"
     case _ => ""
   }
@@ -768,6 +836,208 @@ case class ARLikeTemplateGenerator(table: Table, specifiedClassName: Option[Stri
 
   private def toProperCase(s: String): String = {
     s.substring(0, 1).toUpperCase + s.substring(1).toLowerCase
+  }
+
+  // -----------------------
+  // Spec
+  // -----------------------
+
+  def writeSpecIfNotExist(code: Option[String]): Unit = {
+    val file = new File(config.testDir + "/" + packageName.replaceAll("\\.", "/") + "/" + className + "Spec.scala")
+    if (file.exists) {
+      println("\"" + packageName + "." + className + "Spec\"" + " already exists.")
+    } else {
+      code.map { code =>
+        mkdirRecursively(file.getParentFile)
+        using(new FileOutputStream(file)) {
+          fos =>
+            using(new OutputStreamWriter(fos)) {
+              writer =>
+                writer.write(code)
+                println("\"" + packageName + "." + className + "Spec\"" + " created.")
+            }
+        }
+      }
+    }
+  }
+
+  def specAll(): Option[String] = config.testTemplate match {
+    case GeneratorTestTemplate.ScalaTestFlatSpec =>
+      Some(replaceVariablesForTestPart(
+        """package %package%
+          |
+          |import org.scalatest._
+          |import org.joda.time._
+          |
+          |class %className%Spec extends FlatSpec with ShouldMatchers {
+          |
+          |  behavior of "%className%"
+          |
+          |  it should "find by primary keys" in {
+          |    val maybeFound = %className%.find(%primaryKeys%)
+          |    maybeFound.isDefined should be(true)
+          |  }
+          |  it should "find all records" in {
+          |    val allResults = %className%.findAll()
+          |    allResults.size should be >(0)
+          |  }
+          |  it should "count all records" in {
+          |    val count = %className%.countAll()
+          |    count should be >(0L)
+          |  }
+          |  it should "find by where clauses" in {
+          |    val results = %className%.findAllBy(%whereExample%)
+          |    results.size should be >(0)
+          |  }
+          |  it should "count by where clauses" in {
+          |    val count = %className%.countBy(%whereExample%)
+          |    count should be >(0L)
+          |  }
+          |  it should "create new record" in {
+          |    val created = %className%.create(%createFields%)
+          |    created should not be(null)
+          |  }
+          |  it should "save a record" in {
+          |    val entity = %className%.findAll().head
+          |    val saved = %className%.save(entity)
+          |    saved should not eq(entity)
+          |  }
+          |  it should "delete a record" in {
+          |    val entity = %className%.findAll().head
+          |    %className%.delete(entity)
+          |    val shouldBeNone = %className%.find(%primaryKeys%)
+          |    shouldBeNone.isDefined should be(false)
+          |  }
+          |
+          |}
+        """.stripMargin))
+    case GeneratorTestTemplate.specs2unit =>
+      Some(replaceVariablesForTestPart(
+        """package %package%
+          |
+          |import org.specs2.mutable._
+          |import org.joda.time._
+          |
+          |class %className%Spec extends Specification {
+          |
+          |  "%className%" should {
+          |    "find by primary keys" in {
+          |      val maybeFound = %className%.find(%primaryKeys%)
+          |      maybeFound.isDefined should beTrue
+          |    }
+          |    "find all records" in {
+          |      val allResults = %className%.findAll()
+          |      allResults.size should be_>(0)
+          |    }
+          |    "count all records" in {
+          |      val count = %className%.countAll()
+          |      count should be_>(0L)
+          |    }
+          |    "find by where clauses" in {
+          |      val results = %className%.findAllBy(%whereExample%)
+          |      results.size should be_>(0)
+          |    }
+          |    "count by where clauses" in {
+          |      val count = %className%.countBy(%whereExample%)
+          |      count should be_>(0L)
+          |    }
+          |    "create new record" in {
+          |      val created = %className%.create(%createFields%)
+          |      created should not beNull
+          |    }
+          |    "save a record" in {
+          |      val entity = %className%.findAll().head
+          |      val saved = %className%.save(entity)
+          |      saved should not equalTo(entity)
+          |    }
+          |    "delete a record" in {
+          |      val entity = %className%.findAll().head
+          |      %className%.delete(entity)
+          |      val shouldBeNone = %className%.find(%primaryKeys%)
+          |      shouldBeNone.isDefined should beFalse
+          |    }
+          |  }
+          |
+          |}
+        """.stripMargin))
+    case GeneratorTestTemplate.specs2acceptance =>
+      Some(replaceVariablesForTestPart(
+        """package %package%
+          |
+          |import org.specs2._
+          |import org.joda.time._
+          |
+          |class %className%Spec extends Specification { def is =
+          |
+          |  "The '%className%' model should" ^
+          |    "find by primary keys"         ! findByPrimaryKeys ^
+          |    "find all records"             ! findAll ^
+          |    "count all records"            ! countAll ^
+          |    "find by where clauses"        ! findAllBy ^
+          |    "count by where clauses"       ! countBy ^
+          |    "create new record"            ! create ^
+          |    "save a record"                ! save ^
+          |    "delete a record"              ! delete ^
+          |                                   end
+          |
+          |  def findByPrimaryKeys = {
+          |    val maybeFound = %className%.find(%primaryKeys%)
+          |    maybeFound.isDefined should beTrue
+          |  }
+          |  def findAll = {
+          |    val allResults = %className%.findAll()
+          |    allResults.size should be_>(0)
+          |  }
+          |  def countAll = {
+          |    val count = %className%.countAll()
+          |    count should be_>(0L)
+          |  }
+          |  def findAllBy = {
+          |    val results = %className%.findAllBy(%whereExample%)
+          |    results.size should be_>(0)
+          |  }
+          |  def countBy = {
+          |    val count = %className%.countBy(%whereExample%)
+          |    count should be_>(0L)
+          |  }
+          |  def create = {
+          |    val created = %className%.create(%createFields%)
+          |    created should not beNull
+          |  }
+          |  def save = {
+          |    val entity = %className%.findAll().head
+          |    val saved = %className%.save(entity)
+          |    saved should not equalTo(entity)
+          |  }
+          |  def delete = {
+          |    val entity = %className%.findAll().head
+          |    %className%.delete(entity)
+          |    val shouldBeNone = %className%.find(%primaryKeys%)
+          |    shouldBeNone.isDefined should beFalse
+          |  }
+          |
+          |}
+        """.stripMargin))
+    case GeneratorTestTemplate(name) => None
+  }
+
+  private def replaceVariablesForTestPart(code: String): String = {
+    code.replaceAll("%package%", packageName)
+      .replaceAll("%className%", className)
+      .replaceAll("%primaryKeys%", table.primaryKeyColumns.map {
+        c => c.defaultValueInScala
+      }.mkString(", "))
+      .replaceAll("%whereExample%", table.primaryKeyColumns.headOption.map {
+        c =>
+          "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala
+      }.getOrElse(""))
+      .replaceAll("%createFields%", table.allColumns.filter {
+        c =>
+          c.isNotNull && table.autoIncrementColumns.find(aic => aic.name == c.name).isEmpty
+      }.map {
+        c =>
+          c.nameInScala + " = " + c.defaultValueInScala
+      }.mkString(", "))
   }
 
 }

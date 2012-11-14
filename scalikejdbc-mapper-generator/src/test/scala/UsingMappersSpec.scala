@@ -120,33 +120,33 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
   it should "work fine with Member" in {
     Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     Member.findAll() foreach println
-    Member.findBy(Member.columnNames.description + " = /*'description*/'aaa'", 'description -> "Example") foreach println
+    Member.findAllBy(Member.columnNames.description + " = /*'description*/'aaa'", 'description -> "Example") foreach println
   }
 
   it should "work fine with placeholder.Member" in {
     placeholder.Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     placeholder.Member.findAll() foreach println
-    placeholder.Member.findBy(Member.columnNames.description + " = ?", "Example") foreach println
+    placeholder.Member.findAllBy(Member.columnNames.description + " = ?", "Example") foreach println
   }
 
   it should "work fine with anorm.Member" in {
     anorm.Member.create("Alice" + System.currentTimeMillis, None, Some("Example"), None, new org.joda.time.DateTime)
     anorm.Member.findAll() foreach println
-    anorm.Member.findBy(Member.columnNames.description + " = {description}", 'description -> "Example") foreach println
+    anorm.Member.findAllBy(Member.columnNames.description + " = {description}", 'description -> "Example") foreach println
   }
 
   it should "support within tx" in {
     DB readOnly { implicit session =>
-      Member.findBy("name = /*'name*/''", 'name -> "Rollback").foreach { member => member.destroy() }
+      Member.findAllBy("name = /*'name*/''", 'name -> "Rollback").foreach { member => member.destroy() }
     }
     try {
       DB localTx { implicit session =>
         Member.create("Rollback", None, Some("Rollback test"), None, new DateTime)
-        Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
+        Member.findAllBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
     } catch { case e => }
-    Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
+    Member.findAllBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
   }
 
   it should "work fine with UnNormalized" in {
@@ -187,11 +187,11 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
   it should "work with join queries" in {
     DB localTx { implicit s =>
       val group = MemberGroup.create("group1")
-      Member.findBy("name = {name}", 'name -> "WithGroup") match {
+      Member.findAllBy("name = {name}", 'name -> "WithGroup") match {
         case Nil => Member.create("WithGroup", Some(group.id), Some("xxx"), None, new org.joda.time.DateTime)
         case _ =>
       }
-      Member.findBy("name = {name}", 'name -> "WithoutGroup") match {
+      Member.findAllBy("name = {name}", 'name -> "WithoutGroup") match {
         case Nil => Member.create("WithoutGroup", None, Some("xxx"), None, new org.joda.time.DateTime)
         case _ =>
       }

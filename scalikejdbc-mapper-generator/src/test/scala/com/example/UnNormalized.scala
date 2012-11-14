@@ -84,13 +84,12 @@ class UnNormalized(
       v22 = v22,
       v23 = v23,
       v24 = v24,
-      createdAt = createdAt
-    )
+      createdAt = createdAt)
   }
 
-  def save(): UnNormalized = UnNormalized.save(this)
+  def save()(implicit session: DBSession = UnNormalized.autoSession): UnNormalized = UnNormalized.update(this)(session)
 
-  def destroy(): Unit = UnNormalized.delete(this)
+  def destroy()(implicit session: DBSession = UnNormalized.autoSession): Unit = UnNormalized.delete(this)(session)
 
 }
 
@@ -139,24 +138,25 @@ object UnNormalized {
       v05 = rs.bigDecimal(v05).toScalaBigDecimal,
       v06 = rs.bigDecimal(v06).toScalaBigDecimal,
       v07 = rs.double(v07),
-      v08 = opt[Boolean](rs.boolean(v08)),
-      v09 = Option(rs.string(v09)),
+      v08 = rs.booleanOpt(v08),
+      v09 = rs.stringOpt(v09),
       v10 = rs.string(v10),
-      v11 = opt[Byte](rs.byte(v11)),
-      v12 = opt[Short](rs.short(v12)),
-      v13 = opt[Int](rs.int(v13)),
-      v14 = opt[Long](rs.long(v14)),
-      v15 = Option(rs.bigDecimal(v15).toScalaBigDecimal),
-      v16 = opt[Boolean](rs.boolean(v16)),
+      v11 = rs.byteOpt(v11),
+      v12 = rs.shortOpt(v12),
+      v13 = rs.intOpt(v13),
+      v14 = rs.longOpt(v14),
+      v15 = rs.bigDecimalOpt(v15).map(_.toScalaBigDecimal),
+      v16 = rs.booleanOpt(v16),
       v17 = rs.date(v17).toLocalDate,
       v18 = rs.time(v18).toLocalTime,
       v19 = rs.time(v19).toLocalTime,
       v20 = rs.timestamp(v20).toDateTime,
-      v21 = Option(rs.any(v21)),
+      v21 = rs.anyOpt(v21),
       v22 = rs.boolean(v22),
       v23 = rs.float(v23),
       v24 = rs.double(v24),
       createdAt = rs.timestamp(createdAt).toDateTime)
+
   }
 
   object joinedColumnNames {
@@ -203,24 +203,25 @@ object UnNormalized {
       v05 = rs.bigDecimal(v05).toScalaBigDecimal,
       v06 = rs.bigDecimal(v06).toScalaBigDecimal,
       v07 = rs.double(v07),
-      v08 = opt[Boolean](rs.boolean(v08)),
-      v09 = Option(rs.string(v09)),
+      v08 = rs.booleanOpt(v08),
+      v09 = rs.stringOpt(v09),
       v10 = rs.string(v10),
-      v11 = opt[Byte](rs.byte(v11)),
-      v12 = opt[Short](rs.short(v12)),
-      v13 = opt[Int](rs.int(v13)),
-      v14 = opt[Long](rs.long(v14)),
-      v15 = Option(rs.bigDecimal(v15).toScalaBigDecimal),
-      v16 = opt[Boolean](rs.boolean(v16)),
+      v11 = rs.byteOpt(v11),
+      v12 = rs.shortOpt(v12),
+      v13 = rs.intOpt(v13),
+      v14 = rs.longOpt(v14),
+      v15 = rs.bigDecimalOpt(v15).map(_.toScalaBigDecimal),
+      v16 = rs.booleanOpt(v16),
       v17 = rs.date(v17).toLocalDate,
       v18 = rs.time(v18).toLocalTime,
       v19 = rs.time(v19).toLocalTime,
       v20 = rs.timestamp(v20).toDateTime,
-      v21 = Option(rs.any(v21)),
+      v21 = rs.anyOpt(v21),
       v22 = rs.boolean(v22),
       v23 = rs.float(v23),
       v24 = rs.double(v24),
       createdAt = rs.timestamp(createdAt).toDateTime)
+
   }
 
   val autoSession = AutoSession
@@ -238,7 +239,7 @@ object UnNormalized {
     SQL("""SELECT COUNT(1) FROM UN_NORMALIZED""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[UnNormalized] = {
+  def findAllBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[UnNormalized] = {
     SQL("""SELECT * FROM UN_NORMALIZED WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
@@ -309,7 +310,7 @@ object UnNormalized {
         /*'v05*/1,
         /*'v06*/1,
         /*'v07*/0.1,
-        /*'v08*/boolean,
+        /*'v08*/true,
         /*'v09*/'abc',
         /*'v10*/'abc',
         /*'v11*/1,
@@ -317,13 +318,13 @@ object UnNormalized {
         /*'v13*/1,
         /*'v14*/1,
         /*'v15*/1,
-        /*'v16*/boolean,
+        /*'v16*/true,
         /*'v17*/'1958-09-06',
         /*'v18*/'12:00:00',
         /*'v19*/'12:00:00',
         /*'v20*/'1958-09-06 12:00:00',
         /*'v21*/null,
-        /*'v22*/boolean,
+        /*'v22*/true,
         /*'v23*/null,
         /*'v24*/0.1,
         /*'createdAt*/'1958-09-06 12:00:00'
@@ -356,6 +357,7 @@ object UnNormalized {
         'v24 -> v24,
         'createdAt -> createdAt
       ).updateAndReturnGeneratedKey.apply()
+
     new UnNormalized(
       id = generatedKey,
       v01 = v01,
@@ -385,11 +387,11 @@ object UnNormalized {
       createdAt = createdAt)
   }
 
-  def save(m: UnNormalized)(implicit session: DBSession = autoSession): UnNormalized = {
+  def update(m: UnNormalized)(implicit session: DBSession = autoSession): UnNormalized = {
     SQL("""
-      UPDATE 
+      UPDATE
         UN_NORMALIZED
-      SET 
+      SET
         ID = /*'id*/1,
         V_01 = /*'v01*/1,
         V_02 = /*'v02*/1,
@@ -398,7 +400,7 @@ object UnNormalized {
         V_05 = /*'v05*/1,
         V_06 = /*'v06*/1,
         V_07 = /*'v07*/0.1,
-        V_08 = /*'v08*/boolean,
+        V_08 = /*'v08*/true,
         V_09 = /*'v09*/'abc',
         V_10 = /*'v10*/'abc',
         V_11 = /*'v11*/1,
@@ -406,17 +408,17 @@ object UnNormalized {
         V_13 = /*'v13*/1,
         V_14 = /*'v14*/1,
         V_15 = /*'v15*/1,
-        V_16 = /*'v16*/boolean,
+        V_16 = /*'v16*/true,
         V_17 = /*'v17*/'1958-09-06',
         V_18 = /*'v18*/'12:00:00',
         V_19 = /*'v19*/'12:00:00',
         V_20 = /*'v20*/'1958-09-06 12:00:00',
         V_21 = /*'v21*/null,
-        V_22 = /*'v22*/boolean,
+        V_22 = /*'v22*/true,
         V_23 = /*'v23*/null,
         V_24 = /*'v24*/0.1,
         CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
-      WHERE 
+      WHERE
         ID = /*'id*/1
       """)
       .bindByName(

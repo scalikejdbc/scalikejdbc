@@ -2,7 +2,10 @@ import org.scalatest._
 import org.scalatest.matchers.ShouldMatchers
 
 import scalikejdbc._
-import mapper.{ GeneratorTemplate, GeneratorConfig, ARLikeTemplateGenerator, Model }
+import mapper._
+import mapper.CodeGenerator
+import mapper.GeneratorConfig
+import mapper.Model
 
 class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
@@ -32,27 +35,27 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map {
       table =>
-        val generator1 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        val generator1 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("executableSQL"),
           packageName = "com.example"
         ))
-        println(generator1.generateAll())
-        generator1.writeFileIfNotExist()
-        val generator2 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        println(generator1.modelAll())
+        generator1.writeModelIfNotExist()
+        val generator2 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("placeHolderSQL"),
           packageName = "com.example.placeholder"
         ))
-        println(generator2.generateAll())
-        generator2.writeFileIfNotExist()
-        val generator3 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        println(generator2.modelAll())
+        generator2.writeModelIfNotExist()
+        val generator3 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("anormSQL"),
           packageName = "com.example.anorm"
         ))
-        println(generator3.generateAll())
-        generator3.writeFileIfNotExist()
+        println(generator3.modelAll())
+        generator3.writeModelIfNotExist()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -83,27 +86,34 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "MEMBER").map {
       table =>
-        val generator1 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        val generator1 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("executableSQL"),
+          testTemplate = GeneratorTestTemplate("specs2unit"),
           packageName = "com.example"
         ))
-        println(generator1.generateAll())
-        generator1.writeFileIfNotExist()
-        val generator2 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        println(generator1.modelAll())
+        println(generator1.specAll())
+        generator1.writeModelIfNotExist()
+        val generator2 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("placeHolderSQL"),
+          testTemplate = GeneratorTestTemplate("specs2acceptance"),
           packageName = "com.example.placeholder"
         ))
-        println(generator2.generateAll())
-        generator2.writeFileIfNotExist()
-        val generator3 = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        println(generator2.modelAll())
+        println(generator2.specAll())
+        generator2.writeModelIfNotExist()
+        val generator3 = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           template = GeneratorTemplate("anormSQL"),
+          testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
           packageName = "com.example.anorm"
         ))
-        println(generator3.generateAll())
-        generator3.writeFileIfNotExist()
+        println(generator3.modelAll())
+        println(generator3.specAll())
+        generator3.writeModelIfNotExist()
+
     } getOrElse {
       fail("The table is not found.")
     }
@@ -162,11 +172,11 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "UN_NORMALIZED").map {
       table =>
-        val generator = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        val generator = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           packageName = "com.example"
         ))
-        generator.writeFileIfNotExist()
+        generator.writeModelIfNotExist()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -194,11 +204,11 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "WITHOUT_PK").map {
       table =>
-        val generator = ARLikeTemplateGenerator(table)(GeneratorConfig(
+        val generator = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
           packageName = "com.example"
         ))
-        generator.writeFileIfNotExist()
+        generator.writeModelIfNotExist()
     } getOrElse {
       fail("The table is not found.")
     }

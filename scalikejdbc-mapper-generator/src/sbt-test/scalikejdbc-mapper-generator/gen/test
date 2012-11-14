@@ -2,13 +2,17 @@
 
 > scalikejdbc-gen-echo users
 -$ exists src/main/scala/app/models/Users.scala
+-$ exists src/test/scala/app/models/UsersSpec.scala
 > scalikejdbc-gen-echo users User
 -$ exists src/main/scala/app/models/User.scala
+-$ exists src/test/scala/app/models/UserSpec.scala
 
 > scalikejdbc-gen users
 $ exists src/main/scala/app/models/Users.scala
+$ exists src/test/scala/app/models/UsersSpec.scala
 > scalikejdbc-gen users User
 $ exists src/main/scala/app/models/User.scala
+$ exists src/test/scala/app/models/UserSpec.scala
 
 > scalikejdbc-gen users
 $ newer src/main/scala/app/models/User.scala src/main/scala/app/models/Users.scala

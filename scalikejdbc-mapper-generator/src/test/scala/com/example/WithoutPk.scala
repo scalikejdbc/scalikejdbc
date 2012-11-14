@@ -66,7 +66,7 @@ object WithoutPk {
     SQL("""SELECT COUNT(1) FROM WITHOUT_PK""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[WithoutPk] = {
+  def findAllBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[WithoutPk] = {
     SQL("""SELECT * FROM WITHOUT_PK WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
