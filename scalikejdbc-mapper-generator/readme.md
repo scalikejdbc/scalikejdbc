@@ -10,7 +10,7 @@ resolvers += "Sonatype OSS" at "http://oss.sonatype.org/content/repositories/rel
 // Don't forget adding your JDBC driver
 libraryDependencies += "org.hsqldb" % "hsqldb" % "[2,)"
 
-addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.3,)")
+addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
 ```
 
 ### project/scalikejdbc-mapper-generator.properties
@@ -72,7 +72,7 @@ case class Member(
     birthday: Option[LocalDate] = None,
     createdAt: DateTime) {
 
-  def save()(implicit session: DBSession = Member.autoSession): Member = Member.save(this)(session)
+  def save()(implicit session: DBSession = Member.autoSession): Member = Member.update(this)(session)
 
   def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.delete(this)(session)
 
@@ -97,9 +97,9 @@ object Member {
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
       name = rs.string(name),
-      memberGroupId = opt[Int](rs.int(memberGroupId)),
-      description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toLocalDate),
+      memberGroupId = rs.intOpt(memberGroupId),
+      description = rs.stringOpt(description),
+      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
@@ -121,9 +121,9 @@ object Member {
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
       name = rs.string(name),
-      memberGroupId = opt[Int](rs.int(memberGroupId)),
-      description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toLocalDate),
+      memberGroupId = rs.intOpt(memberGroupId),
+      description = rs.stringOpt(description),
+      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
   }
 
@@ -180,6 +180,7 @@ object Member {
         'birthday -> birthday,
         'createdAt -> createdAt
       ).updateAndReturnGeneratedKey.apply()
+
     Member(
       id = generatedKey.toInt,
       name = name,
@@ -189,7 +190,7 @@ object Member {
       createdAt = createdAt)
   }
 
-  def save(m: Member)(implicit session: DBSession = autoSession): Member = {
+  def update(m: Member)(implicit session: DBSession = autoSession): Member = {
     SQL("""
       UPDATE 
         MEMBER

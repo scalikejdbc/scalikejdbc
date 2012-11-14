@@ -12,8 +12,8 @@ scalaVersion := "2.10.0-M7"
 resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.3,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.3,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
   "org.hsqldb" % "hsqldb" % "[2,)"
 )
 

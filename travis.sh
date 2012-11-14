@@ -5,6 +5,7 @@ wget https://raw.github.com/paulp/sbt-extras/master/sbt &&
 chmod u+x ./sbt &&
 ./sbt -sbt-version 0.12.0 -mem 512 \
   "project library" test 
-  # "project mapper-generator" test scripted # Travis CI causes StackOverFlowError
-  # "project play-plugin" test # Travis CI can't execute this task normally
+  #"project library" test \
+  #"project play-plugin" test \ # StackOverFlowError
+  #"project mapper-generator" test scripted # Failure
 

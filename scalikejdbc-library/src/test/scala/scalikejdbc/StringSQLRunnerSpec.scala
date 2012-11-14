@@ -4,7 +4,7 @@ import org.scalatest._
 import org.scalatest.matchers._
 import scala.util.control.Exception._
 
-class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers {
+class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
   val tableNamePrefix = "emp_StringSQLRunnerSpec" + System.currentTimeMillis()
 

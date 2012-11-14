@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.0-SNAPSHOT"
+  lazy val _version = "1.4.0"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -137,7 +137,7 @@ object ScalikeJDBCProjects extends Build {
     )
   )
 
-  val _crossScalaVersions = Seq("2.9.2", "2.9.1", "2.9.0")
+  val _crossScalaVersions = Seq("2.9.2", "2.9.1")
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")  
