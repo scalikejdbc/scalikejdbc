@@ -13,7 +13,7 @@ libraryDependencies += "org.hsqldb" % "hsqldb" % "[2,)"
 addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
 ```
 
-### project/scalikejdbc-mapper-generator.properties
+### project/scalikejdbc.properties
 
 ```
 jdbc.driver=org.hsqldb.jdbc.JDBCDriver
@@ -26,6 +26,8 @@ generator.packageName=models
 geneartor.lineBreak=LF
 # generator.template: placeHolderSQL/anormSQL/executableSQL
 generator.template=executableSQL
+# generator.testTemplate: specs2unit/specs2acceptance/ScalaTestFlatSpec
+generator.testTemplate=specs2unit
 generator.encoding=UTF-8
 ```
 
@@ -222,3 +224,58 @@ object Member {
 
 }
 ```
+
+And specs2 or ScalaTest's FlatSpec.
+
+
+```scala
+package com.example
+
+import org.specs2.mutable._
+import org.joda.time._
+
+class MemberSpec extends Specification {
+
+  "Member" should {
+    "find by primary keys" in {
+      val maybeFound = Member.find(123)
+      maybeFound.isDefined should beTrue
+    }
+    "find all records" in {
+      val allResults = Member.findAll()
+      allResults.size should be_>(0)
+    }
+    "count all records" in {
+      val count = Member.countAll()
+      count should be_>(0L)
+    }
+    "find by where clauses" in {
+      val results = Member.findAllBy("ID = {id}", 'id -> 123)
+      results.size should be_>(0)
+    }
+    "count by where clauses" in {
+      val count = Member.countBy("ID = {id}", 'id -> 123)
+      count should be_>(0L)
+    }
+    "create new record" in {
+      val created = Member.create(name = "MyString", createdAt = DateTime.now)
+      created should not beNull
+    }
+    "update a record" in {
+      val entity = Member.findAll().head
+      val updated = Member.update(entity)
+      updated should not equalTo (entity)
+    }
+    "delete a record" in {
+      val entity = Member.findAll().head
+      Member.delete(entity)
+      val shouldBeNone = Member.find(123)
+      shouldBeNone.isDefined should beFalse
+    }
+  }
+
+}
+
+```
+
+
