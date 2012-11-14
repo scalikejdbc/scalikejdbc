@@ -156,7 +156,6 @@ object UnNormalized {
       v23 = rs.float(v23),
       v24 = rs.double(v24),
       createdAt = rs.timestamp(createdAt).toDateTime)
-
   }
 
   object joinedColumnNames {
@@ -221,7 +220,6 @@ object UnNormalized {
       v23 = rs.float(v23),
       v24 = rs.double(v24),
       createdAt = rs.timestamp(createdAt).toDateTime)
-
   }
 
   val autoSession = AutoSession

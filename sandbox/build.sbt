@@ -8,7 +8,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
   "org.slf4j" % "slf4j-simple" % "1.6.4",
-  "org.hsqldb" % "hsqldb" % "[2,)"
+  "org.hsqldb" % "hsqldb" % "[2,)",
+  "org.specs2" %% "specs2" % "1.12.2" % "test"
 )
 
 initialCommands := """import scalikejdbc._

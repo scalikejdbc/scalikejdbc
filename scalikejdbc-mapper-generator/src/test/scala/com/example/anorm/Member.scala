@@ -40,7 +40,6 @@ object Member {
       description = rs.stringOpt(description),
       birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
-
   }
 
   object joinedColumnNames {
@@ -65,7 +64,6 @@ object Member {
       description = rs.stringOpt(description),
       birthday = rs.dateOpt(birthday).map(_.toLocalDate),
       createdAt = rs.timestamp(createdAt).toDateTime)
-
   }
 
   val autoSession = AutoSession

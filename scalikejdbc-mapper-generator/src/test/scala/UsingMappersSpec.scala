@@ -217,3 +217,4 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
   }
 
 }
+

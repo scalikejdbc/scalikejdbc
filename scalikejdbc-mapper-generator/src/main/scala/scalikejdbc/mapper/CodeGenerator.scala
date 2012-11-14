@@ -226,7 +226,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
    *
    * {{{
    * case class Member(id: Long, name: String, description: Option[String])) {
-   *   def save(): Member = Member.save(this)
+   *   def save(): Member = Member.update(this)
    *   def destroy(): Unit = Member.delete(this)
    * }
    * }}}
@@ -338,7 +338,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           c =>
             if (c.isNotNull) 3.indent + c.nameInScala + " = rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, false)
             else 3.indent + c.nameInScala + " = " + "rs." + c.extractorName + "Opt(" + c.nameInScala + ")" + cast(c, true)
-        }.mkString(comma + eol) + ")" + eol
+        }.mkString(comma + eol) + ")"
     }
 
     val mapper = {
@@ -596,7 +596,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       """  def delete(m: %className%)(implicit session: DBSession = autoSession): Unit = {
         |    SQL(%3quotes%DELETE FROM %tableName% WHERE %wherePart%%3quotes%)
         |      %bindingPart%.update.apply()
-        |}
+        |  }
       """.stripMargin
         .replaceAll("%3quotes%", "\"\"\"")
         .replaceAll("%className%", className)
@@ -686,7 +686,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
      * def findAllBy(where: String, params:(Symbol, Any)*): List[Member] = {
      *   DB readOnly { implicit session =>
      *     SQL("""SELECT * FROM MEMBER """ + where)
-     *       .bindByName(params:_*).map(*).list.apply()
+     *       .bindByName(params: _*).map(*).list.apply()
      *   }
      * }
      * }}}
@@ -718,7 +718,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
      * def countBy(where: String, params:(Symbol, Any)*): Long = {
      *   DB readOnly { implicit session =>
      *     SQL("""SELECT COUNT(1) FROM MEMBER """ + where)
-     *       .bindByName(params:_*).map(*).single.apply().get
+     *       .bindByName(params: _*).map(*).single.apply().get
      *   }
      * }
      * }}}
@@ -731,7 +731,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       val bindingPart = (config.template match {
         case GeneratorTemplate.placeHolderSQL => ".bind"
         case GeneratorTemplate.anormSQL | GeneratorTemplate.execautableSQL => ".bindByName"
-      }) + "(params:_*)"
+      }) + "(params: _*)"
 
       """  def countBy(where: String, %paramsPart%)(implicit session: DBSession = autoSession): Long = {
         |    SQL(%3quotes%SELECT count(1) FROM %tableName% WHERE %3quotes% + where)
@@ -897,10 +897,10 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |    val created = %className%.create(%createFields%)
           |    created should not be(null)
           |  }
-          |  it should "save a record" in {
+          |  it should "update a record" in {
           |    val entity = %className%.findAll().head
-          |    val saved = %className%.save(entity)
-          |    saved should not eq(entity)
+          |    val updated = %className%.update(entity)
+          |    updated should not eq(entity)
           |  }
           |  it should "delete a record" in {
           |    val entity = %className%.findAll().head
@@ -945,10 +945,10 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |      val created = %className%.create(%createFields%)
           |      created should not beNull
           |    }
-          |    "save a record" in {
+          |    "update a record" in {
           |      val entity = %className%.findAll().head
-          |      val saved = %className%.save(entity)
-          |      saved should not equalTo(entity)
+          |      val updated = %className%.update(entity)
+          |      updated should not equalTo(entity)
           |    }
           |    "delete a record" in {
           |      val entity = %className%.findAll().head
@@ -976,7 +976,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |    "find by where clauses"        ! findAllBy ^
           |    "count by where clauses"       ! countBy ^
           |    "create new record"            ! create ^
-          |    "save a record"                ! save ^
+          |    "update a record"              ! update ^
           |    "delete a record"              ! delete ^
           |                                   end
           |
@@ -1004,10 +1004,10 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |    val created = %className%.create(%createFields%)
           |    created should not beNull
           |  }
-          |  def save = {
+          |  def update = {
           |    val entity = %className%.findAll().head
-          |    val saved = %className%.save(entity)
-          |    saved should not equalTo(entity)
+          |    val updated = %className%.update(entity)
+          |    updated should not equalTo(entity)
           |  }
           |  def delete = {
           |    val entity = %className%.findAll().head
