@@ -119,14 +119,27 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-play-plugin",
       version := _version,
-      crossScalaVersions := Seq("2.9.2", "2.9.1"), 
+      crossScalaVersions := Seq("2.9.2", "2.9.1", "2.10.0-RC1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          _organization %% "scalikejdbc" % _version,
-          "play" % "play_2.9.1" % "2.0.4" % "provided",
-          "play" % "play-test_2.9.1" % "2.0.4" % "test"
-        )
+          _organization %% "scalikejdbc" % _version
+        ) ++ (scalaVersion match {
+          case "2.10" => {
+            val playVersion = "2.1-RC1"
+            Seq(
+              "play" % "play_2.10" % playVersion % "provided",
+              "play" % "play-test_2.10" % playVersion % "test"
+            )
+          }
+          case _ => {
+            val playVersion = "2.0.4"
+            Seq(
+              "play" % "play_2.9.1" % playVersion % "provided",
+              "play" % "play-test_2.9.1" % playVersion % "test"
+            )
+          }
+        })
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
