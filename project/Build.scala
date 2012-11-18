@@ -28,7 +28,7 @@ object ScalikeJDBCProjects extends Build {
           case "2.9.2" => "2.9.1"
           case version => version
         })
-        val time = "time" + _scalaVersion
+        val time = "scalaj-time" + _scalaVersion
         val unfilteredFilter = "unfiltered-filter" + _scalaVersion
         val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
         val scalacheck = "scalacheck" + _scalaVersion
@@ -40,13 +40,13 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"      % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
           // scope: test
-          "org.scala-tools.time"    %  time                   % "0.5"      % "test",
+          "org.scalaj"              %  time                   % "0.6"      % "test",
           "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
           "net.databinder"          %  unfilteredFilter       % "[0.6,)"   % "test",
           "net.databinder"          %  unfilteredJetty        % "[0.6,)"   % "test",
           "org.scalatest"           %  scalatest              % "1.8"      % "test",
-          "org.scala-tools.testing" %  scalacheck             % "1.9"      % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.0"    % "test",
+          "org.scalacheck"          %  scalacheck             % "1.10.0"   % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.5"    % "test",
           "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
@@ -161,8 +161,8 @@ object ScalikeJDBCProjects extends Build {
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % "[1.3,)"        % "test",
     "org.apache.derby"  % "derby"                % "[10.8.2,)"     % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.6.16"        % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.2.8"         % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"         % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.2.9"         % "test",
     "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
