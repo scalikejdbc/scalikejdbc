@@ -24,6 +24,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
           case "2.10.0-RC2" => "2.9.1"
+          case "2.10.0-RC1" => "2.9.1"
           case "2.9.2" => "2.9.1"
           case version => version
         })
@@ -67,12 +68,11 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-interpolation",
       version := _version,
       scalaVersion := "2.10.0-RC2",
-      // scalaBinaryVersion := "2.10", // TODO Travis CI failure
+      scalaBinaryVersion := "2.10.0-RC2", 
       crossScalaVersions := Seq("2.10.0-RC2"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          _organization    %% "scalikejdbc"          % _version,
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
           "org.scalatest"  %  "scalatest_2.10.0-RC2" % "[1.8,)" % "test"
@@ -85,7 +85,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  )
+  ) dependsOn(scalikejdbc)
 
   lazy val scalikejdbcMapperGenerator = Project(
     id = "mapper-generator", 
@@ -97,7 +97,6 @@ object ScalikeJDBCProjects extends Build {
       version := _version,
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
-        _organization %% "scalikejdbc" % _version,
         "org.slf4j" % "slf4j-simple" % "1.7.2" % "compile",
         "org.scalatest" %% "scalatest" % "[1.7,)" % "test",
         "org.specs2" %% "specs2" % "1.12.2" % "test"
@@ -109,7 +108,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  )
+  ) dependsOn(scalikejdbc)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
@@ -122,9 +121,7 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := Seq("2.9.2", "2.9.1", "2.10.0-RC1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        Seq(
-          _organization %% "scalikejdbc" % _version
-        ) ++ (scalaVersion match {
+        scalaVersion match {
           case "2.10" => {
             val playVersion = "2.1-RC1"
             Seq(
@@ -139,7 +136,7 @@ object ScalikeJDBCProjects extends Build {
               "play" % "play-test_2.9.1" % playVersion % "test"
             )
           }
-        })
+        }
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -148,7 +145,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  )
+  ) dependsOn(scalikejdbc)
 
   val _crossScalaVersions = Seq("2.9.2", "2.9.1")
   def _publishTo(v: String) = {
@@ -169,8 +166,6 @@ object ScalikeJDBCProjects extends Build {
     "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  // TODO Travis CI cannot work with -feature option
-  // val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
