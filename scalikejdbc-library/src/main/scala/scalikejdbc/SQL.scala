@@ -476,7 +476,8 @@ class SQLToOption[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: W
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
+    hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
     case Output.single =>
       session match {
         case AutoSession => DB readOnly (s => s.single(sql, params: _*)(extractor))
