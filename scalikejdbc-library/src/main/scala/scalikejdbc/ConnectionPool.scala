@@ -33,7 +33,7 @@ object ConnectionPool extends LogSupport {
 
   val DEFAULT_NAME: Any = 'default
 
-  private val pools = new MutableMap[Any, ConnectionPool]()
+  private[this] val pools = new MutableMap[Any, ConnectionPool]()
 
   /**
    * Returns true when the specified Connection pool is already initialized.

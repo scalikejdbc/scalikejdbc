@@ -18,6 +18,21 @@ package scalikejdbc
 import java.sql.PreparedStatement
 
 /**
+ * Companion object
+ */
+object StatementExecutor {
+
+  type MutableList[A] = collection.mutable.MutableList[A]
+
+  val eol = System.getProperty("line.separator")
+
+  private class NakedExecutor {
+    def apply[A](execute: () => A): A = execute()
+  }
+
+}
+
+/**
  * [[java.sql.Statement]] Executor
  * @param underlying preparedStatement
  * @param template SQL template
@@ -27,18 +42,27 @@ import java.sql.PreparedStatement
 case class StatementExecutor(underlying: PreparedStatement, template: String,
     singleParams: Seq[Any] = Nil, isBatch: Boolean = false) extends LogSupport {
 
-  private val eol = System.getProperty("line.separator")
+  import StatementExecutor._
 
-  type MutableList[A] = collection.mutable.MutableList[A]
+  private[this] lazy val batchParamsList = new MutableList[Seq[Any]]
 
-  private lazy val batchParamsList = new MutableList[Seq[Any]]
+  initialize()
+
+  /**
+   * Initializes
+   */
+  private def initialize() {
+    bindParams(singleParams)
+    if (isBatch) {
+      batchParamsList.clear()
+    }
+  }
 
   /**
    * Binds parameters to the underlying [[java.sql.PreparedStatement]] object
    * @param params parameters
    */
   def bindParams(params: Seq[Any]): Unit = {
-
     val paramsWithIndices = params.map {
       case option: Option[_] => option.orNull[Any]
       case other => other
@@ -74,18 +98,15 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         }
       }
     }
-
     if (isBatch) {
       batchParamsList += params
     }
   }
 
-  bindParams(singleParams)
-  if (isBatch) {
-    batchParamsList.clear()
-  }
-
-  private lazy val sqlString: String = {
+  /**
+   * SQL String value
+   */
+  private[this] lazy val sqlString: String = {
 
     def singleSqlString(params: Seq[Any]): String = {
 
@@ -149,24 +170,25 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
 
   }
 
-  private def stackTraceInformation: String = "  [Stack Trace]" + eol +
+  /**
+   * Returns stack trace information as String value
+   * @return stack trace
+   */
+  private[this] def stackTraceInformation: String = "  [Stack Trace]" + eol +
     "    ..." + eol +
     Thread.currentThread.getStackTrace
-    .dropWhile {
-      trace =>
-        trace.getClassName != getClass.toString &&
-          (trace.getClassName.startsWith("java.lang.") ||
-            trace.getClassName.startsWith("scalikejdbc."))
-    }.take(15).map {
-      trace =>
-        "    " + trace.toString
+    .dropWhile { trace =>
+      trace.getClassName != getClass.toString &&
+        (trace.getClassName.startsWith("java.lang.") ||
+          trace.getClassName.startsWith("scalikejdbc."))
+    }.take(15).map { trace =>
+      "    " + trace.toString
     }.mkString(eol) + eol + "    ..." + eol
 
-  private class NakedExecutor {
-    def apply[A](execute: () => A): A = execute()
-  }
-
-  private trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
+  /**
+   * Logging SQL and timing (this trait depends on this instance)
+   */
+  private[this] trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
 
     abstract override def apply[A](execute: () => A): A = {
       import GlobalSettings.loggingSQLAndTime
@@ -202,7 +224,10 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
     }
   }
 
-  private val statementExecute = new NakedExecutor with LoggingSQLAndTiming
+  /**
+   * Executes SQL statement
+   */
+  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming
 
   def addBatch(): Unit = underlying.addBatch()
 

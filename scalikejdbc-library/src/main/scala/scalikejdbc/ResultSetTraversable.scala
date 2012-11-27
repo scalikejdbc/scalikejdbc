@@ -23,7 +23,7 @@ import java.sql.ResultSet
  */
 class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
 
-  private val cursor: ResultSetCursor = new ResultSetCursor(0)
+  private[this] val cursor: ResultSetCursor = new ResultSetCursor(0)
 
   /**
    * Applies a function.
