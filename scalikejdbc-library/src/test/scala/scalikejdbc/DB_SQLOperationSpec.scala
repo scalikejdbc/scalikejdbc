@@ -533,9 +533,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap).single.apply()
       }
       result.isDefined should equal(true)
-      result.get.get("ID") should equal(Some(4))
+      if (result.get.get("ID").isDefined) {
+        result.get.get("ID") should equal(Some(4))
+        result.get.keys should equal(Set("ID"))
+      } else {
+        result.get.get("id") should equal(Some(4))
+        result.get.keys should equal(Set("id"))
+      }
       result.get.get("Name") should equal(None)
-      result.get.keys should equal(Set("ID"))
     }
   }
 
@@ -548,9 +553,14 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
       }
       result.isDefined should equal(true)
-      result.get.get('ID) should equal(Some(4))
+      if (result.get.get('ID).isDefined) {
+        result.get.get('ID) should equal(Some(4))
+        result.get.keys should equal(Set('ID))
+      } else {
+        result.get.get('id) should equal(Some(4))
+        result.get.keys should equal(Set('id))
+      }
       result.get.get('Name) should equal(None)
-      result.get.keys should equal(Set('ID))
     }
   }
 

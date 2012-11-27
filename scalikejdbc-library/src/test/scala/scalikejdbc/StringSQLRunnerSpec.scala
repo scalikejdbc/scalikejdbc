@@ -21,8 +21,13 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
         ("insert into " + tableName + " values (3, 'Ben')").run
         val result = ("select id,name from " + tableName + " where id = 3").run
-        result.head.get("ID").get should equal(3)
-        result.head.get("NAME").get should equal("Ben")
+        if (result.head.get("ID").isDefined) {
+          result.head.get("ID").get should equal(3)
+          result.head.get("NAME").get should equal("Ben")
+        } else {
+          result.head.get("id").get should equal(3)
+          result.head.get("name").get should equal("Ben")
+        }
       }
     }
   }
