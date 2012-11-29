@@ -110,10 +110,12 @@ object DB {
     }
   }
 
-  private def connectionPool(context: CPContext): ConnectionPool = context match {
+  private def connectionPool(context: CPContext): ConnectionPool = opt(context match {
     case NoCPContext => ConnectionPool()
     case _: MultipleConnectionPoolContext => context.get(ConnectionPool.DEFAULT_NAME)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
+  }) getOrElse {
+    throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
   }
 
   /**
