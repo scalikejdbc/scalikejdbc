@@ -108,5 +108,7 @@ echo "
 command installed to ${DBCONSOLE_COMMAND}
 command installed to ${DBCONSOLE_CONFIG_COMMAND}
 "
+echo 'Please execute `source ~/.bash_profile`
+'
 
 

@@ -32,6 +32,8 @@ Saving to: `sbt-launch.jar'
 command installed to /Users/k-sera/bin/scalikejdbc-cli/dbconsole
 command installed to /Users/k-sera/bin/scalikejdbc-cli/dbconsole_config
 
+Please execute `source ~/.bash_profile`
+
 $ dbconsole
 
 --- DB Console with ScalikeJDBC ---
