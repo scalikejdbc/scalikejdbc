@@ -80,7 +80,7 @@ Use `dbconsole_config` command to edit `~/bin/scalikejdbc-cli/config.properties`
 default.jdbc.url=jdbc:h2:mem:default
 default.jdbc.username=
 default.jdbc.password=
-pg.jdbc.url=jdbc:postgresql/hostname/dbname
+pg.jdbc.url=jdbc:postgresql://hostname/dbname
 pg.jdbc.username=alice
 pg.jdbc.password=bob
 ```
