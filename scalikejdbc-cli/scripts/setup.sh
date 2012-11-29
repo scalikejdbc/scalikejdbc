@@ -53,6 +53,7 @@ echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/depend
 
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"         % "[1.4,)",
+  "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
   "com.h2database"     % "h2"                   % "[1.3,)", 
   "org.apache.derby"   % "derby"                % "[10.8.2,)",
   "org.xerial"         % "sqlite-jdbc"          % "[3.7,)",

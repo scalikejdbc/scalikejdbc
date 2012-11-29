@@ -45,9 +45,6 @@ Starting sbt console...
 [info] Set current project to default-8d98e7 (in build file:/Users/seratch/bin/scalikejdbc-cli/)
 [info] Starting scala interpreter...
 [info] 
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
 import scalikejdbc._
 import scalikejdbc.StringSQLRunner._
 initialize: ()Unit
