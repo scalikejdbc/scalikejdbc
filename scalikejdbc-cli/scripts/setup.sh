@@ -11,13 +11,15 @@ cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
 wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
 
-echo 'default.jdbc.url=jdbc:h2:mem:default
+if [ ! -f ${CONFIG_PROPS} ]; then
+  echo 'default.jdbc.url=jdbc:h2:mem:default
 default.jdbc.username=
 default.jdbc.password=
 sandbox.jdbc.url=jdbc:h2:mem:sandbox
 sandbox.jdbc.username=
 sandbox.jdbc.password=
 ' > ${CONFIG_PROPS}
+fi
 
 echo '#!/bin/sh
 cd `dirname $0`
@@ -88,11 +90,11 @@ def initialize() {
   }
 }
 initialize()
-case class QueryResult(list: List[Map[String, Any]]) {
+case class SQLResponse(list: List[Map[String, Any]]) {
   def result = list.head.apply("RESULT")
   def singleColumn = list.map(m => m.apply(m.keys.head))
 }
-implicit def ListToQueryResult(list: List[Map[String, Any]]) = QueryResult(list)
+implicit def ListToSQLResponse(list: List[Map[String, Any]]) = SQLResponse(list)
 """
 ' > ${BUILD_SBT}
 
