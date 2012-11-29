@@ -102,7 +102,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 The most basic way is just using prepared statement as follows.
 
 ```scala
-SQL("""insert into user values (?, ?, ?, ?)""")
+SQL("""insert into users values (?, ?, ?, ?)""")
   .bind(132430, "bob@example.com", "Bob", "xfewSZe2sd3w")
   .update.apply()
 ```
@@ -113,7 +113,7 @@ SQL("""insert into user values (?, ?, ?, ?)""")
 Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
 
 ```scala
-SQL("""insert into user values ({id}, {email}, {name}, {encryptedPassword})""")
+SQL("""insert into users values ({id}, {email}, {name}, {encryptedPassword})""")
   .bindByName(
     'id -> 132430,
     'emal -> "bob@example.com",
@@ -131,7 +131,7 @@ Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL tem
 
 ```scala
 SQL("""
-  insert into user values (
+  insert into users values (
     /*'id*/123,
     /*'email*/'alice@example.com',
     /*'name*/'Alice',
@@ -154,7 +154,7 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 
 ```scala
 def create(id: Long, email: String, name: String, encryptedPassword: Sting) {
-  sql"insert into user values (${id}, ${email}, ${name}, ${encryptedPassword})"
+  sql"insert into users values (${id}, ${email}, ${name}, ${encryptedPassword})"
     .update.apply()
 }
 ```
