@@ -28,7 +28,7 @@ echo '#!/bin/sh
 cd `dirname $0`
 
 echo
-echo " *** DB Console by ScalikeJDBC ***"
+echo " --- DB Console with ScalikeJDBC ---"
 echo
 
 while [ "${PROFILE}" = "" ]

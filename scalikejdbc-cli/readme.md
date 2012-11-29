@@ -13,14 +13,18 @@ curl -L http://git.io/dbconsole | sh
 The script downloads sbt launcher and prepare commands - `dbconsole` and `dbconsole_config`.
 
 ```
---2012-11-29 20:17:38--  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
+$ curl -L http://git.io/dbconsole | sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  3660  100  3660    0     0   2619      0  0:00:01  0:00:01 --:--:--  2619
+--2012-11-29 20:25:26--  http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
 Resolving repo.typesafe.com... 23.21.39.75
 Connecting to repo.typesafe.com|23.21.39.75|:80... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: 1103618 (1.1M) [application/java-archive]
 Saving to: `sbt-launch.jar'
 
-100%[===============================================================================================================>] 1,103,618    580K/s   in 1.9s    
+100%[===============================================================================================================>] 1,103,618    571K/s   in 1.9s    
 
 2012-11-29 20:17:41 (580 KB/s) - `sbt-launch.jar' saved [1103618/1103618]
 
