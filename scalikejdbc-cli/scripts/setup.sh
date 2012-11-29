@@ -28,7 +28,7 @@ echo '#!/bin/sh
 cd `dirname $0`
 
 echo
-echo " --- DB Console with ScalikeJDBC ---"
+echo "--- DB Console with ScalikeJDBC ---"
 echo
 
 while [ "${PROFILE}" = "" ]
@@ -88,6 +88,11 @@ def initialize() {
   }
 }
 initialize()
+case class QueryResult(list: List[Map[String, Any]]) {
+  def result = list.head.apply("RESULT")
+  def singleColumn = list.map(m => m.apply(m.keys.head))
+}
+implicit def ListToQueryResult(list: List[Map[String, Any]]) = QueryResult(list)
 """
 ' > ${BUILD_SBT}
 
