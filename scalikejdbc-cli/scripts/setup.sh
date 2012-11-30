@@ -100,12 +100,11 @@ implicit def ListToSQLResponse(list: List[Map[String, Any]]) = SQLResponse(list)
 
 SHELL_PROFILE=${HOME}/.bash_profile
 if [[ "$SHELL" == *zsh* ]]; then 
-    SHELL_PROFILE=${HOME}/.zprofile
+  SHELL_PROFILE=${HOME}/.zprofile
 fi
 
 if [ ! `grep 'PATH=${PATH}:${HOME}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; then
   echo "PATH=\${PATH}:\${HOME}/bin/scalikejdbc-cli" >> ${SHELL_PROFILE}
-  source ${SHELL_PROFILE}
 fi
 
 chmod +x ${DBCONSOLE_COMMAND}
@@ -117,5 +116,4 @@ command installed to ${DBCONSOLE_CONFIG_COMMAND}
 "
 echo "Please execute 'source ${SHELL_PROFILE}'
 "
-
 
