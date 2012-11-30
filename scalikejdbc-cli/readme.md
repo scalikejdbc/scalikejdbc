@@ -54,20 +54,23 @@ Welcome to Scala version 2.9.2 (Java HotSpot(TM) Client VM, Java 1.6.0_29).
 Type in expressions to have them evaluated.
 Type :help for more information.
 
-scala> "create table users(id bigint primary key, name varchar(256));".run.result
-res0: Any = false
+scala> "create table users(id bigint primary key, name varchar(256));".run
+res0: List[Map[String,Any]] = List(Map(RESULT -> false))
 
-scala> "insert into users values (1, 'Alice')".run.result
-res1: Any = false
+scala> "insert into users values (1, 'Alice')".run
+res1: List[Map[String,Any]] = List(Map(RESULT -> false))
 
-scala> "insert into users values (2, 'Bob')".run.result
-res2: Any = false
+scala> "insert into users values (2, 'Bob')".run.asSingle[Boolean]
+res2: Boolean = false
 
 scala> "select * from users".run
 res3: List[Map[String,Any]] = List(Map(ID -> 1, NAME -> Alice), Map(ID -> 2, NAME -> Bob))
 
-scala> "select name from users".run.singleColumn
-res4: List[Any] = List(Alice, Bob)
+scala> "select name from users".run.asList[String]
+res4: List[String] = List(Alice, Bob)
+
+scala> "select id from users".run.asList[Long]
+res5: List[Long] = List(1, 2)
 
 scala> :q
 

@@ -91,8 +91,8 @@ def initialize() {
 }
 initialize()
 case class SQLResponse(list: List[Map[String, Any]]) {
-  def result = list.head.apply("RESULT")
-  def singleColumn = list.map(m => m.apply(m.keys.head))
+  def asList[A]: List[A] = list.map(m => m.apply(m.keys.head).asInstanceOf[A])
+  def asSingle[A]: A = asList[A].head
 }
 implicit def ListToSQLResponse(list: List[Map[String, Any]]) = SQLResponse(list)
 """
@@ -113,7 +113,7 @@ chmod +x ${DBCONSOLE_CONFIG_COMMAND}
 echo "
 command installed to ${DBCONSOLE_COMMAND}
 command installed to ${DBCONSOLE_CONFIG_COMMAND}
-"
-echo "Please execute 'source ${SHELL_PROFILE}'
+
+Please execute 'source ${SHELL_PROFILE}'
 "
 
