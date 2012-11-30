@@ -23,7 +23,7 @@ fi
 
 echo '#!/bin/sh
 cd `dirname $0`
-vi ~/bin/scalikejdbc-cli/config.properties
+${EDITOR:=vi} ~/bin/scalikejdbc-cli/config.properties
 ' > ${DBCONSOLE_CONFIG_COMMAND}
 
 echo '#!/bin/sh
