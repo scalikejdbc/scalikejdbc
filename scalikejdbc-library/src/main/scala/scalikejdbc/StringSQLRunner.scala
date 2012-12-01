@@ -32,6 +32,11 @@ package scalikejdbc
  */
 case class StringSQLRunner(sql: String) {
 
+  /**
+   * Runs all SQL and returns result as List[Map[String, Any]]
+   * @param session DB Session
+   * @return results as List[Map]
+   */
   def run()(implicit session: DBSession = AutoSession): List[Map[String, Any]] = try {
     SQL(sql).map(_.toMap()).list.apply()
   } catch {
@@ -40,10 +45,30 @@ case class StringSQLRunner(sql: String) {
       List(Map("RESULT" -> result))
   }
 
+  /**
+   * Returns SQL results as List[A]
+   * @tparam A value type
+   * @return results as List[A]
+   */
+  def asList[A]: List[A] = run().map(m => m.apply(m.keys.head).asInstanceOf[A])
+
+  /**
+   * Returns SQL result as single value
+   * @tparam A value type
+   * @return a single result as A
+   */
+  def asSingle[A]: Option[A] = asList[A].headOption
+
 }
 
 object StringSQLRunner {
 
+  /**
+   * Converts String to SQLRunner implicitly
+   *
+   * @param sql SQL string
+   * @return SQLRunner
+   */
   implicit def stringToSQLRunner(sql: String) = StringSQLRunner(sql)
 
 }
