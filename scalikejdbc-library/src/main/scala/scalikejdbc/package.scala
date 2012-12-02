@@ -3,13 +3,13 @@ import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
 
 /**
- * ScalikeJDBC - A thin JDBC wrapper in Scala
+ * ScalikeJDBC - SQL-Based DB Access Library for Scala
  *
  * Just write SQL:
  *
- * This is a thin JDBC wrapper library which just uses java.sql.PreparedStatement internally.
- * Users only need to write SQL and map from java.sql.ResultSet objects to Scala objects.
- * It's pretty simple, really.
+ * ScalikeJDBC is a SQL-based DB access library for Scala developers.
+ * This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
+ * Users do nothing other than writing SQL and mapping from java.sql.ResultSet objects to Scala values.
  *
  * Basic Usage:
  *
@@ -21,12 +21,8 @@ import org.joda.time._
  * case class User(id: Long, name: String, birthday: Option[DateTime])
  *
  * val activeUsers: List[User] = DB readOnly { session =>
- *   session.list("select * from user where active = ?", true) { rs =>
- *     User(
- *       id = rs.long("id"),
- *       name = rs.string("name"),
- *       birthday = Option(rs.date("birthday")).map(_.toDateTime)
- *     )
+ *   session.list("select * from users where active = ?", true) { rs =>
+ *     User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime))
  *   }
  * }
  * }}}
@@ -39,12 +35,9 @@ import org.joda.time._
  * case class User(id: Long, name: String, birthday: Option[DateTime])
  *
  * val activeUsers: List[User] = DB readOnly { implicit session =>
- *   SQL("select * from user where active = ?").bind(true)
- *     .map { rs => User(
- *       id = rs.long("id"),
- *       name = rs.string("name"),
- *       birthday = Option(rs.date("birthday")).map(_.toDateTime))
- *     }.list.apply()
+ *   SQL("select * from users where active = ?")
+ *     .bind(true)
+ *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime)) }.list.apply()
  * }
  * }}}
  *
@@ -52,13 +45,9 @@ import org.joda.time._
  *
  * {{{
  * val activeUsers: List[User] = DB readOnly { implicit session =>
- *   SQL("select * from user where active = /*'active*/true")
+ *   SQL("select * from users where active = /*'active*/true")
  *     .bindByName('active -> true)
- *     .map { rs => User(
- *       id = rs.long("id"),
- *       name = rs.string("name"),
- *       birthday = Option(rs.date("birthday")).map(_.toDateTime))
- *     }.list.apply()
+ *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime)) }.list.apply()
  * }
  * }}}
  */
