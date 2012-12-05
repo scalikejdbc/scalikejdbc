@@ -45,6 +45,7 @@ echo "Starting sbt console..."
 echo
 
 java -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M \
+  -Dfile.encoding=UTF-8 \
   -jar `dirname $0`/sbt-launch.jar \
   -Dscalikejdbc-cli.config.profile=${PROFILE} \
   console
