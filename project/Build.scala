@@ -17,12 +17,13 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc",
       version := _version,
       scalaVersion := "2.9.2",
-      crossScalaVersions := "2.10.0-RC2" :: _crossScalaVersions.toList,
+      crossScalaVersions := _crossScalaVersions,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
+          case "2.10.0-RC3" => "2.9.1"
           case "2.10.0-RC2" => "2.9.1"
           case "2.10.0-RC1" => "2.9.1"
           case "2.9.2" => "2.9.1"
@@ -67,15 +68,15 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation",
       version := _version,
-      scalaVersion := "2.10.0-RC2",
-      scalaBinaryVersion := "2.10.0-RC2", 
-      crossScalaVersions := Seq("2.10.0-RC2"),
+      scalaVersion := "2.10.0-RC3",
+      scalaBinaryVersion := "2.10.0-RC3", 
+      crossScalaVersions := Seq("2.10.0-RC3"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
-          "org.scalatest"  %  "scalatest_2.10.0-RC2" % "[1.8,)" % "test"
+          "org.scalatest"  %  "scalatest_2.10.0-RC3" % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -118,11 +119,11 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-play-plugin",
       version := _version,
-      crossScalaVersions := Seq("2.9.2", "2.9.1", "2.10.0-RC1"),
+      crossScalaVersions := Seq("2.9.2", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
-          case "2.10" => {
+          case "2.10.0-RC1" => {
             val playVersion = "2.1-RC1"
             Seq(
               "play" % "play_2.10" % playVersion % "provided",
@@ -187,5 +188,4 @@ object ScalikeJDBCProjects extends Build {
         </developer>
       </developers>
 }
-
 
