@@ -94,4 +94,10 @@ case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnec
     db.getTableNames(tableNamePattern)
   }
 
+  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): String = {
+    db.showTables(tableNamePattern, tableTypes)
+  }
+
+  def describe(table: String) = db.describe(table)
+
 }

@@ -291,8 +291,8 @@ object DB {
    * @param context connection pool context as implicit parameter
    * @return table name list
    */
-  def showTables(tableNamePattern: String = "%")(implicit context: CPContext = NoCPContext): String = {
-    getTableNames(tableNamePattern).mkString("\n")
+  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW"))(implicit context: CPContext = NoCPContext): String = {
+    DB(connectionPool(context).borrow()).showTables(tableNamePattern, tableTypes)
   }
 
   /**
@@ -303,7 +303,7 @@ object DB {
    * @return described information
    */
   def describe(table: String)(implicit context: CPContext = NoCPContext): String = {
-    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.")
+    DB(connectionPool(context).borrow()).describe(table)
   }
 
   /**
@@ -642,16 +642,6 @@ case class DB(conn: Connection) extends LogSupport {
   }
 
   /**
-   * Returns all the table types
-   *
-   * @param meta database meta data
-   * @return all the table types
-   */
-  private def allTableTypes(meta: DatabaseMetaData): Array[String] = {
-    new RSTraversable(meta.getTableTypes).map(rs => rs.string("TABLE_TYPE")).toArray
-  }
-
-  /**
    * Returns all the table information that match the pattern
    *
    * @param tableNamePattern table name pattern (with schema optionally)
@@ -753,6 +743,27 @@ case class DB(conn: Connection) extends LogSupport {
         }
       )
     }
+  }
+
+  /**
+   * Returns table name list
+   *
+   * @param tableNamePattern table name pattern
+   * @param tableTypes table types
+   * @return table name list
+   */
+  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): String = {
+    getTableNames(tableNamePattern, tableTypes).mkString("\n")
+  }
+
+  /**
+   * Returns describe style string value for the table
+   *
+   * @param table table name (with schema optionally)
+   * @return described information
+   */
+  def describe(table: String): String = {
+    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.")
   }
 
 }

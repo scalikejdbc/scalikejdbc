@@ -77,15 +77,20 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
       DB.getTableNames("*").size should be >= (2)
       DB.getTableNames("%").size should be >= (2)
 
+      NamedDB('default).getTableNames("*").size should be >= (2)
+      NamedDB('default).getTableNames("%").size should be >= (2)
+
       // showTables returns string value
       println(DB.showTables("%"))
+      println(NamedDB('default).showTables("%"))
 
       // describe table
-      val table = DB.getTable("META_MEMBERS")
-      table.isDefined should be(true)
+      DB.getTable("META_MEMBERS").isDefined should be(true)
+      NamedDB('default).getTable("META_MEMBERS").isDefined should be(true)
 
       // describe returns string value
       println(DB.describe("meta_members"))
+      println(NamedDB('default).describe("meta_members"))
 
     } finally {
       DB autoCommit { implicit s =>
