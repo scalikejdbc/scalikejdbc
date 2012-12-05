@@ -140,8 +140,8 @@ def initialize() {
   }
 }
 initialize()
-def describe(table: String) = DB.describe(table)
-def tables = DB.showTables()
+def describe(table: String) = println(DB.describe(table))
+def tables = println(DB.showTables())
 """
 ' > ${BUILD_SBT}
 

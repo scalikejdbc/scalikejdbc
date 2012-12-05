@@ -77,11 +77,12 @@ case class Table(name: String,
       if (maxLength < 11) 11 else if (maxLength > 30) 30 else maxLength
     }
 
-    "Table: " + nameWithSchema + {
-      if (description == null || description.trim.length == 0) ""
-      else if (description.length > 50) " (" + description.take(48) + "..)"
-      else " (" + description + ")"
-    } + "\n" +
+    "\n" +
+      "Table: " + nameWithSchema + {
+        if (description == null || description.trim.length == 0) ""
+        else if (description.length > 50) " (" + description.take(48) + "..)"
+        else " (" + description + ")"
+      } + "\n" +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
       "| Field" + " " * (maxColumnNameLength - 5) + " | Type" + " " * (maxTypeNameLength - 4) + " | Null | Key | Default" + " " * (maxDefaultValueLength - 7) + " | Extra           | Description" + " " * (maxDescriptionLength - 11) + " |\n" +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
