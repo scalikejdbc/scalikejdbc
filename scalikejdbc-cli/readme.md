@@ -57,13 +57,7 @@ Please try it now with sandbox database.
 ```sh
 $ dbconsole sandbox
 
---- DB Console with ScalikeJDBC ---
-
-Select a profile defined at ~/bin/scalikejdbc-cli/config.properties
-
-default
-
-Starting sbt console...
+Starting sbt console for sandbox...
 
 [info] Set current project to default-8d98e7 (in build file:/Users/seratch/bin/scalikejdbc-cli/)
 [info] Starting scala interpreter...
