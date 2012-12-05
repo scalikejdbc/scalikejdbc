@@ -4,7 +4,6 @@ ROOT_DIR=${HOME}/bin/scalikejdbc-cli
 mkdir -p ${ROOT_DIR}
 CONFIG_PROPS=${ROOT_DIR}/config.properties
 DBCONSOLE_COMMAND=${ROOT_DIR}/dbconsole
-DBCONSOLE_CONFIG_COMMAND=${ROOT_DIR}/dbconsole_config
 BUILD_SBT=${ROOT_DIR}/build.sbt
 
 cd ${ROOT_DIR}
@@ -12,43 +11,90 @@ rm -f sbt-launch.jar*
 wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
 
 if [ ! -f ${CONFIG_PROPS} ]; then
-  echo 'default.jdbc.url=jdbc:h2:mem:default
-default.jdbc.username=
-default.jdbc.password=
-sandbox.jdbc.url=jdbc:h2:mem:sandbox
-sandbox.jdbc.username=
-sandbox.jdbc.password=
+  echo 'mem.jdbc.url=jdbc:h2:mem:default
+mem.jdbc.username=
+mem.jdbc.password=
+#mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
+#postgres.jdbc.url=jdbc:postgresql://localhost:5432/dbname
+#oracle.jdbc.url=jdbc:oracle:thin:@localhost:1521:dbname
 ' > ${CONFIG_PROPS}
 fi
 
-echo '#!/bin/sh
-cd `dirname $0`
-${EDITOR:=vi} ~/bin/scalikejdbc-cli/config.properties
-' > ${DBCONSOLE_CONFIG_COMMAND}
+echo '#!/bin/sh 
 
-echo '#!/bin/sh
-cd `dirname $0`
+function edit_config() {
+  cd `dirname $0`
+  ${EDITOR:=vi} ~/bin/scalikejdbc-cli/config.properties
+}
 
-echo
-echo "--- DB Console with ScalikeJDBC ---"
-echo
-
-while [ "${PROFILE}" = "" ]
-do
-  echo "Select a profile defined at ~/bin/scalikejdbc-cli/config.properties"
+function show_help() {
   echo
-  read PROFILE
+  echo "dbconsole is an extended sbt console to connect database easily."
+  echo
+  echo "Usage:"
+  echo "  dbconsole [OPTION]... [PROFILE]"
+  echo
+  echo "General options:"
+  echo "  -e, --edit    edit configuration, then exit"
+  echo "  -c, --clean   clean sbt environment, then exit"
+  echo "  -h, --help    show this help, then exit"
+  echo
+}
+
+function run_sbt() {
+  java -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M \
+    -Dfile.encoding=UTF-8 \
+    -jar `dirname $0`/sbt-launch.jar \
+    -Dscalikejdbc-cli.config.profile=${PROFILE} \
+    $1
+}
+
+cd `dirname $0`
+
+until [ -z "$1" ]; do
+  case $1 in
+    "-e"|"--edit")
+      edit_config
+      exit 0
+      ;;
+    "-c"|"--clean")
+      run_sbt "clean"
+      exit 0
+      ;;
+    "-h"|"--help")
+      show_help
+      exit 0
+      ;;
+    *) 
+      if [ "`echo $1 | cut -c 1`" == "-" ]; then
+        echo
+        echo "ERROR: Unknown option ($1)"
+        show_help
+        exit 1
+      fi
+      PROFILE=$1
+      shift
+      ;;
+  esac
 done
 
+if [ "$1" != "" ]; then
+  PROFILE=$1
+else
+  while [ "${PROFILE}" = "" ]
+  do
+    echo "Select a profile."
+    echo
+    read PROFILE
+  done
+fi
+
 echo
-echo "Starting sbt console..."
+echo "Starting sbt console for ${PROFILE}..."
 echo
 
-java -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M \
-  -Dfile.encoding=UTF-8 \
-  -jar `dirname $0`/sbt-launch.jar \
-  -Dscalikejdbc-cli.config.profile=${PROFILE} \
-  console
+run_sbt "console"
+
 ' > ${DBCONSOLE_COMMAND}
 
 
@@ -87,13 +133,13 @@ def initialize() {
     val password = Option(props.get(profile + ".jdbc.password")).map(_.toString).orNull[String]
     ConnectionPool.singleton(url, user, password)
   }.getOrElse { 
-    throw new IllegalStateException("JDBC settings for \"" + profile + "\" is not found. Try \"dbconsole_config\" command.")
+    throw new IllegalStateException("JDBC settings for \"" + profile + "\" is not found. Try \"dbconsole --edit\".")
   }
 }
 initialize()
 case class SQLResponse(list: List[Map[String, Any]]) {
   def asList[A]: List[A] = list.map(m => m.apply(m.keys.head).asInstanceOf[A])
-  def asSingle[A]: A = asList[A].head
+  def as[A]: A = asList[A].head
 }
 implicit def ListToSQLResponse(list: List[Map[String, Any]]) = SQLResponse(list)
 """
@@ -109,11 +155,9 @@ if [ ! `grep 'PATH=${PATH}:${HOME}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; the
 fi
 
 chmod +x ${DBCONSOLE_COMMAND}
-chmod +x ${DBCONSOLE_CONFIG_COMMAND}
 
 echo "
 command installed to ${DBCONSOLE_COMMAND}
-command installed to ${DBCONSOLE_CONFIG_COMMAND}
 
 Please execute 'source ${SHELL_PROFILE}'
 "
