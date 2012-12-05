@@ -30,11 +30,4 @@ echo "-------------------"
 echo 
 ./run_tests.sh postgresql
 
-echo
-echo "-------------------"
-echo " SQLite3"
-echo "-------------------"
-echo 
-./run_tests.sh sqlite
-
 
