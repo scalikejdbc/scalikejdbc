@@ -54,15 +54,15 @@ case class Table(name: String,
       val maxLength = columns.map { c =>
         c.typeName.length + (
           if (c.size > 0 && c.size < 10) 3
-          else if (c.size >= 10) 4
-          else if (c.size >= 100) 5
-          else if (c.size >= 1000) 6
-          else if (c.size >= 10000) 7
-          else if (c.size >= 100000) 8
-          else if (c.size >= 1000000) 9
-          else if (c.size >= 10000000) 10
-          else if (c.size >= 100000000) 11
           else if (c.size >= 1000000000) 12
+          else if (c.size >= 100000000) 11
+          else if (c.size >= 10000000) 10
+          else if (c.size >= 1000000) 9
+          else if (c.size >= 100000) 8
+          else if (c.size >= 10000) 7
+          else if (c.size >= 1000) 6
+          else if (c.size >= 100) 5
+          else if (c.size >= 10) 4
           else 0
         )
       }.sortWith { case (a, b) => a > b }.head
