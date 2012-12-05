@@ -186,6 +186,17 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
 
 
+## dbconsle
+
+`dbconsole` is an extended sbt console to connect database. Try it now!
+
+```sh
+curl -L http://git.io/dbconsole | sh
+```
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-cli
+
+
 ## License
 
 Apache License, Version 2.0

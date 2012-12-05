@@ -6,13 +6,13 @@ A simple console to connect database via JDBC.
 
 Execute setup script as follows.
 
-```
+```sh
 curl -L http://git.io/dbconsole | sh
 ```
 
-The script downloads sbt launcher and prepare commands - `dbconsole` and `dbconsole_config`.
+The script downloads sbt launcher and setting up `dbconsole` command.
 
-```
+```sh
 $ curl -L http://git.io/dbconsole | sh
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -33,8 +33,29 @@ command installed to /Users/k-sera/bin/scalikejdbc-cli/dbconsole
 command installed to /Users/k-sera/bin/scalikejdbc-cli/dbconsole_config
 
 Please execute `source ~/.bash_profile`
+```
 
-$ dbconsole
+`dbconsole` is pretty simple.
+
+```sh
+$ dbconsole -h
+
+dbconsole is an extended sbt console to connect database easily.
+
+Usage:
+  dbconsole [OPTION]... [PROFILE]
+
+General options:
+  -e, --edit    edit configuration, then exit
+  -c, --clean   clean sbt environment, then exit
+  -h, --help    show this help, then exit
+
+```
+
+Please try it now with sandbox database.
+
+```sh
+$ dbconsole sandbox
 
 --- DB Console with ScalikeJDBC ---
 
@@ -72,6 +93,15 @@ res4: List[String] = List(Alice, Bob)
 scala> "select id from users".asList[Long]
 res5: List[Long] = List(1, 2)
 
+scala> "select name from users where id = 2".as[String]
+res6: String = Bob
+
+scala> "select name from users where id = 2".asOption[String]
+res7: Option[String] = Some(Bob)
+
+scala> "select count(1) from users".as[Long]
+res8: Long = 2
+
 scala> :q
 
 [success] Total time: 48 s, completed Nov 29, 2012 8:56:36 PM
@@ -79,15 +109,17 @@ scala> :q
 
 ## Configuration
 
-Use `dbconsole_config` command to edit `~/bin/scalikejdbc-cli/config.properties`.
+Use `dbconsole -e` command to edit `~/bin/scalikejdbc-cli/config.properties`.
 
+```properties
+sandbox.jdbc.url=jdbc:h2:mem:sandbox
+sandbox.jdbc.username=
+sandbox.jdbc.password=
+#mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
+#postgres.jdbc.url=jdbc:postgresql://localhost:5432/dbname
+#oracle.jdbc.url=jdbc:oracle:thin:@localhost:1521:dbname
 ```
-default.jdbc.url=jdbc:h2:mem:default
-default.jdbc.username=
-default.jdbc.password=
-pg.jdbc.url=jdbc:postgresql://hostname/dbname
-pg.jdbc.username=alice
-pg.jdbc.password=bob
-```
+
+
 
 

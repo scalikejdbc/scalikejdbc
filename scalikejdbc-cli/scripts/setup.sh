@@ -11,9 +11,9 @@ rm -f sbt-launch.jar*
 wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
 
 if [ ! -f ${CONFIG_PROPS} ]; then
-  echo 'mem.jdbc.url=jdbc:h2:mem:default
-mem.jdbc.username=
-mem.jdbc.password=
+  echo 'sandbox.jdbc.url=jdbc:h2:mem:sandbox
+sandbox.jdbc.username=
+sandbox.jdbc.password=
 #mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
 #postgres.jdbc.url=jdbc:postgresql://localhost:5432/dbname
 #oracle.jdbc.url=jdbc:oracle:thin:@localhost:1521:dbname
