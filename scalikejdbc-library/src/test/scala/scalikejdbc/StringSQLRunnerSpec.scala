@@ -33,11 +33,11 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
       // should be found
       ("select name from " + tableName + " where id = 3").asList[String] should equal(List("Ben"))
-      ("select name from " + tableName + " where id = 3").asSingle[String] should equal(Some("Ben"))
+      ("select name from " + tableName + " where id = 3").as[String] should equal(Some("Ben"))
 
       // should not be found
       ("select name from " + tableName + " where id = 999").asList[String] should equal(List())
-      ("select name from " + tableName + " where id = 999").asSingle[String] should equal(None)
+      ("select name from " + tableName + " where id = 999").as[String] should equal(None)
 
     }
   }
