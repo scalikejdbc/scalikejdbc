@@ -22,7 +22,7 @@ initialCommands := """
   import scalikejdbc.SQLInterpolation._
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
-  case class User(id: Int, name: String)
+  case class Member(id: Int, name: String)
   implicit val session = DB.autoCommitSession
 """
 ```
@@ -34,33 +34,33 @@ Invoke `sbt console` and try the following example.
 Followng is the old style ScalikeJDBC code. It's still fine.
 
 ```scala
-SQL("create table users (id int, name varchar(256));").execute.apply()
+SQL("create table members (id int, name varchar(256));").execute.apply()
 
 Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
-  SQL("insert into users values ({id}, {name})")
+  SQL("insert into members values ({id}, {name})")
     .bindByName('id -> id, 'name -> name)
     .update.apply()
 }
 
 val id = 3
-val user = SQL("select * from users where id = {id}")
+val user = SQL("select * from members where id = {id}")
   .bindByName('id -> id)
-  .map { rs => User(id = rs.int("id"), name = rs.string("name")) }
+  .map { rs => Member(id = rs.int("id"), name = rs.string("name")) }
   .single.apply()
 ```
 
 However, now we can write the same more simply with SQLInterpolation.
 
 ```scala
-sql"create table users (id int, name varchar(256));".execute.apply()
+sql"create table members (id int, name varchar(256));".execute.apply()
 
 Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
-  sql"insert into users values (${id}, ${name})".update.apply()
+  sql"insert into members values (${id}, ${name})".update.apply()
 }
 
 val id = 3
-val user = sql"select * from users where id = ${id}"
-  .map { rs => User(id = rs.int("id"), name = rs.string("name")) }
+val user = sql"select * from members where id = ${id}"
+  .map { rs => Member(id = rs.int("id"), name = rs.string("name")) }
   .single.apply()
 ```
 

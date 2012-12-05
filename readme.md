@@ -71,19 +71,19 @@ cd scalikejdbc/sandbox
 sbt console
 ```
 
-"users" table is already created. You can execute queries as follows:
+"members" table is already created. You can execute queries as follows:
 
 ```scala
-case class User(id: Long, name: String)
+case class Member(id: Long, name: String)
 
-val users = DB readOnly { implicit s => 
-  SQL("select * from users")
-    .map(rs => User(rs.long("id"), rs.string("name")))
+val members = DB readOnly { implicit s => 
+  SQL("select * from members")
+    .map(rs => Member(rs.long("id"), rs.string("name")))
     .list.apply()
 }
 
 DB localTx { implicit s => 
-  SQL("insert into users (id, name) values ({id}, {name})")
+  SQL("insert into members (id, name) values ({id}, {name})")
     .bindByName('id -> 3, 'name -> "Charles")
     .update.apply() 
 }
@@ -101,7 +101,7 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 The most basic way is just using prepared statement as follows.
 
 ```scala
-SQL("""insert into users values (?, ?, ?, ?)""")
+SQL("""insert into members values (?, ?, ?, ?)""")
   .bind(132430, "bob@example.com", "Bob", "xfewSZe2sd3w")
   .update.apply()
 ```
@@ -112,7 +112,7 @@ SQL("""insert into users values (?, ?, ?, ?)""")
 Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
 
 ```scala
-SQL("""insert into users values ({id}, {email}, {name}, {encryptedPassword})""")
+SQL("""insert into members values ({id}, {email}, {name}, {encryptedPassword})""")
   .bindByName(
     'id -> 132430,
     'emal -> "bob@example.com",
@@ -130,7 +130,7 @@ Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL tem
 
 ```scala
 SQL("""
-  insert into users values (
+  insert into members values (
     /*'id*/123,
     /*'email*/'alice@example.com',
     /*'name*/'Alice',
@@ -153,7 +153,7 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 
 ```scala
 def create(id: Long, email: String, name: String, encryptedPassword: Sting) {
-  sql"insert into users values (${id}, ${email}, ${name}, ${encryptedPassword})"
+  sql"insert into members values (${id}, ${email}, ${name}, ${encryptedPassword})"
     .update.apply()
 }
 ```

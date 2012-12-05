@@ -75,32 +75,49 @@ Welcome to Scala version 2.9.2 (Java HotSpot(TM) Client VM, Java 1.6.0_29).
 Type in expressions to have them evaluated.
 Type :help for more information.
 
-scala> "create table users(id bigint primary key, name varchar(256));".run
+scala> "create table members(id bigint primary key, name varchar(256));".run
 res0: List[Map[String,Any]] = List(Map(RESULT -> false))
 
-scala> "insert into users values (1, 'Alice')".run
+scala> "insert into members values (1, 'Alice')".run
 res1: List[Map[String,Any]] = List(Map(RESULT -> false))
 
-scala> "insert into users values (2, 'Bob')".as[Boolean]
+scala> "insert into members values (2, 'Bob')".as[Boolean]
 res2: Boolean = false
 
-scala> "select * from users".run
+scala> "select * from members".run
 res3: List[Map[String,Any]] = List(Map(ID -> 1, NAME -> Alice), Map(ID -> 2, NAME -> Bob))
 
-scala> "select name from users".asList[String]
+scala> "select name from members".asList[String]
 res4: List[String] = List(Alice, Bob)
 
-scala> "select id from users".asList[Long]
+scala> "select id from members".asList[Long]
 res5: List[Long] = List(1, 2)
 
-scala> "select name from users where id = 2".as[String]
+scala> "select name from members where id = 2".as[String]
 res6: String = Bob
 
-scala> "select name from users where id = 2".asOption[String]
+scala> "select name from members where id = 2".asOption[String]
 res7: Option[String] = Some(Bob)
 
-scala> "select count(1) from users".as[Long]
+scala> "select count(1) from members".as[Long]
 res8: Long = 2
+
+scala> tables
+COMPANIES
+GROUPS
+MEMBERS
+
+scala> describe("members")
+
+Table: MEMBERS
++-------+--------------+------+-----+---------+-----------------+-------------+
+| Field | Type         | Null | Key | Default | Extra           | Description |
++-------+--------------+------+-----+---------+-----------------+-------------+
+| ID    | BIGINT(19)   | NO   | PRI | NULL    |                 |             |
+| NAME  | VARCHAR(256) | YES  |     | NULL    |                 |             |
++-------+--------------+------+-----+---------+-----------------+-------------+
+Indexes:
+  "PRIMARY_KEY_6" UNIQUE, (ID)
 
 scala> :q
 
