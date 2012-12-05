@@ -303,7 +303,7 @@ object DB {
    * @return described information
    */
   def describe(table: String)(implicit context: CPContext = NoCPContext): String = {
-    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.\n")
+    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.")
   }
 
   /**
@@ -703,32 +703,54 @@ case class DB(conn: Connection) extends LogSupport {
             size = rs.int("COLUMN_SIZE"),
             isRequired = rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO",
             isPrimaryKey = pkNames.find(pk => pk == rs.string("COLUMN_NAME")).isDefined,
-            isAutoIncrement = rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES",
-            description = rs.string("REMARKS"),
-            defaultValue = rs.string("COLUMN_DEF")
+            isAutoIncrement = {
+              // Oracle throws java.sql.SQLException: Invalid column name
+              try {
+                rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
+              } catch { case e: java.sql.SQLException => false }
+            },
+            description = {
+              try {
+                rs.string("REMARKS")
+              } catch { case e: java.sql.SQLException => null }
+            },
+            defaultValue = {
+              // for Oracle support
+              try {
+                rs.string("COLUMN_DEF")
+              } catch { case e: java.sql.SQLException => null }
+            }
           )
         }.toList.distinct,
-        foreignKeys = new RSTraversable(meta.getImportedKeys(null, schema, _table)).map { rs =>
-          ForeignKey(
-            name = rs.string("FKCOLUMN_NAME"),
-            foreignColumnName = rs.string("PKCOLUMN_NAME"),
-            foreignTableName = rs.string("PKTABLE_NAME")
-          )
-        }.toList.distinct,
-        indices = new RSTraversable(meta.getIndexInfo(null, schema, _table, false, true))
-          .foldLeft(Map[String, Index]()) {
-            case (map, rs) =>
-              val indexName = rs.string("INDEX_NAME")
-              val index = map.get(indexName).map { index =>
-                index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
-              }.getOrElse {
-                Index(
-                  name = indexName,
-                  columnNames = List(rs.string("COLUMN_NAME")),
-                  isUnique = !rs.boolean("NON_UNIQUE"))
-              }
-              map.updated(indexName, index)
-          }.map { case (k, v) => v }.toList.distinct
+        foreignKeys = {
+          try {
+            new RSTraversable(meta.getImportedKeys(null, schema, _table)).map { rs =>
+              ForeignKey(
+                name = rs.string("FKCOLUMN_NAME"),
+                foreignColumnName = rs.string("PKCOLUMN_NAME"),
+                foreignTableName = rs.string("PKTABLE_NAME")
+              )
+            }.toList.distinct
+          } catch { case e: java.sql.SQLException => Nil }
+        },
+        indices = {
+          try {
+            new RSTraversable(meta.getIndexInfo(null, schema, _table, false, true))
+              .foldLeft(Map[String, Index]()) {
+                case (map, rs) =>
+                  val indexName = rs.string("INDEX_NAME")
+                  val index = map.get(indexName).map { index =>
+                    index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
+                  }.getOrElse {
+                    Index(
+                      name = indexName,
+                      columnNames = List(rs.string("COLUMN_NAME")),
+                      isUnique = !rs.boolean("NON_UNIQUE"))
+                  }
+                  map.updated(indexName, index)
+              }.map { case (k, v) => v }.toList.distinct
+          } catch { case e: java.sql.SQLException => Nil }
+        }
       )
     }
   }
