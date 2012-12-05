@@ -16,6 +16,7 @@
 package scalikejdbc
 
 import java.sql.Connection
+import scalikejdbc.metadata.Table
 
 /**
  * Named Basic DB Accessor
@@ -31,10 +32,12 @@ import java.sql.Connection
  */
 case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) {
 
-  private def connectionPool(): ConnectionPool = context match {
+  private[this] def connectionPool(): ConnectionPool = opt(context match {
     case NoConnectionPoolContext => ConnectionPool(name)
     case _: MultipleConnectionPoolContext => context.get(name)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
+  }) getOrElse {
+    throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
   }
 
   private lazy val db: DB = DB(connectionPool().borrow())
@@ -84,5 +87,11 @@ case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnec
   def localTx[A](execution: DBSession => A): A = db.localTx(execution)
 
   def localTxWithConnection[A](execution: Connection => A): A = db.localTxWithConnection(execution)
+
+  def getTable(table: String): Option[Table] = db.getTable(table)
+
+  def getTableNames(tableNamePattern: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
+    db.getTableNames(tableNamePattern)
+  }
 
 }

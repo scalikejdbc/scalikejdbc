@@ -15,9 +15,11 @@
  */
 package scalikejdbc
 
-import java.sql.Connection
+import java.sql.{ DatabaseMetaData, Connection }
 import java.lang.IllegalStateException
 import scala.util.control.Exception._
+
+import scalikejdbc.metadata._
 
 /**
  * Basic Database Accessor
@@ -127,8 +129,8 @@ object DB {
    * @return result value
    */
   def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).readOnly(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).readOnly(execution)
     }
   }
 
@@ -142,8 +144,8 @@ object DB {
    * @return result value
    */
   def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).readOnlyWithConnection(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).readOnlyWithConnection(execution)
     }
   }
 
@@ -166,8 +168,8 @@ object DB {
    * @return result value
    */
   def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).autoCommit(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).autoCommit(execution)
     }
   }
 
@@ -181,8 +183,8 @@ object DB {
    * @return result value
    */
   def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).autoCommitWithConnection(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).autoCommitWithConnection(execution)
     }
   }
 
@@ -205,8 +207,8 @@ object DB {
    * @return result value
    */
   def localTx[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).localTx(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).localTx(execution)
     }
   }
 
@@ -220,8 +222,8 @@ object DB {
    * @return result value
    */
   def localTxWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) {
-      conn => DB(conn).localTxWithConnection(execution)
+    using(connectionPool(context).borrow()) { conn =>
+      DB(conn).localTxWithConnection(execution)
     }
   }
 
@@ -259,6 +261,50 @@ object DB {
    * @return session
    */
   def withinTxSession()(implicit db: DB): DBSession = db.withinTxSession()
+
+  /**
+   * Returns multiple table information
+   *
+   * @param tableNamePattern table name pattern (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return table information
+   */
+  def getTableNames(tableNamePattern: String)(implicit context: CPContext = NoCPContext): List[String] = {
+    DB(connectionPool(context).borrow()).getTableNames(tableNamePattern)
+  }
+
+  /**
+   * Returns table information
+   *
+   * @param table table name (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return table information
+   */
+  def getTable(table: String)(implicit context: CPContext = NoCPContext): Option[Table] = {
+    DB(connectionPool(context).borrow()).getTable(table)
+  }
+
+  /**
+   * Returns table name list
+   *
+   * @param tableNamePattern table name pattern (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return table name list
+   */
+  def showTables(tableNamePattern: String = "%")(implicit context: CPContext = NoCPContext): String = {
+    getTableNames(tableNamePattern).mkString("\n")
+  }
+
+  /**
+   * Returns describe style string value for the table
+   *
+   * @param table table name (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return described information
+   */
+  def describe(table: String)(implicit context: CPContext = NoCPContext): String = {
+    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.\n")
+  }
 
   /**
    * Get a connection and returns a DB instance.
@@ -333,6 +379,8 @@ object DB {
  */
 case class DB(conn: Connection) extends LogSupport {
 
+  type RSTraversable = ResultSetTraversable
+
   /**
    * Returns is the current transaction is active.
    * @return result
@@ -382,12 +430,10 @@ case class DB(conn: Connection) extends LogSupport {
    * @return tx
    */
   def tx: Tx = {
-    handling(classOf[IllegalStateException]) by {
-      e =>
-        throw new IllegalStateException(
-          ErrorMessage.TRANSACTION_IS_NOT_ACTIVE +
-            " If you want to start a new transaction, use #newTx instead."
-        )
+    handling(classOf[IllegalStateException]) by { e =>
+      throw new IllegalStateException(
+        ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead."
+      )
     } apply currentTx
   }
 
@@ -540,10 +586,9 @@ case class DB(conn: Connection) extends LogSupport {
     }
   }
 
-  private val rollbackIfThrowable = handling(classOf[Throwable]) by {
-    t =>
-      tx.rollback()
-      throw t
+  private val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
+    tx.rollback()
+    throw t
   }
 
   /**
@@ -581,6 +626,110 @@ case class DB(conn: Connection) extends LogSupport {
         tx.commit()
         result
       }
+    }
+  }
+
+  /**
+   * Splits the name to schema and table name
+   *
+   * @param name name
+   * @return schema and table
+   */
+  private[this] def toSchemaAndTable(name: String): (String, String) = {
+    val schema = if (name.split("\\.").size > 1) name.split("\\.").head else null
+    val table = if (name.split("\\.").size > 1) name.split("\\.")(1) else name
+    (schema, table)
+  }
+
+  /**
+   * Returns all the table types
+   *
+   * @param meta database meta data
+   * @return all the table types
+   */
+  private def allTableTypes(meta: DatabaseMetaData): Array[String] = {
+    new RSTraversable(meta.getTableTypes).map(rs => rs.string("TABLE_TYPE")).toArray
+  }
+
+  /**
+   * Returns all the table information that match the pattern
+   *
+   * @param tableNamePattern table name pattern (with schema optionally)
+   * @return table information
+   */
+  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = readOnlyWithConnection { conn =>
+    val meta = conn.getMetaData
+    val (schema, _tableNamePattern) = toSchemaAndTable(tableNamePattern.replaceAll("\\*", "%"))
+    new RSTraversable(meta.getTables(null, schema, _tableNamePattern, tableTypes))
+      .map { rs =>
+        if (schema != null) schema + "." + rs.string("TABLE_NAME")
+        else rs.string("TABLE_NAME")
+      }.toList
+  }
+
+  /**
+   * Returns table information if exists
+   *
+   * @param table table name (with schema optionally)
+   * @return table information
+   */
+  def getTable(table: String): Option[Table] = readOnlyWithConnection { conn =>
+    val meta = conn.getMetaData
+    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase)).orElse(_getTable(meta, table.toLowerCase))
+  }
+
+  /**
+   * Returns table information if exists
+   *
+   * @param meta database meta data
+   * @param table table name (with schema optionally)
+   * @param tableTypes target table types
+   * @return table information
+   */
+  private[this] def _getTable(meta: DatabaseMetaData, table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
+    val (schema, _table) = toSchemaAndTable(table)
+    new RSTraversable(meta.getTables(null, schema, _table, tableTypes)).map(rs => rs.string("TABLE_NAME")).headOption.map { tableNameFound =>
+      val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, _table)).map(rs => rs.string("COLUMN_NAME"))
+
+      Table(
+        name = _table,
+        schema = schema,
+        description = new RSTraversable(meta.getTables(null, schema, _table, tableTypes)).map(rs => rs.string("REMARKS")).headOption.orNull[String],
+        columns = new RSTraversable(meta.getColumns(null, schema, _table, "%")).map { rs =>
+          Column(
+            name = rs.string("COLUMN_NAME"),
+            typeCode = rs.int("DATA_TYPE"),
+            typeName = rs.string("TYPE_NAME"),
+            size = rs.int("COLUMN_SIZE"),
+            isRequired = rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO",
+            isPrimaryKey = pkNames.find(pk => pk == rs.string("COLUMN_NAME")).isDefined,
+            isAutoIncrement = rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES",
+            description = rs.string("REMARKS"),
+            defaultValue = rs.string("COLUMN_DEF")
+          )
+        }.toList.distinct,
+        foreignKeys = new RSTraversable(meta.getImportedKeys(null, schema, _table)).map { rs =>
+          ForeignKey(
+            name = rs.string("FKCOLUMN_NAME"),
+            foreignColumnName = rs.string("PKCOLUMN_NAME"),
+            foreignTableName = rs.string("PKTABLE_NAME")
+          )
+        }.toList.distinct,
+        indices = new RSTraversable(meta.getIndexInfo(null, schema, _table, false, true))
+          .foldLeft(Map[String, Index]()) {
+            case (map, rs) =>
+              val indexName = rs.string("INDEX_NAME")
+              val index = map.get(indexName).map { index =>
+                index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
+              }.getOrElse {
+                Index(
+                  name = indexName,
+                  columnNames = List(rs.string("COLUMN_NAME")),
+                  isUnique = !rs.boolean("NON_UNIQUE"))
+              }
+              map.updated(indexName, index)
+          }.map { case (k, v) => v }.toList.distinct
+      )
     }
   }
 

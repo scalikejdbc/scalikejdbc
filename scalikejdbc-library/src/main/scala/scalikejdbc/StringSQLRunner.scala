@@ -47,6 +47,7 @@ case class StringSQLRunner(sql: String) {
 
   /**
    * Returns SQL results as List[A]
+   *
    * @tparam A value type
    * @return results as List[A]
    */
@@ -54,10 +55,19 @@ case class StringSQLRunner(sql: String) {
 
   /**
    * Returns SQL result as single value
+   *
    * @tparam A value type
    * @return a single result as A
    */
-  def as[A]: Option[A] = asList[A].headOption
+  def as[A]: A = asList[A].head
+
+  /**
+   * Returns SQL result as single value optionally
+   *
+   * @tparam A value type
+   * @return a single result as A optionally
+   */
+  def asOption[A]: Option[A] = asList[A].headOption
 
 }
 

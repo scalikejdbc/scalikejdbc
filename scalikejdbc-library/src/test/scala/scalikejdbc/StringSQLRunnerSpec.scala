@@ -3,6 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.matchers._
 import scala.util.control.Exception._
+import java.util.NoSuchElementException
 
 class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
@@ -33,11 +34,18 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
       // should be found
       ("select name from " + tableName + " where id = 3").asList[String] should equal(List("Ben"))
-      ("select name from " + tableName + " where id = 3").as[String] should equal(Some("Ben"))
+      ("select name from " + tableName + " where id = 3").asOption[String] should equal(Some("Ben"))
+      ("select name from " + tableName + " where id = 3").as[String] should equal("Ben")
 
       // should not be found
       ("select name from " + tableName + " where id = 999").asList[String] should equal(List())
-      ("select name from " + tableName + " where id = 999").as[String] should equal(None)
+      ("select name from " + tableName + " where id = 999").asOption[String] should equal(None)
+      try {
+        ("select name from " + tableName + " where id = 999").as[String]
+        fail("NoSuchElementException is expected")
+      } catch {
+        case e: NoSuchElementException =>
+      }
 
     }
   }

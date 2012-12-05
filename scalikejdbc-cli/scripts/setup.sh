@@ -100,6 +100,9 @@ run_sbt "console"
 
 echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 
+// temporary
+resolvers += "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"         % "[1.4,)",
   "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
@@ -137,11 +140,8 @@ def initialize() {
   }
 }
 initialize()
-case class SQLResponse(list: List[Map[String, Any]]) {
-  def asList[A]: List[A] = list.map(m => m.apply(m.keys.head).asInstanceOf[A])
-  def as[A]: A = asList[A].head
-}
-implicit def ListToSQLResponse(list: List[Map[String, Any]]) = SQLResponse(list)
+def describe(table: String) = DB.describe(table)
+def tables = DB.showTables()
 """
 ' > ${BUILD_SBT}
 
