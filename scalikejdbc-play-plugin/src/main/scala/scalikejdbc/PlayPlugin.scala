@@ -33,8 +33,8 @@ class PlayPlugin(app: Application) extends Plugin {
       def load(name: String): (String, String, String, ConnectionPoolSettings) = {
         implicit val config = playDbConfig
         Class.forName(require(name, "driver"))
-        val default = new ConnectionPoolSettings
-        val settings = new ConnectionPoolSettings(
+        val default = ConnectionPoolSettings()
+        val settings = ConnectionPoolSettings(
           initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
           maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
           validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
@@ -72,8 +72,8 @@ class PlayPlugin(app: Application) extends Plugin {
   opt(loggingSQLAndTime, "enabled")(globalConfig).map(_.toBoolean).foreach {
     enabled =>
       implicit val config = globalConfig
-      val default = new LoggingSQLAndTimeSettings
-      GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+      val default = LoggingSQLAndTimeSettings()
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = enabled,
         logLevel = opt(loggingSQLAndTime, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
         warningEnabled = opt(loggingSQLAndTime, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
