@@ -6,6 +6,6 @@ fi
 cd `dirname $0`
 cd ..
 cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
-sbt test
+sbt clean test
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
 

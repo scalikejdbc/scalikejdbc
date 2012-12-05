@@ -713,13 +713,26 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   it should "execute insert with InputStream values" in {
     DB autoCommit { implicit s =>
       try {
-        SQL("create table image_data (name varchar(255), data blob);").execute.apply()
+        try {
+          SQL("create table image_data (name varchar(255), data blob);").execute.apply()
+        } catch {
+          case e =>
+            // PostgreSQL doesn't have blob
+            SQL("create table image_data (name varchar(255), data bytea);").execute.apply()
+        }
         using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
-          SQL("insert into image_data (name, data) values ({name}, {data});")
-            .bindByName(
-              'name -> "logo",
-              'data -> stream)
-            .update.apply()
+          try {
+            SQL("insert into image_data (name, data) values ({name}, {data});")
+              .bindByName(
+                'name -> "logo",
+                'data -> stream)
+              .update.apply()
+          } catch {
+            case e =>
+              // PostgreSQL does not support #setBinaryStream
+              if (url.startsWith("jdbc:postgresql")) println(e.getMessage)
+              else fail("Failed to insert data because " + e.getMessage, e)
+          }
         }
         SQL("select * from image_data;").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
           using(new java.io.ByteArrayOutputStream) { bos =>
@@ -743,7 +756,13 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   it should "execute insert with byte array values" in {
     DB autoCommit { implicit s =>
       try {
-        SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
+        try {
+          SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
+        } catch {
+          case e =>
+            // PostgreSQL doesn't have blob
+            SQL("create table image_data2 (name varchar(255), data bytea);").execute.apply()
+        }
         using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
           using(new java.io.ByteArrayOutputStream) { bos =>
             var next: Int = stream.read()
