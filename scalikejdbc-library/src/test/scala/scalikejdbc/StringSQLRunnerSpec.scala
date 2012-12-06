@@ -50,4 +50,33 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
     }
   }
 
+  it should "cast number values" in {
+
+    val runner = new StringSQLRunner("")
+    val expectedInt: Int = 123
+    val expectedLong: Long = 123L
+
+    val javaInteger: java.lang.Integer = java.lang.Integer.parseInt("123")
+    val scalaInt: Int = 123
+    val javaShort: java.lang.Short = java.lang.Short.parseShort("123")
+    val scalaShort: Short = 123
+    val javaBigDecimal: java.math.BigDecimal = new java.math.BigDecimal("123")
+    val scalaBigDecimal: scala.math.BigDecimal = scala.math.BigDecimal("123")
+
+    runner.cast[Int](javaInteger) should equal(expectedInt)
+    runner.cast[Int](scalaInt) should equal(expectedInt)
+    runner.cast[Int](javaShort) should equal(expectedInt)
+    runner.cast[Int](scalaShort) should equal(expectedInt)
+    runner.cast[Int](javaBigDecimal) should equal(expectedInt)
+    runner.cast[Int](scalaBigDecimal) should equal(expectedInt)
+
+    runner.cast[Long](javaInteger) should equal(expectedLong)
+    runner.cast[Long](scalaInt) should equal(expectedLong)
+    runner.cast[Long](javaShort) should equal(expectedLong)
+    runner.cast[Long](scalaShort) should equal(expectedLong)
+    runner.cast[Long](javaBigDecimal) should equal(expectedLong)
+    runner.cast[Long](scalaBigDecimal) should equal(expectedLong)
+
+  }
+
 }
