@@ -10,8 +10,14 @@ cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
 wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
 
+mkdir -p ./db
+cd ./db
+rm -f sandbox.h2.db
+wget https://raw.github.com/seratch/scalikejdbc/master/scalikejdbc-cli/db/sandbox.h2.db
+cd -
+
 if [ ! -f ${CONFIG_PROPS} ]; then
-  echo 'sandbox.jdbc.url=jdbc:h2:mem:sandbox
+  echo 'sandbox.jdbc.url=jdbc:h2:file:db/sandbox
 sandbox.jdbc.username=
 sandbox.jdbc.password=
 #mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
@@ -99,9 +105,6 @@ run_sbt "console"
 
 
 echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
-
-// temporary
-resolvers += "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
 
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"         % "[1.4,)",
