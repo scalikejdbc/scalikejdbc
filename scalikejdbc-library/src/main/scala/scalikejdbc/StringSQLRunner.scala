@@ -74,6 +74,11 @@ case class StringSQLRunner(sql: String) {
         case short: java.lang.Short => java.lang.Long.parseLong(short.toString)
         case x => x
       }
+    } else if (manifest == classManifest[String]) {
+      v match {
+        case null => null
+        case v => String.valueOf(v)
+      }
     } else {
       v
     }

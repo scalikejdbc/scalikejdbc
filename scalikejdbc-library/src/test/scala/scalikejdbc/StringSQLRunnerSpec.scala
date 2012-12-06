@@ -55,6 +55,7 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
     val runner = new StringSQLRunner("")
     val expectedInt: Int = 123
     val expectedLong: Long = 123L
+    val expectedString: String = "123"
 
     val javaInteger: java.lang.Integer = java.lang.Integer.parseInt("123")
     val scalaInt: Int = 123
@@ -76,6 +77,13 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
     runner.cast[Long](scalaShort) should equal(expectedLong)
     runner.cast[Long](javaBigDecimal) should equal(expectedLong)
     runner.cast[Long](scalaBigDecimal) should equal(expectedLong)
+
+    runner.cast[String](javaInteger) should equal(expectedString)
+    runner.cast[String](scalaInt) should equal(expectedString)
+    runner.cast[String](javaShort) should equal(expectedString)
+    runner.cast[String](scalaShort) should equal(expectedString)
+    runner.cast[String](javaBigDecimal) should equal(expectedString)
+    runner.cast[String](scalaBigDecimal) should equal(expectedString)
 
   }
 
