@@ -1,0 +1,48 @@
+ScalikeJDBC 1.4.1 has been released. 
+
+This version includes a bug fix and some improvement in core-library. 
+
+Also dbconsole is newly added.
+
+## library
+
+    libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.4,)"
+
+* ConnectionPoolContext doesn't work with AutoSession [(GH-51)](https://github.com/seratch/scalikejdbc/issues/51)
+* Added new APIs to retrieve meta data
+* Added #as[A], #asList[A] and #asOption[A] to StringSQLRunner
+
+## interpolation
+
+    libraryDependencies ++= Seq(
+      "com.github.seratch" %% "scalikejdbc" % "[1.4,)"
+      "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)"
+    )
+
+No changes. Released for Scala 2.10.0-RC1/2/3.
+
+## mapper-generator
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
+
+No changes.
+
+## play-plugin
+
+    val appDependencies = Seq(
+      "com.github.seratch" %% "scalikejdbc"             % "[1.4,)",
+      "com.github.seratch" %% "scalikejdbc-play-plugin" % "[1.4,)"
+    )
+
+No changes. Released for Play 2.0.4 and 2.1-RC1.
+
+## CLI
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-cli
+
+Newly released. Try it now!
+
+    curl -L http://git.io/dbconsole | sh
+
+Enjoy!
+
