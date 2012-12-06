@@ -46,6 +46,24 @@ case class Table(name: String,
    */
   def toDescribeStyleString: String = {
 
+    def withoutCRLF(str: String): String = {
+      if (str == null) null
+      else str.replaceAll("\r", "").replaceAll("\n", "")
+    }
+    def length(str: String): Int = {
+      if (str == null) 0
+      else withoutCRLF(str).map(c => if (c.toString.getBytes.size > 1) 2 else 1).sum
+    }
+    def take(str: String, maxLength: Int): String = {
+      if (str == null) null
+      else withoutCRLF(str).foldLeft(("", 0)) {
+        case ((str, len), c) =>
+          if (len >= maxLength) (str, len)
+          else if (len + length(c.toString) > maxLength) (str, maxLength)
+          else (str + c, len + length(c.toString))
+      }._1
+    }
+
     val maxColumnNameLength = {
       val maxLength = columns.map(c => c.name.length).sortWith { case (a, b) => a > b }.head
       if (maxLength < 5) 5 else maxLength
@@ -69,19 +87,19 @@ case class Table(name: String,
       if (maxLength < 4) 4 else maxLength
     }
     val maxDefaultValueLength = {
-      val maxLength = columns.map(c => if (c.defaultValue == null) 0 else c.defaultValue.length).sortWith { case (a, b) => a > b }.head
+      val maxLength = columns.map(c => length(c.defaultValue)).sortWith { case (a, b) => a > b }.head
       if (maxLength > 20) 20 else if (maxLength < 7) 7 else maxLength
     }
     val maxDescriptionLength = {
-      val maxLength = columns.map(c => if (c.description == null) 0 else c.description.length).sortWith { case (a, b) => a > b }.head
-      if (maxLength < 11) 11 else if (maxLength > 30) 30 else maxLength
+      val maxLength = columns.map(c => length(c.description)).sortWith { case (a, b) => a > b }.head
+      if (maxLength < 11) 11 else if (maxLength > 40) 40 else maxLength
     }
 
     "\n" +
       "Table: " + nameWithSchema + {
         if (description == null || description.trim.length == 0) ""
-        else if (description.length > 50) " (" + description.take(48) + "..)"
-        else " (" + description + ")"
+        else if (length(description) > 120) " (" + take(description, 118) + "..)"
+        else " (" + withoutCRLF(description) + ")"
       } + "\n" +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
       "| Field" + " " * (maxColumnNameLength - 5) + " | Type" + " " * (maxTypeNameLength - 4) + " | Null | Key | Default" + " " * (maxDefaultValueLength - 7) + " | Extra           | Description" + " " * (maxDescriptionLength - 11) + " |\n" +
@@ -98,7 +116,7 @@ case class Table(name: String,
         val extra = if (column.isAutoIncrement) "AUTO_INCREMENT" else ""
         val description = {
           if (column.description == null) ""
-          else if (column.description.length > 30) column.description.take(28) + ".."
+          else if (length(column.description) > 40) take(column.description, 38) + ".."
           else column.description
         }
 
@@ -108,7 +126,7 @@ case class Table(name: String,
           key + " " * (3 - key.length) + " | " +
           defaultValue + " " * (maxDefaultValueLength - defaultValue.length) + " | " +
           extra + " " * (15 - extra.length) + " | " +
-          description + " " * (maxDescriptionLength - description.length) + " |\n"
+          withoutCRLF(description) + " " * (maxDescriptionLength - length(description)) + " |\n"
       }.mkString +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
       {
