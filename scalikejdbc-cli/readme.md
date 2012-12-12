@@ -6,11 +6,23 @@ A simple console to connect database via JDBC.
 
 Execute setup script as follows.
 
+- Mac OS X, Linux
+
+Run the following script from command line.
+
 ```sh
 curl -L http://git.io/dbconsole | sh
 ```
 
-The script downloads sbt launcher and setting up `dbconsole` command.
+- Windows
+
+Run the following batch file.
+
+```
+http://git.io/dbconsole.bat
+```
+
+The setup script downloads sbt launcher and setting up `dbconsole` command.
 
 ```sh
 $ curl -L http://git.io/dbconsole | sh

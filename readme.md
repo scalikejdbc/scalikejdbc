@@ -190,8 +190,16 @@ We promise you that it becomes more useful when using together with scalikejdbc-
 
 `dbconsole` is an extended sbt console to connect database. Try it now!
 
+- Mac OS X, Linux
+
 ```sh
 curl -L http://git.io/dbconsole | sh
+```
+
+- Windows
+
+```sh
+http://git.io/dbconsole.bat
 ```
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-cli
