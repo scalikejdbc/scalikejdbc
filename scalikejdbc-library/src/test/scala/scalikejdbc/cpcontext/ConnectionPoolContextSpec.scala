@@ -89,7 +89,7 @@ object ConnectionPoolContextSpecUtils {
     NamedDB(name)(NoConnectionPoolContext) autoCommit { implicit s =>
       try {
         SQL("drop table " + tableName).execute.apply()
-      } catch { case e => }
+      } catch { case e: Throwable => }
       SQL("create table " + tableName + " (id integer primary key, name varchar(30))").execute.apply()
     }
   }
@@ -107,7 +107,7 @@ object ConnectionPoolContextSpecUtils {
       NamedDB(name)(NoConnectionPoolContext) autoCommit { implicit s =>
         SQL("drop table " + tableName).execute.apply()
       }
-    } catch { case e => }
+    } catch { case e: Throwable => }
   }
 
 }

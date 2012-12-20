@@ -23,14 +23,9 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
-          case "2.10.0" => "2.9.1"
-          case "2.9.2" => "2.9.1"
+          case "2.10.0" => "2.10.0"
           case version => version
         })
-        val time = "scalaj-time" + _scalaVersion
-        val unfilteredFilter = "unfiltered-filter" + _scalaVersion
-        val unfilteredJetty = "unfiltered-jetty" + _scalaVersion
-        val scalacheck = "scalacheck" + _scalaVersion
         val scalatest = "scalatest" + _scalaVersion
         Seq(
           // scope: compile
@@ -39,14 +34,10 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"      % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
           // scope: test
-          "org.scalaj"              %  time                   % "0.6"      % "test",
           "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
-          "net.databinder"          %  unfilteredFilter       % "[0.6,)"   % "test",
-          "net.databinder"          %  unfilteredJetty        % "[0.6,)"   % "test",
           "org.scalatest"           %  scalatest              % "1.8"      % "test",
-          "org.scalacheck"          %  scalacheck             % "1.10.0"   % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"    % "test",
-          "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
+          "play"                    %% "anorm"                % "[2,)"     % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -73,7 +64,7 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
-          "org.scalatest"  %  "scalatest_2.10.0-RC5" % "[1.8,)" % "test"
+          "org.scalatest"  %  "scalatest_2.9.2"      % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -96,8 +87,8 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
         "org.slf4j" % "slf4j-simple" % "1.7.2" % "compile",
-        "org.scalatest" %% "scalatest" % "[1.7,)" % "test",
-        "org.specs2" %% "specs2" % "1.12.2" % "test"
+        "org.scalatest" % "scalatest_2.9.2" % "[1.8,)" % "test",
+        "org.specs2" % "specs2_2.9.2" % "1.12.2" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -117,7 +108,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-play-plugin",
       version := _version,
       scalaVersion := "2.10.0",
-      crossScalaVersions := Seq("2.9.2", "2.9.1"),
+      crossScalaVersions := Seq("2.10.0", "2.9.2", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
@@ -165,7 +156,9 @@ object ScalikeJDBCProjects extends Build {
     "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  val _scalacOptions = Seq("-deprecation", "-unchecked")
+  // TODO fix
+  // val _scalacOptions = Seq("-deprecation", "-unchecked")
+  val _scalacOptions = Seq("-unchecked")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>

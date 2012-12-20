@@ -158,27 +158,6 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
   }
 
   // ---------------------------
-  // Working with Anorm API
-  // ---------------------------
-
-  "Anorm 2.0" should "be availabe with scalikejdbc seamlessly" in {
-    val tableName = tableNamePrefix + "_anorm20"
-    try {
-      TestUtils.initialize(tableName)
-
-      import anorm._
-      import anorm.SqlParser._
-      case class Emp(id: Int, name: Option[String])
-      val empAllColumns = get[Int]("id") ~ get[Option[String]]("name") map { case id ~ name => Emp(id, name) }
-      DB localTxWithConnection { implicit conn =>
-        val empOpt: Option[Emp] = SQL("select * from " + tableName + " where id = {id}").on('id -> 1).as(empAllColumns.singleOpt)
-        val empList: List[Emp] = SQL("select * from " + tableName).as(empAllColumns.*)
-      }
-
-    } finally { TestUtils.deleteTable(tableName) }
-  }
-
-  // ---------------------------
   // Working with SQL API
   // ---------------------------
 
