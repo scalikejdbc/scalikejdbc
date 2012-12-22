@@ -7,13 +7,12 @@ This is a SQL template using [SIP-11](http://docs.scala-lang.org/sips/pending/st
 ### build.sbt
 
 ```scala
-scalaVersion := "2.10.0-M7"
-
-resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+scalaVersion := "2.10.0"
 
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
+  "org.slf4j" % "slf4j-simple" % "[1.7,)"
   "org.hsqldb" % "hsqldb" % "[2,)"
 )
 
@@ -34,6 +33,9 @@ Invoke `sbt console` and try the following example.
 Followng is the old style ScalikeJDBC code. It's still fine.
 
 ```scala
+scala> :paste
+// Entering paste mode (ctrl-D to finish)
+
 SQL("create table members (id int, name varchar(256));").execute.apply()
 
 Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
@@ -47,11 +49,22 @@ val user = SQL("select * from members where id = {id}")
   .bindByName('id -> id)
   .map { rs => Member(id = rs.int("id"), name = rs.string("name")) }
   .single.apply()
+
+// Exiting paste mode, now interpreting.
+
+id: Int = 3
+user: Option[Member] = Some(Member(3,baz))
+
+scala> :q
+
 ```
 
 However, now we can write the same more simply with SQLInterpolation.
 
 ```scala
+scala> :paste
+// Entering paste mode (ctrl-D to finish)
+
 sql"create table members (id int, name varchar(256));".execute.apply()
 
 Seq((1, "foo"),(2, "bar"),(3, "baz")) foreach { case (id, name) =>
@@ -62,6 +75,13 @@ val id = 3
 val user = sql"select * from members where id = ${id}"
   .map { rs => Member(id = rs.int("id"), name = rs.string("name")) }
   .single.apply()
+
+// Exiting paste mode, now interpreting.
+
+id: Int = 3
+user: Option[Member] = Some(Member(3,baz))
+
+scala> :q
 ```
 
 Of course, this code is safely protected from SQL injection attacks. 
