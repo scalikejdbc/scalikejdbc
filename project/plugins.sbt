@@ -6,8 +6,6 @@ addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "[0.2,)")
 
 addSbtPlugin("com.github.seratch" % "testgenerator" % "[1.1,)")
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.1.0")
-
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.0")
 
 resolvers += Resolver.url("sbt-plugin-releases for Travis CI", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
