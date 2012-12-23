@@ -155,11 +155,9 @@ In addition, passing `AutoSession` as an implicit parameter is quite useful. Lik
 
 ```scala
 object Member {
-
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
     SQL("select * from members where id = ?").bind(id).map(*).single.apply() 
   }
-
   def setProfileVerified(member: Member)(implicit session: DBSession = AutoSession) = {
     SQL("update members set profile_verified = true where id = ?").bind(id).update.apply()
   }
@@ -169,7 +167,6 @@ Member.find(id) // new read-only session provided by AutoSession
 
 Member.setProfileVerified(member) // new auto-commit session provided by AutoSession
 
-// transaction start
 DB localTx { implicit session =>
   // transaction start
   Member.findByName(name).foreach { member => 
