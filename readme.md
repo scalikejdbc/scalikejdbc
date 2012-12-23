@@ -2,7 +2,7 @@
 
 ## Just write SQL
 
-ScalikeJDBC is a SQL-based DB access library for Scala developers. 
+ScalikeJDBC is A tidy SQL-based DB access library for Scala developers.
 
 This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
 
@@ -27,8 +27,6 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ## Scaladoc
 
-Here is the scaladoc:
-
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 
 
@@ -37,12 +35,12 @@ http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 ### sbt
 
 ```scala
-libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.4,)"
-
-// slf4j binding you like
-libraryDependencies += "org.slf4j" % "slf4j-simple" % "[1.7,)"
+libraryDependencies ++= Seq(
+  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
+  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+)
 ```
-
 
 ### Maven
 
@@ -51,6 +49,11 @@ libraryDependencies += "org.slf4j" % "slf4j-simple" % "[1.7,)"
   <groupId>com.github.seratch</groupId>
   <artifactId>scalikejdbc_2.9.2</artifactId>
   <version>[1.4,)</version>
+</dependency>
+<dependency>
+  <groupId>postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <version>9.1-901.jdbc4</version>
 </dependency>
 <dependency>
   <groupId>org.slf4j</groupId>
@@ -76,13 +79,13 @@ sbt console
 ```scala
 case class Member(id: Long, name: String)
 
-val members = DB readOnly { implicit s => 
+val members = DB readOnly { implicit session => 
   SQL("select * from members")
     .map(rs => Member(rs.long("id"), rs.string("name")))
     .list.apply()
 }
 
-DB localTx { implicit s => 
+DB localTx { implicit session => 
   SQL("insert into members (id, name) values ({id}, {name})")
     .bindByName('id -> 3, 'name -> "Charles")
     .update.apply() 
@@ -93,10 +96,10 @@ If you need more information(connection management, transaction, CRUD), please c
 
 https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
-http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
 
+## Features
 
-## Basic SQL template
+### Basic SQL template
 
 The most basic way is just using prepared statement as follows.
 
@@ -107,7 +110,7 @@ SQL("""insert into members values (?, ?, ?, ?)""")
 ```
 
 
-## Anorm SQL template
+### Anorm-like SQL template
 
 Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
 
@@ -122,7 +125,7 @@ SQL("""insert into members values ({id}, {email}, {name}, {encryptedPassword})""
 ```
 
 
-## Executable SQL template
+### Executable SQL template
 
 Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
 
@@ -144,8 +147,40 @@ SQL("""
   .update.apply()
 ```
 
+### Flexible transactions
 
-## SQLInterpolation for Scala 2.10
+`DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and 'DB.readOnly { session => }` are supported.
+
+In addition, passing `AutoSession` as an implicit parameter is quite useful. Like this:
+
+```scala
+object Member {
+
+  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
+    SQL("select * from members where id = ?").bind(id).map(*).single.apply() 
+  }
+
+  def setProfileVerified(member: Member)(implicit session: DBSession = AutoSession) = {
+    SQL("update members set profile_verified = true where id = ?").bind(id).update.apply()
+  }
+}
+
+Member.find(id) // new read-only session provided by AutoSession
+
+Member.setProfileVerified(member) // new auto-commit session provided by AutoSession
+
+// transaction start
+DB localTx { implicit session =>
+  // transaction start
+  Member.findByName(name).foreach { member => 
+    member.setProfileVerified(member)
+  } 
+  val mightBeUpdated = Member.find(123) 
+  // transaction end
+}
+```
+
+### SQLInterpolation for Scala 2.10
 
 This feature is still experimental, but you can try it now.
 
@@ -159,14 +194,14 @@ def create(id: Long, email: String, name: String, encryptedPassword: Sting) {
 ```
 
 
-## Logging SQL And Timing
+### Logging SQL And Timing
 
 Using LogginSQLAndTime feature, you can check the actual SQL(not exactly) and time.
 
 https://github.com/seratch/scalikejdbc/wiki/LoggingSQLAndTime
 
 
-## Mapper Generator 
+### Source code generator
 
 If you want to create mapper modules easily, also take a look at this sbt plugin. 
 
@@ -177,7 +212,7 @@ sbt "scalikejdbc-gen [table-name (class-name)]"
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
-## Play framework 2.x support
+### Play framework 2.x support
 
 You can use ScalikeJDBC with Play framework 2.x seamlessly.
 
@@ -186,7 +221,7 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
 
 
-## dbconsle
+### dbconsle
 
 `dbconsole` is an extended sbt console to connect database. Try it now!
 
