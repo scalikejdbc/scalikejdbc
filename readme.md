@@ -118,7 +118,7 @@ Instead of embedding `?`(place holder), you can specify named place holder that 
 SQL("""insert into members values ({id}, {email}, {name}, {encryptedPassword})""")
   .bindByName(
     'id -> 132430,
-    'emal -> "bob@example.com",
+    'email -> "bob@example.com",
     'name -> "Bob",
     'encryptedPassword -> "xfewSZe2sd3w")
   .update.apply()
@@ -141,7 +141,7 @@ SQL("""
 """)
   .bindByName(
     'id -> 132430,
-    'emal -> "bob@example.com",
+    'email -> "bob@example.com",
     'name -> "Bob",
     'encryptedPassword -> "xfewSZe2sd3w")
   .update.apply()
