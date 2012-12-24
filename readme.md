@@ -168,12 +168,12 @@ Member.find(id) // new read-only session provided by AutoSession
 Member.setProfileVerified(member) // new auto-commit session provided by AutoSession
 
 DB localTx { implicit session =>
-  // transaction start
+  // begin transaction 
   Member.findByName(name).foreach { member => 
     member.setProfileVerified(member)
   } 
-  val mightBeUpdated = Member.find(123) 
-  // transaction end
+  val mightBeUpdated = Member.find(id) 
+  // end transaction
 }
 ```
 
