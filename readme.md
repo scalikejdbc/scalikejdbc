@@ -85,10 +85,10 @@ val members = DB readOnly { implicit session =>
     .list.apply()
 }
 
-DB localTx { implicit session => 
-  SQL("insert into members (id, name) values ({id}, {name})")
-    .bindByName('id -> 3, 'name -> "Charles")
-    .update.apply() 
+val id = DB localTx { implicit session => 
+  SQL("insert into members (name, group) values ({name}, {group})")
+    .bindByName('name -> "Charley", 'group -> "Angels")
+    .updateAndReturnGeneratedKey.apply() 
 }
 ```
 
@@ -112,7 +112,7 @@ SQL("""insert into members values (?, ?, ?, ?)""")
 
 ### Anorm-like SQL template
 
-Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/2.0.1/ScalaAnorm). 
+Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/latest/ScalaAnorm). 
 
 ```scala
 SQL("""insert into members values ({id}, {email}, {name}, {encryptedPassword})""")
@@ -184,9 +184,10 @@ This feature is still experimental, but you can try it now.
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 
 ```scala
-def create(id: Long, email: String, name: String, encryptedPassword: Sting) {
-  sql"insert into members values (${id}, ${email}, ${name}, ${encryptedPassword})"
-    .update.apply()
+def create(email: String, name: String, encryptedPassword: Sting): Member = {
+  val id = sql"insert into members values (${email}, ${name}, ${encryptedPassword})"
+    .updateAndReturnGeneratedKey.apply()
+  Member(id, email, name, encryptedPassword)
 }
 ```
 
