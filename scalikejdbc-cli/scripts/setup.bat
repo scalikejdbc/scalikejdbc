@@ -117,8 +117,11 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 >>"%build_sbt%" echo.
+>>"%build_sbt%" echo scalaVersion := "2.10.0"
+>>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc"         %% "[1.4,)",
+>>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc"               %% "[1.4,)",
+>>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc-interpolation" %% "[1.4,)",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "[1.7,)",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "[1.3,)", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "[10.8.2,)",
@@ -130,6 +133,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
+>>"%build_sbt%" echo import scalikejdbc.SQLInterpolation._
 >>"%build_sbt%" echo import scalikejdbc.StringSQLRunner._
 >>"%build_sbt%" echo def initialize() {
 >>"%build_sbt%" echo   val props = new java.util.Properties
@@ -156,6 +160,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo initialize()
 >>"%build_sbt%" echo def describe(table: String) = println(DB.describe(table))
 >>"%build_sbt%" echo def tables = println(DB.showTables())
+>>"%build_sbt%" echo implicit val session: DBSession = AutoSession
 >>"%build_sbt%" echo """
 
 echo Command installed to %dbconsole_command%
