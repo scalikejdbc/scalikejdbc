@@ -24,8 +24,8 @@ jdbc.schema=
 generator.packageName=models
 # generator.lineBreak: LF/CRLF
 geneartor.lineBreak=LF
-# generator.template: placeHolderSQL/anormSQL/executableSQL
-generator.template=executableSQL
+# generator.template: basic/namedParameters/executable/interpolation
+generator.template=interpolation
 # generator.testTemplate: specs2unit/specs2acceptance/ScalaTestFlatSpec
 generator.testTemplate=specs2unit
 generator.encoding=UTF-8
@@ -51,9 +51,6 @@ From the following table:
 create table member (
   id int generated always as identity,
   name varchar(30) not null,
-  description varchar(1000),
-  birthday date,
-  created_at timestamp not null,
   primary key(id)
 )
 ```
@@ -64,15 +61,11 @@ This tool will generate the following Scala source code:
 package com.example
 
 import scalikejdbc._
-import org.joda.time.{ LocalDate, DateTime }
+import scalikejdbc.SQLInterpolation._
 
 case class Member(
     id: Int,
-    name: String,
-    memberGroupId: Option[Int] = None,
-    description: Option[String] = None,
-    birthday: Option[LocalDate] = None,
-    createdAt: DateTime) {
+    name: String) {
 
   def save()(implicit session: DBSession = Member.autoSession): Member = Member.update(this)(session)
 
@@ -87,22 +80,14 @@ object Member {
   object columnNames {
     val id = "ID"
     val name = "NAME"
-    val memberGroupId = "MEMBER_GROUP_ID"
-    val description = "DESCRIPTION"
-    val birthday = "BIRTHDAY"
-    val createdAt = "CREATED_AT"
-    val all = Seq(id, name, memberGroupId, description, birthday, createdAt)
+    val all = Seq(id, name)
   }
 
   val * = {
     import columnNames._
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
-      name = rs.string(name),
-      memberGroupId = rs.intOpt(memberGroupId),
-      description = rs.stringOpt(description),
-      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
-      createdAt = rs.timestamp(createdAt).toDateTime)
+      name = rs.string(name))
   }
 
   object joinedColumnNames {
@@ -110,11 +95,7 @@ object Member {
     def as(name: String) = name + delimiter + tableName
     val id = as(columnNames.id)
     val name = as(columnNames.name)
-    val memberGroupId = as(columnNames.memberGroupId)
-    val description = as(columnNames.description)
-    val birthday = as(columnNames.birthday)
-    val createdAt = as(columnNames.createdAt)
-    val all = Seq(id, name, memberGroupId, description, birthday, createdAt)
+    val all = Seq(id, name)
     val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
   }
 
@@ -122,29 +103,24 @@ object Member {
     import joinedColumnNames._
     (rs: WrappedResultSet) => Member(
       id = rs.int(id),
-      name = rs.string(name),
-      memberGroupId = rs.intOpt(memberGroupId),
-      description = rs.stringOpt(description),
-      birthday = rs.dateOpt(birthday).map(_.toLocalDate),
-      createdAt = rs.timestamp(createdAt).toDateTime)
+      name = rs.string(name))
   }
 
   val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[Member] = {
-    SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""")
-      .bindByName('id -> id).map(*).single.apply()
+    sql"""SELECT * FROM MEMBER WHERE ID = ${id}""".map(*).single.apply()
   }
 
   def findAll()(implicit session: DBSession = autoSession): List[Member] = {
-    SQL("""SELECT * FROM MEMBER""").map(*).list.apply()
+    sql"""SELECT * FROM MEMBER""".map(*).list.apply()
   }
 
   def countAll()(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single.apply().get
+    sql"""SELECT COUNT(1) FROM MEMBER""".map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[Member] = {
+  def findAllBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
@@ -155,71 +131,35 @@ object Member {
   }
 
   def create(
-    name: String,
-    memberGroupId: Option[Int] = None,
-    description: Option[String] = None,
-    birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = autoSession): Member = {
-    val generatedKey = SQL("""
+    name: String)(implicit session: DBSession = autoSession): Member = {
+    val generatedKey = sql"""
       INSERT INTO MEMBER (
-        NAME,
-        MEMBER_GROUP_ID,
-        DESCRIPTION,
-        BIRTHDAY,
-        CREATED_AT
+        NAME
       ) VALUES (
-        /*'name*/'abc',
-        /*'memberGroupId*/1,
-        /*'description*/'abc',
-        /*'birthday*/'1958-09-06',
-        /*'createdAt*/'1958-09-06 12:00:00'
+        ${name}
       )
-      """)
-      .bindByName(
-        'name -> name,
-        'memberGroupId -> memberGroupId,
-        'description -> description,
-        'birthday -> birthday,
-        'createdAt -> createdAt
-      ).updateAndReturnGeneratedKey.apply()
+      """.updateAndReturnGeneratedKey.apply()
 
     Member(
       id = generatedKey.toInt,
-      name = name,
-      memberGroupId = memberGroupId,
-      description = description,
-      birthday = birthday,
-      createdAt = createdAt)
+      name = name)
   }
 
   def update(m: Member)(implicit session: DBSession = autoSession): Member = {
-    SQL("""
-      UPDATE 
+    sql"""
+      UPDATE
         MEMBER
-      SET 
-        ID = /*'id*/1,
-        NAME = /*'name*/'abc',
-        MEMBER_GROUP_ID = /*'memberGroupId*/1,
-        DESCRIPTION = /*'description*/'abc',
-        BIRTHDAY = /*'birthday*/'1958-09-06',
-        CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
-      WHERE 
-        ID = /*'id*/1
-      """)
-      .bindByName(
-        'id -> m.id,
-        'name -> m.name,
-        'memberGroupId -> m.memberGroupId,
-        'description -> m.description,
-        'birthday -> m.birthday,
-        'createdAt -> m.createdAt
-      ).update.apply()
+      SET
+        ID = ${m.id},
+        NAME = ${m.name}
+      WHERE
+        ID = ${m.id}
+      """.update.apply()
     m
   }
 
   def delete(m: Member)(implicit session: DBSession = autoSession): Unit = {
-    SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
-      .bindByName('id -> m.id).update.apply()
+    sql"""DELETE FROM MEMBER WHERE ID = ${m.id}""".update.apply()
   }
 
 }
@@ -258,7 +198,7 @@ class MemberSpec extends Specification {
       count should be_>(0L)
     }
     "create new record" in {
-      val created = Member.create(name = "MyString", createdAt = DateTime.now)
+      val created = Member.create(name = "MyString")
       created should not beNull
     }
     "update a record" in {

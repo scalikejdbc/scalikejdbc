@@ -133,6 +133,23 @@ SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
 ```
 
 
+### SQLInterpolation since Scala 2.10
+
+New powerful SQL template using SIP-11 String Interpolation.
+
+```scala
+def create(email: String, name: String, encryptedPassword: Sting): Member = {
+  val id = sql"insert into members values (${email}, ${name}, ${encryptedPassword})"
+    .updateAndReturnGeneratedKey.apply()
+  Member(id, email, name, encryptedPassword)
+}
+```
+
+See in detail:
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
+
+
 ### Flexible transactions
 
 `DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and 'DB.readOnly { session => }` are supported.
@@ -160,20 +177,6 @@ DB localTx { implicit session =>
   } 
   val mightBeUpdated = Member.find(id) 
   // end transaction
-}
-```
-
-### SQLInterpolation since Scala 2.10
-
-This feature is still experimental, but you can try it now.
-
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
-
-```scala
-def create(email: String, name: String, encryptedPassword: Sting): Member = {
-  val id = sql"insert into members values (${email}, ${name}, ${encryptedPassword})"
-    .updateAndReturnGeneratedKey.apply()
-  Member(id, email, name, encryptedPassword)
 }
 ```
 
