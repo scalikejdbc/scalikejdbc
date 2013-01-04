@@ -195,6 +195,50 @@ sbt "scalikejdbc-gen [table-name (class-name)]"
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
+### Testing support
+
+Testing support for ScalaTest:
+
+```scala
+class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
+
+  override def fixture(implicit session: DBSession) {
+    SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
+  }
+
+  it should "create a new record" in { implicit session =>
+    val before = Member.count() 
+    Member.create(3, "Chris")
+    Member.count() should equal(before + 1)
+  }
+
+}
+```
+
+for specs2(unit):
+
+```scala
+object MemberSpec extends Specification {
+
+  "Member should create a new record" in new AutoRollback {
+    val before = Member.count()
+    Member.create(3, "Chris")
+    Member.count() must_==(before + 1) 
+  }
+
+  trait AutoRollbackWithFixture extends AutoRollback {
+    override def fixture(implicit session: DBSession) { ... }
+  }
+
+  "Member should ..." in new AutoRollbackWithFixture { ... }
+
+}
+```
+
+Support for specs2(acceptance) is also available. See in detail:
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test
+
 
 ### Play! Framework 2.x support
 

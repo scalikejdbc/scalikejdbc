@@ -1,0 +1,2 @@
+seq(scalariformSettings: _*)
+
