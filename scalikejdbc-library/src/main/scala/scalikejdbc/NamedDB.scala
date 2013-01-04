@@ -42,6 +42,8 @@ case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnec
 
   private lazy val db: DB = DB(connectionPool().borrow())
 
+  def toDB(): DB = db
+
   def isTxNotActive = db.isTxNotActive
 
   def isTxNotYetStarted = db.isTxNotYetStarted

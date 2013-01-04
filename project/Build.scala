@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.1"
+  lazy val _version = "1.4.2-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -62,7 +62,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
+          "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "compile",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
           "org.scalatest"  %% "scalatest"            % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
@@ -128,6 +128,34 @@ object ScalikeJDBCProjects extends Build {
             )
           }
         }
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ) dependsOn(scalikejdbc)
+
+  lazy val scalikejdbcTest = Project(
+    id = "test",
+    base = file("scalikejdbc-test"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-test",
+      version := _version,
+      scalaVersion := "2.10.0",
+      crossScalaVersions := _crossScalaVersions,
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
+          "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
+          "org.specs2"     %% "specs2"               % "[1.12,)" % "provided",
+          "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
