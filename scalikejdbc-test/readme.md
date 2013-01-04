@@ -5,7 +5,7 @@
 With [ScalaTest](http://scalatest.org/):
 
 ```scala
-val appDependencies = Seq(
+libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"      % "[1.4,)",
   "com.github.seratch" %% "scalikejdbc-test" % "[1.4,)" % "test",
   "org.scalatest"      %% "scalatest"        % "[1.8,)" % "test"
@@ -15,7 +15,7 @@ val appDependencies = Seq(
 or with [specs2](http://specs2.org/):
 
 ```scala
-val appDependencies = Seq(
+libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"      % "[1.4,)",
   "com.github.seratch" %% "scalikejdbc-test" % "[1.4,)"  % "test",
   "org.specs2"         %% "specs2"           % "[1.12,)" % "test"

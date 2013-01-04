@@ -16,7 +16,6 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc",
       version := _version,
-      scalaVersion := "2.10.0",
       crossScalaVersions := _crossScalaVersions,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -85,11 +84,20 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-mapper-generator",
       version := _version,
       resolvers ++= _resolvers,
-      libraryDependencies ++= Seq(
-        "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
-        "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
-        "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
-      ) ++ jdbcDriverDependenciesInTestScope,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        (scalaVersion match {
+          case "2.10.0" => Seq(
+            "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
+            "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
+            "org.specs2"    %% "specs2"       % "[1.13,)" % "test"
+           )
+          case _ => Seq(
+            "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
+            "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
+            "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
+           )
+        }) ++ jdbcDriverDependenciesInTestScope
+      },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       publishArtifact in Test := false,
@@ -97,8 +105,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  ) dependsOn(scalikejdbc)
-  //) dependsOn(scalikejdbc, scalikejdbcInterpolation)
+  ) dependsOn(scalikejdbc, scalikejdbcTest)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
@@ -153,9 +160,11 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
           "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
-          "org.specs2"     %% "specs2"               % "[1.12,)" % "provided",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+        ) ++ (scalaVersion match {
+          case "2.10.0" => Seq("org.specs2" %% "specs2" % "[1.13,)" % "provided")
+          case _ => Seq("org.specs2" %% "specs2" % "[1.12,)" % "provided")
+        }) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,

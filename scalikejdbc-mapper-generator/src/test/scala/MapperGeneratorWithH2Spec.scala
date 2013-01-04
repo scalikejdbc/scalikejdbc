@@ -21,7 +21,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       try {
         SQL("select count(1) from member_group").map(rs => rs).list.apply()
       } catch {
-        case e =>
+        case e: Exception =>
           try {
             SQL("""
             create table member_group (
@@ -30,7 +30,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
               primary key(id)
             )
             """).execute.apply()
-          } catch { case e => }
+          } catch { case e: Exception => }
       }
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
@@ -116,7 +116,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       try {
         SQL("select count(1) from member").map(rs => rs).list.apply()
       } catch {
-        case e =>
+        case e: Exception =>
           try {
             SQL("""
             create table member (
@@ -129,7 +129,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
               primary key(id)
             )
             """).execute.apply()
-          } catch { case e => }
+          } catch { case e: Exception => }
       }
     }
 
@@ -175,7 +175,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       try {
         SQL("select count(1) from un_normalized").map(rs => rs).list.apply()
       } catch {
-        case e =>
+        case e: Exception =>
           try {
             SQL("""
           create table un_normalized (
@@ -215,7 +215,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
             primary key(id)
           )
           """).execute.apply()
-          } catch { case e => }
+          } catch { case e: Exception => }
       }
     }
 
@@ -238,7 +238,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       try {
         SQL("select count(1) from without_pk").map(rs => rs).list.apply()
       } catch {
-        case e =>
+        case e: Exception =>
           try {
             SQL("""
             create table without_pk (
@@ -247,7 +247,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
               created_at timestamp not null
             )
             """).execute.apply()
-          } catch { case e => }
+          } catch { case e: Exception => }
       }
     }
 

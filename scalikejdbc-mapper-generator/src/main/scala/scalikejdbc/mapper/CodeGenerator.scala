@@ -942,41 +942,42 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |
           |import org.scalatest._
           |import org.joda.time._
+          |import scalikejdbc.scalatest.AutoRollback
           |
-          |class %className%Spec extends FlatSpec with ShouldMatchers {
+          |class %className%Spec extends fixture.FlatSpec with ShouldMatchers with AutoRollback {
           |
           |  behavior of "%className%"
           |
-          |  it should "find by primary keys" in {
+          |  it should "find by primary keys" in { implicit session =>
           |    val maybeFound = %className%.find(%primaryKeys%)
           |    maybeFound.isDefined should be(true)
           |  }
-          |  it should "find all records" in {
+          |  it should "find all records" in { implicit session =>
           |    val allResults = %className%.findAll()
           |    allResults.size should be >(0)
           |  }
-          |  it should "count all records" in {
+          |  it should "count all records" in { implicit session =>
           |    val count = %className%.countAll()
           |    count should be >(0L)
           |  }
-          |  it should "find by where clauses" in {
+          |  it should "find by where clauses" in { implicit session =>
           |    val results = %className%.findAllBy(%whereExample%)
           |    results.size should be >(0)
           |  }
-          |  it should "count by where clauses" in {
+          |  it should "count by where clauses" in { implicit session =>
           |    val count = %className%.countBy(%whereExample%)
           |    count should be >(0L)
           |  }
-          |  it should "create new record" in {
+          |  it should "create new record" in { implicit session =>
           |    val created = %className%.create(%createFields%)
           |    created should not be(null)
           |  }
-          |  it should "update a record" in {
+          |  it should "update a record" in { implicit session =>
           |    val entity = %className%.findAll().head
           |    val updated = %className%.update(entity)
           |    updated should not eq(entity)
           |  }
-          |  it should "delete a record" in {
+          |  it should "delete a record" in { implicit session =>
           |    val entity = %className%.findAll().head
           |    %className%.delete(entity)
           |    val shouldBeNone = %className%.find(%primaryKeys%)
@@ -989,42 +990,43 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       Some(replaceVariablesForTestPart(
         """package %package%
           |
+          |import scalikejdbc.specs2.mutable.AutoRollback
           |import org.specs2.mutable._
           |import org.joda.time._
           |
           |class %className%Spec extends Specification {
           |
           |  "%className%" should {
-          |    "find by primary keys" in {
+          |    "find by primary keys" in new AutoRollback {
           |      val maybeFound = %className%.find(%primaryKeys%)
           |      maybeFound.isDefined should beTrue
           |    }
-          |    "find all records" in {
+          |    "find all records" in new AutoRollback {
           |      val allResults = %className%.findAll()
           |      allResults.size should be_>(0)
           |    }
-          |    "count all records" in {
+          |    "count all records" in new AutoRollback {
           |      val count = %className%.countAll()
           |      count should be_>(0L)
           |    }
-          |    "find by where clauses" in {
+          |    "find by where clauses" in new AutoRollback {
           |      val results = %className%.findAllBy(%whereExample%)
           |      results.size should be_>(0)
           |    }
-          |    "count by where clauses" in {
+          |    "count by where clauses" in new AutoRollback {
           |      val count = %className%.countBy(%whereExample%)
           |      count should be_>(0L)
           |    }
-          |    "create new record" in {
+          |    "create new record" in new AutoRollback {
           |      val created = %className%.create(%createFields%)
           |      created should not beNull
           |    }
-          |    "update a record" in {
+          |    "update a record" in new AutoRollback {
           |      val entity = %className%.findAll().head
           |      val updated = %className%.update(entity)
           |      updated should not equalTo(entity)
           |    }
-          |    "delete a record" in {
+          |    "delete a record" in new AutoRollback {
           |      val entity = %className%.findAll().head
           |      %className%.delete(entity)
           |      val shouldBeNone = %className%.find(%primaryKeys%)
@@ -1038,56 +1040,60 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       Some(replaceVariablesForTestPart(
         """package %package%
           |
+          |import scalikejdbc.specs2.AutoRollback
           |import org.specs2._
           |import org.joda.time._
           |
           |class %className%Spec extends Specification { def is =
           |
           |  "The '%className%' model should" ^
-          |    "find by primary keys"         ! findByPrimaryKeys ^
-          |    "find all records"             ! findAll ^
-          |    "count all records"            ! countAll ^
-          |    "find by where clauses"        ! findAllBy ^
-          |    "count by where clauses"       ! countBy ^
-          |    "create new record"            ! create ^
-          |    "update a record"              ! update ^
-          |    "delete a record"              ! delete ^
+          |    "find by primary keys"         ! autoRollback().findByPrimaryKeys ^
+          |    "find all records"             ! autoRollback().findAll ^
+          |    "count all records"            ! autoRollback().countAll ^
+          |    "find by where clauses"        ! autoRollback().findAllBy ^
+          |    "count by where clauses"       ! autoRollback().countBy ^
+          |    "create new record"            ! autoRollback().create ^
+          |    "update a record"              ! autoRollback().update ^
+          |    "delete a record"              ! autoRollback().delete ^
           |                                   end
           |
-          |  def findByPrimaryKeys = {
-          |    val maybeFound = %className%.find(%primaryKeys%)
-          |    maybeFound.isDefined should beTrue
-          |  }
-          |  def findAll = {
-          |    val allResults = %className%.findAll()
-          |    allResults.size should be_>(0)
-          |  }
-          |  def countAll = {
-          |    val count = %className%.countAll()
-          |    count should be_>(0L)
-          |  }
-          |  def findAllBy = {
-          |    val results = %className%.findAllBy(%whereExample%)
-          |    results.size should be_>(0)
-          |  }
-          |  def countBy = {
-          |    val count = %className%.countBy(%whereExample%)
-          |    count should be_>(0L)
-          |  }
-          |  def create = {
-          |    val created = %className%.create(%createFields%)
-          |    created should not beNull
-          |  }
-          |  def update = {
-          |    val entity = %className%.findAll().head
-          |    val updated = %className%.update(entity)
-          |    updated should not equalTo(entity)
-          |  }
-          |  def delete = {
-          |    val entity = %className%.findAll().head
-          |    %className%.delete(entity)
-          |    val shouldBeNone = %className%.find(%primaryKeys%)
-          |    shouldBeNone.isDefined should beFalse
+          |  case class autoRollback() extends AutoRollback {
+          |
+          |    def findByPrimaryKeys = this {
+          |      val maybeFound = %className%.find(%primaryKeys%)
+          |      maybeFound.isDefined should beTrue
+          |    }
+          |    def findAll = this {
+          |      val allResults = %className%.findAll()
+          |      allResults.size should be_>(0)
+          |    }
+          |    def countAll = this {
+          |      val count = %className%.countAll()
+          |      count should be_>(0L)
+          |    }
+          |    def findAllBy = this {
+          |      val results = %className%.findAllBy(%whereExample%)
+          |      results.size should be_>(0)
+          |    }
+          |    def countBy = this {
+          |      val count = %className%.countBy(%whereExample%)
+          |      count should be_>(0L)
+          |    }
+          |    def create = this {
+          |      val created = %className%.create(%createFields%)
+          |      created should not beNull
+          |    }
+          |    def update = this {
+          |      val entity = %className%.findAll().head
+          |      val updated = %className%.update(entity)
+          |      updated should not equalTo(entity)
+          |    }
+          |    def delete = this {
+          |      val entity = %className%.findAll().head
+          |      %className%.delete(entity)
+          |      val shouldBeNone = %className%.find(%primaryKeys%)
+          |      shouldBeNone.isDefined should beFalse
+          |    }
           |  }
           |
           |}
