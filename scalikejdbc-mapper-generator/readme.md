@@ -206,51 +206,50 @@ And specs2 or ScalaTest's FlatSpec.
 ```scala
 package com.example
 
+import scalikejdbc.specs2.mutable.AutoRollback
 import org.specs2.mutable._
 import org.joda.time._
 
 class MemberSpec extends Specification {
 
   "Member" should {
-    "find by primary keys" in {
+    "find by primary keys" in new AutoRollback {
       val maybeFound = Member.find(123)
       maybeFound.isDefined should beTrue
     }
-    "find all records" in {
+    "find all records" in new AutoRollback {
       val allResults = Member.findAll()
       allResults.size should be_>(0)
     }
-    "count all records" in {
+    "count all records" in new AutoRollback {
       val count = Member.countAll()
       count should be_>(0L)
     }
-    "find by where clauses" in {
+    "find by where clauses" in new AutoRollback {
       val results = Member.findAllBy("ID = {id}", 'id -> 123)
       results.size should be_>(0)
     }
-    "count by where clauses" in {
+    "count by where clauses" in new AutoRollback {
       val count = Member.countBy("ID = {id}", 'id -> 123)
       count should be_>(0L)
     }
-    "create new record" in {
-      val created = Member.create(name = "MyString")
+    "create new record" in new AutoRollback {
+      val created = Member.create(name = "MyString", createdAt = DateTime.now)
       created should not beNull
     }
-    "update a record" in {
+    "update a record" in new AutoRollback {
       val entity = Member.findAll().head
-      val updated = Member.update(entity)
+      val updated = Member.update(entity.copy(name = "Updated"))
       updated should not equalTo (entity)
     }
-    "delete a record" in {
-      val entity = Member.findAll().head
-      Member.delete(entity)
+    "delete a record" in new AutoRollback {
+      Member.find(123).map { entity =>
+        Member.delete(entity)
+      }
       val shouldBeNone = Member.find(123)
       shouldBeNone.isDefined should beFalse
     }
   }
 
 }
-
 ```
-
-
