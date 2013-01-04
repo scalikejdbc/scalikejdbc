@@ -1,0 +1,16 @@
+ScalikeJDBC 1.4.3 has been released. 
+
+Updated mapper-generator for scalikejdbc-test support.
+
+## mapper-generator
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
+
+* Generated tests should use AutoRollback [(GH-60)](https://github.com/seratch/scalikejdbc/issues/60)
+
+## test
+
+* Bumped specs2 to 0.13 for Scala 2.10.0 (thanks to @xuwei_k)
+
+Enjoy!
+

@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.2"
+  lazy val _version = "1.4.3"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -83,6 +83,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-mapper-generator",
       version := _version,
+      scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
@@ -115,8 +116,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-play-plugin",
       version := _version,
-      scalaVersion := "2.10.0",
-      crossScalaVersions := Seq("2.10.0", "2.9.2", "2.9.1"),
+      crossScalaVersions := Seq("2.10.0", "2.9.1"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
@@ -153,7 +153,6 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-test",
       version := _version,
-      scalaVersion := "2.10.0",
       crossScalaVersions := _crossScalaVersions,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
