@@ -64,7 +64,7 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "test",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
-          "org.scalatest"  %  "scalatest_2.9.2"      % "[1.8,)" % "test"
+          "org.scalatest"  %% "scalatest"            % "[1.8,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -86,9 +86,9 @@ object ScalikeJDBCProjects extends Build {
       version := _version,
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
-        "org.slf4j" % "slf4j-simple" % "1.7.2" % "compile",
-        "org.scalatest" % "scalatest_2.9.2" % "[1.8,)" % "test",
-        "org.specs2" % "specs2_2.9.2" % "1.12.2" % "test"
+        "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
+        "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
+        "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
       ) ++ jdbcDriverDependenciesInTestScope,
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -98,6 +98,7 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc)
+  //) dependsOn(scalikejdbc, scalikejdbcInterpolation)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",

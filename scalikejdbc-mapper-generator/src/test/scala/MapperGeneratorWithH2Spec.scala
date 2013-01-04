@@ -33,29 +33,78 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
           } catch { case e => }
       }
     }
-    Model(url, username, password).table(null, "MEMBER_GROUP").map {
-      table =>
-        val generator1 = CodeGenerator(table)(GeneratorConfig(
+    Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
-          template = GeneratorTemplate("executableSQL"),
+          template = GeneratorTemplate.executableSQL,
           packageName = "com.example"
         ))
-        println(generator1.modelAll())
-        generator1.writeModelIfNotExist()
-        val generator2 = CodeGenerator(table)(GeneratorConfig(
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
-          template = GeneratorTemplate("placeHolderSQL"),
+          template = GeneratorTemplate.executable,
+          packageName = "com.example.executable"
+        ))
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate.placeHolderSQL,
           packageName = "com.example.placeholder"
         ))
-        println(generator2.modelAll())
-        generator2.writeModelIfNotExist()
-        val generator3 = CodeGenerator(table)(GeneratorConfig(
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator/src/test/scala",
-          template = GeneratorTemplate("anormSQL"),
+          template = GeneratorTemplate.basic,
+          packageName = "com.example.basic"
+        ))
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate.anormSQL,
           packageName = "com.example.anorm"
         ))
-        println(generator3.modelAll())
-        generator3.writeModelIfNotExist()
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate.namedParameters,
+          packageName = "com.example.namedparameters"
+        ))
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
+      {
+        val generator = CodeGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator/src/test/scala",
+          template = GeneratorTemplate.interpolation,
+          packageName = "com.example.interpolation"
+        ))
+        println(generator.modelAll())
+        generator.writeModelIfNotExist()
+      }
+
     } getOrElse {
       fail("The table is not found.")
     }

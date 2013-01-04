@@ -35,7 +35,7 @@ case class Model(url: String, username: String, password: String) {
   private def isAutoIncrement(implicit rs: WrappedResultSet): Boolean = try {
     val isAutoIncrement = rs.string("IS_AUTOINCREMENT")
     isAutoIncrement == "YES" || isAutoIncrement == "Y"
-  } catch { case e => false }
+  } catch { case e: Exception => false }
 
   def table(schema: String = null, tableName: String): Option[Table] = {
     val catalog = null

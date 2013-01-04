@@ -24,9 +24,19 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   encoding: String = "UTF-8")
 
 object GeneratorTemplate {
-  val execautableSQL = GeneratorTemplate("executableSQL")
-  val anormSQL = GeneratorTemplate("anormSQL")
+
+  val basic = GeneratorTemplate("basic")
+  val namedParameters = GeneratorTemplate("namedParameters")
+  val executable = GeneratorTemplate("executable")
+  val interpolation = GeneratorTemplate("interpolation")
+
+  @deprecated(message = "Use basic instead.", since = "1.4.2")
   val placeHolderSQL = GeneratorTemplate("placeHolderSQL")
+  @deprecated(message = "Use namedParameters instead.", since = "1.4.2")
+  val anormSQL = GeneratorTemplate("anormSQL")
+  @deprecated(message = "Use executable instead.", since = "1.4.2")
+  val executableSQL = GeneratorTemplate("executableSQL")
+
 }
 
 case class GeneratorTemplate(name: String)

@@ -18,7 +18,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     try {
       SQL("select count(1) from member_group").map(rs => rs).list.apply()
     } catch {
-      case e =>
+      case e: Exception =>
         try {
           SQL("""
             create table member_group (
@@ -27,7 +27,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
               primary key(id)
             )
             """).execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
     }
   }
 
@@ -35,7 +35,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     try {
       SQL("select count(1) from member").map(rs => rs).list.apply()
     } catch {
-      case e =>
+      case e: Exception =>
         try {
           SQL("""
             create table member (
@@ -48,7 +48,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
               primary key(id)
             )
             """).execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
     }
   }
 
@@ -56,7 +56,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     try {
       SQL("select count(1) from un_normalized").map(rs => rs).list.apply()
     } catch {
-      case e =>
+      case e: Exception =>
         try {
           SQL("""
           create table un_normalized (
@@ -96,7 +96,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
             primary key(id)
           )
           """).execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
     }
   }
 
@@ -104,7 +104,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
     try {
       SQL("select count(1) from without_pk").map(rs => rs).list.apply()
     } catch {
-      case e =>
+      case e: Exception =>
         try {
           SQL("""
             create table without_pk (
@@ -113,7 +113,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
               created_at timestamp not null
             )
             """).execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
     }
   }
 
@@ -145,7 +145,7 @@ class UsingMappersSpec extends FlatSpec with ShouldMatchers {
         Member.findAllBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
-    } catch { case e => }
+    } catch { case e: Exception => }
     Member.findAllBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
   }
 
