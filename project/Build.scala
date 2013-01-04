@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.2-SNAPSHOT"
+  lazy val _version = "1.4.2"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -37,7 +37,7 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
           "org.scalatest"           %  scalatest              % "1.8"      % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"    % "test",
-          "play"                    %% "anorm"                % "[2,)"     % "test"
+          "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,

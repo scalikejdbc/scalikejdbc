@@ -1,0 +1,75 @@
+ScalikeJDBC 1.4.2 has been released. 
+
+mapper-generator started supporting interpolation-style code. And scalikejdbc-test is newly added.
+
+## test
+
+Newly released! Testing support for ScalaTest and specs2.
+
+* Automatic rollback support with ScalaTest and specs2 [(GH-57)](https://github.com/seratch/scalikejdbc/issues/57)
+* Fixture support with ScalaTest and specs2 [(GH-58)](https://github.com/seratch/scalikejdbc/issues/58)
+
+Here is an example with specs2:
+
+    import scalikejdbc._
+    import scalikejdbc.specs2.mutable.AutoRollback
+    import org.specs2.mutable.Specification
+     
+    object MemberSpec extends Specification {
+      "Member should create a new record" in new AutoRollback {
+        val before = Member.count()
+        Member.create(3, "Chris")
+        Member.count() must_==(before + 1)
+      }
+    }
+
+See in detail: 
+
+[https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test](https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test)
+
+
+## library
+
+* `NamedDB#toDB()` is added.
+
+
+## mapper-generator
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
+
+* SQLInterpolation support [(GH-56)](https://github.com/seratch/scalikejdbc/issues/56)
+* Refactored generator.template values (but still backward compatible)
+
+## interpolation
+
+    libraryDependencies ++= Seq(
+      "com.github.seratch" %% "scalikejdbc"               % "[1.4,)",
+      "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)"
+    )
+
+No changes.
+
+## play-plugin
+
+    val appDependencies = Seq(
+      "com.github.seratch" %% "scalikejdbc"             % "[1.4,)",
+      "com.github.seratch" %% "scalikejdbc-play-plugin" % "[1.4,)"
+    )
+
+No changes. 
+
+## dbconsole
+
+For Mac OS X or Linux and so on.
+
+    curl -L http://git.io/dbconsole | sh
+
+For Windows.
+
+    curl http://git.io/dbconsole.bat
+
+* Enabled SQLInterpolation
+* Enabled implicit AutoSession by default
+
+Enjoy!
+
