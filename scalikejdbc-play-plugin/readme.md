@@ -2,7 +2,7 @@
 
 ## ScalikeJDBC
 
-SQL-Based DB Access Library for Scala
+ScalikeJDBC is A tidy SQL-based DB access library for Scala developers.
 
 https://github.com/seratch/scalikejdbc
 
@@ -12,17 +12,6 @@ https://github.com/seratch/scalikejdbc
 ScalikeJDBC works with Play20 seamlessly.
 
 http://www.playframework.org/documentation/2.0/ScalaHome
-
-
-## g8 template
-
-https://github.com/seratch/play-with-scalikejdbc.g8
-
-If you know giter8, try the template now as follows.
-
-```sh
-g8 seratch/play-with-scalikejdbc
-```
 
 
 ## Setting up manually

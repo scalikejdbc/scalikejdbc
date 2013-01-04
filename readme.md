@@ -77,18 +77,18 @@ sbt console
 "members" table is already created. You can execute queries as follows:
 
 ```scala
-case class Member(id: Long, name: String)
+case class Member(id: Long, name: Option[String] = None)
 
-val members = DB readOnly { implicit session => 
+val members: List[Member] = DB readOnly { implicit session => 
   SQL("select * from members")
-    .map(rs => Member(rs.long("id"), rs.string("name")))
+    .map { rs => Member(rs.long("id"), rs.stringOpt("name")) }
     .list.apply()
 }
 
-val id = DB localTx { implicit session => 
-  SQL("insert into members (name, group) values ({name}, {group})")
-    .bindByName('name -> "Charley", 'group -> "Angels")
-    .updateAndReturnGeneratedKey.apply() 
+val createdMember: Member = DB localTx { implicit session => 
+  val id = SQL("insert into members (name) values ({name})")
+    .bindByName('name -> Some("Charley")).updateAndReturnGeneratedKey.apply() 
+  Member(id, Some("Charley"))
 }
 ```
 
@@ -99,53 +99,39 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 ## Features
 
-### Basic SQL template
+### Basic SQL Template
 
 The most basic way is just using prepared statement as follows.
 
 ```scala
-SQL("""insert into members values (?, ?, ?, ?)""")
-  .bind(132430, "bob@example.com", "Bob", "xfewSZe2sd3w")
-  .update.apply()
+SQL("""insert into members values (?, ?)""")
+  .bind(132430, Some("Bob")).update.apply()
 ```
 
 
-### Anorm-like SQL template
+### Named Parameters SQL Template
 
 Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/latest/ScalaAnorm). 
 
 ```scala
-SQL("""insert into members values ({id}, {email}, {name}, {encryptedPassword})""")
-  .bindByName(
-    'id -> 132430,
-    'email -> "bob@example.com",
-    'name -> "Bob",
-    'encryptedPassword -> "xfewSZe2sd3w")
+SQL("insert into members values ({id}, {name})")
+  .bindByName('id -> 132430, 'name -> Some("Bob"))
   .update.apply()
 ```
 
 
-### Executable SQL template
+### Executable SQL Template
 
 Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
 
 Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
 
 ```scala
-SQL("""
-  insert into members values (
-    /*'id*/123,
-    /*'email*/'alice@example.com',
-    /*'name*/'Alice',
-    /*'encryptedPassword*/'123456789012')
-""")
-  .bindByName(
-    'id -> 132430,
-    'email -> "bob@example.com",
-    'name -> "Bob",
-    'encryptedPassword -> "xfewSZe2sd3w")
+SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
+  .bindByName('id -> 132430, 'name -> Some("Bob"))
   .update.apply()
 ```
+
 
 ### Flexible transactions
 
@@ -177,7 +163,7 @@ DB localTx { implicit session =>
 }
 ```
 
-### SQLInterpolation for Scala 2.10
+### SQLInterpolation since Scala 2.10
 
 This feature is still experimental, but you can try it now.
 
@@ -192,7 +178,7 @@ def create(email: String, name: String, encryptedPassword: Sting): Member = {
 ```
 
 
-### Logging SQL And Timing
+### Logging SQL and timing
 
 Using LogginSQLAndTime feature, you can check the actual SQL(not exactly) and time.
 
@@ -210,7 +196,7 @@ sbt "scalikejdbc-gen [table-name (class-name)]"
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
 
 
-### Play framework 2.x support
+### Play! Framework 2.x support
 
 You can use ScalikeJDBC with Play framework 2.x seamlessly.
 
@@ -236,6 +222,13 @@ http://git.io/dbconsole.bat
 ```
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-cli
+
+
+### ScalikeJDBC Cookbook on the Kindle store
+
+"ScalikeJDBC Cookbook" is the e-book for ScalikeJDBC users.
+
+https://github.com/seratch/scalikejdbc-cookbook
 
 
 ## License
