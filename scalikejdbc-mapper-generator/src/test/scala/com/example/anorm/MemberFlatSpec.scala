@@ -41,8 +41,8 @@ class MemberFlatSpec extends fixture.FlatSpec with ShouldMatchers with AutoRollb
   }
   it should "update a record" in { implicit session =>
     val entity = Member.findAll().head
-    val updated = Member.update(entity)
-    updated should not eq (entity)
+    val updated = Member.update(entity.copy(name = "Updated"))
+    updated should not equal (entity)
   }
   it should "delete a record" in { implicit session =>
     Member.find(123).map { entity =>

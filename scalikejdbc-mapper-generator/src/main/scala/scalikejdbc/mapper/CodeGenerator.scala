@@ -975,7 +975,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
           |  it should "update a record" in { implicit session =>
           |    val entity = %className%.findAll().head
           |    val updated = %className%.update(entity)
-          |    updated should not eq(entity)
+          |    updated should not equal(entity)
           |  }
           |  it should "delete a record" in { implicit session =>
           |    val entity = %className%.findAll().head
