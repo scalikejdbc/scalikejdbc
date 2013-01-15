@@ -122,6 +122,29 @@ object ConnectionPool extends LogSupport {
     pool.borrow()
   }
 
+  /**
+   * Close a pool by name
+   * @param name pool name
+   */
+  def close(name: Any): Unit = {
+    pools.synchronized {
+      val removed = pools.remove(name)
+      removed.foreach { pool => pool.close() }
+    }
+  }
+
+  /**
+   * Close all connection pools
+   */
+  def closeAll(): Unit = {
+    pools.synchronized {
+      pools.foreach {
+        case (name, pool) =>
+          close(name)
+      }
+    }
+  }
+
 }
 
 /**
@@ -174,6 +197,11 @@ abstract class ConnectionPool(url: String,
    */
   override def toString() = "ConnectionPool(url:" + url + ", user:" + user + ")"
 
+  /**
+   * Close this connection pool.
+   */
+  def close(): Unit = throw new UnsupportedOperationException
+
 }
 
 /**
@@ -221,6 +249,8 @@ class CommonsConnectionPool(url: String,
   override def maxActive: Int = _pool.getMaxActive
 
   override def maxIdle: Int = _pool.getMaxIdle
+
+  override def close(): Unit = _pool.close()
 
 }
 

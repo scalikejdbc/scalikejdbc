@@ -128,6 +128,13 @@ object PlayPluginSpec extends Specification {
       running(fakeAppWithDBPlugin) { simpleTest("user_withdbplugin") }
     }
 
+    "close connection pools after stopping Play app" in {
+      running(fakeApp) {
+        simpleTest("user_4")
+      }
+      simpleTest("user_5") must throwA[IllegalStateException](message = "Connection pool is not yet initialized.")
+    }
+
   }
 
 }
