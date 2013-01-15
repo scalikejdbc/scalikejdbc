@@ -26,60 +26,68 @@ class PlayPlugin(app: Application) extends Plugin {
 
   // Play DB configuration
 
-  private[this] lazy val playDbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
-
-  playDbConfig.subKeys map {
-    name =>
-      def load(name: String): (String, String, String, ConnectionPoolSettings) = {
-        implicit val config = playDbConfig
-        Class.forName(require(name, "driver"))
-        val default = ConnectionPoolSettings()
-        val settings = ConnectionPoolSettings(
-          initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
-          maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
-          validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
-        )
-        (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
-      }
-
-      registeredPoolNames.synchronized {
-        name match {
-          case "global" =>
-            // because "db.global" was used as "scalikejdbc.global" previously
-            Logger(classOf[PlayPlugin]).warn("Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
-          case "default" =>
-            if (!registeredPoolNames.contains("default")) {
-              val (url, user, password, settings) = load(name)
-              ConnectionPool.singleton(url, user, password, settings)
-              registeredPoolNames.append("default")
-            }
-          case _ =>
-            if (!registeredPoolNames.contains(name)) {
-              val (url, user, password, settings) = load(name)
-              ConnectionPool.add(Symbol(name), url, user, password, settings)
-              registeredPoolNames.append(name)
-            }
-        }
-      }
-  }
+  private[this] def playDbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
 
   // ScalikeJDBC global configuration
 
-  private[this] lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
+  private[this] def globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
 
   private[this] val loggingSQLAndTime = "loggingSQLAndTime"
 
-  opt(loggingSQLAndTime, "enabled")(globalConfig).map(_.toBoolean).foreach {
-    enabled =>
-      implicit val config = globalConfig
-      val default = LoggingSQLAndTimeSettings()
-      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
-        enabled = enabled,
-        logLevel = opt(loggingSQLAndTime, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
-        warningEnabled = opt(loggingSQLAndTime, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
-        warningThresholdMillis = opt(loggingSQLAndTime, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
-        warningLogLevel = opt(loggingSQLAndTime, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
-      )
+  override def onStart(): Unit = {
+    playDbConfig.subKeys map {
+      name =>
+        def load(name: String): (String, String, String, ConnectionPoolSettings) = {
+          implicit val config = playDbConfig
+          Class.forName(require(name, "driver"))
+          val default = ConnectionPoolSettings()
+          val settings = ConnectionPoolSettings(
+            initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
+            maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
+            validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
+          )
+          (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
+        }
+
+        registeredPoolNames.synchronized {
+          name match {
+            case "global" =>
+              // because "db.global" was used as "scalikejdbc.global" previously
+              Logger(classOf[PlayPlugin]).warn("Configuration with \"db.global\" is ignored. Use \"scalikejdbc.global\" instead.")
+            case "default" =>
+              if (!registeredPoolNames.contains("default")) {
+                val (url, user, password, settings) = load(name)
+                ConnectionPool.singleton(url, user, password, settings)
+                registeredPoolNames.append("default")
+              }
+            case _ =>
+              if (!registeredPoolNames.contains(name)) {
+                val (url, user, password, settings) = load(name)
+                ConnectionPool.add(Symbol(name), url, user, password, settings)
+                registeredPoolNames.append(name)
+              }
+          }
+        }
+    }
+
+    opt(loggingSQLAndTime, "enabled")(globalConfig).map(_.toBoolean).foreach {
+      enabled =>
+        implicit val config = globalConfig
+        val default = LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+          enabled = enabled,
+          logLevel = opt(loggingSQLAndTime, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
+          warningEnabled = opt(loggingSQLAndTime, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
+          warningThresholdMillis = opt(loggingSQLAndTime, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
+          warningLogLevel = opt(loggingSQLAndTime, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
+        )
+    }
+
+  }
+
+  override def onStop(): Unit = {
+    ConnectionPool.closeAll()
+    registeredPoolNames.clear()
   }
 
 }
