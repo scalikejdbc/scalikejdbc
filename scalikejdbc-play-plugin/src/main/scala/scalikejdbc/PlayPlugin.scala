@@ -26,11 +26,11 @@ class PlayPlugin(app: Application) extends Plugin {
 
   // Play DB configuration
 
-  private[this] def playDbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
+  private[this] lazy val playDbConfig = app.configuration.getConfig("db").getOrElse(Configuration.empty)
 
   // ScalikeJDBC global configuration
 
-  private[this] def globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
+  private[this] lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
 
   private[this] val loggingSQLAndTime = "loggingSQLAndTime"
 
