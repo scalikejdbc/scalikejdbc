@@ -81,6 +81,7 @@ object ConnectionPool extends LogSupport {
   def add(name: Any, url: String, user: String, password: String,
     settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
     pools.synchronized {
+      pools.get(name).foreach { pool => pool.close() }
       pools.update(name, factory.apply(url, user, password, settings))
     }
     log.debug("Registered connection pool : " + get(name).toString())
