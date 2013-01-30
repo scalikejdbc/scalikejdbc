@@ -150,7 +150,7 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 
 ### Flexible transactions
 
-`DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and 'DB.readOnly { session => }` are supported.
+`DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and `DB.readOnly { session => }` are supported.
 
 In addition, passing `AutoSession` as an implicit parameter is quite useful. Like this:
 
