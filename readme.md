@@ -138,9 +138,9 @@ SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
 New powerful SQL template using SIP-11 String Interpolation.
 
 ```scala
-val id = sql"insert into members values (${email}, ${name}, ${encryptedPassword})"
-  .updateAndReturnGeneratedKey.apply()
-}
+val name = "Martin"
+val email = "martin@example.com"
+val id = sql"insert into members values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
 ```
 
 See in detail:
