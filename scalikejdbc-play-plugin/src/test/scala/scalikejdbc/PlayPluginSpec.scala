@@ -12,6 +12,8 @@ import play.api.Play.current
 
 object PlayPluginSpec extends Specification {
 
+  sequential
+
   Class.forName("org.h2.Driver")
 
   def fakeApp = FakeApplication(

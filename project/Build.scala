@@ -120,11 +120,12 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
-          case "2.10.0-RC1"|"2.10.0" => {
-            val playVersion = "2.1-RC1"
+          case "2.10.0" => {
+            val playVersion = "2.1.0"
             Seq(
               "play" % "play_2.10" % playVersion % "provided",
-              "play" % "play-test_2.10" % playVersion % "test"
+              "play" % "play-test_2.10" % playVersion % "test",
+              "com.h2database" % "h2" % "[1.3,)" % "test"
             )
           }
           case _ => {
