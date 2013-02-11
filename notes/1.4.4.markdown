@@ -1,0 +1,45 @@
+ScalikeJDBC 1.4.4 has been released. 
+
+Fixed two mapper-generator bug and improved connection management.
+
+https://github.com/seratch/scalikejdbc/issues?milestone=18&state=closed
+
+
+## library
+
+for Scala 2.10.0, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc" % "1.4.4"
+
+* Enabled cleaning up connection pools, thanks to @tototoshi
+
+## interpolation
+
+for Scala 2.10.0:
+
+    "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.4"
+
+## test
+
+for Scala 2.10.0, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc-test" % "1.4.4"
+
+## mapper-generator
+
+for xsbt 0.12:
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.4")
+
+* Invalid code for ScalaTest [(GH-61)](https://github.com/seratch/scalikejdbc/issues/61), thanks to @xuwei_k
+
+* Invalid code generation for BigDecimal [(GH-64)](https://github.com/seratch/scalikejdbc/issues/64), thanks to @malsmith 
+
+## play-plugin
+
+for Play 2.1.x and 2.0.x:
+
+    "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.4.4"
+
+Enjoy writing SQL!
+
