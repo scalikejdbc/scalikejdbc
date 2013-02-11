@@ -58,3 +58,5 @@ db
 
 .lib
 sbt
+
+logs

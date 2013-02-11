@@ -124,7 +124,7 @@ SQL("insert into members values ({id}, {name})")
 
 Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
 
-Usage is simple. Use Scala Symbol literal in comment with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
+Usage is simple. Just specify Scala Symbol literal values inside of comments with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
 
 ```scala
 SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
@@ -138,11 +138,9 @@ SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
 New powerful SQL template using SIP-11 String Interpolation.
 
 ```scala
-def create(email: String, name: String, encryptedPassword: Sting): Member = {
-  val id = sql"insert into members values (${email}, ${name}, ${encryptedPassword})"
-    .updateAndReturnGeneratedKey.apply()
-  Member(id, email, name, encryptedPassword)
-}
+val name = "Martin"
+val email = "martin@example.com"
+val id = sql"insert into members values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
 ```
 
 See in detail:
@@ -152,7 +150,7 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 
 ### Flexible transactions
 
-`DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and 'DB.readOnly { session => }` are supported.
+`DB.autoCommit { session => }`, `DB.localTx { session => }`, `DB.withinTx { session => }` and `DB.readOnly { session => }` are supported.
 
 In addition, passing `AutoSession` as an implicit parameter is quite useful. Like this:
 

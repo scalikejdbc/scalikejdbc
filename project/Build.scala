@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.3"
+  lazy val _version = "1.4.4"
 
   lazy val scalikejdbc = Project(
     id = "library", 
@@ -120,11 +120,12 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
-          case "2.10.0-RC1"|"2.10.0" => {
-            val playVersion = "2.1-RC1"
+          case "2.10.0" => {
+            val playVersion = "2.1.0"
             Seq(
               "play" % "play_2.10" % playVersion % "provided",
-              "play" % "play-test_2.10" % playVersion % "test"
+              "play" % "play-test_2.10" % playVersion % "test",
+              "com.h2database" % "h2" % "[1.3,)" % "test"
             )
           }
           case _ => {
@@ -181,6 +182,7 @@ object ScalikeJDBCProjects extends Build {
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
   val _resolvers = Seq(
+    "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
     "typesafe releases" at "http://repo.typesafe.com/typesafe/releases",
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
     "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
