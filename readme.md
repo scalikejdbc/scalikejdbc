@@ -99,6 +99,22 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 ## Features
 
+### Easy-to-use connection management
+
+`ConnectionPool` object is so easy-to-use API.
+
+```scala
+// Just load the jdbc driver and register connection pool
+Class.forName("org.h2.Driver")
+ConnectionPool.singleton("jdbc:h2:file:db/test", "sa", "")
+
+// Now DB operations are available
+val idList: List[Long] = DB readOnly { implicit session =>
+  SQL("select id from members").map { rs => rs.long("id") }.list.apply()
+}
+````
+
+
 ### Basic SQL Template
 
 The most basic way is just using prepared statement as follows.
