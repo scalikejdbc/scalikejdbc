@@ -81,4 +81,46 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  it should "be available with the IN statement" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"create table users (id int not null, name varchar(256))".execute.apply()
+          Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
+            sql"insert into users values (${id}, ${name})".update.apply()
+          }
+
+          val ids = Seq(1, 2, 4)
+          val users = sql"select * from users where id in (${ids})".map {
+            rs => User(id = rs.int("id"), name = rs.string("name"))
+          }.list.apply()
+          users.size should equal(2)
+          users.map(_.name) should equal(Seq("foo", "bar"))
+        } finally {
+          sql"drop table users".execute.apply()
+        }
+    }
+  }
+
+  it should "be available with sql literal" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"create table users (id int not null, name varchar(256))".execute.apply()
+          Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
+            sql"insert into users values (${id}, ${name})".update.apply()
+          }
+
+          val ids = Seq(1, 2, 4)
+          val sorting = SqlLiteral("DESC")
+          val users = sql"select * from users where id in (${ids}) order by id ${sorting}".map {
+            rs => User(id = rs.int("id"), name = rs.string("name"))
+          }.list.apply()
+          users.size should equal(2)
+          users.map(_.name) should equal(Seq("bar", "foo"))
+        } finally {
+          sql"drop table users".execute.apply()
+        }
+    }
+  }
 }
