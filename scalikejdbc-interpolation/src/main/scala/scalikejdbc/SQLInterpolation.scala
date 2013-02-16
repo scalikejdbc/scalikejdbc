@@ -16,16 +16,10 @@ class SQLInterpolation(val s: StringContext) extends AnyVal {
   import SQLInterpolation.{LastParameter, SQLSyntax}
 
   def sql(param: Any*) = {
-    try {
-      val query = s.parts.zipAll(param, "", LastParameter).foldLeft("") {
-        case (r, (q, p)) => r + q + placeholders(p)
-      }
-      SQL(query).bind(param.flatMap(bindings): _*)
-    } catch { case _: Throwable =>
-        param match {
-          case singleParam => SQL(s.parts.mkString("?")).bind(singleParam)
-        }
+    val query = s.parts.zipAll(param, "", LastParameter).foldLeft("") {
+      case (r, (q, p)) => r + q + placeholders(p)
     }
+    SQL(query).bind(param.flatMap(bindings): _*)
   }
 
   private def placeholders(p : Any): String = p match {
