@@ -90,7 +90,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             sql"insert into users values (${id}, ${name})".update.apply()
           }
 
-          val ids = Seq(1, 2, 4)
+          val ids = List(1, 2, 4) ::: (100 until 200).toList
           val users = sql"select * from users where id in (${ids})".map {
             rs => User(id = rs.int("id"), name = rs.string("name"))
           }.list.apply()
@@ -102,7 +102,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
-  it should "be available with sql literal" in {
+  it should "be available with sql syntax" in {
     DB localTx {
       implicit s =>
         try {
@@ -111,7 +111,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             sql"insert into users values (${id}, ${name})".update.apply()
           }
 
-          val ids = Seq(1, 2, 4)
+          val ids = List(1, 2, 4) ::: (100 until 200).toList
           val sorting = SQLSyntax("DESC")
           val users = sql"select * from users where id in (${ids}) order by id ${sorting}".map {
             rs => User(id = rs.int("id"), name = rs.string("name"))
