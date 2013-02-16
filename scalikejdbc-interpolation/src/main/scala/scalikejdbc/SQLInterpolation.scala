@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import scala.runtime.BoxedUnit
 import scala.language.implicitConversions
 import scala.language.reflectiveCalls
 
