@@ -48,7 +48,23 @@ object PlayPluginSpec extends Specification {
     )
   )
 
-  lazy val fakeAppWithDBPlugin = FakeApplication(
+  def fakeAppWithoutCloseAllOnStop = FakeApplication(
+    withoutPlugins = Seq("play.api.cache.EhCachePlugin"),
+    additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
+    additionalConfiguration = Map(
+      "db.default.driver" -> "org.h2.Driver",
+      "db.default.url" -> "jdbc:h2:mem:default",
+      "db.default.user" -> "sa",
+      "db.default.password" -> "sa",
+      "db.legacydb.driver" -> "org.h2.Driver",
+      "db.legacydb.url" -> "jdbc:h2:mem:legacy",
+      "db.legacydb.user" -> "l",
+      "db.legacydb.password" -> "g",
+      "scalikejdbc.global.closeAllOnStop.enabled" -> "false"
+    )
+  )
+
+  def fakeAppWithDBPlugin = FakeApplication(
     withoutPlugins = Seq("play.api.cache.EhCachePlugin"),
     additionalPlugins = Seq("scalikejdbc.PlayPlugin"),
     additionalConfiguration = Map(
@@ -131,12 +147,19 @@ object PlayPluginSpec extends Specification {
     }
 
     "close connection pools after stopping Play app" in {
-      running(fakeApp) {
-        simpleTest("user_4")
-      }
+      try {
+        // Play 2.0.4 throws Exception here
+        running(fakeApp) { simpleTest("user_4") }
+      } catch { case e: Exception => }
       simpleTest("user_5") must throwA[IllegalStateException](message = "Connection pool is not yet initialized.")
     }
 
+    "skip closing connection pools after stopping Play app" in {
+      running(fakeAppWithoutCloseAllOnStop) {
+        simpleTest("user_4")
+      }
+      simpleTest("user_5")
+    }
   }
 
 }

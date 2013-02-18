@@ -34,6 +34,8 @@ class PlayPlugin(app: Application) extends Plugin {
 
   private[this] val loggingSQLAndTime = "loggingSQLAndTime"
 
+  private[this] var closeAllOnStop = true
+
   override def onStart(): Unit = {
     playDbConfig.subKeys map {
       name =>
@@ -83,9 +85,11 @@ class PlayPlugin(app: Application) extends Plugin {
         )
     }
 
+    opt("closeAllOnStop", "enabled")(globalConfig).foreach { enabled => closeAllOnStop = enabled.toBoolean }
+
   }
 
-  override def onStop(): Unit = {
+  override def onStop(): Unit = if (closeAllOnStop) {
     ConnectionPool.closeAll()
     registeredPoolNames.clear()
   }
