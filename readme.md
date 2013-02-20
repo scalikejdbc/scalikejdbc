@@ -263,6 +263,14 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
 
 
+
+### Typesafe Config support
+
+This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe config.
+
+https://github.com/seratch/scalikejdbc/tree/develop/scalikejdbc-config
+
+
 ### dbconsle
 
 `dbconsole` is an extended sbt console to connect database. Try it now!
