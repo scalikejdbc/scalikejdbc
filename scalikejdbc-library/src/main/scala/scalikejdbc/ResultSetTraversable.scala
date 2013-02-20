@@ -30,20 +30,21 @@ class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] 
    * @param f function
    * @tparam U type
    */
-  def foreach[U](f: (WrappedResultSet) => U): Unit = foldLeft(()) { case (_, rs) => f(rs) }
+  def foreach[U](f: (WrappedResultSet) => U): Unit = foldLeft(()) { case (_, rs) => f.apply(rs) }
 
   /**
    * folding results.
-   * @param f function
+   * @param z initial value
+   * @param op function
    * @tparam U type
    */
-  def foldLeft[U](init: U)(f: ((U, WrappedResultSet)) => U): U = {
-    var sentinel = init
+  def foldLeft[U](z: U)(op: ((U, WrappedResultSet)) => U): U = {
+    var res = z
     while (rs.next()) {
       cursor.position += 1
-      sentinel = f((sentinel, new WrappedResultSet(rs, cursor, cursor.position)))
+      res = op.apply((res, new WrappedResultSet(rs, cursor, cursor.position)))
     }
-    sentinel
+    res
   }
 
 }

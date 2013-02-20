@@ -156,14 +156,14 @@ trait DBSession extends LogSupport {
    *
    * @param template SQL template
    * @param params parameters
-   * @param init initial value
-   * @param f function
+   * @param z initial value
+   * @param op function
    * @return folded value
    */
-  def foldLeft[A](template: String, params: Any*)(init: A)(f: ((A, WrappedResultSet)) => A): A = {
+  def foldLeft[A](template: String, params: Any*)(z: A)(op: ((A, WrappedResultSet)) => A): A = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
-        new ResultSetTraversable(executor.executeQuery()).foldLeft(init)(f)
+        new ResultSetTraversable(executor.executeQuery()).foldLeft(z)(op)
     }
   }
 
