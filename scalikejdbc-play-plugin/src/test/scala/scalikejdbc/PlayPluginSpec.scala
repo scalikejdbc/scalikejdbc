@@ -60,7 +60,7 @@ object PlayPluginSpec extends Specification {
       "db.legacydb.url" -> "jdbc:h2:mem:legacy",
       "db.legacydb.user" -> "l",
       "db.legacydb.password" -> "g",
-      "scalikejdbc.global.closeAllOnStop.enabled" -> "false"
+      "scalikejdbc.play.closeAllOnStop.enabled" -> "false"
     )
   )
 
