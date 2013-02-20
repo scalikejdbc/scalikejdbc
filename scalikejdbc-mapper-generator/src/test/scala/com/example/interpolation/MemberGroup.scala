@@ -22,6 +22,7 @@ object MemberGroup {
     val id = "ID"
     val name = "NAME"
     val all = Seq(id, name)
+    val inSQL = all.mkString(", ")
   }
 
   val * = {
@@ -50,11 +51,11 @@ object MemberGroup {
   val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[MemberGroup] = {
-    sql"""SELECT * FROM MEMBER_GROUP WHERE ID = ${id}""".map(*).single.apply()
+    sql"""SELECT ${SQLSyntax(columnNames.inSQL)} FROM MEMBER_GROUP WHERE ID = ${id}""".map(*).single.apply()
   }
 
   def findAll()(implicit session: DBSession = autoSession): List[MemberGroup] = {
-    sql"""SELECT * FROM MEMBER_GROUP""".map(*).list.apply()
+    sql"""SELECT ${SQLSyntax(columnNames.inSQL)} FROM MEMBER_GROUP""".map(*).list.apply()
   }
 
   def countAll()(implicit session: DBSession = autoSession): Long = {

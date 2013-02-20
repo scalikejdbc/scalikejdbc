@@ -59,6 +59,8 @@ scalikejdbc.global.loggingSQLAndTime.warningEnabled=true
 scalikejdbc.global.loggingSQLAndTime.warningThresholdMillis=1000
 scalikejdbc.global.loggingSQLAndTime.warningLogLevel=warn
 
+#scalikejdbc.play.closeAllOnStop.enabled=true
+
 # You can disable the default DB plugin
 dbplugin=disabled
 evolutionplugin=disabled
