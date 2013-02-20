@@ -1,9 +1,19 @@
-# scalikejdbc-config
+# ScalikeJDBC Config
 
-Easy setup for scalikejdbc
+This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe config.
 
+https://github.com/typesafehub/config
 
-## Example
+## How to use
+
+### project/Build.scala
+
+```scala
+libraryDependencies ++= Seq(
+  "com.github.seratch" %% "scalikejdbc"        % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc-config" % "[1.4,)"
+)
+```
 
 ### Working with default database
 
@@ -14,6 +24,10 @@ db.default.url="jdbc:h2:mem:sample1"
 db.default.driver="org.h2.Driver"
 db.default.user="sa"
 db.default.password="secret"
+
+db.default.poolInitialSize=10
+db.default.poolMaxSize=10
+db.default.poolValidationQuery="select 1 as one"
 ```
 
 ```scala
