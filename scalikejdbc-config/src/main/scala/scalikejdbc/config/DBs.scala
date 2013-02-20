@@ -10,11 +10,13 @@ object DBs {
 
   def setup(dbName: Symbol): Unit = {
     val JDBCSettings(driver, url, user, password) = TypesafeConfigReader.readJDBCSettings(dbName)
+    val cpSettings = TypesafeConfigReader.readConnectionPoolSettings(dbName)
     Class.forName(driver)
-    ConnectionPool.add(dbName, url, user, password)
+    ConnectionPool.add(dbName, url, user, password, cpSettings)
   }
 
   def setupAll(): Unit = {
+    TypesafeConfigReader.loadGlobalSettings()
     TypesafeConfigReader.dbNames.foreach { dbName => setup(Symbol(dbName)) }
   }
 

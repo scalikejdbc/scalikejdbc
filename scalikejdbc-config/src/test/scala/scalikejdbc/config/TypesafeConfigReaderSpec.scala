@@ -55,7 +55,7 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("should get db names") {
-      val expected = List("default", "foo", "bar").sorted
+      val expected = List("default", "foo", "bar", "baz").sorted
       TypesafeConfigReader.dbNames.sorted should be (expected)
     }
 
