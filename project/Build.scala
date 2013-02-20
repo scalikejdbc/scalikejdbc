@@ -106,7 +106,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  ) dependsOn(scalikejdbc, scalikejdbcTest)
+  ) dependsOn(scalikejdbc, scalikejdbcInterpolation, scalikejdbcTest)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
