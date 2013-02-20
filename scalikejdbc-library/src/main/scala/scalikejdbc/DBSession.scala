@@ -152,6 +152,22 @@ trait DBSession extends LogSupport {
   }
 
   /**
+   * folding into one value.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param init initial value
+   * @param f function
+   * @return folded value
+   */
+  def foldLeft[A](template: String, params: Any*)(init: A)(f: ((A, WrappedResultSet)) => A): A = {
+    using(createStatementExecutor(conn, template, params)) {
+      executor =>
+        new ResultSetTraversable(executor.executeQuery()).foldLeft(init)(f)
+    }
+  }
+
+  /**
    * Returns query result as [[scala.collection.Traversable]] object.
    *
    * @param template SQL template

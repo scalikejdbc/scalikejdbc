@@ -229,6 +229,17 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
   }
 
   /**
+   * folding into one value
+   * @param init initial value
+   * @param op operation
+   */
+  def foldLeft[A](init: A)(op: ((A, WrappedResultSet)) => A)(implicit session: DBSession): A = session match {
+    case AutoSession => DB autoCommit (s => s.foldLeft(sql, params: _*)(init)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foldLeft(sql, params: _*)(init)(op))
+    case _ => session.foldLeft(sql, params: _*)(init)(op)
+  }
+
+  /**
    * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
    * @param extractor extractor function
    * @tparam A return type
