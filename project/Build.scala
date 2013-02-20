@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.4"
+  lazy val _version = "1.4.5-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -57,6 +57,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-interpolation",
       version := _version,
       scalaVersion := "2.10.0",
+      scalaBinaryVersion := "2.10",
       crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -106,7 +107,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  ) dependsOn(scalikejdbc, scalikejdbcInterpolation, scalikejdbcTest)
+  ) dependsOn(scalikejdbc, scalikejdbcTest)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",

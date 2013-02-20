@@ -1,5 +1,6 @@
 package com.example.interpolation
 
+/*
 import scalikejdbc._
 import scalikejdbc.SQLInterpolation._
 
@@ -104,3 +105,4 @@ object MemberGroup {
   }
 
 }
+*/
