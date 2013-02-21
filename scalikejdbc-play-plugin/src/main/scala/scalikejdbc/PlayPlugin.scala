@@ -32,7 +32,11 @@ class PlayPlugin(app: Application) extends Plugin {
 
   private[this] lazy val globalConfig = app.configuration.getConfig("scalikejdbc.global").getOrElse(Configuration.empty)
 
+  private[this] lazy val playConfig = app.configuration.getConfig("scalikejdbc.play").getOrElse(Configuration.empty)
+
   private[this] val loggingSQLAndTime = "loggingSQLAndTime"
+
+  private[this] var closeAllOnStop = true
 
   override def onStart(): Unit = {
     playDbConfig.subKeys map {
@@ -83,9 +87,11 @@ class PlayPlugin(app: Application) extends Plugin {
         )
     }
 
+    opt("closeAllOnStop", "enabled")(playConfig).foreach { enabled => closeAllOnStop = enabled.toBoolean }
+
   }
 
-  override def onStop(): Unit = {
+  override def onStop(): Unit = if (closeAllOnStop) {
     ConnectionPool.closeAll()
     registeredPoolNames.clear()
   }

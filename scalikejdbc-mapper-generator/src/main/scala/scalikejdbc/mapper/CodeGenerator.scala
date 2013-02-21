@@ -309,6 +309,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       """  object columnNames {
         |%valueDefinitions%
         |    val all = Seq(%valueNames%)
+        |    val inSQL = all.mkString(", ")
         |  }
       """.stripMargin
         .replaceAll("%valueDefinitions%", allColumns.map {
@@ -681,7 +682,7 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       (config.template match {
         case GeneratorTemplate.interpolation if pkColumns.size <= 22 =>
           """  def find(%argsPart%)(implicit session: DBSession = autoSession): Option[%className%] = {
-            |    sql%3quotes%SELECT * FROM %tableName% WHERE %wherePart%%3quotes%.map(*).single.apply()
+            |    sql%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName% WHERE %wherePart%%3quotes%.map(*).single.apply()
             |  }
           """
         case _ =>
@@ -738,12 +739,12 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
       (config.template match {
         case GeneratorTemplate.interpolation =>
           """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
-            |    sql%3quotes%SELECT * FROM %tableName%%3quotes%.map(*).list.apply()
+            |    sql%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName%%3quotes%.map(*).list.apply()
             |  }
           """
         case _ =>
           """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
-            |    SQL(%3quotes%SELECT * FROM %tableName%%3quotes%).map(*).list.apply()
+            |    SQL(%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName%%3quotes%).map(*).list.apply()
             |  }
           """
       }).stripMargin

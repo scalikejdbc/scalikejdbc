@@ -22,9 +22,6 @@ We never release without passing all the unit tests with the following RDBMS.
 - H2 Database Engine
 - HSQLDB
 
-[![Build Status](https://secure.travis-ci.org/seratch/scalikejdbc.png?branch=master)](http://travis-ci.org/seratch/scalikejdbc)
-
-
 ## Scaladoc
 
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
@@ -98,6 +95,22 @@ https://github.com/seratch/scalikejdbc/wiki/GettingStarted
 
 
 ## Features
+
+### Easy-to-use connection management
+
+`ConnectionPool` object is so easy-to-use API.
+
+```scala
+// Just load the jdbc driver and register connection pool
+Class.forName("org.h2.Driver")
+ConnectionPool.singleton("jdbc:h2:file:db/test", "sa", "")
+
+// Now DB operations are available
+val idList: List[Long] = DB readOnly { implicit session =>
+  SQL("select id from members").map { rs => rs.long("id") }.list.apply()
+}
+````
+
 
 ### Basic SQL Template
 
@@ -248,6 +261,14 @@ You can use ScalikeJDBC with Play framework 2.x seamlessly.
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
 We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
+
+
+
+### Typesafe Config support
+
+This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe config.
+
+https://github.com/seratch/scalikejdbc/tree/develop/scalikejdbc-config
 
 
 ### dbconsle

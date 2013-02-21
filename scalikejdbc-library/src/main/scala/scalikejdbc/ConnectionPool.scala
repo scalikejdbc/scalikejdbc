@@ -31,7 +31,7 @@ object ConnectionPool extends LogSupport {
   type CPSettings = ConnectionPoolSettings
   type CPFactory = ConnectionPoolFactory
 
-  val DEFAULT_NAME: Any = 'default
+  val DEFAULT_NAME: Symbol = 'default
 
   private[this] val pools = new MutableMap[Any, ConnectionPool]()
 

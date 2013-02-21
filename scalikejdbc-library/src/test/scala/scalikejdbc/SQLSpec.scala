@@ -76,6 +76,20 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "execute fold in auto commit mode" in {
+    val tableName = tableNamePrefix + "_listInAutoCommit"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        implicit val session = db.autoCommitSession()
+        val result = SQL("select id from " + tableName + "").foldLeft[List[String]](Nil) {
+          case (r, rs) => rs.string("id") :: r
+        }
+        result.size should equal(2)
+      }
+    }
+  }
+
   it should "execute executeUpdate in auto commit mode" in {
     val tableName = tableNamePrefix + "_updateInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
@@ -149,6 +163,23 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         val result = SQL("select id from " + tableName + "").map {
           rs => rs.string("id")
         }.toList().apply()
+        result.size should equal(2)
+        db.rollbackIfActive()
+      }
+    }
+  }
+
+  it should "execute fold in within tx mode" in {
+    val tableName = tableNamePrefix + "_listInWithinTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        implicit val session = db.withinTxSession()
+        TestUtils.initializeEmpRecords(session, tableName)
+        val result = SQL("select id from " + tableName + "").foldLeft[List[String]](Nil) {
+          case (r, rs) => rs.string("id") :: r
+        }
         result.size should equal(2)
         db.rollbackIfActive()
       }

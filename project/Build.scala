@@ -7,11 +7,11 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.3"
+  lazy val _version = "1.4.6"
 
   lazy val scalikejdbc = Project(
-    id = "library", 
-    base = file("scalikejdbc-library"), 
+    id = "library",
+    base = file("scalikejdbc-library"),
     settings = Defaults.defaultSettings ++ Seq(
       organization := _organization,
       name := "scalikejdbc",
@@ -57,6 +57,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-interpolation",
       version := _version,
       scalaVersion := "2.10.0",
+      scalaBinaryVersion := "2.10",
       crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -76,8 +77,8 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbc)
 
   lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator", 
-    base = file("scalikejdbc-mapper-generator"), 
+    id = "mapper-generator",
+    base = file("scalikejdbc-mapper-generator"),
     settings = Defaults.defaultSettings ++ Seq(
       sbtPlugin := true,
       organization := _organization,
@@ -175,13 +176,42 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
+
+  lazy val scalikejdbcConfig = Project(
+    id = "config",
+    base = file("scalikejdbc-config"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-config",
+      version := _version,
+      crossScalaVersions := _crossScalaVersions,
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
+          "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
+          "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
+          "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ) dependsOn(scalikejdbc)
+
   val _crossScalaVersions = Seq("2.10.0", "2.9.2", "2.9.1")
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
-    if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")  
+    if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
   val _resolvers = Seq(
+    "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
     "typesafe releases" at "http://repo.typesafe.com/typesafe/releases",
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
     "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"

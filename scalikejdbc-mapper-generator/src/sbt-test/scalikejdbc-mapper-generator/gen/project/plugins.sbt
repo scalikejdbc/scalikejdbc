@@ -5,5 +5,5 @@ resolvers ++= Seq(
 
 libraryDependencies += "org.hsqldb" % "hsqldb" % "[2,)"
 
-addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.3")
+addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.6")
 
