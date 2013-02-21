@@ -160,7 +160,7 @@ trait DBSession extends LogSupport {
    * @param op function
    * @return folded value
    */
-  def foldLeft[A](template: String, params: Any*)(z: A)(op: ((A, WrappedResultSet)) => A): A = {
+  def foldLeft[A](template: String, params: Any*)(z: A)(op: (A, WrappedResultSet) => A): A = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         new ResultSetTraversable(executor.executeQuery()).foldLeft(z)(op)
