@@ -44,4 +44,4 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig =>
 
 }
 
-object DBs extends DBs with TypesafeConfigReader with StandardConfig
+object DBs extends DBs with TypesafeConfigReader with StandardTypesafeConfig
