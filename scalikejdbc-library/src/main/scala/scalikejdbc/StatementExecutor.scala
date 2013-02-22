@@ -26,8 +26,11 @@ object StatementExecutor {
 
   val eol = System.getProperty("line.separator")
 
-  private class NakedExecutor {
-    def apply[A](execute: () => A): A = execute()
+  private trait Executor {
+    def apply[A](execute: () => A): A
+  }
+  private class NakedExecutor extends Executor {
+    override def apply[A](execute: () => A): A = execute()
   }
 
 }
@@ -188,7 +191,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
   /**
    * Logging SQL and timing (this trait depends on this instance)
    */
-  private[this] trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
+  private[this] trait LoggingSQLAndTiming extends Executor with LogSupport {
 
     abstract override def apply[A](execute: () => A): A = {
       import GlobalSettings.loggingSQLAndTime
