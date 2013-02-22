@@ -22,10 +22,6 @@ We never release without passing all the unit tests with the following RDBMS.
 - H2 Database Engine
 - HSQLDB
 
-## Scaladoc
-
-http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
-
 
 ## Setup
 
