@@ -22,6 +22,8 @@ We never release without passing all the unit tests with the following RDBMS.
 - H2 Database Engine
 - HSQLDB
 
+[![Build Status](https://buildhive.cloudbees.com/job/seratch/job/scalikejdbc/badge/icon)](https://buildhive.cloudbees.com/job/seratch/job/scalikejdbc/)
+
 ## Scaladoc
 
 http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
