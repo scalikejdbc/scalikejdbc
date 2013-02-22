@@ -55,7 +55,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
             where ${u.id} = ${id}
             """.map { rs => 
-              val (user, group) = (u.result, g.result)
+              val (user, group) = (u.result.names, g.result.names)
               User(
                 id = rs.int(user.id), 
                 name = rs.stringOpt(user.firstName), 
