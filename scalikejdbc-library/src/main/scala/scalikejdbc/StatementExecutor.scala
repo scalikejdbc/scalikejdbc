@@ -227,10 +227,21 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
     }
   }
 
+  private[this] trait LoggingSQLIfFailed extends Executor with LogSupport {
+
+    abstract override def apply[A](execute: () => A): A = try {
+      super.apply(execute)
+    } catch {
+      case e: Exception =>
+        log.error("Failed to execute the following SQL:" + eol + eol + "   " + sqlString + eol)
+        throw e;
+    }
+  }
+
   /**
    * Executes SQL statement
    */
-  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming
+  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming with LoggingSQLIfFailed
 
   def addBatch(): Unit = underlying.addBatch()
 

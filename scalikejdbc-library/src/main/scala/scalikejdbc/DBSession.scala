@@ -52,15 +52,21 @@ trait DBSession extends LogSupport {
    */
   private def createStatementExecutor(conn: Connection, template: String, params: Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
-    val statement = if (returnGeneratedKeys) {
-      conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
-    } else {
-      conn.prepareStatement(template)
+    try {
+      val statement = if (returnGeneratedKeys) {
+        conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
+      } else {
+        conn.prepareStatement(template)
+      }
+      StatementExecutor(
+        underlying = statement,
+        template = template,
+        singleParams = params)
+    } catch {
+      case e: Exception =>
+        log.error("Failed to parse the following SQL template:\n\n  " + template + "\n")
+        throw e
     }
-    StatementExecutor(
-      underlying = statement,
-      template = template,
-      singleParams = params)
   }
 
   /**
