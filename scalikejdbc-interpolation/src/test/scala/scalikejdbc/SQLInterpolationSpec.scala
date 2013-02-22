@@ -44,14 +44,15 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   case class Group(id: Int, websiteUrl: Option[String])
 
   it should "be available with SQLSyntaxSupport" in {
-   DB localTx {
+    DB localTx {
       implicit s =>
         try {
           sql"create table users (id int not null, first_name varchar(256), group_id int)".execute.apply()
           sql"create table groups (id int not null, website_url varchar(256))".execute.apply()
 
-          Seq((1, Some("foo"), None),(2, Some("bar"), None), (3, Some("baz") ,Some(1))) foreach { case (id, name, groupId) =>
-            sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
+          Seq((1, Some("foo"), None), (2, Some("bar"), None), (3, Some("baz"), Some(1))) foreach {
+            case (id, name, groupId) =>
+              sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
           }
           sql"insert into groups values (${1}, ${"http://www.example.com"})".update.apply()
 
@@ -71,7 +72,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           user.group.isDefined should equal(true)
 
           intercept[IllegalArgumentException] {
-            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy  }.single.apply()
+            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy }.single.apply()
           }
 
         } finally {
@@ -86,8 +87,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         try {
           sql"""create table users (id int, name varchar(256))""".execute.apply()
 
-          Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
-            sql"""insert into users values (${id}, ${name})""".update.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"""insert into users values (${id}, ${name})""".update.apply()
           }
 
           val id = 3
@@ -102,16 +104,17 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
   it should "be available with option values" in {
-   DB localTx {
+    DB localTx {
       implicit s =>
         try {
           sql"create table users (id int not null, name varchar(256))".execute.apply()
 
-          Seq((1, Some("foo")),(2, None)) foreach { case (id, name) =>
-            sql"insert into users values (${id}, ${name})".update.apply()
+          Seq((1, Some("foo")), (2, None)) foreach {
+            case (id, name) =>
+              sql"insert into users values (${id}, ${name})".update.apply()
           }
 
-          val id = 2 
+          val id = 2
           val user = sql"select * from users where id = ${id}".map {
             rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
           }.single.apply()
@@ -129,8 +132,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
       implicit s =>
         try {
           sql"create table users (id int not null, name varchar(256))".execute.apply()
-          Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
-            sql"insert into users values (${id}, ${name})".update.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"insert into users values (${id}, ${name})".update.apply()
           }
 
           val ids = List(1, 2, 4) ::: (100 until 200).toList
@@ -150,8 +154,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
       implicit s =>
         try {
           sql"create table users (id int not null, name varchar(256))".execute.apply()
-          Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
-            sql"insert into users values (${id}, ${name})".update.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"insert into users values (${id}, ${name})".update.apply()
           }
 
           val ids = List(1, 2, 4) ::: (100 until 200).toList

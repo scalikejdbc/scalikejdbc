@@ -32,11 +32,11 @@ object SQLInterpolation {
     def nameConverters: Map[String, String] = Map()
 
     def syntax() = {
-      val _name = if(forceUpperCase) tableName.toUpperCase else tableName
+      val _name = if (forceUpperCase) tableName.toUpperCase else tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
     def syntax(name: String) = {
-      val _name = if(forceUpperCase) name.toUpperCase else name
+      val _name = if (forceUpperCase) name.toUpperCase else name
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
@@ -49,14 +49,14 @@ object SQLInterpolation {
   /**
    * SQLSyntax Provider
    */
-  trait SQLSyntaxProvider extends Dynamic { 
+  trait SQLSyntaxProvider extends Dynamic {
     import SQLSyntaxProvider._
     def c(name: String) = column(name)
     def column(name: String): SQLSyntax
     def nameConverters: Map[String, String]
     def forceUpperCase: Boolean
-    def selectDynamic(name: String): SQLSyntax = { 
-      val nameInSQL = { 
+    def selectDynamic(name: String): SQLSyntax = {
+      val nameInSQL = {
         if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
         else toSnakeCase(name, nameConverters)
       }
@@ -77,10 +77,10 @@ object SQLInterpolation {
     def toSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = {
       val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
       var acronymsFiltered = acronymRegExp.replaceAllIn(
-      acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
-        convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
-      }.getOrElse(convertersApplied), // might end with an acronym
-      { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
+        acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
+          convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
+        }.getOrElse(convertersApplied), // might end with an acronym
+        { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
       )
       singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
         .replaceFirst("^_", "")
@@ -95,14 +95,14 @@ object SQLInterpolation {
     def delimiter = if (support.forceUpperCase) "__ON__" else "__on__"
     def nameConverters = support.nameConverters
     def forceUpperCase = support.forceUpperCase
-    def columns : Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
+    def columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
   }
 
   /**
    * SQLSyntax provider for query parts
    */
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-    extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
     def result(): ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase else tableAliasName
@@ -111,7 +111,7 @@ object SQLInterpolation {
 
     def * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
 
-    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c => 
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
@@ -122,15 +122,15 @@ object SQLInterpolation {
    * SQLSyntax provider for result parts
    */
   case class ResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-    extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
     def names(): ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     def * : SQLSyntax = SQLSyntax(columns.map { c =>
-        s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}"
-      }.mkString(", "))
+      s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}"
+    }.mkString(", "))
 
-    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c => 
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
@@ -141,7 +141,7 @@ object SQLInterpolation {
    * SQLSyntax provider for result names
    */
   case class ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-    extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
     def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
       SQLSyntax(s"${c.value}${delimiter}${tableAliasName}")
@@ -161,7 +161,7 @@ object SQLInterpolation {
  */
 class SQLInterpolation(val s: StringContext) extends AnyVal {
 
-  import SQLInterpolation.{LastParameter, SQLSyntax}
+  import SQLInterpolation.{ LastParameter, SQLSyntax }
 
   def sql(params: Any*) = {
     val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
@@ -170,7 +170,7 @@ class SQLInterpolation(val s: StringContext) extends AnyVal {
     SQL(query).bind(params.flatMap(toSeq): _*)
   }
 
-  private def getPlaceholders(param : Any): String = param match {
+  private def getPlaceholders(param: Any): String = param match {
     case _: String => "?"
     case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
     case LastParameter => ""
@@ -178,7 +178,7 @@ class SQLInterpolation(val s: StringContext) extends AnyVal {
     case _ => "?"
   }
 
-  private def toSeq(param : Any): Traversable[Any] = param match {
+  private def toSeq(param: Any): Traversable[Any] = param match {
     case s: String => Seq(s)
     case t: Traversable[_] => t
     case SQLSyntax(s) => Nil
