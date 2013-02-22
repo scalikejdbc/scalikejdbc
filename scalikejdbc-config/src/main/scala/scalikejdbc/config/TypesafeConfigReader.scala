@@ -36,7 +36,7 @@ trait TypesafeConfig {
 /*
  * A Trait that follows the standard behavior of typesafe-config.
  */
-trait StandardConfig extends TypesafeConfig {
+trait StandardTypesafeConfig extends TypesafeConfig {
   lazy val config: Config = ConfigFactory.load()
 }
 
@@ -45,7 +45,7 @@ trait StandardConfig extends TypesafeConfig {
  *
  * It follows standard behavior of typesafe-config
  */
-object TypesafeConfigReader extends TypesafeConfigReader with StandardConfig
+object TypesafeConfigReader extends TypesafeConfigReader with StandardTypesafeConfig
 
 /**
  * Typesafe TypesafeConfig reader
