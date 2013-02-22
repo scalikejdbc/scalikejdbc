@@ -26,16 +26,26 @@ class ConfigurationException(val message: String) extends Exception(message) {
   def this(e: Throwable) = this(e.getMessage)
 }
 
+/*
+ * A Trait that holds configuration
+ */
 trait TypesafeConfig {
   val config: Config
 }
 
+/*
+ * A Trait that follows the standard behavior of typesafe-config.
+ */
 trait StandardConfig extends TypesafeConfig {
   lazy val config: Config = ConfigFactory.load()
 }
 
+/*
+ * Typesafe TypesafeConfig reader
+ *
+ * It follows standard behavior of typesafe-config
+ */
 object TypesafeConfigReader extends TypesafeConfigReader with StandardConfig
-
 
 /**
  * Typesafe TypesafeConfig reader
