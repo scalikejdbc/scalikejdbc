@@ -28,6 +28,7 @@ object SQLInterpolation {
       if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
       else { SQLSyntax(tableName + " " + provider.tableAliasName) }
     }
+    def toDBNamingRule(scalaName: String): String = "[A-Z]".r.replaceAllIn(scalaName, "_" + _.matched.toLowerCase)
   }
 
   import scala.language.dynamics
@@ -41,7 +42,7 @@ object SQLInterpolation {
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
-    def selectDynamic(name: String): SQLSyntax = c(name)
+    def selectDynamic(name: String): SQLSyntax = c(underlying.toDBNamingRule(name))
   }
 
   case class ResultSQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
@@ -54,7 +55,7 @@ object SQLInterpolation {
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
-    def selectDynamic(name: String): SQLSyntax = c(name)
+    def selectDynamic(name: String): SQLSyntax = c(underlying.toDBNamingRule(name))
   }
 
   implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
