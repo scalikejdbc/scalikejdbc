@@ -31,7 +31,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
           val id = 3
           val u = User.syntax("u")
-          val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.c("id")} = ${id}".map {
+          val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map {
             rs => User(id = rs.int(u.result.id), name = rs.string(u.result.name))
           }.single.apply()
           user.isDefined should equal(true)
