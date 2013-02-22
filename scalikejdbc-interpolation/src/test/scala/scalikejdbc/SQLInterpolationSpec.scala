@@ -12,18 +12,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
+  it should "convert camelCase to snake_case correctly" in {
+    SQLSyntaxProvider.toSnakeCase("firstName") should equal("first_name")
+    SQLSyntaxProvider.toSnakeCase("SQLObject") should equal("sql_object")
+    SQLSyntaxProvider.toSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
+    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
+    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
+  }
+
   object User extends SQLSyntaxSupport {
-    val tableName = "users"
-    val columns = Seq("id", "name")
+    override def tableName = "users"
+    override def columns = Seq("id", "first_name")
+    override def forceUpperCase = true
   }
 
   case class User(id: Int, name: String)
 
-  it should "be available" in {
+  it should "be available with SQLSyntaxSupport" in {
    DB localTx {
       implicit s =>
         try {
-          sql"create table users (id int, name varchar(256))".execute.apply()
+          sql"create table users (id int, first_name varchar(256))".execute.apply()
 
           Seq((1, "foo"),(2, "bar"), (3, "baz")) foreach { case (id, name) =>
             sql"insert into users values (${id}, ${name})".update.apply()
@@ -32,11 +41,16 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val id = 3
           val u = User.syntax("u")
           val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map {
-            rs => User(id = rs.int(u.result.id), name = rs.string(u.result.name))
+            rs => User(id = rs.int(u.result.id), name = rs.string(u.result.firstName))
           }.single.apply()
           user.isDefined should equal(true)
           user.get.id should equal(3)
           user.get.name should equal("baz")
+
+          intercept[IllegalArgumentException] {
+            val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy  }.single.apply()
+          }
+
         } finally {
           sql"drop table users".execute.apply()
         }
