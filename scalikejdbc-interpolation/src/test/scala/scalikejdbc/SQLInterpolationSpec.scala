@@ -69,12 +69,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val id = 1
           val u = User.syntax("u")
           val c = Contract.syntax("c")
+          // sql"""${User.as(c)}""" compile error!
           val contracts = sql"""
             select
               ${c.result.*}
             from
               ${User.as(u)},
-              ${Contract.as(u)}
+              ${Contract.as(c)}
             where
               ${c.id} = ${u.id}
               and ${u.id} = ${id}

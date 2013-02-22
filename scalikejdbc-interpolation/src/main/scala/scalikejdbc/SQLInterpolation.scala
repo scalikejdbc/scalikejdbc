@@ -22,9 +22,9 @@ object SQLInterpolation {
   trait SQLSyntaxSupport {
     def tableName: String
     def columns: Seq[String]
-    def syntax() = SQLSyntaxProvider(this, this.tableName)
-    def syntax(name: String) = SQLSyntaxProvider(this, name)
-    def as(provider: SQLSyntaxProvider[_]) = {
+    def syntax() = SQLSyntaxProvider[this.type](this, this.tableName)
+    def syntax(name: String) = SQLSyntaxProvider[this.type](this, name)
+    def as(provider: SQLSyntaxProvider[this.type]) = {
       if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
       else { SQLSyntax(tableName + " " + provider.tableAliasName) }
     }
