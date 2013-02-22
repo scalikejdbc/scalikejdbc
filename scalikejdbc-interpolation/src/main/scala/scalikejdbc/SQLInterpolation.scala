@@ -17,7 +17,46 @@ object SQLInterpolation {
    *
    * This value won't be treated as a binding parameter but will be appended as a part of SQL.
    */
-  case class SQLSyntax(underlying: String)
+  case class SQLSyntax(value: String)
+
+  trait SQLSyntaxSupport {
+    def tableName: String
+    def columns: Seq[String]
+    def syntax() = SQLSyntaxProvider(this, this.tableName)
+    def syntax(name: String) = SQLSyntaxProvider(this, name)
+    def as(provider: SQLSyntaxProvider[_]) = {
+      if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
+      else { SQLSyntax(tableName + " " + provider.tableAliasName) }
+    }
+  }
+
+  case class SQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) {
+    def result(): ResultSQLSyntaxProvider[A] = ResultSQLSyntaxProvider(underlying, tableAliasName)
+    def *(): SQLSyntax = SQLSyntax(underlying.columns.map { name => s"${tableAliasName}.${name}" }.mkString(", "))
+    def c(name: String) = column(name)
+    def column(name: String): SQLSyntax = underlying.columns.find(_ == name).map {
+      _ => SQLSyntax(s"${tableAliasName}.${name}")
+    }.getOrElse {
+      throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
+    }
+  }
+
+  import scala.language.dynamics
+
+  case class ResultSQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
+    def *(): SQLSyntax = SQLSyntax(underlying.columns.map { column =>
+        s"${tableAliasName}.${column} as ${column}__on__${tableAliasName}"
+      }.mkString(", "))
+    def c(name: String) = column(name)
+    def column(name: String): SQLSyntax =  underlying.columns.find(_ == name).map{
+      _ => SQLSyntax(s"${name}__on__${tableAliasName}")
+    }.getOrElse {
+      throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
+    }
+    def selectDynamic(name: String): SQLSyntax = c(name)
+  }
+
+  implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
 
 }
 
