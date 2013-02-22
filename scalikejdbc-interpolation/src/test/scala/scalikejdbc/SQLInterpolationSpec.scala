@@ -48,19 +48,19 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
           val id = 3
           val u = User.syntax("u")
-          val g = Group.syntax("g")
+          val g = Group.syntax
           // User.as(g) compile error!
           val user = sql"""
             select ${u.result.*}, ${g.result.*} 
-            from ${User.as(u)} left join ${Group.as(g)} 
-            on ${u.groupId} = ${g.id}
+            from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
             where ${u.id} = ${id}
             """.map { rs => 
+              val (user, group) = (u.result, g.result)
               User(
-                id = rs.int(u.result.id), 
-                name = rs.stringOpt(u.result.firstName), 
-                groupId = rs.intOpt(u.result.groupId),
-                group = rs.intOpt(g.result.id).map(id => Group(id = id, websiteUrl = rs.stringOpt(g.result.websiteUrl))
+                id = rs.int(user.id), 
+                name = rs.stringOpt(user.firstName), 
+                groupId = rs.intOpt(user.groupId),
+                group = rs.intOpt(group.id).map(id => Group(id = id, websiteUrl = rs.stringOpt(group.websiteUrl))
               )
             )
           }.single.apply()
