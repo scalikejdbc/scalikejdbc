@@ -3,6 +3,7 @@ package scalikejdbc.config
 import org.scalatest.FunSpec
 import org.scalatest.matchers._
 import scalikejdbc._
+import com.typesafe.config.{ Config => TypesafeConfig, _ }
 
 class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
 
@@ -86,8 +87,36 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
 
     }
 
-    it ("should load global settings") {
-      TypesafeConfigReader.loadGlobalSettings() 
+    val emptyConfigReader = new TypesafeConfigReader with Config {
+      override lazy val config: TypesafeConfig = ConfigFactory.load("empty.conf")
+    }
+
+    val badConfigReader = new TypesafeConfigReader with Config {
+      override lazy val config: TypesafeConfig = ConfigFactory.load("application-bad.conf")
+    }
+
+    val badConfigReaderLogEnabled = new TypesafeConfigReader with Config {
+      override lazy val config: TypesafeConfig = ConfigFactory.load("application-bad-logenabled.conf")
+    }
+
+    describe ("#loadGlobalSettings") {
+
+      it ("should load global settings") {
+        TypesafeConfigReader.loadGlobalSettings()
+      }
+
+      describe ("When the format of config file is bad") {
+        it ("should not throw Exception") {
+          badConfigReader.loadGlobalSettings()
+          badConfigReaderLogEnabled.loadGlobalSettings()
+        }
+      }
+
+      describe ("When the config file is empty") {
+        it ("should not throw Exception") {
+          emptyConfigReader.loadGlobalSettings()
+        }
+      }
     }
 
   }
