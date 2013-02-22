@@ -12,6 +12,11 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
+  object User extends SQLSyntaxSupport {
+    val tableName = "users"
+    val columns = Seq("id", "name")
+  }
+
   case class User(id: Int, name: String)
 
   it should "be available" in {
@@ -25,8 +30,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           }
 
           val id = 3
-          val user = sql"select * from users where id = ${id}".map {
-            rs => User(id = rs.int("id"), name = rs.string("name"))
+          val u = User.syntax("u")
+          val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.c("id")} = ${id}".map {
+            rs => User(id = rs.int(u.result.id), name = rs.string(u.result.name))
           }.single.apply()
           user.isDefined should equal(true)
           user.get.id should equal(3)

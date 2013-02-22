@@ -42,4 +42,6 @@ private[scalikejdbc] object ErrorMessage {
 
   val UNKNOWN_CONNECTION_POOL_CONTEXT = "Unknown connection pool context is specified."
 
+  val INVALID_COLUMN_NAME = "Invalid column name."
+
 }
