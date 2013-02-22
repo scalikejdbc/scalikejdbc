@@ -32,8 +32,6 @@ object SQLInterpolation {
     }
   }
 
-  import scala.language.dynamics
-
   object SQLSyntaxProvider {
 
     private val acronymRegExpStr = "[A-Z]{2,}"
@@ -56,6 +54,8 @@ object SQLInterpolation {
         .replaceFirst("_$", "")
     }
   }
+
+  import scala.language.dynamics
 
   trait SQLSyntaxProvider extends Dynamic { 
     import SQLSyntaxProvider._
@@ -89,8 +89,8 @@ object SQLInterpolation {
 
     def * : SQLSyntax = SQLSyntax(columns.map { c => s"${tableAliasName}.${c.value}" }.mkString(", "))
 
-    def column(name: String): SQLSyntax = columns.find(_.value == name).map {
-      _ => SQLSyntax(s"${tableAliasName}.${name}")
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c => 
+      SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
