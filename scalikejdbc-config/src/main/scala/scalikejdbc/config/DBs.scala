@@ -20,7 +20,7 @@ import scalikejdbc._
 /**
  * DB configurator
  */
-object DBs {
+trait DBs { self: TypesafeConfigReader with Config =>
 
   def setup(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Unit = {
     val JDBCSettings(driver, url, user, password) = TypesafeConfigReader.readJDBCSettings(dbName)
@@ -44,3 +44,4 @@ object DBs {
 
 }
 
+object DBs extends DBs with TypesafeConfigReader with StandardConfig
