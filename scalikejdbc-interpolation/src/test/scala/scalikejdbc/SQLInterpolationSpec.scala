@@ -20,15 +20,24 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
   }
 
-  object User extends SQLSyntaxSupport {
+  object User extends SQLSyntaxSupport[User] {
+
     override def tableName = "users"
     override def columns = Seq("id", "first_name", "group_id")
     override def forceUpperCase = true
+
+    def apply(rs: WrappedResultSet, u: ResultName[User]): User = {
+      User(id = rs.int(u.id), name = rs.stringOpt(u.firstName), groupId = rs.intOpt(u.groupId))
+    }
+
+    def apply(rs: WrappedResultSet, u: ResultName[User], g: ResultName[Group]): User = {
+      apply(rs, u).copy(group = rs.intOpt(g.id).map(id => Group(id = id, websiteUrl = rs.stringOpt(g.websiteUrl))))
+    }
   }
 
   case class User(id: Int, name: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
 
-  object Group extends SQLSyntaxSupport {
+  object Group extends SQLSyntaxSupport[Group] {
     override def tableName = "groups"
     override def columns = Seq("id", "website_url")
   }
@@ -50,28 +59,19 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val u = User.syntax("u")
           val g = Group.syntax
           // User.as(g) compile error!
+
           val user = sql"""
-            select ${u.result.*}, ${g.result.*} 
+            select ${u.result.*}, ${g.result.*}
             from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
             where ${u.id} = ${id}
-            """.map { rs => 
-              val (user, group) = (u.result.names, g.result.names)
-              User(
-                id = rs.int(user.id), 
-                name = rs.stringOpt(user.firstName), 
-                groupId = rs.intOpt(user.groupId),
-                group = rs.intOpt(group.id).map(id => Group(id = id, websiteUrl = rs.stringOpt(group.websiteUrl))
-              )
-            )
-          }.single.apply()
-          user.isDefined should equal(true)
-          user.get.id should equal(3)
-          user.get.name should equal(Some("baz"))
+            """.map(rs => User(rs, u.result.names, g.result.names)).single.apply().get
 
-          user.get.group.isDefined should equal(true)
+          user.id should equal(3)
+          user.name should equal(Some("baz"))
+          user.group.isDefined should equal(true)
 
           intercept[IllegalArgumentException] {
-            val user = sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy  }.single.apply()
+            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy  }.single.apply()
           }
 
         } finally {
