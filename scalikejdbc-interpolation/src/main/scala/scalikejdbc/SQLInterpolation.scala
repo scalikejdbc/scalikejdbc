@@ -24,9 +24,9 @@ object SQLInterpolation {
     def columns: Seq[String]
     def forceUpperCase: Boolean = false
     def nameConverters: Map[String, String] = Map()
-    def syntax() = QuerySyntaxProvider(this, this.tableName)
-    def syntax(name: String) = QuerySyntaxProvider(this, if(forceUpperCase) name.toUpperCase else name)
-    def as(provider: QuerySyntaxProvider[_]) = {
+    def syntax() = QuerySyntaxProvider[this.type](this, this.tableName)
+    def syntax(name: String) = QuerySyntaxProvider[this.type](this, if(forceUpperCase) name.toUpperCase else name)
+    def as(provider: QuerySyntaxProvider[this.type]) = {
       if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
       else { SQLSyntax(tableName + " " + provider.tableAliasName) }
     }
