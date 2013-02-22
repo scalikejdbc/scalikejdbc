@@ -30,21 +30,22 @@ object SQLInterpolation {
     }
   }
 
-  case class SQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) {
+  import scala.language.dynamics
+
+  case class SQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
     def result(): ResultSQLSyntaxProvider[A] = ResultSQLSyntaxProvider(underlying, tableAliasName)
-    def *(): SQLSyntax = SQLSyntax(underlying.columns.map { name => s"${tableAliasName}.${name}" }.mkString(", "))
+    def * : SQLSyntax = SQLSyntax(underlying.columns.map { name => s"${tableAliasName}.${name}" }.mkString(", "))
     def c(name: String) = column(name)
     def column(name: String): SQLSyntax = underlying.columns.find(_ == name).map {
       _ => SQLSyntax(s"${tableAliasName}.${name}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
+    def selectDynamic(name: String): SQLSyntax = c(name)
   }
 
-  import scala.language.dynamics
-
   case class ResultSQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
-    def *(): SQLSyntax = SQLSyntax(underlying.columns.map { column =>
+    def * : SQLSyntax = SQLSyntax(underlying.columns.map { column =>
         s"${tableAliasName}.${column} as ${column}__on__${tableAliasName}"
       }.mkString(", "))
     def c(name: String) = column(name)
