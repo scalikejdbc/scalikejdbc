@@ -45,7 +45,8 @@ object SQLInterpolation {
 
       var acronymsFiltered = acronymRegExp.replaceAllIn(
         acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
-          convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase) }.getOrElse(convertersApplied), // might end with an acronym
+          convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase) 
+        }.getOrElse(convertersApplied), // might end with an acronym
         { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
       )
 
@@ -98,6 +99,8 @@ object SQLInterpolation {
 
   case class ResultSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends SQLSyntaxProviderBase(underlying, tableAliasName) {
 
+    def names(): ResultNameSyntaxProvider[A] = ResultNameSyntaxProvider(underlying, tableAliasName)
+
     private def delimiter = if (underlying.forceUpperCase) "__ON__" else "__on__"
 
     def * : SQLSyntax = SQLSyntax(columns.map { c =>
@@ -105,6 +108,17 @@ object SQLInterpolation {
       }.mkString(", "))
 
     def column(name: String): SQLSyntax = columns.find(_.value == name).map { c => 
+      SQLSyntax(s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}")
+    }.getOrElse {
+      throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
+    }
+  }
+
+  case class ResultNameSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends SQLSyntaxProviderBase(underlying, tableAliasName) {
+
+    private def delimiter = if (underlying.forceUpperCase) "__ON__" else "__on__"
+
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
       SQLSyntax(s"${c.value}${delimiter}${tableAliasName}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
