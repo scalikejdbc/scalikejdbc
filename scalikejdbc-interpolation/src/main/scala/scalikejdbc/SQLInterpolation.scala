@@ -22,9 +22,11 @@ object SQLInterpolation {
   trait SQLSyntaxSupport {
     def tableName: String
     def columns: Seq[String]
-    def syntax() = SQLSyntaxProvider(this, this.tableName)
-    def syntax(name: String) = SQLSyntaxProvider(this, name)
-    def as(provider: SQLSyntaxProvider[_]) = {
+    def forceUpperCase: Boolean = false
+    def nameConverters: Map[String, String] = Map()
+    def syntax() = QuerySyntaxProvider(this, this.tableName)
+    def syntax(name: String) = QuerySyntaxProvider(this, if(forceUpperCase) name.toUpperCase else name)
+    def as(provider: QuerySyntaxProvider[_]) = {
       if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
       else { SQLSyntax(tableName + " " + provider.tableAliasName) }
     }
@@ -32,29 +34,81 @@ object SQLInterpolation {
 
   import scala.language.dynamics
 
-  case class SQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
-    def result(): ResultSQLSyntaxProvider[A] = ResultSQLSyntaxProvider(underlying, tableAliasName)
-    def * : SQLSyntax = SQLSyntax(underlying.columns.map { name => s"${tableAliasName}.${name}" }.mkString(", "))
+  object SQLSyntaxProvider {
+
+    private val acronymRegExpStr = "[A-Z]{2,}"
+    private val acronymRegExp = acronymRegExpStr.r
+    private val endsWithAcronymRegExpStr = "[A-Z]{2,}$"
+    private val singleUpperCaseRegExp = """[A-Z]""".r
+
+    def toSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = { 
+
+      val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
+
+      var acronymsFiltered = acronymRegExp.replaceAllIn(
+        acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
+          convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase) }.getOrElse(convertersApplied), // might end with an acronym
+        { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
+      )
+
+      singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
+        .replaceFirst("^_", "")
+        .replaceFirst("_$", "")
+    }
+  }
+
+  trait SQLSyntaxProvider extends Dynamic { 
+    import SQLSyntaxProvider._
     def c(name: String) = column(name)
-    def column(name: String): SQLSyntax = underlying.columns.find(_ == name).map {
+    def column(name: String): SQLSyntax
+    def nameConverters: Map[String, String]
+    def forceUpperCase: Boolean
+    def selectDynamic(name: String): SQLSyntax = { 
+      val nameInSQL = { 
+        if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
+        else toSnakeCase(name, nameConverters)
+      }
+      c(nameInSQL)
+    }
+  }
+
+  abstract class SQLSyntaxProviderBase[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends SQLSyntaxProvider {
+
+    def nameConverters = underlying.nameConverters
+
+    def forceUpperCase = underlying.forceUpperCase
+
+    def columns : Seq[SQLSyntax] = underlying.columns.map { c => if (underlying.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
+  }
+
+  case class QuerySyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends SQLSyntaxProviderBase(underlying, tableAliasName) {
+
+    def result(): ResultSyntaxProvider[A] = {
+      ResultSyntaxProvider(underlying, if (underlying.forceUpperCase) tableAliasName.toUpperCase else tableAliasName)
+    }
+
+    def * : SQLSyntax = SQLSyntax(columns.map { c => s"${tableAliasName}.${c.value}" }.mkString(", "))
+
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map {
       _ => SQLSyntax(s"${tableAliasName}.${name}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
-    def selectDynamic(name: String): SQLSyntax = c(name)
   }
 
-  case class ResultSQLSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends Dynamic {
-    def * : SQLSyntax = SQLSyntax(underlying.columns.map { column =>
-        s"${tableAliasName}.${column} as ${column}__on__${tableAliasName}"
+  case class ResultSyntaxProvider[A <: SQLSyntaxSupport](underlying: A, tableAliasName: String) extends SQLSyntaxProviderBase(underlying, tableAliasName) {
+
+    private def delimiter = if (underlying.forceUpperCase) "__ON__" else "__on__"
+
+    def * : SQLSyntax = SQLSyntax(columns.map { c =>
+        s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}"
       }.mkString(", "))
-    def c(name: String) = column(name)
-    def column(name: String): SQLSyntax =  underlying.columns.find(_ == name).map{
-      _ => SQLSyntax(s"${name}__on__${tableAliasName}")
+
+    def column(name: String): SQLSyntax = columns.find(_.value == name).map { c => 
+      SQLSyntax(s"${c.value}${delimiter}${tableAliasName}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
-    def selectDynamic(name: String): SQLSyntax = c(name)
   }
 
   implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
