@@ -16,7 +16,7 @@
 package scalikejdbc.config
 
 import scalikejdbc._
-import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory, ConfigException }
+import com.typesafe.config.{ Config, ConfigFactory, ConfigException }
 import scala.collection.mutable.{ Map => MutableMap, ListBuffer }
 
 /**
@@ -26,15 +26,34 @@ class ConfigurationException(val message: String) extends Exception(message) {
   def this(e: Throwable) = this(e.getMessage)
 }
 
-/**
- * Typesafe Config reader
+/*
+ * A Trait that holds configuration
  */
-object TypesafeConfigReader {
+trait TypesafeConfig {
+  val config: Config
+}
 
-  private lazy val _config: TypesafeConfig = ConfigFactory.load()
+/*
+ * A Trait that follows the standard behavior of typesafe-config.
+ */
+trait StandardTypesafeConfig extends TypesafeConfig {
+  lazy val config: Config = ConfigFactory.load()
+}
+
+/*
+ * Typesafe TypesafeConfig reader
+ *
+ * It follows standard behavior of typesafe-config
+ */
+object TypesafeConfigReader extends TypesafeConfigReader with StandardTypesafeConfig
+
+/**
+ * Typesafe TypesafeConfig reader
+ */
+trait TypesafeConfigReader { self: TypesafeConfig =>
 
   lazy val dbNames: List[String] = {
-    val it = _config.entrySet.iterator
+    val it = config.entrySet.iterator
     val buf: ListBuffer[String] = new ListBuffer
     while (it.hasNext) {
       val entry = it.next
@@ -48,13 +67,13 @@ object TypesafeConfigReader {
   }
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
-    val dbConfig = _config.getConfig("db." + dbName.name)
+    val dbConfig = config.getConfig("db." + dbName.name)
     val iter = dbConfig.entrySet.iterator
     val configMap: MutableMap[String, String] = MutableMap.empty
     while (iter.hasNext) {
       val entry = iter.next()
       val key = entry.getKey
-      configMap(key) = _config.getString("db." + dbName.name + "." + key)
+      configMap(key) = config.getString("db." + dbName.name + "." + key)
     }
     configMap.toMap
   } catch {
@@ -85,22 +104,37 @@ object TypesafeConfigReader {
      )
   }
 
-  def loadGlobalSettings(): Unit = Option(_config.getConfig("scalikejdbc.global")).map { globalConfig =>
-    Option(globalConfig.getConfig("loggingSQLAndTime")).map { config => 
-      val enabled = config.getBoolean("enabled")
+  def loadGlobalSettings(): Unit = {
+    for {
+      globalConfig <- readConfig(config, "scalikejdbc.global")
+      logConfig <- readConfig(globalConfig, "loggingSQLAndTime")
+    } {
+      val enabled = readBoolean(logConfig, "enabled").getOrElse(false)
       if (enabled) {
         val default = LoggingSQLAndTimeSettings()
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = enabled,
-          logLevel = Option(config.getString("logLevel")).map(v => Symbol(v)).getOrElse(default.logLevel),
-          warningEnabled = Option(config.getString("warningEnabled")).map(_.toBoolean).getOrElse(default.warningEnabled),
-          warningThresholdMillis = Option(config.getString("warningThresholdMillis")).map(_.toLong).getOrElse(default.warningThresholdMillis),
-          warningLogLevel = Option(config.getString("warningLogLevel")).map(v => Symbol(v)).getOrElse(default.warningLogLevel)
+          logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
+          warningEnabled = readString(logConfig, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
+          warningThresholdMillis = readString(logConfig, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
+          warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
         )
       } else {
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
       }
     }
+  }
+
+  private def readConfig(config: Config, path: String): Option[Config] = {
+    if (config.hasPath(path)) Some(config.getConfig(path)) else None
+  }
+
+  private def readBoolean(config: Config, path: String): Option[Boolean] = {
+    if (config.hasPath(path)) Some(config.getBoolean(path)) else None
+  }
+
+  private def readString(config: Config, path: String): Option[String] = {
+    if (config.hasPath(path)) Some(config.getString(path)) else None
   }
 
 }
