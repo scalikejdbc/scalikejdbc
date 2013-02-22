@@ -225,7 +225,7 @@ object ScalikeJDBCProjects extends Build {
     "org.apache.derby"  % "derby"                % "[10.8.2,)"     % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"         % "test",
     "org.hsqldb"        % "hsqldb"               % "2.2.9"         % "test",
-    "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.23"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
   // TODO fix
