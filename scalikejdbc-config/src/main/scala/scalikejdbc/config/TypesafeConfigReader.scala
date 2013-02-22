@@ -16,7 +16,7 @@
 package scalikejdbc.config
 
 import scalikejdbc._
-import com.typesafe.config.{ Config => TypesafeConfig, ConfigFactory, ConfigException }
+import com.typesafe.config.{ Config, ConfigFactory, ConfigException }
 import scala.collection.mutable.{ Map => MutableMap, ListBuffer }
 
 /**
@@ -26,21 +26,21 @@ class ConfigurationException(val message: String) extends Exception(message) {
   def this(e: Throwable) = this(e.getMessage)
 }
 
-trait Config {
-  val config: TypesafeConfig
+trait TypesafeConfig {
+  val config: Config
 }
 
-trait StandardConfig extends Config {
-  lazy val config: TypesafeConfig = ConfigFactory.load()
+trait StandardConfig extends TypesafeConfig {
+  lazy val config: Config = ConfigFactory.load()
 }
 
 object TypesafeConfigReader extends TypesafeConfigReader with StandardConfig
 
 
 /**
- * Typesafe Config reader
+ * Typesafe TypesafeConfig reader
  */
-trait TypesafeConfigReader { self: Config =>
+trait TypesafeConfigReader { self: TypesafeConfig =>
 
   lazy val dbNames: List[String] = {
     val it = config.entrySet.iterator
@@ -115,15 +115,15 @@ trait TypesafeConfigReader { self: Config =>
     }
   }
 
-  private def readConfig(config: TypesafeConfig, path: String): Option[TypesafeConfig] = {
+  private def readConfig(config: Config, path: String): Option[Config] = {
     if (config.hasPath(path)) Some(config.getConfig(path)) else None
   }
 
-  private def readBoolean(config: TypesafeConfig, path: String): Option[Boolean] = {
+  private def readBoolean(config: Config, path: String): Option[Boolean] = {
     if (config.hasPath(path)) Some(config.getBoolean(path)) else None
   }
 
-  private def readString(config: TypesafeConfig, path: String): Option[String] = {
+  private def readString(config: Config, path: String): Option[String] = {
     if (config.hasPath(path)) Some(config.getString(path)) else None
   }
 
