@@ -361,7 +361,11 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
    * Set execution type as updateAndreturnGeneratedKey
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)
+  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = updateAndReturnGeneratedKey(1)
+
+  def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(name)
+
+  def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(index)
 
 }
 
@@ -419,12 +423,12 @@ class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(
  * @param sql SQL template
  * @param params parameters
  */
-class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
+class SQLUpdateWithGeneratedKey(sql: String)(params: Any*)(key: Any) {
 
   def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession => DB autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
-    case _ => session.updateAndReturnGeneratedKey(sql, params: _*)
+    case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
+    case _ => (session.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key))
   }
 
 }

@@ -295,7 +295,17 @@ trait DBSession extends LogSupport {
    * @param params parameters
    * @return generated key as a long value
    */
-  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
+  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = updateAndReturnSpecifiedGeneratedKey(template, params: _*)(1)
+
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param key name
+   * @return generated key as a long value
+   */
+  def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
     var generatedKeyFound = false
     var generatedKey: Long = -1
     val before = (stmt: PreparedStatement) => {}
@@ -303,7 +313,17 @@ trait DBSession extends LogSupport {
       val rs = stmt.getGeneratedKeys
       while (rs.next()) {
         generatedKeyFound = true
-        generatedKey = rs.getLong(1)
+        generatedKey = key match {
+          case name: String => rs.getLong(name)
+          case index: Int => try {
+            rs.getLong(index)
+          } catch {
+            case e: Exception =>
+              log.warn("Failed to get generated key value via index " + index + ". Going to retrieve it via index 1.")
+              rs.getLong(1)
+          }
+          case _ => throw new IllegalArgumentException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + "(key:" + key + ")")
+        }
       }
     }
     updateWithFilters(true, before, after, template, params: _*)
