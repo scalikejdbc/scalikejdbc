@@ -1,9 +1,96 @@
 # ScalikeJDBC Sandbox
 
-## Try it now
+## Example
+
+```scala
+import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
+
+// users
+case class User(id: Long, val name: Option[String], companyId: Option[Long] = None, company: Option[Company] = None)
+
+object User extends SQLSyntaxSupport[User] { 
+  override def tableName = "users"
+  override def columns = Seq("id", "name", "company_id")
+  def apply(rs: WrappedResultSet, u: ResultName[User]): User = User(rs.long(u.id), rs.stringOpt(u.name), rs.longOpt(u.companyId))
+  def apply(rs: WrappedResultSet, u: ResultName[User], c: ResultName[Company]): User = {
+    apply(rs, u).copy(company = rs.longOpt(c.id).map(id => Company(rs.long(c.id), rs.stringOpt(c.name))))
+  }
+} 
+
+// companies
+case class Company(id: Long, name: Option[String])
+
+object Company extends SQLSyntaxSupport[Company] {
+  override def tableName = "companies"
+  override def columns = Seq("id", "name")
+  def apply(rs: WrappedResultSet, c: ResultName[Company]): Company = Company(rs.long(c.id), rs.stringOpt(c.name))
+} 
+
+// groups
+case class Group(id: Long, name: Option[String], members: List[User] = Nil)
+
+object Group extends SQLSyntaxSupport[Group] { 
+  override def tableName = "groups"
+  override def columns = Seq("id", "name")
+  def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(rs.long(g.id), rs.stringOpt(g.name))
+}
+
+// group_members
+case class GroupMember(groupId: Long, userId: Long)
+object GroupMember extends SQLSyntaxSupport[GroupMember] {
+  override def tableName = "group_members"
+  override def columns = Seq("group_id", "user_id")
+}
+
+// -----------------------------
+// Query Examples
+// -----------------------------
+
+val users: List[User] = DB readOnly { implicit s =>
+  val (u, c) = (User.syntax, Company.syntax)
+  sql"""
+    select ${u.result.*}, ${c.result.*} 
+    from ${User.as(u)} left join ${Company.as(c)} on ${u.companyId} = ${c.id}
+  """
+    .map(rs => User(rs, u.result.names, c.result.names)).list.apply()
+}
+
+println("-------------------")
+users.foreach(user => println(user))
+println("-------------------")
+
+val groups: List[Group] = DB readOnly { implicit s =>
+  val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
+  sql"""
+    select 
+      ${u.result.*}, ${g.result.*}, ${c.result.*} 
+    from 
+      ${GroupMember.as(gm)} 
+        inner join ${User.as(u)} on ${u.id} = ${gm.userId} 
+        inner join ${Group.as(g)} on ${g.id} = ${gm.groupId} 
+        left join ${Company.as(c)} on ${u.companyId} = ${c.id}
+  """
+    .foldLeft(List[Group]()){ case (groups, rs) => 
+       val newGroup = Group(rs, g.result.names)
+       val member = User(rs, u.result.names, c.result.names)
+
+       groups.find(_.id == newGroup.id).map { group => 
+         group.copy(members = member :: group.members) :: groups.filterNot(_.id == group.id)
+       }.getOrElse { 
+         newGroup.copy(members = List(member)) :: groups 
+       }
+     }
+}
+
+println("-------------------")
+groups.foreach(group => println(group))
+println("-------------------")
+```
+
+## How to run
 
 ```sh
-
 git clone git://github.com/seratch/scalikejdbc.git
 cd scalikejdbc/sandbox
 sbt console
