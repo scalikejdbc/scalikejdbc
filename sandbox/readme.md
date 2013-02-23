@@ -96,7 +96,7 @@ cd scalikejdbc/sandbox
 sbt console
 ```
 
-```scala
+```sh
 [info] Starting scala interpreter...
 [info] 
 [run-main] INFO scalikejdbc.StatementExecutor$$anon$1 - SQL execution completed
