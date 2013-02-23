@@ -1,4 +1,6 @@
-seq(scalikejdbcSettings: _*)
+scalikejdbcSettings
+
+scalaVersion := "2.10.0"
 
 resolvers ++= Seq(
   "Sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
@@ -6,25 +8,95 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc" % "1.4.7-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.7-SNAPSHOT",
   "org.slf4j" % "slf4j-simple" % "[1.7,)",
   "org.hsqldb" % "hsqldb" % "[2,)",
-  "org.specs2" %% "specs2" % "1.12.2" % "test"
+  "org.specs2" %% "specs2" % "1.14" % "test"
 )
 
 initialCommands := """import scalikejdbc._
-import scalikejdbc.StringSQLRunner._
+import scalikejdbc.SQLInterpolation._
+// -----------------------------
 Class.forName("org.hsqldb.jdbc.JDBCDriver")
-ConnectionPool.singleton("jdbc:hsqldb:file:db/test", "", "")
+ConnectionPool.singleton("jdbc:hsqldb:mem:test", "", "")
 DB autoCommit { implicit s =>
   try {
-    SQL("create table users(id bigint primary key not null, name varchar(255))").execute.apply()
-    SQL("insert into users values ({id}, {name})").bindByName('id -> 1, 'name -> "Andy").update.apply()
-    SQL("insert into users values ({id}, {name})").bindByName('id -> 2, 'name -> "Brian").update.apply()
-  } catch { case e => println(e.getMessage) }
+    // create tables
+    sql"create table users(id bigint primary key not null, name varchar(255), company_id bigint)".execute.apply()
+    sql"create table companies(id bigint primary key not null, name varchar(255))".execute.apply()
+    sql"create table groups(id bigint primary key not null, name varchar(255))".execute.apply()
+    sql"create table group_members(group_id bigint not null, user_id bigint not null, primary key(group_id, user_id))".execute.apply()
+    // insert data
+    sql"insert into users values (${1}, ${"Alice"}, null)".update.apply()
+    sql"insert into users values (${2}, ${"Bob"}, ${1})".update.apply()
+    sql"insert into users values (${3}, ${"Chris"}, ${1})".update.apply()
+    sql"insert into companies values (${1}, ${"Typesafe"})".update.apply()
+    sql"insert into groups values (${1}, ${"Japan Scala Users Group"})".update.apply()
+    sql"insert into group_members values (${1}, ${1})".update.apply()
+    sql"insert into group_members values (${1}, ${2})".update.apply()
+  } catch { case e: Exception => println(e.getMessage) }
 }
-case class User(val id: Long, val name: String)
-val * = (rs: WrappedResultSet) => new User(rs.long("id"), rs.string("name"))
-implicit val session = DB.autoCommitSession
+// -----------------------------
+// users
+case class User(id: Long, val name: Option[String], 
+  companyId: Option[Long] = None, company: Option[Company] = None)
+object User extends SQLSyntaxSupport[User] { 
+  override def tableName = "users"
+  override def columns = Seq("id", "name", "company_id")
+  def apply(rs: WrappedResultSet, u: ResultName[User]): User = User(rs.long(u.id), rs.stringOpt(u.name), rs.longOpt(u.companyId))
+  def apply(rs: WrappedResultSet, u: ResultName[User], c: ResultName[Company]): User = {
+    apply(rs, u).copy(company = rs.longOpt(c.id).map(id => Company(rs.long(c.id), rs.stringOpt(c.name))))
+  }
+} 
+// companies
+case class Company(id: Long, name: Option[String])
+object Company extends SQLSyntaxSupport[Company] {
+  override def tableName = "companies"
+  override def columns = Seq("id", "name")
+  def apply(rs: WrappedResultSet, c: ResultName[Company]): Company = Company(rs.long(c.id), rs.stringOpt(c.name))
+} 
+// groups
+case class Group(id: Long, name: Option[String], members: List[User] = Nil)
+object Group extends SQLSyntaxSupport[Group] { 
+  override def tableName = "groups"
+  override def columns = Seq("id", "name")
+  def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(rs.long(g.id), rs.stringOpt(g.name))
+}
+// group_members
+case class GroupMember(groupId: Long, userId: Long)
+object GroupMember extends SQLSyntaxSupport[GroupMember] {
+  override def tableName = "group_members"
+  override def columns = Seq("group_id", "user_id")
+}
+GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+  enabled = true,
+  logLevel = 'info
+)
+// -----------------------------
+// Query Examples
+// -----------------------------
+val users: List[User] = DB readOnly { implicit s =>
+  val (u, c) = (User.syntax, Company.syntax)
+  sql"select ${u.result.*}, ${c.result.*} from ${User.as(u)} left join ${Company.as(c)} on ${u.companyId} = ${c.id}"
+    .map(rs => User(rs, u.result.names, c.result.names)).list.apply()
+}
+println("-------------------")
+users.foreach(user => println(user))
+println("-------------------")
+val groups: List[Group] = DB readOnly { implicit s =>
+  val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
+  sql"select ${u.result.*}, ${g.result.*}, ${c.result.*} from ${GroupMember.as(gm)} inner join ${User.as(u)} on ${u.id} = ${gm.userId} inner join ${Group.as(g)} on ${g.id} = ${gm.groupId} left join ${Company.as(c)} on ${u.companyId} = ${c.id}"
+  .foldLeft(List[Group]()){ case (groups, rs) => 
+     val group = Group(rs, g.result.names)
+     val member = User(rs, u.result.names, c.result.names)
+     groups.find(g => g.id == group.id).map { group => 
+       group.copy(members = member :: group.members) :: groups.filterNot(_.id == group.id)
+     }.getOrElse { group.copy(members = List(member)) :: groups }
+   }
+}
+println("-------------------")
+groups.foreach(group => println(group))
+println("-------------------")
 """
 
