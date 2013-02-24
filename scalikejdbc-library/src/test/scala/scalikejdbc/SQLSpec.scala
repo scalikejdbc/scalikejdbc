@@ -17,7 +17,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     try {
       DB autoCommit { implicit s =>
 
-        SQL("create table users_" + suffix + " (id int not null, group_id int not null)").execute.apply()
+        SQL("create table users_" + suffix + " (id int not null, group_id int)").execute.apply()
         SQL("create table groups_" + suffix + " (id int not null, name varchar(30))").execute.apply()
         SQL("insert into users_" + suffix + " values (1,1)").update.apply()
         SQL("insert into users_" + suffix + " values (2,1)").update.apply()
@@ -25,6 +25,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         SQL("insert into users_" + suffix + " values (4,1)").update.apply()
         SQL("insert into users_" + suffix + " values (5,2)").update.apply()
         SQL("insert into users_" + suffix + " values (6,2)").update.apply()
+        SQL("insert into users_" + suffix + " values (7,null)").update.apply()
         SQL("insert into groups_" + suffix + " values (1, 'A')").update.apply()
         SQL("insert into groups_" + suffix + " values (2, 'B')").update.apply()
         SQL("insert into groups_" + suffix + " values (3, 'C')").update.apply()
@@ -32,16 +33,32 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         case class User(id: Int, groupId: Int, group: Option[Group] = None)
         case class Group(id: Int, name: String)
 
-        val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
-          " from users_" + suffix + " u inner join groups_" + suffix + " g " +
-          " on u.group_id = g.id")
-          .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-          .toOne[Group](rs => Group(rs.int("g_id"), rs.string("g_name")))
-          .map((u: User, g: Group) => u.copy(group = Option(g)))
-          .list.apply()
+        {
+          val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
+            " from users_" + suffix + " u inner join groups_" + suffix + " g " +
+            " on u.group_id = g.id")
+            .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
+            .toOne[Group](rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
+            .map((u: User, g: Group) => u.copy(group = Option(g)))
+            .list.apply()
 
-        users.size should equal(6)
-        users.foreach { user => user.group should not be (null) }
+          users.size should equal(6)
+          users.foreach { user => user.group should not be (Some) }
+        }
+
+        {
+          val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
+            " from users_" + suffix + " u left join groups_" + suffix + " g " +
+            " on u.group_id = g.id where u.id = 7")
+            .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
+            .toOne[Group](rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
+            .map((u: User, g: Group) => u.copy(group = Option(g)))
+            .list.apply()
+
+          users.size should equal(1)
+          users.foreach { user => user.group should be(None) }
+        }
+
       }
     } finally {
       DB autoCommit { implicit s =>
@@ -82,19 +99,21 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         case class User(id: Int)
         case class Group(id: Int, name: String, members: List[User] = Nil)
 
-        val groups = SQL("select u.id as u_id, g.id as g_id, g.name as g_name " +
-          " from group_members_" + suffix + " gm" +
-          " inner join users_" + suffix + " u on u.id = gm.user_id" +
-          " inner join groups_" + suffix + " g on g.id = gm.group_id" +
-          " order by g.id")
-          .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-          .toMany[User](rs => User(rs.int("u_id")))
-          .map((g: Group, ms: List[User]) => g.copy(members = ms))
-          .list.apply()
+        {
+          val groups = SQL("select u.id as u_id, g.id as g_id, g.name as g_name " +
+            " from group_members_" + suffix + " gm" +
+            " inner join users_" + suffix + " u on u.id = gm.user_id" +
+            " inner join groups_" + suffix + " g on g.id = gm.group_id" +
+            " order by g.id")
+            .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
+            .toMany[User](rs => rs.intOpt("u_id").map(id => User(id)))
+            .map((g: Group, ms: List[User]) => g.copy(members = ms))
+            .list.apply()
 
-        groups.size should equal(2)
-        groups(0).members.size should equal(6)
-        groups(1).members.size should equal(4)
+          groups.size should equal(2)
+          groups(0).members.size should equal(6)
+          groups(1).members.size should equal(4)
+        }
       }
     } finally {
       DB autoCommit { implicit s =>
