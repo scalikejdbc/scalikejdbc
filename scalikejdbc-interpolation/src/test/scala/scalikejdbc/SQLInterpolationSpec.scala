@@ -41,7 +41,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   object Group extends SQLSyntaxSupport[Group] {
     override def tableName = "groups"
     override def columns = Seq("id", "website_url")
-    def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.websiteUrl))
+    def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.field("websiteUrl")))
   }
   case class Group(id: Int, websiteUrl: Option[String], members: List[User] = Nil)
 

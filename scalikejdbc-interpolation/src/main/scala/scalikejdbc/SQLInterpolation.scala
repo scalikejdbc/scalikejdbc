@@ -50,18 +50,22 @@ object SQLInterpolation {
    */
   trait SQLSyntaxProvider extends Dynamic {
     import SQLSyntaxProvider._
+
     def c(name: String) = column(name)
     def column(name: String): SQLSyntax
+
     def nameConverters: Map[String, String]
     def forceUpperCase: Boolean
     def delimiterForResultName: String
-    def selectDynamic(name: String): SQLSyntax = {
-      val nameInSQL = {
+
+    def field(name: String): SQLSyntax = {
+      val columnName = {
         if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
         else toSnakeCase(name, nameConverters)
       }
-      c(nameInSQL)
+      c(columnName)
     }
+    def selectDynamic(name: String): SQLSyntax = field(name)
   }
 
   /**
