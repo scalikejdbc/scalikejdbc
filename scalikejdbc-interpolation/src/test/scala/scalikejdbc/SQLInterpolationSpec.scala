@@ -24,6 +24,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
     override def tableName = "users"
     override def columns = Seq("id", "first_name", "group_id")
+    override def delimiterForResultName = "_Z_"
     override def forceUpperCase = true
 
     def apply(rs: WrappedResultSet, u: ResultName[User]): User = {

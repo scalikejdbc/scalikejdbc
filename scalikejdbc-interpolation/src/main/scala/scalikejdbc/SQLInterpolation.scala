@@ -29,6 +29,7 @@ object SQLInterpolation {
     def columns: Seq[String]
 
     def forceUpperCase: Boolean = false
+    def delimiterForResultName = if (forceUpperCase) "__ON__" else "__on__"
     def nameConverters: Map[String, String] = Map()
 
     def syntax = {
@@ -55,6 +56,7 @@ object SQLInterpolation {
     def column(name: String): SQLSyntax
     def nameConverters: Map[String, String]
     def forceUpperCase: Boolean
+    def delimiterForResultName: String
     def selectDynamic(name: String): SQLSyntax = {
       val nameInSQL = {
         if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
@@ -92,9 +94,9 @@ object SQLInterpolation {
    * SQLSyntax Provider basic implementation
    */
   abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String) extends SQLSyntaxProvider {
-    def delimiter = if (support.forceUpperCase) "__ON__" else "__on__"
     def nameConverters = support.nameConverters
     def forceUpperCase = support.forceUpperCase
+    def delimiterForResultName = support.delimiterForResultName
     def columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
   }
 
@@ -127,11 +129,11 @@ object SQLInterpolation {
     def names: ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     def * : SQLSyntax = SQLSyntax(columns.map { c =>
-      s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}"
+      s"${tableAliasName}.${c.value} as ${c.value}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
     def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
-      SQLSyntax(s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}")
+      SQLSyntax(s"${tableAliasName}.${c.value} as ${c.value}${delimiterForResultName}${tableAliasName}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
@@ -144,7 +146,7 @@ object SQLInterpolation {
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
     def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
-      SQLSyntax(s"${c.value}${delimiter}${tableAliasName}")
+      SQLSyntax(s"${c.value}${delimiterForResultName}${tableAliasName}")
     }.getOrElse {
       throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + " (" + name + ")")
     }
