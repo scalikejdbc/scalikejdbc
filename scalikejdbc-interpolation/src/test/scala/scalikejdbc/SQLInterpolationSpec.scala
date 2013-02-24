@@ -63,9 +63,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             case (id, name, groupId) =>
               sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
           }
-          sql"insert into groups values (${1}, ${"http://www.example.com"})".update.apply()
+          sql"insert into groups values (${1}, ${"http://jp.scala-users.org/"})".update.apply()
+          sql"insert into groups values (${2}, ${"http://http://www.java-users.jp/"})".update.apply()
           sql"insert into group_members values (${1}, ${1})".update.apply()
           sql"insert into group_members values (${2}, ${1})".update.apply()
+          sql"insert into group_members values (${1}, ${2})".update.apply()
+          sql"insert into group_members values (${2}, ${2})".update.apply()
+          sql"insert into group_members values (${3}, ${2})".update.apply()
 
           val (u, g) = (User.syntax("u"), Group.syntax)
 
@@ -86,28 +90,51 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${3}".map { rs => u.result.dummy }.single.apply()
           }
 
-          val gm = GroupMember.syntax
-          val groupWithMembers: Option[Group] = sql"""
-            select 
+          {
+            val gm = GroupMember.syntax
+            val groupWithMembers: Option[Group] = sql"""
+            select
               ${u.result.*}, ${g.result.*}
-            from 
-              ${GroupMember.as(gm)} 
+            from
+              ${GroupMember.as(gm)}
                 inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
                 inner join ${User.as(u)} on ${gm.userId} = ${u.id}
             where
               ${g.id} = ${1}
           """.foldLeft(Option.empty[Group]) { (groupOpt, rs) =>
-            val newMember = User(rs, u.result.names)
-            groupOpt.map { group =>
-              if (group.members.contains(newMember)) group
-              else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members)
-            }.orElse {
-              Some(Group(rs, g.result.names).copy(members = List(newMember)))
+              val newMember = User(rs, u.result.names)
+              groupOpt.map { group =>
+                if (group.members.contains(newMember)) group
+                else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members)
+              }.orElse {
+                Some(Group(rs, g.result.names).copy(members = List(newMember)))
+              }
             }
+
+            groupWithMembers.isDefined should equal(true)
+            groupWithMembers.get.members.size should equal(2)
           }
 
-          groupWithMembers.isDefined should equal(true)
-          groupWithMembers.get.members.size should equal(2)
+          {
+            val gm = GroupMember.syntax
+            val groupsWithMembers: List[Group] = sql"""
+            select
+              ${u.result.*}, ${g.result.*}
+            from
+              ${GroupMember.as(gm)}
+                inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
+                inner join ${User.as(u)} on ${gm.userId} = ${u.id}
+            order by ${g.id}
+            """
+              .one(rs => Group(rs, g.result.names))
+              .toMany[User](rs => User(rs, u.result.names))
+              .map { (group: Group, members: List[User]) => group.copy(members = members) }
+              .list.apply()
+
+            groupsWithMembers.size should equal(2)
+            groupsWithMembers(0).members.size should equal(2)
+            groupsWithMembers(1).members.size should equal(3)
+          }
 
         } finally {
           sql"drop table users".execute.apply()

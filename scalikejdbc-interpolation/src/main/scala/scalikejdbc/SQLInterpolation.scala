@@ -164,11 +164,11 @@ class SQLInterpolation(val s: StringContext) extends AnyVal {
 
   import SQLInterpolation.{ LastParameter, SQLSyntax }
 
-  def sql(params: Any*) = {
+  def sql[A](params: Any*) = {
     val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
       case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
     }
-    SQL(query).bind(params.flatMap(toSeq): _*)
+    SQL[A](query).bind(params.flatMap(toSeq): _*)
   }
 
   private def getPlaceholders(param: Any): String = param match {
