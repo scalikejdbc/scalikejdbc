@@ -41,8 +41,15 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   object Group extends SQLSyntaxSupport[Group] {
     override def tableName = "groups"
     override def columns = Seq("id", "website_url")
+    def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.websiteUrl))
   }
-  case class Group(id: Int, websiteUrl: Option[String])
+  case class Group(id: Int, websiteUrl: Option[String], members: List[User] = Nil)
+
+  object GroupMember extends SQLSyntaxSupport[GroupMember] {
+    override def tableName = "group_members"
+    override def columns = Seq("user_id", "group_id")
+  }
+  case class GroupMember(userId: Int, groupId: Int)
 
   it should "be available with SQLSyntaxSupport" in {
     DB localTx {
@@ -50,31 +57,57 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         try {
           sql"create table users (id int not null, first_name varchar(256), group_id int)".execute.apply()
           sql"create table groups (id int not null, website_url varchar(256))".execute.apply()
+          sql"create table group_members (user_id int not null, group_id int not null)".execute.apply()
 
           Seq((1, Some("foo"), None), (2, Some("bar"), None), (3, Some("baz"), Some(1))) foreach {
             case (id, name, groupId) =>
               sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
           }
           sql"insert into groups values (${1}, ${"http://www.example.com"})".update.apply()
+          sql"insert into group_members values (${1}, ${1})".update.apply()
+          sql"insert into group_members values (${2}, ${1})".update.apply()
 
-          val id = 3
-          val u = User.syntax("u")
-          val g = Group.syntax
-          // User.as(g) compile error!
+          val (u, g) = (User.syntax("u"), Group.syntax)
 
           val user = sql"""
-            select ${u.result.*}, ${g.result.*}
-            from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
-            where ${u.id} = ${id}
-            """.map(rs => User(rs, u.result.names, g.result.names)).single.apply().get
+            select 
+              ${u.result.*}, ${g.result.*}
+            from 
+              ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
+            where 
+              ${u.id} = ${3}
+          """.map(rs => User(rs, u.result.names, g.result.names)).single.apply().get
 
           user.id should equal(3)
           user.name should equal(Some("baz"))
           user.group.isDefined should equal(true)
 
           intercept[IllegalArgumentException] {
-            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${id}".map { rs => u.result.dummy }.single.apply()
+            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${3}".map { rs => u.result.dummy }.single.apply()
           }
+
+          val gm = GroupMember.syntax
+          val groupWithMembers: Option[Group] = sql"""
+            select 
+              ${u.result.*}, ${g.result.*}
+            from 
+              ${GroupMember.as(gm)} 
+                inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
+                inner join ${User.as(u)} on ${gm.userId} = ${u.id}
+            where
+              ${g.id} = ${1}
+          """.foldLeft(Option.empty[Group]) { (groupOpt, rs) =>
+            val newMember = User(rs, u.result.names)
+            groupOpt.map { group =>
+              if (group.members.contains(newMember)) group
+              else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members)
+            }.orElse {
+              Some(Group(rs, g.result.names).copy(members = List(newMember)))
+            }
+          }
+
+          groupWithMembers.isDefined should equal(true)
+          groupWithMembers.get.members.size should equal(2)
 
         } finally {
           sql"drop table users".execute.apply()
