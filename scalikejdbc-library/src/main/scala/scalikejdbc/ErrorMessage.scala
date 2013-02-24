@@ -44,4 +44,6 @@ private[scalikejdbc] object ErrorMessage {
 
   val INVALID_COLUMN_NAME = "Invalid column name."
 
+  val INVALID_ONE_TO_ONE_RELATION = "one-to-one relation is expected but it seems to be a one-to-many relationship."
+
 }
