@@ -69,7 +69,7 @@ object SQLInterpolation {
   /**
    * SQLSyntaxProvider companion
    */
-  object SQLSyntaxProvider {
+  private[scalikejdbc] object SQLSyntaxProvider {
 
     private val acronymRegExpStr = "[A-Z]{2,}"
     private val acronymRegExp = acronymRegExpStr.r
@@ -93,7 +93,7 @@ object SQLInterpolation {
   /**
    * SQLSyntax Provider basic implementation
    */
-  abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String) extends SQLSyntaxProvider {
+  private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String) extends SQLSyntaxProvider {
     def nameConverters = support.nameConverters
     def forceUpperCase = support.forceUpperCase
     def delimiterForResultName = support.delimiterForResultName
