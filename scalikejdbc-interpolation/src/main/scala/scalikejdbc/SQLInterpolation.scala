@@ -9,8 +9,6 @@ import scala.language.dynamics
  */
 object SQLInterpolation {
 
-  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
-
   private object LastParameter
 
   /**
@@ -154,7 +152,8 @@ object SQLInterpolation {
 
   type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
 
-  implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
+  @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
+  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
 
 }
 
