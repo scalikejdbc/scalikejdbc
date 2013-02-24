@@ -127,7 +127,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${g.id}
             """
               .one(rs => Group(rs, g.result.names))
-              .toMany[User](rs => User(rs, u.result.names))
+              .toMany[User](rs => rs.intOpt(u.result.names.id).map(_ => User(rs, u.result.names)))
               .map { (group: Group, members: List[User]) => group.copy(members = members) }
               .list.apply()
 
