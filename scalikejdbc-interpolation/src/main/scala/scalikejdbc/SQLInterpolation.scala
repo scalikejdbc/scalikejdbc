@@ -31,7 +31,7 @@ object SQLInterpolation {
     def forceUpperCase: Boolean = false
     def nameConverters: Map[String, String] = Map()
 
-    def syntax() = {
+    def syntax = {
       val _name = if (forceUpperCase) tableName.toUpperCase else tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
@@ -104,7 +104,7 @@ object SQLInterpolation {
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
-    def result(): ResultSQLSyntaxProvider[S, A] = {
+    def result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase else tableAliasName
       ResultSQLSyntaxProvider[S, A](support, table)
     }
@@ -124,7 +124,7 @@ object SQLInterpolation {
   case class ResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
-    def names(): ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
+    def names: ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     def * : SQLSyntax = SQLSyntax(columns.map { c =>
       s"${tableAliasName}.${c.value} as ${c.value}${delimiter}${tableAliasName}"
