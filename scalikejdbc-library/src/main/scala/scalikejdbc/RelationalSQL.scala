@@ -41,7 +41,7 @@ object OneToXRelationalSQL {
  * @tparam A return type
  */
 class OneToXRelationalSQL[A, E <: WithExtractor](sql: String)(params: Any*)(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)
-    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("TODO"))(output) {
+    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one/one-to-many operation needs toOne(RS => Option[B]).map((A,B) => A) or toMany(RS => Option[B]).map((A,Seq(B) => A)."))(output) {
 
   def toOne[B](to: WrappedResultSet => Option[B]): OneToOneRelationalSQL[A, B, E] = {
     new OneToOneRelationalSQL(sql)(params: _*)(output)(one)(to)((a, b) => a)
@@ -74,7 +74,7 @@ private[scalikejdbc] trait RelationalSQLExtractor[A, B, E <: WithExtractor] { se
  * @tparam B return type for one2
  */
 class OneToOneRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*)(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
-    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(A).toOne(B)) is specified, please use #map((A,B) =>A) instead."))(output) {
+    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(output) {
 
   def map(extractor: (A, B) => A): OneToOneRelationalSQL[A, B, HasExtractor] = {
     new OneToOneRelationalSQL(sql)(params: _*)(output)(one)(toOne)(extractor)
@@ -107,7 +107,7 @@ private[scalikejdbc] trait OneToOneResultSetOperation[A, B, E <: WithExtractor] 
 }
 
 class OneToOneRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
-    extends SQLToTraversable[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(A).toOne(B)) is specified, please use #map((A,B) =>A) instead."))(Output.traversable)
+    extends SQLToTraversable[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.traversable)
     with RelationalSQLExtractor[A, B, E]
     with OneToOneResultSetOperation[A, B, E] {
 
@@ -135,7 +135,7 @@ class OneToOneRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(
 }
 
 class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
-    extends SQLToList[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(A).toOne(B)) is specified, please use #map((A,B) =>A) instead."))(Output.list)
+    extends SQLToList[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.list)
     with RelationalSQLExtractor[A, B, E]
     with OneToOneResultSetOperation[A, B, E] {
 
@@ -163,7 +163,7 @@ class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params:
 }
 
 class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
-    extends SQLToOption[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(A).toOne(B)) is specified, please use #map((A,B) =>A) instead."))(Output.single)
+    extends SQLToOption[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.single)
     with RelationalSQLExtractor[A, B, E]
     with OneToOneResultSetOperation[A, B, E] {
 
@@ -209,7 +209,7 @@ class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(param
  * @tparam B return type for many
  */
 class OneToManyRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*)(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
-    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(A).toMany(B)) is specified, please use #map((A,B) =>A) instead."))(output) {
+    extends SQL[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(output) {
 
   def map(extractor: (A, Seq[B]) => A): OneToManyRelationalSQL[A, B, HasExtractor] = {
     new OneToManyRelationalSQL(sql)(params: _*)(output)(one)(toMany)(extractor)
@@ -241,7 +241,7 @@ private[scalikejdbc] trait OneToManyResultSetOperation[A, B, E <: WithExtractor]
 }
 
 class OneToManyRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
-    extends SQLToList[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(A).toMany(B)) is specified, please use #map((A,B) =>A) instead."))(Output.list)
+    extends SQLToList[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.list)
     with RelationalSQLExtractor[A, B, E]
     with OneToManyResultSetOperation[A, B, E] {
 
@@ -265,7 +265,7 @@ class OneToManyRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params
 }
 
 class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(params: Any*)(val one: WrappedResultSet => A)(val toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
-    extends SQLToTraversable[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(A).toMany(B)) is specified, please use #map((A,B) =>A) instead."))(Output.traversable)
+    extends SQLToTraversable[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.traversable)
     with RelationalSQLExtractor[A, B, E]
     with OneToManyResultSetOperation[A, B, E] {
 
@@ -289,7 +289,7 @@ class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)
 }
 
 class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
-    extends SQLToOption[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(A).toMany(B)) is specified, please use #map((A,B) =>A) instead."))(Output.single)
+    extends SQLToOption[A, E](sql)(params: _*)(SQL.noExtractor[A]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, please use #map((A,B) =>A) instead."))(Output.single)
     with RelationalSQLExtractor[A, B, E]
     with OneToManyResultSetOperation[A, B, E] {
 
