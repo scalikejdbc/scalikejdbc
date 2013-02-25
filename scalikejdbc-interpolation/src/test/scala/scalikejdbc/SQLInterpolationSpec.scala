@@ -230,6 +230,21 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           }
 
           {
+            val (c, o) = (Customer.syntax("c"), Order.syntax("o"))
+            val customers = sql"""
+              select
+                ${c.result.*}
+              from
+                ${Customer.as(c)}
+              where
+               ${c.id} in (select ${o.result.customerId} from ${Order.as(o)})
+            """
+              .map(rs => Customer(rs.int(c.resultName.id), rs.string(c.resultName.name))).list.apply()
+
+            customers.size should equal(3)
+          }
+
+          {
             val (c, o, p) = (Customer.syntax("c"), Order.syntax("o"), Product.syntax("p"))
             val x = SubQuery.syntax("x", o.resultName, p.resultName)
             val customers = sql"""
