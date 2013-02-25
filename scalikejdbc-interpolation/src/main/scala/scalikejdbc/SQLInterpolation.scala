@@ -102,10 +102,10 @@ object SQLInterpolation {
     def delimiterForResultName = support.delimiterForResultName
     def columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
 
-    def notFoundInColumns(name: String): IllegalArgumentException = notFoundInColumns(name, columns.map(_.value).mkString(","))
+    def notFoundInColumns(name: String): InvalidColumnNameException = notFoundInColumns(name, columns.map(_.value).mkString(","))
 
-    def notFoundInColumns(name: String, registeredNames: String): IllegalArgumentException = {
-      new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
+    def notFoundInColumns(name: String, registeredNames: String): InvalidColumnNameException = {
+      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
     }
 
   }
@@ -128,7 +128,7 @@ object SQLInterpolation {
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
-      throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
     }
 
   }
@@ -165,7 +165,7 @@ object SQLInterpolation {
     }
 
     def namedColumn(name: String) = namedColumns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
-      throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
     }
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
@@ -205,7 +205,7 @@ object SQLInterpolation {
         SQLSyntax(s"${aliasName}.${rn.namedColumn(name).value}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
-        throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})")
+        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})")
       }
     }
 
@@ -230,7 +230,7 @@ object SQLInterpolation {
         SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
-        throw new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
+        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
       }
     }
 
@@ -262,7 +262,7 @@ object SQLInterpolation {
 
     def notFoundInColumns(name: String) = {
       val registeredNames = resultNames.map { rn => rn.namedColumns.map(_.value).mkString(",") }.mkString(",")
-      new IllegalArgumentException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
+      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
     }
 
   }
