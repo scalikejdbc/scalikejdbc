@@ -30,7 +30,9 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
           SQL("insert into groups_" + suffix + " values (3, 'C')").update.apply()
 
           case class User(id: Int, groupId: Int, group: Option[Group] = None)
-          case class Group(id: Int, name: String) {
+          case class Group(id: Int, name: String)
+
+          {
             val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
               " from users_" + suffix + " u inner join groups_" + suffix + " g " +
               " on u.group_id = g.id order by u.id")
@@ -106,7 +108,9 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
           SQL("insert into group_members_" + suffix + " values (4,2)").update.apply()
 
           case class User(id: Int)
-          case class Group(id: Int, name: String, members: Seq[User] = Nil) {
+          case class Group(id: Int, name: String, members: Seq[User] = Nil)
+
+          {
             val groups = SQL("select u.id as u_id, g.id as g_id, g.name as g_name " +
               " from group_members_" + suffix + " gm" +
               " inner join users_" + suffix + " u on u.id = gm.user_id" +

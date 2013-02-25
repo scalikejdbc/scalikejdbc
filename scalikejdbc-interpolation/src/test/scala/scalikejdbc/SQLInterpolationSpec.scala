@@ -5,6 +5,7 @@ import org.scalatest.matchers._
 
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
+import java.sql.SQLException
 
 class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
@@ -25,6 +26,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
     override def tableName = "users"
     override def columns = Seq("id", "first_name", "group_id")
+    override def nameConverters = Map("uid" -> "id")
     override def delimiterForResultName = "_Z_"
     override def forceUpperCase = true
 
@@ -44,7 +46,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     override def columns = Seq("id", "website_url")
     def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.field("websiteUrl")))
   }
-  case class Group(id: Int, websiteUrl: Option[String], members: List[User] = Nil)
+  case class Group(id: Int, websiteUrl: Option[String], members: Seq[User] = Nil)
 
   object GroupMember extends SQLSyntaxSupport[GroupMember] {
     override def tableName = "group_members"
@@ -64,13 +66,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             case (id, name, groupId) =>
               sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
           }
-          sql"insert into groups values (${1}, ${"http://jp.scala-users.org/"})".update.apply()
-          sql"insert into groups values (${2}, ${"http://http://www.java-users.jp/"})".update.apply()
-          sql"insert into group_members values (${1}, ${1})".update.apply()
-          sql"insert into group_members values (${2}, ${1})".update.apply()
-          sql"insert into group_members values (${1}, ${2})".update.apply()
-          sql"insert into group_members values (${2}, ${2})".update.apply()
-          sql"insert into group_members values (${3}, ${2})".update.apply()
+          sql"insert into groups values (1, ${"http://jp.scala-users.org/"})".update.apply()
+          sql"insert into groups values (2, ${"http://http://www.java-users.jp/"})".update.apply()
+          sql"insert into group_members values (1, 1)".update.apply()
+          sql"insert into group_members values (2, 1)".update.apply()
+          sql"insert into group_members values (1, 2)".update.apply()
+          sql"insert into group_members values (2, 2)".update.apply()
+          sql"insert into group_members values (3, 2)".update.apply()
 
           val (u, g) = (User.syntax("u"), Group.syntax)
 
@@ -80,17 +82,37 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             from 
               ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
             where 
-              ${u.id} = ${3}
+              ${u.id} = 3
           """.map(rs => User(rs, u.resultName, g.resultName)).single.apply().get
 
           user.id should equal(3)
           user.name should equal(Some("baz"))
           user.group.isDefined should equal(true)
 
-          intercept[IllegalArgumentException] {
-            sql"select ${u.result.*} from ${User.as(u)} where ${u.id} = ${3}".map { rs => u.result.dummy }.single.apply()
+          // exception patterns
+          {
+            intercept[InvalidColumnNameException] {
+              sql"""select ${u.result.id}, ${u.result.dummy}
+              from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
+              where ${u.id} = 3"""
+                .one(rs => User(rs, u.resultName))
+                .toOne(rs => rs.intOpt(g.resultName.id).map(id => Group(rs, g.resultName)))
+                .map { (u, g) => u.copy(group = Some(g)) }
+                .single.apply()
+            }
+
+            intercept[ResultSetExtractorException] {
+              sql"""select ${u.result.*}
+                from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
+                where ${u.id} = 3"""
+                .one(rs => User(rs, u.resultName))
+                .toOne(rs => rs.intOpt(g.resultName.dummy).map(id => Group(rs, g.resultName)))
+                .map { (u, g) => u.copy(group = Some(g)) }
+                .list.apply()
+            }
           }
 
+          // foldLeft example
           {
             val gm = GroupMember.syntax
             val groupWithMembers: Option[Group] = sql"""
@@ -101,14 +123,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
                 inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
                 inner join ${User.as(u)} on ${gm.userId} = ${u.id}
             where
-              ${g.id} = ${1}
+              ${g.id} = 1
           """.foldLeft(Option.empty[Group]) { (groupOpt, rs) =>
               val newMember = User(rs, u.resultName)
               groupOpt.map { group =>
                 if (group.members.contains(newMember)) group
-                else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members)
+                else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members.toList)
               }.orElse {
-                Some(Group(rs, g.resultName).copy(members = List(newMember)))
+                Some(Group(rs, g.resultName).copy(members = Seq(newMember)))
               }
             }
 
@@ -116,6 +138,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             groupWithMembers.get.members.size should equal(2)
           }
 
+          // one-to-many API
           {
             val gm = GroupMember.syntax
             val groupsWithMembers: List[Group] = sql"""
@@ -142,6 +165,55 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             groupsWithMembers(1).members(2).id should equal(3)
           }
 
+          {
+            val gm = GroupMember.syntax
+            val groupsWithMembers: Traversable[Group] = sql"""
+            select
+              ${u.result.*}, ${g.result.*}
+            from
+              ${GroupMember.as(gm)}
+                inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
+                inner join ${User.as(u)} on ${gm.userId} = ${u.id}
+            order by ${g.id}, ${u.id}
+            """
+              .one(rs => Group(rs, g.resultName))
+              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .map { (g, us) => g.copy(members = us) }
+              .traversable.apply()
+
+            groupsWithMembers.size should equal(2)
+            groupsWithMembers.head.members.size should equal(2)
+            groupsWithMembers.head.members(0).id should equal(1)
+            groupsWithMembers.head.members(1).id should equal(2)
+            groupsWithMembers.tail.head.members.size should equal(3)
+            groupsWithMembers.tail.head.members(0).id should equal(1)
+            groupsWithMembers.tail.head.members(1).id should equal(2)
+            groupsWithMembers.tail.head.members(2).id should equal(3)
+          }
+
+          {
+            val gm = GroupMember.syntax
+            val groupWithMembers: Option[Group] = sql"""
+            select
+              ${u.result.*}, ${g.result.*}
+            from
+              ${GroupMember.as(gm)}
+                inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
+                inner join ${User.as(u)} on ${gm.userId} = ${u.id}
+            where ${g.id} = 1
+            order by ${g.id}, ${u.id}
+            """
+              .one(rs => Group(rs, g.resultName))
+              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .map { (g, us) => g.copy(members = us) }
+              .single.apply()
+
+            groupWithMembers.isDefined should be(true)
+            groupWithMembers.get.members.size should equal(2)
+            groupWithMembers.get.members(0).id should equal(1)
+            groupWithMembers.get.members(1).id should equal(2)
+          }
+
         } finally {
           sql"drop table users".execute.apply()
           sql"drop table groups".execute.apply()
@@ -155,7 +227,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     override def columns = Seq("id", "name", "group_id")
   }
   case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None,
-    orders: List[Order] = Nil)
+    orders: Seq[Order] = Nil)
 
   object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
     override def tableName = "customer_groups"
@@ -192,17 +264,17 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"insert into customers values (6, ${"Fred"}, 1)".update.apply()
           sql"insert into customers values (7, ${"George"}, 1)".update.apply()
 
-          sql"insert into customer_groups values (${1}, ${"JSA"})".update.apply()
+          sql"insert into customer_groups values (1, ${"JSA"})".update.apply()
 
-          sql"insert into products values (${1}, ${"Bean"})".update.apply()
-          sql"insert into products values (${2}, ${"Milk"})".update.apply()
-          sql"insert into products values (${3}, ${"Chocolate"})".update.apply()
+          sql"insert into products values (1, ${"Bean"})".update.apply()
+          sql"insert into products values (2, ${"Milk"})".update.apply()
+          sql"insert into products values (3, ${"Chocolate"})".update.apply()
 
-          sql"insert into orders values (${1}, ${1}, ${1}, current_timestamp)".update.apply()
-          sql"insert into orders values (${2}, ${1}, ${2}, current_timestamp)".update.apply()
-          sql"insert into orders values (${3}, ${2}, ${3}, current_timestamp)".update.apply()
-          sql"insert into orders values (${4}, ${2}, ${2}, current_timestamp)".update.apply()
-          sql"insert into orders values (${5}, ${2}, ${1}, current_timestamp)".update.apply()
+          sql"insert into orders values (1, 1, 1, current_timestamp)".update.apply()
+          sql"insert into orders values (2, 1, 2, current_timestamp)".update.apply()
+          sql"insert into orders values (3, 2, 3, current_timestamp)".update.apply()
+          sql"insert into orders values (4, 2, 2, current_timestamp)".update.apply()
+          sql"insert into orders values (5, 2, 1, current_timestamp)".update.apply()
 
           {
             val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
@@ -224,9 +296,57 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               .list
               .apply()
 
-            customers.map(u => u.id) should equal(List(4, 5))
+            customers.map(u => u.id) should equal(Seq(4, 5))
             customers(0).id should equal(4)
             customers(1).id should equal(5)
+          }
+
+          {
+            val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
+            val sq = SubQuery.syntax("sq", c.resultName)
+
+            val customers: Traversable[Customer] = sql"""
+            select
+              ${sq.result.*}, ${cg.result.*}
+            from
+              (select ${c.result.*} from ${Customer.as(c)} order by id limit 5) ${SubQuery.as(sq)}
+                left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
+            where
+              ${sq(c).id} > 3
+            order by ${sq(c).id}
+          """
+              .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
+              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .traversable
+              .apply()
+
+            customers.map(u => u.id) should equal(Seq(4, 5))
+            customers.head.id should equal(4)
+            customers.tail.head.id should equal(5)
+          }
+
+          {
+            val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
+            val sq = SubQuery.syntax("sq", c.resultName)
+
+            val customer: Option[Customer] = sql"""
+            select
+              ${sq.result.*}, ${cg.result.*}
+            from
+              (select ${c.result.*} from ${Customer.as(c)} order by id limit 5) ${SubQuery.as(sq)}
+                left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
+            where
+              ${sq(c).id} = 4
+          """
+              .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
+              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .single
+              .apply()
+
+            customer.isDefined should be(true)
+            customer.get.id should equal(4)
           }
 
           {
