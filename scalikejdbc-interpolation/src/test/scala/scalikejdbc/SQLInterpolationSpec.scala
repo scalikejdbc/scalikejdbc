@@ -24,11 +24,11 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
   object User extends SQLSyntaxSupport[User] {
 
-    override def tableName = "users"
-    override def columns = Seq("id", "first_name", "group_id")
-    override def nameConverters = Map("uid" -> "id")
-    override def delimiterForResultName = "_Z_"
-    override def forceUpperCase = true
+    override val tableName = "users"
+    override val columns = Seq("id", "first_name", "group_id")
+    override val nameConverters = Map("uid" -> "id")
+    override val delimiterForResultName = "_Z_"
+    override val forceUpperCase = true
 
     def apply(rs: WrappedResultSet, u: ResultName[User]): User = {
       User(id = rs.int(u.id), name = rs.stringOpt(u.firstName), groupId = rs.intOpt(u.groupId))
@@ -42,15 +42,15 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   case class User(id: Int, name: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
 
   object Group extends SQLSyntaxSupport[Group] {
-    override def tableName = "groups"
-    override def columns = Seq("id", "website_url")
+    override val tableName = "groups"
+    override val columns = Seq("id", "website_url")
     def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.field("websiteUrl")))
   }
   case class Group(id: Int, websiteUrl: Option[String], members: Seq[User] = Nil)
 
   object GroupMember extends SQLSyntaxSupport[GroupMember] {
-    override def tableName = "group_members"
-    override def columns = Seq("user_id", "group_id")
+    override val tableName = "group_members"
+    override val columns = Seq("user_id", "group_id")
   }
   case class GroupMember(userId: Int, groupId: Int)
 
@@ -223,27 +223,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
   object Customer extends SQLSyntaxSupport[Customer] {
-    override def tableName = "customers"
-    override def columns = Seq("id", "name", "group_id")
+    override val tableName = "customers"
+    override val columns = Seq("id", "name", "group_id")
   }
   case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None,
     orders: Seq[Order] = Nil)
 
   object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
-    override def tableName = "customer_groups"
-    override def columns = Seq("id", "name")
+    override val tableName = "customer_groups"
+    override val columns = Seq("id", "name")
   }
   case class CustomerGroup(id: Int, name: String)
 
   object Product extends SQLSyntaxSupport[Product] {
-    override def tableName = "products"
-    override def columns = Seq("id", "name")
+    override val tableName = "products"
+    override val columns = Seq("id", "name")
   }
   case class Product(id: Int, name: String)
 
   object Order extends SQLSyntaxSupport[Order] {
-    override def tableName = "orders"
-    override def columns = Seq("id", "customer_id", "product_id", "ordered_at")
+    override val tableName = "orders"
+    override val columns = Seq("id", "customer_id", "product_id", "ordered_at")
   }
   case class Order(customerId: Int, productId: Int, orderedAt: DateTime)
 
@@ -438,6 +438,40 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           user.isDefined should equal(true)
           user.get.id should equal(2)
           user.get.name should be(None)
+        } finally {
+          sql"drop table users".execute.apply()
+        }
+    }
+  }
+
+  it should "be available with shortened names" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"create table users (id int not null, first_name varchar(256), full_name varchar(256))".execute.apply()
+          Seq((1, "Alice", "Aclice Cooper"), (2, "Bob", "Bob Lee")) foreach {
+            case (id, first, full) =>
+              sql"insert into users values (${id}, ${first}, ${full})".update.apply()
+          }
+
+          object UserName extends SQLSyntaxSupport[UserName] {
+            override val tableName = "users"
+            override val columns = Seq("id", "first_name", "full_name")
+          }
+          case class UserName(id: Int, first: String, full: String)
+
+          val u = UserName.syntax("u")
+          val user = sql"select ${u.result.*} from ${UserName.as(u)} where ${u.id} = 2".map {
+            rs =>
+              UserName(id = rs.int(u.resultName.id),
+                first = rs.string(u.resultName.firstName),
+                full = rs.string(u.resultName.fullName))
+          }.single.apply()
+
+          user.isDefined should be(true)
+          user.get.first should equal("Bob")
+          user.get.full should equal("Bob Lee")
+
         } finally {
           sql"drop table users".execute.apply()
         }
