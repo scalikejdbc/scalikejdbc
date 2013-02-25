@@ -113,6 +113,8 @@ object SQLInterpolation {
       ResultSQLSyntaxProvider[S, A](support, table)
     }
 
+    def resultName: ResultNameSQLSyntaxProvider[S, A] = result.name
+
     def * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
 
     def column(name: String): SQLSyntax = columns.find(_.value == name).map { c =>
@@ -128,7 +130,7 @@ object SQLInterpolation {
   case class ResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
 
-    def names: ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
+    def name: ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     def * : SQLSyntax = SQLSyntax(columns.map { c =>
       s"${tableAliasName}.${c.value} as ${c.value}${delimiterForResultName}${tableAliasName}"

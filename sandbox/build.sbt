@@ -79,7 +79,7 @@ GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
 val users: List[User] = DB readOnly { implicit s =>
   val (u, c) = (User.syntax, Company.syntax)
   sql"select ${u.result.*}, ${c.result.*} from ${User.as(u)} left join ${Company.as(c)} on ${u.companyId} = ${c.id}"
-    .map(rs => User(rs, u.result.names, c.result.names)).list.apply()
+    .map(rs => User(rs, u.resultName, c.resultName)).list.apply()
 }
 println("-------------------")
 users.foreach(user => println(user))
@@ -87,13 +87,10 @@ println("-------------------")
 val groups: List[Group] = DB readOnly { implicit s =>
   val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
   sql"select ${u.result.*}, ${g.result.*}, ${c.result.*} from ${GroupMember.as(gm)} inner join ${User.as(u)} on ${u.id} = ${gm.userId} inner join ${Group.as(g)} on ${g.id} = ${gm.groupId} left join ${Company.as(c)} on ${u.companyId} = ${c.id}"
-  .foldLeft(List[Group]()){ case (groups, rs) => 
-     val group = Group(rs, g.result.names)
-     val member = User(rs, u.result.names, c.result.names)
-     groups.find(g => g.id == group.id).map { group => 
-       group.copy(members = member :: group.members) :: groups.filterNot(_.id == group.id)
-     }.getOrElse { group.copy(members = List(member)) :: groups }
-   }
+  .one(rs => Group(rs, g.resultName))
+  .toMany(rs => rs.intOpt(u.resultName.id).map(id => User(rs, u.resultName, c.resultName)))
+  .map { (g, us) => g.copy(members = us) }
+  .list.apply()
 }
 println("-------------------")
 groups.foreach(group => println(group))

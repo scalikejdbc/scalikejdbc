@@ -80,7 +80,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
             where 
               ${u.id} = ${3}
-          """.map(rs => User(rs, u.result.names, g.result.names)).single.apply().get
+          """.map(rs => User(rs, u.resultName, g.resultName)).single.apply().get
 
           user.id should equal(3)
           user.name should equal(Some("baz"))
@@ -102,12 +102,12 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             where
               ${g.id} = ${1}
           """.foldLeft(Option.empty[Group]) { (groupOpt, rs) =>
-              val newMember = User(rs, u.result.names)
+              val newMember = User(rs, u.resultName)
               groupOpt.map { group =>
                 if (group.members.contains(newMember)) group
                 else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members)
               }.orElse {
-                Some(Group(rs, g.result.names).copy(members = List(newMember)))
+                Some(Group(rs, g.resultName).copy(members = List(newMember)))
               }
             }
 
@@ -126,9 +126,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
                 inner join ${User.as(u)} on ${gm.userId} = ${u.id}
             order by ${g.id}
             """
-              .one(rs => Group(rs, g.result.names))
-              .toMany[User](rs => rs.intOpt(u.result.names.id).map(_ => User(rs, u.result.names)))
-              .map { (group: Group, members: List[User]) => group.copy(members = members) }
+              .one(rs => Group(rs, g.resultName))
+              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .map { (g, us) => g.copy(members = us) }
               .list.apply()
 
             groupsWithMembers.size should equal(2)

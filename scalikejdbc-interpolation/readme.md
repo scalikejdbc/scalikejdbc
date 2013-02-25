@@ -145,7 +145,7 @@ val user: Option[User] = sql"""
   from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
   where ${u.id} = ${id}
 """
-  .map(rs => User(rs, u.result.names, g.result.names))
+  .map(rs => User(rs, u.resultName, g.resultName))
   .single.apply()
 ```
 
