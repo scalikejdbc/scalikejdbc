@@ -53,7 +53,7 @@ val users: List[User] = DB readOnly { implicit s =>
     select ${u.result.*}, ${c.result.*} 
     from ${User.as(u)} left join ${Company.as(c)} on ${u.companyId} = ${c.id}
   """
-    .map(rs => User(rs, u.result.names, c.result.names)).list.apply()
+    .map(rs => User(rs, u.resultName, c.resultName)).list.apply()
 }
 
 println("-------------------")
@@ -71,16 +71,11 @@ val groups: List[Group] = DB readOnly { implicit s =>
         inner join ${Group.as(g)} on ${g.id} = ${gm.groupId} 
         left join ${Company.as(c)} on ${u.companyId} = ${c.id}
   """
-    .foldLeft(List[Group]()){ case (groups, rs) => 
-       val newGroup = Group(rs, g.result.names)
-       val member = User(rs, u.result.names, c.result.names)
-
-       groups.find(_.id == newGroup.id).map { group => 
-         group.copy(members = member :: group.members) :: groups.filterNot(_.id == group.id)
-       }.getOrElse { 
-         newGroup.copy(members = List(member)) :: groups 
-       }
-     }
+    .one(rs => Group(rs, g.resultName))
+    .toMany(rs => rs.intOpt(u.resultName.id).map(id => User(rs, u.resultName, c.resultName)))
+    .map { (g, us) => g.copy(members = us) }
+    .list
+    .apply()
 }
 
 println("-------------------")
