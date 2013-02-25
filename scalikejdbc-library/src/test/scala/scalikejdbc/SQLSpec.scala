@@ -103,7 +103,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         SQL("insert into group_members_" + suffix + " values (4,2)").update.apply()
 
         case class User(id: Int)
-        case class Group(id: Int, name: String, members: List[User] = Nil)
+        case class Group(id: Int, name: String, members: Seq[User] = Nil)
 
         {
           val groups = SQL("select u.id as u_id, g.id as g_id, g.name as g_name " +
@@ -113,7 +113,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
             " order by g.id, u.id desc")
             .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
             .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
-            .map((g: Group, ms: List[User]) => g.copy(members = ms))
+            .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
             .list.apply()
 
           groups.size should equal(2)
