@@ -38,7 +38,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
             " from users_" + suffix + " u inner join groups_" + suffix + " g " +
             " on u.group_id = g.id")
             .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-            .toOne[Group](rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
+            .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
             .map((u: User, g: Group) => u.copy(group = Option(g)))
             .list.apply()
 
@@ -51,7 +51,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
             " from users_" + suffix + " u left join groups_" + suffix + " g " +
             " on u.group_id = g.id where u.id = 7")
             .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-            .toOne[Group](rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
+            .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
             .map((u: User, g: Group) => u.copy(group = Option(g)))
             .list.apply()
 
@@ -106,7 +106,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
             " inner join groups_" + suffix + " g on g.id = gm.group_id" +
             " order by g.id")
             .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-            .toMany[User](rs => rs.intOpt("u_id").map(id => User(id)))
+            .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
             .map((g: Group, ms: List[User]) => g.copy(members = ms))
             .list.apply()
 
