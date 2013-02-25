@@ -17,6 +17,7 @@ package scalikejdbc
 
 import scalikejdbc.SQL.Output
 import java.sql.PreparedStatement
+import scala.collection.immutable.ListMap
 
 /**
  * SQL abstraction's companion object.
@@ -246,7 +247,7 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
   }
 
   /**
-   * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
+   * ListMaps values from each [[scalikejdbc.WrappedResultSet]] object.
    * @param extractor extractor function
    * @tparam A return type
    * @return SQL instance
@@ -582,7 +583,7 @@ class OneToOneRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*)
 }
 
 private[scalikejdbc] trait OneToOneResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
-  def processResultSet(oneToOne: (Map[A, Option[B]]), rs: WrappedResultSet): Map[A, Option[B]] = {
+  def processResultSet(oneToOne: (ListMap[A, Option[B]]), rs: WrappedResultSet): ListMap[A, Option[B]] = {
     val o = extractOne(rs)
     oneToOne.keys.find(_ == o).map {
       case Some(found) =>
@@ -603,7 +604,7 @@ class OneToOneRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = {
     def operate(session: DBSession): Traversable[A] = {
-      session.foldLeft(sql, params: _*)(Map[A, Option[B]]())(processResultSet).map {
+      session.foldLeft(sql, params: _*)(ListMap[A, Option[B]]())(processResultSet).map {
         case (one, Some(toOne)) => extractor(one, toOne)
         case (one, None) => one
       }
@@ -629,7 +630,7 @@ class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params:
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = {
     def operate(session: DBSession): List[A] = {
-      session.foldLeft(sql, params: _*)(Map[A, Option[B]]())(processResultSet).map {
+      session.foldLeft(sql, params: _*)(ListMap[A, Option[B]]())(processResultSet).map {
         case (one, Some(toOne)) => extractor(one, toOne)
         case (one, None) => one
       }.toList
@@ -654,7 +655,7 @@ class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(param
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = {
     def operate(session: DBSession): Option[A] = {
-      val rows = session.foldLeft(sql, params: _*)(Map[A, Option[B]]())(processResultSet).map {
+      val rows = session.foldLeft(sql, params: _*)(ListMap[A, Option[B]]())(processResultSet).map {
         case (one, Some(toOne)) => extractor(one, toOne)
         case (one, None) => one
       }
@@ -711,12 +712,12 @@ class OneToManyRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*
 }
 
 private[scalikejdbc] trait OneToManyResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
-  def processResultSet(oneToMany: (Map[A, List[B]]), rs: WrappedResultSet): Map[A, List[B]] = {
+  def processResultSet(oneToMany: (ListMap[A, List[B]]), rs: WrappedResultSet): ListMap[A, List[B]] = {
     val o = self.extractOne(rs)
     oneToMany.keys.find(_ == o).map { _ =>
-      self.extractTo(rs).map(many => oneToMany.updated(o, many :: oneToMany.apply(o))).getOrElse(oneToMany)
+      self.extractTo(rs).map(many => oneToMany.updated(o, oneToMany.apply(o) :+ many)).getOrElse(oneToMany)
     }.getOrElse {
-      self.extractTo(rs).map(many => oneToMany.updated(o, many :: Nil)).getOrElse(oneToMany)
+      self.extractTo(rs).map(many => oneToMany.updated(o, List(many))).getOrElse(oneToMany)
     }
   }
 }
@@ -730,7 +731,7 @@ class OneToManyRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = {
     def operate(session: DBSession): List[A] = {
-      session.foldLeft(sql, params: _*)(Map[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.toList
+      session.foldLeft(sql, params: _*)(ListMap[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.toList
     }
     session match {
       case AutoSession => DB readOnly (s => operate(s))
@@ -752,7 +753,7 @@ class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = {
     def operate(session: DBSession): Traversable[A] = {
-      session.foldLeft(sql, params: _*)(Map[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }
+      session.foldLeft(sql, params: _*)(ListMap[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }
     }
     session match {
       case AutoSession => DB readOnly (s => operate(s))
@@ -772,12 +773,12 @@ class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(para
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = {
     def operate(session: DBSession): Option[A] = {
-      def processResultSet(oneToMany: (Map[A, List[B]]), rs: WrappedResultSet): Map[A, List[B]] = {
+      def processResultSet(oneToMany: (ListMap[A, List[B]]), rs: WrappedResultSet): ListMap[A, List[B]] = {
         val o = one(rs)
         if (oneToMany.contains(o)) throw new IllegalStateException(ErrorMessage.INVALID_ONE_TO_ONE_RELATION)
-        toMany(rs).map(many => oneToMany.updated(o, many :: Nil)).getOrElse(oneToMany)
+        toMany(rs).map(many => oneToMany.updated(o, List(many))).getOrElse(oneToMany)
       }
-      session.foldLeft(sql, params: _*)(Map[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.headOption
+      session.foldLeft(sql, params: _*)(ListMap[A, List[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.headOption
     }
     session match {
       case AutoSession => DB readOnly (s => operate(s))
