@@ -3,6 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.matchers._
 
+import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
 class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
@@ -124,7 +125,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               ${GroupMember.as(gm)}
                 inner join ${Group.as(g)} on ${gm.groupId} = ${g.id}
                 inner join ${User.as(u)} on ${gm.userId} = ${u.id}
-            order by ${g.id}
+            order by ${g.id}, ${u.id}
             """
               .one(rs => Group(rs, g.resultName))
               .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
@@ -133,11 +134,131 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
             groupsWithMembers.size should equal(2)
             groupsWithMembers(0).members.size should equal(2)
+            groupsWithMembers(0).members(0).id should equal(1)
+            groupsWithMembers(0).members(1).id should equal(2)
             groupsWithMembers(1).members.size should equal(3)
+            groupsWithMembers(1).members(0).id should equal(1)
+            groupsWithMembers(1).members(1).id should equal(2)
+            groupsWithMembers(1).members(2).id should equal(3)
           }
 
         } finally {
           sql"drop table users".execute.apply()
+          sql"drop table groups".execute.apply()
+          sql"drop table group_members".execute.apply()
+        }
+    }
+  }
+
+  object Customer extends SQLSyntaxSupport[Customer] {
+    override def tableName = "customers"
+    override def columns = Seq("id", "name", "group_id")
+  }
+  case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None,
+    orders: List[Order] = Nil)
+
+  object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
+    override def tableName = "customer_groups"
+    override def columns = Seq("id", "name")
+  }
+  case class CustomerGroup(id: Int, name: String)
+
+  object Product extends SQLSyntaxSupport[Product] {
+    override def tableName = "products"
+    override def columns = Seq("id", "name")
+  }
+  case class Product(id: Int, name: String)
+
+  object Order extends SQLSyntaxSupport[Order] {
+    override def tableName = "orders"
+    override def columns = Seq("id", "customer_id", "product_id", "ordered_at")
+  }
+  case class Order(customerId: Int, productId: Int, orderedAt: DateTime)
+
+  it should "be available for sub-queries with SQLSyntaxSupport" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"create table customers (id int not null, name varchar(256) not null, group_id int)".execute.apply()
+          sql"create table customer_groups (id int not null, name varchar(256) not null)".execute.apply()
+          sql"create table products (id int not null, name varchar(256) not null)".execute.apply()
+          sql"create table orders (id int not null, product_id int not null, customer_id int not null, ordered_at timestamp not null)".execute.apply()
+
+          sql"insert into customers values (1, ${"Alice"}, null)".update.apply()
+          sql"insert into customers values (2, ${"Bob"}, 1)".update.apply()
+          sql"insert into customers values (3, ${"Chris"}, 1)".update.apply()
+          sql"insert into customers values (4, ${"Dennis"}, null)".update.apply()
+          sql"insert into customers values (5, ${"Eric"}, null)".update.apply()
+          sql"insert into customers values (6, ${"Fred"}, 1)".update.apply()
+          sql"insert into customers values (7, ${"George"}, 1)".update.apply()
+
+          sql"insert into customer_groups values (${1}, ${"JSA"})".update.apply()
+
+          sql"insert into products values (${1}, ${"Bean"})".update.apply()
+          sql"insert into products values (${2}, ${"Milk"})".update.apply()
+          sql"insert into products values (${3}, ${"Chocolate"})".update.apply()
+
+          sql"insert into orders values (${1}, ${1}, ${1}, current_timestamp)".update.apply()
+          sql"insert into orders values (${2}, ${1}, ${2}, current_timestamp)".update.apply()
+          sql"insert into orders values (${3}, ${2}, ${3}, current_timestamp)".update.apply()
+          sql"insert into orders values (${4}, ${2}, ${2}, current_timestamp)".update.apply()
+          sql"insert into orders values (${5}, ${2}, ${1}, current_timestamp)".update.apply()
+
+          {
+            val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
+            val sq = SubQuery.syntax("sq", c.resultName)
+
+            val customers: List[Customer] = sql"""
+            select
+              ${sq.result.*}, ${cg.result.*}
+            from
+              (select ${c.result.*} from ${Customer.as(c)} order by id limit 5) ${SubQuery.as(sq)}
+                left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
+            where
+              ${sq(c).id} > 3
+            order by ${sq(c).id}
+          """
+              .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
+              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .list
+              .apply()
+
+            customers.map(u => u.id) should equal(List(4, 5))
+            customers(0).id should equal(4)
+            customers(1).id should equal(5)
+          }
+
+          {
+            val (c, o, p) = (Customer.syntax("c"), Order.syntax("o"), Product.syntax("p"))
+            val x = SubQuery.syntax("x", o.resultName, p.resultName)
+            val customers = sql"""
+              select
+                ${c.result.*}, ${x.result.*}
+              from
+                ${Customer.as(c)}
+                left join
+                (select
+                   ${o.result.*}, ${p.result.*}
+                 from
+                   ${Order.as(o)} inner join ${Product.as(p)} on ${o.productId} = ${p.id}
+                ) ${SubQuery.as(x)}
+                on ${c.id} = ${x(o).customerId}
+              order by ${c.id}
+            """
+              .one(rs => Customer(rs.int(c.resultName.id), rs.string(c.resultName.name)))
+              .toMany(rs => rs.intOpt(x(o).resultName.customerId).map { id =>
+                Order(id, rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toDateTime)
+              }).map { (c, os) => c.copy(orders = os) }.list.apply()
+
+            customers.size should equal(3)
+          }
+
+        } finally {
+          sql"drop table customers".execute.apply()
+          sql"drop table customer_groups".execute.apply()
+          sql"drop table products".execute.apply()
+          sql"drop table orders".execute.apply()
         }
     }
   }
@@ -232,4 +353,5 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         }
     }
   }
+
 }
