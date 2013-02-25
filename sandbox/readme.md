@@ -10,8 +10,8 @@ import scalikejdbc.SQLInterpolation._
 case class User(id: Long, val name: Option[String], companyId: Option[Long] = None, company: Option[Company] = None)
 
 object User extends SQLSyntaxSupport[User] { 
-  override def tableName = "users"
-  override def columns = Seq("id", "name", "company_id")
+  override val tableName = "users"
+  override val columns = Seq("id", "name", "company_id")
   def apply(rs: WrappedResultSet, u: ResultName[User]): User = User(rs.long(u.id), rs.stringOpt(u.name), rs.longOpt(u.companyId))
   def apply(rs: WrappedResultSet, u: ResultName[User], c: ResultName[Company]): User = {
     apply(rs, u).copy(company = rs.longOpt(c.id).map(id => Company(rs.long(c.id), rs.stringOpt(c.name))))
@@ -22,8 +22,8 @@ object User extends SQLSyntaxSupport[User] {
 case class Company(id: Long, name: Option[String])
 
 object Company extends SQLSyntaxSupport[Company] {
-  override def tableName = "companies"
-  override def columns = Seq("id", "name")
+  override val tableName = "companies"
+  override val columns = Seq("id", "name")
   def apply(rs: WrappedResultSet, c: ResultName[Company]): Company = Company(rs.long(c.id), rs.stringOpt(c.name))
 } 
 
@@ -31,16 +31,16 @@ object Company extends SQLSyntaxSupport[Company] {
 case class Group(id: Long, name: Option[String], members: List[User] = Nil)
 
 object Group extends SQLSyntaxSupport[Group] { 
-  override def tableName = "groups"
-  override def columns = Seq("id", "name")
+  override val tableName = "groups"
+  override val columns = Seq("id", "name")
   def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(rs.long(g.id), rs.stringOpt(g.name))
 }
 
 // group_members
 case class GroupMember(groupId: Long, userId: Long)
 object GroupMember extends SQLSyntaxSupport[GroupMember] {
-  override def tableName = "group_members"
-  override def columns = Seq("group_id", "user_id")
+  override val tableName = "group_members"
+  override val columns = Seq("group_id", "user_id")
 }
 
 // -----------------------------
@@ -97,7 +97,7 @@ sbt console
 [run-main] INFO scalikejdbc.StatementExecutor$$anon$1 - SQL execution completed
 
   [Executed SQL]
-   select users.id as id__on__users, users.name as name__on__users, users.company_id as company_id__on__users, companies.id as id__on__companies, companies.name as name__on__companies from users left join companies on users.company_id = companies.id; (16 ms)
+   select users.id as i_on_users, users.name as n_on_users, users.company_id as ci_on_users, companies.id as i_on_companies, companies.name as n_on_companies from users left join companies on users.company_id = companies.id; (8 ms)
 
   [Stack Trace]
     ...
@@ -126,12 +126,12 @@ User(3,Some(Chris),Some(1),Some(Company(1,Some(Typesafe))))
 [run-main] INFO scalikejdbc.StatementExecutor$$anon$1 - SQL execution completed
 
   [Executed SQL]
-   select u.id as id__on__u, u.name as name__on__u, u.company_id as company_id__on__u, g.id as id__on__g, g.name as name__on__g, c.id as id__on__c, c.name as name__on__c from group_members gm inner join users u on u.id = gm.user_id inner join groups g on g.id = gm.group_id left join companies c on u.company_id = c.id; (0 ms)
+   select u.id as i_on_u, u.name as n_on_u, u.company_id as ci_on_u, g.id as i_on_g, g.name as n_on_g, c.id as i_on_c, c.name as n_on_c from group_members gm inner join users u on u.id = gm.user_id inner join groups g on g.id = gm.group_id left join companies c on u.company_id = c.id; (0 ms)
 
   [Stack Trace]
     ...
-    $line1.$read$$iw$$iw$$anonfun$5.apply(<console>:79)
-    $line1.$read$$iw$$iw$$anonfun$5.apply(<console>:76)
+    $line1.$read$$iw$$iw$$anonfun$6.apply(<console>:78)
+    $line1.$read$$iw$$iw$$anonfun$6.apply(<console>:76)
     scalikejdbc.DB$$anonfun$readOnly$2.apply(DB.scala:500)
     scalikejdbc.DB$$anonfun$readOnly$2.apply(DB.scala:499)
     scalikejdbc.LoanPattern$.using(LoanPattern.scala:29)

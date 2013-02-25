@@ -106,17 +106,17 @@ DB autoCommit { implicit s =>
 #### Classes to bind and setup thier companion objects
 
 ```scala
-case class User(id: Int, name: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
+case class User(id: Int, name: Option[String], fullName: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
 
 object User extends SQLSyntaxSupport[User] {
 
   override def tableName = "users"
-  override def columns = Seq("id", "first_name", "group_id")
+  override def columns = Seq("id", "first_name", "full_name", "group_id")
   override def nameConverters = Map("givenName" -> "first_name")
 
   def apply(rs: WrappedResultSet, u: ResultName[User]): User = {
     // ResultName provides dynamic camelCase methods
-    User(id = rs.int(u.id), name = rs.stringOpt(u.givenName), groupId = rs.intOpt(u.groupId))
+    User(id = rs.int(u.id), name = rs.stringOpt(u.givenName), fullName = rs.stirngOpt(u.fullName), groupId = rs.intOpt(u.groupId))
   }
 
   def apply(rs: WrappedResultSet, u: ResultName[User], g: ResultName[Group]): User = {
@@ -153,9 +153,31 @@ This code generates the following SQL. It's quite easy-to-understand and open fo
 
 ```sql
 select 
-  u.id as id__on__u, u.first_name as first_name__on__u, u.group_id as group_id__on__u, 
-  groups.id as id__on__groups, groups.website_url as website_url__on__groups
+  u.id as i_on_u, u.first_name as fn1_on_u, u.full_name as fn2_on_u, u.group_id as gi_on_u, 
+  groups.id as i_on_groups, groups.website_url as wu_on__groups
 from users u left join groups on u.group_id = groups.id 
 where u.id = 3;
+```
+
+Furthermore, one-to-one, one-to-many queries are quite readable:
+
+```scala
+val groups: List[Group] = DB readOnly { implicit s =>
+  val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
+  sql"""
+    select
+      ${u.result.*}, ${g.result.*}, ${c.result.*}
+    from
+      ${GroupMember.as(gm)}
+        inner join ${User.as(u)} on ${u.id} = ${gm.userId}
+        inner join ${Group.as(g)} on ${g.id} = ${gm.groupId}
+        left join ${Company.as(c)} on ${u.companyId} = ${c.id}
+  """
+    .one(rs => Group(rs, g.resultName))
+    .toMany(rs => rs.intOpt(u.resultName.id).map(id => User(rs, u.resultName, c.resultName)))
+    .map { (g, us) => g.copy(members = us) }
+    .list
+    .apply()
+}
 ```
 
