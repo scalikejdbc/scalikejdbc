@@ -171,17 +171,17 @@ class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(param
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = {
     def operate(session: DBSession): Option[A] = {
-      try {
-        val rows = session.foldLeft(sql, params: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
+      val rows = try {
+        session.foldLeft(sql, params: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
           case (one, Some(toOne)) => extractor(one, toOne)
           case (one, None) => one
         }
-        if (rows.size > 1) {
-          throw new TooManyRowsException(1, rows.size)
-        } else {
-          rows.headOption
-        }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
+      if (rows.size > 1) {
+        throw new TooManyRowsException(1, rows.size)
+      } else {
+        rows.headOption
+      }
     }
     session match {
       case AutoSession => DB readOnly (s => operate(s))
@@ -297,9 +297,14 @@ class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(para
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = {
     def operate(session: DBSession): Option[A] = {
-      try {
-        session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.headOption
+      val rows: Traversable[A] = try {
+        session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
+      if (rows.size > 1) {
+        throw new TooManyRowsException(1, rows.size)
+      } else {
+        rows.headOption
+      }
     }
     session match {
       case AutoSession => DB readOnly (s => operate(s))
