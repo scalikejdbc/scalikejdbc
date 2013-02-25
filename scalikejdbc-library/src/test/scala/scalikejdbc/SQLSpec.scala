@@ -36,7 +36,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
         {
           val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
             " from users_" + suffix + " u inner join groups_" + suffix + " g " +
-            " on u.group_id = g.id")
+            " on u.group_id = g.id order by u.id")
             .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
             .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
             .map((u: User, g: Group) => u.copy(group = Option(g)))
@@ -44,6 +44,12 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
           users.size should equal(6)
           users.foreach { user => user.group should not be (Some) }
+          users(0).id should equal(1)
+          users(1).id should equal(2)
+          users(2).id should equal(3)
+          users(3).id should equal(4)
+          users(4).id should equal(5)
+          users(5).id should equal(6)
         }
 
         {
@@ -104,7 +110,7 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
             " from group_members_" + suffix + " gm" +
             " inner join users_" + suffix + " u on u.id = gm.user_id" +
             " inner join groups_" + suffix + " g on g.id = gm.group_id" +
-            " order by g.id")
+            " order by g.id, u.id desc")
             .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
             .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
             .map((g: Group, ms: List[User]) => g.copy(members = ms))
@@ -112,7 +118,17 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
 
           groups.size should equal(2)
           groups(0).members.size should equal(6)
+          groups(0).members(0).id should equal(6)
+          groups(0).members(1).id should equal(5)
+          groups(0).members(2).id should equal(4)
+          groups(0).members(3).id should equal(3)
+          groups(0).members(4).id should equal(2)
+          groups(0).members(5).id should equal(1)
           groups(1).members.size should equal(4)
+          groups(1).members(0).id should equal(4)
+          groups(1).members(1).id should equal(3)
+          groups(1).members(2).id should equal(2)
+          groups(1).members(3).id should equal(1)
         }
       }
     } finally {
