@@ -92,6 +92,11 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
       println(DB.describe("meta_members"))
       println(NamedDB('default).describe("meta_members"))
 
+      // get column names
+      DB.getColumnNames("meta_members").size should equal(6)
+      DB.getColumnNames("Meta_Members").size should equal(6)
+      DB.getColumnNames("META_MEMBERS").size should equal(6)
+
     } finally {
       DB autoCommit { implicit s =>
         SQL("drop table meta_members").execute.apply()

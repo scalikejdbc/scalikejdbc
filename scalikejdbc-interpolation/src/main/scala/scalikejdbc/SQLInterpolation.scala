@@ -18,18 +18,21 @@ object SQLInterpolation {
    */
   case class SQLSyntax(value: String)
 
+  import scala.collection.concurrent.TrieMap
+  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new TrieMap[String, Seq[String]]()
+
   /**
    * SQLSyntax support utilities
    */
   trait SQLSyntaxSupport[A] {
 
-    val tableName: String
-    val columns: Seq[String]
+    def tableName: String
+    def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName))
 
-    val forceUpperCase: Boolean = false
-    val useShortenedResultName: Boolean = true
-    val delimiterForResultName = if (forceUpperCase) "_ON_" else "_on_"
-    val nameConverters: Map[String, String] = Map()
+    def forceUpperCase: Boolean = false
+    def useShortenedResultName: Boolean = true
+    def delimiterForResultName = if (forceUpperCase) "_ON_" else "_on_"
+    def nameConverters: Map[String, String] = Map()
 
     def syntax = {
       val _name = if (forceUpperCase) tableName.toUpperCase else tableName
