@@ -82,7 +82,7 @@ object SQLInterpolation {
 
     def toSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = {
       val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
-      var acronymsFiltered = acronymRegExp.replaceAllIn(
+      val acronymsFiltered = acronymRegExp.replaceAllIn(
         acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
           convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
         }.getOrElse(convertersApplied), // might end with an acronym
