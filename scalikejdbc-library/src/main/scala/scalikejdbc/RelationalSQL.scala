@@ -53,9 +53,9 @@ class OneToXRelationalSQL[A, E <: WithExtractor](sql: String)(params: Any*)(outp
 
 }
 
-private[scalikejdbc] trait RelationalSQLExtractor[A, B, E <: WithExtractor] { self: SQL[A, E] =>
-  def extractOne: WrappedResultSet => A
-  def extractTo: WrappedResultSet => Option[B]
+trait RelationalSQLExtractor[A, B, E <: WithExtractor] { self: SQL[A, E] =>
+  protected def extractOne: WrappedResultSet => A
+  protected def extractTo: WrappedResultSet => Option[B]
 }
 
 //------------------------------------
@@ -94,9 +94,9 @@ class OneToOneRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*)
 
 }
 
-private[scalikejdbc] trait OneToOneResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
+trait OneToOneResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
 
-  def processResultSet(oneToOne: (LinkedHashMap[A, Option[B]]), rs: WrappedResultSet): LinkedHashMap[A, Option[B]] = {
+  protected def processResultSet(oneToOne: (LinkedHashMap[A, Option[B]]), rs: WrappedResultSet): LinkedHashMap[A, Option[B]] = {
     val o = extractOne(rs)
     oneToOne.keys.find(_ == o).map {
       case Some(found) =>
@@ -106,7 +106,7 @@ private[scalikejdbc] trait OneToOneResultSetOperation[A, B, E <: WithExtractor] 
     }
   }
 
-  def operate[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
+  protected def executeQuery[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
     case AutoSession => DB readOnly (s => op(s))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
     case _ => op(session)
@@ -130,11 +130,11 @@ class OneToOneRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(
         }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    operate[Traversable, A](session, op)
+    executeQuery[Traversable, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toOne
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toOne
 }
 
 class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
@@ -154,11 +154,11 @@ class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params:
         }.toList
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    operate[List, A](session, op)
+    executeQuery[List, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toOne
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toOne
 }
 
 class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => A)
@@ -182,11 +182,11 @@ class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(param
         rows.headOption
       }
     }
-    operate[Option, A](session, op)
+    executeQuery[Option, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toOne
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toOne
 }
 //------------------------------------
 // One-to-many
@@ -224,9 +224,9 @@ class OneToManyRelationalSQL[A, B, E <: WithExtractor](sql: String)(params: Any*
 
 }
 
-private[scalikejdbc] trait OneToManyResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
+trait OneToManyResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQLExtractor[A, B, E] =>
 
-  def processResultSet(oneToMany: (LinkedHashMap[A, Seq[B]]), rs: WrappedResultSet): LinkedHashMap[A, Seq[B]] = {
+  protected def processResultSet(oneToMany: (LinkedHashMap[A, Seq[B]]), rs: WrappedResultSet): LinkedHashMap[A, Seq[B]] = {
     val o = self.extractOne(rs)
     oneToMany.keys.find(_ == o).map { _ =>
       self.extractTo(rs).map(many => oneToMany += (o -> (oneToMany.apply(o) :+ many))).getOrElse(oneToMany)
@@ -235,7 +235,7 @@ private[scalikejdbc] trait OneToManyResultSetOperation[A, B, E <: WithExtractor]
     }
   }
 
-  def operate[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
+  protected def executeQuery[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
     case AutoSession => DB readOnly (s => op(s))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
     case _ => op(session)
@@ -256,11 +256,11 @@ class OneToManyRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params
         session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.toList
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    operate[List, A](session, op)
+    executeQuery[List, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toMany
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toMany
 }
 
 class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(params: Any*)(val one: WrappedResultSet => A)(val toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
@@ -276,11 +276,11 @@ class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)
         session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    operate[Traversable, A](session, op)
+    executeQuery[Traversable, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toMany
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toMany
 }
 
 class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(params: Any*)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => A)
@@ -301,10 +301,10 @@ class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(para
         rows.headOption
       }
     }
-    operate[Option, A](session, op)
+    executeQuery[Option, A](session, op)
   }
 
-  def extractOne: WrappedResultSet => A = one
-  def extractTo: WrappedResultSet => Option[B] = toMany
+  protected def extractOne: WrappedResultSet => A = one
+  protected def extractTo: WrappedResultSet => Option[B] = toMany
 }
 
