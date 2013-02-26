@@ -143,7 +143,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
       }
 
       var isInsideOfText = false
-      SQLTemplateParser.trimComments(trimSpaces(template
+      val sql = SQLTemplateParser.trimComments(trimSpaces(template
         .replaceAll("\r", " ")
         .replaceAll("\n", " ")
         .replaceAll("\t", " ")))
@@ -158,6 +158,13 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
             c
           }
         }.mkString
+
+      if (GlobalSettings.sqlFormatter.formatter.isDefined) {
+        val formatter = GlobalSettings.sqlFormatter.formatter.get
+        formatter.format(sql)
+      } else {
+        sql
+      }
     }
 
     if (isBatch) {

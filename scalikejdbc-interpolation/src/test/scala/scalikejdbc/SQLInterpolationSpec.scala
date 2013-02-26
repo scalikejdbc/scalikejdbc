@@ -14,6 +14,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
+  GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
+
   it should "convert camelCase to snake_case correctly" in {
     SQLSyntaxProvider.toSnakeCase("firstName") should equal("first_name")
     SQLSyntaxProvider.toSnakeCase("SQLObject") should equal("sql_object")

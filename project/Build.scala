@@ -32,15 +32,16 @@ object ScalikeJDBCProjects extends Build {
         })
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
-          "org.slf4j"               %  "slf4j-api"            % "1.7.2"    % "compile",
-          "joda-time"               %  "joda-time"            % "2.1"      % "compile",
-          "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
+          "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
+          "org.slf4j"               %  "slf4j-api"            % "1.7.2"       % "compile",
+          "joda-time"               %  "joda-time"            % "2.1"         % "compile",
+          "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
-          "org.scalatest"           %  scalatest              % "1.8"      % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.5"    % "test",
-          "play"                    %  anorm                  % "[2,)"     % "test"
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"       % "test",
+          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
+          "org.scalatest"           %  scalatest              % "1.8"         % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
+          "play"                    %  anorm                  % "[2,)"        % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -66,9 +67,10 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "compile",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
-          "org.scalatest"  %% "scalatest"            % "[1.8,)" % "test"
+          "org.slf4j"      %  "slf4j-api"        % "1.7.2"       % "compile",
+          "ch.qos.logback" %  "logback-classic"  % "1.0.7"       % "test",
+          "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
+          "org.scalatest"  %% "scalatest"        % "[1.8,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },

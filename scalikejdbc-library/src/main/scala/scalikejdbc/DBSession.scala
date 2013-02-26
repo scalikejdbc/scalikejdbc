@@ -64,7 +64,13 @@ trait DBSession extends LogSupport {
         singleParams = params)
     } catch {
       case e: Exception =>
-        log.error("Failed to parse the following SQL template:\n\n  " + template + "\n")
+        val formattedTemplate = if (GlobalSettings.sqlFormatter.formatter.isDefined) {
+          val formatter = GlobalSettings.sqlFormatter.formatter.get
+          formatter.format(template)
+        } else {
+          template
+        }
+        log.error("Failed to parse the following SQL template:\n\n  " + formattedTemplate + "\n")
         throw e
     }
   }
