@@ -159,11 +159,17 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
           }
         }.mkString
 
-      if (GlobalSettings.sqlFormatter.formatter.isDefined) {
-        val formatter = GlobalSettings.sqlFormatter.formatter.get
-        formatter.format(sql)
-      } else {
-        sql
+      try {
+        if (GlobalSettings.sqlFormatter.formatter.isDefined) {
+          val formatter = GlobalSettings.sqlFormatter.formatter.get
+          formatter.format(sql)
+        } else {
+          sql
+        }
+      } catch {
+        case e: Exception =>
+          log.debug("Catched an exception when formatting SQL because of " + e.getMessage)
+          sql
       }
     }
 
