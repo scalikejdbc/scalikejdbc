@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2013 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,24 @@
 package scalikejdbc
 
 /**
- * GlobalSettings for this library
+ * Settings for SQL formatter
  */
-object GlobalSettings {
+case class SQLFormatterSettings(formatterClassName: Option[String]) {
 
-  var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
-
-  var sqlFormatter: SQLFormatterSettings = SQLFormatterSettings()
+  lazy val formatter: Option[SQLFormatter] = formatterClassName.map { className =>
+    try {
+      val clazz = Class.forName(className)
+      clazz.newInstance().asInstanceOf[SQLFormatter]
+    } catch { case e: Exception => null }
+  }
 
 }
+
+object SQLFormatterSettings {
+
+  def apply(): SQLFormatterSettings = SQLFormatterSettings(None)
+
+  def apply(formatterClassName: String): SQLFormatterSettings = SQLFormatterSettings(Some(formatterClassName))
+
+}
+
