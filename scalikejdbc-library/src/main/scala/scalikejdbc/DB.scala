@@ -284,6 +284,14 @@ object DB {
     DB(connectionPool(context).borrow()).getTable(table)
   }
 
+  def getColumnNames(table: String)(implicit context: CPContext = NoCPContext): List[String] = {
+    if (table != null) {
+      DB(connectionPool(context).borrow()).getColumnNames(table)
+    } else {
+      Nil
+    }
+  }
+
   /**
    * Returns table name list
    *
@@ -655,6 +663,24 @@ case class DB(conn: Connection) extends LogSupport {
         if (schema != null) schema + "." + rs.string("TABLE_NAME")
         else rs.string("TABLE_NAME")
       }.toList
+  }
+
+  /**
+   * Returns all the column names on the matched table name
+   */
+  def getColumnNames(tableName: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
+    def _getTableName(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String]): Option[String] = {
+      new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map(rs => rs.string("TABLE_NAME")).headOption
+    }
+    val (schema, table) = toSchemaAndTable(tableName)
+    readOnlyWithConnection { conn =>
+      val meta = conn.getMetaData
+      _getTableName(meta, schema, table, tableTypes)
+        .orElse(_getTableName(meta, schema, table.toUpperCase, tableTypes))
+        .orElse(_getTableName(meta, schema, table.toLowerCase, tableTypes)).map { tableName =>
+          new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
+        }
+    }.getOrElse(Nil)
   }
 
   /**

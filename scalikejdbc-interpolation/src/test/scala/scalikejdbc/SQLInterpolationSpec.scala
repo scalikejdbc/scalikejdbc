@@ -5,7 +5,6 @@ import org.scalatest.matchers._
 
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
-import java.sql.SQLException
 
 class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
@@ -232,8 +231,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     orders: Seq[Order] = Nil)
 
   object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
-    override val tableName = "customer_groups"
-    override val columns = Seq("id", "name")
+    override val tableName = "customer_group"
   }
   case class CustomerGroup(id: Int, name: String)
 
@@ -254,7 +252,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
       implicit s =>
         try {
           sql"create table customers (id int not null, name varchar(256) not null, group_id int)".execute.apply()
-          sql"create table customer_groups (id int not null, name varchar(256) not null)".execute.apply()
+          sql"create table customer_group (id int not null, name varchar(256) not null)".execute.apply()
           sql"create table products (id int not null, name varchar(256) not null)".execute.apply()
           sql"create table orders (id int not null, product_id int not null, customer_id int not null, ordered_at timestamp not null)".execute.apply()
 
@@ -266,7 +264,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"insert into customers values (6, ${"Fred"}, 1)".update.apply()
           sql"insert into customers values (7, ${"George"}, 1)".update.apply()
 
-          sql"insert into customer_groups values (1, ${"JSA"})".update.apply()
+          sql"insert into customer_group values (1, ${"JSA"})".update.apply()
 
           sql"insert into products values (1, ${"Bean"})".update.apply()
           sql"insert into products values (2, ${"Milk"})".update.apply()
@@ -393,7 +391,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
         } finally {
           sql"drop table customers".execute.apply()
-          sql"drop table customer_groups".execute.apply()
+          sql"drop table customer_group".execute.apply()
           sql"drop table products".execute.apply()
           sql"drop table orders".execute.apply()
         }
