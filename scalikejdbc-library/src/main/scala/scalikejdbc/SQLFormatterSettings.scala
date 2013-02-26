@@ -18,13 +18,17 @@ package scalikejdbc
 /**
  * Settings for SQL formatter
  */
-case class SQLFormatterSettings(formatterClassName: Option[String]) {
+case class SQLFormatterSettings(formatterClassName: Option[String]) extends LogSupport {
 
-  lazy val formatter: Option[SQLFormatter] = formatterClassName.map { className =>
+  lazy val formatter: Option[SQLFormatter] = formatterClassName.flatMap { className =>
     try {
       val clazz = Class.forName(className)
-      clazz.newInstance().asInstanceOf[SQLFormatter]
-    } catch { case e: Exception => null }
+      Some(clazz.newInstance().asInstanceOf[SQLFormatter])
+    } catch {
+      case e: Exception =>
+        log.warn("Failed to load " + className)
+        None
+    }
   }
 
 }

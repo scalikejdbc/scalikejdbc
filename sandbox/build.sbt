@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc" % "1.4.7-SNAPSHOT",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.7-SNAPSHOT",
   "org.slf4j" % "slf4j-simple" % "[1.7,)",
+  "org.hibernate" %  "hibernate-core" % "4.1.9.Final",
   "org.hsqldb" % "hsqldb" % "[2,)",
   "org.specs2" %% "specs2" % "1.14" % "test"
 )
@@ -90,8 +91,8 @@ val groups: Seq[Group] = DB readOnly { implicit s =>
   .one(rs => Group(rs, g.resultName))
   .toMany(rs => rs.intOpt(u.resultName.id)
   .map(id => User(rs, u.resultName, c.resultName))).map { (g, us) => g.copy(members = us) }
-  .lis
-  t.apply()
+  .list
+  .apply()
 }
 println("-------------------")
 groups.foreach(group => println(group))
