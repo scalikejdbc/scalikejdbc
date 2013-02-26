@@ -185,7 +185,7 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
 
-  def one(f: (WrappedResultSet) => A): OneToXRelationalSQL[A, E] = new OneToXRelationalSQL[A, E](sql)(params: _*)(output)(f)
+  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](sql)(params: _*)(output)(f)
 
   /**
    * Binds parameters to SQL template in order.
