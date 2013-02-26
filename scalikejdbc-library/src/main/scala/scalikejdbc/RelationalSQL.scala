@@ -106,7 +106,7 @@ trait OneToOneResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQL
     }
   }
 
-  protected def executeQuery[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
+  protected def executeQuery[R[A]](session: DBSession, op: DBSession => R[A]): R[A] = session match {
     case AutoSession => DB readOnly (s => op(s))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
     case _ => op(session)
@@ -130,7 +130,7 @@ class OneToOneRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)(
         }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    executeQuery[Traversable, A](session, op)
+    executeQuery[Traversable](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
@@ -154,7 +154,7 @@ class OneToOneRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params:
         }.toList
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    executeQuery[List, A](session, op)
+    executeQuery[List](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
@@ -182,7 +182,7 @@ class OneToOneRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(param
         rows.headOption
       }
     }
-    executeQuery[Option, A](session, op)
+    executeQuery[Option](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
@@ -235,7 +235,7 @@ trait OneToManyResultSetOperation[A, B, E <: WithExtractor] { self: RelationalSQ
     }
   }
 
-  protected def executeQuery[R[A], A](session: DBSession, op: DBSession => R[A]): R[A] = session match {
+  protected def executeQuery[R[A]](session: DBSession, op: DBSession => R[A]): R[A] = session match {
     case AutoSession => DB readOnly (s => op(s))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
     case _ => op(session)
@@ -256,7 +256,7 @@ class OneToManyRelationalSQLToList[A, B, E <: WithExtractor](sql: String)(params
         session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }.toList
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    executeQuery[List, A](session, op)
+    executeQuery[List](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
@@ -276,7 +276,7 @@ class OneToManyRelationalSQLToTraversable[A, B, E <: WithExtractor](sql: String)
         session.foldLeft(sql, params: _*)(LinkedHashMap[A, Seq[B]]())(processResultSet).map { case (one, many) => extractor(one, many) }
       } catch { case e: Exception => OneToXRelationalSQL.handleException(e) }
     }
-    executeQuery[Traversable, A](session, op)
+    executeQuery[Traversable](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
@@ -301,7 +301,7 @@ class OneToManyRelationalSQLToOption[A, B, E <: WithExtractor](sql: String)(para
         rows.headOption
       }
     }
-    executeQuery[Option, A](session, op)
+    executeQuery[Option](session, op)
   }
 
   protected def extractOne: WrappedResultSet => A = one
