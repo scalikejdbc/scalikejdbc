@@ -125,10 +125,10 @@ object SQLInterpolation {
     val delimiterForResultName = support.delimiterForResultName
     val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
 
-    def notFoundInColumns(name: String): InvalidColumnNameException = notFoundInColumns(name, columns.map(_.value).mkString(","))
+    def notFoundInColumns(aliasName: String, name: String): InvalidColumnNameException = notFoundInColumns(aliasName, name, columns.map(_.value).mkString(","))
 
-    def notFoundInColumns(name: String, registeredNames: String): InvalidColumnNameException = {
-      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
+    def notFoundInColumns(aliasName: String, name: String, registeredNames: String): InvalidColumnNameException = {
+      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${aliasName}.${name}, registered names: ${registeredNames})")
     }
 
   }
@@ -151,7 +151,7 @@ object SQLInterpolation {
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
     }
 
   }
@@ -173,7 +173,7 @@ object SQLInterpolation {
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
       SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
-    }.getOrElse(throw notFoundInColumns(name))
+    }.getOrElse(throw notFoundInColumns(tableAliasName, name))
   }
 
   /**
@@ -200,7 +200,7 @@ object SQLInterpolation {
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
-    }.getOrElse(throw notFoundInColumns(name))
+    }.getOrElse(throw notFoundInColumns(tableAliasName, name))
   }
 
   // --------------------
@@ -280,20 +280,20 @@ object SQLInterpolation {
     }
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
-      throw notFoundInColumns(name)
+      throw notFoundInColumns(aliasName, name)
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
       resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.toLowerCase).isDefined).map { rn =>
         SQLSyntax(s"${rn.namedColumn(name).value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
-        throw notFoundInColumns(name.value)
+        throw notFoundInColumns(aliasName, name.value)
       }
     }
 
-    def notFoundInColumns(name: String) = {
+    def notFoundInColumns(aliasName: String, name: String) = {
       val registeredNames = resultNames.map { rn => rn.namedColumns.map(_.value).mkString(",") }.mkString(",")
-      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
+      new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${aliasName}.${name}, registered names: ${registeredNames})")
     }
 
   }
@@ -317,7 +317,7 @@ object SQLInterpolation {
       underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { _ =>
         SQLSyntax(s"${aliasName}.${underlying.namedColumn(name).value}")
       }.getOrElse {
-        throw notFoundInColumns(name.value, resultName.columns.map(_.value).mkString(","))
+        throw notFoundInColumns(aliasName, name.value, resultName.columns.map(_.value).mkString(","))
       }
     }
 
@@ -342,7 +342,7 @@ object SQLInterpolation {
       underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { nc =>
         SQLSyntax(s"${aliasName}.${nc.value} as ${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
-        throw notFoundInColumns(name, underlying.columns.map(_.value).mkString(","))
+        throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
       }
     }
 
@@ -363,7 +363,7 @@ object SQLInterpolation {
       val name = if (underlying.support.useShortenedResultName) toShortenedName(original.value, underlying.support.columns) else original.value
       SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
     }.getOrElse {
-      throw notFoundInColumns(name, underlying.columns.map(_.value).mkString(","))
+      throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
     }
 
     val namedColumns: Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
@@ -371,14 +371,14 @@ object SQLInterpolation {
     }
 
     def namedColumn(name: String) = underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
-      throw notFoundInColumns(name, namedColumns.map(_.value).mkString(","))
+      throw notFoundInColumns(aliasName, name, namedColumns.map(_.value).mkString(","))
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
       underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { nc =>
         SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
-        throw notFoundInColumns(name.value, underlying.columns.map(_.value).mkString(","))
+        throw notFoundInColumns(aliasName, name.value, underlying.columns.map(_.value).mkString(","))
       }
     }
 
