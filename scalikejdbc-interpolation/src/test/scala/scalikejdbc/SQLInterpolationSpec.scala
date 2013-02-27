@@ -15,8 +15,16 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
   behavior of "SQLInterpolation"
 
-  Class.forName("org.hsqldb.jdbc.JDBCDriver")
-  ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
+  val props = new java.util.Properties
+  using(new java.io.FileInputStream("scalikejdbc-library/src/test/resources/jdbc.properties")) { in => props.load(in) }
+  val driverClassName = props.getProperty("driverClassName")
+  val url = props.getProperty("url")
+  val user = props.getProperty("user")
+  val password = props.getProperty("password")
+
+  Class.forName(driverClassName)
+  val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
+  ConnectionPool.singleton(url, user, password, poolSettings)
 
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
@@ -341,14 +349,17 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   case class Order(customerId: Int, productId: Int, orderedAt: DateTime)
 
   it should "be available for sub-queries with SQLSyntaxSupport" in {
+    try {
+      DB autoCommit { implicit s =>
+        sql"create table customers (id int not null, name varchar(256) not null, group_id int)".execute.apply()
+        sql"create table customer_group (id int not null, name varchar(256) not null)".execute.apply()
+        sql"create table products (id int not null, name varchar(256) not null)".execute.apply()
+        sql"create table orders (id int not null, product_id int not null, customer_id int not null, ordered_at timestamp not null)".execute.apply()
+      }
+    } catch { case e: Exception => }
     DB localTx {
       implicit s =>
         try {
-          sql"create table customers (id int not null, name varchar(256) not null, group_id int)".execute.apply()
-          sql"create table customer_group (id int not null, name varchar(256) not null)".execute.apply()
-          sql"create table products (id int not null, name varchar(256) not null)".execute.apply()
-          sql"create table orders (id int not null, product_id int not null, customer_id int not null, ordered_at timestamp not null)".execute.apply()
-
           sql"insert into customers values (1, ${"Alice"}, null)".update.apply()
           sql"insert into customers values (2, ${"Bob"}, 1)".update.apply()
           sql"insert into customers values (3, ${"Chris"}, 1)".update.apply()
