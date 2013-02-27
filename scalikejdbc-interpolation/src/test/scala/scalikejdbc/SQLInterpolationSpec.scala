@@ -288,7 +288,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             issue.map(i => i.id) should equal(Some(1))
           }
 
-
           {
             val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
 
@@ -318,7 +317,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         }
     }
   }
-
 
   object Customer extends SQLSyntaxSupport[Customer] {
     override val tableName = "customers"
@@ -462,12 +460,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           {
             val (c, o, p) = (Customer.syntax("c"), Order.syntax("o"), Product.syntax("p"))
             val x = SubQuery.syntax("x", o.resultName, p.resultName)
+
             val customers = sql"""
               select
                 ${c.result.*}, ${x.result.*}
               from
                 ${Customer.as(c)}
-                left join
+                inner join
                 (select
                    ${o.result.*}, ${p.result.*}
                  from
