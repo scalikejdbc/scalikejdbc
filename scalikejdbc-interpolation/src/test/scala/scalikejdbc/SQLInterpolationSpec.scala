@@ -6,6 +6,11 @@ import org.scalatest.matchers._
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
+class HibernateSQLFormatter extends SQLFormatter {
+  private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
+  def format(sql: String) = formatter.format(sql)
+}
+
 class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
   behavior of "SQLInterpolation"
@@ -13,6 +18,10 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
+  class HibernateSQLFormatter extends SQLFormatter {
+    private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
+    def format(sql: String) = formatter.format(sql)
+  }
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
@@ -225,10 +234,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
   object Customer extends SQLSyntaxSupport[Customer] {
     override val tableName = "customers"
-    override val columns = Seq("id", "name", "group_id")
+    override val forceUpperCase = true
   }
-  case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None,
-    orders: Seq[Order] = Nil)
+  case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None, orders: Seq[Order] = Nil)
 
   object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
     override val tableName = "customer_group"
@@ -237,7 +245,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
   object Product extends SQLSyntaxSupport[Product] {
     override val tableName = "products"
-    override val columns = Seq("id", "name")
   }
   case class Product(id: Int, name: String)
 
