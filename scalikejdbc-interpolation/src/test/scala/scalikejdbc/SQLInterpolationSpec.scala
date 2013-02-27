@@ -228,6 +228,98 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  case class Issue(id: Int, body: String, tags: Seq[Tag] = Vector())
+
+  object Issue extends SQLSyntaxSupport[Issue] {
+    override val tableName = "issues"
+    override val columns = Seq("id", "body")
+    def apply(rs: WrappedResultSet, i: ResultName[Issue]): Issue = Issue(
+      id = rs.int(i.id),
+      body = rs.string(i.body)
+    )
+  }
+
+  case class Tag(id: Int, name: String)
+
+  object Tag extends SQLSyntaxSupport[Tag] {
+    override val tableName = "tags"
+    override val columns = Seq("id", "name")
+    def apply(rs: WrappedResultSet, t: ResultName[Tag]): Tag = Tag(
+      id = rs.int(t.id),
+      name = rs.string(t.name)
+    )
+  }
+
+  object IssueTag extends SQLSyntaxSupport[Nothing] {
+    override val tableName = "issue_tag"
+    override val columns = Seq("issue_id", "tag_id")
+  }
+
+  it should "be available for empty relation" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"create table issues (id int not null, body varchar(256) not null)".execute.apply()
+          sql"create table tags (id int not null, name varchar(256) not null)".execute.apply()
+          sql"create table issue_tag (issue_id int not null, tag_id int not null)".execute.apply()
+
+          sql"insert into issues values (1, ${"Alice"})".update.apply()
+          sql"insert into issues values (2, ${"Bob"})".update.apply()
+          sql"insert into issues values (3, ${"Chris"})".update.apply()
+          sql"insert into issues values (4, ${"Dennis"})".update.apply()
+
+          {
+            val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
+
+            val issue: Option[Issue] = sql"""
+              select
+                ${i.result.*}, ${t.result.*}
+              from
+                ${Issue.as(i)}
+                left join ${IssueTag.as(it)} ON ${it.issueId} = ${i.id}
+                left join ${Tag.as(t)} ON ${t.id} = ${it.tagId}
+              where
+                ${i.id} = ${1}
+            """.foldLeft(Option.empty[Issue]) { (result, rs) =>
+              val tag = rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name)))
+              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.to[Vector]))
+            }
+
+            issue.map(i => i.id) should equal(Some(1))
+          }
+
+
+          {
+            val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
+
+            val issue: Option[Issue] = sql"""
+              select
+                ${i.result.*}, ${t.result.*}
+              from
+                ${Issue.as(i)}
+                left join ${IssueTag.as(it)} ON ${it.issueId} = ${i.id}
+                left join ${Tag.as(t)} ON ${t.id} = ${it.tagId}
+              where
+                ${i.id} = ${1}
+            """
+              .one(rs => Issue(rs.int(i.resultName.id), rs.string(i.resultName.body)))
+              .toMany(rs => rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name))))
+              .map { (i, ts) => i.copy(tags = i.tags ++ ts) }
+              .single
+              .apply()
+
+            issue.map(i => i.id) should equal(Some(1))
+          }
+
+        } finally {
+          sql"drop table issues".execute.apply()
+          sql"drop table tags".execute.apply()
+          sql"drop table issue_tag".execute.apply()
+        }
+    }
+  }
+
+
   object Customer extends SQLSyntaxSupport[Customer] {
     override val tableName = "customers"
     override val forceUpperCase = true
