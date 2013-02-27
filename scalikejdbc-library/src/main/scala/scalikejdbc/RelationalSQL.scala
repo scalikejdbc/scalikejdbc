@@ -97,7 +97,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
     oneToOne.keys.find(_ == o).map {
       case Some(found) => throw new IllegalRelationshipException(ErrorMessage.INVALID_ONE_TO_ONE_RELATION)
     }.getOrElse {
-      extractTo(rs).map { that => oneToOne += (o -> Some(that)) }.getOrElse(oneToOne += (o -> None))
+      oneToOne += (o -> extractTo(rs))
     }
   }
 
@@ -191,7 +191,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     oneToMany.keys.find(_ == o).map { _ =>
       extractTo(rs).map(many => oneToMany += (o -> (oneToMany.apply(o) :+ many))).getOrElse(oneToMany)
     }.getOrElse {
-      extractTo(rs).map(many => oneToMany += (o -> Vector(many))).getOrElse(oneToMany += (o -> Nil))
+      oneToMany += (o -> extractTo(rs).map(many => Vector(many)).getOrElse(Nil))
     }
   }
 
