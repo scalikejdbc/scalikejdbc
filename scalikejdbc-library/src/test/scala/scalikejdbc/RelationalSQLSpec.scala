@@ -38,8 +38,8 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " on u.group_id = g.id order by u.id"
             val sql = SQL[User](sqlString)
             val users: List[User] = sql.one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-              .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Option(g)))
+              .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
+              .map((u: User, g: Group) => u.copy(group = Some(g)))
               .list.apply()
 
             users.size should equal(6)
@@ -59,8 +59,8 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " from users_" + suffix + " u inner join groups_" + suffix + " g " +
               " on u.group_id = g.id order by u.id")
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-              .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Option(g)))
+              .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
+              .map((u: User, g: Group) => u.copy(group = Some(g)))
               .traversable.apply()
 
             users.size should equal(6)
@@ -74,8 +74,8 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " from users_" + suffix + " u inner join groups_" + suffix + " g " +
               " on u.group_id = g.id where u.id = 1")
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-              .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Option(g)))
+              .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
+              .map((u: User, g: Group) => u.copy(group = Some(g)))
               .single.apply()
 
             user.get.id should equal(1)
@@ -87,8 +87,8 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
                 " from users_" + suffix + " u inner join groups_" + suffix + " g " +
                 " on u.group_id = g.id order by u.id")
                 .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-                .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-                .map((u: User, g: Group) => u.copy(group = Option(g)))
+                .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
+                .map((u: User, g: Group) => u.copy(group = Some(g)))
                 .single.apply()
             }
           }
@@ -98,8 +98,8 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " from users_" + suffix + " u left join groups_" + suffix + " g " +
               " on u.group_id = g.id where u.id = 7")
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
-              .toOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Option(g)))
+              .toOptionalOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
+              .map((u: User, g: Group) => u.copy(group = Some(g)))
               .list.apply()
 
             users.size should equal(1)
@@ -157,7 +157,7 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " inner join groups_" + suffix + " g on g.id = gm.group_id" +
               " order by g.id, u.id desc")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-              .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
+              .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
               .list.apply()
 
@@ -183,7 +183,7 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " inner join groups_" + suffix + " g on g.id = gm.group_id" +
               " order by g.id, u.id desc")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-              .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
+              .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
               .traversable.apply()
 
@@ -197,7 +197,7 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " inner join groups_" + suffix + " g on g.id = gm.group_id" +
               " where g.id = 1")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-              .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
+              .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
               .single.apply()
 
@@ -212,7 +212,7 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
                 " inner join groups_" + suffix + " g on g.id = gm.group_id" +
                 " order by g.id, u.id desc")
                 .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
-                .toMany(rs => rs.intOpt("u_id").map(id => User(id)))
+                .toMany(rs => Some(User(rs.int("u_id"))))
                 .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
                 .single.apply()
             }
