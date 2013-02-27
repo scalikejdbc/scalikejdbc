@@ -99,7 +99,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           {
             intercept[InvalidColumnNameException] {
               sql"""select ${u.result.id}, ${u.result.dummy}
-              from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
+              from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
               where ${u.id} = 3"""
                 .one(rs => User(rs, u.resultName))
                 .toOne(rs => Group(rs, g.resultName))
@@ -109,7 +109,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
             intercept[ResultSetExtractorException] {
               sql"""select ${u.result.id}
-                from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
+                from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
                 where ${u.id} = 3"""
                 .one(rs => rs.int(u.resultName.foo))
                 .toOne(rs => Group(rs, g.resultName))
