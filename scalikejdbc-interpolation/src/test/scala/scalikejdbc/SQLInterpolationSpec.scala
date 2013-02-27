@@ -18,10 +18,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   Class.forName("org.hsqldb.jdbc.JDBCDriver")
   ConnectionPool.singleton("jdbc:hsqldb:mem:hsqldb:interpolation", "", "")
 
-  class HibernateSQLFormatter extends SQLFormatter {
-    private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
-    def format(sql: String) = formatter.format(sql)
-  }
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
