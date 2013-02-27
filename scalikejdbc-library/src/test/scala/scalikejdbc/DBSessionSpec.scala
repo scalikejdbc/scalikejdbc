@@ -207,14 +207,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (10001 to 40000).map(i => Seq(i, "Name" + i))
+          val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
           session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (40001 to 70000) foreach {
+          (20001 to 30000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }
@@ -239,7 +239,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             throw new RuntimeException
         }
       } catch {
-        case e =>
+        case e: Exception =>
       }
       val result = DB localTx {
         implicit session =>
@@ -290,15 +290,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       implicit session =>
         try {
           try {
-            SQL("create table dbsessionspec_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
+            SQL("create table dbsessionspec_genkey (name varchar(30), id integer generated always as identity(start with 0))").execute.apply()
           } catch {
-            case e =>
-              println(e.getMessage)
+            case e: Exception =>
               try {
-                SQL("create table dbsessionspec_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute.apply()
+                SQL("create table dbsessionspec_genkey (name varchar(30), id integer auto_increment, primary key(id))").execute.apply()
               } catch {
-                case e =>
-                  SQL("create table dbsessionspec_genkey (id serial not null, name varchar(30), primary key(id))").execute.apply()
+                case e: Exception =>
+                  SQL("create table dbsessionspec_genkey (name varchar(30), id serial not null, primary key(id))").execute.apply()
               }
           }
           var id = -1L
@@ -306,7 +305,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           val after = (stmt: PreparedStatement) => {
             val rs = stmt.getGeneratedKeys
             while (rs.next()) {
-              id = rs.getLong(1)
+              id = if (driverClassName == "org.h2.Driver" || driverClassName == "com.mysql.jdbc.Driver") rs.getLong(1) else rs.getLong("id")
             }
           }
           session.updateWithFilters(true, before, after, "insert into dbsessionspec_genkey (name) values (?)", "xxx")
@@ -326,12 +325,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("create table dbsessionspec_update_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
           } catch {
-            case e =>
-              println(e.getMessage)
+            case e: Exception =>
               try {
                 SQL("create table dbsessionspec_update_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute.apply()
               } catch {
-                case e =>
+                case e: Exception =>
                   SQL("create table dbsessionspec_update_genkey (id serial not null, name varchar(30), primary key(id))").execute.apply()
               }
           }
@@ -346,6 +344,37 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           id4 should be <= 4L
         } finally {
           SQL("drop table dbsessionspec_update_genkey").execute.apply()
+        }
+    }
+  }
+
+  it should "be able to updateAndReturnGeneratedKey with key" in {
+    DB autoCommit {
+      implicit session =>
+        try {
+          try {
+            SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer generated always as identity(start with 0))").execute.apply()
+          } catch {
+            case e: Exception =>
+              try {
+                SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer auto_increment, primary key(id))").execute.apply()
+              } catch {
+                case e: Exception =>
+                  SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id serial not null, primary key(id))").execute.apply()
+              }
+          }
+
+          if (driverClassName == "org.h2.Driver" || driverClassName == "com.mysql.jdbc.Driver") {
+            val id1 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+            id1 should be <= 1L
+          } else {
+            val id1 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey("id").apply()
+            id1 should be <= 1L
+          }
+          val id2 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey(2).apply()
+          id2 should be <= 2L
+        } finally {
+          SQL("drop table dbsessionspec_update_genkey2").execute.apply()
         }
     }
   }
@@ -374,7 +403,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             )
                    """).execute.apply()
             } catch {
-              case e =>
+              case e: Exception =>
                 try {
                   SQL("""
             create table dbsessionspec_dateTimeValues (
@@ -386,7 +415,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             )
                        """).execute.apply()
                 } catch {
-                  case e =>
+                  case e: Exception =>
                     SQL("""
             create table dbsessionspec_dateTimeValues (
               id serial not null,
@@ -446,7 +475,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             try {
               SQL("drop table dbsessionspec_dateTimeValues").execute.apply()
             } catch {
-              case e =>
+              case e: Exception =>
             }
           }
       }
@@ -461,11 +490,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
           } catch {
-            case e =>
+            case e: Exception =>
               try {
                 SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
               } catch {
-                case e =>
+                case e: Exception =>
                   SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute.apply()
               }
           }
@@ -475,7 +504,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("drop table dbsession_work_with_short_values").execute.apply()
           } catch {
-            case e => e.printStackTrace
+            case e: Exception => e.printStackTrace
           }
         }
     }
@@ -488,11 +517,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
           } catch {
-            case e =>
+            case e: Exception =>
               try {
                 SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
               } catch {
-                case e =>
+                case e: Exception =>
                   SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
               }
           }
@@ -502,7 +531,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("drop table dbsession_work_with_scala_big_decimal_values").execute.apply()
           } catch {
-            case e => e.printStackTrace
+            case e: Exception => e.printStackTrace
           }
         }
     }
@@ -515,11 +544,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
           } catch {
-            case e =>
+            case e: Exception =>
               try {
                 SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
               } catch {
-                case e =>
+                case e: Exception =>
                   SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
               }
           }
@@ -529,7 +558,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("drop table dbsession_work_with_java_big_decimal_values").execute.apply()
           } catch {
-            case e => e.printStackTrace
+            case e: Exception => e.printStackTrace
           }
         }
     }
@@ -554,7 +583,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           )
                  """).execute.apply()
           } catch {
-            case e =>
+            case e: Exception =>
               try {
                 SQL("""
           create table dbsession_work_with_optional_values (
@@ -571,7 +600,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           )
                      """).execute.apply()
               } catch {
-                case e =>
+                case e: Exception =>
                   SQL("""
           create table dbsession_work_with_optional_values (
             id serial not null,
@@ -704,7 +733,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           try {
             SQL("drop table dbsession_work_with_optional_values").execute.apply()
           } catch {
-            case e => e.printStackTrace
+            case e: Exception => e.printStackTrace
           }
         }
     }
@@ -716,7 +745,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         try {
           SQL("create table image_data (name varchar(255), data blob);").execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
             // PostgreSQL doesn't have blob
             SQL("create table image_data (name varchar(255), data bytea);").execute.apply()
         }
@@ -728,7 +757,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
                 'data -> stream)
               .update.apply()
           } catch {
-            case e =>
+            case e: Exception =>
               // PostgreSQL does not support #setBinaryStream
               if (url.startsWith("jdbc:postgresql")) println(e.getMessage)
               else fail("Failed to insert data because " + e.getMessage, e)
@@ -748,7 +777,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       } finally {
         try {
           SQL("drop table image_data;").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
       }
     }
   }
@@ -759,7 +788,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
         try {
           SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
             // PostgreSQL doesn't have blob
             SQL("create table image_data2 (name varchar(255), data bytea);").execute.apply()
         }
@@ -792,7 +821,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       } finally {
         try {
           SQL("drop table image_data2").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
       }
     }
   }

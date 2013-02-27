@@ -17,6 +17,7 @@ package scalikejdbc
 
 import scalikejdbc.SQL.Output
 import java.sql.PreparedStatement
+import scala.collection.immutable.ListMap
 
 /**
  * SQL abstraction's companion object.
@@ -55,13 +56,17 @@ import java.sql.PreparedStatement
  */
 object SQL {
 
+  private[scalikejdbc] def noExtractor[A](message: String): WrappedResultSet => A = { (rs: WrappedResultSet) =>
+    throw new IllegalStateException(message)
+  }
+
   private[scalikejdbc] object Output extends Enumeration {
     val single, first, list, traversable = Value
   }
 
-  def apply[A](sql: String): SQL[A, NoExtractor] = createSQL(sql)(Seq(): _*)({ (rs: WrappedResultSet) =>
-    throw new IllegalStateException("If you see this message, it's a ScalikeJDBC's bug. Please report us.")
-  })()
+  def apply[A](sql: String): SQL[A, NoExtractor] = createSQL(sql)(Seq(): _*)(noExtractor[A](
+    "If you see this message, it's a ScalikeJDBC's bug. Please report us."
+  ))()
 
 }
 
@@ -157,7 +162,7 @@ trait NoExtractor extends WithExtractor
 object GeneralizedTypeConstraintsForWithExtractor {
 
   // customized error message
-  @annotation.implicitNotFound(msg = "No extractor is specified. You need to call #map((WrappedResultSet) => A) before #apply().")
+  @annotation.implicitNotFound(msg = "No extractor is specified. You have forgotten call #map(...) before #apply().")
   sealed abstract class =:=[From, To] extends (From => To) with Serializable
   private[this] final val singleton_=:= = new =:=[WithExtractor, WithExtractor] { def apply(x: WithExtractor): WithExtractor = x }
   object =:= {
@@ -179,6 +184,8 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
+
+  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](sql)(params: _*)(output)(f)
 
   /**
    * Binds parameters to SQL template in order.
@@ -230,17 +237,17 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
 
   /**
    * folding into one value
-   * @param init initial value
+   * @param z initial value
    * @param op operation
    */
-  def foldLeft[A](init: A)(op: ((A, WrappedResultSet)) => A)(implicit session: DBSession): A = session match {
-    case AutoSession => DB autoCommit (s => s.foldLeft(sql, params: _*)(init)(op))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foldLeft(sql, params: _*)(init)(op))
-    case _ => session.foldLeft(sql, params: _*)(init)(op)
+  def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = session match {
+    case AutoSession => DB autoCommit (_.foldLeft(sql, params: _*)(z)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.foldLeft(sql, params: _*)(z)(op))
+    case _ => session.foldLeft(sql, params: _*)(z)(op)
   }
 
   /**
-   * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
+   * ListMaps values from each [[scalikejdbc.WrappedResultSet]] object.
    * @param extractor extractor function
    * @tparam A return type
    * @return SQL instance
@@ -361,7 +368,11 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
    * Set execution type as updateAndreturnGeneratedKey
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)
+  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = updateAndReturnGeneratedKey(1)
+
+  def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(name)
+
+  def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(index)
 
 }
 
@@ -398,7 +409,7 @@ class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Uni
 }
 
 /**
- * SQL which execute [[java.sql.Statement#exeuteUpdate()]].
+ * SQL which execute [[java.sql.Statement#executeUpdate()]].
  * @param sql SQL template
  * @param params parameters
  * @param before before filter
@@ -415,22 +426,22 @@ class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(
 }
 
 /**
- * SQL which execute [[java.sql.Statement#exeuteUpdate()]] and get generated key value.
+ * SQL which execute [[java.sql.Statement#executeUpdate()]] and get generated key value.
  * @param sql SQL template
  * @param params parameters
  */
-class SQLUpdateWithGeneratedKey(sql: String)(params: Any*) {
+class SQLUpdateWithGeneratedKey(sql: String)(params: Any*)(key: Any) {
 
   def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession => DB autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateAndReturnGeneratedKey(sql, params: _*))
-    case _ => session.updateAndReturnGeneratedKey(sql, params: _*)
+    case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
+    case _ => (session.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key))
   }
 
 }
 
 /**
- * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.collection.Traversable]] value.
  * @param sql SQL template
  * @param params parameters
@@ -443,7 +454,7 @@ class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(extract
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
     case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(sql, params: _*)(extractor))
     case _ => session.traversable(sql, params: _*)(extractor)
@@ -452,7 +463,7 @@ class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(extract
 }
 
 /**
- * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.collection.immutable.List]] value.
  * @param sql SQL template
  * @param params parameters
@@ -465,7 +476,7 @@ class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: Wra
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  def apply()(implicit session: DBSession, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
     case AutoSession => DB readOnly (s => s.list(sql, params: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(sql, params: _*)(extractor))
     case _ => session.list(sql, params: _*)(extractor)
@@ -474,7 +485,7 @@ class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: Wra
 }
 
 /**
- * SQL which exeute [[java.sql.Statement#executeQuery()]]
+ * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.Option]] value.
  * @param sql SQL template
  * @param params parameters
@@ -504,3 +515,4 @@ class SQLToOption[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: W
   }
 
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2013 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 package scalikejdbc
 
 /**
- * GlobalSettings for this library
+ * Exception which represents failure on ResultSet extraction.
  */
-object GlobalSettings {
-
-  var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
-
-  var sqlFormatter: SQLFormatterSettings = SQLFormatterSettings()
-
-}
+case class ResultSetExtractorException(message: String) extends IllegalArgumentException(message)

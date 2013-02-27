@@ -26,8 +26,11 @@ object StatementExecutor {
 
   val eol = System.getProperty("line.separator")
 
-  private class NakedExecutor {
-    def apply[A](execute: () => A): A = execute()
+  private trait Executor {
+    def apply[A](execute: () => A): A
+  }
+  private class NakedExecutor extends Executor {
+    override def apply[A](execute: () => A): A = execute()
   }
 
 }
@@ -140,7 +143,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
       }
 
       var isInsideOfText = false
-      SQLTemplateParser.trimComments(trimSpaces(template
+      val sql = SQLTemplateParser.trimComments(trimSpaces(template
         .replaceAll("\r", " ")
         .replaceAll("\n", " ")
         .replaceAll("\t", " ")))
@@ -155,6 +158,19 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
             c
           }
         }.mkString
+
+      try {
+        if (GlobalSettings.sqlFormatter.formatter.isDefined) {
+          val formatter = GlobalSettings.sqlFormatter.formatter.get
+          formatter.format(sql)
+        } else {
+          sql
+        }
+      } catch {
+        case e: Exception =>
+          log.debug("Catched an exception when formatting SQL because of " + e.getMessage)
+          sql
+      }
     }
 
     if (isBatch) {
@@ -188,7 +204,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
   /**
    * Logging SQL and timing (this trait depends on this instance)
    */
-  private[this] trait LoggingSQLAndTiming extends NakedExecutor with LogSupport {
+  private[this] trait LoggingSQLAndTiming extends Executor with LogSupport {
 
     abstract override def apply[A](execute: () => A): A = {
       import GlobalSettings.loggingSQLAndTime
@@ -224,10 +240,21 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
     }
   }
 
+  private[this] trait LoggingSQLIfFailed extends Executor with LogSupport {
+
+    abstract override def apply[A](execute: () => A): A = try {
+      super.apply(execute)
+    } catch {
+      case e: Exception =>
+        log.error("Failed to execute the following SQL:" + eol + eol + "   " + sqlString + eol)
+        throw e;
+    }
+  }
+
   /**
    * Executes SQL statement
    */
-  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming
+  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming with LoggingSQLIfFailed
 
   def addBatch(): Unit = underlying.addBatch()
 

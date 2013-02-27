@@ -52,15 +52,27 @@ trait DBSession extends LogSupport {
    */
   private def createStatementExecutor(conn: Connection, template: String, params: Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
-    val statement = if (returnGeneratedKeys) {
-      conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
-    } else {
-      conn.prepareStatement(template)
+    try {
+      val statement = if (returnGeneratedKeys) {
+        conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
+      } else {
+        conn.prepareStatement(template)
+      }
+      StatementExecutor(
+        underlying = statement,
+        template = template,
+        singleParams = params)
+    } catch {
+      case e: Exception =>
+        val formattedTemplate = if (GlobalSettings.sqlFormatter.formatter.isDefined) {
+          val formatter = GlobalSettings.sqlFormatter.formatter.get
+          formatter.format(template)
+        } else {
+          template
+        }
+        log.error("Failed to parse the following SQL template:\n\n  " + formattedTemplate + "\n")
+        throw e
     }
-    StatementExecutor(
-      underlying = statement,
-      template = template,
-      singleParams = params)
   }
 
   /**
@@ -160,7 +172,7 @@ trait DBSession extends LogSupport {
    * @param op function
    * @return folded value
    */
-  def foldLeft[A](template: String, params: Any*)(z: A)(op: ((A, WrappedResultSet)) => A): A = {
+  def foldLeft[A](template: String, params: Any*)(z: A)(op: (A, WrappedResultSet) => A): A = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         new ResultSetTraversable(executor.executeQuery()).foldLeft(z)(op)
@@ -295,7 +307,17 @@ trait DBSession extends LogSupport {
    * @param params parameters
    * @return generated key as a long value
    */
-  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
+  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = updateAndReturnSpecifiedGeneratedKey(template, params: _*)(1)
+
+  /**
+   * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param key name
+   * @return generated key as a long value
+   */
+  def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
     var generatedKeyFound = false
     var generatedKey: Long = -1
     val before = (stmt: PreparedStatement) => {}
@@ -303,7 +325,17 @@ trait DBSession extends LogSupport {
       val rs = stmt.getGeneratedKeys
       while (rs.next()) {
         generatedKeyFound = true
-        generatedKey = rs.getLong(1)
+        generatedKey = key match {
+          case name: String => rs.getLong(name)
+          case index: Int => try {
+            rs.getLong(index)
+          } catch {
+            case e: Exception =>
+              log.warn("Failed to get generated key value via index " + index + ". Going to retrieve it via index 1.")
+              rs.getLong(1)
+          }
+          case _ => throw new IllegalArgumentException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + "(key:" + key + ")")
+        }
       }
     }
     updateWithFilters(true, before, after, template, params: _*)

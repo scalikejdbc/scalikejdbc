@@ -22,10 +22,8 @@ We never release without passing all the unit tests with the following RDBMS.
 - H2 Database Engine
 - HSQLDB
 
-## Scaladoc
-
-http://seratch.github.com/scalikejdbc/api/index.html#scalikejdbc.package
-
+=======
+[![Build Status](https://buildhive.cloudbees.com/job/seratch/job/scalikejdbc/badge/icon)](https://buildhive.cloudbees.com/job/seratch/job/scalikejdbc/)
 
 ## Setup
 
@@ -261,6 +259,14 @@ You can use ScalikeJDBC with Play framework 2.x seamlessly.
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
 We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
+
+
+
+### Typesafe Config support
+
+This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe config.
+
+https://github.com/seratch/scalikejdbc/tree/develop/scalikejdbc-config
 
 
 ### dbconsle

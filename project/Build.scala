@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.4.5"
+  lazy val _version = "1.4.7"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -26,17 +26,22 @@ object ScalikeJDBCProjects extends Build {
           case version => version
         })
         val scalatest = "scalatest" + _scalaVersion
+        val anorm = "anorm_" + (scalaVersion match {
+          case "2.10.0" => "2.10"
+          case version => version
+        })
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"         % "1.4"      % "compile",
-          "org.slf4j"               %  "slf4j-api"            % "1.7.2"    % "compile",
-          "joda-time"               %  "joda-time"            % "2.1"      % "compile",
-          "org.joda"                %  "joda-convert"         % "1.2"      % "compile",
+          "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
+          "org.slf4j"               %  "slf4j-api"            % "1.7.2"       % "compile",
+          "joda-time"               %  "joda-time"            % "2.1"         % "compile",
+          "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"    % "test",
-          "org.scalatest"           %  scalatest              % "1.8"      % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.5"    % "test",
-          "play"                    %  "anorm_2.9.1"          % "[2,)"     % "test"
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"       % "test",
+          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
+          "org.scalatest"           %  scalatest              % "1.8"         % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
+          "play"                    %  anorm                  % "[2,)"        % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -62,9 +67,10 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"            % "1.7.2"  % "compile",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.7"  % "test",
-          "org.scalatest"  %% "scalatest"            % "[1.8,)" % "test"
+          "org.slf4j"      %  "slf4j-api"        % "1.7.2"       % "compile",
+          "ch.qos.logback" %  "logback-classic"  % "1.0.7"       % "test",
+          "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
+          "org.scalatest"  %% "scalatest"        % "[1.8,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -212,21 +218,17 @@ object ScalikeJDBCProjects extends Build {
   }
   val _resolvers = Seq(
     "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
-    "typesafe releases" at "http://repo.typesafe.com/typesafe/releases",
-    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
-    "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % "[1.3,)"        % "test",
     "org.apache.derby"  % "derby"                % "[10.8.2,)"     % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"         % "test",
     "org.hsqldb"        % "hsqldb"               % "2.2.9"         % "test",
-    "mysql"             % "mysql-connector-java" % "[5.1,)"        % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.23"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  // TODO fix
-  // val _scalacOptions = Seq("-deprecation", "-unchecked")
-  val _scalacOptions = Seq("-unchecked")
+  val _scalacOptions = Seq("-deprecation", "-unchecked")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>

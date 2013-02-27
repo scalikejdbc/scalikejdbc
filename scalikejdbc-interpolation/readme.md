@@ -86,6 +86,98 @@ scala> :q
 
 Of course, this code is safely protected from SQL injection attacks. 
 
-Unfortunately, there is a known limitation that the number of parameters should be less than 23 due to Scala tuple limit...
 
+### Experimental Feature
+
+You can use more powerful `SQLSyntaxSupport` trait. This feature is still experimental. So APIs or specifications are subject to change.
+
+#### Prepared tables
+
+```scala
+import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
+
+DB autoCommit { implicit s =>
+  sql"create table users (id int not null, first_name varchar(256), group_id int)".execute.apply()
+  sql"create table groups (id int not null, website_url varchar(256))".execute.apply()
+}
+```
+
+#### Classes to bind and setup thier companion objects
+
+```scala
+case class User(id: Int, name: Option[String], fullName: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
+
+object User extends SQLSyntaxSupport[User] {
+
+  override def tableName = "users"
+  override def columns = Seq("id", "first_name", "full_name", "group_id")
+  override def nameConverters = Map("givenName" -> "first_name")
+
+  def apply(rs: WrappedResultSet, u: ResultName[User]): User = {
+    // ResultName provides dynamic camelCase methods
+    User(id = rs.int(u.id), name = rs.stringOpt(u.givenName), fullName = rs.stirngOpt(u.fullName), groupId = rs.intOpt(u.groupId))
+  }
+
+  def apply(rs: WrappedResultSet, u: ResultName[User], g: ResultName[Group]): User = {
+    // User might have a Group
+    apply(rs, u).copy(group = rs.intOpt(g.id).map(id => Group(id = id, websiteUrl = rs.stringOpt(g.websiteUrl))))
+  }
+}
+
+case class Group(id: Int, websiteUrl: Option[String])
+
+object Group extends SQLSyntaxSupport[Group] {
+  override def tableName = "groups"
+  override def columns = Seq("id", "website_url")
+}
+```
+
+### Query Examples
+
+```scala
+val id = 3
+val u = User.syntax("u")
+val g = Group.syntax
+
+val user: Option[User] = sql"""
+  select ${u.result.*}, ${g.result.*}
+  from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
+  where ${u.id} = ${id}
+"""
+  .map(rs => User(rs, u.resultName, g.resultName))
+  .single.apply()
+```
+
+This code generates the following SQL. It's quite easy-to-understand and open for extension:
+
+```sql
+select 
+  u.id as i_on_u, u.first_name as fn1_on_u, u.full_name as fn2_on_u, u.group_id as gi_on_u, 
+  groups.id as i_on_groups, groups.website_url as wu_on__groups
+from users u left join groups on u.group_id = groups.id 
+where u.id = 3;
+```
+
+Furthermore, one-to-one, one-to-many queries are quite readable:
+
+```scala
+val groups: List[Group] = DB readOnly { implicit s =>
+  val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
+  sql"""
+    select
+      ${u.result.*}, ${g.result.*}, ${c.result.*}
+    from
+      ${GroupMember.as(gm)}
+        inner join ${User.as(u)} on ${u.id} = ${gm.userId}
+        inner join ${Group.as(g)} on ${g.id} = ${gm.groupId}
+        left join ${Company.as(c)} on ${u.companyId} = ${c.id}
+  """
+    .one(rs => Group(rs, g.resultName))
+    .toMany(rs => rs.intOpt(u.resultName.id).map(id => User(rs, u.resultName, c.resultName)))
+    .map { (g, us) => g.copy(members = us) }
+    .list
+    .apply()
+}
+```
 
