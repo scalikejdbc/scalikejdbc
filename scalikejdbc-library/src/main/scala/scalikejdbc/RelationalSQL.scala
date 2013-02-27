@@ -52,7 +52,11 @@ object OneToXSQL {
 class OneToXSQL[A, E <: WithExtractor, Z](sql: String)(params: Any*)(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)
     extends SQL[Z, E](sql)(params: _*)(SQL.noExtractor[Z]("one-to-one/one-to-many operation needs toOne(RS => Option[B]).map((A,B) => A) or toMany(RS => Option[B]).map((A,Seq(B) => A)."))(output) {
 
-  def toOne[B](to: WrappedResultSet => Option[B]): OneToOneSQL[A, B, E, Z] = {
+  def toOne[B](to: WrappedResultSet => B): OneToOneSQL[A, B, E, Z] = {
+    new OneToOneSQL(sql)(params: _*)(output)(one)(to.andThen((b: B) => Option(b)))((a, b) => a.asInstanceOf[Z])
+  }
+
+  def toOptionalOne[B](to: WrappedResultSet => Option[B]): OneToOneSQL[A, B, E, Z] = {
     new OneToOneSQL(sql)(params: _*)(output)(one)(to)((a, b) => a.asInstanceOf[Z])
   }
 

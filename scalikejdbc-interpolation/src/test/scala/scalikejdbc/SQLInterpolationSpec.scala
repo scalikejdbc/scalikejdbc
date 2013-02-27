@@ -99,21 +99,21 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           {
             intercept[InvalidColumnNameException] {
               sql"""select ${u.result.id}, ${u.result.dummy}
-              from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
+              from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
               where ${u.id} = 3"""
                 .one(rs => User(rs, u.resultName))
-                .toOne(rs => rs.intOpt(g.resultName.id).map(id => Group(rs, g.resultName)))
-                .map { (u, g) => u.copy(group = Some(g)) }
+                .toOne(rs => Group(rs, g.resultName))
+                .map { (u, g) => u.copy(group = Option(g)) }
                 .single.apply()
             }
 
             intercept[ResultSetExtractorException] {
-              sql"""select ${u.result.*}
-                from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
+              sql"""select ${u.result.id}
+                from ${User.as(u)} left join ${Group.as(g)} on ${u.groupId} = ${g.id}
                 where ${u.id} = 3"""
-                .one(rs => User(rs, u.resultName))
-                .toOne(rs => rs.intOpt(g.resultName.dummy).map(id => Group(rs, g.resultName)))
-                .map { (u, g) => u.copy(group = Some(g)) }
+                .one(rs => rs.int(u.resultName.foo))
+                .toOne(rs => Group(rs, g.resultName))
+                .map { (foo, g) => foo }
                 .list.apply()
             }
           }
@@ -157,7 +157,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${g.id}, ${u.id}
             """
               .one(rs => Group(rs, g.resultName))
-              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .toMany(rs => Some(User(rs, u.resultName)))
               .map { (g, us) => g.copy(members = us) }
               .list.apply()
 
@@ -183,7 +183,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${g.id}, ${u.id}
             """
               .one(rs => Group(rs, g.resultName))
-              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .toMany(rs => Some(User(rs, u.resultName)))
               .map { (g, us) => g.copy(members = us) }
               .traversable.apply()
 
@@ -210,7 +210,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${g.id}, ${u.id}
             """
               .one(rs => Group(rs, g.resultName))
-              .toMany(rs => rs.intOpt(u.resultName.id).map(_ => User(rs, u.resultName)))
+              .toMany(rs => Some(User(rs, u.resultName)))
               .map { (g, us) => g.copy(members = us) }
               .single.apply()
 
@@ -384,7 +384,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${sq(c).id}
           """
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
-              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = Some(cg)) }
               .list
               .apply()
@@ -409,7 +409,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${sq(c).id}
           """
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
-              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = Some(cg)) }
               .traversable
               .apply()
@@ -433,7 +433,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               ${sq(c).id} = 4
           """
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
-              .toOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = Some(cg)) }
               .single
               .apply()
@@ -476,9 +476,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               order by ${c.id}
             """
               .one(rs => Customer(rs.int(c.resultName.id), rs.string(c.resultName.name)))
-              .toMany(rs => rs.intOpt(x(o).resultName.customerId).map { id =>
-                Order(id, rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toDateTime)
-              }).map { (c, os) => c.copy(orders = os) }.list.apply()
+              .toMany(rs => Some(Order(rs.int(x(o).resultName.id), rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toDateTime)))
+              .map { (c, os) => c.copy(orders = os) }.list.apply()
 
             customers.size should equal(3)
           }
