@@ -27,7 +27,7 @@ object SQLInterpolation {
   trait SQLSyntaxSupport[A] {
 
     def tableName: String
-    def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName))
+    def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
 
     def forceUpperCase: Boolean = false
     def useShortenedResultName: Boolean = true
