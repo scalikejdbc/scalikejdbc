@@ -1,0 +1,71 @@
+ScalikeJDBC 1.4.7 has been released. SQLInterpolation provides a new powerful feature named SQLSyntaxSupport (though it's still experimental). SQLSyntaxSupport generates common query parts. For instance:
+
+    case class User(id: Long, name:String)
+    object User extends SQLSyntaxSupport[User] {
+      override val tableName = "users"
+      override val columns = Seq("id", "name")
+      
+      def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(rs.long(u.id), rs.string(u.name))
+    }
+    
+    val u = User.syntax("u")
+    val users = sql"select ${u.result.*} from ${User.as(u)}".map(User(u.resultName)).list.apply()
+    // select u.id as i_on_u, u.name as n_on_u from users u
+
+Join queries and sub-queries are also supported. Please check the test code.
+
+Here is the fixed issues in this version.
+
+https://github.com/seratch/scalikejdbc/issues?milestone=21&state=closed
+
+
+## library
+
+for Scala 2.10.0, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc" % "1.4.7"
+
+* Fixed [(GH-74)](https://github.com/seratch/scalikejdbc/issues/74) updateAndReturnGeneratedKey error on postgres?
+* Enabled getting all column names for single table via meta data
+* [Experimental Feature] Newly added one.toOne, one.toOptionalOne, one.toMany, one.toManies APIs
+
+
+## interpolation
+
+for Scala 2.10.0:
+
+    "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.7"
+
+* [Experimental Feature] Newly added SQLSyntaxSupport
+
+
+## config
+
+Released for Scala 2.10.0, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc-config" % "1.4.7"
+
+* Fixed [(GH-75)](https://github.com/seratch/scalikejdbc/issues/75) Fixed error when application.conf includes no settings for scalikejdbc.global by @tototoshi
+
+
+## test
+
+for Scala 2.10.0, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc-test" % "1.4.7"
+
+## mapper-generator
+
+for xsbt 0.12:
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.7")
+
+## play-plugin
+
+for Play 2.1.x and 2.0.x:
+
+    "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.4.7"
+
+
+Enjoy writing SQL with SQLSytanxSupport!
+
