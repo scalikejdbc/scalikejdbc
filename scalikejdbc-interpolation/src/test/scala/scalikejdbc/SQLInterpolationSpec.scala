@@ -228,6 +228,42 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             groupWithMembers.get.members(1).id should equal(2)
           }
 
+          {
+            val userId: Option[Int] = Some(1)
+            val users: List[User] = sql"""
+            select
+              ${u.result.*}
+            from
+              ${User as u}
+            ${userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls""}
+            order by ${u.id}
+            """
+              .map(rs => User(rs, u.resultName))
+              .list.apply()
+
+            users.size should be(1)
+            users(0).id should equal(1)
+          }
+
+          {
+            val userId: Option[Int] = None
+            val users: List[User] = sql"""
+            select
+              ${u.result.*}
+            from
+              ${User as u}
+            ${userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls""}
+            order by ${u.id}
+            """
+              .map(rs => User(rs, u.resultName))
+              .list.apply()
+
+            users.size should be(3)
+            users(0).id should equal(1)
+            users(1).id should equal(2)
+            users(2).id should equal(3)
+          }
+
         } finally {
           sql"drop table users".execute.apply()
           sql"drop table groups".execute.apply()
