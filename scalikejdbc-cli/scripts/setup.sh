@@ -56,6 +56,15 @@ function run_sbt() {
     $1
 }
 
+function collect_profile() {
+  cat config.properties \
+    | perl -pe '"'"'s/^\s*//; s/^(.*?)#.*$/$1/'"'"' \
+    | grep -v ^$ \
+    | cut -f 1 -d "." \
+    | sort -u
+}
+
+
 cd `dirname $0`
 
 until [ -z "$1" ]; do
@@ -89,7 +98,7 @@ if [ "$1" != "" ]; then
   PROFILE=$1
 else
   echo "Select a profile."
-  select INPUT in `grep -v "^$" config.properties | cut -f 1 -d "." | sort -u` EXIT
+  select INPUT in `collect_profile` EXIT
   do
       if [ "$INPUT" == "EXIT" ]; then
           exit;
