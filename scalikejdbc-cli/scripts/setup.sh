@@ -88,7 +88,7 @@ if [ "$1" != "" ]; then
   PROFILE=$1
 else
   echo "Select a profile."
-  select INPUT in `grep -v '^$' config.properties | cut -f 1 -d "." | sort -u` EXIT
+  select INPUT in `grep -v "^$" config.properties | cut -f 1 -d "." | sort -u` EXIT
   do
       if [ "$INPUT" == "EXIT" ]; then
           exit;
