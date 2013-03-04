@@ -23,13 +23,11 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val _scalaVersion = "_" + (scalaVersion match {
           case "2.10.0" => "2.10.0"
+          case "2.9.3" => "2.9.2"
           case version => version
         })
         val scalatest = "scalatest" + _scalaVersion
-        val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.0" => "2.10"
-          case version => version
-        })
+        val anorm = "anorm" + _scalaVersion
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
@@ -98,6 +96,11 @@ object ScalikeJDBCProjects extends Build {
             "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
             "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
             "org.specs2"    %% "specs2"       % "[1.13,)" % "test"
+           )
+          case "2.9.3" => Seq(
+            "org.slf4j"     %  "slf4j-simple"    % "1.7.2"   % "compile",
+            "org.scalatest" %  "scalatest_2.9.2" % "[1.8,)"  % "test",
+            "org.specs2"    %% "specs2_2.9.2"    % "[1.12,)" % "test"
            )
           case _ => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
@@ -169,8 +172,9 @@ object ScalikeJDBCProjects extends Build {
           "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
           "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
         ) ++ (scalaVersion match {
-          case "2.10.0" => Seq("org.specs2" %% "specs2" % "[1.13,)" % "provided")
-          case _ => Seq("org.specs2" %% "specs2" % "[1.12,)" % "provided")
+          case "2.10.0" => Seq("org.specs2" %% "specs2"       % "[1.13,)" % "provided")
+          case "2.9.3"  => Seq("org.specs2" %  "specs2_2.9.2" % "[1.12,)" % "provided")
+          case _ => Seq("org.specs2" %% "specs2" % "[1.12,)"  % "provided")
         }) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -194,12 +198,20 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := _crossScalaVersions,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        Seq(
-          "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
-          "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
-          "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+        (scalaVersion match {
+          case "2.9.3" => Seq(
+            "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
+            "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
+            "org.scalatest"  %  "scalatest_2.9.2"      % "[1.8,)"  % "provided",
+            "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+           )
+          case _ => Seq(
+            "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
+            "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
+            "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
+            "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+           )
+        }) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -210,7 +222,7 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
-  val _crossScalaVersions = Seq("2.10.0", "2.9.2", "2.9.1")
+  val _crossScalaVersions = Seq("2.10.0", "2.9.3", "2.9.2", "2.9.1")
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")

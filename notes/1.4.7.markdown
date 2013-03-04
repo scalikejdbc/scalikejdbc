@@ -21,7 +21,7 @@ https://github.com/seratch/scalikejdbc/issues?milestone=21&state=closed
 
 ## library
 
-for Scala 2.10.0, 2.9.2 and 2.9.1:
+for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc" % "1.4.7"
 
@@ -41,7 +41,7 @@ for Scala 2.10.0:
 
 ## config
 
-Released for Scala 2.10.0, 2.9.2 and 2.9.1:
+Released for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc-config" % "1.4.7"
 
@@ -50,7 +50,7 @@ Released for Scala 2.10.0, 2.9.2 and 2.9.1:
 
 ## test
 
-for Scala 2.10.0, 2.9.2 and 2.9.1:
+for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc-test" % "1.4.7"
 
