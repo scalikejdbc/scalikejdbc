@@ -87,12 +87,18 @@ done
 if [ "$1" != "" ]; then
   PROFILE=$1
 else
-  while [ "${PROFILE}" = "" ]
+  echo "Select a profile."
+  select INPUT in `grep -v '^$' config.properties | cut -f 1 -d "." | sort -u` EXIT
   do
-    echo "Select a profile."
-    echo
-    read PROFILE
-  done
+      if [ "$INPUT" == "EXIT" ]; then
+          exit;
+      fi
+      PROFILE=$INPUT
+      if [ "$INPUT" == "" ]; then
+          continue
+      fi
+      break
+  done || exit
 fi
 
 echo
