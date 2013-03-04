@@ -99,13 +99,6 @@ object DB {
   type CPContext = ConnectionPoolContext
   val NoCPContext = NoConnectionPoolContext
 
-  /**
-   * Returns DB instance.
-   * @param conn  connection
-   * @return  DB instance
-   */
-  def apply(conn: => Connection): DB = new DB(conn)
-
   private def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
       throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
