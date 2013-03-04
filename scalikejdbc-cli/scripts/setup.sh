@@ -27,7 +27,7 @@ sandbox.jdbc.password=
 ' > ${CONFIG_PROPS}
 fi
 
-echo '#!/bin/sh 
+echo '#!/bin/sh
 
 function edit_config() {
   cd `dirname $0`
@@ -56,11 +56,28 @@ function run_sbt() {
     $1
 }
 
+function ltrim () {
+   perl -pe '"'"'s/^\s*//'"'"'
+}
+
+function ignore_comment() {
+   perl -pe '"'"'s/^(.*?)#.*$/$1/'"'"'
+}
+
+function remove_blank_line() {
+  grep -v ^$
+}
+
+function take_until_first_dot() {
+  cut -f 1 -d "."
+}
+
 function collect_profile() {
   cat config.properties \
-    | perl -pe '"'"'s/^\s*//; s/^(.*?)#.*$/$1/'"'"' \
-    | grep -v ^$ \
-    | cut -f 1 -d "." \
+    | ltrim \
+    | ignore_comment \
+    | remove_blank_line \
+    | take_until_first_dot \
     | sort -u
 }
 
@@ -81,7 +98,7 @@ until [ -z "$1" ]; do
       show_help
       exit 0
       ;;
-    *) 
+    *)
       if [ "`echo $1 | cut -c 1`" == "-" ]; then
         echo
         echo "ERROR: Unknown option ($1)"
@@ -128,7 +145,7 @@ libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"               % "[1.4,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
   "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
-  "com.h2database"     % "h2"                   % "[1.3,)", 
+  "com.h2database"     % "h2"                   % "[1.3,)",
   "org.apache.derby"   % "derby"                % "[10.8.2,)",
   "org.xerial"         % "sqlite-jdbc"          % "[3.7,)",
   "org.hsqldb"         % "hsqldb"               % "[2.2,)",
@@ -169,7 +186,7 @@ def initialize() {
     val user = Option(props.get(profile + ".jdbc.username")).map(_.toString).orNull[String]
     val password = Option(props.get(profile + ".jdbc.password")).map(_.toString).orNull[String]
     ConnectionPool.singleton(url, user, password)
-  }.getOrElse { 
+  }.getOrElse {
     throw new IllegalStateException("JDBC settings for \"" + profile + "\" is not found. Try \"dbconsole --edit\".")
   }
 }
@@ -180,7 +197,7 @@ implicit val session: DBSession = AutoSession
 ' > ${INIT_SCRIPT}
 
 SHELL_PROFILE=${HOME}/.bash_profile
-if [[ "$SHELL" == *zsh* ]]; then 
+if [[ "$SHELL" == *zsh* ]]; then
   SHELL_PROFILE=${HOME}/.zprofile
 fi
 
