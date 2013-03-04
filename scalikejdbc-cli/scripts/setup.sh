@@ -5,7 +5,8 @@ mkdir -p ${ROOT_DIR}
 CONFIG_PROPS=${ROOT_DIR}/config.properties
 DBCONSOLE_COMMAND=${ROOT_DIR}/dbconsole
 BUILD_SBT=${ROOT_DIR}/build.sbt
-
+INIT_DIR=${ROOT_DIR}/init
+INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
 wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.1/sbt-launch.jar
@@ -127,7 +128,18 @@ libraryDependencies ++= Seq(
   "oracle"             % "ojdbc14"              % "10.2.0.2"
 )
 
-initialCommands := """import scalikejdbc._
+initialCommands := {
+  def using[A, R <: { def close() }](r : R)(f : R => A) : A = try { f(r) } finally { r.close() }
+  def readFileAsString(file: File): String = using (io.Source.fromFile(file)) { _.mkString }
+  readFileAsString(new File("init/init.scala")) +
+  ";" +
+  new File("init").listFiles.filter(f => f.isFile && f.getName != "init.scala").map(f => readFileAsString(f)).mkString("\\n")
+}
+' > ${BUILD_SBT}
+
+mkdir ${INIT_DIR} 2> /dev/null
+
+echo 'import scalikejdbc._
 import scalikejdbc.SQLInterpolation._
 import scalikejdbc.StringSQLRunner._
 def initialize() {
@@ -156,8 +168,7 @@ initialize()
 def describe(table: String) = println(DB.describe(table))
 def tables = println(DB.showTables())
 implicit val session: DBSession = AutoSession
-"""
-' > ${BUILD_SBT}
+' > ${INIT_SCRIPT}
 
 SHELL_PROFILE=${HOME}/.bash_profile
 if [[ "$SHELL" == *zsh* ]]; then 
