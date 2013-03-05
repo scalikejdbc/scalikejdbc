@@ -27,7 +27,11 @@ object ScalikeJDBCProjects extends Build {
           case version => version
         })
         val scalatest = "scalatest" + _scalaVersion
-        val anorm = "anorm" + _scalaVersion
+        val anorm = "anorm_" + (scalaVersion match {
+          case "2.10.0" => "2.10"
+          case "2.9.3" => "2.9.2"
+          case version => version
+        })
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",

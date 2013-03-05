@@ -18,8 +18,7 @@ object SQLInterpolation {
    */
   case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
 
-  import scala.collection.concurrent.TrieMap
-  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new TrieMap[String, Seq[String]]()
+  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
   /**
    * SQLSyntax support utilities
@@ -118,7 +117,8 @@ object SQLInterpolation {
   /**
    * SQLSyntax Provider basic implementation
    */
-  private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String) extends SQLSyntaxProvider {
+  private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
+      extends SQLSyntaxProvider {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
@@ -144,14 +144,15 @@ object SQLInterpolation {
       ResultSQLSyntaxProvider[S, A](support, table)
     }
 
-    val resultName: ResultNameSQLSyntaxProvider[S, A] = result.name
+    val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
 
     val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+        s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
     }
 
   }
@@ -163,7 +164,7 @@ object SQLInterpolation {
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
     import SQLSyntaxProvider._
 
-    val name: ResultNameSQLSyntaxProvider[S, A] = ResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
+    val name: BasicResultNameSQLSyntaxProvider[S, A] = BasicResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     val * : SQLSyntax = SQLSyntax(columns.map { c =>
       val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
@@ -176,7 +177,10 @@ object SQLInterpolation {
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
   }
 
-  trait ResultNameSQLSyntaxProviderI[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider {
+  /**
+   * SQLSyntax provider for result names
+   */
+  trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider {
     def * : SQLSyntax
     def namedColumns: Seq[SQLSyntax]
     def namedColumn(name: String): SQLSyntax
@@ -184,10 +188,10 @@ object SQLInterpolation {
   }
 
   /**
-   * SQLSyntax provider for result names
+   * Basic Query SQLSyntax Provider for result names
    */
-  case class ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultNameSQLSyntaxProviderI[S, A] {
+  case class BasicResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultNameSQLSyntaxProvider[S, A] {
     import SQLSyntaxProvider._
 
     val * : SQLSyntax = SQLSyntax(columns.map { c =>
@@ -201,7 +205,8 @@ object SQLInterpolation {
     }
 
     def namedColumn(name: String) = namedColumns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+        s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
     }
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
@@ -216,18 +221,21 @@ object SQLInterpolation {
 
   object SubQuery {
 
-    def syntax(name: String, resultNames: ResultNameSQLSyntaxProvider[_, _]*) = {
+    def syntax(name: String, resultNames: BasicResultNameSQLSyntaxProvider[_, _]*) = {
       SubQuerySQLSyntaxProvider(name, resultNames.head.delimiterForResultName, resultNames)
     }
 
-    def syntax(name: String, delimiterForResultName: String, resultNames: ResultNameSQLSyntaxProvider[_, _]*) = {
+    def syntax(name: String, delimiterForResultName: String, resultNames: BasicResultNameSQLSyntaxProvider[_, _]*) = {
       SubQuerySQLSyntaxProvider(name, delimiterForResultName, resultNames)
     }
 
     def as(subquery: SubQuerySQLSyntaxProvider): SQLSyntax = SQLSyntax(subquery.aliasName)
   }
 
-  case class SubQuerySQLSyntaxProvider(aliasName: String, delimiterForResultName: String, resultNames: Seq[ResultNameSQLSyntaxProvider[_, _]]) {
+  case class SubQuerySQLSyntaxProvider(
+      aliasName: String,
+      delimiterForResultName: String,
+      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     val result: SubQueryResultSQLSyntaxProvider = SubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
     val resultName: SubQueryResultNameSQLSyntaxProvider = result.name
@@ -253,7 +261,10 @@ object SQLInterpolation {
 
   }
 
-  case class SubQueryResultSQLSyntaxProvider(aliasName: String, delimiterForResultName: String, resultNames: Seq[ResultNameSQLSyntaxProvider[_, _]]) {
+  case class SubQueryResultSQLSyntaxProvider(
+      aliasName: String,
+      delimiterForResultName: String,
+      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     def name: SubQueryResultNameSQLSyntaxProvider = SubQueryResultNameSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
 
@@ -274,7 +285,10 @@ object SQLInterpolation {
 
   }
 
-  case class SubQueryResultNameSQLSyntaxProvider(aliasName: String, delimiterForResultName: String, resultNames: Seq[ResultNameSQLSyntaxProvider[_, _]]) {
+  case class SubQueryResultNameSQLSyntaxProvider(
+      aliasName: String,
+      delimiterForResultName: String,
+      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     val * : SQLSyntax = SQLSyntax(resultNames.map { rn =>
       rn.namedColumns.map { c =>
@@ -309,7 +323,10 @@ object SQLInterpolation {
   // partial subquery syntax providers
   // --------------------
 
-  case class PartialSubQuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](aliasName: String, override val delimiterForResultName: String, underlying: ResultNameSQLSyntaxProvider[S, A])
+  case class PartialSubQuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
+    aliasName: String,
+    override val delimiterForResultName: String,
+    underlying: BasicResultNameSQLSyntaxProvider[S, A])
       extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
 
     val result: PartialSubQueryResultSQLSyntaxProvider[S, A] = {
@@ -334,7 +351,10 @@ object SQLInterpolation {
 
   }
 
-  case class PartialSubQueryResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](aliasName: String, override val delimiterForResultName: String, underlying: ResultNameSQLSyntaxProvider[S, A])
+  case class PartialSubQueryResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
+    aliasName: String,
+    override val delimiterForResultName: String,
+    underlying: BasicResultNameSQLSyntaxProvider[S, A])
       extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
 
     val name: PartialSubQueryResultNameSQLSyntaxProvider[S, A] = {
@@ -355,8 +375,11 @@ object SQLInterpolation {
 
   }
 
-  case class PartialSubQueryResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](aliasName: String, override val delimiterForResultName: String, underlying: ResultNameSQLSyntaxProvider[S, A])
-      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) with ResultNameSQLSyntaxProviderI[S, A] {
+  case class PartialSubQueryResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
+    aliasName: String,
+    override val delimiterForResultName: String,
+    underlying: BasicResultNameSQLSyntaxProvider[S, A])
+      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) with ResultNameSQLSyntaxProvider[S, A] {
     import SQLSyntaxProvider._
 
     val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
@@ -391,7 +414,7 @@ object SQLInterpolation {
 
   }
 
-  type ResultName[A] = ResultNameSQLSyntaxProviderI[SQLSyntaxSupport[A], A]
+  type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type SubQueryResultName = SubQueryResultNameSQLSyntaxProvider
 
   @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
