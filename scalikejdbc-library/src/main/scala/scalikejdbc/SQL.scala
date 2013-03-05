@@ -107,7 +107,7 @@ private[scalikejdbc] object createNameBindingSQL extends LogSupport {
       case validation =>
         params.foreach {
           param =>
-            if (names.find(_ == param._1).isEmpty) {
+            if (!names.contains(param._1)) {
               validation match {
                 case NoCheckForIgnoredParams => // no op
                 case InfoLoggingForIgnoredParams => log.info(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
