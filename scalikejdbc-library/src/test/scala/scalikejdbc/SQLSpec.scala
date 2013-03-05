@@ -211,4 +211,30 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "use GlobalSettings.nameBindingSQLValidation" in {
+    val tableName = tableNamePrefix + "_updateInWithinTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
+      DB readOnly { implicit s =>
+        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+      }
+      GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.InfoLoggingForIgnoredParams)
+      DB readOnly { implicit s =>
+        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+      }
+      GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.WarnLoggingForIgnoredParams)
+      DB readOnly { implicit s =>
+        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+      }
+      GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.ExceptionForIgnoredParams)
+      intercept[IllegalStateException] {
+        DB readOnly { implicit s =>
+          SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+        }
+      }
+    }
+    GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings()
+  }
+
 }

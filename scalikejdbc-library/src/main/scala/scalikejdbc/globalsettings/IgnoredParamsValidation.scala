@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2013 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package scalikejdbc
+package scalikejdbc.globalsettings
 
-/**
- * GlobalSettings for this library
- */
-object GlobalSettings {
+sealed trait IgnoredParamsValidation
 
-  var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
+object NoCheckForIgnoredParams extends IgnoredParamsValidation
 
-  var sqlFormatter: SQLFormatterSettings = SQLFormatterSettings()
+object InfoLoggingForIgnoredParams extends IgnoredParamsValidation
 
-  var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
+object WarnLoggingForIgnoredParams extends IgnoredParamsValidation
 
-}
+object ExceptionForIgnoredParams extends IgnoredParamsValidation

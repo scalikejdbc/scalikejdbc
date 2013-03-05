@@ -95,17 +95,29 @@ private[scalikejdbc] object createSQL {
 /**
  * Name binding [[scalikejdbc.SQL]] instance factory.
  */
-private[scalikejdbc] object createNameBindingSQL {
+private[scalikejdbc] object createNameBindingSQL extends LogSupport {
 
   def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = SQLTemplateParser.extractAllParameters(sql)
+
     // check all the parameters passed by #bindByName are actually used
-    params.foreach {
-      param =>
-        names.find(_ == param._1).orElse {
-          throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+    import scalikejdbc.globalsettings._
+    GlobalSettings.nameBindingSQLValidator.ignoredParams match {
+      case NoCheckForIgnoredParams => // no op
+      case validation =>
+        params.foreach {
+          param =>
+            if (names.find(_ == param._1).isEmpty) {
+              validation match {
+                case NoCheckForIgnoredParams => // no op
+                case InfoLoggingForIgnoredParams => log.info(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+                case WarnLoggingForIgnoredParams => log.warn(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+                case ExceptionForIgnoredParams => throw new IllegalStateException(ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")")
+              }
+            }
         }
     }
+
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     (sqlWithPlaceHolders, names.map {
       name =>

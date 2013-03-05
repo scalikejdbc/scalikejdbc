@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2013 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,10 @@
  */
 package scalikejdbc
 
+import scalikejdbc.globalsettings._
+
 /**
- * GlobalSettings for this library
+ * Settings for Name binding SQL validator
  */
-object GlobalSettings {
+case class NameBindingSQLValidatorSettings(ignoredParams: IgnoredParamsValidation = ExceptionForIgnoredParams)
 
-  var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
-
-  var sqlFormatter: SQLFormatterSettings = SQLFormatterSettings()
-
-  var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
-
-}
