@@ -211,8 +211,8 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     }
   }
 
-  it should "use GlobalSettings.nameBindingSQLValidation" in {
-    val tableName = tableNamePrefix + "_updateInWithinTx"
+  it should "use GlobalSettings.nameBindingSQLValidator" in {
+    val tableName = tableNamePrefix + "_nameBindingSQLValidator"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
