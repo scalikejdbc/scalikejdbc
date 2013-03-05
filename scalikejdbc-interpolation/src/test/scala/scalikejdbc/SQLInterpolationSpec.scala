@@ -365,6 +365,10 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   object Customer extends SQLSyntaxSupport[Customer] {
     override val tableName = "customers"
     override val forceUpperCase = true
+
+    def apply(c: ResultName[Customer])(rs: WrappedResultSet): Customer = {
+      Customer(rs.int(c.id), rs.string(c.name))
+    }
   }
   case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None, orders: Seq[Order] = Nil)
 
@@ -430,7 +434,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               ${sq(c).id} > 3
             order by ${sq(c).id}
           """
-              .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
+              .one(Customer(sq(c).resultName))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = Some(cg)) }
               .list
