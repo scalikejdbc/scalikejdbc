@@ -127,7 +127,7 @@ object ConnectionPool extends LogSupport {
    * Close a pool by name
    * @param name pool name
    */
-  def close(name: Any): Unit = {
+  def close(name: Any = DEFAULT_NAME): Unit = {
     pools.synchronized {
       val removed = pools.remove(name)
       removed.foreach { pool => pool.close() }
