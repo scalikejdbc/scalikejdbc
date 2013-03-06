@@ -23,7 +23,17 @@ class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
   it should "be available" in {
     val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
     ConnectionPool.singleton(url, user, password, poolSettings)
-    ConnectionPool.add('unused, url, user, password, poolSettings)
+    ConnectionPool.borrow() should not be (null)
+    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    ConnectionPool.borrow('secondary) should not be (null)
+
+    // close default connection
+    ConnectionPool.close()
+    intercept[java.lang.IllegalStateException] { ConnectionPool.borrow() }
+
+    // close secondary connection
+    ConnectionPool.close('secondary)
+    intercept[java.lang.IllegalStateException] { ConnectionPool.borrow('secondary) }
   }
 
   it should "be acceptable external ConnectionPoolFactory" in {
