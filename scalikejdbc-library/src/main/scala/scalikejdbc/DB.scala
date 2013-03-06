@@ -267,6 +267,17 @@ object DB {
   }
 
   /**
+   * Returns all the table names
+   *
+   * @param tableNamePattern table name pattern (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return table information
+   */
+  def getAllTableNames()(implicit context: CPContext = NoCPContext): List[String] = {
+    DB(connectionPool(context).borrow()).getTableNames("%")
+  }
+
+  /**
    * Returns table information
    *
    * @param table table name (with schema optionally)

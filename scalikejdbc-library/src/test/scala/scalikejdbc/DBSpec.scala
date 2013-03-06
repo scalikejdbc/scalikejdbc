@@ -407,4 +407,14 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     }
   }
 
+  // --------------------
+  // metadata
+  it should "work with db metadat" in {
+    val tableName = tableNamePrefix + "_metadata"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      DB.getAllTableNames().size should be > (0)
+    }
+  }
+
 }
