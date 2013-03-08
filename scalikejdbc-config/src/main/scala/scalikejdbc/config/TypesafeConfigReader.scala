@@ -81,7 +81,7 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
   }
 
   def readJDBCSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): JDBCSettings = {
-    val configMap = TypesafeConfigReader.readAsMap(dbName)
+    val configMap = self.readAsMap(dbName)
     (for {
       driver <- configMap.get("driver")
       url <- configMap.get("url")
@@ -95,7 +95,7 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
   }
 
   def readConnectionPoolSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
-     val configMap = TypesafeConfigReader.readAsMap(dbName)
+     val configMap = self.readAsMap(dbName)
      val default = new ConnectionPoolSettings
      ConnectionPoolSettings(
        initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),

@@ -7,6 +7,18 @@ import com.typesafe.config._
 
 class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
 
+  val emptyConfigReader = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("empty.conf")
+  }
+
+  val badConfigReader = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-bad.conf")
+  }
+
+  val badConfigReaderLogEnabled = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-bad-logenabled.conf")
+  }
+
   describe("TypesafeConfigReader") {
 
     describe ("#readJDBCSettings") {
@@ -19,6 +31,12 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
       it ("should read configuration by db name and return as JDBCSettings") {
         val expected = JDBCSettings("org.h2.Driver", "jdbc:h2:mem:test2", "sa", "secret")
         TypesafeConfigReader.readJDBCSettings('foo) should be (expected)
+      }
+
+      describe ("When configuration file is empty") {
+        intercept[ConfigurationException] {
+          emptyConfigReader.readJDBCSettings('foo) should be (None)
+        }
       }
 
       describe ("When an unknown database name is passed") {
@@ -85,18 +103,6 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
         }
       }
 
-    }
-
-    val emptyConfigReader = new TypesafeConfigReader with TypesafeConfig {
-      override lazy val config: Config = ConfigFactory.load("empty.conf")
-    }
-
-    val badConfigReader = new TypesafeConfigReader with TypesafeConfig {
-      override lazy val config: Config = ConfigFactory.load("application-bad.conf")
-    }
-
-    val badConfigReaderLogEnabled = new TypesafeConfigReader with TypesafeConfig {
-      override lazy val config: Config = ConfigFactory.load("application-bad-logenabled.conf")
     }
 
     describe ("#loadGlobalSettings") {
