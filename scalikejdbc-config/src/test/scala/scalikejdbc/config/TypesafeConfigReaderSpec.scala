@@ -34,8 +34,10 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
       }
 
       describe ("When configuration file is empty") {
-        intercept[ConfigurationException] {
-          emptyConfigReader.readJDBCSettings('foo) should be (None)
+        it ("throws Configuration Exception") {
+          intercept[ConfigurationException] {
+            emptyConfigReader.readJDBCSettings('foo) should be (None)
+          }
         }
       }
 
