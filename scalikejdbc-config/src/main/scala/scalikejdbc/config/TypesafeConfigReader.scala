@@ -85,9 +85,9 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
     (for {
       driver <- configMap.get("driver")
       url <- configMap.get("url")
-      user <- configMap.get("user")
-      password <- configMap.get("password")
     } yield {
+      val user = configMap.get("user").orNull[String]
+      val password = configMap.get("password").orNull[String]
       JDBCSettings(driver, url, user, password)
     }) getOrElse {
       throw new ConfigurationException("Configuration error for database " + dbName + ". " + configMap.toString)
