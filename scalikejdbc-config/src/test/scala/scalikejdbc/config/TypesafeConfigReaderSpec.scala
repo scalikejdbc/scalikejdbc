@@ -33,6 +33,13 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
         TypesafeConfigReader.readJDBCSettings('foo) should be (expected)
       }
 
+      describe ("When user and password is not specified in application.conf") {
+        it ("should return JDBCSettings the user and password of which is null") {
+          val expected = JDBCSettings("org.h2.Driver", "jdbc:h2:mem:test4", null, null)
+          TypesafeConfigReader.readJDBCSettings('baz) should be (expected)
+        }
+      }
+
       describe ("When configuration file is empty") {
         it ("throws Configuration Exception") {
           intercept[ConfigurationException] {
