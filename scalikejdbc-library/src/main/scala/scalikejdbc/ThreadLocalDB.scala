@@ -23,7 +23,7 @@ import java.sql.Connection
  */
 object ThreadLocalDB {
 
-  private val _db = new DynamicVariable[DB](null)
+  private[this] val _db = new DynamicVariable[DB](null)
 
   /**
    * Creates a new DB instance for the current thread.
