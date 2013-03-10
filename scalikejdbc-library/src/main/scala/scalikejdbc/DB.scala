@@ -598,7 +598,7 @@ case class DB(conn: Connection) extends LogSupport {
     }
   }
 
-  private val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
+  private[this] val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
     tx.rollback()
     throw t
   }
