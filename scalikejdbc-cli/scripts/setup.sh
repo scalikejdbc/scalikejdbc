@@ -111,9 +111,7 @@ until [ -z "$1" ]; do
   esac
 done
 
-if [ "$1" != "" ]; then
-  PROFILE=$1
-else
+if [ "$PROFILE" == "" ]; then
   echo "Select a profile."
   select INPUT in `collect_profile` EXIT
   do
