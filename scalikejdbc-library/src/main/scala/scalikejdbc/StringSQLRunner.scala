@@ -46,6 +46,12 @@ case class StringSQLRunner(sql: String) {
   }
 
   /**
+   * Shows all the result
+   * @param session DB Session
+   */
+  def show()(implicit session: DBSession = AutoSession): Unit = run().foreach(println)
+
+  /**
    * Casts value to expected type value
    *
    * TODO: ClassManifest will be deprecated since Scala 2.10.0
