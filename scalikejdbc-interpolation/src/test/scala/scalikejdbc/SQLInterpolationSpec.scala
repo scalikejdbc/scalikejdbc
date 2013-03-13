@@ -275,8 +275,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   case class Issue(id: Int, body: String, tags: Seq[Tag] = Vector())
 
   object Issue extends SQLSyntaxSupport[Issue] {
-    override val tableName = "issues"
-    override val columns = Seq("id", "body")
     def apply(rs: WrappedResultSet, i: ResultName[Issue]): Issue = Issue(
       id = rs.int(i.id),
       body = rs.string(i.body)
@@ -286,31 +284,26 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   case class Tag(id: Int, name: String)
 
   object Tag extends SQLSyntaxSupport[Tag] {
-    override val tableName = "tags"
-    override val columns = Seq("id", "name")
     def apply(rs: WrappedResultSet, t: ResultName[Tag]): Tag = Tag(
       id = rs.int(t.id),
       name = rs.string(t.name)
     )
   }
 
-  object IssueTag extends SQLSyntaxSupport[Nothing] {
-    override val tableName = "issue_tag"
-    override val columns = Seq("issue_id", "tag_id")
-  }
+  object IssueTag extends SQLSyntaxSupport[Nothing]
 
   it should "be available for empty relation" in {
     DB localTx {
       implicit s =>
         try {
-          sql"create table issues (id int not null, body varchar(256) not null)".execute.apply()
-          sql"create table tags (id int not null, name varchar(256) not null)".execute.apply()
+          sql"create table issue (id int not null, body varchar(256) not null)".execute.apply()
+          sql"create table tag (id int not null, name varchar(256) not null)".execute.apply()
           sql"create table issue_tag (issue_id int not null, tag_id int not null)".execute.apply()
 
-          sql"insert into issues values (1, ${"Alice"})".update.apply()
-          sql"insert into issues values (2, ${"Bob"})".update.apply()
-          sql"insert into issues values (3, ${"Chris"})".update.apply()
-          sql"insert into issues values (4, ${"Dennis"})".update.apply()
+          sql"insert into issue values (1, ${"Alice"})".update.apply()
+          sql"insert into issue values (2, ${"Bob"})".update.apply()
+          sql"insert into issue values (3, ${"Chris"})".update.apply()
+          sql"insert into issue values (4, ${"Dennis"})".update.apply()
 
           {
             val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
@@ -355,8 +348,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           }
 
         } finally {
-          sql"drop table issues".execute.apply()
-          sql"drop table tags".execute.apply()
+          sql"drop table issue".execute.apply()
+          sql"drop table tag".execute.apply()
           sql"drop table issue_tag".execute.apply()
         }
     }

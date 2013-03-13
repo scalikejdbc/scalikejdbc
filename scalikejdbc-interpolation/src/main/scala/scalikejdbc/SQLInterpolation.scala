@@ -25,7 +25,11 @@ object SQLInterpolation {
    */
   trait SQLSyntaxSupport[A] {
 
-    def tableName: String
+    def tableName: String = {
+      val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
+      SQLSyntaxProvider.toSnakeCase(className)
+    }
+
     def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
 
     def forceUpperCase: Boolean = false
