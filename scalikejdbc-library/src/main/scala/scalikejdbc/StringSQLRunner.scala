@@ -41,7 +41,9 @@ case class StringSQLRunner(sql: String) extends LogSupport {
     SQL(sql).map(_.toMap()).list.apply()
   } catch {
     case e: java.sql.SQLException =>
-      List(Map("RESULT" -> SQL(sql).execute.apply()))
+      val result = List(Map("RESULT" -> SQL(sql).execute.apply()))
+      log.warn("The execution failed in read-only mode first, then was rerun in auto-commit mode. Using #execute from the first is highly recommended.")
+      result
   }
 
   /**

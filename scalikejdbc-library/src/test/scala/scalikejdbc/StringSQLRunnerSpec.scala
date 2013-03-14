@@ -21,6 +21,7 @@ class StringSQLRunnerSpec extends FlatSpec with ShouldMatchers with Settings {
 
       // run insert SQL
       ("insert into " + tableName + " values (3, 'Ben')").run
+      ("insert into " + tableName + " values (4, 'Chris')").execute
 
       // run select SQL
       val result = ("select id,name from " + tableName + " where id = 3").run
