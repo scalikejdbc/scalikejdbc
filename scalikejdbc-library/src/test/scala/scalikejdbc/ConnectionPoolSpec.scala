@@ -27,13 +27,18 @@ class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
     ConnectionPool.add('secondary, url, user, password, poolSettings)
     ConnectionPool.borrow('secondary) should not be (null)
 
-    // close default connection
-    ConnectionPool.close()
-    intercept[java.lang.IllegalStateException] { ConnectionPool.borrow() }
+    ConnectionPool.synchronized {
+      // close default connection
+      ConnectionPool.close()
+      intercept[java.lang.IllegalStateException] { ConnectionPool.borrow() }
 
-    // close secondary connection
-    ConnectionPool.close('secondary)
-    intercept[java.lang.IllegalStateException] { ConnectionPool.borrow('secondary) }
+      // close secondary connection
+      ConnectionPool.close('secondary)
+      intercept[java.lang.IllegalStateException] { ConnectionPool.borrow('secondary) }
+
+      // recover for concurrent tests
+      ConnectionPool.singleton(url, user, password, poolSettings)
+    }
   }
 
   it should "be acceptable external ConnectionPoolFactory" in {

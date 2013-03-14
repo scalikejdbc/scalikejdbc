@@ -430,6 +430,9 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
 
             }
 
+            // clean table
+            SQL("delete from dbsessionspec_dateTimeValues").update.apply()
+
             SQL("""
             insert into dbsessionspec_dateTimeValues
               (date_value, time_value, timestamp_value)
