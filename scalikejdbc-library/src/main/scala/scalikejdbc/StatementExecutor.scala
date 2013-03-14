@@ -254,10 +254,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
   /**
    * Executes SQL statement
    */
-  private[this] val statementExecute = {
-    if (GlobalSettings.loggingSQLIfFailed) new NakedExecutor with LoggingSQLAndTiming with LoggingSQLIfFailed
-    else new NakedExecutor with LoggingSQLAndTiming
-  }
+  private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming with LoggingSQLIfFailed
 
   def addBatch(): Unit = underlying.addBatch()
 

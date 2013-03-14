@@ -38,14 +38,18 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @return results as List[Map]
    */
   def run()(implicit session: DBSession = AutoSession): List[Map[String, Any]] = try {
-    GlobalSettings.loggingSQLIfFailed = false
     SQL(sql).map(_.toMap()).list.apply()
   } catch {
     case e: java.sql.SQLException =>
       List(Map("RESULT" -> SQL(sql).execute.apply()))
-  } finally {
-    GlobalSettings.loggingSQLIfFailed = true
   }
+
+  /**
+   * Runs all SQL and returns result as List[Map[String, Any]]
+   * @param session DB Session
+   * @return results as Boolean
+   */
+  def execute()(implicit session: DBSession = AutoSession): Boolean = SQL(sql).execute.apply()
 
   /**
    * Shows all the result
