@@ -30,7 +30,7 @@ package scalikejdbc
  *
  * @param sql SQL value
  */
-case class StringSQLRunner(sql: String) {
+case class StringSQLRunner(sql: String) extends LogSupport {
 
   /**
    * Runs all SQL and returns result as List[Map[String, Any]]
@@ -38,11 +38,13 @@ case class StringSQLRunner(sql: String) {
    * @return results as List[Map]
    */
   def run()(implicit session: DBSession = AutoSession): List[Map[String, Any]] = try {
+    GlobalSettings.loggingSQLIfFailed = false
     SQL(sql).map(_.toMap()).list.apply()
   } catch {
     case e: java.sql.SQLException =>
-      val result = SQL(sql).execute.apply()
-      List(Map("RESULT" -> result))
+      List(Map("RESULT" -> SQL(sql).execute.apply()))
+  } finally {
+    GlobalSettings.loggingSQLIfFailed = true
   }
 
   /**

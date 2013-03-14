@@ -1,6 +1,7 @@
 #!/bin/sh
 
-ROOT_DIR=${HOME}/bin/scalikejdbc-cli
+HOME_DIR=`echo $HOME | sed -e s/\\\\/$//`
+ROOT_DIR=${HOME_DIR}/bin/scalikejdbc-cli
 mkdir -p ${ROOT_DIR}
 CONFIG_PROPS=${ROOT_DIR}/config.properties
 DBCONSOLE_COMMAND=${ROOT_DIR}/dbconsole
@@ -57,11 +58,11 @@ function run_sbt() {
 }
 
 function ltrim () {
-   perl -pe '"'"'s/^\s*//'"'"'
+  perl -pe '"'"'s/^\s*//'"'"'
 }
 
 function ignore_comment() {
-   perl -pe '"'"'s/^(.*?)#.*$/$1/'"'"'
+  perl -pe '"'"'s/^(.*?)#.*$/$1/'"'"'
 }
 
 function remove_blank_line() {
@@ -115,14 +116,14 @@ if [ "$PROFILE" == "" ]; then
   echo "Select a profile."
   select INPUT in `collect_profile` EXIT
   do
-      if [ "$INPUT" == "EXIT" ]; then
-          exit;
-      fi
-      PROFILE=$INPUT
-      if [ "$INPUT" == "" ]; then
-          continue
-      fi
-      break
+    if [ "$INPUT" == "EXIT" ]; then
+      exit;
+    fi
+    PROFILE=$INPUT
+    if [ "$INPUT" == "" ]; then
+      continue
+    fi
+    break
   done || exit
 fi
 
@@ -194,13 +195,13 @@ def tables = println(DB.showTables())
 implicit val session: DBSession = AutoSession
 ' > ${INIT_SCRIPT}
 
-SHELL_PROFILE=${HOME}/.bash_profile
+SHELL_PROFILE=${HOME_DIR}/.bash_profile
 if [[ "$SHELL" == *zsh* ]]; then
-  SHELL_PROFILE=${HOME}/.zprofile
+  SHELL_PROFILE=${HOME_DIR}/.zprofile
 fi
 
-if [ ! `grep 'PATH=${PATH}:${HOME}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; then
-  echo "PATH=\${PATH}:\${HOME}/bin/scalikejdbc-cli" >> ${SHELL_PROFILE}
+if [ ! `grep 'PATH=${PATH}:${HOME_DIR}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; then
+  echo "PATH=\${PATH}:\${HOME_DIR}/bin/scalikejdbc-cli" >> ${SHELL_PROFILE}
 fi
 
 chmod +x ${DBCONSOLE_COMMAND}

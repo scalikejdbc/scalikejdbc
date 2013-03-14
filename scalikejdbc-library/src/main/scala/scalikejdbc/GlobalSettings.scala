@@ -20,6 +20,8 @@ package scalikejdbc
  */
 object GlobalSettings {
 
+  var loggingSQLIfFailed: Boolean = true
+
   var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()
 
   var sqlFormatter: SQLFormatterSettings = SQLFormatterSettings()
