@@ -293,12 +293,16 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   object IssueTag extends SQLSyntaxSupport[Nothing]
 
   it should "be available for empty relation" in {
+    DB autoCommit { implicit s =>
+      try {
+        sql"create table issue (id int not null, body varchar(256) not null)".execute.apply()
+        sql"create table tag (id int not null, name varchar(256) not null)".execute.apply()
+        sql"create table issue_tag (issue_id int not null, tag_id int not null)".execute.apply()
+      } catch { case e: Exception => }
+    }
     DB localTx {
       implicit s =>
         try {
-          sql"create table issue (id int not null, body varchar(256) not null)".execute.apply()
-          sql"create table tag (id int not null, name varchar(256) not null)".execute.apply()
-          sql"create table issue_tag (issue_id int not null, tag_id int not null)".execute.apply()
 
           sql"insert into issue values (1, ${"Alice"})".update.apply()
           sql"insert into issue values (2, ${"Bob"})".update.apply()

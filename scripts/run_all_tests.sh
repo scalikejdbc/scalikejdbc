@@ -30,15 +30,3 @@ echo "-------------------"
 echo 
 ./run_tests.sh postgresql
 
-sbt "project library" \
-    "set scalaVersion := \"2.9.2\"" \
-    "set scalaBinaryVersion := \"2.9.2\"" \
-    "project mapper-generator" test \
-    "project play-plugin" test \
-    "project config" test \
-    "project test" test \
-    "project library" \
-    "set scalaVersion := \"2.10.0\"" \
-    "set scalaBinaryVersion := \"2.10\"" \
-    "project interpolation" test
-
