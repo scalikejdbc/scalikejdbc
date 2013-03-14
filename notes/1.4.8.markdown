@@ -1,0 +1,67 @@
+ScalikeJDBC 1.4.8 has been released. Typesafe Config support and dbconsole are improved a lot thanks to @tototoshi. Interpolation is improved by @gakuzzzz.
+
+Here is the fixed issues in this version.
+
+https://github.com/seratch/scalikejdbc/issues?milestone=22&state=closed
+
+
+## library
+
+for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc" % "1.4.8"
+
+* Fixed [(GH-85)](https://github.com/seratch/scalikejdbc/issues/85) Need an easier way to pass parameters in dynamic SQL about bindByName (@tsuyoshizawa)
+* Added ConnectionPool.close() for cleaning up the default CP
+* Added DB.getAllTableNames()
+* Some internal improvements thanks to @xuwei-k
+
+## interpolation
+
+for Scala 2.10.0:
+
+    "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.8"
+
+* Added nested interpolation support by @gakuzzzz [(GH-87)](https://github.com/seratch/scalikejdbc/issues/87)
+* Added type compatibility between ResultName and PartialResultNameProvider by @gakuzzzz [(GH-94)](https://github.com/seratch/scalikejdbc/issues/94)
+
+## config
+
+Released for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc-config" % "1.4.8"
+
+* Fixed TypesafeConfigReader always calls the default reader method by @tototoshi [(GH-96)](https://github.com/seratch/scalikejdbc/issues/96)
+* Enabled TypesafeConfigReader to accept null username/password by @tototoshi [(GH-97)](https://github.com/seratch/scalikejdbc/issues/97)
+
+## test
+
+for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
+
+    "com.github.seratch" %% "scalikejdbc-test" % "1.4.8"
+
+## mapper-generator
+
+for xsbt 0.12:
+
+    addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.8")
+
+## play-plugin
+
+for Play 2.1.x and 2.0.x:
+
+    "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.4.8"
+
+## dbconsole
+
+    curl -L http://git.io/dbconsole | sh
+
+* Added useful profile selector by @tototoshi
+* Enabled users to customize intial commands by @tototoshi [(GH-91)](https://github.com/seratch/scalikejdbc/issues/91)
+* Bumped sbt version to 0.12.2
+* Deprecated update operations by #run (use #execute instead)
+
+
+Enjoy writing SQL and get things done!
+
+
