@@ -18,6 +18,15 @@ object SQLInterpolation {
    */
   case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
 
+  @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
+  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
+
+}
+
+object SQLSyntaxSupport {
+
+  import scalikejdbc.SQLInterpolation._
+
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
   /**
@@ -55,8 +64,10 @@ object SQLInterpolation {
   /**
    * SQLSyntax Provider
    */
-  trait SQLSyntaxProvider extends Dynamic {
+  trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
+    import scalikejdbc.interpolation.SQLSyntaxFieldMacro._
+    import scala.reflect.runtime.universe._
 
     def c(name: String) = column(name)
     def column(name: String): SQLSyntax
@@ -73,7 +84,19 @@ object SQLInterpolation {
       c(columnName)
     }
 
-    def selectDynamic(name: String): SQLSyntax = field(name)
+    private[this] def fields(implicit tag: WeakTypeTag[A]): Seq[String] = {
+      import scala.reflect.runtime.universe._
+      tag.tpe.declarations.collectFirst {
+        case m: MethodSymbol if m.isPrimaryConstructor => m
+      }.map { const =>
+        const.paramss.map { symbols: List[Symbol] => symbols.map(s => s.name.encoded.trim) }.flatten
+      }.getOrElse(Nil)
+    }
+
+    def selectDynamic(name: String)(implicit tag: WeakTypeTag[A]): SQLSyntax = {
+      val expectedNames: Seq[String] = fields
+      field(validate(name, expectedNames))
+    }
   }
 
   /**
@@ -122,7 +145,7 @@ object SQLInterpolation {
    * SQLSyntax Provider basic implementation
    */
   private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-      extends SQLSyntaxProvider {
+      extends SQLSyntaxProvider[A] {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
@@ -184,7 +207,7 @@ object SQLInterpolation {
   /**
    * SQLSyntax provider for result names
    */
-  trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider {
+  trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider[A] {
     def * : SQLSyntax
     def namedColumns: Seq[SQLSyntax]
     def namedColumn(name: String): SQLSyntax
@@ -420,9 +443,6 @@ object SQLInterpolation {
 
   type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type SubQueryResultName = SubQueryResultNameSQLSyntaxProvider
-
-  @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
-  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
 
 }
 

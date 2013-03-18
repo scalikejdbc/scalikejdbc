@@ -55,6 +55,32 @@ object ScalikeJDBCProjects extends Build {
     )
   )
 
+  lazy val scalikejdbcInterpolationMacro = Project(
+    id = "interpolation-macro",
+    base = file("scalikejdbc-interpolation-macro"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-interpolation-macro",
+      version := _version,
+      scalaVersion := "2.10.0",
+      scalaBinaryVersion := "2.10",
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "org.scala-lang" %  "scala-reflect" % scalaVersion  % "compile",
+          "org.scala-lang" %  "scala-compiler" % scalaVersion  % "compile"
+        )
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  )
+
   lazy val scalikejdbcInterpolation = Project(
     id = "interpolation",
     base = file("scalikejdbc-interpolation"),
@@ -69,6 +95,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
+          "org.scala-lang" %  "scala-reflect"    % scalaVersion  % "compile",
           "org.slf4j"      %  "slf4j-api"        % "1.7.2"       % "compile",
           "ch.qos.logback" %  "logback-classic"  % "1.0.7"       % "test",
           "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
@@ -82,7 +109,7 @@ object ScalikeJDBCProjects extends Build {
       pomExtra := _pomExtra,
       scalacOptions ++= _scalacOptions
     )
-  ) dependsOn(scalikejdbc)
+  ) dependsOn(scalikejdbc, scalikejdbcInterpolationMacro)
 
   lazy val scalikejdbcMapperGenerator = Project(
     id = "mapper-generator",
