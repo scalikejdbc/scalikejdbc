@@ -2,7 +2,44 @@ package scalikejdbc
 
 import scala.language.implicitConversions
 import scala.language.reflectiveCalls
+import scala.language.experimental.macros
 import scala.language.dynamics
+
+/**
+ * SQLInterpolation
+ */
+class SQLInterpolation(val s: StringContext) extends AnyVal {
+
+  import SQLInterpolation.{ LastParameter, SQLSyntax }
+
+  def sql[A](params: Any*) = {
+    val syntax = sqls(params: _*)
+    SQL[A](syntax.value).bind(syntax.parameters: _*)
+  }
+
+  def sqls(params: Any*) = {
+    val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
+      case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
+    }
+    SQLSyntax(query, params.flatMap(toSeq))
+  }
+
+  private def getPlaceholders(param: Any): String = param match {
+    case _: String => "?"
+    case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
+    case LastParameter => ""
+    case SQLSyntax(s, _) => s
+    case _ => "?"
+  }
+
+  private def toSeq(param: Any): Traversable[Any] = param match {
+    case s: String => Seq(s)
+    case t: Traversable[_] => t
+    case SQLSyntax(_, params) => params
+    case n => Seq(n)
+  }
+
+}
 
 /**
  * SQLInterpolation companion object
@@ -20,12 +57,6 @@ object SQLInterpolation {
 
   @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
   @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
-
-}
-
-object SQLSyntaxSupport {
-
-  import scalikejdbc.SQLInterpolation._
 
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
@@ -66,7 +97,6 @@ object SQLSyntaxSupport {
    */
   trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
-    import scalikejdbc.interpolation.SQLSyntaxFieldMacro._
     import scala.reflect.runtime.universe._
 
     def c(name: String) = column(name)
@@ -93,10 +123,11 @@ object SQLSyntaxSupport {
       }.getOrElse(Nil)
     }
 
-    def selectDynamic(name: String)(implicit tag: WeakTypeTag[A]): SQLSyntax = {
-      val expectedNames: Seq[String] = fields
-      field(validate(name, expectedNames))
-    }
+    private def validateField(name: String, expectedNames: Seq[String]): String = macro scalikejdbc.SQLInterpolationMacro.validateFieldImpl
+
+    //def selectDynamic(name: String)(implicit tag: WeakTypeTag[A]): SQLSyntax = field(validateField(name, fields))
+    def selectDynamic(name: String): SQLSyntax = { val expectedNames: Seq[String] = Nil; field(validateField(name, expectedNames)) }
+
   }
 
   /**
@@ -446,38 +477,3 @@ object SQLSyntaxSupport {
 
 }
 
-/**
- * SQLInterpolation
- */
-class SQLInterpolation(val s: StringContext) extends AnyVal {
-
-  import SQLInterpolation.{ LastParameter, SQLSyntax }
-
-  def sql[A](params: Any*) = {
-    val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.parameters: _*)
-  }
-
-  def sqls(params: Any*) = {
-    val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
-      case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
-    }
-    SQLSyntax(query, params.flatMap(toSeq))
-  }
-
-  private def getPlaceholders(param: Any): String = param match {
-    case _: String => "?"
-    case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
-    case LastParameter => ""
-    case SQLSyntax(s, _) => s
-    case _ => "?"
-  }
-
-  private def toSeq(param: Any): Traversable[Any] = param match {
-    case s: String => Seq(s)
-    case t: Traversable[_] => t
-    case SQLSyntax(_, params) => params
-    case n => Seq(n)
-  }
-
-}

@@ -3,7 +3,6 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.matchers._
 import org.joda.time._
-import scalikejdbc.SQLSyntaxSupport._
 
 class HibernateSQLFormatter extends SQLFormatter {
   private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
