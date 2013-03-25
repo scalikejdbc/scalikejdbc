@@ -273,7 +273,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
   case class Issue(id: Int, body: String, tags: Seq[Tag] = Vector())
-
   object Issue extends SQLSyntaxSupport[Issue] {
     def apply(rs: WrappedResultSet, i: ResultName[Issue]): Issue = Issue(
       id = rs.int(i.id),
@@ -282,7 +281,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
   case class Tag(id: Int, name: String)
-
   object Tag extends SQLSyntaxSupport[Tag] {
     def apply(rs: WrappedResultSet, t: ResultName[Tag]): Tag = Tag(
       id = rs.int(t.id),
@@ -291,6 +289,12 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
   object IssueTag extends SQLSyntaxSupport[Nothing]
+
+  case class IssueSummary(count: Long, sum: Long)
+  object IssueSummary extends SQLSyntaxSupport[IssueSummary] {
+    override val columns = Seq("count", "sum")
+    def apply(is: ResultName[IssueSummary])(rs: WrappedResultSet) = new IssueSummary(rs.long(is.count), rs.long(is.sum))
+  }
 
   it should "be available for empty relation" in {
     DB autoCommit { implicit s =>
@@ -349,6 +353,17 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               .apply()
 
             issue.map(i => i.id) should equal(Some(1))
+          }
+
+          {
+            val (i, is) = (Issue.syntax("i"), IssueSummary.syntax("is"))
+            val idCount = sqls"count(${i.resultName.id})"
+            val idSum = sqls"sum(${i.resultName.id})"
+            val summary = sql"""
+              select ${is.result(idCount).count}, ${is.result(idSum).sum} from (select ${i.result.id} from ${Issue.as(i)})
+              """.map(IssueSummary(is.resultName)).single.apply().get
+            summary.count should equal(4)
+            summary.sum should equal(10)
           }
 
         } finally {

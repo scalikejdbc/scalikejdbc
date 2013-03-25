@@ -218,10 +218,22 @@ object SQLInterpolation {
       s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
+    def apply(syntax: SQLSyntax): PartialResultSQLSyntaxProvider[S, A] = PartialResultSQLSyntaxProvider(support, tableAliasName, syntax)
+
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
       SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+  }
+
+  case class PartialResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, aliasName: String, syntax: SQLSyntax)
+      extends SQLSyntaxProviderCommonImpl[S, A](support, aliasName) {
+    import SQLSyntaxProvider._
+
+    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
+    }.getOrElse(throw notFoundInColumns(aliasName, name))
   }
 
   /**
