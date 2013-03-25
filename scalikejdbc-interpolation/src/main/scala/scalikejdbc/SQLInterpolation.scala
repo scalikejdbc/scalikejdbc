@@ -107,6 +107,8 @@ object SQLInterpolation {
     val delimiterForResultName: String
 
     def field(name: String): SQLSyntax = {
+      import scalikejdbc.SQLInterpolationMacro.validateField
+      validateField[A](name)
       val columnName = {
         if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
         else toSnakeCase(name, nameConverters)
@@ -114,20 +116,7 @@ object SQLInterpolation {
       c(columnName)
     }
 
-    private[this] def fields(implicit tag: WeakTypeTag[A]): Seq[String] = {
-      import scala.reflect.runtime.universe._
-      tag.tpe.declarations.collectFirst {
-        case m: MethodSymbol if m.isPrimaryConstructor => m
-      }.map { const =>
-        const.paramss.map { symbols: List[Symbol] => symbols.map(s => s.name.encoded.trim) }.flatten
-      }.getOrElse(Nil)
-    }
-
-    private def validateField(name: String, expectedNames: Seq[String]): String = macro scalikejdbc.SQLInterpolationMacro.validateFieldImpl
-
-    //def selectDynamic(name: String)(implicit tag: WeakTypeTag[A]): SQLSyntax = field(validateField(name, fields))
-    def selectDynamic(name: String): SQLSyntax = { val expectedNames: Seq[String] = Nil; field(validateField(name, expectedNames)) }
-
+    def selectDynamic(name: String): SQLSyntax = field(name)
   }
 
   /**
