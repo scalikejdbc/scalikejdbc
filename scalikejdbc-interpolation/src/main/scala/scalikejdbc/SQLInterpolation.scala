@@ -10,7 +10,8 @@ import scala.language.dynamics
  */
 class SQLInterpolation(val s: StringContext) extends AnyVal {
 
-  import SQLInterpolation.{ LastParameter, SQLSyntax }
+  //import SQLInterpolation.{ LastParameter, SQLSyntax }
+  import SQLInterpolation.{ LastParameter }
 
   def sql[A](params: Any*) = {
     val syntax = sqls(params: _*)
@@ -53,7 +54,9 @@ object SQLInterpolation {
    *
    * This value won't be treated as a binding parameter but will be appended as a part of SQL.
    */
+  /*
   case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
+*/
 
   @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
   @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
@@ -107,8 +110,6 @@ object SQLInterpolation {
     val delimiterForResultName: String
 
     def field(name: String): SQLSyntax = {
-      import scalikejdbc.SQLInterpolationMacro.validateField
-      validateField[A](name)
       val columnName = {
         if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
         else toSnakeCase(name, nameConverters)
@@ -116,7 +117,7 @@ object SQLInterpolation {
       c(columnName)
     }
 
-    def selectDynamic(name: String): SQLSyntax = field(name)
+    def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A, SQLSyntaxProvider[A]]
   }
 
   /**

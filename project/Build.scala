@@ -21,14 +21,13 @@ object ScalikeJDBCProjects extends Build {
       publishMavenStyle := true,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        val _scalaVersion = "_" + (scalaVersion match {
-          case "2.10.0" => "2.10.0"
+        val scalatest = "scalatest_" + (scalaVersion match {
+          case "2.10.1" | "2.10.0" => "2.10.0"
           case "2.9.3" => "2.9.2"
           case version => version
         })
-        val scalatest = "scalatest" + _scalaVersion
         val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.0" => "2.10"
+          case "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
@@ -39,7 +38,7 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"         % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.7"       % "test",
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.10"       % "test",
           "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
           "org.scalatest"           %  scalatest              % "1.8"         % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
@@ -67,16 +66,10 @@ object ScalikeJDBCProjects extends Build {
       scalaBinaryVersion := "2.10",
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        val _scalaVersion = "_" + (scalaVersion match {
-          case "2.10.0" => "2.10.0"
-          case "2.9.3" => "2.9.2"
-          case version => version
-        })
-        val scalatest = "scalatest" + _scalaVersion
         Seq(
-          "org.scala-lang" %  "scala-reflect"  % scalaVersion  % "compile",
-          "org.scala-lang" %  "scala-compiler" % scalaVersion  % "compile",
-          "org.scalatest"  %  scalatest        % "1.8"         % "test"
+          "org.scala-lang" %  "scala-reflect"    % scalaVersion  % "compile",
+          "org.scala-lang" %  "scala-compiler"   % scalaVersion  % "compile",
+          "org.scalatest"  %  "scalatest_2.10.0" % "1.8"         % "test"
         )
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -104,7 +97,7 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.scala-lang" %  "scala-reflect"    % scalaVersion  % "compile",
           "org.slf4j"      %  "slf4j-api"        % "1.7.2"       % "compile",
-          "ch.qos.logback" %  "logback-classic"  % "1.0.7"       % "test",
+          "ch.qos.logback" %  "logback-classic"  % "1.0.10"       % "test",
           "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
           "org.scalatest"  %% "scalatest"        % "[1.8,)"      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
@@ -130,7 +123,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
-          case "2.10.0" => Seq(
+          case "2.10.1" | "2.10.0" => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.2"   % "compile",
             "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
             "org.specs2"    %% "specs2"       % "[1.13,)" % "test"
@@ -168,7 +161,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
-          case "2.10.0" => {
+          case "2.10.1" | "2.10.0" => {
             val playVersion = "2.1.0"
             Seq(
               "play" % "play_2.10" % playVersion % "provided",
@@ -208,9 +201,9 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
           "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+          "ch.qos.logback" %  "logback-classic"      % "1.0.10"  % "test"
         ) ++ (scalaVersion match {
-          case "2.10.0" => Seq("org.specs2" %% "specs2"       % "[1.13,)" % "provided")
+          case "2.10.1" | "2.10.0" => Seq("org.specs2" %% "specs2"       % "[1.13,)" % "provided")
           case "2.9.3"  => Seq("org.specs2" %  "specs2_2.9.2" % "[1.12,)" % "provided")
           case _ => Seq("org.specs2" %% "specs2" % "[1.12,)"  % "provided")
         }) ++ jdbcDriverDependenciesInTestScope
@@ -241,13 +234,13 @@ object ScalikeJDBCProjects extends Build {
             "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
             "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
             "org.scalatest"  %  "scalatest_2.9.2"      % "[1.8,)"  % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+            "ch.qos.logback" %  "logback-classic"      % "1.0.10"  % "test"
            )
           case _ => Seq(
             "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
             "org.slf4j"      %  "slf4j-api"            % "1.7.2"   % "compile",
             "org.scalatest"  %% "scalatest"            % "[1.8,)"  % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.7"   % "test"
+            "ch.qos.logback" %  "logback-classic"      % "1.0.10"  % "test"
            )
         }) ++ jdbcDriverDependenciesInTestScope
       },
@@ -279,7 +272,7 @@ object ScalikeJDBCProjects extends Build {
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite")
-  val _scalacOptions = Seq("-deprecation", "-unchecked")
+  val _scalacOptions = Seq("-deprecation", "-unchecked", "-Xlog-free-terms")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>
