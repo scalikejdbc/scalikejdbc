@@ -149,5 +149,8 @@ sandbox.jdbc.password=
 ```
 
 
+### Adding custom functions
+dbconsole loads all Scala files in `~/bin/scalikejdbc-cli/init/` on start-up. There is only a file named `init.scala` in it by default.
+You can add your custom functions by adding Scala files to this directory. The files you added are loaded on start-up together as `initialCommands` of sbt console.
 
-
+For example, if you want to use `hello()` function in dbcosole, save `def hello() = println("Hello")` as `hello.scala` or somethiing.

@@ -3,6 +3,7 @@ package models
 import java.util.Date
 
 import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
 
 case class NewTask(
   folder: String, 
@@ -23,148 +24,85 @@ case class Task(
   assignedTo: Option[String]
 )
 
-object Task {
+object Task extends SQLSyntaxSupport[Task] {
   
-  // -- Parsers
-  
-  /**
-   * Parse a Task from a ResultSet
-   */
-  val simple = (rs: WrappedResultSet) => Task(
-     id = rs.long("id"), 
-     folder = rs.string("folder"), 
-     project = rs.long("project"), 
-     title = rs.string("title"), 
-     done = rs.boolean("done"), 
-     dueDate = Option(rs.timestamp("due_date")), 
-     assignedTo = Option(rs.string("assigned_to"))
-   )
-  
-  val withProject = (rs: WrappedResultSet) => (
-    Task(
-      id = rs.long("task_id"),
-      folder = rs.string("folder"), 
-      project = rs.long("project_id"), 
-      title = rs.string("title"), 
-      done = rs.boolean("done"), 
-      dueDate = Option(rs.timestamp("due_date")), 
-      assignedTo = Option(rs.string("assigned_to"))
-    ), 
-    Project(
-      id = rs.long("project_id"), 
-      folder = rs.string("folder"), 
-      name = rs.string("project_name")
-    )
+  def apply(t: ResultName[Task])(rs: WrappedResultSet) = new Task(
+     id = rs.long(t.id), 
+     folder = rs.string(t.folder), 
+     project = rs.long(t.project), 
+     title = rs.string(t.title), 
+     done = rs.boolean(t.done), 
+     dueDate = rs.timestampOpt(t.due_date), 
+     assignedTo = rs.stringOpt(t.assigned_to)
   )
+
+  def apply(t: ResultName[Task], p: ResultName[Project])(rs: WrappedResultSet): (Task, Project) = (Task(t)(rs), Project(p)(rs))
+
+  private val t = Task.syntax("t")
+  private val p = Project.syntax("p")
+  private val m = ProjectMember.syntax("m")
+  private val auto = AutoSession
   
-  // -- Queries
-  
-  /**
-   * Retrieve a Task from the id.
-   */
-  def findById(id: Long)(implicit session: DBSession = AutoSession): Option[Task] = {
-    SQL("select * from task where id = {id}").bindByName('id -> id).map(simple).single.apply()
+  def findById(id: Long)(implicit session: DBSession = auto): Option[Task] = {
+    sql"select ${t.result.*} from ${Task as t} where ${t.id} = ${id}".map(Task(t.resultName)).single.apply()
   }
   
-  /**
-   * Retrieve todo tasks for the user.
-   */
-  def findTodoInvolving(user: String)(implicit session: DBSession = AutoSession): Seq[(Task,Project)] = {
-    SQL(
-      """
-        select 
-          task.id as task_id,
-          project.id as project_id,
-          project.name as project_name,
-          *
-        from 
-          task 
-          join project_member on project_member.project_id = task.project 
-          join project on project.id = project_member.project_id
-        where 
-          task.done = false and project_member.user_email = {user}
-      """
-    ).bindByName('user -> user).map(withProject).list.apply().toSeq
+  def findTodoInvolving(user: String)(implicit session: DBSession = auto): Seq[(Task,Project)] = {
+    sql"""
+      select 
+        ${t.result.*}, ${p.result.*}
+      from 
+        ${Task as t} 
+        join ${ProjectMember as m} on ${m.projectId} = ${t.project}
+        join ${Project as p} on ${p.id} = ${m.projectId}
+      where 
+        ${t.done} = false and ${m.userEmail} = ${user}
+    """.map(Task(t.resultName, p.resultName)).list.apply()
   }
-  
-  /**
-   * Find tasks related to a project
-   */
-  def findByProject(project: Long)(implicit session: DBSession = AutoSession): Seq[Task] = {
-    SQL(
-      """
-        select * from task 
-        where task.project = {project}
-      """
-    ).bindByName('project -> project).map(simple).list.apply().toSeq
+
+  def findByProject(project: Long)(implicit session: DBSession = auto): Seq[Task] = {
+    sql"select ${t.result.*} from ${Task as t} where ${t.project} = ${project}".map(Task(t.resultName)).list.apply()
   }
 
   /**
    * Delete a task
    */
-  def delete(id: Long)(implicit session: DBSession = AutoSession) {
-    SQL("delete from task where id = {id}").bindByName('id -> id).update.apply()
+  def delete(id: Long)(implicit session: DBSession = auto) {
+    sql"delete from ${Task as t} where ${t.id} = ${id}".update.apply()
   }
   
-  /**
-   * Delete all task in a folder.
-   */
-  def deleteInFolder(projectId: Long, folder: String)(implicit session: DBSession = AutoSession) {
-    SQL("delete from task where project = {project} and folder = {folder}")
-      .bindByName('project -> projectId, 'foler -> folder).update.apply()
+  def deleteInFolder(projectId: Long, folder: String)(implicit session: DBSession = auto) {
+    sql"delete from ${Task as t} where ${t.project} = ${projectId} and ${t.folder} = ${folder}".update.apply()
   }
   
-  /**
-   * Mark a task as done or not
-   */
-  def markAsDone(taskId: Long, done: Boolean)(implicit session: DBSession = AutoSession) {
-    SQL("update task set done = {done} where id = {id}")
-      .bindByName('id -> taskId, 'done -> done).update.apply()
+  def markAsDone(taskId: Long, done: Boolean)(implicit session: DBSession = auto) {
+    sql"update ${Task as t} set ${t.done} = ${done} where ${t.id} = ${taskId}".update.apply()
   }
   
-  /**
-   * Rename a folder.
-   */
-  def renameFolder(projectId: Long, folder: String, newName: String)(implicit session: DBSession = AutoSession) {
-    SQL("update task set folder = {newFolder} where folder = {folder} and project = {project}")
-      .bindByName('folder -> folder, 'newFolder -> newName, 'project -> projectId).update.apply()
+  def renameFolder(projectId: Long, folder: String, newName: String)(implicit session: DBSession = auto) {
+    sql"update ${Task as t} set ${t.folder} = ${newName} where ${t.folder} = ${folder} and ${t.project} = ${projectId}".update.apply()
   }
   
-  /**
-   * Check if a user is the owner of this task
-   */
-  def isOwner(task: Long, user: String)(implicit session: DBSession = AutoSession): Boolean = {
-    SQL(
-      """
-        select count(task.id) = 1 as v from task 
-        join project on task.project = project.id 
-        join project_member on project_member.project_id = project.id 
-        where project_member.user_email = {user} and task.id = {task}
-      """
-    ).bindByName('user -> user, 'task -> task)
-      .map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
+  def isOwner(task: Long, user: String)(implicit session: DBSession = auto): Boolean = {
+   val p = Project.syntax("p")
+   sql"""
+      select count(${t.id}) = 1 as v 
+      from 
+        ${Task as t}
+        join ${Project as p} on ${t.project} = ${p.id}
+        join ${ProjectMember as m} on ${m.projectId} = ${p.id}
+      where 
+        ${m.userEmail} = ${user} and ${t.id} = ${task}
+    """.map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
   }
 
-  /**
-   * Create a Task.
-   */
-  def create(task: NewTask)(implicit session: DBSession = AutoSession): Task = {
-    val newId = SQL("select next value for task_seq as v from dual").map(rs => rs.long("v")).single.apply().get
-    SQL(
-      """
-        insert into task (id, folder, project, title, done, due_date, assigned_to) values (
-          {id}, {folder}, {project}, {title}, {done}, {dueDate}, {assignedTo} 
-        )
-      """
-    ).bindByName(
-      'id -> newId,
-      'folder -> task.folder, 
-      'project -> task.project, 
-      'title -> task.title, 
-      'done -> task.done,
-      'dueDate -> task.dueDate,
-      'assignedTo -> task.assignedTo
-    ).update.apply()
+  def create(task: NewTask)(implicit session: DBSession = auto): Task = {
+    val newId = sql"select next value for task_seq as v from dual".map(rs => rs.long("v")).single.apply().get
+    sql"""
+      insert into ${Task.table} (id, folder, project, title, done, due_date, assigned_to) values (
+        ${newId}, ${task.folder}, ${task.project}, ${task.title}, ${task.done}, ${task.dueDate}, ${task.assignedTo} 
+      )
+    """.update.apply()
 
     Task(
       id = newId,

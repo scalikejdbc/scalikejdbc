@@ -72,6 +72,7 @@ object SQLInterpolation {
       val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
       SQLSyntaxProvider.toSnakeCase(className)
     }
+    def table: SQLSyntax = SQLSyntax(tableName)
 
     def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
 
