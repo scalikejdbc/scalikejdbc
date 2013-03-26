@@ -23,32 +23,32 @@ object InitialData {
 
     import scalikejdbc._
     val ddl = """
-drop table user if exists;
-create table user (
+drop table if exists users;
+create table users (
   email                     varchar(255) not null primary key,
   name                      varchar(255) not null,
   password                  varchar(255) not null
 );
 
-drop table project if exists;
+drop table if exists project;
 create table project (
   id                        bigint not null primary key,
   name                      varchar(255) not null,
   folder                    varchar(255) not null
 );
 
-drop sequence project_seq if exists;
+drop sequence if exists project_seq;
 create sequence project_seq start with 1000;
 
-drop table project_member if exists;
+drop table if exists project_member;
 create table project_member (
   project_id                bigint not null,
   user_email                varchar(255) not null,
   foreign key(project_id)   references project(id) on delete cascade,
-  foreign key(user_email)   references user(email) on delete cascade
+  foreign key(user_email)   references users(email) on delete cascade
 );
 
-drop table task if exists;
+drop table if exists task;
 create table task (
   id                        bigint not null primary key,
   title                     varchar(255) not null,
@@ -57,18 +57,18 @@ create table task (
   assigned_to               varchar(255),
   project                   bigint not null,
   folder                    varchar(255),
-  foreign key(assigned_to)  references user(email) on delete set null,
+  foreign key(assigned_to)  references users(email) on delete set null,
   foreign key(project)      references project(id) on delete cascade
 );
 
-drop sequence task_seq if exists;
+drop sequence if exists task_seq;
 create sequence task_seq start with 1000;
 """
 
     DB autoCommit { implicit session =>
       try {
-        SQL("select * from user").map(rs => rs).list.apply()
-      } catch { case e => 
+        SQL("select * from users").map(rs => rs).list.apply()
+      } catch { case e: Exception => 
         SQL(ddl).execute.apply()
       }
     }
