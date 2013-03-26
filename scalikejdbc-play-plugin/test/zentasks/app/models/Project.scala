@@ -41,7 +41,7 @@ object Project extends SQLSyntaxSupport[Project] {
   }
 
   def rename(id: Long, newName: String)(implicit session: DBSession = auto) {
-    sql"update ${Project as p} set ${p.name} = ${name} where ${p.id} = ${id}".update.apply()
+    sql"update ${Project as p} set ${p.name} = ${newName} where ${p.id} = ${id}".update.apply()
   }
 
   def delete(id: Long)(implicit session: DBSession = auto) {
