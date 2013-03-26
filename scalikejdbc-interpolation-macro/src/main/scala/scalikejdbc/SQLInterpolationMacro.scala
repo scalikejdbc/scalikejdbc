@@ -30,12 +30,11 @@ object SQLInterpolationMacro {
     }
 
     reify(SQLSyntax(name.splice))
-    // TODO type parameter for SQLSyntaxSupport
-    /*
-    def typeIndent[A: TypeTag] = Ident(typeTag[A].tpe.typeSymbol)
-    val provider = c.weakTypeOf[P].typeSymbol
-    c.Expr[SQLSyntax](Apply(TypeApply(Select(Ident(provider, typeIndent[E]), newTermName("field")), List(typeIndent[String])), List(name.tree)))
-    */
+
+    // TODO call this.field(name)???
+    // def typeIndent[A: TypeTag] = Ident(typeTag[A].tpe.typeSymbol)
+    // val provider = c.weakTypeOf[P].typeSymbol
+    // c.Expr[SQLSyntax](Apply(TypeApply(Select(Ident(provider, typeIndent[E]), newTermName("field")), List(typeIndent[String])), List(name.tree)))
   }
 
 }
