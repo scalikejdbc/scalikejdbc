@@ -96,7 +96,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.scala-lang" %  "scala-reflect"    % scalaVersion  % "compile",
-          "org.scala-lang" %  "scala-compiler"   % scalaVersion  % "compile",
+          "org.scala-lang" %  "scala-compiler"   % scalaVersion  % "optional",
           "org.scalatest"  %  "scalatest_2.10.0" % "1.8"         % "test"
         )
       },
