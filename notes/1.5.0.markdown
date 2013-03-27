@@ -1,6 +1,6 @@
 ScalikeJDBC 1.5.0 has been released. Now wonderfully SQLSyntax's dynamic fields became type-safe with marco validation. Special thanks to [@pab_tech](https://twitter.com/pab_tech). 
 
-Basically application code will be compatible but if your application use dynamic field name which is not a member of entity class, your code will have compilation error.
+Basically your application code will be compatible. But if your code uses dynamic field name which is not a member of entity class, it might have compilation error.
 
     case class Member(id: Long, name: String)
     object Member extends SQLSyntaxSupport[Member] {
@@ -12,7 +12,7 @@ Basically application code will be compatible but if your application use dynami
     val members = sql"""
       select ${m.result.*} from ${Member as m} 
       where ${m.namme} = ${name}""".map(Member(m.resultName)).list.apply()
-            ^ COMPILATION ERROR! (Member#namme not found. Expected fields are #id, #name.)
+                ^ Compilation error!!!
 
 ## library
 
