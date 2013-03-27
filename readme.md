@@ -37,53 +37,69 @@ libraryDependencies ++= Seq(
 )
 ```
 
-### Maven
+If you're using Scala 2.10.x, using scalikejdbc-interpolation is highly recommended.
 
-```xml
-<dependency>
-  <groupId>com.github.seratch</groupId>
-  <artifactId>scalikejdbc_2.9.2</artifactId>
-  <version>[1.4,)</version>
-</dependency>
-<dependency>
-  <groupId>postgresql</groupId>
-  <artifactId>postgresql</artifactId>
-  <version>9.1-901.jdbc4</version>
-</dependency>
-<dependency>
-  <groupId>org.slf4j</groupId>
-  <artifactId>slf4j-simple</artifactId>
-  <version>[1.7,)</version>
-</dependency>
+```scala
+libraryDependencies ++= Seq(
+  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
+  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+)
 ```
-
 
 ## Try it now
 
 Try ScalikeJDBC right now!
 
 ```sh
-
 git clone git://github.com/seratch/scalikejdbc.git
 cd scalikejdbc/sandbox
 sbt console
 ```
 
-"members" table is already created. You can execute queries as follows:
+## Basic usage
+
+### Scala 2.10
+
+SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
-case class Member(id: Long, name: Option[String] = None)
-
-val members: List[Member] = DB readOnly { implicit session => 
-  SQL("select * from members")
-    .map { rs => Member(rs.long("id"), rs.stringOpt("name")) }
-    .list.apply()
+case class User(id: Long, name: Option[String] = None)
+object User extends SQLSyntaxSupport[User] {
+  override val tableName = "users"
 }
 
-val createdMember: Member = DB localTx { implicit session => 
-  val id = SQL("insert into members (name) values ({name})")
-    .bindByName('name -> Some("Charley")).updateAndReturnGeneratedKey.apply() 
-  Member(id, Some("Charley"))
+val u = User.syntax("u")
+val users: List[User] = DB readOnly { implicit session =>
+  sql"select ${u.result.*} from ${User as u}".map(User(u.resultName)).list.apply()
+}
+
+val name = Some("Chris")
+val newUser: User = DB localTx { implicit session =>
+  val id = sql"insert into ${User.table} values (${name})").updateAndReturnGeneratedKey.apply()
+  User(id, name)
+}
+```
+
+### Scala 2.9
+
+Basically, use string template. Indeed, it's an old style but still good.
+
+```scala
+case class User(id: Long, name: Option[String] = None)
+
+val * = (rs: WrappedResultSet) => User(rs.long("id"), rs.stringOpt("name"))
+
+val users: List[User] = DB readOnly { implicit session => 
+  SQL("select id, name from users").map(*).list.apply()
+}
+
+val name = Some("Chris")
+val newUser: User = DB localTx { implicit session => 
+  val id = SQL("insert into users values ({name})")
+    .bindByName('name -> name)).updateAndReturnGeneratedKey.apply() 
+  User(id, name)
 }
 ```
 
@@ -105,7 +121,7 @@ ConnectionPool.singleton("jdbc:h2:file:db/test", "sa", "")
 
 // Now DB operations are available
 val idList: List[Long] = DB readOnly { implicit session =>
-  SQL("select id from members").map { rs => rs.long("id") }.list.apply()
+  sql"select id from users".map(_.long("id")).list.apply()
 }
 ````
 
@@ -115,7 +131,7 @@ val idList: List[Long] = DB readOnly { implicit session =>
 The most basic way is just using prepared statement as follows.
 
 ```scala
-SQL("""insert into members values (?, ?)""")
+SQL("""insert into users values (?, ?)""")
   .bind(132430, Some("Bob")).update.apply()
 ```
 
@@ -125,7 +141,7 @@ SQL("""insert into members values (?, ?)""")
 Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/latest/ScalaAnorm). 
 
 ```scala
-SQL("insert into members values ({id}, {name})")
+SQL("insert into users values ({id}, {name})")
   .bindByName('id -> 132430, 'name -> Some("Bob"))
   .update.apply()
 ```
@@ -138,7 +154,7 @@ Instead of embedding `?`(place holder), you can specify executable SQL as templa
 Usage is simple. Just specify Scala Symbol literal values inside of comments with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
 
 ```scala
-SQL("insert into members values (/*'id*/123, /*'name*/'Alice')")
+SQL("insert into users values (/*'id*/123, /*'name*/'Alice')")
   .bindByName('id -> 132430, 'name -> Some("Bob"))
   .update.apply()
 ```
@@ -151,7 +167,7 @@ New powerful SQL template using SIP-11 String Interpolation.
 ```scala
 val name = "Martin"
 val email = "martin@example.com"
-val id = sql"insert into members values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
+val id = sql"insert into users values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
 ```
 
 See in detail:
@@ -166,25 +182,25 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
 In addition, passing `AutoSession` as an implicit parameter is quite useful. Like this:
 
 ```scala
-object Member {
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
-    SQL("select * from members where id = ?").bind(id).map(*).single.apply() 
+object User {
+  def find(id: Long)(implicit session: DBSession = AutoSession): Option[User] = {
+    sql"select * from users where id = ${id}").map(*).single.apply() 
   }
-  def setProfileVerified(member: Member)(implicit session: DBSession = AutoSession) = {
-    SQL("update members set profile_verified = true where id = ?").bind(id).update.apply()
+  def setProfileVerified(member: User)(implicit session: DBSession = AutoSession) = {
+    sql"update users set profile_verified = true where id = ${id}").update.apply()
   }
 }
 
-Member.find(id) // new read-only session provided by AutoSession
+User.find(id) // new read-only session provided by AutoSession
 
-Member.setProfileVerified(member) // new auto-commit session provided by AutoSession
+User.setProfileVerified(member) // new auto-commit session provided by AutoSession
 
 DB localTx { implicit session =>
   // begin transaction 
-  Member.findByName(name).foreach { member => 
+  User.findByName(name).foreach { member => 
     member.setProfileVerified(member)
   } 
-  val mightBeUpdated = Member.find(id) 
+  val mightBeUpdated = User.find(id) 
   // end transaction
 }
 ```
@@ -215,13 +231,13 @@ Testing support for ScalaTest:
 class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 
   override def fixture(implicit session: DBSession) {
-    SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
+    sql"insert into users values (${1}, ${"Alice"}, ${DateTime.now})").update.apply()
   }
 
   it should "create a new record" in { implicit session =>
-    val before = Member.count() 
-    Member.create(3, "Chris")
-    Member.count() should equal(before + 1)
+    val before = User.count() 
+    User.create(3, "Chris")
+    User.count() should equal(before + 1)
   }
 
 }
@@ -230,19 +246,19 @@ class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 for specs2(unit):
 
 ```scala
-object MemberSpec extends Specification {
+object UserSpec extends Specification {
 
-  "Member should create a new record" in new AutoRollback {
-    val before = Member.count()
-    Member.create(3, "Chris")
-    Member.count() must_==(before + 1) 
+  "User should create a new record" in new AutoRollback {
+    val before = User.count()
+    User.create(3, "Chris")
+    User.count() must_==(before + 1) 
   }
 
   trait AutoRollbackWithFixture extends AutoRollback {
     override def fixture(implicit session: DBSession) { ... }
   }
 
-  "Member should ..." in new AutoRollbackWithFixture { ... }
+  "User should ..." in new AutoRollbackWithFixture { ... }
 
 }
 ```
