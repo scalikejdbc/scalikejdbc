@@ -6,60 +6,15 @@ import scala.language.experimental.macros
 import scala.language.dynamics
 
 /**
- * SQLInterpolation
- */
-class SQLInterpolation(val s: StringContext) extends AnyVal {
-
-  //import SQLInterpolation.{ LastParameter, SQLSyntax }
-  import SQLInterpolation.{ LastParameter }
-
-  def sql[A](params: Any*) = {
-    val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.parameters: _*)
-  }
-
-  def sqls(params: Any*) = {
-    val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
-      case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
-    }
-    SQLSyntax(query, params.flatMap(toSeq))
-  }
-
-  private def getPlaceholders(param: Any): String = param match {
-    case _: String => "?"
-    case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
-    case LastParameter => ""
-    case SQLSyntax(s, _) => s
-    case _ => "?"
-  }
-
-  private def toSeq(param: Any): Traversable[Any] = param match {
-    case s: String => Seq(s)
-    case t: Traversable[_] => t
-    case SQLSyntax(_, params) => params
-    case n => Seq(n)
-  }
-
-}
-
-/**
  * SQLInterpolation companion object
  */
 object SQLInterpolation {
 
-  private object LastParameter
-
-  /**
-   * Value as a part of SQL syntax.
-   *
-   * This value won't be treated as a binding parameter but will be appended as a part of SQL.
-   */
-  /*
-  case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
-*/
-
   @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
-  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
+  @inline implicit def interpolation(s: StringContext) = new SQLInterpolationString(s)
+
+  type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+  val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
 
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
@@ -118,7 +73,8 @@ object SQLInterpolation {
       c(columnName)
     }
 
-    def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A, SQLSyntaxProvider[A]]
+    def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A]
+
   }
 
   /**

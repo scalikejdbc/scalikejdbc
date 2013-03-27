@@ -45,7 +45,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     override val forceUpperCase = true
 
     def apply(rs: WrappedResultSet, u: ResultName[User]): User = {
-      User(id = rs.int(u.id), name = rs.stringOpt(u.firstName), groupId = rs.intOpt(u.groupId))
+      User(id = rs.int(u.id), firstName = rs.stringOpt(u.firstName), groupId = rs.intOpt(u.groupId))
     }
 
     def apply(rs: WrappedResultSet, u: ResultName[User], g: ResultName[Group]): User = {
@@ -53,7 +53,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
-  case class User(id: Int, name: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
+  case class User(id: Int, firstName: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
 
   object Group extends SQLSyntaxSupport[Group] {
     override val tableName = "groups"
@@ -100,11 +100,12 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           """.map(rs => User(rs, u.resultName, g.resultName)).single.apply().get
 
           user.id should equal(3)
-          user.name should equal(Some("baz"))
+          user.firstName should equal(Some("baz"))
           user.group.isDefined should equal(true)
 
           // exception patterns
           {
+            /* Compile error by Macro
             intercept[InvalidColumnNameException] {
               sql"""select ${u.result.id}, ${u.result.dummy}
               from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
@@ -114,7 +115,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
                 .map { (u, g) => u.copy(group = Option(g)) }
                 .single.apply()
             }
-
+          
             intercept[ResultSetExtractorException] {
               sql"""select ${u.result.id}
                 from ${User.as(u)} inner join ${Group.as(g)} on ${u.groupId} = ${g.id}
@@ -124,6 +125,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
                 .map { (foo, g) => foo }
                 .list.apply()
             }
+            */
           }
 
           // foldLeft example
@@ -539,7 +541,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
               order by ${c.id}
             """
               .one(rs => Customer(rs.int(c.resultName.id), rs.string(c.resultName.name)))
-              .toMany(rs => Some(Order(rs.int(x(o).resultName.id), rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toDateTime)))
+              .toMany(rs => Some(Order(rs.int(x(o).resultName.customerId), rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toDateTime)))
               .map { (c, os) => c.copy(orders = os) }.list.apply()
 
             customers.size should equal(3)
@@ -550,52 +552,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"drop table customer_group".execute.apply()
           sql"drop table products".execute.apply()
           sql"drop table orders".execute.apply()
-        }
-    }
-  }
-
-  it should "be available with here document values" in {
-    DB localTx {
-      implicit s =>
-        try {
-          sql"""create table users (id int, name varchar(256))""".execute.apply()
-
-          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
-            case (id, name) =>
-              sql"""insert into users values (${id}, ${name})""".update.apply()
-          }
-
-          val id = 3
-          val user = sql"""select * from users where id = ${id}""".map {
-            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
-          }.single.apply()
-          user.isDefined should equal(true)
-        } finally {
-          sql"""drop table users""".execute.apply()
-        }
-    }
-  }
-
-  it should "be available with option values" in {
-    DB localTx {
-      implicit s =>
-        try {
-          sql"create table users (id int not null, name varchar(256))".execute.apply()
-
-          Seq((1, Some("foo")), (2, None)) foreach {
-            case (id, name) =>
-              sql"insert into users values (${id}, ${name})".update.apply()
-          }
-
-          val id = 2
-          val user = sql"select * from users where id = ${id}".map {
-            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
-          }.single.apply()
-          user.isDefined should equal(true)
-          user.get.id should equal(2)
-          user.get.name should be(None)
-        } finally {
-          sql"drop table users".execute.apply()
         }
     }
   }
@@ -613,6 +569,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           object UserName extends SQLSyntaxSupport[UserName] {
             override val tableName = "users"
             override val columns = Seq("id", "first_name", "full_name")
+            override val nameConverters = Map("^first$" -> "first_name", "full" -> "full_name")
           }
           case class UserName(id: Int, first: String, full: String)
 
@@ -620,59 +577,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val user = sql"select ${u.result.*} from ${UserName.as(u)} where ${u.id} = 2".map {
             rs =>
               UserName(id = rs.int(u.resultName.id),
-                first = rs.string(u.resultName.firstName),
-                full = rs.string(u.resultName.fullName))
+                first = rs.string(u.resultName.first),
+                full = rs.string(u.resultName.full))
           }.single.apply()
 
           user.isDefined should be(true)
           user.get.first should equal("Bob")
           user.get.full should equal("Bob Lee")
 
-        } finally {
-          sql"drop table users".execute.apply()
-        }
-    }
-  }
-
-  it should "be available with the IN statement" in {
-    DB localTx {
-      implicit s =>
-        try {
-          sql"create table users (id int not null, name varchar(256))".execute.apply()
-          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
-            case (id, name) =>
-              sql"insert into users values (${id}, ${name})".update.apply()
-          }
-
-          val ids = List(1, 2, 4) ::: (100 until 200).toList
-          val users = sql"select * from users where id in (${ids})".map {
-            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
-          }.list.apply()
-          users.size should equal(2)
-          users.map(_.name) should equal(Seq(Some("foo"), Some("bar")))
-        } finally {
-          sql"drop table users".execute.apply()
-        }
-    }
-  }
-
-  it should "be available with sql syntax" in {
-    DB localTx {
-      implicit s =>
-        try {
-          sql"create table users (id int not null, name varchar(256))".execute.apply()
-          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
-            case (id, name) =>
-              sql"insert into users values (${id}, ${name})".update.apply()
-          }
-
-          val ids = List(1, 2, 4) ::: (100 until 200).toList
-          val sorting = SQLSyntax("DESC")
-          val users = sql"select * from users where id in (${ids}) order by id ${sorting}".map {
-            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
-          }.list.apply()
-          users.size should equal(2)
-          users.map(_.name) should equal(Seq(Some("bar"), Some("foo")))
         } finally {
           sql"drop table users".execute.apply()
         }

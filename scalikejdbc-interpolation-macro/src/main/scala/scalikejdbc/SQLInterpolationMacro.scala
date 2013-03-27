@@ -3,11 +3,11 @@ package scalikejdbc
 import scala.language.experimental.macros
 import scala.reflect.macros._
 
-case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
+import scalikejdbc.interpolation.SQLSyntax
 
 object SQLInterpolationMacro {
 
-  def selectDynamic[E: c.WeakTypeTag, P: c.WeakTypeTag](c: Context)(name: c.Expr[String]): c.Expr[SQLSyntax] = {
+  def selectDynamic[E: c.WeakTypeTag](c: Context)(name: c.Expr[String]): c.Expr[SQLSyntax] = {
     import c.universe._
 
     val nameOpt: Option[String] = try {
@@ -25,15 +25,11 @@ object SQLInterpolationMacro {
 
     nameOpt.map { _name =>
       if (!expectedNames.isEmpty && !expectedNames.contains(_name)) {
-        c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected: [${expectedNames.mkString("#", ", #", "")}]")
+        c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
       }
     }
 
-    reify(SQLSyntax(name.splice))
-
-    //def typeIndent[A: TypeTag] = Ident(typeTag[A].tpe.typeSymbol)
-    //c.Expr[SQLSyntax](Apply(TypeApply(Select(This(tpnme.EMPTY), newTermName("field")), List(typeIndent[String])), List(name.tree)))
-    //c.Expr[SQLSyntax](Apply(TypeApply(Select(Ident(c.mirror.staticClass("SQLSyntaxProvider")), newTermName("field")), List(typeIndent[String])), List(name.tree)))
+    c.Expr[SQLSyntax](Apply(Select(c.prefix.tree, newTermName("field")), List(name.tree)))
   }
 
 }
