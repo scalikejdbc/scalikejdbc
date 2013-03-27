@@ -10,7 +10,7 @@ resolvers += "Sonatype OSS" at "http://oss.sonatype.org/content/repositories/rel
 // Don't forget adding your JDBC driver
 libraryDependencies += "org.hsqldb" % "hsqldb" % "[2,)"
 
-addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
+addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.5,)")
 ```
 
 ### project/scalikejdbc.properties

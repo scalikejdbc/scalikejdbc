@@ -31,7 +31,7 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.5,)",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
   "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
 )
@@ -41,8 +41,8 @@ If you're using Scala 2.10.x, using scalikejdbc-interpolation is highly recommen
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.5,)",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
   "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
 )

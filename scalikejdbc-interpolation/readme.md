@@ -10,8 +10,8 @@ This is a SQL template using [SIP-11](http://docs.scala-lang.org/sips/pending/st
 scalaVersion := "2.10.0"
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.5,)",
   "org.slf4j" % "slf4j-simple" % "[1.7,)"
   "org.hsqldb" % "hsqldb" % "[2,)"
 )

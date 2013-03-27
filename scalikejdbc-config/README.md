@@ -10,8 +10,8 @@ https://github.com/typesafehub/config
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"        % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-config" % "[1.4,)"
+  "com.github.seratch" %% "scalikejdbc"        % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-config" % "[1.5,)"
 )
 ```
 

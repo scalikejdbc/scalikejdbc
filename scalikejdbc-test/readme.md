@@ -6,8 +6,8 @@ With [ScalaTest](http://scalatest.org/):
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"      % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-test" % "[1.4,)" % "test",
+  "com.github.seratch" %% "scalikejdbc"      % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-test" % "[1.5,)" % "test",
   "org.scalatest"      %% "scalatest"        % "[1.8,)" % "test"
 )
 ```
@@ -16,8 +16,8 @@ or with [specs2](http://specs2.org/):
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"      % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-test" % "[1.4,)"  % "test",
+  "com.github.seratch" %% "scalikejdbc"      % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-test" % "[1.5,)"  % "test",
   "org.specs2"         %% "specs2"           % "[1.12,)" % "test"
 )
 ```
@@ -37,8 +37,8 @@ class AutoRollbackSpec extends FlatSpec with AutoRollback {
   // override def db = NamedDB('anotherdb).toDB
 
   override def fixture(implicit session: DBSession) {
-    SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    sql"insert into members values (1, ${"Alice"}, ${DateTime.now})".update.apply()
+    sql"insert into members values (2, ${"Bob"}, ${DateTime.now})".update.apply()
   }
 
   behavior of "Members"
@@ -83,8 +83,8 @@ object MemberSpec extends Specification {
 trait AutoRollbackWithFixture extends AutoRollback {
   // override def db = NamedDB('db2).toDB
   override def fixture(implicit session: DBSession) {
-    SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    sql"insert into members values (1, ${"Alice"}, ${DateTime.now})".update.apply()
+    sql"insert into members values (2, ${"Bob"}, ${DateTime.now})".update.apply()
   }
 }
 
