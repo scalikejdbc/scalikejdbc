@@ -68,6 +68,7 @@ SQLInterpolation and SQLSyntaxSupport is much powerful.
 case class User(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
   override val tableName = "users"
+  def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(rs.long(u.id), rs.stringOpt(u.name))
 }
 
 val u = User.syntax("u")
