@@ -17,7 +17,7 @@ case class NewProject(folder: String, name: String)
 case class Project(id: Long, folder: String, name: String)
 
 object Project extends SQLSyntaxSupport[Project] {
- 
+
   def apply(p: ResultName[Project])(rs: WrappedResultSet) = new Project(
     id = rs.long(p.id), 
     folder = rs.string(p.folder), 
@@ -37,7 +37,7 @@ object Project extends SQLSyntaxSupport[Project] {
   def findInvolving(user: String)(implicit session: DBSession = auto): Seq[Project] = {
     sql"""
       select ${p.result.*} 
-      from ${Project as p} join ${ProjectMember as m} on ${p.id} = ${m.project_id}
+      from ${Project as p} join ${ProjectMember as m} on ${p.id} = ${m.projectId}
       where ${m.userEmail} = ${user}
     """.map(Project(p.resultName)).list.apply()
   }

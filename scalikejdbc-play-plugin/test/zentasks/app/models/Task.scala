@@ -25,15 +25,15 @@ case class Task(
 )
 
 object Task extends SQLSyntaxSupport[Task] {
-  
+
   def apply(t: ResultName[Task])(rs: WrappedResultSet) = new Task(
      id = rs.long(t.id), 
      folder = rs.string(t.folder), 
      project = rs.long(t.project), 
      title = rs.string(t.title), 
      done = rs.boolean(t.done), 
-     dueDate = rs.timestampOpt(t.due_date), 
-     assignedTo = rs.stringOpt(t.assigned_to)
+     dueDate = rs.timestampOpt(t.dueDate), 
+     assignedTo = rs.stringOpt(t.assignedTo)
   )
 
   def apply(t: ResultName[Task], p: ResultName[Project])(rs: WrappedResultSet): (Task, Project) = (Task(t)(rs), Project(p)(rs))
