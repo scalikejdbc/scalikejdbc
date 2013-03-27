@@ -2,6 +2,7 @@ package scalikejdbc
 
 import scala.language.implicitConversions
 import scala.language.reflectiveCalls
+import scala.language.experimental.macros
 import scala.language.dynamics
 
 /**
@@ -9,14 +10,11 @@ import scala.language.dynamics
  */
 object SQLInterpolation {
 
-  private object LastParameter
+  @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
+  @inline implicit def interpolation(s: StringContext) = new SQLInterpolationString(s)
 
-  /**
-   * Value as a part of SQL syntax.
-   *
-   * This value won't be treated as a binding parameter but will be appended as a part of SQL.
-   */
-  case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
+  type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+  val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
 
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
@@ -56,8 +54,9 @@ object SQLInterpolation {
   /**
    * SQLSyntax Provider
    */
-  trait SQLSyntaxProvider extends Dynamic {
+  trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
+    import scala.reflect.runtime.universe._
 
     def c(name: String) = column(name)
     def column(name: String): SQLSyntax
@@ -74,7 +73,8 @@ object SQLInterpolation {
       c(columnName)
     }
 
-    def selectDynamic(name: String): SQLSyntax = field(name)
+    def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A]
+
   }
 
   /**
@@ -123,7 +123,7 @@ object SQLInterpolation {
    * SQLSyntax Provider basic implementation
    */
   private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-      extends SQLSyntaxProvider {
+      extends SQLSyntaxProvider[A] {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
@@ -197,7 +197,7 @@ object SQLInterpolation {
   /**
    * SQLSyntax provider for result names
    */
-  trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider {
+  trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider[A] {
     def * : SQLSyntax
     def namedColumns: Seq[SQLSyntax]
     def namedColumn(name: String): SQLSyntax
@@ -434,43 +434,5 @@ object SQLInterpolation {
   type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type SubQueryResultName = SubQueryResultNameSQLSyntaxProvider
 
-  @inline implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
-  @inline implicit def interpolation(s: StringContext) = new SQLInterpolation(s)
-
 }
 
-/**
- * SQLInterpolation
- */
-class SQLInterpolation(val s: StringContext) extends AnyVal {
-
-  import SQLInterpolation.{ LastParameter, SQLSyntax }
-
-  def sql[A](params: Any*) = {
-    val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.parameters: _*)
-  }
-
-  def sqls(params: Any*) = {
-    val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
-      case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
-    }
-    SQLSyntax(query, params.flatMap(toSeq))
-  }
-
-  private def getPlaceholders(param: Any): String = param match {
-    case _: String => "?"
-    case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
-    case LastParameter => ""
-    case SQLSyntax(s, _) => s
-    case _ => "?"
-  }
-
-  private def toSeq(param: Any): Traversable[Any] = param match {
-    case s: String => Seq(s)
-    case t: Traversable[_] => t
-    case SQLSyntax(_, params) => params
-    case n => Seq(n)
-  }
-
-}
