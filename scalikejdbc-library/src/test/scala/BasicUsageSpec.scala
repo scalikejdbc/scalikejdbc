@@ -216,7 +216,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
             sql.list.apply() // trying limit keyword for this database
             sql // ok, this database supports limit keyword
           } catch {
-            case e =>
+            case e: Exception =>
               val sql = SQL("select * from emp order by id fetch first 10 rows only").map(empMapper)
               sql.list.apply()
               sql
@@ -244,7 +244,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         // Execute DDL
         try {
           SQL("drop table company").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         try {
           val result: Boolean = SQL("""
             create table company (
@@ -253,7 +253,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
               description varchar(1000),
               created_at timestamp
             );""").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         SQL("truncate table company").execute.apply()
 
         // simply using statement with ?(place holder)
@@ -304,7 +304,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
 
         try {
           SQL("drop table logging_sql_and_timing").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)").execute.apply()
 
         // bulk insert
@@ -325,7 +325,7 @@ class BasicUsageSpec extends FlatSpec with ShouldMatchers {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings
         try {
           SQL("drop table logging_sql_and_timing").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
       }
     }
   }

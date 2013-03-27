@@ -7,7 +7,15 @@ cd `dirname $0`
 cd ..
 cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
 
-sbt clean test ++2.10.0 interpolation/test
+sbt \
+  ++2.9.3 \
+  clean \
+  library/test \
+  ++2.10.1 \
+  clean \
+  library/test \
+  interpolation-core/test \
+  interpolation/test
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
 

@@ -443,7 +443,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         val count2 = SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(params2: _*).apply()
         count2.size should equal(1000)
       } catch {
-        case e =>
+        case e: Exception =>
         // Exception should be catched here. It's not a bug.
       }
       db.rollback()
@@ -500,7 +500,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
       DB autoCommit { implicit session =>
         try {
           SQL("drop table issue30;").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         SQL("""
         create table issue30 (
           id bigint not null,
@@ -519,7 +519,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         DB autoCommit { implicit s =>
           SQL("drop table issue30;").execute.apply()
         }
-      } catch { case e => }
+      } catch { case e: Exception => }
       GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
     }
   }

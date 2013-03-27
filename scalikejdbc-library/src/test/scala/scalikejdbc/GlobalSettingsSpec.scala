@@ -13,7 +13,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
       try {
         try {
           SQL("drop table settings_example").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         SQL("create table settings_example (id int primary key, name varchar(13) not null)")
           .execute.apply()
         1 to 20000 foreach { i =>
@@ -31,7 +31,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
           SQL("drop table settings_example").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
       }
     }
   }
@@ -41,7 +41,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
       try {
         try {
           SQL("drop table issue22").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
         SQL("create table issue22 (id int primary key, created_at timestamp)").execute.apply()
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
@@ -57,7 +57,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
           SQL("drop table issue22").execute.apply()
-        } catch { case e => }
+        } catch { case e: Exception => }
       }
     }
   }

@@ -1,8 +1,4 @@
-seq(scalariformSettings: _*)
-
-seq(scalagSettings: _*)
-
-seq(testgeneratorSettings: _*)
+scalariformSettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 

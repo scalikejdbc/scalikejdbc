@@ -1,8 +1,8 @@
-seq(scalariformSettings: _*)
+scalariformSettings
 
-seq(testgeneratorSettings: _*)
+testgeneratorSettings
 
-seq(scalagSettings: _*)
+scalagSettings
 
 ScriptedPlugin.scriptedSettings
 

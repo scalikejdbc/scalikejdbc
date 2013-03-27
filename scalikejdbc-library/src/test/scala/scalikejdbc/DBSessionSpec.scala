@@ -207,14 +207,14 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (10001 to 20000).map(i => Seq(i, "Name" + i))
+          val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
           session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          (20001 to 30000) foreach {
+          (30001 to 40000) foreach {
             i =>
               session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
           }

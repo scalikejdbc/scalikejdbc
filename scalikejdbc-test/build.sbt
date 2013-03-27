@@ -1,2 +1,2 @@
-seq(scalariformSettings: _*)
+scalariformSettings
 

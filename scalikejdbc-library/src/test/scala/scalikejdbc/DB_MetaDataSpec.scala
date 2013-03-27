@@ -22,7 +22,7 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
       );
             """).execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
             SQL(
               """
       create table meta_groups (
@@ -45,7 +45,7 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
       );
             """).execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
             SQL("""
       create table meta_members (
         id integer primary key,
@@ -63,7 +63,7 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
           SQL("comment on column meta_members.name is 'Full name';").execute.apply()
           SQL("comment on column meta_members.description is 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';").execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
             SQL("alter table meta_members comment 'website members';").execute.apply()
             SQL("alter table meta_members change name name varchar(30) not null comment 'Full name';").execute.apply()
             SQL("alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';").execute.apply()
