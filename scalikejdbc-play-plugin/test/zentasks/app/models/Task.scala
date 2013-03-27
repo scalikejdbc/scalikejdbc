@@ -41,6 +41,7 @@ object Task extends SQLSyntaxSupport[Task] {
   private val t = Task.syntax("t")
   private val p = Project.syntax("p")
   private val m = ProjectMember.syntax("m")
+
   private val auto = AutoSession
   
   def findById(id: Long)(implicit session: DBSession = auto): Option[Task] = {
@@ -99,9 +100,8 @@ object Task extends SQLSyntaxSupport[Task] {
   def create(task: NewTask)(implicit session: DBSession = auto): Task = {
     val newId = sql"select next value for task_seq as v from dual".map(rs => rs.long("v")).single.apply().get
     sql"""
-      insert into ${Task.table} (id, folder, project, title, done, due_date, assigned_to) values (
-        ${newId}, ${task.folder}, ${task.project}, ${task.title}, ${task.done}, ${task.dueDate}, ${task.assignedTo} 
-      )
+      insert into ${Task.table} values 
+        (${newId}, ${task.title}, ${task.done}, ${task.dueDate}, ${task.assignedTo}, ${task.project}, ${task.folder})
     """.update.apply()
 
     Task(

@@ -15,6 +15,7 @@ object User extends SQLSyntaxSupport[User] {
   )
 
   private val u = User.syntax("u") 
+
   private val auto = AutoSession
  
   def findByEmail(email: String)(implicit session: DBSession = auto): Option[User] = {

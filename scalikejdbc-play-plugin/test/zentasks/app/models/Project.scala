@@ -3,16 +3,18 @@ package models
 import scalikejdbc._
 import scalikejdbc.SQLInterpolation._
 
-case class NewProject(folder: String, name: String)
-case class Project(id: Long, folder: String, name: String)
-
 case class ProjectMember(projectId: Long, userEmail: String)
+
 object ProjectMember extends SQLSyntaxSupport[ProjectMember] {
   def apply(p: ResultName[ProjectMember])(rs: WrappedResultSet) = new ProjectMember(
     projectId = rs.long(p.projectId),
     userEmail = rs.string(p.userEmail)
   )
 }
+
+case class NewProject(folder: String, name: String)
+
+case class Project(id: Long, folder: String, name: String)
 
 object Project extends SQLSyntaxSupport[Project] {
  
@@ -34,10 +36,10 @@ object Project extends SQLSyntaxSupport[Project] {
   
   def findInvolving(user: String)(implicit session: DBSession = auto): Seq[Project] = {
     sql"""
-      select ${p.result.*} from ${Project as p} 
-      join ${ProjectMember as m} on ${p.id} = ${m.project_id}
+      select ${p.result.*} 
+      from ${Project as p} join ${ProjectMember as m} on ${p.id} = ${m.project_id}
       where ${m.userEmail} = ${user}
-      """.map(Project(p.resultName)).list.apply()
+    """.map(Project(p.resultName)).list.apply()
   }
 
   def rename(id: Long, newName: String)(implicit session: DBSession = auto) {
@@ -58,7 +60,6 @@ object Project extends SQLSyntaxSupport[Project] {
   }
   
   def membersOf(project: Long)(implicit session: DBSession = auto): Seq[User] = {
-    val u = User.syntax("u")
     sql"""
       select ${u.result.*} 
       from ${User as u} join ${ProjectMember as m} on ${m.userEmail} = ${u.email}
@@ -84,8 +85,8 @@ object Project extends SQLSyntaxSupport[Project] {
    
   def create(project: NewProject, members: Seq[String])(implicit session: DBSession = auto): Project = {
      // Insert the project
-     val newId: Long = sql"select next value for project_seq as v from dual".map(rs => rs.long("v")).single.apply().get
-     sql"insert into ${Project.table} (id, name, folder) values (${newId}, ${project.name}, ${project.folder})".update.apply()
+     val newId = sql"select next value for project_seq as v from dual".map(rs => rs.long("v")).single.apply().get
+     sql"insert into ${Project.table} values (${newId}, ${project.name}, ${project.folder})".update.apply()
      // Add members
      members.foreach(email => sql"insert into ${ProjectMember.table} values (${newId}, ${email})".update.apply())
      Project(id = newId, name = project.name, folder = project.folder)
