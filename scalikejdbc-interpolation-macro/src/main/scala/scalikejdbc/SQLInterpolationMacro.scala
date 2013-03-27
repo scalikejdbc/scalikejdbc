@@ -25,16 +25,15 @@ object SQLInterpolationMacro {
 
     nameOpt.map { _name =>
       if (!expectedNames.isEmpty && !expectedNames.contains(_name)) {
-        c.error(c.enclosingPosition, s"'${_name}' is an invalid name. ([${expectedNames.mkString(", ")}] in ${c.weakTypeOf[E]} are expected.)")
+        c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected: [${expectedNames.mkString("#", ", #", "")}]")
       }
     }
 
     reify(SQLSyntax(name.splice))
 
-    // TODO call this.field(name)???
-    // def typeIndent[A: TypeTag] = Ident(typeTag[A].tpe.typeSymbol)
-    // val provider = c.weakTypeOf[P].typeSymbol
-    // c.Expr[SQLSyntax](Apply(TypeApply(Select(Ident(provider, typeIndent[E]), newTermName("field")), List(typeIndent[String])), List(name.tree)))
+    //def typeIndent[A: TypeTag] = Ident(typeTag[A].tpe.typeSymbol)
+    //c.Expr[SQLSyntax](Apply(TypeApply(Select(This(tpnme.EMPTY), newTermName("field")), List(typeIndent[String])), List(name.tree)))
+    //c.Expr[SQLSyntax](Apply(TypeApply(Select(Ident(c.mirror.staticClass("SQLSyntaxProvider")), newTermName("field")), List(typeIndent[String])), List(name.tree)))
   }
 
 }

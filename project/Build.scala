@@ -271,8 +271,8 @@ object ScalikeJDBCProjects extends Build {
     "mysql"             % "mysql-connector-java" % "5.1.23"        % "test",
     "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
   )
-  //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite")
-  val _scalacOptions = Seq("-deprecation", "-unchecked", "-Xlog-free-terms")
+  //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees")
+  val _scalacOptions = Seq("-deprecation", "-unchecked")
   val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
       <licenses>
         <license>
