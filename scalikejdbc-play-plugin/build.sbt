@@ -1,5 +1,5 @@
-seq(scalariformSettings: _*)
+scalariformSettings
 
-seq(scalagSettings: _*)
+scalagSettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings

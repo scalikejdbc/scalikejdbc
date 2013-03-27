@@ -30,7 +30,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
         try {
           conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
         } catch {
-          case e =>
+          case e: Exception =>
             conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
         }
       }
@@ -47,7 +47,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
         try {
           conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
         } catch {
-          case e =>
+          case e: Exception =>
             conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
         }
       }
@@ -74,7 +74,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
         try {
           conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
         } catch {
-          case e =>
+          case e: Exception =>
             conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
         }
       }
@@ -91,7 +91,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
         try {
           conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
         } catch {
-          case e =>
+          case e: Exception =>
             conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
         }
       }

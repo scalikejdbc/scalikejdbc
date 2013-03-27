@@ -16,7 +16,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
       try {
         SQL("drop table member").execute.apply()
       } catch {
-        case e =>
+        case e: Exception =>
       }
       SQL("""
             create table member (
@@ -58,7 +58,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
         Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
-    } catch { case e => }
+    } catch { case e: Exception => }
     Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
 
     // execute SQL directly
@@ -79,7 +79,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
       try {
         SQL("drop table named_member").execute.apply()
       } catch {
-        case e =>
+        case e: Exception =>
       }
       SQL("""
             create table named_member (
@@ -121,7 +121,7 @@ class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
         NamedMember.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
-    } catch { case e => }
+    } catch { case e: Exception => }
     NamedMember.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
 
   }

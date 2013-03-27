@@ -19,7 +19,7 @@ object TestUtils {
             try {
               session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
             } catch {
-              case e =>
+              case e: Exception =>
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
             }
             initializeEmpRecords(session, tableName)

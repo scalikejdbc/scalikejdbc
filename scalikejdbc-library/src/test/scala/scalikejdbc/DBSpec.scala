@@ -4,8 +4,11 @@ import org.scalatest._
 import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
 import scala.concurrent.ops._
+// TODO switch when giving up 2.9 support
+//import scala.concurrent._
+//import scala.concurrent.ExecutionContext.Implicits.global
 import java.sql.SQLException
-import util.control.Exception._
+import scala.util.control.Exception._
 
 class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 

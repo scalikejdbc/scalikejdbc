@@ -1,65 +1,40 @@
 package models
 
 import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
 
-case class User(email: String, name: String, password: String)
+case class User(email: String, name: String, password: String) 
 
-object User {
-  
-  // -- Parsers
-  
-  /**
-   * Parse a User from a ResultSet
-   */
-  val simple = (rs: WrappedResultSet) => User(
-    rs.string("user.email"), 
-    rs.string("user.name"), 
-    rs.string("user.password")
+object User extends SQLSyntaxSupport[User] {
+
+  override val tableName = "users"
+  override val columns = Seq("email", "name", "password")
+
+  def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(
+    email = rs.string(u.email), name = rs.string(u.name), password = rs.string(u.password)
   )
-  
-  // -- Queries
-  
-  /**
-   * Retrieve a User from email.
-   */
-  def findByEmail(email: String)(implicit session: DBSession = AutoSession): Option[User] = {
-    SQL("select * from user where email = {email}").bindByName('email -> email).map(simple).single.apply()
+
+  private val u = User.syntax("u") 
+
+  private val auto = AutoSession
+ 
+  def findByEmail(email: String)(implicit session: DBSession = auto): Option[User] = {
+    sql"select ${u.result.*} from ${User as u} where ${u.email} = ${email}".map(User(u.resultName)).single.apply()
   }
   
-  /**
-   * Retrieve all users.
-   */
-  def findAll()(implicit session: DBSession = AutoSession): Seq[User] = {
-    SQL("select * from user").map(simple).list.apply().toSeq
+  def findAll()(implicit session: DBSession = auto): Seq[User] = {
+    sql"select ${u.result.*} from ${User as u}".map(User(u.resultName)).list.apply()
   }
   
-  /**
-   * Authenticate a User.
-   */
-  def authenticate(email: String, password: String)(implicit session: DBSession = AutoSession): Option[User] = {
-    SQL(
-      """
-       select * from user where 
-       email = {email} and password = {password}
-      """
-    ).bindByName('email -> email, 'password -> password).map(simple).single.apply()
+  def authenticate(email: String, password: String)(implicit session: DBSession = auto): Option[User] = {
+    sql"select ${u.result.*} from ${User as u} where ${u.email} = ${email} and ${u.password} = ${password}".map(User(u.resultName)).single.apply()
   }
    
   /**
    * Create a User.
    */
-  def create(user: User)(implicit session: DBSession = AutoSession): User = {
-    SQL(
-      """
-        insert into user values (
-          {email}, {name}, {password} 
-        )
-      """
-    ).bindByName(
-      'email -> user.email, 
-      'name -> user.name, 
-      'password -> user.password
-    ).update.apply()
+  def create(user: User)(implicit session: DBSession = auto): User = {
+    sql"insert into ${User.table} values (${user.email}, ${user.name}, ${user.password})".update.apply()
     user
   }
   

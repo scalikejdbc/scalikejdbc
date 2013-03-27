@@ -19,7 +19,7 @@ class MemberOnMemorySpec extends FlatSpec with ShouldMatchers {
         try {
           SQL("drop table member").execute.apply()
         } catch {
-          case e =>
+          case e: Exception =>
         }
         SQL("""
             create table member (
@@ -66,7 +66,7 @@ class MemberOnMemorySpec extends FlatSpec with ShouldMatchers {
               throw new RuntimeException
           }
         } catch {
-          case e =>
+          case e: Exception =>
         }
         Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(0)
     }

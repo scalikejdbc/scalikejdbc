@@ -434,7 +434,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
               try {
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               } catch {
-                case e =>
+                case e: Exception =>
                   session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               }
               session.update("delete from " + tableName)
@@ -481,11 +481,11 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
               try {
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               } catch {
-                case e =>
+                case e: Exception =>
                   try {
                     session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
                   } catch {
-                    case e =>
+                    case e: Exception =>
                   }
               }
               session.update("delete from " + tableName)
@@ -546,11 +546,11 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
               try {
                 session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
               } catch {
-                case e =>
+                case e: Exception =>
                   try {
                     session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
                   } catch {
-                    case e =>
+                    case e: Exception =>
                   }
               }
               session.update("delete from " + tableName)

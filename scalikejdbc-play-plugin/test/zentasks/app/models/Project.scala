@@ -1,140 +1,94 @@
 package models
 
 import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
 
-case class NewProject(
-  folder: String, 
-  name: String
-)
+case class ProjectMember(projectId: Long, userEmail: String)
 
-case class Project(
-  id: Long, 
-  folder: String, 
-  name: String
-)
-
-object Project {
-  
-  // -- Queries
-  private val simple = (rs: WrappedResultSet) => Project(
-    rs.long("id"), 
-    rs.string("folder"), 
-    rs.string("name")
+object ProjectMember extends SQLSyntaxSupport[ProjectMember] {
+  def apply(p: ResultName[ProjectMember])(rs: WrappedResultSet) = new ProjectMember(
+    projectId = rs.long(p.projectId),
+    userEmail = rs.string(p.userEmail)
   )
+}
+
+case class NewProject(folder: String, name: String)
+
+case class Project(id: Long, folder: String, name: String)
+
+object Project extends SQLSyntaxSupport[Project] {
+
+  def apply(p: ResultName[Project])(rs: WrappedResultSet) = new Project(
+    id = rs.long(p.id), 
+    folder = rs.string(p.folder), 
+    name = rs.string(p.name)
+  )
+
+  private val p = Project.syntax("p")
+  private val u = User.syntax("u")
+  private val m = ProjectMember.syntax("m")
+
+  private val auto = AutoSession
     
-  /**
-   * Retrieve a Project from id.
-   */
-  def findById(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
-    SQL("select * from project where id = {id}")
-      .bindByName('id -> id).map(simple).single.apply()
+  def findById(id: Long)(implicit session: DBSession = auto): Option[Project] = {
+    sql"select ${p.result.*} from ${Project as p} where ${p.id} = ${id}".map(Project(p.resultName)).single.apply()
   }
   
-  /**
-   * Retrieve project for user
-   */
-  def findInvolving(user: String)(implicit session: DBSession = AutoSession): Seq[Project] = {
-    SQL(
-      """
-        select * from project 
-        join project_member on project.id = project_member.project_id 
-        where project_member.user_email = {user}
-      """
-    ).bindByName('user -> user).map(simple).list.apply().toSeq
+  def findInvolving(user: String)(implicit session: DBSession = auto): Seq[Project] = {
+    sql"""
+      select ${p.result.*} 
+      from ${Project as p} join ${ProjectMember as m} on ${p.id} = ${m.projectId}
+      where ${m.userEmail} = ${user}
+    """.map(Project(p.resultName)).list.apply()
+  }
+
+  def rename(id: Long, newName: String)(implicit session: DBSession = auto) {
+    sql"update ${Project as p} set ${p.name} = ${newName} where ${p.id} = ${id}".update.apply()
+  }
+
+  def delete(id: Long)(implicit session: DBSession = auto) {
+    sql"delete from ${Project as p} where ${p.id} = ${id}".update.apply()
   }
   
-  /**
-   * Update a project.
-   */
-  def rename(id: Long, newName: String)(implicit session: DBSession = AutoSession) {
-    SQL("update project set name = {name} where id = {id}")
-      .bindByName('id -> id, 'name -> newName).update.apply()
+  def deleteInFolder(folder: String)(implicit session: DBSession = auto) {
+    sql"delete from ${Project as p} where ${p.folder} = ${folder}".update.apply()
   }
   
-  /**
-   * Delete a project.
-   */
-  def delete(id: Long)(implicit session: DBSession = AutoSession) {
-    SQL("delete from project where id = {id}").bindByName('id -> id).update.apply()
+  def renameFolder(folder: String, newName: String)(implicit session: DBSession = auto) {
+    sql"update ${Project as p} set ${p.folder} = ${newName} where ${p.folder} = ${folder}"
+      .update.apply()
   }
   
-  /**
-   * Delete all project in a folder
-   */
-  def deleteInFolder(folder: String)(implicit session: DBSession = AutoSession) {
-    SQL("delete from project where folder = {folder}").bindByName('folder -> folder).update.apply()
+  def membersOf(project: Long)(implicit session: DBSession = auto): Seq[User] = {
+    sql"""
+      select ${u.result.*} 
+      from ${User as u} join ${ProjectMember as m} on ${m.userEmail} = ${u.email}
+      where ${m.projectId} = ${project}
+    """.map(User(u.resultName)).list.apply()
   }
   
-  /**
-   * Rename a folder
-   */
-  def renameFolder(folder: String, newName: String)(implicit session: DBSession = AutoSession) {
-    SQL("update project set folder = {newName} where folder = {folder}")
-      .bindByName('folder -> folder, 'newName -> newName).update.apply()
+  def addMember(project: Long, user: String)(implicit session: DBSession = auto) {
+    sql"insert into ${ProjectMember.table} values (${project}, ${user})".update.apply()
   }
   
-  /**
-   * Retrieve project member
-   */
-  def membersOf(project: Long)(implicit session: DBSession = AutoSession): Seq[User] = {
-    SQL(
-      """
-        select user.* from user 
-        join project_member on project_member.user_email = user.email 
-        where project_member.project_id = {project}
-      """
-    ).bindByName('project -> project).map(User.simple).list.apply().toSeq
+  def removeMember(project: Long, user: String)(implicit session: DBSession = auto) {
+    sql"delete from ${ProjectMember as m} where ${m.projectId} = ${project} and ${m.userEmail} = ${user}".update.apply()
   }
   
-  /**
-   * Add a member to the project team.
-   */
-  def addMember(project: Long, user: String)(implicit session: DBSession = AutoSession) {
-    SQL("insert into project_member values({project}, {user})")
-      .bindByName('project -> project, 'user -> user).map(simple).update.apply()
-  }
-  
-  /**
-   * Remove a member from the project team.
-   */
-  def removeMember(project: Long, user: String)(implicit session: DBSession = AutoSession) {
-    SQL("delete from project_member where project_id = {project} and user_email = {user}")
-      .bindByName('project -> project, 'user -> user).update.apply()
-  }
-  
-  /**
-   * Check if a user is a member of this project
-   */
-  def isMember(project: Long, user: String)(implicit session: DBSession = AutoSession): Boolean = {
-    SQL(
-      """
-        select count(user.email) = 1 as is_member from user 
-        join project_member on project_member.user_email = user.email 
-        where project_member.project_id = {project} and user.email = {user}
-      """
-    ).bindByName('project -> project, 'user -> user)
-     .map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
+  def isMember(project: Long, user: String)(implicit session: DBSession = auto): Boolean = {
+    sql"""
+      select count(${u.email}) = 1 as is_member 
+      from ${User as u} join ${ProjectMember as m} on ${m.userEmail} = ${u.email}
+      where ${m.projectId} = ${project} and ${u.email} = ${user}
+    """.map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
   }
    
-  /**
-   * Create a Project.
-   */
-  def create(project: NewProject, members: Seq[String])(implicit session: DBSession = AutoSession): Project = {
+  def create(project: NewProject, members: Seq[String])(implicit session: DBSession = auto): Project = {
      // Insert the project
-     val newId: Long = SQL("select next value for project_seq as v from dual")
-       .map(rs => rs.long("v")).single.apply().get
-     SQL(
-       """
-         insert into project (id, name, folder) values (
-           {id}, {name}, {folder} 
-         )
-       """
-     ).bindByName('id -> newId, 'name -> project.name, 'folder -> project.folder).update.apply()
+     val newId = sql"select next value for project_seq as v from dual".map(rs => rs.long("v")).single.apply().get
+     sql"insert into ${Project.table} values (${newId}, ${project.name}, ${project.folder})".update.apply()
      // Add members
-     members.foreach { email =>
-       SQL("insert into project_member values ({id}, {email})")
-         .bindByName('id -> newId, 'email -> email).update.apply()
-     }
+     members.foreach(email => sql"insert into ${ProjectMember.table} values (${newId}, ${email})".update.apply())
      Project(id = newId, name = project.name, folder = project.folder)
   }
   
