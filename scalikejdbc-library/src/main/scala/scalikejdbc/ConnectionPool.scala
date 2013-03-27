@@ -69,6 +69,11 @@ object ConnectionPool extends LogSupport {
     pools.get(name).orNull
   }
 
+  // Heroku support
+  private val HerokuPostgresRegexp = "^postgres://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
+  private val HerokuMySQLRegexp = "^mysql://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
+  private val MysqlCustomProperties = ".*\\?(.*)".r
+
   /**
    * Register new named Connection pool.
    *
@@ -80,9 +85,23 @@ object ConnectionPool extends LogSupport {
    */
   def add(name: Any, url: String, user: String, password: String,
     settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
+
     pools.synchronized {
       pools.get(name).foreach { pool => pool.close() }
-      pools.update(name, factory.apply(url, user, password, settings))
+      // Heroku support 
+      val pool = url match {
+        case HerokuPostgresRegexp(_user, _password, _host, _dbname) =>
+          val _url = "jdbc:postgresql://%s/%s".format(_host, _dbname)
+          factory.apply(_url, _user, _password, settings)
+        case url @ HerokuMySQLRegexp(_user, _password, _host, _dbname) =>
+          val defaultProperties = """?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci"""
+          val addDefaultPropertiesIfNeeded = MysqlCustomProperties.findFirstMatchIn(url).map(_ => "").getOrElse(defaultProperties)
+          val _url = "jdbc:mysql://%s/%s".format(_host, _dbname + addDefaultPropertiesIfNeeded)
+          factory.apply(_url, _user, _password, settings)
+        case _ =>
+          factory.apply(url, user, password, settings)
+      }
+      pools.update(name, pool)
     }
     log.debug("Registered connection pool : " + get(name).toString())
   }
