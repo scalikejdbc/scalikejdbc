@@ -10,8 +10,8 @@ import scala.language.dynamics
  */
 object SQLInterpolation {
 
-  type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
-  val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+  @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
+  @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
 
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
@@ -19,9 +19,6 @@ object SQLInterpolation {
    * SQLSyntax support utilities
    */
   trait SQLSyntaxSupport[A] {
-
-    implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
-    implicit def interpolation(s: StringContext) = new SQLInterpolationString(s)
 
     def tableName: String = {
       val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
@@ -434,8 +431,8 @@ object SQLInterpolation {
   type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type SubQueryResultName = SubQueryResultNameSQLSyntaxProvider
 
-  implicit def convertSQLSyntaxToString(syntax: SQLSyntax): String = syntax.value
-  implicit def interpolation(s: StringContext) = new SQLInterpolationString(s)
+  type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+  val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
 
 }
 
