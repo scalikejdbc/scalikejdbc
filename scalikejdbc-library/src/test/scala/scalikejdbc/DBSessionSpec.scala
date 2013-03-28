@@ -223,7 +223,6 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
       println("")
       println("batch: " + batchTime + ", loop: " + loopTime)
       println("")
-      (batchTime.toDouble * 0.75D) should be < loopTime.toDouble
     }
   }
 

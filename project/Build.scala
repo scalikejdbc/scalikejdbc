@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.5.0"
+  lazy val _version = "1.5.1"
 
   lazy val scalikejdbc = Project(
     id = "library",

@@ -3,6 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.matchers._
 import org.joda.time._
+import scalikejdbc.SQLInterpolation._
 
 class HibernateSQLFormatter extends SQLFormatter {
   private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
@@ -10,8 +11,6 @@ class HibernateSQLFormatter extends SQLFormatter {
 }
 
 class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
-
-  import scalikejdbc.SQLInterpolation._
 
   behavior of "SQLInterpolation"
 
