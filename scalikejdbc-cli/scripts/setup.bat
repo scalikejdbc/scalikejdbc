@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.2/sbt-launch.jar sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.3/sbt-launch.jar sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -107,7 +107,7 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 >>"%dbconsole_command%" echo exit /b 0
 >>"%dbconsole_command%" echo.
 >>"%dbconsole_command%" echo :run_sbt
->>"%dbconsole_command%" echo   call java -Xms512M -Xmx512M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M ^^
+>>"%dbconsole_command%" echo   call java -Xms256M -Xmx512M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M ^^
 >>"%dbconsole_command%" echo     -jar "%%~dp0\sbt-launch.jar" ^^
 >>"%dbconsole_command%" echo     -Dscalikejdbc-cli.config.profile=%%_profile%% ^^
 >>"%dbconsole_command%" echo     %%1
@@ -117,11 +117,11 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 >>"%build_sbt%" echo.
->>"%build_sbt%" echo scalaVersion := "2.10.0"
+>>"%build_sbt%" echo scalaVersion := "2.10.1"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc"               %% "[1.4,)",
->>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc-interpolation" %% "[1.4,)",
+>>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc"               %% "[1.5,)",
+>>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc-interpolation" %% "[1.5,)",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "[1.7,)",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "[1.3,)", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "[10.8.2,)",

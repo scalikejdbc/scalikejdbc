@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.2/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.3/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -50,7 +50,7 @@ function show_help() {
 }
 
 function run_sbt() {
-  java -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=384M \
+  java -Xms256M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M \
     -Dfile.encoding=UTF-8 \
     -jar `dirname $0`/sbt-launch.jar \
     -Dscalikejdbc-cli.config.profile=${PROFILE} \
@@ -138,11 +138,11 @@ run_sbt "console"
 
 echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.1"
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"               % "[1.4,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.4,)",
+  "com.github.seratch" %% "scalikejdbc"               % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.5,)",
   "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
   "com.h2database"     % "h2"                   % "[1.3,)",
   "org.apache.derby"   % "derby"                % "[10.8.2,)",
