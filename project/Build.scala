@@ -242,7 +242,7 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbc)
 
   lazy val scalikejdbcPlayPluginTestZentasks = {
-    val appName         = "play-plugin-test-zentask"
+    val appName         = "play-plugin-test-zentasks"
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
