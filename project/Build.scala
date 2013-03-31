@@ -66,7 +66,6 @@ object ScalikeJDBCProjects extends Build {
       version := _version,
       scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
-      crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
@@ -147,7 +146,6 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-mapper-generator-core",
       version := _version,
-      scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {

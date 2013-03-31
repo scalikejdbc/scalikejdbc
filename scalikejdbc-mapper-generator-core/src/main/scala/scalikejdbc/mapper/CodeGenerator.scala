@@ -27,6 +27,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(toClassName(table))
+  private val syntaxName = "[A-Z]".r.findAllIn(className).mkString.toLowerCase
   private val comma = ","
   private val eol = config.lineBreak.value
 
@@ -290,7 +291,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
-     * val tableName = "MEMBER"
+     * val tableName = "member"
      * }}}
      */
     val tableName = "  val tableName = \"" + table.name + "\"" + eol
@@ -348,6 +349,21 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |%mapper%
         |  }
       """.stripMargin.replaceFirst("%mapper%", _mapper)
+    }
+
+    val _interpolationMapper = allColumns.map {
+      c =>
+        if (c.isNotNull) 2.indent + c.nameInScala + " = rs." + c.extractorName + "(" + syntaxName + "." + c.nameInScala + ")" + cast(c, false)
+        else 2.indent + c.nameInScala + " = " + "rs." + c.extractorName + "Opt(" + syntaxName + "." + c.nameInScala + ")" + cast(c, true)
+    }.mkString(comma + eol)
+
+    val interpolationMapper = {
+      """  def apply(%syntaxName%: ResultName[%className%])(rs: WrappedResultSet): %className% = new %className%(
+        |%mapper%
+        |  )
+      """.stripMargin.replaceAll("%className%", className)
+        .replaceFirst("%syntaxName%", syntaxName)
+        .replaceFirst("%mapper%", _interpolationMapper)
     }
 
     /**
@@ -411,7 +427,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def create(name: String, birthday: Option[LocalDate])(implicit session: DBSession = autoSession): Member = {
      *   val generatedKey = SQL("""
-     *     INSERT INTO MEMBER (
+     *     insert into member (
      *       NAME,
      *       BIRTHDAY
      *     ) VALUES (
@@ -465,16 +481,20 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         }.mkString(comma + eol) + ")(implicit session: DBSession = autoSession): " + className + " = {" + eol +
         2.indent + table.autoIncrementColumns.headOption.map(_ => "val generatedKey = ").getOrElse("") +
         (config.template match {
-          case GeneratorTemplate.interpolation if createColumns.size <= 22 => "sql\"\"\""
+          case GeneratorTemplate.interpolation => "sql\"\"\""
           case _ => "SQL(\"\"\""
         }) + eol +
-        3.indent + "INSERT INTO " + table.name + " (" + eol +
+        3.indent + "insert into " +
+        (config.template match {
+          case GeneratorTemplate.interpolation => "${" + className + ".table}"
+          case _ => table.name
+        }) + " (" + eol +
         createColumns.map(c => 4.indent + c.name).mkString(comma + eol) + eol +
         3.indent + ") VALUES (" + eol +
         placeHolderPart + eol +
         3.indent + ")" + eol +
         (config.template match {
-          case GeneratorTemplate.interpolation if createColumns.size <= 22 =>
+          case GeneratorTemplate.interpolation =>
             3.indent + "\"\"\"" + table.autoIncrementColumns.headOption.map(_ => ".updateAndReturnGeneratedKey.apply()").getOrElse(".update.apply()")
           case _ =>
             3.indent + "\"\"\")" + eol +
@@ -508,13 +528,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def update(m: Member)(implicit session: DBSession = autoSession): Member = {
      *   SQL("""
-     *     UPDATE
-     *       MEMBER
-     *     SET
+     *     update
+     *       member
+     *     set
      *       ID = /*'id*/123,
      *       NAME = /*'name*/'abc',
      *       BIRTHDAY = /*'birthday*/'1958-09-06'
-     *     WHERE
+     *     where
      *       ID = /*'id*/123
      * """).bindByName(
      *     'id -> m.id,
@@ -532,7 +552,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           allColumns.map(c => 4.indent + c.name + " = ?").mkString(comma + eol)
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           allColumns.map(c => 4.indent + c.name + " = /*'" + c.nameInScala + "*/" + c.dummyValue).mkString(comma + eol)
-        case GeneratorTemplate.interpolation if (allColumns.size + pkColumns.size) <= 22 =>
+        case GeneratorTemplate.interpolation =>
           allColumns.map(c => 4.indent + c.name + " = \\${m." + c.nameInScala + "}").mkString(comma + eol)
         case _ =>
           allColumns.map(c => 4.indent + c.name + " = {" + c.nameInScala + "}").mkString(comma + eol)
@@ -543,7 +563,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           4.indent + pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           4.indent + pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
-        case GeneratorTemplate.interpolation if (allColumns.size + pkColumns.size) <= 22 =>
+        case GeneratorTemplate.interpolation =>
           4.indent + pkColumns.map(pk => pk.name + " = \\${m." + pk.nameInScala + "}").mkString(" AND ")
         case _ =>
           4.indent + pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
@@ -555,7 +575,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             allColumns.map(c => 4.indent + "m." + c.nameInScala).mkString(comma + eol) + ", " + eol +
             pkColumns.map(pk => 4.indent + "m." + pk.nameInScala).mkString(comma + eol) + eol +
             3.indent + ")"
-        case GeneratorTemplate.interpolation if (allColumns.size + pkColumns.size) <= 22 => ""
+        case GeneratorTemplate.interpolation => ""
         case _ =>
           3.indent + ".bindByName(" + eol +
             allColumns.map(c => 4.indent + "'" + c.nameInScala + " -> m." + c.nameInScala).mkString(comma + eol) + eol +
@@ -563,14 +583,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }
 
       (config.template match {
-        case GeneratorTemplate.interpolation if (allColumns.size + pkColumns.size) <= 22 =>
+        case GeneratorTemplate.interpolation =>
           """  def update(m: %className%)(implicit session: DBSession = autoSession): %className% = {
           |    sql%3quotes%
-          |      UPDATE
-          |        %tableName%
-          |      SET
+          |      update
+          |        ${%className%.table}
+          |      set
           |%placeHolderPart%
-          |      WHERE
+          |      where
           |%wherePart%
           |      %3quotes%.update.apply()
           |    m
@@ -579,11 +599,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case _ =>
           """  def update(m: %className%)(implicit session: DBSession = autoSession): %className% = {
         |    SQL(%3quotes%
-        |      UPDATE
+        |      update
         |        %tableName%
-        |      SET
+        |      set
         |%placeHolderPart%
-        |      WHERE
+        |      where
         |%wherePart%
         |      %3quotes%)
         |%bindingPart%.update.apply()
@@ -602,7 +622,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     /**
      * {{{
      * def delete(m: Member)(implicit session: DBSession = autoSession): Unit = {
-     *   SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/123""")
+     *   SQL("""delete from member where id = /*'id*/123""")
      *     .bindByName('id -> m.id)
      *     .update.apply()
      * }
@@ -615,7 +635,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 =>
+        case GeneratorTemplate.interpolation =>
           pkColumns.map(pk => pk.name + " = \\${m." + pk.nameInScala + "}").mkString(" AND ")
         case _ =>
           pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
@@ -624,20 +644,20 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val bindingPart: String = config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
           ".bind(" + pkColumns.map(pk => "m." + pk.nameInScala).mkString(", ") + ")"
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 => ""
+        case GeneratorTemplate.interpolation => ""
         case _ =>
           ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> m." + pk.nameInScala).mkString(", ") + ")"
       }
 
       (config.template match {
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 =>
+        case GeneratorTemplate.interpolation =>
           """  def delete(m: %className%)(implicit session: DBSession = autoSession): Unit = {
-          |    sql%3quotes%DELETE FROM %tableName% WHERE %wherePart%%3quotes%.update.apply()
+          |    sql%3quotes%delete from ${%className%.table} where %wherePart%%3quotes%.update.apply()
           |  }
         """
         case _ =>
           """  def delete(m: %className%)(implicit session: DBSession = autoSession): Unit = {
-            |    SQL(%3quotes%DELETE FROM %tableName% WHERE %wherePart%%3quotes%)
+            |    SQL(%3quotes%delete from %tableName% where %wherePart%%3quotes%)
             |      %bindingPart%.update.apply()
             |  }
           """
@@ -653,7 +673,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def find(id: Long): Option[Member] = {
      *   DB readOnly { implicit session =>
-     *     SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/123""")
+     *     SQL("""select * from member where id = /*'id*/123""")
      *       .bindByName('id -> id).map(*).single.apply()
      *   }
      * }
@@ -666,7 +686,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 =>
+        case GeneratorTemplate.interpolation =>
           pkColumns.map(pk => pk.name + " = \\${" + pk.nameInScala + "}").mkString(" AND ")
         case _ =>
           pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
@@ -674,20 +694,21 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val bindingPart = (config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
           ".bind(" + pkColumns.map(pk => pk.nameInScala).mkString(", ")
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 => ""
+        case GeneratorTemplate.interpolation => ""
         case _ =>
           ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> " + pk.nameInScala).mkString(", ")
       }) + ")"
 
       (config.template match {
-        case GeneratorTemplate.interpolation if pkColumns.size <= 22 =>
+        case GeneratorTemplate.interpolation =>
           """  def find(%argsPart%)(implicit session: DBSession = autoSession): Option[%className%] = {
-            |    sql%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName% WHERE %wherePart%%3quotes%.map(*).single.apply()
+            |    sql%3quotes%select ${%syntaxName%.result.*} from ${%className% as %syntaxName%} where %wherePart%%3quotes%
+            |      .map(%className%(%syntaxName%.resultName)).single.apply()
             |  }
           """
         case _ =>
           """  def find(%argsPart%)(implicit session: DBSession = autoSession): Option[%className%] = {
-            |    SQL(%3quotes%SELECT * FROM %tableName% WHERE %wherePart%%3quotes%)
+            |    SQL(%3quotes%select * from %tableName% where %wherePart%%3quotes%)
             |      %bindingPart%.map(*).single.apply()
             |  }
           """
@@ -695,6 +716,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         .replaceAll("%3quotes%", "\"\"\"")
         .replaceAll("%argsPart%", argsPart)
         .replaceAll("%className%", className)
+        .replaceAll("%syntaxName%", syntaxName)
         .replaceAll("%tableName%", table.name)
         .replaceAll("%wherePart%", wherePart)
         .replaceAll("%bindingPart%", bindingPart)
@@ -704,7 +726,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def countAll(): Long = {
      *   DB readOnly { implicit session =>
-     *     SQL("""SELECT COUNT(1) FROM MEMBER""")
+     *     SQL("""select count(1) from member""")
      *       .map(rs => rs.long(1)).single.apply().get
      *   }
      * }
@@ -714,37 +736,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       (config.template match {
         case GeneratorTemplate.interpolation =>
           """  def countAll()(implicit session: DBSession = autoSession): Long = {
-            |    sql%3quotes%SELECT COUNT(1) FROM %tableName%%3quotes%.map(rs => rs.long(1)).single.apply().get
+            |    sql%3quotes%select count(1) from ${%className%.table}%3quotes%.map(rs => rs.long(1)).single.apply().get
             |  }
           """
         case _ =>
           """  def countAll()(implicit session: DBSession = autoSession): Long = {
-            |    SQL(%3quotes%SELECT COUNT(1) FROM %tableName%%3quotes%).map(rs => rs.long(1)).single.apply().get
-            |  }
-          """
-      }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%tableName%", table.name)
-
-    /**
-     * {{{
-     * def findAll(): List[Member] = {
-     *   DB readOnly { implicit session =>
-     *     SQL("""SELECT * FROM MEMBER""").map(*).list.apply()
-     *   }
-     * }
-     * }}}
-     */
-    val findAllMethod =
-      (config.template match {
-        case GeneratorTemplate.interpolation =>
-          """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
-            |    sql%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName%%3quotes%.map(*).list.apply()
-            |  }
-          """
-        case _ =>
-          """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
-            |    SQL(%3quotes%SELECT ${SQLSyntax(columnNames.inSQL)} FROM %tableName%%3quotes%).map(*).list.apply()
+            |    SQL(%3quotes%select count(1) from %tableName%%3quotes%).map(rs => rs.long(1)).single.apply().get
             |  }
           """
       }).stripMargin
@@ -754,9 +751,36 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
+     * def findAll(): List[Member] = {
+     *   DB readOnly { implicit session =>
+     *     SQL("""select * from member""").map(*).list.apply()
+     *   }
+     * }
+     * }}}
+     */
+    val findAllMethod =
+      (config.template match {
+        case GeneratorTemplate.interpolation =>
+          """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
+            |    sql%3quotes%select ${%syntaxName%.result.*} from ${%className% as %syntaxName%}%3quotes%.map(%className%(%syntaxName%.resultName)).list.apply()
+            |  }
+          """
+        case _ =>
+          """  def findAll()(implicit session: DBSession = autoSession): List[%className%] = {
+            |    SQL(%3quotes%select * from %tableName%%3quotes%).map(*).list.apply()
+            |  }
+          """
+      }).stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%syntaxName%", syntaxName)
+        .replaceAll("%tableName%", table.name)
+
+    /**
+     * {{{
      * def findAllBy(where: String, params:(Symbol, Any)*): List[Member] = {
      *   DB readOnly { implicit session =>
-     *     SQL("""SELECT * FROM MEMBER """ + where)
+     *     SQL("""select * from member """ + where)
      *       .bindByName(params: _*).map(*).list.apply()
      *   }
      * }
@@ -773,7 +797,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }) + "(params: _*)"
 
       """  def findAllBy(where: String, %paramsPart%)(implicit session: DBSession = autoSession): List[%className%] = {
-        |    SQL(%3quotes%SELECT * FROM %tableName% WHERE %3quotes% + where)
+        |    SQL(%3quotes%select * from %tableName% where %3quotes% + where)
         |      %bindingPart%.map(*).list.apply()
         |  }
       """.stripMargin
@@ -784,11 +808,22 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         .replaceAll("%bindingPart%", bindingPart)
     }
 
+    val interpolationFindAllByMethod = {
+      """  def findAllBy(where: SQLSyntax)(implicit session: DBSession = autoSession): List[%className%] = {
+        |    sql%3quotes%select ${%syntaxName%.result.*} from ${%className% as %syntaxName%} where ${where}%3quotes% 
+        |      .map(%className%(%syntaxName%.resultName)).list.apply()
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%syntaxName%", syntaxName)
+    }
+
     /**
      * {{{
      * def countBy(where: String, params:(Symbol, Any)*): Long = {
      *   DB readOnly { implicit session =>
-     *     SQL("""SELECT COUNT(1) FROM MEMBER """ + where)
+     *     SQL("""select count(1) from member """ + where)
      *       .bindByName(params: _*).map(*).single.apply().get
      *   }
      * }
@@ -805,7 +840,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }) + "(params: _*)"
 
       """  def countBy(where: String, %paramsPart%)(implicit session: DBSession = autoSession): Long = {
-        |    SQL(%3quotes%SELECT count(1) FROM %tableName% WHERE %3quotes% + where)
+        |    SQL(%3quotes%select count(1) from %tableName% where %3quotes% + where)
         |      %bindingPart%.map(rs => rs.long(1)).single.apply().get
         |  }
       """.stripMargin
@@ -816,18 +851,29 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         .replaceAll("%bindingPart%", bindingPart)
     }
 
-    "object " + className + " {" + eol +
+    val interpolationCountByMethod = {
+      """  def countBy(where: SQLSyntax)(implicit session: DBSession = autoSession): Long = {
+        |    sql%3quotes%select count(1) from ${%className% as %syntaxName%} where ${where}%3quotes%
+        |      .map(_.long(1)).single.apply().get
+        |  }
+      """.stripMargin
+        .replaceAll("%3quotes%", "\"\"\"")
+        .replaceAll("%className%", className)
+        .replaceAll("%syntaxName%", syntaxName)
+    }
+
+    val isInterpolation = config.template == GeneratorTemplate.interpolation
+    "object " + className + (if (isInterpolation) " extends SQLSyntaxSupport[" + className + "]" else "") + " {" + eol +
       eol +
-      tableName +
+      (if (isInterpolation) 1.indent + "override val tableName = \"" + table.name + "\"" + eol else tableName) +
       eol +
-      columnNames +
+      (if (isInterpolation) 1.indent + "override val columns = Seq(" + allColumns.map(c => c.name).mkString("\"", "\", \"", "\"") + ")" + eol else columnNames) +
       eol +
-      mapper +
+      (if (isInterpolation) interpolationMapper else mapper) +
       eol +
-      joinedColumnNames +
-      eol +
-      joinedMapper +
-      eol +
+      (if (isInterpolation) "" else joinedColumnNames + eol) +
+      (if (isInterpolation) "" else joinedMapper + eol) +
+      (if (isInterpolation) 1.indent + "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" + eol + eol else "") +
       autoSession +
       eol +
       findMethod +
@@ -836,9 +882,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       eol +
       countAllMethod +
       eol +
-      findAllByMethod +
+      (if (isInterpolation) interpolationFindAllByMethod else findAllByMethod) +
       eol +
-      countByMethod +
+      (if (isInterpolation) interpolationCountByMethod else countByMethod) +
       eol +
       createMethod +
       eol +
@@ -947,6 +993,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import org.scalatest._
           |import org.joda.time._
           |import scalikejdbc.scalatest.AutoRollback
+          |%interpolationImport%
           |
           |class %className%Spec extends fixture.FlatSpec with ShouldMatchers with AutoRollback {
           |
@@ -997,6 +1044,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import scalikejdbc.specs2.mutable.AutoRollback
           |import org.specs2.mutable._
           |import org.joda.time._
+          |%interpolationImport%
           |
           |class %className%Spec extends Specification {
           |
@@ -1047,6 +1095,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import scalikejdbc.specs2.AutoRollback
           |import org.specs2._
           |import org.joda.time._
+          |%interpolationImport%
           |
           |class %className%Spec extends Specification { def is =
           |
@@ -1106,15 +1155,19 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   }
 
   private def replaceVariablesForTestPart(code: String): String = {
+    val isInterpolation = config.template == GeneratorTemplate.interpolation
     code.replaceAll("%package%", packageName)
       .replaceAll("%className%", className)
+      .replaceFirst("%interpolationImport%", if (isInterpolation) "import scalikejdbc.SQLInterpolation._" else "")
       .replaceAll("%primaryKeys%", table.primaryKeyColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))
-      .replaceAll("%whereExample%", table.primaryKeyColumns.headOption.map {
-        c =>
-          "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala
-      }.getOrElse(""))
+      .replaceAll("%whereExample%",
+        if (isInterpolation) table.primaryKeyColumns.headOption.map(c =>
+          "sqls\"" + c.name + " = \\${" + c.defaultValueInScala + "}\"").getOrElse("")
+        else table.primaryKeyColumns.headOption.map(c =>
+          "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala).getOrElse("")
+      )
       .replaceAll("%createFields%", table.allColumns.filter {
         c =>
           c.isNotNull && table.autoIncrementColumns.find(aic => aic.name == c.name).isEmpty

@@ -37,7 +37,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.executableSQL,
           packageName = "com.example"
@@ -47,7 +47,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.executable,
           packageName = "com.example.executable"
@@ -57,7 +57,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.placeHolderSQL,
           packageName = "com.example.placeholder"
@@ -67,7 +67,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.basic,
           packageName = "com.example.basic"
@@ -77,7 +77,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.anormSQL,
           packageName = "com.example.anorm"
@@ -87,7 +87,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.namedParameters,
           packageName = "com.example.namedparameters"
@@ -97,7 +97,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
 
       {
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate.interpolation,
           packageName = "com.example.interpolation"
@@ -136,7 +136,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "MEMBER").map {
       table =>
-        val generator1 = CodeGenerator(table)(GeneratorConfig(
+        val generator1 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate("executableSQL"),
           testTemplate = GeneratorTestTemplate("specs2unit"),
@@ -145,7 +145,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         println(generator1.modelAll())
         println(generator1.specAll())
         generator1.writeModelIfNotExist()
-        val generator2 = CodeGenerator(table)(GeneratorConfig(
+        val generator2 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate("placeHolderSQL"),
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
@@ -154,7 +154,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         println(generator2.modelAll())
         println(generator2.specAll())
         generator2.writeModelIfNotExist()
-        val generator3 = CodeGenerator(table)(GeneratorConfig(
+        val generator3 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           template = GeneratorTemplate("anormSQL"),
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
@@ -222,7 +222,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "UN_NORMALIZED").map {
       table =>
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           packageName = "com.example"
         ))
@@ -254,7 +254,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
     Model(url, username, password).table(null, "WITHOUT_PK").map {
       table =>
-        val generator = CodeGenerator(table)(GeneratorConfig(
+        val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
           packageName = "com.example"
         ))

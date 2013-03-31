@@ -15,73 +15,50 @@ case class MemberGroup(
 }
       
 
-object MemberGroup {
+object MemberGroup extends SQLSyntaxSupport[MemberGroup] {
 
-  val tableName = "MEMBER_GROUP"
+  override val tableName = "MEMBER_GROUP"
 
-  object columnNames {
-    val id = "ID"
-    val name = "NAME"
-    val underscore = "_UNDERSCORE"
-    val all = Seq(id, name, underscore)
-    val inSQL = all.mkString(", ")
-  }
+  override val columns = Seq("ID", "NAME", "_UNDERSCORE")
+
+  def apply(mg: ResultName[MemberGroup])(rs: WrappedResultSet): MemberGroup = new MemberGroup(
+    id = rs.int(mg.id),
+    name = rs.string(mg.name),
+    underscore = rs.stringOpt(mg.underscore)
+  )
       
-  val * = {
-    import columnNames._
-    (rs: WrappedResultSet) => MemberGroup(
-      id = rs.int(id),
-      name = rs.string(name),
-      underscore = rs.stringOpt(underscore))
-  }
-      
-  object joinedColumnNames {
-    val delimiter = "__ON__"
-    def as(name: String) = name + delimiter + tableName
-    val id = as(columnNames.id)
-    val name = as(columnNames.name)
-    val underscore = as(columnNames.underscore)
-    val all = Seq(id, name, underscore)
-    val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
-  }
-      
-  val joined = {
-    import joinedColumnNames._
-    (rs: WrappedResultSet) => MemberGroup(
-      id = rs.int(id),
-      name = rs.string(name),
-      underscore = rs.stringOpt(underscore))
-  }
-      
+  val mg = MemberGroup.syntax("mg")
+
   val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[MemberGroup] = {
-    sql"""SELECT ${SQLSyntax(columnNames.inSQL)} FROM MEMBER_GROUP WHERE ID = ${id}""".map(*).single.apply()
+    sql"""select ${mg.result.*} from ${MemberGroup as mg} where ID = ${id}"""
+      .map(MemberGroup(mg.resultName)).single.apply()
   }
           
   def findAll()(implicit session: DBSession = autoSession): List[MemberGroup] = {
-    sql"""SELECT ${SQLSyntax(columnNames.inSQL)} FROM MEMBER_GROUP""".map(*).list.apply()
+    sql"""select ${mg.result.*} from ${MemberGroup as mg}""".map(MemberGroup(mg.resultName)).list.apply()
   }
           
   def countAll()(implicit session: DBSession = autoSession): Long = {
-    sql"""SELECT COUNT(1) FROM MEMBER_GROUP""".map(rs => rs.long(1)).single.apply().get
+    sql"""select count(1) from ${MemberGroup.table}""".map(rs => rs.long(1)).single.apply().get
   }
           
-  def findAllBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[MemberGroup] = {
-    SQL("""SELECT * FROM MEMBER_GROUP WHERE """ + where)
-      .bindByName(params: _*).map(*).list.apply()
+  def findAllBy(where: SQLSyntax)(implicit session: DBSession = autoSession): List[MemberGroup] = {
+    sql"""select ${mg.result.*} from ${MemberGroup as mg} where ${where}""" 
+      .map(MemberGroup(mg.resultName)).list.apply()
   }
       
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT count(1) FROM MEMBER_GROUP WHERE """ + where)
-      .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
+  def countBy(where: SQLSyntax)(implicit session: DBSession = autoSession): Long = {
+    sql"""select count(1) from ${MemberGroup as mg} where ${where}"""
+      .map(_.long(1)).single.apply().get
   }
       
   def create(
     name: String,
     underscore: Option[String] = None)(implicit session: DBSession = autoSession): MemberGroup = {
     val generatedKey = sql"""
-      INSERT INTO MEMBER_GROUP (
+      insert into ${MemberGroup.table} (
         NAME,
         _UNDERSCORE
       ) VALUES (
@@ -98,20 +75,20 @@ object MemberGroup {
 
   def update(m: MemberGroup)(implicit session: DBSession = autoSession): MemberGroup = {
     sql"""
-      UPDATE
-        MEMBER_GROUP
-      SET
+      update
+        ${MemberGroup.table}
+      set
         ID = ${m.id},
         NAME = ${m.name},
         _UNDERSCORE = ${m.underscore}
-      WHERE
+      where
         ID = ${m.id}
       """.update.apply()
     m
   }
         
   def delete(m: MemberGroup)(implicit session: DBSession = autoSession): Unit = {
-    sql"""DELETE FROM MEMBER_GROUP WHERE ID = ${m.id}""".update.apply()
+    sql"""delete from ${MemberGroup.table} where ID = ${m.id}""".update.apply()
   }
         
 }
