@@ -1,0 +1,20 @@
+ScalikeJDBC 1.5.2 has been released. Changed: mapper-generator and play-plugin.
+
+http://git.io/scalikejdbc
+
+## mapper-generator
+
+Enabled using CodeGenerator from not only sbt.
+
+- Fixed #105 StringIndexOutOfBoundsException if column name starts with _
+- Devided mapper-generator into core library and sbt plugin
+
+## play-plugin
+
+Great job by @tototoshi
+
+- Added fixture support for Play framework by @tototoshi
+
+Enjoy writing SQL and get things done!
+
+
