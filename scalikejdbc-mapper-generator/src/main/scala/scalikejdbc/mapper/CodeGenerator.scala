@@ -912,7 +912,8 @@ case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None
   }
 
   private def toProperCase(s: String): String = {
-    s.substring(0, 1).toUpperCase + s.substring(1).toLowerCase
+    if (s == null || s.trim.size == 0) ""
+    else s.substring(0, 1).toUpperCase + s.substring(1).toLowerCase
   }
 
   // -----------------------

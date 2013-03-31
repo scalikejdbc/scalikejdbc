@@ -27,6 +27,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
             create table member_group (
               id int generated always as identity,
               name varchar(30) not null,
+              _underscore varchar(30),
               primary key(id)
             )
             """).execute.apply()
