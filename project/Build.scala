@@ -1,6 +1,8 @@
 import sbt._
 import Keys._
 
+import play.Project._
+
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
@@ -212,6 +214,31 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc)
+
+  lazy val scalikejdbcPlayPluginTestZentasks = {
+    val appName         = "play-plugin-test-zentask"
+    val appVersion      = "1.0"
+
+    val appDependencies = Seq(
+      "com.h2database"     %  "h2"                        % "[1.3,)",
+      "postgresql"         %  "postgresql"                % "9.1-901.jdbc4"
+    )
+
+    play.Project(appName, appVersion, appDependencies,
+                            path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
+      scalaVersion in ThisBuild := "2.10.1",
+      resolvers ++= Seq(
+        "Sonatype OSS Releases"  at "http://oss.sonatype.org/content/repositories/releases",
+        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+      )
+    ).dependsOn(
+      scalikejdbcPlayPlugin,
+      scalikejdbcInterpolation
+     ).aggregate(
+      scalikejdbcPlayPlugin,
+      scalikejdbcInterpolation
+    )
+  }
 
   lazy val scalikejdbcTest = Project(
     id = "test",
