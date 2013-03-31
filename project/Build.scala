@@ -157,7 +157,7 @@ object ScalikeJDBCProjects extends Build {
           case "2.9.3" => Seq(
             "org.slf4j"     %  "slf4j-simple"    % "1.7.4"   % "compile",
             "org.scalatest" %  "scalatest_2.9.2" % "[1.8,)"  % "test",
-            "org.specs2"    %% "specs2_2.9.2"    % "[1.12,)" % "test"
+            "org.specs2"    %  "specs2_2.9.2"    % "[1.12,)" % "test"
            )
           case _ => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.4"   % "compile",
