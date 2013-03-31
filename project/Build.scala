@@ -92,7 +92,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation-macro",
       version := _version,
-      scalaVersion := "2.10.1",
+      scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -119,7 +119,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation",
       version := _version,
-      scalaVersion := "2.10.1",
+      scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
