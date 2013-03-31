@@ -253,7 +253,8 @@ object ScalikeJDBCProjects extends Build {
 
     play.Project(appName, appVersion, appDependencies,
                             path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
-      scalaVersion in ThisBuild := "2.10.1",
+      // This settings affects other sub projects
+      //scalaVersion in ThisBuild := "2.10.0",
       resolvers ++= Seq(
         "Sonatype OSS Releases"  at "http://oss.sonatype.org/content/repositories/releases",
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
