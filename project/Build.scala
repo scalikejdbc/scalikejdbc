@@ -232,6 +232,7 @@ object ScalikeJDBCProjects extends Build {
           }
         }
       },
+      testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       publishArtifact in Test := false,
