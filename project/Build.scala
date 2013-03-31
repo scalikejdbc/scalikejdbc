@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.5.1"
+  lazy val _version = "1.5.2-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -139,13 +139,13 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc, scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
-  lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator",
-    base = file("scalikejdbc-mapper-generator"),
+  lazy val scalikejdbcMapperGeneratorCore = Project(
+    id = "mapper-generator-core",
+    base = file("scalikejdbc-mapper-generator-core"),
     settings = Defaults.defaultSettings ++ Seq(
-      sbtPlugin := true,
+      sbtPlugin := false,
       organization := _organization,
-      name := "scalikejdbc-mapper-generator",
+      name := "scalikejdbc-mapper-generator-core",
       version := _version,
       scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
@@ -176,6 +176,32 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest)
+
+  lazy val scalikejdbcMapperGenerator = Project(
+    id = "mapper-generator",
+    base = file("scalikejdbc-mapper-generator"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := true,
+      organization := _organization,
+      name := "scalikejdbc-mapper-generator",
+      version := _version,
+      scalaBinaryVersion <<= scalaVersion,
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "org.slf4j"     %  "slf4j-simple" % "1.7.4"   % "compile",
+          "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
+          "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
