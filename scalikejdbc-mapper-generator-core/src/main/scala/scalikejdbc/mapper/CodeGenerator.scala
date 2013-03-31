@@ -20,7 +20,7 @@ import scalikejdbc._
 /**
  * Active Record like template generator
  */
-case class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
+class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
 
   import java.sql.{ Types => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
