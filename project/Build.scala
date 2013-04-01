@@ -240,6 +240,35 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
+  lazy val scalikejdbcPlayFixturePlugin = Project(
+    id = "play-fixture-plugin",
+    base = file("scalikejdbc-play-fixture-plugin"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-play-fixture-plugin",
+      version := _version,
+      crossScalaVersions := Seq("2.10.0"),
+      resolvers ++= _resolvers,
+      libraryDependencies ++= Seq(
+        "play" %% "play" % "2.1.0" % "provided",
+        "play" %% "play-test" % "2.1.0" % "test",
+        "com.h2database" % "h2" % "[1.3,)" % "test"
+      ),
+      testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ).dependsOn(
+    scalikejdbcPlayPlugin
+  ).aggregate(
+    scalikejdbcPlayPlugin
+  )
+
   lazy val scalikejdbcPlayPluginTestZentasks = {
     val appName         = "play-plugin-test-zentasks"
     val appVersion      = "1.0"
@@ -257,10 +286,11 @@ object ScalikeJDBCProjects extends Build {
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
       )
     ).dependsOn(
-      scalikejdbcPlayPlugin,
+      scalikejdbcPlayFixturePlugin,
       scalikejdbcInterpolation
      ).aggregate(
       scalikejdbcPlayPlugin,
+      scalikejdbcPlayFixturePlugin,
       scalikejdbcInterpolation
     )
   }
