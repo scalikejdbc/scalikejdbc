@@ -27,10 +27,6 @@ val appDependencies = Seq(
   "com.github.seratch" %% "scalikejdbc"             % "[1.5,)",
   "com.github.seratch" %% "scalikejdbc-play-plugin" % "[1.5,)"
 )
-
-val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
-  externalResolvers ~= (_.filter(_.name != "Scala-Tools Maven2 Repository"))
-)
 ```
 
 ### conf/application.conf
@@ -69,29 +65,34 @@ evolutionplugin=disabled
 ### conf/play.plugins
 
 ```
-9999:scalikejdbc.PlayPlugin
+10000:scalikejdbc.PlayPlugin
 ```
 
 ### app/models/Project.scala
 
 ```scala
 import scalikejdbc._
+import scalikejdbc.SQLInterpolation._
 
 case class Project(id: Long, folder: String, name: String)
 
-object Project {
+object Project extends SQLSyntaxSupport[Project] {
 
-  private val * = (rs: WrappedResultSet) => Project(
-    id = rs.long("id"), 
-    folder = rs.string("folder"), 
-    name = rs.string("name")
+  def apply(p: ResultName[Project])(rs: WrappedResultSet): Project = new Project(
+    id = rs.long(p.id), 
+    folder = rs.string(p.folder), 
+    name = rs.string(p.name)
   )
 
+  private val p = Project.syntax("p")
+
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
-    SQL("select * from project where id = {id}").bindByName('id -> id).map(*).single.apply()
+    sql"select ${p.result.*} from ${Project as p} where ${p.id} = ${id}")
+      .map(Project(p.resultName)).single.apply()
   }
 
 ...
+}
 ```
 
 ## Generating models
@@ -99,6 +100,4 @@ object Project {
 See also:
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
-
-
 
