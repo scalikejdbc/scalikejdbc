@@ -10,5 +10,6 @@ sbt \
   "project interpolation" ++2.10.0 publish \
   "project mapper-generator-core" ++2.10.0 publish \
   "project play-plugin" ++2.10.0 publish \
+  "project play-fixture-plugin" ++2.10.0 publish \
   "project test" ++2.10.0 publish 
 

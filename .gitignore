@@ -60,3 +60,4 @@ derby.log
 sbt
 
 logs
+sandbox/db

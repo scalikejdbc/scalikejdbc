@@ -1,4 +1,4 @@
-package scalikejdbc
+package scalikejdbc.play
 
 import play.api.test._
 import play.api.test.Helpers._
@@ -30,7 +30,7 @@ class FixtureSupportSpec extends Specification with BeforeAfterExample {
       "db.secondary.user" -> "l",
       "db.secondary.password" -> "g"
     ),
-    additionalPlugins = Seq("scalikejdbc.PlayPlugin", "scalikejdbc.FixturePlugin")
+    additionalPlugins = Seq("scalikejdbc.PlayPlugin", "scalikejdbc.PlayFixturePlugin")
   )
 
   "FixtureSupport" should {

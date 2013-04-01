@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package scalikejdbc
+package scalikejdbc.play
 
 class FixtureNotFoundException(message: String)
   extends Exception(message)

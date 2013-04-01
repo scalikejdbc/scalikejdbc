@@ -15,13 +15,13 @@
  */
 package scalikejdbc
 
-import play.api._
+import _root_.play.api._
 
 /**
  * The Play fixture plugin
  */
-class FixturePlugin(implicit app: Application) extends Plugin
-    with FixtureSupport {
+class PlayFixturePlugin(implicit app: Application) extends Plugin
+    with scalikejdbc.play.FixtureSupport {
 
   override def onStart(): Unit = {
     if (Play.isTest || Play.isDev) {

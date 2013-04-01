@@ -13,11 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package scalikejdbc
+package scalikejdbc.play
 
-import play.api._
+import _root_.play.api._
 import java.io.File
 import scala.collection.JavaConverters._
+import scalikejdbc._
 
 trait FixtureSupport {
 

@@ -1,4 +1,4 @@
-package scalikejdbc
+package scalikejdbc.play
 
 import java.io.File
 import play.api.test._
