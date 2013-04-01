@@ -20,8 +20,7 @@ import play.api._
 /**
  * The Play plugin to use ScalikeJDBC
  */
-class PlayPlugin(implicit app: Application) extends Plugin
-    with FixtureSupport {
+class PlayPlugin(implicit app: Application) extends Plugin {
 
   import PlayPlugin._
 
@@ -90,16 +89,9 @@ class PlayPlugin(implicit app: Application) extends Plugin
 
     opt("closeAllOnStop", "enabled")(playConfig).foreach { enabled => closeAllOnStop = enabled.toBoolean }
 
-    if (Play.isTest || Play.isDev) {
-      loadFixtures()
-    }
   }
 
   override def onStop(): Unit = {
-    if (Play.isTest || Play.isDev) {
-      cleanFixtures()
-    }
-
     if (closeAllOnStop) {
       ConnectionPool.closeAll()
       registeredPoolNames.clear()

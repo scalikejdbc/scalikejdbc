@@ -30,7 +30,7 @@ class FixtureSupportSpec extends Specification with BeforeAfterExample {
       "db.secondary.user" -> "l",
       "db.secondary.password" -> "g"
     ),
-    additionalPlugins = Seq("scalikejdbc.PlayPlugin")
+    additionalPlugins = Seq("scalikejdbc.PlayPlugin", "scalikejdbc.FixturePlugin")
   )
 
   "FixtureSupport" should {
