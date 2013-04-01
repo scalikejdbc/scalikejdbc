@@ -280,9 +280,9 @@ You can use ScalikeJDBC with Play framework 2.x seamlessly. We promise you that 
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
-We also provides fixtures for Play apps.
+We also provides fixture for Play apps.
 
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-fixtures-plugin
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-fixture-plugin
 
 
 ### Typesafe Config support
