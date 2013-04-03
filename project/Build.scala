@@ -274,8 +274,9 @@ object ScalikeJDBCProjects extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "com.h2database"     %  "h2"                        % "[1.3,)",
-      "postgresql"         %  "postgresql"                % "9.1-901.jdbc4"
+      "com.github.tototoshi" %% "play-flyway"                % "0.1.1",
+      "com.h2database"        % "h2"                        % "[1.3,)",
+      "postgresql"            % "postgresql"                % "9.1-901.jdbc4"
     )
 
     play.Project(appName, appVersion, appDependencies,
