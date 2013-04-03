@@ -1,7 +1,7 @@
 # --- !Ups
 
 INSERT INTO project (id, name, folder) VALUES (1, 'Play 2.0', 'Play framework');
-INSERT INTO project (id, name, folder) VALUES (2, 'Play 1.2.4', 'Play framewor');
+INSERT INTO project (id, name, folder) VALUES (2, 'Play 1.2.4', 'Play framework');
 INSERT INTO project (id, name, folder) VALUES (3, 'Website', 'Play framework');
 INSERT INTO project (id, name, folder) VALUES (4, 'Secret project', 'Zenexity');
 INSERT INTO project (id, name, folder) VALUES (5, 'Playmate', 'Zenexity');
