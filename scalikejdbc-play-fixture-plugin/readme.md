@@ -22,7 +22,7 @@ This plugin uses the default Database configuration.
 
 ```
 # Database configuration
-# ~~~~~ 
+# ~~~~~
 # You can declare as many datasources as you want.
 # By convention, the default datasource is named `default`
 db.default.driver=org.h2.Driver
@@ -49,30 +49,53 @@ PlayFixturePlugin should be loaded after PlayPlugin.
 
 ```sql
 # --- !Ups
-create table project (
-id bigint not null primary key,
-name varchar(255) not null,
-folder varchar(255) not null
-);
-create sequence project_seq start with 1000;
+
+INSERT INTO project (id, name, folder) VALUES (1, 'Play 2.0', 'Play framework');
+INSERT INTO project (id, name, folder) VALUES (2, 'Play 1.2.4', 'Play framework');
+INSERT INTO project (id, name, folder) VALUES (3, 'Website', 'Play framework');
+INSERT INTO project (id, name, folder) VALUES (4, 'Secret project', 'Zenexity');
+INSERT INTO project (id, name, folder) VALUES (5, 'Playmate', 'Zenexity');
+INSERT INTO project (id, name, folder) VALUES (6, 'Things to do', 'Personal');
+INSERT INTO project (id, name, folder) VALUES (7, 'Play samples', 'Zenexity');
+INSERT INTO project (id, name, folder) VALUES (8, 'Private', 'Personal');
+INSERT INTO project (id, name, folder) VALUES (9, 'Private', 'Personal');
+INSERT INTO project (id, name, folder) VALUES (10, 'Private', 'Personal');
+INSERT INTO project (id, name, folder) VALUES (11, 'Private', 'Personal');
+ALTER SEQUENCE project_seq RESTART WITH 12;
 
 # --- !Downs
-drop sequence project_seq;
-drop table project;
+ALTER SEQUENCE project_seq RESTART WITH 1;
+DELETE FROM project;
 ```
 
 ### conf/db/fixtures/defaut/project_member.sql
 
 ```sql
 # --- !Ups
-create table project_member (
-project_id bigint not null,
-user_email varchar(255) not null,
-foreign key(project_id) references project(id) on delete cascade,
-foreign key(user_email) references users(email) on delete cascade
-);
+
+INSERT INTO project_member (project_id, user_email) VALUES (1, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (1, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (1, 'sadek@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (1, 'erwan@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (2, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (2, 'erwan@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (3, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (3, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (4, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (4, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (4, 'sadek@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (4, 'erwan@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (5, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (6, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (7, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (7, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (8, 'maxime@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (9, 'guillaume@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (10, 'erwan@sample.com');
+INSERT INTO project_member (project_id, user_email) VALUES (11, 'sadek@sample.com');
 
 # --- !Downs
-drop table project_member;
+
+DELETE FROM project_member;
 ```
 
