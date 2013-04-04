@@ -65,7 +65,10 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     override val tableName = "group_members"
     override val columns = Seq("user_id", "group_id")
   }
-  case class GroupMember(userId: Int, groupId: Int)
+  // case class GroupMember(userId: Int, groupId: Int) // works!
+  class GroupMember(val userId: Int, val groupId: Int)
+  // class GroupMember(userId: Int, groupId: Int) // works!
+  // class GroupMember(userId: Int) // compilation error
 
   it should "be available with SQLSyntaxSupport" in {
     DB localTx {
