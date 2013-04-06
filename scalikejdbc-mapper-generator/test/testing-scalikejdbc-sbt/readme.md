@@ -1,4 +1,0 @@
-# testing-scalikejdbc-sbt
-
-TODO
-

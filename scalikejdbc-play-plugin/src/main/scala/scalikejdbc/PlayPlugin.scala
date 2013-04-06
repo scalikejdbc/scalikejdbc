@@ -20,7 +20,7 @@ import play.api._
 /**
  * The Play plugin to use ScalikeJDBC
  */
-class PlayPlugin(app: Application) extends Plugin {
+class PlayPlugin(implicit app: Application) extends Plugin {
 
   import PlayPlugin._
 
@@ -91,11 +91,12 @@ class PlayPlugin(app: Application) extends Plugin {
 
   }
 
-  override def onStop(): Unit = if (closeAllOnStop) {
-    ConnectionPool.closeAll()
-    registeredPoolNames.clear()
+  override def onStop(): Unit = {
+    if (closeAllOnStop) {
+      ConnectionPool.closeAll()
+      registeredPoolNames.clear()
+    }
   }
-
 }
 
 object PlayPlugin {

@@ -65,7 +65,10 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     override val tableName = "group_members"
     override val columns = Seq("user_id", "group_id")
   }
-  case class GroupMember(userId: Int, groupId: Int)
+  // case class GroupMember(userId: Int, groupId: Int) // works!
+  class GroupMember(val userId: Int, val groupId: Int)
+  // class GroupMember(userId: Int, groupId: Int) // works!
+  // class GroupMember(userId: Int) // compilation error
 
   it should "be available with SQLSyntaxSupport" in {
     DB localTx {
@@ -305,9 +308,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         sql"create table issue_tag (issue_id int not null, tag_id int not null)".execute.apply()
       } catch { case e: Exception => }
     }
-    DB localTx {
-      implicit s =>
-        try {
+    try {
+      DB localTx {
+        implicit s =>
 
           sql"insert into issue values (1, ${"Alice"})".update.apply()
           sql"insert into issue values (2, ${"Bob"})".update.apply()
@@ -360,18 +363,18 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             val (i, is) = (Issue.syntax("i"), IssueSummary.syntax("is"))
             val idCount = sqls"count(${i.resultName.id})"
             val idSum = sqls"sum(${i.resultName.id})"
+            val sq = SubQuery.syntax("sq", i.resultName)
             val summary = sql"""
-              select ${is.result(idCount).count}, ${is.result(idSum).sum} from (select ${i.result.id} from ${Issue.as(i)})
+              select ${is.result(idCount).count}, ${is.result(idSum).sum} from (select ${i.result.id} from ${Issue.as(i)}) ${SubQuery.as(sq)}
               """.map(IssueSummary(is.resultName)).single.apply().get
             summary.count should equal(4)
             summary.sum should equal(10)
           }
-
-        } finally {
-          sql"drop table issue".execute.apply()
-          sql"drop table tag".execute.apply()
-          sql"drop table issue_tag".execute.apply()
-        }
+      }
+    } finally {
+      DB.autoCommit { implicit s => sql"drop table issue".execute.apply() }
+      DB.autoCommit { implicit s => sql"drop table tag".execute.apply() }
+      DB.autoCommit { implicit s => sql"drop table issue_tag".execute.apply() }
     }
   }
 

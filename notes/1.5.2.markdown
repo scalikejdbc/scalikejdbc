@@ -1,0 +1,46 @@
+ScalikeJDBC 1.5.2 has been released. play-fixture-plugin by tototoshi is newly released. mapper-generator is divided into core library and sbt plugin.
+
+http://git.io/scalikejdbc
+
+## mapper-generator
+
+Enabled using CodeGenerator from not only sbt.
+
+- Fixed #105 StringIndexOutOfBoundsException if column name starts with _
+- Fixed #106 mapper-generator should be divided into generator-part and sbt-plugin-part
+
+## play-fixture-plugin
+
+Great job by @tototoshi
+
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-fixture-plugin
+
+### conf/application.conf
+
+    db.default.driver=org.h2.Driver
+    db.default.url="jdbc:h2:mem:play"
+    db.default.user="sa"
+    db.default.password="sa"
+    db.default.fixtures.test=[ "project.sql", "project_member.sql" ]
+
+### conf/play.plugins
+
+    10000:scalikejdbc.PlayPlugin
+    11000:scalikejdbc.PlayFixturePlugin
+
+### conf/db/fixtures/default/project.sql
+
+    # --- !Ups
+    insert into project (id, name, folder) values (1, 'Play 2.0', 'Play framework');
+    insert into project (id, name, folder) values (2, 'Play 1.2.4', 'Play framework');
+    insert into project (id, name, folder) values (5, 'Playmate', 'Zenexity');
+    alter sequence project_seq restart with 12;
+    
+    # --- !Downs
+    delete from project;
+    alter sequence project_seq restart with 1;
+
+
+Enjoy writing SQL and playing with fixture!
+
+

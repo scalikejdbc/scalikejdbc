@@ -74,7 +74,7 @@ object SbtPlugin extends Plugin {
           lineBreak = LineBreak(generatorSettings.lineBreak),
           encoding = generatorSettings.encoding
         )
-        Option(CodeGenerator(table, className)(config))
+        Option(new CodeGenerator(table, className)(config))
       } getOrElse {
         println("The table is not found.")
         None

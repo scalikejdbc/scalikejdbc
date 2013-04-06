@@ -54,9 +54,10 @@ build.log
 .DS_Store
 derby.log
 
-db
+*.db
 
 .lib
 sbt
 
 logs
+sandbox/db

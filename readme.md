@@ -271,12 +271,18 @@ https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test
 
 ### Play! Framework 2.x support
 
-You can use ScalikeJDBC with Play framework 2.x seamlessly.
+```
+10000:scalikejdbc.PlayPlugin
+11000:scalikejdbc.PlayFixturePlugin
+```
+
+You can use ScalikeJDBC with Play framework 2.x seamlessly. We promise you that it becomes more productive when using together with scalikejdbc-mapper-generator.
 
 https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-plugin
 
-We promise you that it becomes more useful when using together with scalikejdbc-mapper-generator.
+We also provides fixture for Play apps.
 
+https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-fixture-plugin
 
 
 ### Typesafe Config support

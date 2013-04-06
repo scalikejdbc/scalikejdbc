@@ -1,13 +1,15 @@
 import sbt._
 import Keys._
 
+import play.Project._
+
 object ScalikeJDBCProjects extends Build {
 
   lazy val _organization = "com.github.seratch"
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.5.1"
+  lazy val _version = "1.5.2"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -64,7 +66,6 @@ object ScalikeJDBCProjects extends Build {
       version := _version,
       scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
-      crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
@@ -90,7 +91,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation-macro",
       version := _version,
-      scalaVersion := "2.10.1",
+      scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -117,7 +118,7 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-interpolation",
       version := _version,
-      scalaVersion := "2.10.1",
+      scalaVersion := "2.10.0",
       scalaBinaryVersion := "2.10",
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -137,15 +138,14 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc, scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
-  lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator",
-    base = file("scalikejdbc-mapper-generator"),
+  lazy val scalikejdbcMapperGeneratorCore = Project(
+    id = "mapper-generator-core",
+    base = file("scalikejdbc-mapper-generator-core"),
     settings = Defaults.defaultSettings ++ Seq(
-      sbtPlugin := true,
+      sbtPlugin := false,
       organization := _organization,
-      name := "scalikejdbc-mapper-generator",
+      name := "scalikejdbc-mapper-generator-core",
       version := _version,
-      scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
@@ -157,7 +157,7 @@ object ScalikeJDBCProjects extends Build {
           case "2.9.3" => Seq(
             "org.slf4j"     %  "slf4j-simple"    % "1.7.4"   % "compile",
             "org.scalatest" %  "scalatest_2.9.2" % "[1.8,)"  % "test",
-            "org.specs2"    %% "specs2_2.9.2"    % "[1.12,)" % "test"
+            "org.specs2"    %  "specs2_2.9.2"    % "[1.12,)" % "test"
            )
           case _ => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.4"   % "compile",
@@ -174,6 +174,32 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest)
+
+  lazy val scalikejdbcMapperGenerator = Project(
+    id = "mapper-generator",
+    base = file("scalikejdbc-mapper-generator"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := true,
+      organization := _organization,
+      name := "scalikejdbc-mapper-generator",
+      version := _version,
+      scalaBinaryVersion <<= scalaVersion,
+      resolvers ++= _resolvers,
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "org.slf4j"     %  "slf4j-simple" % "1.7.4"   % "compile",
+          "org.scalatest" %% "scalatest"    % "[1.8,)"  % "test",
+          "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
+      },
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
 
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
@@ -204,6 +230,7 @@ object ScalikeJDBCProjects extends Build {
           }
         }
       },
+      testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
       publishArtifact in Test := false,
@@ -212,6 +239,62 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc)
+
+  lazy val scalikejdbcPlayFixturePlugin = Project(
+    id = "play-fixture-plugin",
+    base = file("scalikejdbc-play-fixture-plugin"),
+    settings = Defaults.defaultSettings ++ Seq(
+      sbtPlugin := false,
+      organization := _organization,
+      name := "scalikejdbc-play-fixture-plugin",
+      version := _version,
+      crossScalaVersions := Seq("2.10.0"),
+      resolvers ++= _resolvers,
+      libraryDependencies ++= Seq(
+        "play" %% "play" % "2.1.0" % "provided",
+        "play" %% "play-test" % "2.1.0" % "test",
+        "com.h2database" % "h2" % "[1.3,)" % "test"
+      ),
+      testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishMavenStyle := true,
+      publishArtifact in Test := false,
+      pomIncludeRepository := { x => false },
+      pomExtra := _pomExtra,
+      scalacOptions ++= _scalacOptions
+    )
+  ).dependsOn(
+    scalikejdbcPlayPlugin
+  ).aggregate(
+    scalikejdbcPlayPlugin
+  )
+
+  lazy val scalikejdbcPlayPluginTestZentasks = {
+    val appName         = "play-plugin-test-zentasks"
+    val appVersion      = "1.0"
+
+    val appDependencies = Seq(
+      "com.github.tototoshi" %% "play-flyway"                % "0.1.1",
+      "com.h2database"        % "h2"                        % "[1.3,)",
+      "postgresql"            % "postgresql"                % "9.1-901.jdbc4"
+    )
+
+    play.Project(appName, appVersion, appDependencies,
+                            path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
+      scalaVersion in ThisBuild := "2.10.1",
+      resolvers ++= Seq(
+        "Sonatype OSS Releases"  at "http://oss.sonatype.org/content/repositories/releases",
+        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+      )
+    ).dependsOn(
+      scalikejdbcPlayFixturePlugin,
+      scalikejdbcInterpolation
+     ).aggregate(
+      scalikejdbcPlayPlugin,
+      scalikejdbcPlayFixturePlugin,
+      scalikejdbcInterpolation
+    )
+  }
 
   lazy val scalikejdbcTest = Project(
     id = "test",
