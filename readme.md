@@ -1,5 +1,7 @@
 # ScalikeJDBC - SQL-Based DB Access Library for Scala
 
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+
 ## Just write SQL
 
 ScalikeJDBC is A tidy SQL-based DB access library for Scala developers.
