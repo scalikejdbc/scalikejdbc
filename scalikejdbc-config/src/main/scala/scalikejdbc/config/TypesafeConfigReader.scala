@@ -18,6 +18,7 @@ package scalikejdbc.config
 import scalikejdbc._
 import com.typesafe.config.{ Config, ConfigFactory, ConfigException }
 import scala.collection.mutable.{ Map => MutableMap, ListBuffer }
+import scala.collection.JavaConverters._
 
 /**
  * Configuration Exception
@@ -53,17 +54,11 @@ object TypesafeConfigReader extends TypesafeConfigReader with StandardTypesafeCo
 trait TypesafeConfigReader { self: TypesafeConfig =>
 
   lazy val dbNames: List[String] = {
-    val it = config.entrySet.iterator
-    val buf: ListBuffer[String] = new ListBuffer
-    while (it.hasNext) {
-      val entry = it.next
-      val key = entry.getKey
-      key.split("\\.").toList match {
-        case List("db", dbName, _) => buf.append(dbName)
-        case _ => ()
-      }
+    if (config.hasPath("db")) {
+      config.getConfig("db").root.keySet.asScala.toList
+    } else {
+      Nil
     }
-    buf.toList.distinct
   }
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
