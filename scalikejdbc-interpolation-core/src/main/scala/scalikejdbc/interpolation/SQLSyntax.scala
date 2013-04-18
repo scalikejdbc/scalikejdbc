@@ -5,5 +5,13 @@ package scalikejdbc.interpolation
  *
  * This value won't be treated as a binding parameter but will be appended as a part of SQL.
  */
-case class SQLSyntax(value: String, parameters: Seq[Any] = Vector())
+class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any] = Vector())
+
+object SQLSyntax {
+
+  private[scalikejdbc] def apply(value: String, parameters: Seq[Any]) = new SQLSyntax(value, parameters)
+
+  def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))
+
+}
 
