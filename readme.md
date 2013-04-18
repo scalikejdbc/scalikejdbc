@@ -2,17 +2,9 @@
 
 ![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
 
-## Just write SQL
+## Just write SQL and get things done!
 
-ScalikeJDBC is A tidy SQL-based DB access library for Scala developers.
-
-This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
-
-Users do nothing other than writing SQL and mapping from `java.sql.ResultSet` objects to Scala values. 
-
-If you want to create mapper modules easily, also take a look at scalikejdbc-mapper-generator.
-
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-mapper-generator
+ScalikeJDBC is A tidy SQL-based DB access library for Scala developers. This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
 
 
 ## Supported RDBMS
