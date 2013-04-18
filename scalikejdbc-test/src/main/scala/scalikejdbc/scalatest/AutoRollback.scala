@@ -48,7 +48,7 @@ trait AutoRollback { self: Suite =>
    * Provides transactional block
    * @param test one arg test
    */
-  def withFixture(test: OneArgTest) {
+  def withFixture(test: OneArgTest) = {
     using(db()) { db =>
       try {
         db.begin()
