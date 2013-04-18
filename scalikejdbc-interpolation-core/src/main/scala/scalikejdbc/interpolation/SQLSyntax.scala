@@ -9,7 +9,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
 object SQLSyntax {
 
-  private[scalikejdbc] def apply(value: String, parameters: Seq[Any]) = new SQLSyntax(value, parameters)
+  private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLSyntax(value, parameters)
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))
 
