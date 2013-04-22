@@ -19,7 +19,7 @@ import scala.language.implicitConversions
 import scalikejdbc.SQLInterpolationString
 
 /**
- *Implicit conversions
+ * Implicit conversions
  */
 object Implicits {
 
