@@ -48,6 +48,8 @@ object SQLInterpolation {
     def delimiterForResultName = if (forceUpperCase) "_ON_" else "_on_"
     def nameConverters: Map[String, String] = Map()
 
+    def column = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A](this)
+
     def syntax = {
       val _name = if (forceUpperCase) tableName.toUpperCase else tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
@@ -139,6 +141,29 @@ object SQLInterpolation {
       if (alphabetOnly.size == 0) alphabetOnly = "x"
       if (support.useShortenedResultName) toShortenedName(alphabetOnly, support.columns)
       else alphabetOnly
+    }
+
+  }
+
+  /**
+   * SQLSyntax provider for column names
+   */
+  case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A] {
+
+    val nameConverters = support.nameConverters
+    val forceUpperCase = support.forceUpperCase
+
+    lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
+
+    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
+
+    val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
+
+    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+      SQLSyntax(c.value)
+    }.getOrElse {
+      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+        s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
     }
 
   }

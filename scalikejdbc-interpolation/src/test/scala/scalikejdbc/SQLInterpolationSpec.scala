@@ -568,7 +568,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"create table users (id int not null, first_name varchar(256), full_name varchar(256))".execute.apply()
           Seq((1, "Alice", "Aclice Cooper"), (2, "Bob", "Bob Lee")) foreach {
             case (id, first, full) =>
-              sql"insert into users values (${id}, ${first}, ${full})".update.apply()
+              val c = UserName.column
+              sql"insert into ${UserName.table} (${c.id}, ${c.first}, ${c.full}) values (${id}, ${first}, ${full})".update.apply()
           }
 
           object UserName extends SQLSyntaxSupport[UserName] {
