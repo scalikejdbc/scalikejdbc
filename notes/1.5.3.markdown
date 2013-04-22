@@ -1,0 +1,24 @@
+ScalikeJDBC 1.5.3 has been released. interpolation, config and test are changed.
+
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+
+http://git.io/scalikejdbc
+
+## interpolation
+
+- #116 Possible SQL injection vulnerability
+- #117 Type safety for insert/update SQL
+- Enabled to use " or ' in column name when using SQLSyntaxSupport
+- Enaled using underscore as first/last character of field name
+
+## test
+
+- Followed ScalaTest's API change
+
+## config
+
+- Refactored TypesafeConfigReader#dbNames by @tototoshi
+
+
+Enjoy writing (mostly) typesafe SQL and get things done!
+
