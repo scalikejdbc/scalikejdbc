@@ -1,4 +1,4 @@
-ScalikeJDBC 1.5.3 has been released. interpolation, config and test are changed.
+ScalikeJDBC 1.5.3 has been released. interpolation, mapper-generator, config and test are changed.
 
 ![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
 
@@ -39,6 +39,12 @@ The following code works with this version.
 
     case class Something(_type: String)
     object Something(_type: String)
+
+## mapper-generator
+
+- Updated create method generation for interpolation template
+
+Repleated with #117.
 
 ## test
 
