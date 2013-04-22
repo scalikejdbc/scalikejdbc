@@ -129,6 +129,14 @@ object SQLInterpolation {
         shortenedName
       }
     }
+
+    def toAliasName(originalName: String, support: SQLSyntaxSupport[_]): String = {
+      var alphabetOnly = originalName.filter(c => c.isLetter && c <= 'z' || c == '_')
+      if (alphabetOnly.size == 0) alphabetOnly = "x"
+      if (support.useShortenedResultName) toShortenedName(alphabetOnly, support.columns)
+      else alphabetOnly
+    }
+
   }
 
   /**
@@ -184,14 +192,14 @@ object SQLInterpolation {
     val name: BasicResultNameSQLSyntaxProvider[S, A] = BasicResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
     val * : SQLSyntax = SQLSyntax(columns.map { c =>
-      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      val name = toAliasName(c.value, support)
       s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
     def apply(syntax: SQLSyntax): PartialResultSQLSyntaxProvider[S, A] = PartialResultSQLSyntaxProvider(support, tableAliasName, syntax)
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
-      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      val name = toAliasName(c.value, support)
       SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
   }
@@ -201,7 +209,7 @@ object SQLInterpolation {
     import SQLSyntaxProvider._
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
-      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      val name = toAliasName(c.value, support)
       SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
     }.getOrElse(throw notFoundInColumns(aliasName, name))
   }
@@ -224,12 +232,12 @@ object SQLInterpolation {
     import SQLSyntaxProvider._
 
     val * : SQLSyntax = SQLSyntax(columns.map { c =>
-      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      val name = toAliasName(c.value, support)
       s"${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
     val namedColumns: Seq[SQLSyntax] = support.columns.map { columnName: String =>
-      val name = if (support.useShortenedResultName) toShortenedName(columnName, support.columns) else columnName
+      val name = toAliasName(SQLSyntax(columnName), support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
 
@@ -239,7 +247,7 @@ object SQLInterpolation {
     }
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
-      val name = if (support.useShortenedResultName) toShortenedName(c.value, support.columns) else c.value
+      val name = toAliasName(c.value, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
   }
@@ -412,14 +420,14 @@ object SQLInterpolation {
     import SQLSyntaxProvider._
 
     val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
-      val name = if (underlying.support.useShortenedResultName) toShortenedName(c.value, underlying.support.columns) else c.value
+      val name = toAliasName(c.value, underlying.support)
       s"${name}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
     override val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
 
     def column(name: String): SQLSyntax = underlying.columns.find(_.value.toLowerCase == name.toLowerCase).map { original: SQLSyntax =>
-      val name = if (underlying.support.useShortenedResultName) toShortenedName(original.value, underlying.support.columns) else original.value
+      val name = toAliasName(original.value, underlying.support)
       SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
     }.getOrElse {
       throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
