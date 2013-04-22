@@ -457,7 +457,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           (1 to createColumns.size).map(c => 4.indent + "?").mkString(comma + eol)
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           createColumns.map(c => 4.indent + "/*'" + c.nameInScala + "*/" + c.dummyValue).mkString(comma + eol)
-        case GeneratorTemplate.interpolation if createColumns.size <= 22 =>
+        case GeneratorTemplate.interpolation =>
           createColumns.map(c => 4.indent + "${" + c.nameInScala + "}").mkString(comma + eol)
         case _ =>
           createColumns.map(c => 4.indent + "{" + c.nameInScala + "}").mkString(comma + eol)
@@ -467,7 +467,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
           3.indent + ".bind(" + eol +
             createColumns.map(c => 4.indent + c.nameInScala).mkString(comma + eol)
-        case GeneratorTemplate.interpolation if createColumns.size <= 22 => ""
+        case GeneratorTemplate.interpolation => ""
         case _ =>
           3.indent + ".bindByName(" + eol +
             createColumns.map {
@@ -489,8 +489,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           case GeneratorTemplate.interpolation => "${" + className + ".table}"
           case _ => table.name
         }) + " (" + eol +
-        createColumns.map(c => 4.indent + c.name).mkString(comma + eol) + eol +
-        3.indent + ") VALUES (" + eol +
+        (config.template match {
+          case GeneratorTemplate.interpolation => createColumns.map(c => 4.indent + "${" + className + ".column." + c.nameInScala + "}").mkString(comma + eol)
+          case _ => createColumns.map(c => 4.indent + c.name).mkString(comma + eol)
+        }) + eol +
+        3.indent + ") values (" + eol +
         placeHolderPart + eol +
         3.indent + ")" + eol +
         (config.template match {

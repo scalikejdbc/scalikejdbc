@@ -55,25 +55,25 @@ object MemberGroup {
   val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[MemberGroup] = {
-    SQL("""SELECT * FROM MEMBER_GROUP WHERE ID = ?""")
+    SQL("""select * from MEMBER_GROUP where ID = ?""")
       .bind(id).map(*).single.apply()
   }
           
   def findAll()(implicit session: DBSession = autoSession): List[MemberGroup] = {
-    SQL("""SELECT ${SQLSyntax(columnNames.inSQL)} FROM MEMBER_GROUP""").map(*).list.apply()
+    SQL("""select * from MEMBER_GROUP""").map(*).list.apply()
   }
           
   def countAll()(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT COUNT(1) FROM MEMBER_GROUP""").map(rs => rs.long(1)).single.apply().get
+    SQL("""select count(1) from MEMBER_GROUP""").map(rs => rs.long(1)).single.apply().get
   }
           
   def findAllBy(where: String, params: Any*)(implicit session: DBSession = autoSession): List[MemberGroup] = {
-    SQL("""SELECT * FROM MEMBER_GROUP WHERE """ + where)
+    SQL("""select * from MEMBER_GROUP where """ + where)
       .bind(params: _*).map(*).list.apply()
   }
       
   def countBy(where: String, params: Any*)(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT count(1) FROM MEMBER_GROUP WHERE """ + where)
+    SQL("""select count(1) from MEMBER_GROUP where """ + where)
       .bind(params: _*).map(rs => rs.long(1)).single.apply().get
   }
       
@@ -81,10 +81,10 @@ object MemberGroup {
     name: String,
     underscore: Option[String] = None)(implicit session: DBSession = autoSession): MemberGroup = {
     val generatedKey = SQL("""
-      INSERT INTO MEMBER_GROUP (
+      insert into MEMBER_GROUP (
         NAME,
         _UNDERSCORE
-      ) VALUES (
+      ) values (
         ?,
         ?
       )
@@ -102,13 +102,13 @@ object MemberGroup {
 
   def update(m: MemberGroup)(implicit session: DBSession = autoSession): MemberGroup = {
     SQL("""
-      UPDATE
+      update
         MEMBER_GROUP
-      SET
+      set
         ID = ?,
         NAME = ?,
         _UNDERSCORE = ?
-      WHERE
+      where
         ID = ?
       """)
       .bind(
@@ -121,7 +121,7 @@ object MemberGroup {
   }
       
   def delete(m: MemberGroup)(implicit session: DBSession = autoSession): Unit = {
-    SQL("""DELETE FROM MEMBER_GROUP WHERE ID = ?""")
+    SQL("""delete from MEMBER_GROUP where ID = ?""")
       .bind(m.id).update.apply()
   }
           

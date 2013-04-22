@@ -59,9 +59,9 @@ object MemberGroup extends SQLSyntaxSupport[MemberGroup] {
     underscore: Option[String] = None)(implicit session: DBSession = autoSession): MemberGroup = {
     val generatedKey = sql"""
       insert into ${MemberGroup.table} (
-        NAME,
-        _UNDERSCORE
-      ) VALUES (
+        ${MemberGroup.column.name},
+        ${MemberGroup.column.underscore}
+      ) values (
         ${name},
         ${underscore}
       )

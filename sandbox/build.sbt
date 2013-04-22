@@ -8,9 +8,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "1.5.2",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.5.2",
-  "com.github.seratch" %% "scalikejdbc-test" % "1.5.2",
+  "com.github.seratch" %% "scalikejdbc" % "1.5.3-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.5.3-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-test" % "1.5.3-SNAPSHOT",
   "org.slf4j" % "slf4j-simple" % "[1.7,)",
   "org.hibernate" %  "hibernate-core" % "4.1.9.Final",
   "org.hsqldb" % "hsqldb" % "[2,)",
@@ -39,7 +39,6 @@ DB autoCommit { implicit s =>
     sql"insert into group_members values (${1}, ${2})".update.apply()
   } catch { case e: Exception => println(e.getMessage) }
 }
-/*
 // -----------------------------
 // users
 case class User(id: Long, val name: Option[String], 
@@ -99,6 +98,5 @@ val groups: Seq[Group] = DB readOnly { implicit s =>
 println("-------------------")
 groups.foreach(group => println(group))
 println("-------------------")
-*/
 """
 
