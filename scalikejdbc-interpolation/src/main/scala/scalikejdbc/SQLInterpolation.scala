@@ -107,9 +107,13 @@ object SQLInterpolation {
         }.getOrElse(convertersApplied), // might end with an acronym
         { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
       )
-      singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
+      val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
         .replaceFirst("^_", "")
         .replaceFirst("_$", "")
+
+      if (str.startsWith("_")) "_" + result
+      else if (str.endsWith("_")) result + "_"
+      else result
     }
 
     def toShortenedName(name: String, columns: Seq[String]): String = {

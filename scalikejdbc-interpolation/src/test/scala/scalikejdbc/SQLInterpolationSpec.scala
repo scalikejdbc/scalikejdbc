@@ -28,11 +28,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
+    SQLSyntaxProvider.toSnakeCase("_type") should equal("_type")
+    SQLSyntaxProvider.toSnakeCase("type_") should equal("type_")
     SQLSyntaxProvider.toSnakeCase("firstName") should equal("first_name")
     SQLSyntaxProvider.toSnakeCase("SQLObject") should equal("sql_object")
     SQLSyntaxProvider.toSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
     SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
     SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
+    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
   }
 
   object User extends SQLSyntaxSupport[User] {
