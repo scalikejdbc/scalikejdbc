@@ -78,17 +78,17 @@ object MemberGroup extends SQLSyntaxSupport[MemberGroup] {
       update
         ${MemberGroup.table}
       set
-        ID = ${m.id},
-        NAME = ${m.name},
-        _UNDERSCORE = ${m.underscore}
+        ${id} = ${m.id},
+        ${name} = ${m.name},
+        ${underscore} = ${m.underscore}
       where
-        ID = ${m.id}
+        ${MemberGroup.column.id} = ${m.id}
       """.update.apply()
     m
   }
         
   def delete(m: MemberGroup)(implicit session: DBSession = autoSession): Unit = {
-    sql"""delete from ${MemberGroup.table} where ID = ${m.id}""".update.apply()
+    sql"""delete from ${MemberGroup.table} where ${MemberGroup.column.id} = ${m.id}""".update.apply()
   }
         
 }

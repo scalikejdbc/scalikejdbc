@@ -556,20 +556,20 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           allColumns.map(c => 4.indent + c.name + " = /*'" + c.nameInScala + "*/" + c.dummyValue).mkString(comma + eol)
         case GeneratorTemplate.interpolation =>
-          allColumns.map(c => 4.indent + c.name + " = \\${m." + c.nameInScala + "}").mkString(comma + eol)
+          allColumns.map(c => 4.indent + "\\${" + c.nameInScala + "} = \\${m." + c.nameInScala + "}").mkString(comma + eol)
         case _ =>
           allColumns.map(c => 4.indent + c.name + " = {" + c.nameInScala + "}").mkString(comma + eol)
       }
 
       val wherePart = config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
-          4.indent + pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
+          4.indent + pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
-          4.indent + pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
+          4.indent + pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case GeneratorTemplate.interpolation =>
-          4.indent + pkColumns.map(pk => pk.name + " = \\${m." + pk.nameInScala + "}").mkString(" AND ")
+          4.indent + pkColumns.map(pk => "\\${" + className + ".column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
         case _ =>
-          4.indent + pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
+          4.indent + pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
       }
 
       val bindingPart = config.template match {
@@ -635,13 +635,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val wherePart: String = config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
-          pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
-          pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case GeneratorTemplate.interpolation =>
-          pkColumns.map(pk => pk.name + " = \\${m." + pk.nameInScala + "}").mkString(" AND ")
+          pkColumns.map(pk => "\\${" + className + ".column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
         case _ =>
-          pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
       }
 
       val bindingPart: String = config.template match {
@@ -686,13 +686,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val argsPart = pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ")
       val wherePart = (config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>
-          pkColumns.map(pk => pk.name + " = ?").mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
-          pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case GeneratorTemplate.interpolation =>
-          pkColumns.map(pk => pk.name + " = \\${" + pk.nameInScala + "}").mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = \\${" + pk.nameInScala + "}").mkString(" and ")
         case _ =>
-          pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" AND ")
+          pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
       })
       val bindingPart = (config.template match {
         case GeneratorTemplate.basic | GeneratorTemplate.placeHolderSQL =>

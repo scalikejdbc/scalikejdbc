@@ -56,7 +56,7 @@ object WithoutPk {
   val autoSession = AutoSession
 
   def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = autoSession): Option[WithoutPk] = {
-    SQL("""select * from WITHOUT_PK where AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
+    SQL("""select * from WITHOUT_PK where AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> aaa, 'bbb -> bbb, 'createdAt -> createdAt).map(*).single.apply()
   }
           
@@ -114,7 +114,7 @@ object WithoutPk {
         BBB = /*'bbb*/1,
         CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
       where
-        AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
+        AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
       """)
       .bindByName(
         'aaa -> m.aaa,
@@ -125,7 +125,7 @@ object WithoutPk {
   }
       
   def delete(m: WithoutPk)(implicit session: DBSession = autoSession): Unit = {
-    SQL("""delete from WITHOUT_PK where AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
+    SQL("""delete from WITHOUT_PK where AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> m.aaa, 'bbb -> m.bbb, 'createdAt -> m.createdAt).update.apply()
   }
           

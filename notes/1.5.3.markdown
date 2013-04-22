@@ -42,7 +42,7 @@ The following code works with this version.
 
 ## mapper-generator
 
-- Updated create method generation for interpolation template
+- Updated create/update/delete method generation for interpolation template
 
 Repleated with #117.
 

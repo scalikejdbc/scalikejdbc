@@ -129,11 +129,11 @@ object Member extends SQLSyntaxSupport[Member] {
     createdAt: DateTime)(implicit session: DBSession = autoSession): Member = {
     val generatedKey = sql"""
       insert into ${Member.table} (
-        NAME,
-        DESCRIPTION,
-        BIRTHDAY,
-        CREATED_AT
-      ) VALUES (
+        ${Member.column.name},
+        ${Member.column.description},
+        ${Member.column.birthday},
+        ${Member.column.createdAt}
+      ) values (
         ${name},
         ${description},
         ${birthday},
@@ -154,19 +154,19 @@ object Member extends SQLSyntaxSupport[Member] {
       update
         ${Member.table}
       set
-        ID = ${m.id},
-        NAME = ${m.name},
-        DESCRIPTION = ${m.description},
-        BIRTHDAY = ${m.birthday},
-        CREATED_AT = ${m.createdAt}
+        ${Member.column.id} = ${m.id},
+        ${Member.column.name} = ${m.name},
+        ${Member.column.description} = ${m.description},
+        ${Member.column.birthday} = ${m.birthday},
+        ${Member.column.createdAt} = ${m.createdAt}
       where
-        ID = ${m.id}
+        ${Member.column.id} = ${m.id}
       """.update.apply()
     m
   }
 
   def delete(m: Member)(implicit session: DBSession = autoSession): Unit = {
-    sql"""delete from ${Member.table} where ID = ${m.id}""".update.apply()
+    sql"""delete from ${Member.table} where ${Member.column.id} = ${m.id}""".update.apply()
   }
 
 }
