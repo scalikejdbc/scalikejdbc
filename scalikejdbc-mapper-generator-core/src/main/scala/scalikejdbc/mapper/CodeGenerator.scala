@@ -490,7 +490,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           case _ => table.name
         }) + " (" + eol +
         (config.template match {
-          case GeneratorTemplate.interpolation => createColumns.map(c => 4.indent + "${" + className + ".column." + c.nameInScala + "}").mkString(comma + eol)
+          case GeneratorTemplate.interpolation => createColumns.map(c => 4.indent + "${" + "column." + c.nameInScala + "}").mkString(comma + eol)
           case _ => createColumns.map(c => 4.indent + c.name).mkString(comma + eol)
         }) + eol +
         3.indent + ") values (" + eol +
@@ -556,7 +556,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           allColumns.map(c => 4.indent + c.name + " = /*'" + c.nameInScala + "*/" + c.dummyValue).mkString(comma + eol)
         case GeneratorTemplate.interpolation =>
-          allColumns.map(c => 4.indent + "\\${" + c.nameInScala + "} = \\${m." + c.nameInScala + "}").mkString(comma + eol)
+          allColumns.map(c => 4.indent + "\\${column." + c.nameInScala + "} = \\${m." + c.nameInScala + "}").mkString(comma + eol)
         case _ =>
           allColumns.map(c => 4.indent + c.name + " = {" + c.nameInScala + "}").mkString(comma + eol)
       }
@@ -567,7 +567,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           4.indent + pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case GeneratorTemplate.interpolation =>
-          4.indent + pkColumns.map(pk => "\\${" + className + ".column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
+          4.indent + pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
         case _ =>
           4.indent + pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
       }
@@ -639,7 +639,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.executable | GeneratorTemplate.executableSQL =>
           pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case GeneratorTemplate.interpolation =>
-          pkColumns.map(pk => "\\${" + className + ".column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
+          pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
         case _ =>
           pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
       }

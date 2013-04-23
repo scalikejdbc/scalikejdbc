@@ -48,7 +48,7 @@ object SQLInterpolation {
     def delimiterForResultName = if (forceUpperCase) "_ON_" else "_on_"
     def nameConverters: Map[String, String] = Map()
 
-    def column = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A](this)
+    def column: ColumnName[A] = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A](this)
 
     def syntax = {
       val _name = if (forceUpperCase) tableName.toUpperCase else tableName
@@ -480,6 +480,7 @@ object SQLInterpolation {
 
   }
 
+  type ColumnName[A] = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type ResultName[A] = ResultNameSQLSyntaxProvider[SQLSyntaxSupport[A], A]
   type SubQueryResultName = SubQueryResultNameSQLSyntaxProvider
 
