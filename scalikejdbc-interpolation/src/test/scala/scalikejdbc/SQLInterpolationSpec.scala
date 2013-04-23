@@ -28,11 +28,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
+    SQLSyntaxProvider.toSnakeCase("_type") should equal("_type")
+    SQLSyntaxProvider.toSnakeCase("type_") should equal("type_")
     SQLSyntaxProvider.toSnakeCase("firstName") should equal("first_name")
     SQLSyntaxProvider.toSnakeCase("SQLObject") should equal("sql_object")
     SQLSyntaxProvider.toSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
     SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
     SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
+    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
   }
 
   object User extends SQLSyntaxSupport[User] {
@@ -565,7 +568,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"create table users (id int not null, first_name varchar(256), full_name varchar(256))".execute.apply()
           Seq((1, "Alice", "Aclice Cooper"), (2, "Bob", "Bob Lee")) foreach {
             case (id, first, full) =>
-              sql"insert into users values (${id}, ${first}, ${full})".update.apply()
+              val c = UserName.column
+              sql"insert into ${UserName.table} (${c.id}, ${c.first}, ${c.full}) values (${id}, ${first}, ${full})".update.apply()
           }
 
           object UserName extends SQLSyntaxSupport[UserName] {

@@ -56,25 +56,25 @@ object WithoutPk {
   val autoSession = AutoSession
 
   def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = autoSession): Option[WithoutPk] = {
-    SQL("""SELECT * FROM WITHOUT_PK WHERE AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
+    SQL("""select * from WITHOUT_PK where AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> aaa, 'bbb -> bbb, 'createdAt -> createdAt).map(*).single.apply()
   }
           
   def findAll()(implicit session: DBSession = autoSession): List[WithoutPk] = {
-    SQL("""SELECT ${SQLSyntax(columnNames.inSQL)} FROM WITHOUT_PK""").map(*).list.apply()
+    SQL("""select * from WITHOUT_PK""").map(*).list.apply()
   }
           
   def countAll()(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT COUNT(1) FROM WITHOUT_PK""").map(rs => rs.long(1)).single.apply().get
+    SQL("""select count(1) from WITHOUT_PK""").map(rs => rs.long(1)).single.apply().get
   }
           
   def findAllBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): List[WithoutPk] = {
-    SQL("""SELECT * FROM WITHOUT_PK WHERE """ + where)
+    SQL("""select * from WITHOUT_PK where """ + where)
       .bindByName(params: _*).map(*).list.apply()
   }
       
   def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = autoSession): Long = {
-    SQL("""SELECT count(1) FROM WITHOUT_PK WHERE """ + where)
+    SQL("""select count(1) from WITHOUT_PK where """ + where)
       .bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
       
@@ -83,11 +83,11 @@ object WithoutPk {
     bbb: Option[Int] = None,
     createdAt: DateTime)(implicit session: DBSession = autoSession): WithoutPk = {
     SQL("""
-      INSERT INTO WITHOUT_PK (
+      insert into WITHOUT_PK (
         AAA,
         BBB,
         CREATED_AT
-      ) VALUES (
+      ) values (
         /*'aaa*/'abc',
         /*'bbb*/1,
         /*'createdAt*/'1958-09-06 12:00:00'
@@ -107,14 +107,14 @@ object WithoutPk {
 
   def update(m: WithoutPk)(implicit session: DBSession = autoSession): WithoutPk = {
     SQL("""
-      UPDATE
+      update
         WITHOUT_PK
-      SET
+      set
         AAA = /*'aaa*/'abc',
         BBB = /*'bbb*/1,
         CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
-      WHERE
-        AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
+      where
+        AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'
       """)
       .bindByName(
         'aaa -> m.aaa,
@@ -125,7 +125,7 @@ object WithoutPk {
   }
       
   def delete(m: WithoutPk)(implicit session: DBSession = autoSession): Unit = {
-    SQL("""DELETE FROM WITHOUT_PK WHERE AAA = /*'aaa*/'abc' AND BBB = /*'bbb*/1 AND CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
+    SQL("""delete from WITHOUT_PK where AAA = /*'aaa*/'abc' and BBB = /*'bbb*/1 and CREATED_AT = /*'createdAt*/'1958-09-06 12:00:00'""")
       .bindByName('aaa -> m.aaa, 'bbb -> m.bbb, 'createdAt -> m.createdAt).update.apply()
   }
           

@@ -103,7 +103,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           }
 
           val ids = List(1, 2, 4) ::: (100 until 200).toList
-          val sorting = SQLSyntax("DESC")
+          val sorting = sqls"desc"
           val users = sql"select * from users where id in (${ids}) order by id ${sorting}".map {
             rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
           }.list.apply()

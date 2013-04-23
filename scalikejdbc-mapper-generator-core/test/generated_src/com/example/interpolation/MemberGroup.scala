@@ -59,9 +59,9 @@ object MemberGroup extends SQLSyntaxSupport[MemberGroup] {
     underscore: Option[String] = None)(implicit session: DBSession = autoSession): MemberGroup = {
     val generatedKey = sql"""
       insert into ${MemberGroup.table} (
-        NAME,
-        _UNDERSCORE
-      ) VALUES (
+        ${column.name},
+        ${column.underscore}
+      ) values (
         ${name},
         ${underscore}
       )
@@ -78,17 +78,17 @@ object MemberGroup extends SQLSyntaxSupport[MemberGroup] {
       update
         ${MemberGroup.table}
       set
-        ID = ${m.id},
-        NAME = ${m.name},
-        _UNDERSCORE = ${m.underscore}
+        ${column.id} = ${m.id},
+        ${column.name} = ${m.name},
+        ${column.underscore} = ${m.underscore}
       where
-        ID = ${m.id}
+        ${column.id} = ${m.id}
       """.update.apply()
     m
   }
         
   def delete(m: MemberGroup)(implicit session: DBSession = autoSession): Unit = {
-    sql"""delete from ${MemberGroup.table} where ID = ${m.id}""".update.apply()
+    sql"""delete from ${MemberGroup.table} where ${column.id} = ${m.id}""".update.apply()
   }
         
 }
