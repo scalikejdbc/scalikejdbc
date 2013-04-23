@@ -14,13 +14,12 @@ Disabled to use `SQLSyntax.apply(String)` and the constructor of `SQLSyntax` cla
 
 Before:
 
-    val m = Member.column
     sql"inser into ${Member.table} (id, full_name) values (${id}, ${fullName})".update.apply()
 
 After:
 
-    val m = Member.column
-    sql"inser into ${Member.table} (${m.id}, ${m.fullName}) values (${id}, ${fullName})".update.apply()
+    val column = Member.column
+    sql"inser into ${Member.table} (${column.id}, ${column.fullName}) values (${id}, ${fullName})".update.apply()
 
 - Enabled using " or ' in column name
 
