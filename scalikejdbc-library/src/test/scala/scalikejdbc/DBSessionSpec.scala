@@ -444,7 +444,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             ).update.apply()
 
             val c = Calendar.getInstance()
-            SQL("select * from dbsessionspec_dateTimeValues").map {
+            SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
               rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
             }.first().apply().map {
               case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
@@ -455,7 +455,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
                 d.toLocalDate.getDayOfMonth should equal(3)
 
                 // java.sql.Time
-                t.toLocalTime.getHourOfDay should (equal(13) or equal(20)) // TODO Travis CI issue
+                t.toLocalTime.getHourOfDay should equal(13)
                 t.toLocalTime.getMinuteOfHour should equal(40)
                 t.toLocalTime.getSecondOfMinute should equal(0)
                 t.toLocalTime.getMillisOfSecond should equal(0)
@@ -464,7 +464,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
                 ts.toDateTime.getYear should equal(2012)
                 ts.toDateTime.getMonthOfYear should equal(5)
                 ts.toDateTime.getDayOfMonth should equal(3)
-                ts.toDateTime.getHourOfDay should (equal(13) or equal(20)) // TODO Travis CI issue
+                ts.toDateTime.getHourOfDay should equal(13)
                 ts.toDateTime.getMinuteOfHour should equal(40)
                 ts.toDateTime.getSecondOfMinute should equal(0)
                 ts.toDateTime.getMillisOfSecond should equal(0)
