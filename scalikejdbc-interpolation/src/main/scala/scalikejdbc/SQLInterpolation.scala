@@ -119,8 +119,8 @@ object SQLInterpolation {
     }
 
     def toShortenedName(name: String, columns: Seq[String]): String = {
-      val shortenedName = name.split("_").map(word => word.take(1)).mkString
-      val shortenedNames = columns.map(_.split("_").map(word => word.take(1)).mkString)
+      val shortenedName = toAlphabetOnly(name).split("_").map(word => word.take(1)).mkString
+      val shortenedNames = columns.map(c => toAlphabetOnly(c).split("_").map(word => word.take(1)).mkString)
       if (shortenedNames.filter(_ == shortenedName).size > 1) {
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
@@ -137,10 +137,13 @@ object SQLInterpolation {
     }
 
     def toAliasName(originalName: String, support: SQLSyntaxSupport[_]): String = {
-      var alphabetOnly = originalName.filter(c => c.isLetter && c <= 'z' || c == '_')
-      if (alphabetOnly.size == 0) alphabetOnly = "x"
-      if (support.useShortenedResultName) toShortenedName(alphabetOnly, support.columns)
-      else alphabetOnly
+      if (support.useShortenedResultName) toShortenedName(originalName, support.columns)
+      else toAlphabetOnly(originalName)
+    }
+
+    private[this] def toAlphabetOnly(name: String): String = {
+      val _name = name.filter(c => c.isLetter && c <= 'z' || c == '_')
+      if (_name.size == 0) "x" else _name
     }
 
   }
