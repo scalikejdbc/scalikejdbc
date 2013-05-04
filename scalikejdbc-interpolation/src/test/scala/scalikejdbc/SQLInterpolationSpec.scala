@@ -631,4 +631,39 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  case class Names(fullName: String, firstName: String, lastName: String)
+  object Names extends SQLSyntaxSupport[Names] {
+    override val columns = Seq("full_name", "first_name", "last_name")
+    def apply(n: ResultName[Names])(rs: WrappedResultSet) = new Names(
+      fullName = rs.string(n.fullName), firstName = rs.string(n.firstName), lastName = rs.string(n.lastName)
+    )
+  }
+
+  it should "be available with duplicated shorten names" in {
+    try {
+      DB localTx { implicit s =>
+        sql"create table names (full_name varchar(256), first_name varchar(256), last_name varchar(256))".execute.apply()
+      }
+      DB localTx {
+        implicit s =>
+          val (n, c) = (Names.syntax("n"), Names.column)
+          Seq(("Alice Cooper", "Alice", "Cooper"), ("Bob Lee", "Bob", "Lee")) foreach {
+            case (full, first, last) =>
+              sql"insert into ${Names.table} (${c.fullName}, ${c.firstName}, ${c.lastName}) values (${full}, ${first}, ${last})".update.apply()
+          }
+          val found = sql"select ${n.result.*} from ${Names as n} where ${n.firstName} = 'Alice'".map(Names(n.resultName)).single.apply()
+          found.isDefined should be(true)
+          found.get.firstName should equal("Alice")
+          found.get.lastName should equal("Cooper")
+          found.get.fullName should equal("Alice Cooper")
+      }
+    } finally {
+      DB localTx { implicit s =>
+        try {
+          sql"drop table names".execute.apply()
+        } catch { case e: Exception => }
+      }
+    }
+  }
+
 }

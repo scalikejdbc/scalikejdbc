@@ -119,15 +119,22 @@ object SQLInterpolation {
     }
 
     def toShortenedName(name: String, columns: Seq[String]): String = {
-      val shortenedName = toAlphabetOnly(name).split("_").map(word => word.take(1)).mkString
-      val shortenedNames = columns.map(c => toAlphabetOnly(c).split("_").map(word => word.take(1)).mkString)
+      def shorten(s: String): String = s.split("_").map(word => word.take(1)).mkString
+
+      val shortenedName = shorten(toAlphabetOnly(name))
+      val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))
       if (shortenedNames.filter(_ == shortenedName).size > 1) {
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
-            if (found) (n, found)
-            else if (column == name) (n, true)
-            else if (shortened == shortenedName) (n + 1, false)
-            else (n, found)
+            if (found) {
+              (n, found) // alread found
+            } else if (column == name) {
+              (n, true) // original name is expected
+            } else if (shortened == shortenedName) {
+              (n + 1, false) // original name is different but shorten name is same
+            } else {
+              (n, found) // not found yet
+            }
         }
         if (!found) throw new IllegalStateException("This must be a library bug.")
         else shortenedName + n
