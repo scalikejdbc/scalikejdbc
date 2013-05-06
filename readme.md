@@ -21,20 +21,21 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ### sbt
 
-```scala
-libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.5,)",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
-  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
-)
-```
-
 If you're using Scala 2.10.x, using scalikejdbc-interpolation is highly recommended.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.5,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.5,)",
+  "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
+  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+)
+```
+If you're using Scala 2.9.x, just use scalikejdbc only.
+
+```scala
+libraryDependencies ++= Seq(
+  "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
   "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
 )
@@ -48,6 +49,9 @@ Try ScalikeJDBC right now!
 git clone git://github.com/seratch/scalikejdbc.git
 cd scalikejdbc/sandbox
 sbt console
+
+// simple query
+// val ids = withSQL { select(u.id).from(User as u).orderBy(u.id) }.map(_.long(1)).list.apply()
 ```
 
 ## Basic usage
@@ -65,12 +69,16 @@ object User extends SQLSyntaxSupport[User] {
 
 val u = User.syntax("u")
 val users: List[User] = DB readOnly { implicit session =>
-  sql"select ${u.result.*} from ${User as u}".map(User(u.resultName)).list.apply()
+  withSQL { 
+    select.all(u).from(User as u).where.eq(u.id, 123) 
+  }.map(User(u.resultName)).list.apply()
+
+  // or sql"select ${u.result.*} from ${User as u} where ${u.id} = ${123}".map(User.resultName).list.apply()
 }
 
 val name = Some("Chris")
 val newUser: User = DB localTx { implicit session =>
-  val id = sql"insert into ${User.table} values (${name})").updateAndReturnGeneratedKey.apply()
+  val id = withSQL { insert.into(User).values(name) }.updateAndReturnGeneratedKey.apply()
   User(id, name)
 }
 ```
@@ -85,7 +93,7 @@ case class User(id: Long, name: Option[String] = None)
 val * = (rs: WrappedResultSet) => User(rs.long("id"), rs.stringOpt("name"))
 
 val users: List[User] = DB readOnly { implicit session => 
-  SQL("select id, name from users").map(*).list.apply()
+  SQL("select id, name from users where id = ?").bind(123).map(*).list.apply()
 }
 
 val name = Some("Chris")
@@ -161,6 +169,26 @@ New powerful SQL template using SIP-11 String Interpolation.
 val name = "Martin"
 val email = "martin@example.com"
 val id = sql"insert into users values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
+```
+
+SQLSyntaxSupport makes it more convenient.
+
+```scala
+case class User(id: Long, name: String, email: String)
+object User extends SQLSyntaxSupport[User] {
+  override val tableName = "users"
+  def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(
+    rs.long(u.id), rs.string(u.name), rs.strng(u.email)
+  )
+}
+
+val u = User.syntax("u")
+val (name, email) = ("Martin", "martin@example.com")
+val id = withSQL { insert.into(User).values(name, email) }.updateAndReturnGeneratedKey.apply()
+
+val created: Option[User] = withSQL { 
+  select(u).from(User as u).where.eq(u.id, id) 
+}.map(User(u.resultName).single.apply()
 ```
 
 See in detail:
