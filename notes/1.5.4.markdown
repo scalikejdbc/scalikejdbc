@@ -1,0 +1,25 @@
+ScalikeJDBC 1.5.4 has been released. In this release, core-library, interpolation and play-plugin are changed.
+
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+
+http://git.io/scalikejdbc
+
+## library
+
+- #118 LoggingSQLAndTimeSettings.singleLineMode support
+
+Newly singleLineMode option is added to LoggingSQLAndTimeSettings. If the option is set as true, ScalikeJDBC uses simplified and single line logging.
+
+## interpolation
+
+- #119 SQLSyntaxSupport doesn't suppose the column such as x1 and x2
+
+## play-plugin
+
+- #118 LoggingSQLAndTimeSettings.singleLineMode support
+
+Enabled specifying "scalikejdbc.global.loggingSQLAndTime.singleLineMode".
+
+
+Enjoy writing (mostly) typesafe SQL and get things done!
+
