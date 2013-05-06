@@ -41,6 +41,7 @@ object PlayPluginSpec extends Specification {
       "db.global.loggingSQLAndTime.warningThreasholdMillis" -> "1",
       "db.global.loggingSQLAndTime.warningLogLevel" -> "warn",
       "scalikejdbc.global.loggingSQLAndTime.enabled" -> "true",
+      "scalikejdbc.global.loggingSQLAndTime.singleLineMode" -> "true",
       "scalikejdbc.global.loggingSQLAndTime.logLevel" -> "debug",
       "scalikejdbc.global.loggingSQLAndTime.warningEnabled" -> "true",
       "scalikejdbc.global.loggingSQLAndTime.warningThreasholdMillis" -> "1",

@@ -21,44 +21,113 @@ import scala.language.experimental.macros
 import scala.language.dynamics
 
 /**
- * SQLInterpolation companion object
+ * SQLInterpolation imports.
  */
 object SQLInterpolation {
 
+  /*
+   * Implicit conversions.
+   */
   @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
   @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
 
+  /**
+   * Loaded columns for tables.
+   */
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
 
   /**
-   * SQLSyntax support utilities
+   * SQLSyntaxSupport trait. Companion object needs this trait as follows.
+   *
+   * {{{
+   *   case class Member(id: Long, name: Option[String])
+   *   object Member extends SQLSyntaxSupport[Member]
+   * }}}
    */
   trait SQLSyntaxSupport[A] {
 
+    /**
+     * Table name (default: the snake_case name from this companion object's name).
+     */
     def tableName: String = {
       val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
-      SQLSyntaxProvider.toSnakeCase(className)
+      SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase(className)
     }
+
+    /**
+     * [[scalikekdbc.SQLSyntax]] value for table name.
+     */
     def table: SQLSyntax = SQLSyntax(tableName)
 
+    /**
+     * Column names for this table (default: column names that are loaded from JDBC metadata).
+     */
     def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
 
+    /**
+     * True if you need forcing upper column names in SQL.
+     */
     def forceUpperCase: Boolean = false
+
+    /**
+     * True if you need shortening alias names in SQL.
+     */
     def useShortenedResultName: Boolean = true
+
+    /**
+     * Delimiter for alias names in SQL.
+     */
     def delimiterForResultName = if (forceUpperCase) "_ON_" else "_on_"
+
+    /**
+     * Rule to convert field names to column names.
+     *
+     * {{{
+     *   override val nameConverters = Map("^serviceCode$" -> "service_cd")
+     * }}}
+     */
     def nameConverters: Map[String, String] = Map()
 
+    /**
+     * Returns ColumnName provider for this (expected to use for insert/update queries).
+     */
     def column: ColumnName[A] = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A](this)
 
+    /**
+     * Returns SQLSyntax provider for this.
+     *
+     * {{{
+     *   val m = Member.syntax
+     *   sql"select ${m.result.*} from ${Member as m}".map(Member(m.resultName)).list.apply()
+     *   // select member.id as i_on_member, member.name as n_on_member from member
+     * }}}
+     */
     def syntax = {
       val _name = if (forceUpperCase) tableName.toUpperCase else tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
+
+    /**
+     * Returns SQLSyntax provider for this.
+     *
+     * {{{
+     *   val m = Member.syntax("m")
+     *   sql"select ${m.result.*} from ${Member as m}".map(Member(m.resultName)).list.apply()
+     *   // select m.id as i_on_m, m.name as n_on_m from member m
+     * }}}
+     */
     def syntax(name: String) = {
       val _name = if (forceUpperCase) name.toUpperCase else name
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
+    /**
+     * Returns table name and alias name part in SQL. If alias name and table name are same, alias name will be skipped.
+     *
+     * {{{
+     *   sql"select ${m.result.*} from ${Member.as(m)}"
+     * }}}
+     */
     def as(provider: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A]) = {
       if (tableName == provider.tableAliasName) { SQLSyntax(tableName) }
       else { SQLSyntax(tableName + " " + provider.tableAliasName) }
@@ -72,27 +141,51 @@ object SQLInterpolation {
     import SQLSyntaxProvider._
     import scala.reflect.runtime.universe._
 
-    def c(name: String) = column(name)
-    def column(name: String): SQLSyntax
-
+    /**
+     * Rule to convert field names to column names.
+     */
     val nameConverters: Map[String, String]
+
+    /**
+     * True if you need forcing upper column names in SQL.
+     */
     val forceUpperCase: Boolean
+
+    /**
+     * Delimiter for alias names in SQL.
+     */
     val delimiterForResultName: String
 
+    /**
+     * Returns [[scalikejdbc.SQLSyntax]] value for the column.
+     */
+    def c(name: String): SQLSyntax = column(name)
+
+    /**
+     * Returns [[scalikejdbc.SQLSyntax]] value for the column.
+     */
+    def column(name: String): SQLSyntax
+
+    /**
+     * Returns [[scalikejdbc.SQLSyntax]] value for the column which is referred by the field.
+     */
     def field(name: String): SQLSyntax = {
       val columnName = {
-        if (forceUpperCase) toSnakeCase(name, nameConverters).toUpperCase
-        else toSnakeCase(name, nameConverters)
+        if (forceUpperCase) applyNameConvertersAndConvertToSnakeCase(name, nameConverters).toUpperCase
+        else applyNameConvertersAndConvertToSnakeCase(name, nameConverters)
       }
       c(columnName)
     }
 
+    /**
+     * Returns [[scalikejdbc.SQLSyntax]] value for the column which is referred by the field.
+     */
     def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A]
 
   }
 
   /**
-   * SQLSyntaxProvider companion
+   * SQLSyntaxProvider companion.
    */
   private[scalikejdbc] object SQLSyntaxProvider {
 
@@ -101,7 +194,10 @@ object SQLInterpolation {
     private val endsWithAcronymRegExpStr = "[A-Z]{2,}$"
     private val singleUpperCaseRegExp = """[A-Z]""".r
 
-    def toSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = {
+    /**
+     * Returns the snake_case name after applying nameConverters.
+     */
+    def applyNameConvertersAndConvertToSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = {
       val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
       val acronymsFiltered = acronymRegExp.replaceAllIn(
         acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
@@ -118,16 +214,26 @@ object SQLInterpolation {
       else result
     }
 
+    /**
+     * Returns the shortened name for the name.
+     */
     def toShortenedName(name: String, columns: Seq[String]): String = {
-      val shortenedName = name.split("_").map(word => word.take(1)).mkString
-      val shortenedNames = columns.map(_.split("_").map(word => word.take(1)).mkString)
+      def shorten(s: String): String = s.split("_").map(word => word.take(1)).mkString
+
+      val shortenedName = shorten(toAlphabetOnly(name))
+      val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))
       if (shortenedNames.filter(_ == shortenedName).size > 1) {
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
-            if (found) (n, found)
-            else if (column == name) (n, true)
-            else if (shortened == shortenedName) (n + 1, false)
-            else (n, found)
+            if (found) {
+              (n, found) // alread found
+            } else if (column == name) {
+              (n, true) // original name is expected
+            } else if (shortened == shortenedName) {
+              (n + 1, false) // original name is different but shorten name is same
+            } else {
+              (n, found) // not found yet
+            }
         }
         if (!found) throw new IllegalStateException("This must be a library bug.")
         else shortenedName + n
@@ -136,17 +242,26 @@ object SQLInterpolation {
       }
     }
 
+    /**
+     * Returns the alias name for the name.
+     */
     def toAliasName(originalName: String, support: SQLSyntaxSupport[_]): String = {
-      var alphabetOnly = originalName.filter(c => c.isLetter && c <= 'z' || c == '_')
-      if (alphabetOnly.size == 0) alphabetOnly = "x"
-      if (support.useShortenedResultName) toShortenedName(alphabetOnly, support.columns)
-      else alphabetOnly
+      if (support.useShortenedResultName) toShortenedName(originalName, support.columns)
+      else originalName
+    }
+
+    /**
+     * Returns the name which is converted to pure alphabet only.
+     */
+    private[this] def toAlphabetOnly(name: String): String = {
+      val _name = name.filter(c => c.isLetter && c <= 'z' || c == '_')
+      if (_name.size == 0) "x" else _name
     }
 
   }
 
   /**
-   * SQLSyntax provider for column names
+   * SQLSyntax provider for column names.
    */
   case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A] {
 
@@ -169,7 +284,7 @@ object SQLInterpolation {
   }
 
   /**
-   * SQLSyntax Provider basic implementation
+   * SQLSyntax Provider basic implementation.
    */
   private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProvider[A] {
@@ -188,7 +303,7 @@ object SQLInterpolation {
   }
 
   /**
-   * SQLSyntax provider for query parts
+   * SQLSyntax provider for query parts.
    */
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
@@ -212,7 +327,7 @@ object SQLInterpolation {
   }
 
   /**
-   * SQLSyntax provider for result parts
+   * SQLSyntax provider for result parts.
    */
   case class ResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
@@ -244,7 +359,7 @@ object SQLInterpolation {
   }
 
   /**
-   * SQLSyntax provider for result names
+   * SQLSyntax provider for result names.
    */
   trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider[A] {
     def * : SQLSyntax
@@ -254,7 +369,7 @@ object SQLInterpolation {
   }
 
   /**
-   * Basic Query SQLSyntax Provider for result names
+   * Basic Query SQLSyntax Provider for result names.
    */
   case class BasicResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultNameSQLSyntaxProvider[S, A] {

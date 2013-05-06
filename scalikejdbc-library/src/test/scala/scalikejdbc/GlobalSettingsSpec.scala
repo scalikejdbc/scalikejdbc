@@ -62,4 +62,27 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
     }
   }
 
+  it should "support singleLineMode logging" in {
+    GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+      enabled = true,
+      singleLineMode = true,
+      logLevel = 'ERROR
+    )
+
+    DB autoCommit { implicit session =>
+      try {
+        try {
+          SQL("drop table issue118").execute.apply()
+        } catch { case e: Exception => }
+        SQL("create table issue118 (id int primary key, created_at timestamp)").execute.apply()
+        SQL("insert into issue118 values (?,?)").bind(1, DateTime.now).update.apply()
+      } finally {
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        try {
+          SQL("drop table issue118").execute.apply()
+        } catch { case e: Exception => }
+      }
+    }
+  }
+
 }

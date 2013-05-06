@@ -19,6 +19,7 @@ package scalikejdbc
  * Settings for logging SQL and timing
  */
 case class LoggingSQLAndTimeSettings(enabled: Boolean = true,
+  singleLineMode: Boolean = false,
   logLevel: Symbol = 'debug,
   warningEnabled: Boolean = false,
   warningThresholdMillis: Long = 3000L,

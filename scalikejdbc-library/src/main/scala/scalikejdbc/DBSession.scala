@@ -70,7 +70,7 @@ trait DBSession extends LogSupport {
         } else {
           template
         }
-        log.error("Failed to parse the following SQL template:\n\n  " + formattedTemplate + "\n")
+        log.error("Failed preparing the statement (Reason: " + e.getMessage + "):\n\n  " + formattedTemplate + "\n")
         throw e
     }
   }

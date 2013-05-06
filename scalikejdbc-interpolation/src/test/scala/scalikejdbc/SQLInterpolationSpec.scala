@@ -28,14 +28,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
-    SQLSyntaxProvider.toSnakeCase("_type") should equal("_type")
-    SQLSyntaxProvider.toSnakeCase("type_") should equal("type_")
-    SQLSyntaxProvider.toSnakeCase("firstName") should equal("first_name")
-    SQLSyntaxProvider.toSnakeCase("SQLObject") should equal("sql_object")
-    SQLSyntaxProvider.toSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
-    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
-    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
-    SQLSyntaxProvider.toSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("_type") should equal("_type")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("type_") should equal("type_")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("firstName") should equal("first_name")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject") should equal("sql_object")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
+    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
   }
 
   object User extends SQLSyntaxSupport[User] {
@@ -566,7 +566,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
       implicit s =>
         try {
           sql"create table users (id int not null, first_name varchar(256), full_name varchar(256))".execute.apply()
-          Seq((1, "Alice", "Aclice Cooper"), (2, "Bob", "Bob Lee")) foreach {
+          Seq((1, "Alice", "Alice Cooper"), (2, "Bob", "Bob Lee")) foreach {
             case (id, first, full) =>
               val c = UserName.column
               sql"insert into ${UserName.table} (${c.id}, ${c.first}, ${c.full}) values (${id}, ${first}, ${full})".update.apply()
@@ -594,6 +594,75 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         } finally {
           sql"drop table users".execute.apply()
         }
+    }
+  }
+
+  case class XNames(x1: String, x2: String)
+  object XNames extends SQLSyntaxSupport[XNames] {
+    override val columns = Seq("x1", "x2")
+    def apply(xn: ResultName[XNames])(rs: WrappedResultSet) = new XNames(
+      x1 = rs.string(xn.x1), x2 = rs.string(xn.x2)
+    )
+  }
+
+  it should "be available with names such as x1, x2" in {
+    try {
+      DB localTx { implicit s =>
+        sql"create table x_names (x1 varchar(256), x2 varchar(256))".execute.apply()
+      }
+      DB localTx {
+        implicit s =>
+          val (xn, c) = (XNames.syntax("xn"), XNames.column)
+          Seq(("Alice", "Alice Cooper"), ("Bob", "Bob Lee")) foreach {
+            case (x1, x2) =>
+              sql"insert into ${XNames.table} (${c.x1}, ${c.x2}) values (${x1}, ${x2})".update.apply()
+          }
+          val found = sql"select ${xn.result.*} from ${XNames as xn} where ${xn.x1} = 'Alice'".map(XNames(xn.resultName)).single.apply()
+          found.isDefined should be(true)
+          found.get.x1 should equal("Alice")
+          found.get.x2 should equal("Alice Cooper")
+      }
+    } finally {
+      DB localTx { implicit s =>
+        try {
+          sql"drop table x_names".execute.apply()
+        } catch { case e: Exception => }
+      }
+    }
+  }
+
+  case class Names(fullName: String, firstName: String, lastName: String)
+  object Names extends SQLSyntaxSupport[Names] {
+    override val columns = Seq("full_name", "first_name", "last_name")
+    def apply(n: ResultName[Names])(rs: WrappedResultSet) = new Names(
+      fullName = rs.string(n.fullName), firstName = rs.string(n.firstName), lastName = rs.string(n.lastName)
+    )
+  }
+
+  it should "be available with duplicated shorten names" in {
+    try {
+      DB localTx { implicit s =>
+        sql"create table names (full_name varchar(256), first_name varchar(256), last_name varchar(256))".execute.apply()
+      }
+      DB localTx {
+        implicit s =>
+          val (n, c) = (Names.syntax("n"), Names.column)
+          Seq(("Alice Cooper", "Alice", "Cooper"), ("Bob Lee", "Bob", "Lee")) foreach {
+            case (full, first, last) =>
+              sql"insert into ${Names.table} (${c.fullName}, ${c.firstName}, ${c.lastName}) values (${full}, ${first}, ${last})".update.apply()
+          }
+          val found = sql"select ${n.result.*} from ${Names as n} where ${n.firstName} = 'Alice'".map(Names(n.resultName)).single.apply()
+          found.isDefined should be(true)
+          found.get.firstName should equal("Alice")
+          found.get.lastName should equal("Cooper")
+          found.get.fullName should equal("Alice Cooper")
+      }
+    } finally {
+      DB localTx { implicit s =>
+        try {
+          sql"drop table names".execute.apply()
+        } catch { case e: Exception => }
+      }
     }
   }
 

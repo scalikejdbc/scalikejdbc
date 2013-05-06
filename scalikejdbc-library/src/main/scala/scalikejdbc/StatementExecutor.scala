@@ -208,6 +208,17 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
 
     abstract override def apply[A](execute: () => A): A = {
       import GlobalSettings.loggingSQLAndTime
+
+      def messageInSingleLine(spentMillis: Long): String = "[SQL Execution] " + sqlString + "; (" + spentMillis + " ms)"
+      def messageInMultiLines(spentMillis: Long): String = {
+        "SQL execution completed" + eol +
+          eol +
+          "  [SQL Execution]" + eol +
+          "   " + sqlString + "; (" + spentMillis + " ms)" + eol +
+          eol +
+          stackTraceInformation
+      }
+
       if (loggingSQLAndTime.enabled) {
         val before = System.currentTimeMillis
         val result = super.apply(execute)
@@ -215,22 +226,16 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         val spentMillis = after - before
         if (loggingSQLAndTime.warningEnabled &&
           spentMillis >= loggingSQLAndTime.warningThresholdMillis) {
-          log.withLevel(loggingSQLAndTime.warningLogLevel) {
-            "SQL execution completed" + eol +
-              eol +
-              "  [Executed SQL]" + eol +
-              "   " + sqlString + "; (" + spentMillis + " ms)" + eol +
-              eol +
-              stackTraceInformation
+          if (loggingSQLAndTime.singleLineMode) {
+            log.withLevel(loggingSQLAndTime.warningLogLevel)(messageInSingleLine(spentMillis))
+          } else {
+            log.withLevel(loggingSQLAndTime.warningLogLevel)(messageInMultiLines(spentMillis))
           }
         } else {
-          log.withLevel(loggingSQLAndTime.logLevel) {
-            "SQL execution completed" + eol +
-              eol +
-              "  [Executed SQL]" + eol +
-              "   " + sqlString + "; (" + spentMillis + " ms)" + eol +
-              eol +
-              stackTraceInformation
+          if (loggingSQLAndTime.singleLineMode) {
+            log.withLevel(loggingSQLAndTime.logLevel)(messageInSingleLine(spentMillis))
+          } else {
+            log.withLevel(loggingSQLAndTime.logLevel)(messageInMultiLines(spentMillis))
           }
         }
         result
@@ -246,7 +251,11 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
       super.apply(execute)
     } catch {
       case e: Exception =>
-        log.error("Failed to execute the following SQL:" + eol + eol + "   " + sqlString + eol)
+        if (GlobalSettings.loggingSQLAndTime.singleLineMode) {
+          log.error("[SQL Execution Failed] " + sqlString + " (Reason: " + e.getMessage + ")")
+        } else {
+          log.error("SQL execution failed (Reason: " + e.getMessage + "):" + eol + eol + "   " + sqlString + eol)
+        }
         throw e;
     }
   }
