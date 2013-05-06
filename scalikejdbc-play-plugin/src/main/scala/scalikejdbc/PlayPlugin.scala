@@ -80,6 +80,7 @@ class PlayPlugin(implicit app: Application) extends Plugin {
         val default = LoggingSQLAndTimeSettings()
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = enabled,
+          singleLineMode = opt(loggingSQLAndTime, "singleLineMode").map(_.toBoolean).getOrElse(default.singleLineMode),
           logLevel = opt(loggingSQLAndTime, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
           warningEnabled = opt(loggingSQLAndTime, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
           warningThresholdMillis = opt(loggingSQLAndTime, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
