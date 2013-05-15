@@ -21,21 +21,10 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ### sbt
 
-If you're using Scala 2.10.x, using scalikejdbc-interpolation is highly recommended.
-
 ```scala
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
-  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
-)
-```
-If you're using Scala 2.9.x, just use scalikejdbc only.
-
-```scala
-libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
   "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
 )
@@ -61,22 +50,30 @@ sbt console
 SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
-case class User(id: Long, name: Option[String] = None)
+case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
+case class UserGroup(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
-  override val tableName = "users"
-  def apply(provider: SyntaxProvider[User])(rs: WrappedResultSet): User = {
-    val u = provider.resultName
-    new User(rs.long(u.id), rs.stringOpt(u.name))
-  }
+  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group]): User = { ... }
 }
 
-val u = User.syntax("u")
+val (u, g) = (User.syntax("u"), Group.sytnax("g"))
 val users: List[User] = DB readOnly { implicit session =>
   withSQL { 
-    select.from(User as u).where.eq(u.id, 123) 
-  }.map(User(u)).list.apply()
+    select
+      .from(User as u)
+      .leftJoin(Group as g).on(u.groupId, g.id)
+      .where.eq(u.id, 123) 
+      .orderBy(u.createdAt).desc
+      .limit(20)
+      .offset(0)
+  }.map(User(u, g)).list.apply()
 
-  // or sql"select ${u.result.*} from ${User as u} where ${u.id} = ${123}".map(User.resultName).list.apply()
+  // or sql"""
+  //  select ${u.result.*}, ${g.result.*} 
+  //    from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
+  //    where ${u.id} = ${123}
+  //    order by ${u.createdAt} desc limit ${limit} offset ${offset}
+  //  """.map(User(u, g)).list.apply()
 }
 
 val name = Some("Chris")
@@ -89,7 +86,7 @@ DB localTx { implicit session =>
   applyUdate {
     update(User as u)
       .set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
-      .where.eq(u.name, "Bob").and.isNotNull(u.createdAt)
+      .where.eq(u.id, 123)
   } // = withSQL { ... }.update.apply()
 
   applyUpdate { delete.from(User).where.eq(User.column.id, 123) }
@@ -102,14 +99,12 @@ Basically, use string template. Indeed, it's an old style but still good.
 
 ```scala
 case class User(id: Long, name: Option[String] = None)
-
 val * = (rs: WrappedResultSet) => User(rs.long("id"), rs.stringOpt("name"))
-
 val users: List[User] = DB readOnly { implicit session => 
   SQL("select id, name from users where id = ?").bind(123).map(*).list.apply()
 }
-
 val name = Some("Chris")
+
 val newUser: User = DB localTx { implicit session => 
   val id = SQL("insert into users values ({name})")
     .bindByName('name -> name)).updateAndReturnGeneratedKey.apply() 
@@ -138,76 +133,6 @@ val idList: List[Long] = DB readOnly { implicit session =>
   sql"select id from users".map(_.long("id")).list.apply()
 }
 ````
-
-
-### Basic SQL Template
-
-The most basic way is just using prepared statement as follows.
-
-```scala
-SQL("""insert into users values (?, ?)""")
-  .bind(132430, Some("Bob")).update.apply()
-```
-
-
-### Named Parameters SQL Template
-
-Instead of embedding `?`(place holder), you can specify named place holder that is similar to [Anorm](http://www.playframework.org/documentation/latest/ScalaAnorm). 
-
-```scala
-SQL("insert into users values ({id}, {name})")
-  .bindByName('id -> 132430, 'name -> Some("Bob"))
-  .update.apply()
-```
-
-
-### Executable SQL Template
-
-Instead of embedding `?`(place holder), you can specify executable SQL as template. Using this API, it's possible to validate SQL before building into application. 
-
-Usage is simple. Just specify Scala Symbol literal values inside of comments with dummy value in SQL template, and pass named values by using not `bind(Any*)` but `bindByName((Symbol, Any)*)`. When some of the passed names by `#bindByName` are not used, or `#bind` is used although the template seems to be executable SQL template, runtime exception will be thrown.
-
-```scala
-SQL("insert into users values (/*'id*/123, /*'name*/'Alice')")
-  .bindByName('id -> 132430, 'name -> Some("Bob"))
-  .update.apply()
-```
-
-
-### SQLInterpolation since Scala 2.10
-
-New powerful SQL template using SIP-11 String Interpolation.
-
-```scala
-val name = "Martin"
-val email = "martin@example.com"
-val id = sql"insert into users values (${name}, ${email})".updateAndReturnGeneratedKey.apply()
-```
-
-SQLSyntaxSupport makes it more convenient.
-
-```scala
-case class User(id: Long, name: String, email: String)
-object User extends SQLSyntaxSupport[User] {
-  override val tableName = "users"
-  def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(
-    rs.long(u.id), rs.string(u.name), rs.strng(u.email)
-  )
-}
-
-val u = User.syntax("u")
-val (name, email) = ("Martin", "martin@example.com")
-val id = withSQL { insert.into(User).values(name, email) }.updateAndReturnGeneratedKey.apply()
-
-val created: Option[User] = withSQL { 
-  select(u).from(User as u).where.eq(u.id, id) 
-}.map(User(u.resultName).single.apply()
-```
-
-See in detail:
-
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-interpolation
-
 
 ### Flexible transactions
 
