@@ -42,7 +42,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: test
           "ch.qos.logback"          %  "logback-classic"      % "1.0.11"      % "test",
           "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
-          "org.scalatest"           %  scalatest              % "[1.9,)"      % "test",
+          "org.scalatest"           %  scalatest              % "1.9.1"       % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
           "play"                    %  anorm                  % "[2,)"        % "test"
         ) ++ jdbcDriverDependenciesInTestScope
