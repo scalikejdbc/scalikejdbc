@@ -362,7 +362,7 @@ object SQLInterpolation {
      */
     def tableName: String = {
       val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
-      SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase(className)
+      SQLSyntaxProvider.toColumnName(className, nameConverters, useSnakeCaseColumnName)
     }
 
     /**
@@ -384,6 +384,11 @@ object SQLInterpolation {
      * True if you need shortening alias names in SQL.
      */
     def useShortenedResultName: Boolean = true
+
+    /**
+     * True if you need to convert filed names to snake_case column names in SQL.
+     */
+    def useSnakeCaseColumnName: Boolean = true
 
     /**
      * Delimiter for alias names in SQL.
@@ -487,6 +492,11 @@ object SQLInterpolation {
     val delimiterForResultName: String
 
     /**
+     * True if you need to convert filed names to snake_case column names in SQL.
+     */
+    val useSnakeCaseColumnName: Boolean
+
+    /**
      * Returns [[scalikejdbc.SQLSyntax]] value for the column.
      */
     def c(name: String): SQLSyntax = column(name)
@@ -501,8 +511,8 @@ object SQLInterpolation {
      */
     def field(name: String): SQLSyntax = {
       val columnName = {
-        if (forceUpperCase) applyNameConvertersAndConvertToSnakeCase(name, nameConverters).toUpperCase
-        else applyNameConvertersAndConvertToSnakeCase(name, nameConverters)
+        if (forceUpperCase) toColumnName(name, nameConverters, useSnakeCaseColumnName).toUpperCase
+        else toColumnName(name, nameConverters, useSnakeCaseColumnName)
       }
       c(columnName)
     }
@@ -527,21 +537,26 @@ object SQLInterpolation {
     /**
      * Returns the snake_case name after applying nameConverters.
      */
-    def applyNameConvertersAndConvertToSnakeCase(str: String, nameConverters: Map[String, String] = Map()): String = {
+    def toColumnName(str: String, nameConverters: Map[String, String], useSnakeCaseColumnName: Boolean): String = {
       val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
-      val acronymsFiltered = acronymRegExp.replaceAllIn(
-        acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
-          convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
-        }.getOrElse(convertersApplied), // might end with an acronym
-        { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
-      )
-      val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
-        .replaceFirst("^_", "")
-        .replaceFirst("_$", "")
+      if (useSnakeCaseColumnName) {
+        val acronymsFiltered = acronymRegExp.replaceAllIn(
+          acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
+            convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
+          }.getOrElse(convertersApplied), // might end with an acronym
+          { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
+        )
+        val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
+          .replaceFirst("^_", "")
+          .replaceFirst("_$", "")
 
-      if (str.startsWith("_")) "_" + result
-      else if (str.endsWith("_")) result + "_"
-      else result
+        if (str.startsWith("_")) "_" + result
+        else if (str.endsWith("_")) result + "_"
+        else result
+
+      } else {
+        convertersApplied
+      }
     }
 
     /**
@@ -597,6 +612,7 @@ object SQLInterpolation {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
+    val useSnakeCaseColumnName = support.useSnakeCaseColumnName
 
     lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
@@ -621,6 +637,7 @@ object SQLInterpolation {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
+    val useSnakeCaseColumnName = support.useSnakeCaseColumnName
     val delimiterForResultName = support.delimiterForResultName
     val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
 
