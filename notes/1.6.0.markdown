@@ -1,0 +1,43 @@
+ScalikeJDBC 1.6.0 has been released. New query DSL for SQLSyntaxSupport users is added!
+
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+
+http://git.io/scalikejdbc
+
+## library
+
+- Wrapped exception explicitly for extraction failures
+
+## interpolation
+
+- #122 Query Interface DSL support
+- #121 useSnakeCaseColumnName option in SQLSyntaxSupport
+
+Quite readable and typesafe DSL for SyntaxSupport users.
+
+    val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
+    
+    val groups: List[Group] = withSQL {
+    
+      select
+        .from(GroupMember as gm)
+        .innerJoin(User as u).on(u.id, gm.userId)
+        .innerJoin(Group as g).on(g.id, gm.groupId)
+        .leftJoin(Company as c).on(u.companyId, c.id)
+        .where.eq(g.id, 1)
+        .orderBy(u.id)
+        .limit(5)
+        .offset(0)
+    
+    }.one(Group(g))
+     .toMany(User.opt(u, c))
+     .map { (group, members) => group.copy(members = members) }
+     .list
+     .apply()
+
+Also check more examples!
+
+https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
+
+Enjoy writing typesafe SQL and get things done!
+
