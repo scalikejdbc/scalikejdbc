@@ -177,8 +177,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         newName should equal(Some("Bob Marley"))
 
         // compilation error since 2.10.1
-        // applyUpdate { delete.from(Order as o).where.isNull(o.accountId) } 
-        withSQL { delete.from(Order as o).where.isNull(o.accountId) }.update.apply()
+        // applyUpdate { delete.from(Order).where.isNull(Order.column.accountId) } 
+        withSQL { delete.from(Order).where.isNull(Order.column.accountId) }.update.apply()
 
         val noAccountIdOrderCount = withSQL {
           select(count).from(Order as o).where.isNull(o.accountId)
