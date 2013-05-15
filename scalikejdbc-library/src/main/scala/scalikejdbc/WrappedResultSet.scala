@@ -31,14 +31,25 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     }
   }
 
+  /**
+   * Throws ResultSetExtractorException if some exception is thrown.
+   */
+  private[this] def wrapIfError[A](op: => A): A = {
+    try {
+      op
+    } catch {
+      case e: Exception => throw new ResultSetExtractorException(e.getMessage, Some(e))
+    }
+  }
+
   def array(columnIndex: Int): java.sql.Array = {
     ensureCursor()
-    underlying.getArray(columnIndex)
+    wrapIfError(underlying.getArray(columnIndex))
   }
 
   def array(columnLabel: String): java.sql.Array = {
     ensureCursor()
-    underlying.getArray(columnLabel)
+    wrapIfError(underlying.getArray(columnLabel))
   }
 
   def arrayOpt(columnIndex: Int): Option[java.sql.Array] = opt[java.sql.Array](array(columnIndex))
@@ -47,12 +58,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def asciiStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
-    underlying.getAsciiStream(columnIndex)
+    wrapIfError(underlying.getAsciiStream(columnIndex))
   }
 
   def asciiStream(columnLabel: String): java.io.InputStream = {
     ensureCursor()
-    underlying.getAsciiStream(columnLabel)
+    wrapIfError(underlying.getAsciiStream(columnLabel))
   }
 
   def asciiStreamOpt(columnIndex: Int): Option[java.io.InputStream] = opt[java.io.InputStream](asciiStream(columnIndex))
@@ -61,12 +72,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def bigDecimal(columnIndex: Int): java.math.BigDecimal = {
     ensureCursor()
-    underlying.getBigDecimal(columnIndex)
+    wrapIfError(underlying.getBigDecimal(columnIndex))
   }
 
   def bigDecimal(columnLabel: String): java.math.BigDecimal = {
     ensureCursor()
-    underlying.getBigDecimal(columnLabel)
+    wrapIfError(underlying.getBigDecimal(columnLabel))
   }
 
   def bigDecimalOpt(columnIndex: Int): Option[java.math.BigDecimal] = opt[java.math.BigDecimal](bigDecimal(columnIndex))
@@ -75,12 +86,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def binaryStream(columnIndex: Int): java.io.InputStream = {
     ensureCursor()
-    underlying.getBinaryStream(columnIndex)
+    wrapIfError(underlying.getBinaryStream(columnIndex))
   }
 
   def binaryStream(columnLabel: String): java.io.InputStream = {
     ensureCursor()
-    underlying.getBinaryStream(columnLabel)
+    wrapIfError(underlying.getBinaryStream(columnLabel))
   }
 
   def binaryStreamOpt(columnIndex: Int): Option[java.io.InputStream] = opt[java.io.InputStream](binaryStream(columnIndex))
@@ -89,12 +100,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def blob(columnIndex: Int): java.sql.Blob = {
     ensureCursor()
-    underlying.getBlob(columnIndex)
+    wrapIfError(underlying.getBlob(columnIndex))
   }
 
   def blob(columnLabel: String): java.sql.Blob = {
     ensureCursor()
-    underlying.getBlob(columnLabel)
+    wrapIfError(underlying.getBlob(columnLabel))
   }
 
   def blobOpt(columnIndex: Int): Option[java.sql.Blob] = opt[java.sql.Blob](blob(columnIndex))
@@ -147,12 +158,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def bytes(columnIndex: Int): Array[Byte] = {
     ensureCursor()
-    underlying.getBytes(columnIndex)
+    wrapIfError(underlying.getBytes(columnIndex))
   }
 
   def bytes(columnLabel: String): Array[Byte] = {
     ensureCursor()
-    underlying.getBytes(columnLabel)
+    wrapIfError(underlying.getBytes(columnLabel))
   }
 
   def bytesOpt(columnIndex: Int): Option[Array[Byte]] = opt[Array[Byte]](bytes(columnIndex))
@@ -161,12 +172,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def characterStream(columnIndex: Int): java.io.Reader = {
     ensureCursor()
-    underlying.getCharacterStream(columnIndex)
+    wrapIfError(underlying.getCharacterStream(columnIndex))
   }
 
   def characterStream(columnLabel: String): java.io.Reader = {
     ensureCursor()
-    underlying.getCharacterStream(columnLabel)
+    wrapIfError(underlying.getCharacterStream(columnLabel))
   }
 
   def characterStreamOpt(columnIndex: Int): Option[java.io.Reader] = opt[java.io.Reader](characterStream(columnIndex))
@@ -175,12 +186,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def clob(columnIndex: Int): java.sql.Clob = {
     ensureCursor()
-    underlying.getClob(columnIndex)
+    wrapIfError(underlying.getClob(columnIndex))
   }
 
   def clob(columnLabel: String): java.sql.Clob = {
     ensureCursor()
-    underlying.getClob(columnLabel)
+    wrapIfError(underlying.getClob(columnLabel))
   }
 
   def clobOpt(columnIndex: Int): Option[java.sql.Clob] = opt[java.sql.Clob](clob(columnIndex))
@@ -199,22 +210,22 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def date(columnIndex: Int): java.sql.Date = {
     ensureCursor()
-    underlying.getDate(columnIndex)
+    wrapIfError(underlying.getDate(columnIndex))
   }
 
   def date(columnLabel: String): java.sql.Date = {
     ensureCursor()
-    underlying.getDate(columnLabel)
+    wrapIfError(underlying.getDate(columnLabel))
   }
 
   def date(columnIndex: Int, cal: Calendar): java.sql.Date = {
     ensureCursor()
-    underlying.getDate(columnIndex, cal)
+    wrapIfError(underlying.getDate(columnIndex, cal))
   }
 
   def date(columnLabel: String, cal: Calendar): java.sql.Date = {
     ensureCursor()
-    underlying.getDate(columnLabel, cal)
+    wrapIfError(underlying.getDate(columnLabel, cal))
   }
 
   def dateOpt(columnIndex: Int): Option[java.sql.Date] = opt[java.sql.Date](date(columnIndex))
@@ -335,12 +346,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nCharacterStream(columnIndex: Int): java.io.Reader = {
     ensureCursor()
-    underlying.getNCharacterStream(columnIndex)
+    wrapIfError(underlying.getNCharacterStream(columnIndex))
   }
 
   def nCharacterStream(columnLabel: String): java.io.Reader = {
     ensureCursor()
-    underlying.getNCharacterStream(columnLabel)
+    wrapIfError(underlying.getNCharacterStream(columnLabel))
   }
 
   def nCharacterStreamOpt(columnIndex: Int): Option[java.io.Reader] = opt[java.io.Reader](nCharacterStream(columnIndex))
@@ -349,12 +360,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nClob(columnIndex: Int): java.sql.NClob = {
     ensureCursor()
-    underlying.getNClob(columnIndex)
+    wrapIfError(underlying.getNClob(columnIndex))
   }
 
   def nClob(columnLabel: String): java.sql.NClob = {
     ensureCursor()
-    underlying.getNClob(columnLabel)
+    wrapIfError(underlying.getNClob(columnLabel))
   }
 
   def nClobOpt(columnIndex: Int): Option[java.sql.NClob] = opt[java.sql.NClob](nClob(columnIndex))
@@ -363,12 +374,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nString(columnIndex: Int): String = {
     ensureCursor()
-    underlying.getNString(columnIndex)
+    wrapIfError(underlying.getNString(columnIndex))
   }
 
   def nString(columnLabel: String): String = {
     ensureCursor()
-    underlying.getNString(columnLabel)
+    wrapIfError(underlying.getNString(columnLabel))
   }
 
   def nStringOpt(columnIndex: Int): Option[String] = opt[String](nString(columnIndex))
@@ -377,22 +388,22 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def any(columnIndex: Int): Any = {
     ensureCursor()
-    underlying.getObject(columnIndex)
+    wrapIfError(underlying.getObject(columnIndex))
   }
 
   def any(columnLabel: String): Any = {
     ensureCursor()
-    underlying.getObject(columnLabel)
+    wrapIfError(underlying.getObject(columnLabel))
   }
 
   def any(columnIndex: Int, map: Map[String, Class[_]]): Any = {
     ensureCursor()
-    underlying.getObject(columnIndex.asInstanceOf[java.lang.Integer], map.asJava)
+    wrapIfError(underlying.getObject(columnIndex.asInstanceOf[java.lang.Integer], map.asJava))
   }
 
   def any(columnLabel: String, map: Map[String, Class[_]]): Any = {
     ensureCursor()
-    underlying.getObject(columnLabel, map.asJava)
+    wrapIfError(underlying.getObject(columnLabel, map.asJava))
   }
 
   def anyOpt(columnIndex: Int): Option[Any] = opt[Any](any(columnIndex))
@@ -405,12 +416,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def ref(columnIndex: Int): java.sql.Ref = {
     ensureCursor()
-    underlying.getRef(columnIndex)
+    wrapIfError(underlying.getRef(columnIndex))
   }
 
   def ref(columnLabel: String): java.sql.Ref = {
     ensureCursor()
-    underlying.getRef(columnLabel)
+    wrapIfError(underlying.getRef(columnLabel))
   }
 
   def refOpt(columnIndex: Int): Option[java.sql.Ref] = opt[java.sql.Ref](ref(columnIndex))
@@ -456,12 +467,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def sqlXml(columnIndex: Int): java.sql.SQLXML = {
     ensureCursor()
-    underlying.getSQLXML(columnIndex)
+    wrapIfError(underlying.getSQLXML(columnIndex))
   }
 
   def sqlXml(columnLabel: String): java.sql.SQLXML = {
     ensureCursor()
-    underlying.getSQLXML(columnLabel)
+    wrapIfError(underlying.getSQLXML(columnLabel))
   }
 
   def sqlXmlOpt(columnIndex: Int): Option[java.sql.SQLXML] = opt[java.sql.SQLXML](sqlXml(columnIndex))
@@ -475,12 +486,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def string(columnIndex: Int): String = {
     ensureCursor()
-    underlying.getString(columnIndex)
+    wrapIfError(underlying.getString(columnIndex))
   }
 
   def string(columnLabel: String): String = {
     ensureCursor()
-    underlying.getString(columnLabel)
+    wrapIfError(underlying.getString(columnLabel))
   }
 
   def stringOpt(columnIndex: Int): Option[String] = opt[String](string(columnIndex))
@@ -489,22 +500,22 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def time(columnIndex: Int): java.sql.Time = {
     ensureCursor()
-    underlying.getTime(columnIndex)
+    wrapIfError(underlying.getTime(columnIndex))
   }
 
   def time(columnLabel: String): java.sql.Time = {
     ensureCursor()
-    underlying.getTime(columnLabel)
+    wrapIfError(underlying.getTime(columnLabel))
   }
 
   def time(columnIndex: Int, cal: Calendar): java.sql.Time = {
     ensureCursor()
-    underlying.getTime(columnIndex, cal)
+    wrapIfError(underlying.getTime(columnIndex, cal))
   }
 
   def time(columnLabel: String, cal: Calendar): java.sql.Time = {
     ensureCursor()
-    underlying.getTime(columnLabel, cal)
+    wrapIfError(underlying.getTime(columnLabel, cal))
   }
 
   def timeOpt(columnIndex: Int): Option[java.sql.Time] = opt[java.sql.Time](time(columnIndex))
@@ -517,22 +528,22 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def timestamp(columnIndex: Int): java.sql.Timestamp = {
     ensureCursor()
-    underlying.getTimestamp(columnIndex)
+    wrapIfError(underlying.getTimestamp(columnIndex))
   }
 
   def timestamp(columnLabel: String): java.sql.Timestamp = {
     ensureCursor()
-    underlying.getTimestamp(columnLabel)
+    wrapIfError(underlying.getTimestamp(columnLabel))
   }
 
   def timestamp(columnIndex: Int, cal: Calendar): java.sql.Timestamp = {
     ensureCursor()
-    underlying.getTimestamp(columnIndex, cal)
+    wrapIfError(underlying.getTimestamp(columnIndex, cal))
   }
 
   def timestamp(columnLabel: String, cal: Calendar): java.sql.Timestamp = {
     ensureCursor()
-    underlying.getTimestamp(columnLabel, cal)
+    wrapIfError(underlying.getTimestamp(columnLabel, cal))
   }
 
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex))
@@ -545,12 +556,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def url(columnIndex: Int): java.net.URL = {
     ensureCursor()
-    underlying.getURL(columnIndex)
+    wrapIfError(underlying.getURL(columnIndex))
   }
 
   def url(columnLabel: String): java.net.URL = {
     ensureCursor()
-    underlying.getURL(columnLabel)
+    wrapIfError(underlying.getURL(columnLabel))
   }
 
   def urlOpt(columnIndex: Int): Option[java.net.URL] = opt[java.net.URL](url(columnIndex))
