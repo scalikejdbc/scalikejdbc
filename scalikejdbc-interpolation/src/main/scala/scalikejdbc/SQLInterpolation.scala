@@ -68,6 +68,8 @@ object SQLInterpolation {
     def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
   }
 
+  trait UpdateOperation
+
   /**
    * Query Interface for insert query.
    * {{{
@@ -78,11 +80,11 @@ object SQLInterpolation {
    * }}}}
    */
   object insert {
-    def into[A](support: SQLSyntaxSupport[_]): InsertSQLBuilder[A] = new InsertSQLBuilder[A](sqls"insert into ${support.table}")
+    def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
   }
 
   object insertInto {
-    def apply[A](support: SQLSyntaxSupport[_]): InsertSQLBuilder[A] = insert.into(support)
+    def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder = insert.into(support)
   }
 
   /**
@@ -95,13 +97,13 @@ object SQLInterpolation {
    * }}}}
    */
   object delete {
-    def from[A](table: TableAsAliasSQLSyntax): DeleteSQLBuilder[A] = new DeleteSQLBuilder[A](sqls"delete from ${table}")
-    def from[A](support: SQLSyntaxSupport[_]): DeleteSQLBuilder[A] = new DeleteSQLBuilder[A](sqls"delete from ${support.table}")
+    def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
+    def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
   }
 
   object deleteFrom {
-    def apply[A](table: TableAsAliasSQLSyntax): DeleteSQLBuilder[A] = delete.from(table)
-    def apply[A](support: SQLSyntaxSupport[_]): DeleteSQLBuilder[A] = delete.from(support)
+    def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = delete.from(table)
+    def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = delete.from(support)
   }
 
   /**
@@ -114,8 +116,8 @@ object SQLInterpolation {
    * }}}}
    */
   object update {
-    def apply[A](table: TableAsAliasSQLSyntax): UpdateSQLBuilder[A] = new UpdateSQLBuilder[A](sqls"update ${table}")
-    def apply[A](support: SQLSyntaxSupport[_]): UpdateSQLBuilder[A] = new UpdateSQLBuilder[A](sqls"update ${support.table}")
+    def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
+    def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
   }
 
   /**
@@ -129,21 +131,21 @@ object SQLInterpolation {
    * withSQL and update.apply()
    */
   object applyUpdate {
-    def apply(builder: SQLBuilder[_])(implicit session: DBSession): Int = withSQL(builder).update.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Int = withSQL[UpdateOperation](builder).update.apply()
   }
 
   /**
    * withSQL and updateAndReturnGeneratedKey.apply()
    */
   object applyUpdateAndReturnGeneratedKey {
-    def apply(builder: SQLBuilder[_])(implicit session: DBSession): Long = withSQL(builder).updateAndReturnGeneratedKey.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Long = withSQL[UpdateOperation](builder).updateAndReturnGeneratedKey.apply()
   }
 
   /**
    * withSQL and execute.apply()
    */
   object applyExecute {
-    def apply(builder: SQLBuilder[_])(implicit session: DBSession): Boolean = withSQL(builder).execute.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Boolean = withSQL[UpdateOperation](builder).execute.apply()
   }
 
   // -----
@@ -319,24 +321,24 @@ object SQLInterpolation {
   /**
    * SQLBuilder for insert queries.
    */
-  case class InsertSQLBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] {
+  case class InsertSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] {
     import SQLSyntax.csv
-    def columns(columns: SQLSyntax*): InsertSQLBuilder[A] = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
-    def values(values: Any*): InsertSQLBuilder[A] = this.copy(sql = sqls"${sql} values (${values})")
+    def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
+    def values(values: Any*): InsertSQLBuilder = this.copy(sql = sqls"${sql} values (${values})")
   }
 
   /**
    * SQLBuilder for update queries.
    */
-  case class UpdateSQLBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with WhereSQLBuilder[A] {
-    def set(sqlPart: SQLSyntax): UpdateSQLBuilder[A] = this.copy(sql = sqls"${sql} set ${sqlPart}")
-    def set(tuples: (SQLSyntax, Any)*): UpdateSQLBuilder[A] = set(SQLSyntax.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+  case class UpdateSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] with WhereSQLBuilder[UpdateOperation] {
+    def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
+    def set(tuples: (SQLSyntax, Any)*): UpdateSQLBuilder = set(SQLSyntax.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
   }
 
   /**
    * SQLBuilder for delete queries.
    */
-  case class DeleteSQLBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with WhereSQLBuilder[A]
+  case class DeleteSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] with WhereSQLBuilder[UpdateOperation]
 
   // ---------------------------------
   // SQL Interpolation Core Elements

@@ -250,7 +250,7 @@ This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe
 https://github.com/seratch/scalikejdbc/tree/develop/scalikejdbc-config
 
 
-### dbconsle
+### dbconsole
 
 `dbconsole` is an extended sbt console to connect database. Try it now!
 

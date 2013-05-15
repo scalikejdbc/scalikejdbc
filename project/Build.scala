@@ -24,12 +24,12 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val scalatest = "scalatest_" + (scalaVersion match {
-          case "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
         val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
@@ -42,7 +42,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: test
           "ch.qos.logback"          %  "logback-classic"      % "1.0.11"      % "test",
           "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
-          "org.scalatest"           %  scalatest              % "1.9.1"       % "test",
+          "org.scalatest"           %  scalatest              % "[1.9,)"      % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
           "play"                    %  anorm                  % "[2,)"        % "test"
         ) ++ jdbcDriverDependenciesInTestScope

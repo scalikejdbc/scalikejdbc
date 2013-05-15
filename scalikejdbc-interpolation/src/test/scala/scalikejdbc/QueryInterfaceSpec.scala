@@ -48,7 +48,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // insert test data
         val (oc, pc, ac) = (Order.column, Product.column, Account.column)
-        Seq[SQLBuilder[Int]](
+        Seq(
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
           insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
@@ -159,12 +159,26 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
-        applyUpdate(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2))
+
+        // the folloing code becomes compilation error on Scala 2.10.1.
+        // applyUpdate(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2))
+        /*
+         [error]   scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala:162: erroneous or inaccessible type
+         [error]         applyExecute(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2))
+         [error]                                                                                  ^
+         */
+        // the following code works fine. Don't know why.
+        val updateQuery = update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)
+        applyUpdate(updateQuery)
+        // of course, this code also works fine.
+        withSQL(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)).update.apply()
 
         val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }.map(Account(a)).single.apply().get.name
         newName should equal(Some("Bob Marley"))
 
-        applyUpdate(delete.from(Order as o).where.isNull(o.accountId))
+        // compilation error since 2.10.1
+        // applyUpdate { delete.from(Order as o).where.isNull(o.accountId) } 
+        withSQL { delete.from(Order as o).where.isNull(o.accountId) }.update.apply()
 
         val noAccountIdOrderCount = withSQL {
           select(count).from(Order as o).where.isNull(o.accountId)
