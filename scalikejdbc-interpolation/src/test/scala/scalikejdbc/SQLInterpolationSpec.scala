@@ -1,41 +1,25 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
-class HibernateSQLFormatter extends SQLFormatter {
-  private val formatter = new org.hibernate.engine.jdbc.internal.BasicFormatterImpl()
-  def format(sql: String) = formatter.format(sql)
-}
-
-class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
+class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
 
   behavior of "SQLInterpolation"
 
-  val props = new java.util.Properties
-  using(new java.io.FileInputStream("scalikejdbc-library/src/test/resources/jdbc.properties")) { in => props.load(in) }
-  val driverClassName = props.getProperty("driverClassName")
-  val url = props.getProperty("url")
-  val user = props.getProperty("user")
-  val password = props.getProperty("password")
-
-  Class.forName(driverClassName)
-  val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
-  ConnectionPool.singleton(url, user, password, poolSettings)
-
-  GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
-
   it should "convert camelCase to snake_case correctly" in {
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("_type") should equal("_type")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("type_") should equal("type_")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("firstName") should equal("first_name")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject") should equal("sql_object")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
+    SQLSyntaxProvider.toColumnName("_type", Map(), true) should equal("_type")
+    SQLSyntaxProvider.toColumnName("type_", Map(), true) should equal("type_")
+    SQLSyntaxProvider.toColumnName("firstName", Map(), true) should equal("first_name")
+    SQLSyntaxProvider.toColumnName("SQLObject", Map(), true) should equal("sql_object")
+    SQLSyntaxProvider.toColumnName("SQLObject", Map("SQL" -> "s_q_l"), true) should equal("s_q_l_object")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map(), true) should equal("wonderful_my_html")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map("My" -> "xxx"), true) should equal("wonderfulxxx_html")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map("wonderful" -> ""), true) should equal("my_html")
+
+    SQLSyntaxProvider.toColumnName("firstName", Map(), false) should equal("firstName")
+    SQLSyntaxProvider.toColumnName("firstName", Map("first" -> "full"), false) should equal("fullName")
   }
 
   object User extends SQLSyntaxSupport[User] {
@@ -83,7 +67,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
           Seq((1, Some("foo"), None), (2, Some("bar"), None), (3, Some("baz"), Some(1))) foreach {
             case (id, name, groupId) =>
-              sql"insert into users values (${id}, ${name}, ${groupId})".update.apply()
+              val c = User.column
+              applyUpdate { insert.into(User).columns(c.id, c.firstName, c.groupId).values(id, name, groupId) }
           }
           sql"insert into groups values (1, ${"http://jp.scala-users.org/"})".update.apply()
           sql"insert into groups values (2, ${"http://http://www.java-users.jp/"})".update.apply()
@@ -107,6 +92,28 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           user.id should equal(3)
           user.firstName should equal(Some("baz"))
           user.group.isDefined should equal(true)
+
+          // Query Interface using toSQL
+          val user2 = select.all(u, g).from(User as u).leftJoin(Group as g).on(u.groupId, g.id)
+            .where.eq(u.id, 3).and.isNotNull(u.firstName)
+            .toSQL
+            .map(rs => User(rs, u.resultName, g.resultName)).single.apply().get
+
+          user2.id should equal(3)
+          user2.firstName should equal(Some("baz"))
+          user2.group.isDefined should equal(true)
+
+          // Query Interface using withSQL
+          val user3: User = withSQL {
+            select.all(u, g)
+              .from(User as u)
+              .leftJoin(Group as g).on(u.groupId, g.id)
+              .where.eq(u.id, 3).and.isNotNull(u.firstName)
+          }.map(rs => User(rs, u.resultName, g.resultName)).single.apply().get
+
+          user3.id should equal(3)
+          user3.firstName should equal(Some("baz"))
+          user3.group.isDefined should equal(true)
 
           // exception patterns
           {
@@ -159,6 +166,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             groupWithMembers.get.members.size should equal(2)
           }
 
+          {
+            val gm = GroupMember.syntax
+            val groupWithMembers: Option[Group] = withSQL {
+              select.all(u, g).from(GroupMember as gm)
+                .innerJoin(Group as g).on(gm.groupId, g.id)
+                .innerJoin(User as u).on(gm.userId, u.id)
+                .where.eq(g.id, 1)
+            }.foldLeft(Option.empty[Group]) { (groupOpt, rs) =>
+              val newMember = User(rs, u.resultName)
+              groupOpt.map { group =>
+                if (group.members.contains(newMember)) group
+                else group.copy(members = newMember.copy(groupId = Option(group.id), group = Option(group)) :: group.members.toList)
+              }.orElse {
+                Some(Group(rs, g.resultName).copy(members = Seq(newMember)))
+              }
+            }
+
+            groupWithMembers.isDefined should equal(true)
+            groupWithMembers.get.members.size should equal(2)
+          }
+
           // one-to-many API
           {
             val gm = GroupMember.syntax
@@ -172,6 +200,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             order by ${g.id}, ${u.id}
             """
               .one(rs => Group(rs, g.resultName))
+              .toMany(rs => Some(User(rs, u.resultName)))
+              .map { (g, us) => g.copy(members = us) }
+              .list.apply()
+
+            groupsWithMembers.size should equal(2)
+            groupsWithMembers(0).members.size should equal(2)
+            groupsWithMembers(0).members(0).id should equal(1)
+            groupsWithMembers(0).members(1).id should equal(2)
+            groupsWithMembers(1).members.size should equal(3)
+            groupsWithMembers(1).members(0).id should equal(1)
+            groupsWithMembers(1).members(1).id should equal(2)
+            groupsWithMembers(1).members(2).id should equal(3)
+          }
+          {
+            val gm = GroupMember.syntax
+            val groupsWithMembers: List[Group] = withSQL {
+              select.all(u, g).from(GroupMember as gm)
+                .innerJoin(Group as g).on(gm.groupId, g.id)
+                .innerJoin(User as u).on(gm.userId, u.id)
+                .orderBy(g.id, u.id)
+            }.one(rs => Group(rs, g.resultName))
               .toMany(rs => Some(User(rs, u.resultName)))
               .map { (g, us) => g.copy(members = us) }
               .list.apply()
@@ -251,6 +300,18 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             users.size should be(1)
             users(0).id should equal(1)
           }
+          {
+            val userId: Option[Int] = Some(1)
+            val users: List[User] = withSQL {
+              select.all(u).from(User as u)
+                .append(userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls"")
+                .orderBy(u.id)
+            }.map(rs => User(rs, u.resultName))
+              .list.apply()
+
+            users.size should be(1)
+            users(0).id should equal(1)
+          }
 
           {
             val userId: Option[Int] = None
@@ -320,6 +381,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           sql"insert into issue values (3, ${"Chris"})".update.apply()
           sql"insert into issue values (4, ${"Dennis"})".update.apply()
 
+          // insert, update, delete
+          val c = Issue.column
+          // withSQL { insert.into(Issue).values(5, "Eric") }.update.apply()
+          applyUpdate { insert.into(Issue).values(5, "Eric") }
+          applyUpdate { update(Issue).set(c.body -> "Debian").where.eq(c.id, 4) }
+          applyUpdate { delete.from(Issue).where.eq(c.id, 5) }
+
           {
             val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
 
@@ -339,6 +407,19 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
 
             issue.map(i => i.id) should equal(Some(1))
           }
+          {
+            val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
+            val issue: Option[Issue] = withSQL {
+              select.all(i, t).from(Issue as i)
+                .leftJoin(IssueTag as it).on(it.issueId, i.id)
+                .leftJoin(Tag as t).on(t.id, it.tagId)
+                .where.eq(i.id, 1)
+            }.foldLeft(Option.empty[Issue]) { (result, rs) =>
+              val tag = rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name)))
+              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.to[Vector]))
+            }
+            issue.map(i => i.id) should equal(Some(1))
+          }
 
           {
             val (i, it, t) = (Issue.syntax("i"), IssueTag.syntax("it"), Tag.syntax("t"))
@@ -351,7 +432,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
                 left join ${IssueTag.as(it)} ON ${it.issueId} = ${i.id}
                 left join ${Tag.as(t)} ON ${t.id} = ${it.tagId}
               where
-                ${i.id} = ${1}
+                ${i.id} = 1
             """
               .one(rs => Issue(rs.int(i.resultName.id), rs.string(i.resultName.body)))
               .toMany(rs => rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name))))
@@ -370,6 +451,18 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             val summary = sql"""
               select ${is.result(idCount).count}, ${is.result(idSum).sum} from (select ${i.result.id} from ${Issue.as(i)}) ${SubQuery.as(sq)}
               """.map(IssueSummary(is.resultName)).single.apply().get
+            summary.count should equal(4)
+            summary.sum should equal(10)
+          }
+          {
+            val (i, is) = (Issue.syntax("i"), IssueSummary.syntax("is"))
+            val idCount = sqls"count(${i.resultName.id})"
+            val idSum = sqls"sum(${i.resultName.id})"
+            val sq = SubQuery.syntax("sq", i.resultName)
+            val summary: IssueSummary = withSQL {
+              select(is.result(idCount).count, is.result(idSum).sum)
+                .from(select(i.result.id).from(Issue as i).as(sq))
+            }.map(IssueSummary(is.resultName)).single.apply().get
             summary.count should equal(4)
             summary.sum should equal(10)
           }
@@ -447,13 +540,33 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
             select
               ${sq.result.*}, ${cg.result.*}
             from
-              (select ${c.result.*} from ${Customer.as(c)} order by id limit 5) ${SubQuery.as(sq)}
+              (select ${c.result.*} from ${Customer.as(c)} order by ${c.id} limit 5) ${SubQuery.as(sq)}
                 left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
             where
               ${sq(c).id} > 3
             order by ${sq(c).id}
           """
               .one(Customer(sq(c).resultName))
+              .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
+              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .list
+              .apply()
+
+            customers.map(u => u.id) should equal(Seq(4, 5))
+            customers(0).id should equal(4)
+            customers(1).id should equal(5)
+          }
+
+          {
+            val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
+            val sq = SubQuery.syntax("sq", c.resultName)
+            val customers: List[Customer] = withSQL {
+              select.all(sq, cg)
+                .from(select.all(c).from(Customer as c).orderBy(c.id).limit(5).as(sq))
+                .leftJoin(CustomerGroup as cg).on(sq(c).groupId, cg.id)
+                .where.gt(sq(c).id, 3)
+                .orderBy(sq(c).id)
+            }.one(Customer(sq(c).resultName))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = Some(cg)) }
               .list
@@ -656,6 +769,27 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           found.get.firstName should equal("Alice")
           found.get.lastName should equal("Cooper")
           found.get.fullName should equal("Alice Cooper")
+
+          val found2: Option[Names] = withSQL {
+            select.all(n).from(Names as n).where.eq(n.firstName, "Alice").append(sqls"order by ${n.firstName}")
+          }.map(Names(n.resultName)).single.apply()
+          found2.isDefined should be(true)
+          found2.get.firstName should equal("Alice")
+          found2.get.lastName should equal("Cooper")
+          found2.get.fullName should equal("Alice Cooper")
+
+          {
+            val names = withSQL {
+              select.all(n).from(Names as n).where.in(n.firstName, Seq("Alice", "Bob", "Chris"))
+            }.map(Names(n.resultName)).list.apply()
+            names.size should equal(2)
+          }
+          {
+            val groupByResult = withSQL {
+              select(n.result.firstName, sqls"count(1)").from(Names as n).groupBy(n.firstName)
+            }.map(_.toMap).list.apply()
+            groupByResult.size should equal(2)
+          }
       }
     } finally {
       DB localTx { implicit s =>
@@ -667,3 +801,4 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   }
 
 }
+

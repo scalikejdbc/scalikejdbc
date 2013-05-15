@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.5.4"
+  lazy val _version = "1.6.0-SNAPSHOT"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -24,12 +24,12 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val scalatest = "scalatest_" + (scalaVersion match {
-          case "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
         val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })

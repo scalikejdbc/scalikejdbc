@@ -102,6 +102,9 @@ object ConnectionPool extends LogSupport {
           factory.apply(url, user, password, settings)
       }
       pools.update(name, pool)
+
+      // wait a little because rarely NPE occurs when immediately accessed.
+      Thread.sleep(100L)
     }
     log.debug("Registered connection pool : " + get(name).toString())
   }
