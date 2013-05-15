@@ -39,6 +39,7 @@ object SQLInterpolation {
 
   /**
    * Query Interface for select query.
+   *
    * {{{
    *   implicit val session = AutoSession
    *   val u = User.syntax("u")
@@ -68,10 +69,14 @@ object SQLInterpolation {
     def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
   }
 
+  /**
+   * Stands for return type for Insert/Update/DeleteSQLBuilder.
+   */
   trait UpdateOperation
 
   /**
    * Query Interface for insert query.
+   *
    * {{{
    *   implicit val session = AutoSession
    *   val (u, c) = (User.syntax("u"), User.column)
@@ -89,6 +94,7 @@ object SQLInterpolation {
 
   /**
    * Query Interface for delete query.
+   *
    * {{{
    *   implicit val session = AutoSession
    *   val (u, c) = (User.syntax("u"), User.column)
@@ -108,6 +114,7 @@ object SQLInterpolation {
 
   /**
    * Query Interface for update query.
+   *
    * {{{
    *   implicit val session = AutoSession
    *   val u = User.syntax("u")
@@ -161,6 +168,9 @@ object SQLInterpolation {
     def toSQL: SQL[A, NoExtractor] = sql"${sql}"
   }
 
+  /**
+   * Provides where part.
+   */
   trait WhereSQLBuilder[A] extends SQLBuilder[A] {
     def sql: SQLSyntax
 
@@ -168,15 +178,21 @@ object SQLInterpolation {
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.where(where)}")
   }
 
-  class PagingSQLBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
-    def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} ${SQLSyntax.orderBy(columns: _*)}")
-    def asc: PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} asc")
-    def desc: PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} desc")
-    def limit(n: Int): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} ${SQLSyntax.limit(n)}")
-    def offset(n: Int): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} ${SQLSyntax.offset(n)}")
+  /*
+   * Provides sort and paing part.
+   */
+  class SortAndPagingBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
+    def orderBy(columns: SQLSyntax*): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.orderBy(columns: _*)}")
+    def asc: SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} asc")
+    def desc: SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} desc")
+    def limit(n: Int): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.limit(n)}")
+    def offset(n: Int): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.offset(n)}")
   }
 
-  class ConditionSQLBuilder[A](override val sql: SQLSyntax) extends PagingSQLBuilder[A](sql) with SubQuerySQLBuilder[A] {
+  /**
+   * Provides condition part in where clause.
+   */
+  class ConditionSQLBuilder[A](override val sql: SQLSyntax) extends SortAndPagingBuilder[A](sql) with SubQuerySQLBuilder[A] {
 
     /**
      * Appends SQLSyntax directly.
@@ -216,6 +232,9 @@ object SQLInterpolation {
     }
   }
 
+  /**
+   * Provides sub-query part.
+   */
   trait SubQuerySQLBuilder[A] {
     def sql: SQLSyntax
 
@@ -232,7 +251,7 @@ object SQLInterpolation {
    * SQLBuilder for select queries.
    */
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
-      extends PagingSQLBuilder[A](sql) with WhereSQLBuilder[A] with SubQuerySQLBuilder[A] {
+      extends SortAndPagingBuilder[A](sql) with WhereSQLBuilder[A] with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
       table.resultAllProvider.map(provider => provider :: resultAllProviders).getOrElse(resultAllProviders)
