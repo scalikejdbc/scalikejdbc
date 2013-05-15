@@ -51,10 +51,11 @@ SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
 case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
-case class UserGroup(id: Long, name: Option[String] = None)
+case class Group(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
   def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group]): User = { ... }
 }
+object Group extends SQLSyntaxSupport[Group] { ... }
 
 val (u, g) = (User.syntax("u"), Group.sytnax("g"))
 val users: List[User] = DB readOnly { implicit session =>
