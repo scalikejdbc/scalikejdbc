@@ -28,14 +28,17 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
   GlobalSettings.sqlFormatter = SQLFormatterSettings("scalikejdbc.HibernateSQLFormatter")
 
   it should "convert camelCase to snake_case correctly" in {
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("_type") should equal("_type")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("type_") should equal("type_")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("firstName") should equal("first_name")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject") should equal("sql_object")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("SQLObject", Map("SQL" -> "s_q_l")) should equal("s_q_l_object")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML") should equal("wonderful_my_html")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("My" -> "xxx")) should equal("wonderfulxxx_html")
-    SQLSyntaxProvider.applyNameConvertersAndConvertToSnakeCase("wonderfulMyHTML", Map("wonderful" -> "")) should equal("my_html")
+    SQLSyntaxProvider.toColumnName("_type", Map(), true) should equal("_type")
+    SQLSyntaxProvider.toColumnName("type_", Map(), true) should equal("type_")
+    SQLSyntaxProvider.toColumnName("firstName", Map(), true) should equal("first_name")
+    SQLSyntaxProvider.toColumnName("SQLObject", Map(), true) should equal("sql_object")
+    SQLSyntaxProvider.toColumnName("SQLObject", Map("SQL" -> "s_q_l"), true) should equal("s_q_l_object")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map(), true) should equal("wonderful_my_html")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map("My" -> "xxx"), true) should equal("wonderfulxxx_html")
+    SQLSyntaxProvider.toColumnName("wonderfulMyHTML", Map("wonderful" -> ""), true) should equal("my_html")
+
+    SQLSyntaxProvider.toColumnName("firstName", Map(), false) should equal("firstName")
+    SQLSyntaxProvider.toColumnName("firstName", Map("first" -> "full"), false) should equal("fullName")
   }
 
   object User extends SQLSyntaxSupport[User] {
