@@ -1,4 +1,4 @@
-# ScalikeJDBC - SQL-Based DB Access Library for Scala
+# ScalikeJDBC
 
 ![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
 
@@ -64,14 +64,17 @@ SQLInterpolation and SQLSyntaxSupport is much powerful.
 case class User(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
   override val tableName = "users"
-  def apply(u: ResultName[User])(rs: WrappedResultSet) = new User(rs.long(u.id), rs.stringOpt(u.name))
+  def apply(provider: SyntaxProvider[User])(rs: WrappedResultSet): User = {
+    val u = provider.resultName
+    new User(rs.long(u.id), rs.stringOpt(u.name))
+  }
 }
 
 val u = User.syntax("u")
 val users: List[User] = DB readOnly { implicit session =>
   withSQL { 
-    select.all(u).from(User as u).where.eq(u.id, 123) 
-  }.map(User(u.resultName)).list.apply()
+    select.from(User as u).where.eq(u.id, 123) 
+  }.map(User(u)).list.apply()
 
   // or sql"select ${u.result.*} from ${User as u} where ${u.id} = ${123}".map(User.resultName).list.apply()
 }
@@ -80,6 +83,16 @@ val name = Some("Chris")
 val newUser: User = DB localTx { implicit session =>
   val id = withSQL { insert.into(User).values(name) }.updateAndReturnGeneratedKey.apply()
   User(id, name)
+}
+
+DB localTx { implicit session =>
+  applyUdate {
+    update(User as u)
+      .set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
+      .where.eq(u.name, "Bob").and.isNotNull(u.createdAt)
+  } // = withSQL { ... }.update.apply()
+
+  applyUpdate { delete.from(User).where.eq(User.column.id, 123) }
 }
 ```
 
