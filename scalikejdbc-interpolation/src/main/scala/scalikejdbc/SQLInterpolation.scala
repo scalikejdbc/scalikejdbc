@@ -325,6 +325,19 @@ object SQLInterpolation {
     import SQLSyntax.csv
     def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
     def values(values: Any*): InsertSQLBuilder = this.copy(sql = sqls"${sql} values (${values})")
+
+    def select(columns: SQLSyntax*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = scalikejdbc.SQLInterpolation.select(columns: _*)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
+    def selectAll(providers: ResultAllProvider*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = scalikejdbc.SQLInterpolation.select.all(providers: _*)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
+    def select(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = new SelectSQLBuilder[Nothing](sql = sqls"", lazyColumns = true)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
   }
 
   /**

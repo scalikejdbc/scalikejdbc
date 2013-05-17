@@ -9,6 +9,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
   behavior of "QueryInterface"
 
   case class Order(id: Int, productId: Int, accountId: Option[Int], createdAt: DateTime, product: Option[Product] = None, account: Option[Account] = None)
+  case class LegacyProduct(id: Option[Int], name: Option[String], price: Int)
   case class Product(id: Int, name: Option[String], price: Int)
   case class Account(id: Int, name: Option[String])
 
@@ -24,6 +25,9 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product], a: SyntaxProvider[Account])(rs: WrappedResultSet): Order = {
       (apply(o)(rs)).copy(product = Some(Product(p)(rs)), account = Account.opt(a)(rs))
     }
+  }
+  object LegacyProduct extends SQLSyntaxSupport[LegacyProduct] {
+    override val tableName = "qi_legacy_products"
   }
   object Product extends SQLSyntaxSupport[Product] {
     override val tableName = "qi_products"
@@ -42,18 +46,26 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
       DB localTx { implicit s =>
         sql"create table ${Order.table} (id int not null, product_id int not null, account_id int, created_at timestamp not null)".execute.apply()
         sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute.apply()
+        sql"create table ${LegacyProduct.table} (id int, name varchar(256), price int not null)".execute.apply()
         sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
       }
       DB localTx { implicit s =>
 
         // insert test data
         val (oc, pc, ac) = (Order.column, Product.column, Account.column)
+        val lp = LegacyProduct.syntax("lp")
         Seq(
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
           insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
+          insert.into(LegacyProduct).values(None, "tmp", 777),
+          insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
+          insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
           insert.into(Product).values(1, "Cookie", 120),
           insert.into(Product).values(2, "Tea", 80),
+          insert.into(Product).select(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
+          insert.into(Product).select(lp.id, lp.name, lp.price)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
+          delete.from(Product).where.in(pc.id, Seq(100, 200)),
           insert.into(Order).values(11, 1, Some(1), DateTime.now),
           insert.into(Order).values(12, 1, Some(2), DateTime.now),
           insert.into(Order).values(13, 1, Some(3), DateTime.now),
@@ -194,6 +206,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
       DB localTx { implicit s =>
         try {
           sql"drop table ${Order.table}".execute.apply()
+          sql"drop table ${LegacyProduct.table}".execute.apply()
           sql"drop table ${Product.table}".execute.apply()
           sql"drop table ${Account.table}".execute.apply()
         } catch { case e: Exception => }
