@@ -216,7 +216,7 @@ object SQLInterpolation {
     }
   }
 
-  trait SubQuerySQLBuilder[A] {
+  trait SubQuerySQLBuilder[A] extends SQLBuilder[A] {
     def sql: SQLSyntax
 
     /**
@@ -225,7 +225,7 @@ object SQLInterpolation {
      *   val x = SubQuery.syntax("x").include(u, g)
      *   withSQL { select.from(select.from(User as u).leftJoin(Group as g).on(u.groupId, g.id).where.eq(u.groupId, 234).as(x)) }
      */
-    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${sql}) ${SubQuery.as(sq)}")
+    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}")
   }
 
   /**

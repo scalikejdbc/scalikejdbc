@@ -65,6 +65,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Product).values(2, "Tea", 80),
           insert.into(Product).select(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
           insert.into(Product).select(lp.id, lp.name, lp.price)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
+          insert.into(Product).selectAll(lp)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
           delete.from(Product).where.in(pc.id, Seq(100, 200)),
           insert.into(Order).values(11, 1, Some(1), DateTime.now),
           insert.into(Order).values(12, 1, Some(2), DateTime.now),
@@ -113,10 +114,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           select
             .from[Order](Order as o)
             .innerJoin(Product as p).on(o.productId, p.id)
-            .map { sql =>
-              if (accountRequired) sql.leftJoin(Account as a).on(o.accountId, a.id)
-              else sql
-            }.where.eq(o.id, 13)
+            .map { sql => if (accountRequired) sql.leftJoin(Account as a).on(o.accountId, a.id) else sql }
+            .where.eq(o.id, 13)
         }.map {
           rs => if (accountRequired) Order(o, p, a)(rs) else Order(o, p)(rs)
         }.single.apply()
@@ -128,8 +127,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         import SQLSyntax.{ sum, gt }
         val x = SubQuery.syntax("x").include(o, p)
         val preferredClients: List[(Int, Int)] = withSQL {
-          select(sqls"${x(o).accountId} id", sqls"${sum(x(p).price)} as amount")
-            .from(select.all(o, p).from(Order as o).innerJoin(Product as p).on(o.productId, p.id).as(x))
+          select(sqls"${x(o).accountId} id", sqls"${sum(x(p).price)} amount")
+            .from(select.from(Order as o).innerJoin(Product as p).on(o.productId, p.id).as(x))
             .groupBy(x(o).accountId)
             .having(gt(sum(x(p).price), 300))
             .orderBy(sqls"amount")
