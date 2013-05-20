@@ -8,9 +8,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "1.6.0",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.0",
-  "com.github.seratch" %% "scalikejdbc-test" % "1.6.0",
+  "com.github.seratch" %% "scalikejdbc" % "1.6.1-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.1-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-test" % "1.6.1-SNAPSHOT",
   "org.slf4j" % "slf4j-simple" % "[1.7,)",
   "org.hibernate" %  "hibernate-core" % "4.1.9.Final",
   "org.hsqldb" % "hsqldb" % "[2,)",
@@ -61,7 +61,7 @@ DB localTx { implicit session =>
     sql"create table companies(id bigint primary key not null, name varchar(255))".execute.apply()
     sql"create table groups(id bigint primary key not null, name varchar(255))".execute.apply()
     sql"create table group_members(group_id bigint not null, user_id bigint not null, primary key(group_id, user_id))".execute.apply()
-    Seq[SQLBuilder[Int]](
+    Seq(
       insert.into(User).values(1, "Alice", null),
       insert.into(User).values(2, "Bob",   1),
       insert.into(User).values(3, "Chris", 1),
