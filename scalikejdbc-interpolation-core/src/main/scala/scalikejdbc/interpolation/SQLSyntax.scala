@@ -43,7 +43,7 @@ object SQLSyntax {
   def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",")
 
   def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax): SQLSyntax = parts.foldLeft(sqls"") {
-    case (sql, part) if !sql.isEmpty && !part.isEmpty => sqls"${sql}${delimiter} ${part}"
+    case (sql, part) if !sql.isEmpty && !part.isEmpty => sqls"${sql} ${delimiter} ${part}"
     case (sql, part) if sql.isEmpty && !part.isEmpty => part
     case (sql, _) => sql
   }
