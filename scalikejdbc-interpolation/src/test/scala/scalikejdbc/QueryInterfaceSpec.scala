@@ -200,9 +200,11 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         QueryDSL.insert.into(Account).columns(ac.id, ac.name).values(1, "Alice")
 
-        // TODO compilation error since 2.10.1, no work around...
+        // TODO compilation error since 2.10.1
         //QueryDSL.update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)
         //QueryDSL.delete.from(Order).where.isNull(Order.column.accountId)
+        QueryDSL.update(Account as a).set(a.name -> "Bob Marley").where.eq(a.c("id"), 2)
+        QueryDSL.delete.from(Order).where.isNull(Order.column.field("accountId"))
 
       }
     } catch {
