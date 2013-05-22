@@ -23,7 +23,39 @@ package scalikejdbc.interpolation
  * Note: The constructor should NOT be used by library users at the considerable risk of SQL injection vulnerability.
  * https://github.com/seratch/scalikejdbc/issues/116
  */
-class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any] = Vector())
+class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any] = Vector()) {
+  import Implicits._
+  import SQLSyntax._
+
+  def groupBy(columns: SQLSyntax*) = sqls"${this} group by ${csv(columns: _*)}"
+  def having(condition: SQLSyntax) = sqls"${this} having ${condition}"
+
+  def orderBy(columns: SQLSyntax*) = sqls"${this} order by ${csv(columns: _*)}"
+  def asc = sqls"${this} asc"
+  def desc = sqls"${this} desc"
+
+  def limit(n: Int) = sqls"${this} limit ${SQLSyntax(n.toString)}"
+  def offset(n: Int) = sqls"${this} offset ${SQLSyntax(n.toString)}"
+
+  def where = sqls"${this} where"
+  def where(where: SQLSyntax) = sqls"${this} where ${where}"
+
+  def and = sqls"${this} and"
+  def or = sqls"${this} or"
+
+  def eq(column: SQLSyntax, value: Any) = sqls"${this} ${column} = ${value}"
+  def ne(column: SQLSyntax, value: Any) = sqls"${this} ${column} <> ${value}"
+  def gt(column: SQLSyntax, value: Any) = sqls"${this} ${column} > ${value}"
+  def ge(column: SQLSyntax, value: Any) = sqls"${this} ${column} >= ${value}"
+  def lt(column: SQLSyntax, value: Any) = sqls"${this} ${column} < ${value}"
+  def le(column: SQLSyntax, value: Any) = sqls"${this} ${column} <= ${value}"
+
+  def isNull(column: SQLSyntax) = sqls"${this} ${column} is null"
+  def isNotNull(column: SQLSyntax) = sqls"${this} ${column} is not null"
+  def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
+  def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
+
+}
 
 /*
  * SQLSyntax companion object
@@ -38,28 +70,39 @@ object SQLSyntax {
 
   import Implicits._
 
-  def and(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"and")
-  def or(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"or")
-  def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",")
-
   def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax): SQLSyntax = parts.foldLeft(sqls"") {
     case (sql, part) if !sql.isEmpty && !part.isEmpty => sqls"${sql} ${delimiter} ${part}"
     case (sql, part) if sql.isEmpty && !part.isEmpty => part
     case (sql, _) => sql
   }
+  def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",")
+  def joinWithAnd(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"and")
+  def joinWithOr(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"or")
 
-  def groupBy(columns: SQLSyntax*) = sqls"group by ${csv(columns: _*)}"
-  def having(condition: SQLSyntax) = sqls"having ${condition}"
+  def groupBy(columns: SQLSyntax*) = sqls"".groupBy(columns: _*)
+  def having(condition: SQLSyntax) = sqls"".having(condition)
 
-  def orderBy(columns: SQLSyntax*) = sqls"order by ${csv(columns: _*)}"
-  def asc = sqls"asc"
-  def desc = sqls"desc"
+  def orderBy(columns: SQLSyntax*) = sqls"".orderBy(columns: _*)
+  def asc = sqls"".asc
+  def desc = sqls"".desc
 
-  def limit(n: Int) = sqls"limit ${SQLSyntax(n.toString)}"
-  def offset(n: Int) = sqls"offset ${SQLSyntax(n.toString)}"
+  def limit(n: Int) = sqls"".limit(n)
+  def offset(n: Int) = sqls"".offset(n)
 
-  def where = sqls"where"
-  def where(where: SQLSyntax) = sqls"where ${where}"
+  def where = sqls"".where
+  def where(where: SQLSyntax) = sqls"".where(where)
+
+  def eq(column: SQLSyntax, value: Any) = sqls"".eq(column, value)
+  def ne(column: SQLSyntax, value: Any) = sqls"".ne(column, value)
+  def gt(column: SQLSyntax, value: Any) = sqls"".gt(column, value)
+  def ge(column: SQLSyntax, value: Any) = sqls"".ge(column, value)
+  def lt(column: SQLSyntax, value: Any) = sqls"".lt(column, value)
+  def le(column: SQLSyntax, value: Any) = sqls"".le(column, value)
+
+  def isNull(column: SQLSyntax) = sqls"".isNull(column)
+  def isNotNull(column: SQLSyntax) = sqls"".isNotNull(column)
+  def between(a: Any, b: Any) = sqls"".between(a, b)
+  def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
 
   def distinct(column: SQLSyntax) = sqls"distinct ${column}"
 
@@ -70,20 +113,7 @@ object SQLSyntax {
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"
 
-  def eq(column: SQLSyntax, value: Any) = sqls"${column} = ${value}"
-  def ne(column: SQLSyntax, value: Any) = sqls"${column} <> ${value}"
-  def gt(column: SQLSyntax, value: Any) = sqls"${column} > ${value}"
-  def ge(column: SQLSyntax, value: Any) = sqls"${column} >= ${value}"
-  def lt(column: SQLSyntax, value: Any) = sqls"${column} < ${value}"
-  def le(column: SQLSyntax, value: Any) = sqls"${column} <= ${value}"
-
-  def isNull(column: SQLSyntax) = sqls"${column} is null"
-  def isNotNull(column: SQLSyntax) = sqls"${column} is not null"
-  def between(a: Any, b: Any) = sqls"between ${a} and ${b}"
-  def in(column: SQLSyntax, values: Seq[Any]) = sqls"${column} in (${values})"
-
   def currentTimestamp = sqls"current_timestamp"
-
   def dual = sqls"dual"
 
 }

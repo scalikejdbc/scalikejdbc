@@ -124,7 +124,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         findCookieOrder(false).get.account.isEmpty should be(true)
 
         // sub-query, group by, having
-        import SQLSyntax.{ sum, gt }
+        import sqls.{ sum, gt }
         val x = SubQuery.syntax("x").include(o, p)
         val preferredClients: List[(Int, Int)] = withSQL {
           select(sqls"${x(o).accountId} id", sqls"${sum(x(p).price)} amount")
@@ -144,7 +144,6 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
               _.eq(o.productId, 1).and.isNotNull(o.accountId)
             }.or.isNull(o.accountId)
             .orderBy(o.id)
-
         }.map(_.int(o.resultName.id)).list.apply()
 
         bracketTestResults should equal(List(11, 12, 13, 14, 15, 26))
@@ -161,7 +160,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
 
         // distinct count
-        import SQLSyntax.{ distinct, count }
+        import sqls.{ distinct, count }
         val productCount = withSQL {
           select(count(distinct(o.productId))).from(Order as o)
         }.map(_.int(1)).single.apply().get
