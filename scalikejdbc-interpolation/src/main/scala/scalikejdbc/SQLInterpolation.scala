@@ -214,6 +214,7 @@ object SQLInterpolation {
 
     def and: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} and")
     def or: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} or")
+    def not: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} not")
 
     def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
     def ne(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.ne(column, value)}")
@@ -227,6 +228,9 @@ object SQLInterpolation {
 
     def between(a: Any, b: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(a, b)}")
     def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
+
+    def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
+    def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)
 
     /**
      * Appends a round bracket in where clause.
