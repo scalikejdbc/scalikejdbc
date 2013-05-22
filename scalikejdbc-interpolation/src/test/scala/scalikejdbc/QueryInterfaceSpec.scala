@@ -170,7 +170,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
 
-        // the folloing code becomes compilation error on Scala 2.10.1.
+        // TODO the folloing code becomes compilation error on Scala 2.10.1.
         // applyUpdate(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2))
         /*
          [error]   scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala:162: erroneous or inaccessible type
@@ -186,7 +186,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }.map(Account(a)).single.apply().get.name
         newName should equal(Some("Bob Marley"))
 
-        // compilation error since 2.10.1
+        // TODO compilation error since 2.10.1
         // applyUpdate { delete.from(Order).where.isNull(Order.column.accountId) } 
         withSQL { delete.from(Order).where.isNull(Order.column.accountId) }.update.apply()
 
@@ -197,6 +197,13 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         val orders = withSQL { QueryDSL.select.from(Order as o).where.isNotNull(o.accountId) }.map(Order(o)).list.apply()
         orders.size should be > (0)
+
+        QueryDSL.insert.into(Account).columns(ac.id, ac.name).values(1, "Alice")
+
+        // TODO compilation error since 2.10.1, no work around...
+        //QueryDSL.update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)
+        //QueryDSL.delete.from(Order).where.isNull(Order.column.accountId)
+
       }
     } catch {
       case e: Exception =>

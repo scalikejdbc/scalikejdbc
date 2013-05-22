@@ -38,6 +38,11 @@ object SQLInterpolation {
   // ---------------------------------
 
   /**
+   * Represents UpdateOperation (used as SQLBuilder[UpdateOperation]).
+   */
+  trait UpdateOperation
+
+  /**
    * Prefix object for name confiliction.
    *
    * {{{
@@ -45,94 +50,97 @@ object SQLInterpolation {
    * }}}
    */
   object QueryDSL {
-    val select = SQLInterpolation.select
-    val insert = SQLInterpolation.insert
-    val update = SQLInterpolation.update
-    val delete = SQLInterpolation.delete
-  }
 
-  /**
-   * Query Interface for select query.
-   * {{{
-   *   implicit val session = AutoSession
-   *   val u = User.syntax("u")
-   *   val user = withSQL { select.from(User).where.eq.(u.id, 123) }.map(User(u.resultName)).single.apply()
-   *   val userIdAndName = withSQL {
-   *     select(u.result.id, u.result.name).from(User).where.eq.(u.id, 123)
-   *   }.map(User(u.resultName)).single.apply()
-   * }}}}
-   */
-  object select {
-    def from[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      new SelectSQLBuilder[A](
-        sql = sqls"from ${table}",
-        lazyColumns = true,
-        resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
-      )
+    /**
+     * Query Interface for select query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val u = User.syntax("u")
+     *   val user = withSQL { select.from(User).where.eq.(u.id, 123) }.map(User(u.resultName)).single.apply()
+     *   val userIdAndName = withSQL {
+     *     select(u.result.id, u.result.name).from(User).where.eq.(u.id, 123)
+     *   }.map(User(u.resultName)).single.apply()
+     * }}}}
+     */
+    object select {
+      def from[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
+        new SelectSQLBuilder[A](
+          sql = sqls"from ${table}",
+          lazyColumns = true,
+          resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
+        )
+      }
+      def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = sqls"", lazyColumns = true)
+      def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
+        val columns = sqls.join(providers.map(p => sqls"${p.resultAll}"), sqls",")
+        new SelectSQLBuilder[A](sqls"select ${columns}")
+      }
+      def apply[A](columns: SQLSyntax*): SelectSQLBuilder[A] = new SelectSQLBuilder[A](sqls"select ${sqls.csv(columns: _*)}")
     }
-    def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = sqls"", lazyColumns = true)
-    def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
-      val columns = sqls.join(providers.map(p => sqls"${p.resultAll}"), sqls",")
-      new SelectSQLBuilder[A](sqls"select ${columns}")
+
+    object selectFrom {
+      def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
     }
-    def apply[A](columns: SQLSyntax*): SelectSQLBuilder[A] = new SelectSQLBuilder[A](sqls"select ${sqls.csv(columns: _*)}")
+
+    /**
+     * Query Interface for insert query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val (u, c) = (User.syntax("u"), User.column)
+     *   withSQL { insert.into(User).columns(c.id, c.name, c.createdAt).values(1, "Alice", DateTime.now) }.update.apply()
+     *   applyUpdate { insert.into(User).values(2, "Bob", DateTime.now) }
+     * }}}}
+     */
+    object insert {
+      def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
+    }
+
+    object insertInto {
+      def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder = insert.into(support)
+    }
+
+    /**
+     * Query Interface for delete query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val (u, c) = (User.syntax("u"), User.column)
+     *   withSQL { delete.from(User as u).where.eq(u.id, 1) }.update.apply()
+     *   applyUpdate { delete.from(User).where.eq(c.id, 1) }
+     * }}}}
+     */
+    object delete {
+      def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
+      def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
+    }
+
+    object deleteFrom {
+      def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = delete.from(table)
+      def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = delete.from(support)
+    }
+
+    /**
+     * Query Interface for update query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val u = User.syntax("u")
+     *   withSQL { update(User as u).set(u.name -> "Chris", u.updatedAt -> DateTime.now).where.eq(u.id, 1) }.update.apply()
+     *   applyUpdate { update(User as u).set(u.name -> "Dennis").where.eq(u.id, 1) }
+     * }}}}
+     */
+    object update {
+      def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
+      def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
+    }
+
   }
 
-  object selectFrom {
-    def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
-  }
-
-  trait UpdateOperation
-
-  /**
-   * Query Interface for insert query.
-   * {{{
-   *   implicit val session = AutoSession
-   *   val (u, c) = (User.syntax("u"), User.column)
-   *   withSQL { insert.into(User).columns(c.id, c.name, c.createdAt).values(1, "Alice", DateTime.now) }.update.apply()
-   *   applyUpdate { insert.into(User).values(2, "Bob", DateTime.now) }
-   * }}}}
-   */
-  object insert {
-    def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
-  }
-
-  object insertInto {
-    def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder = insert.into(support)
-  }
-
-  /**
-   * Query Interface for delete query.
-   * {{{
-   *   implicit val session = AutoSession
-   *   val (u, c) = (User.syntax("u"), User.column)
-   *   withSQL { delete.from(User as u).where.eq(u.id, 1) }.update.apply()
-   *   applyUpdate { delete.from(User).where.eq(c.id, 1) }
-   * }}}}
-   */
-  object delete {
-    def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
-    def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
-  }
-
-  object deleteFrom {
-    def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = delete.from(table)
-    def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = delete.from(support)
-  }
-
-  /**
-   * Query Interface for update query.
-   * {{{
-   *   implicit val session = AutoSession
-   *   val u = User.syntax("u")
-   *   withSQL { update(User as u).set(u.name -> "Chris", u.updatedAt -> DateTime.now).where.eq(u.id, 1) }.update.apply()
-   *   applyUpdate { update(User as u).set(u.name -> "Dennis").where.eq(u.id, 1) }
-   * }}}}
-   */
-  object update {
-    def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
-    def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
-  }
+  val select = QueryDSL.select
+  val selectFrom = QueryDSL.selectFrom
+  val insert = QueryDSL.insert
+  val insertInto = QueryDSL.insertInto
+  val update = QueryDSL.update
+  val delete = QueryDSL.delete
+  val deleteFrom = QueryDSL.deleteFrom
 
   /**
    * withSQL clause which returns SQL[A, NoExtractor] from SQLBuilder.

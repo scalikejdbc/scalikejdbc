@@ -665,6 +665,11 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
             customers.size should equal(3)
           }
 
+        } catch {
+          case e: Exception =>
+            e.printStackTrace
+            throw e
+
         } finally {
           sql"drop table customers".execute.apply()
           sql"drop table customer_group".execute.apply()
