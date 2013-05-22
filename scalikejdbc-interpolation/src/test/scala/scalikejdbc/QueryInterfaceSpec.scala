@@ -162,7 +162,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // exists clause
         val existsClauseResults = withSQL {
-          select(a.result.id)
+          select(a.id)
             .from(Account as a)
             .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
             .orderBy(a.id)
@@ -172,7 +172,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // not exists clause
         val notExistsClauseResults = withSQL {
-          select(a.result.id)
+          select(a.id)
             .from(Account as a)
             .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
             .orderBy(a.id)
