@@ -74,9 +74,9 @@ case class Member(
   birthday: Option[LocalDate] = None,
   createdAt: DateTime) {
 
-  def save()(implicit session: DBSession = Member.autoSession): Member = Member.update(this)(session)
+  def save()(implicit session: DBSession = Member.autoSession): Member = Member.save(this)(session)
 
-  def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.delete(this)(session)
+  def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.destroy(this)(session)
 
 }
 
@@ -100,26 +100,29 @@ object Member extends SQLSyntaxSupport[Member] {
   val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[Member] = {
-    sql"""select ${m.result.*} from ${Member as m} where ID = ${id}"""
-      .map(Member(m.resultName)).single.apply()
+    withSQL {
+      select.from(Member as m).where.eq(m.id, id)
+    }.map(Member(m.resultName)).single.apply()
   }
 
   def findAll()(implicit session: DBSession = autoSession): List[Member] = {
-    sql"""select ${m.result.*} from ${Member as m}""".map(Member(m.resultName)).list.apply()
+    withSQL(select.from(Member as m)).map(Member(m.resultName)).list.apply()
   }
 
   def countAll()(implicit session: DBSession = autoSession): Long = {
-    sql"""select count(1) from ${Member.table}""".map(rs => rs.long(1)).single.apply().get
+    withSQL(select(sqls"count(1)").from(Member as m)).map(rs => rs.long(1)).single.apply().get
   }
 
   def findAllBy(where: SQLSyntax)(implicit session: DBSession = autoSession): List[Member] = {
-    sql"""select ${m.result.*} from ${Member as m} where ${where}"""
-      .map(Member(m.resultName)).list.apply()
+    withSQL {
+      select.from(Member as m).where.append(sqls"${where}")
+    }.map(Member(m.resultName)).list.apply()
   }
 
   def countBy(where: SQLSyntax)(implicit session: DBSession = autoSession): Long = {
-    sql"""select count(1) from ${Member as m} where ${where}"""
-      .map(_.long(1)).single.apply().get
+    withSQL {
+      select(sqls"count(1)").from(Member as m).where.append(sqls"${where}")
+    }.map(_.long(1)).single.apply().get
   }
 
   def create(
@@ -127,19 +130,19 @@ object Member extends SQLSyntaxSupport[Member] {
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
     createdAt: DateTime)(implicit session: DBSession = autoSession): Member = {
-    val generatedKey = sql"""
-      insert into ${Member.table} (
-        ${column.name},
-        ${column.description},
-        ${column.birthday},
-        ${column.createdAt}
-      ) values (
-        ${name},
-        ${description},
-        ${birthday},
-        ${createdAt}
+    val generatedKey = withSQL {
+      insert.into(Member).columns(
+        column.name,
+        column.description,
+        column.birthday,
+        column.createdAt
+      ).values(
+        name,
+        description,
+        birthday,
+        createdAt
       )
-      """.updateAndReturnGeneratedKey.apply()
+    }.updateAndReturnGeneratedKey.apply()
 
     Member(
       id = generatedKey.toInt,
@@ -149,24 +152,21 @@ object Member extends SQLSyntaxSupport[Member] {
       createdAt = createdAt)
   }
 
-  def update(m: Member)(implicit session: DBSession = autoSession): Member = {
-    sql"""
-      update
-        ${Member.table}
-      set
-        ${column.id} = ${m.id},
-        ${column.name} = ${m.name},
-        ${column.description} = ${m.description},
-        ${column.birthday} = ${m.birthday},
-        ${column.createdAt} = ${m.createdAt}
-      where
-        ${column.id} = ${m.id}
-      """.update.apply()
+  def save(m: Member)(implicit session: DBSession = autoSession): Member = {
+    withSQL {
+      update(Member as m).set(
+        m.id -> m.id,
+        m.name -> m.name,
+        m.description -> m.description,
+        m.birthday -> m.birthday,
+        m.createdAt -> m.createdAt
+      ).where.eq(m.id, m.id)
+    }.update.apply()
     m
   }
 
-  def delete(m: Member)(implicit session: DBSession = autoSession): Unit = {
-    sql"""delete from ${Member.table} where ${column.id} = ${m.id}""".update.apply()
+  def destroy(m: Member)(implicit session: DBSession = autoSession): Unit = {
+    withSQL { delete.from(Member).where.eq(column.id, m.id) }.update.apply()
   }
 
 }
@@ -210,14 +210,14 @@ class MemberSpec extends Specification {
       val created = Member.create(name = "MyString", createdAt = DateTime.now)
       created should not beNull
     }
-    "update a record" in new AutoRollback {
+    "save a record" in new AutoRollback {
       val entity = Member.findAll().head
-      val updated = Member.update(entity)
+      val updated = Member.save(entity)
       updated should not equalTo(entity)
     }
-    "delete a record" in new AutoRollback {
+    "destroy a record" in new AutoRollback {
       val entity = Member.findAll().head
-      Member.delete(entity)
+      Member.destroy(entity)
       val shouldBeNone = Member.find(123)
       shouldBeNone.isDefined should beFalse
     }

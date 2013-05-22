@@ -86,10 +86,9 @@ object Project extends SQLSyntaxSupport[Project] {
 
   private val p = Project.syntax("p")
 
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = {
-    sql"select ${p.result.*} from ${Project as p} where ${p.id} = ${id}")
-      .map(Project(p.resultName)).single.apply()
-  }
+  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Project] = withSQL {
+    select.from(Project as p).where.eq(p.id, id)
+  }.map(Project(p.resultName)).single.apply()
 
 ...
 }
