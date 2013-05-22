@@ -195,6 +195,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         }.map(_.long(1)).single.apply().get
         noAccountIdOrderCount should equal(0)
 
+        val orders = withSQL { QueryDSL.select.from(Order as o).where.isNotNull(o.accountId) }.map(Order(o)).list.apply()
+        orders.size should be > (0)
       }
     } catch {
       case e: Exception =>

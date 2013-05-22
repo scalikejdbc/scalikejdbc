@@ -34,8 +34,22 @@ object SQLInterpolation {
   @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
 
   // ---------------------------------
-  // Query Interface
+  // Query DSL
   // ---------------------------------
+
+  /**
+   * Prefix object for name confiliction.
+   *
+   * {{{
+   *   withSQL { QueryDSL.select.from(User as u).where.eq(u.id, 123) }
+   * }}}
+   */
+  object QueryDSL {
+    val select = SQLInterpolation.select
+    val insert = SQLInterpolation.insert
+    val update = SQLInterpolation.update
+    val delete = SQLInterpolation.delete
+  }
 
   /**
    * Query Interface for select query.
