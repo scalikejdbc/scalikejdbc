@@ -215,6 +215,26 @@ object SQLInterpolation {
     def and: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} and")
     def or: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} or")
 
+    /**
+     * Appends conditions with delimiter.
+     *
+     * {{{
+     * .where
+     * .dynamicAndConditions(
+     *   id.map(i => sqls.eq(u.id, i)),
+     *   Some(sqls.isNotNull(u.name))
+     * )
+     * }}}
+     */
+    def dynamicAndConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      new ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithAnd(cs: _*)}")
+    }
+    def dynamicOrConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      new ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithOr(cs: _*)}")
+    }
+
     def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
     def ne(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.ne(column, value)}")
     def gt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.gt(column, value)}")
