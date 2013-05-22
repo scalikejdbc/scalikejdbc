@@ -155,7 +155,6 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
             .from(Order as o)
             .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
             .orderBy(o.id)
-
         }.map(Order(o)).list.apply()
 
         inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
@@ -171,14 +170,26 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         existsClauseResults should equal(List(1, 2, 3))
 
         // not exists clause
-        val notExistsClauseResults = withSQL {
-          select(a.id)
-            .from(Account as a)
-            .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
-            .orderBy(a.id)
-        }.map(_.int(1)).list.apply()
+        {
+          val notExistsClauseResults = withSQL {
+            select(a.id)
+              .from(Account as a)
+              .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
+              .orderBy(a.id)
+          }.map(_.int(1)).list.apply()
 
-        notExistsClauseResults should equal(List(4))
+          notExistsClauseResults should equal(List(4))
+        }
+        {
+          val notExistsClauseResults = withSQL {
+            select(a.id)
+              .from(Account as a)
+              .where.notExists(sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}")
+              .orderBy(a.id)
+          }.map(_.int(1)).list.apply()
+
+          notExistsClauseResults should equal(List(4))
+        }
 
         // distinct count
         import sqls.{ distinct, count }

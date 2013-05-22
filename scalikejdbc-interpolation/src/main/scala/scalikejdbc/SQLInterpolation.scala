@@ -232,6 +232,9 @@ object SQLInterpolation {
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
     def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)
 
+    def notExists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = not.exists(subQuery)
+    def notExists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = not.exists(subQuery)
+
     /**
      * Appends a round bracket in where clause.
      * e.g. select.from(User as u).where.withRoundBracket { _.eq(u.id, 123).and.eq(u.groupId, 234) }.or.eq(u.groupId, 345)
