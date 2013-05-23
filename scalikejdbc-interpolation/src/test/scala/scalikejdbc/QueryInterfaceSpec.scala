@@ -314,10 +314,10 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
          [error]                                                                                  ^
          */
         // the following code works fine. Don't know why.
-        val updateQuery = update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)
+        val updateQuery = update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)
         applyUpdate(updateQuery)
         // of course, this code also works fine.
-        withSQL(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)).update.apply()
+        withSQL(update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)).update.apply()
 
         val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }.map(Account(a)).single.apply().get.name
         newName should equal(Some("Bob Marley"))
@@ -339,7 +339,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         // TODO compilation error since 2.10.1
         //QueryDSL.update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2)
         //QueryDSL.delete.from(Order).where.isNull(Order.column.accountId)
-        QueryDSL.update(Account as a).set(a.name -> "Bob Marley").where.eq(a.c("id"), 2)
+        QueryDSL.update(Account).set(ac.name -> "Bob Marley").where.eq(ac.c("id"), 2)
         QueryDSL.delete.from(Order).where.isNull(Order.column.field("accountId"))
 
       }
