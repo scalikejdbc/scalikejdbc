@@ -259,6 +259,27 @@ object SQLInterpolation {
       val emptyBuilder = ConditionSQLBuilder[A](sqls"")
       ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
     }
+
+    /**
+     * Appends conditions with delimiter.
+     *
+     * {{{
+     * .where
+     * .dynamicAndConditions(
+     *   id.map(i => sqls.eq(u.id, i)),
+     *   Some(sqls.isNotNull(u.name))
+     * )
+     * }}}
+     */
+    def dynamicAndConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithAnd(cs: _*)}")
+    }
+    def dynamicOrConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithOr(cs: _*)}")
+    }
+
   }
 
   trait SubQuerySQLBuilder[A] extends SQLBuilder[A] {
