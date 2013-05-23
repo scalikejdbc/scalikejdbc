@@ -15,7 +15,9 @@ sbt \
   clean \
   library/test \
   interpolation-core/test \
-  interpolation/test
+  interpolation/test > logs/test_stdout.log
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
+
+grep -A 5 "Failed tests:" logs/test_stdout.log
 
