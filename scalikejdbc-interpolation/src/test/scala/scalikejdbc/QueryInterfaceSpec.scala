@@ -284,6 +284,17 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         productCount should equal(2)
 
+        // group by after where clause
+        val groupByAfterWhereClauseResults = withSQL {
+          select(o.accountId, count(o.*)).from(Order as o)
+            .where.isNotNull(o.accountId)
+            .groupBy(o.accountId)
+            .orderBy(o.accountId).desc
+            .limit(2)
+        }.map(rs => (rs.int(1), rs.int(2))).list.apply()
+
+        groupByAfterWhereClauseResults should equal(List((3, 2), (2, 4)))
+
         // union
         val unionResults = withSQL {
           select(sqls"${a.id} as id").from(Account as a)

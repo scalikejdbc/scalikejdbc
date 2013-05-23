@@ -191,6 +191,11 @@ object SQLInterpolation {
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
   }
 
+  trait GroupBySQLBuilder[A] extends SQLBuilder[A] {
+    def groupBy(columns: SQLSyntax*): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
+    def having(condition: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql = sqls"${sql} ${sqls.having(condition)}")
+  }
+
   // factory
   private[scalikejdbc] object PagingSQLBuilder {
     def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
@@ -213,6 +218,7 @@ object SQLInterpolation {
 
   trait ConditionSQLBuilder[A] extends SQLBuilder[A]
       with PagingSQLBuilder[A]
+      with GroupBySQLBuilder[A]
       with UnionQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
 
@@ -306,6 +312,7 @@ object SQLInterpolation {
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
       extends SQLBuilder[A]
       with PagingSQLBuilder[A]
+      with GroupBySQLBuilder[A]
       with UnionQuerySQLBuilder[A]
       with WhereSQLBuilder[A]
       with SubQuerySQLBuilder[A] {
@@ -362,9 +369,6 @@ object SQLInterpolation {
      * e.g. select.from(User as u).map { sql => if (groupRequired) sql.leftJoin(Group as g).on(u.groupId, g.id) else sql }
      */
     def map(mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]): SelectSQLBuilder[A] = mapper.apply(this)
-
-    def groupBy(columns: SQLSyntax*): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} ${sqls.groupBy(columns: _*)}")
-    def having(condition: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} ${sqls.having(condition)}")
 
     override def where: ConditionSQLBuilder[A] = {
       if (lazyColumns) {
