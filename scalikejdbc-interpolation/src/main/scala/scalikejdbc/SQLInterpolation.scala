@@ -191,9 +191,15 @@ object SQLInterpolation {
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
   }
 
-  trait GroupBySQLBuilder[A] extends SQLBuilder[A] {
-    def groupBy(columns: SQLSyntax*): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
-    def having(condition: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql = sqls"${sql} ${sqls.having(condition)}")
+  // factory
+  private[scalikejdbc] object GroupBySQLBuilder {
+    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with GroupBySQLBuilder[A]
+  }
+
+  trait GroupBySQLBuilder[A] extends SQLBuilder[A]
+      with PagingSQLBuilder[A] {
+    def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
+    def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sql = sqls"${sql} ${sqls.having(condition)}")
   }
 
   // factory
