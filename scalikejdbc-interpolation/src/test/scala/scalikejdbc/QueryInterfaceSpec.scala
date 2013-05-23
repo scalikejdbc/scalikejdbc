@@ -199,6 +199,25 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         productCount should equal(2)
 
+        // union
+        val unionResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a)
+            .union(select(sqls"${p.id} as id").from(Product as p))
+            .orderBy(sqls"id").desc
+            .limit(3).offset(0)
+        }.map(_.int("id")).list.apply()
+
+        unionResults should equal(List(4, 3, 2))
+
+        // union all
+        val unionAllResults = withSQL {
+          select(a.id).from(Account as a)
+            .unionAll(select(p.id).from(Product as p))
+            .unionAll(select(p.id).from(Product as p))
+        }.map(_.int(1)).list.apply()
+
+        unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
+
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
 

@@ -190,7 +190,11 @@ object SQLInterpolation {
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
   }
 
-  class PagingSQLBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
+  class PagingSQLBuilder[A](override val sql: SQLSyntax)
+      extends SQLBuilder[A]
+      with UnionQuerySQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
+
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} asc")
     def desc: PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} desc")
@@ -198,7 +202,10 @@ object SQLInterpolation {
     def offset(n: Int): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"${sql} ${sqls.offset(n)}")
   }
 
-  class ConditionSQLBuilder[A](override val sql: SQLSyntax) extends PagingSQLBuilder[A](sql) with SubQuerySQLBuilder[A] {
+  class ConditionSQLBuilder[A](override val sql: SQLSyntax)
+      extends PagingSQLBuilder[A](sql)
+      with UnionQuerySQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
 
     /**
      * Appends SQLSyntax directly.
@@ -257,11 +264,24 @@ object SQLInterpolation {
     def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}")
   }
 
+  trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def sql: SQLSyntax
+
+    def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"(${sql}) union (${anotherQuery})")
+    def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = new PagingSQLBuilder[A](sqls"(${sql}) union all (${anotherQuery})")
+
+    def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(anotherQuery.toSQLSyntax)
+    def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(anotherQuery.toSQLSyntax)
+  }
+
   /**
    * SQLBuilder for select queries.
    */
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
-      extends PagingSQLBuilder[A](sql) with WhereSQLBuilder[A] with SubQuerySQLBuilder[A] {
+      extends PagingSQLBuilder[A](sql)
+      with UnionQuerySQLBuilder[A]
+      with WhereSQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
       table.resultAllProvider.map(provider => provider :: resultAllProviders).getOrElse(resultAllProviders)
