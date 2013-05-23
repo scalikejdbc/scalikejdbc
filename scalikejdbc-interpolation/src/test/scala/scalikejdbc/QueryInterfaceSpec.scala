@@ -124,6 +124,59 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         findCookieOrder(true).get.account.isEmpty should be(false)
         findCookieOrder(false).get.account.isEmpty should be(true)
 
+        {
+          val (productId, accountId) = (Some(1), None)
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where
+              .dynamicAndConditions(
+                productId.map(id => sqls.eq(o.productId, id)),
+                accountId.map(id => sqls.eq(o.accountId, id))
+              )
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(11, 12, 13, 14, 15))
+        }
+        {
+          val (productId, accountId) = (Some(1), Some(2))
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where
+              .dynamicAndConditions(
+                productId.map(id => sqls.eq(o.productId, id)),
+                accountId.map(id => sqls.eq(o.accountId, id))
+              )
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(12))
+        }
+        {
+          val (id1, id2) = (Some(1), None)
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where
+              .dynamicOrConditions(
+                id1.map(id => sqls.eq(o.productId, id)),
+                id2.map(id => sqls.eq(o.productId, id))
+              ).and.isNotNull(o.accountId)
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(11, 12, 13, 14, 15))
+        }
+        {
+          val (id1, id2) = (Some(1), Some(2))
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where
+              .dynamicOrConditions(
+                id1.map(id => sqls.eq(o.productId, id)),
+                id2.map(id => sqls.eq(o.productId, id))
+              ).and.isNotNull(o.accountId)
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(11, 12, 13, 14, 15, 21, 22, 23, 24, 25))
+        }
+
         // sub-query, group by, having
         import sqls.{ sum, gt }
         val x = SubQuery.syntax("x").include(o, p)
@@ -148,6 +201,38 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         }.map(_.int(o.resultName.id)).list.apply()
 
         bracketTestResults should equal(List(11, 12, 13, 14, 15, 26))
+
+        {
+          val productId = Some(1)
+          val withConditionsTestResults = withSQL {
+            select(o.result.id)
+              .from(Order as o)
+              .where
+              .withRoundBracket(_.dynamicAndConditions(
+                productId.map(i => sqls.eq(o.productId, i)),
+                Some(sqls.isNotNull(o.accountId))
+              ))
+              .or.isNull(o.accountId)
+              .orderBy(o.id)
+          }.map(_.int(o.resultName.id)).list.apply()
+
+          withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
+        }
+
+        {
+          val productId = Some(1)
+          val withConditionsTestResults = withSQL {
+            select(o.result.id)
+              .from(Order as o)
+              .where
+              .dynamicOrConditions(
+                productId.map(i => sqls.eq(o.productId, i)),
+                Some(sqls.isNull(o.accountId))
+              ).orderBy(o.id)
+          }.map(_.int(o.resultName.id)).list.apply()
+
+          withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
+        }
 
         // in clause
         val inClauseResults = withSQL {
