@@ -58,6 +58,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
           insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
+          insert.into(Account).columns(ac.id, ac.name).values(4, "Debian"),
           insert.into(LegacyProduct).values(None, "tmp", 777),
           insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
           insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
@@ -239,10 +240,41 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
             .from(Order as o)
             .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
             .orderBy(o.id)
-
         }.map(Order(o)).list.apply()
 
         inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
+
+        // exists clause
+        val existsClauseResults = withSQL {
+          select(a.id)
+            .from(Account as a)
+            .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
+            .orderBy(a.id)
+        }.map(_.int(1)).list.apply()
+
+        existsClauseResults should equal(List(1, 2, 3))
+
+        // not exists clause
+        {
+          val notExistsClauseResults = withSQL {
+            select(a.id)
+              .from(Account as a)
+              .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
+              .orderBy(a.id)
+          }.map(_.int(1)).list.apply()
+
+          notExistsClauseResults should equal(List(4))
+        }
+        {
+          val notExistsClauseResults = withSQL {
+            select(a.id)
+              .from(Account as a)
+              .where.notExists(sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}")
+              .orderBy(a.id)
+          }.map(_.int(1)).list.apply()
+
+          notExistsClauseResults should equal(List(4))
+        }
 
         // distinct count
         import sqls.{ distinct, count }
@@ -251,6 +283,25 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         }.map(_.int(1)).single.apply().get
 
         productCount should equal(2)
+
+        // union
+        val unionResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a)
+            .union(select(sqls"${p.id} as id").from(Product as p))
+            .orderBy(sqls"id").desc
+            .limit(3).offset(0)
+        }.map(_.int("id")).list.apply()
+
+        unionResults should equal(List(4, 3, 2))
+
+        // union all
+        val unionAllResults = withSQL {
+          select(a.id).from(Account as a)
+            .unionAll(select(p.id).from(Product as p))
+            .unionAll(select(p.id).from(Product as p))
+        }.map(_.int(1)).list.apply()
+
+        unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
 
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
