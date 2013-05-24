@@ -712,7 +712,8 @@ object SQLInterpolation {
   /**
    * SQLSyntax provider for column names.
    */
-  case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A] {
+  case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A]
+      with AsteriskProvider {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
@@ -723,6 +724,8 @@ object SQLInterpolation {
     val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
 
     val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
+
+    val asterisk: SQLSyntax = sqls"*"
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(c.value)
@@ -754,17 +757,12 @@ object SQLInterpolation {
   }
 
   /**
-   * A trait which has #resultAll: SQLSyntax
-   */
-  trait ResultAllProvider {
-    def resultAll: SQLSyntax
-  }
-
-  /**
    * SQLSyntax provider for query parts.
    */
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultAllProvider {
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
+      with ResultAllProvider
+      with AsteriskProvider {
 
     val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase else tableAliasName
@@ -776,6 +774,8 @@ object SQLInterpolation {
     val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
 
     val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
@@ -888,9 +888,11 @@ object SQLInterpolation {
   }
 
   case class SubQuerySQLSyntaxProvider(
-      aliasName: String,
-      delimiterForResultName: String,
-      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) extends ResultAllProvider {
+    aliasName: String,
+    delimiterForResultName: String,
+    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]])
+      extends ResultAllProvider
+      with AsteriskProvider {
 
     val result: SubQueryResultSQLSyntaxProvider = SubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
     val resultName: SubQueryResultNameSQLSyntaxProvider = result.name
@@ -902,6 +904,8 @@ object SQLInterpolation {
         s"${aliasName}.${c.value}"
       }
     }.mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
       resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
@@ -983,7 +987,8 @@ object SQLInterpolation {
     aliasName: String,
     override val delimiterForResultName: String,
     underlying: BasicResultNameSQLSyntaxProvider[S, A])
-      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
+      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
+      with AsteriskProvider {
 
     val result: PartialSubQueryResultSQLSyntaxProvider[S, A] = {
       PartialSubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, underlying)
@@ -992,6 +997,8 @@ object SQLInterpolation {
     val resultName: PartialSubQueryResultNameSQLSyntaxProvider[S, A] = result.name
 
     val * : SQLSyntax = SQLSyntax(resultName.namedColumns.map { c => s"${aliasName}.${c.value}" }.mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
       underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { _ =>
@@ -1083,6 +1090,9 @@ object SQLInterpolation {
   type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
   val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
   val sqls = scalikejdbc.interpolation.SQLSyntax
+
+  type ResultAllProvider = scalikejdbc.interpolation.ResultAllProvider
+  type AsteriskProvider = scalikejdbc.interpolation.AsteriskProvider
 
 }
 

@@ -57,6 +57,20 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
 }
 
+/**
+ * A trait which has #resultAll: SQLSyntax
+ */
+trait ResultAllProvider {
+  def resultAll: SQLSyntax
+}
+
+/**
+ * A trait which has #asterisk: SQLSyntax
+ */
+trait AsteriskProvider {
+  def asterisk: SQLSyntax
+}
+
 /*
  * SQLSyntax companion object
  */
@@ -109,6 +123,7 @@ object SQLSyntax {
   def avg(column: SQLSyntax) = sqls"avg(${column})"
   def count = sqls"count(1)"
   def count(column: SQLSyntax) = sqls"count(${column})"
+  def count(asteriskProvider: AsteriskProvider) = sqls"count(${asteriskProvider.asterisk})"
   def min(column: SQLSyntax) = sqls"min(${column})"
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"

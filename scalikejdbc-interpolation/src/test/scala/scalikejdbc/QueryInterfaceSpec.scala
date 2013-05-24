@@ -284,6 +284,21 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         productCount should equal(2)
 
+        // enabled wildcard count but it doesn't work with all the RDBMS
+        // HSQLDB: sytax error, H2: always treated as *
+        val wildCardCountSyntax = select(o.productId, count(p), count(a))
+
+        val wildcardCounts = withSQL {
+          // select(o.productId, count(p), count(a))
+          select(o.productId, count(p.id), count(a.id))
+            .from(Order as o)
+            .innerJoin(Product as p).on(o.productId, p.id)
+            .leftJoin(Account as a).on(o.accountId, a.id)
+            .groupBy(o.productId)
+        }.map(rs => (rs.int(1), rs.int(2), rs.int(3))).list.apply()
+
+        wildcardCounts should equal(List((1, 5, 5), (2, 6, 5)))
+
         // group by after where clause
         val groupByAfterWhereClauseResults = withSQL {
           select(o.accountId, count(o.*)).from(Order as o)
