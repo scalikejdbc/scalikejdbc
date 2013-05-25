@@ -1,6 +1,6 @@
 # ScalikeJDBC
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
 
 ## Just write SQL and get things done!
 
