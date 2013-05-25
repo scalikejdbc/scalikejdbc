@@ -199,7 +199,7 @@ object SQLInterpolation {
   trait GroupBySQLBuilder[A] extends SQLBuilder[A]
       with PagingSQLBuilder[A] {
     def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
-    def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sql = sqls"${sql} ${sqls.having(condition)}")
+    def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.having(condition)}")
   }
 
   // factory
