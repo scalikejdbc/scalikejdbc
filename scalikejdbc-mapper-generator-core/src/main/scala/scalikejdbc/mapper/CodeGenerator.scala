@@ -1239,6 +1239,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def replaceVariablesForTestPart(code: String): String = {
     val isInterpolation = config.template == GeneratorTemplate.interpolation || config.template == GeneratorTemplate.queryDsl
+    val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     code.replaceAll("%package%", packageName)
       .replaceAll("%className%", className)
       .replaceFirst("%interpolationImport%", if (isInterpolation) "import scalikejdbc.SQLInterpolation._" else "")
@@ -1246,10 +1247,18 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         c => c.defaultValueInScala
       }.mkString(", "))
       .replaceAll("%whereExample%",
-        if (isInterpolation)
-          table.primaryKeyColumns.headOption.map(c => "sqls\"" + c.name + " = \\${" + c.defaultValueInScala + "}\"").getOrElse("")
+        if (isQueryDsl)
+          table.primaryKeyColumns.headOption.map { c =>
+          "sqls.eq(" + syntaxName + "." + c.nameInScala + ", " + c.defaultValueInScala + ")"
+        }.getOrElse("")
+        else if (isInterpolation)
+          table.primaryKeyColumns.headOption.map { c =>
+          "sqls\"" + c.name + " = \\${" + c.defaultValueInScala + "}\""
+        }.getOrElse("")
         else
-          table.primaryKeyColumns.headOption.map(c => "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala).getOrElse("")
+          table.primaryKeyColumns.headOption.map { c =>
+            "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala
+          }.getOrElse("")
       )
       .replaceAll("%createFields%", table.allColumns.filter {
         c =>
