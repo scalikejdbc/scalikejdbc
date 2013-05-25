@@ -1,0 +1,68 @@
+ScalikeJDBC 1.6.1 has been released. Several fixes for Query DSL.
+
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+
+http://git.io/scalikejdbc
+
+## interpolation
+
+- Added sqls alias for SQLSyntax object
+
+Now you can write sqls.count instead of SQLSyntax.count!
+
+- Added insert-select
+
+    insert.into(Product).select(_.from(LegacyProduct as lp).where.isNotNull(lp.id))
+
+- Added dynamicAnd/OrConditions
+
+    val (productId, accountId) = (Some(1), None)
+    val ids: List[Int] = withSQL {
+      select(o.result.id).from(Order as o)
+        .where
+        .dynamicAndConditions(
+          productId.map(id => sqls.eq(o.productId, id)),
+          accountId.map(id => sqls.eq(o.accountId, id))
+        )
+        .orderBy(o.id)
+    }.map(_.int(1)).list.apply()
+
+- Added #exists, #notExists
+
+    select(a.result.id)
+      .from(Account as a)
+      .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
+      .orderBy(a.id)
+
+- Added #union, #unionAll
+
+    val ids: List[Int] = withSQL {
+      select(a.id).from(Account as a)
+        .union(select(p.id).from(Product as p))
+    }.map(_.int(1)).list.apply()
+
+- Fixed the bug that adding #groupBy after where clause is not allowed
+- Fixed the bug that lazy loading columns doesn't work with sub-query
+- Added wildcard count for PostgreSQL users
+- Renamed SQLSyntax.and(Seq), or(Seq) to joinWithAnd, joinWithOr
+- Added some basic DSL on SQLSyntax class
+
+- Added QueryDSL prefix to select/insert/update/delete
+
+In some cases, select/insert/update/delete might be already used. QueryDSL prefix is the easiest way to avoid the name confliction.
+
+    def select(id: Long)(implicit s: DBSession): Option[User] = {
+      withSQL { QueryDSL.select.from(User as u).where.eq(u.id, id) }.map(User(u)).single.apply()
+    }
+
+## mapper-generator
+
+- Added queryDsl template
+
+## library
+
+- Avoid SQL printer's IndexOutOfBoundsException just in case
+- Catching Formatter's exception
+
+Enjoy writing typesafe SQL and get things done!
+
