@@ -1,6 +1,6 @@
 # ScalikeJDBC
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
 
 ## Just write SQL and get things done!
 
@@ -92,6 +92,10 @@ DB localTx { implicit session =>
   applyUpdate { delete.from(User).where.eq(User.column.id, 123) }
 }
 ```
+
+More examples:
+
+https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
 
 ### Scala 2.9
 
