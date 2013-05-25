@@ -34,98 +34,113 @@ object SQLInterpolation {
   @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
 
   // ---------------------------------
-  // Query Interface
+  // Query DSL
   // ---------------------------------
 
   /**
-   * Query Interface for select query.
-   *
-   * {{{
-   *   implicit val session = AutoSession
-   *   val u = User.syntax("u")
-   *   val user = withSQL { select.from(User).where.eq.(u.id, 123) }.map(User(u.resultName)).single.apply()
-   *   val userIdAndName = withSQL {
-   *     select(u.result.id, u.result.name).from(User).where.eq.(u.id, 123)
-   *   }.map(User(u.resultName)).single.apply()
-   * }}}}
-   */
-  object select {
-    def from[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      new SelectSQLBuilder[A](
-        sql = sqls"from ${table}",
-        lazyColumns = true,
-        resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
-      )
-    }
-    def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = sqls"", lazyColumns = true)
-    def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
-      val columns = SQLSyntax.join(providers.map(p => sqls"${p.resultAll}"), sqls",")
-      new SelectSQLBuilder[A](sqls"select ${columns}")
-    }
-    def apply[A](columns: SQLSyntax*): SelectSQLBuilder[A] = new SelectSQLBuilder[A](sqls"select ${SQLSyntax.csv(columns: _*)}")
-  }
-
-  object selectFrom {
-    def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
-  }
-
-  /**
-   * Stands for return type for Insert/Update/DeleteSQLBuilder.
+   * Represents UpdateOperation (used as SQLBuilder[UpdateOperation]).
    */
   trait UpdateOperation
 
   /**
-   * Query Interface for insert query.
+   * Prefix object for name confiliction.
    *
    * {{{
-   *   implicit val session = AutoSession
-   *   val (u, c) = (User.syntax("u"), User.column)
-   *   withSQL { insert.into(User).columns(c.id, c.name, c.createdAt).values(1, "Alice", DateTime.now) }.update.apply()
-   *   applyUpdate { insert.into(User).values(2, "Bob", DateTime.now) }
-   * }}}}
+   *   withSQL { QueryDSL.select.from(User as u).where.eq(u.id, 123) }
+   * }}}
    */
-  object insert {
-    def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
+  object QueryDSL {
+
+    /**
+     * Query Interface for select query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val u = User.syntax("u")
+     *   val user = withSQL { select.from(User).where.eq.(u.id, 123) }.map(User(u.resultName)).single.apply()
+     *   val userIdAndName = withSQL {
+     *     select(u.result.id, u.result.name).from(User).where.eq.(u.id, 123)
+     *   }.map(User(u.resultName)).single.apply()
+     * }}}}
+     */
+    object select {
+      def from[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
+        new SelectSQLBuilder[A](
+          sql = sqls"from ${table}",
+          lazyColumns = true,
+          resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
+        )
+      }
+      def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = sqls"", lazyColumns = true)
+      def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
+        val columns = sqls.join(providers.map(p => sqls"${p.resultAll}"), sqls",")
+        new SelectSQLBuilder[A](sqls"select ${columns}")
+      }
+      def apply[A](columns: SQLSyntax*): SelectSQLBuilder[A] = new SelectSQLBuilder[A](sqls"select ${sqls.csv(columns: _*)}")
+    }
+
+    object selectFrom {
+      def apply[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = select.from(table)
+    }
+
+    /**
+     * Query Interface for insert query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val (u, c) = (User.syntax("u"), User.column)
+     *   withSQL { insert.into(User).columns(c.id, c.name, c.createdAt).values(1, "Alice", DateTime.now) }.update.apply()
+     *   applyUpdate { insert.into(User).values(2, "Bob", DateTime.now) }
+     * }}}}
+     */
+    object insert {
+      def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
+    }
+
+    object insertInto {
+      def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder = insert.into(support)
+    }
+
+    /**
+     * Query Interface for delete query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val (u, c) = (User.syntax("u"), User.column)
+     *   withSQL { delete.from(User as u).where.eq(u.id, 1) }.update.apply()
+     *   applyUpdate { delete.from(User).where.eq(c.id, 1) }
+     * }}}}
+     */
+    object delete {
+      def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
+      def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
+    }
+
+    object deleteFrom {
+      def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = delete.from(table)
+      def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = delete.from(support)
+    }
+
+    /**
+     * Query Interface for update query.
+     * {{{
+     *   implicit val session = AutoSession
+     *   val u = User.syntax("u")
+     *   withSQL { update(User as u).set(u.name -> "Chris", u.updatedAt -> DateTime.now).where.eq(u.id, 1) }.update.apply()
+     *   applyUpdate { update(User as u).set(u.name -> "Dennis").where.eq(u.id, 1) }
+     * }}}}
+     */
+    object update {
+      def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
+      def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
+    }
+
   }
 
-  object insertInto {
-    def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder = insert.into(support)
-  }
-
-  /**
-   * Query Interface for delete query.
-   *
-   * {{{
-   *   implicit val session = AutoSession
-   *   val (u, c) = (User.syntax("u"), User.column)
-   *   withSQL { delete.from(User as u).where.eq(u.id, 1) }.update.apply()
-   *   applyUpdate { delete.from(User).where.eq(c.id, 1) }
-   * }}}}
-   */
-  object delete {
-    def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
-    def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
-  }
-
-  object deleteFrom {
-    def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = delete.from(table)
-    def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = delete.from(support)
-  }
-
-  /**
-   * Query Interface for update query.
-   *
-   * {{{
-   *   implicit val session = AutoSession
-   *   val u = User.syntax("u")
-   *   withSQL { update(User as u).set(u.name -> "Chris", u.updatedAt -> DateTime.now).where.eq(u.id, 1) }.update.apply()
-   *   applyUpdate { update(User as u).set(u.name -> "Dennis").where.eq(u.id, 1) }
-   * }}}}
-   */
-  object update {
-    def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
-    def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
-  }
+  val select = QueryDSL.select
+  val selectFrom = QueryDSL.selectFrom
+  val insert = QueryDSL.insert
+  val insertInto = QueryDSL.insertInto
+  val update = QueryDSL.update
+  val delete = QueryDSL.delete
+  val deleteFrom = QueryDSL.deleteFrom
 
   /**
    * withSQL clause which returns SQL[A, NoExtractor] from SQLBuilder.
@@ -168,37 +183,56 @@ object SQLInterpolation {
     def toSQL: SQL[A, NoExtractor] = sql"${sql}"
   }
 
-  /**
-   * Provides where part.
-   */
+  // Featureless constructor for SQLBuilder
+  private[scalikejdbc] class RawSQLBuilder[A](val sql: SQLSyntax) extends SQLBuilder[A]
+
   trait WhereSQLBuilder[A] extends SQLBuilder[A] {
-    def sql: SQLSyntax
-
-    def where: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.where}")
-    def where(where: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.where(where)}")
+    def where: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.where}")
+    def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
   }
 
-  /*
-   * Provides sort and paing part.
-   */
-  class SortAndPagingBuilder[A](override val sql: SQLSyntax) extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
-    def orderBy(columns: SQLSyntax*): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.orderBy(columns: _*)}")
-    def asc: SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} asc")
-    def desc: SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} desc")
-    def limit(n: Int): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.limit(n)}")
-    def offset(n: Int): SortAndPagingBuilder[A] = new SortAndPagingBuilder[A](sqls"${sql} ${SQLSyntax.offset(n)}")
+  // factory
+  private[scalikejdbc] object GroupBySQLBuilder {
+    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with GroupBySQLBuilder[A]
   }
 
-  /**
-   * Provides condition part in where clause.
-   */
-  class ConditionSQLBuilder[A](override val sql: SQLSyntax) extends SortAndPagingBuilder[A](sql) with SubQuerySQLBuilder[A] {
+  trait GroupBySQLBuilder[A] extends SQLBuilder[A]
+      with PagingSQLBuilder[A] {
+    def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
+    def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.having(condition)}")
+  }
+
+  // factory
+  private[scalikejdbc] object PagingSQLBuilder {
+    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
+  }
+
+  trait PagingSQLBuilder[A] extends SQLBuilder[A]
+      with UnionQuerySQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
+    def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
+    def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
+    def desc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} desc")
+    def limit(n: Int): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.limit(n)}")
+    def offset(n: Int): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.offset(n)}")
+  }
+
+  // factory
+  private[scalikejdbc] object ConditionSQLBuilder {
+    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with ConditionSQLBuilder[A]
+  }
+
+  trait ConditionSQLBuilder[A] extends SQLBuilder[A]
+      with PagingSQLBuilder[A]
+      with GroupBySQLBuilder[A]
+      with UnionQuerySQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
 
     /**
      * Appends SQLSyntax directly.
      * e.g. select.from(User as u).where.eq(u.id, 123).append(sqls"order by ${u.id} desc")
      */
-    def append(part: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${part}")
+    def append(part: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${part}")
 
     /**
      * Maps SQLBuilder as follows.
@@ -206,52 +240,88 @@ object SQLInterpolation {
      */
     def map(mapper: ConditionSQLBuilder[A] => ConditionSQLBuilder[A]): ConditionSQLBuilder[A] = mapper.apply(this)
 
-    def and: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} and")
-    def or: ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} or")
+    def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
+    def or: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} or")
+    def not: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} not")
 
-    def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.eq(column, value)}")
-    def ne(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.ne(column, value)}")
-    def gt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.gt(column, value)}")
-    def ge(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.ge(column, value)}")
-    def lt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.lt(column, value)}")
-    def le(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.le(column, value)}")
+    def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
+    def ne(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ne(column, value)}")
+    def gt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.gt(column, value)}")
+    def ge(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ge(column, value)}")
+    def lt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.lt(column, value)}")
+    def le(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.le(column, value)}")
 
-    def isNull(column: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.isNull(column)}")
-    def isNotNull(column: SQLSyntax): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.isNotNull(column)}")
+    def isNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNull(column)}")
+    def isNotNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNotNull(column)}")
 
-    def between(a: Any, b: Any): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.between(a, b)}")
-    def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.in(column, values)}")
+    def between(a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(a, b)}")
+    def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
+
+    def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
+    def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)
+
+    def notExists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = not.exists(subQuery)
+    def notExists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = not.exists(subQuery)
 
     /**
      * Appends a round bracket in where clause.
      * e.g. select.from(User as u).where.withRoundBracket { _.eq(u.id, 123).and.eq(u.groupId, 234) }.or.eq(u.groupId, 345)
      */
     def withRoundBracket[A](insidePart: ConditionSQLBuilder[_] => ConditionSQLBuilder[_]): ConditionSQLBuilder[A] = {
-      val emptyBuilder = new ConditionSQLBuilder[A](sqls"")
-      new ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
+      val emptyBuilder = ConditionSQLBuilder[A](sqls"")
+      ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
     }
-  }
-
-  /**
-   * Provides sub-query part.
-   */
-  trait SubQuerySQLBuilder[A] {
-    def sql: SQLSyntax
 
     /**
-     * Converts SQLBuilder to sub-query part SQLSyntax.
+     * Appends conditions with delimiter.
+     *
+     * {{{
+     * .where
+     * .dynamicAndConditions(
+     *   id.map(i => sqls.eq(u.id, i)),
+     *   Some(sqls.isNotNull(u.name))
+     * )
+     * }}}
+     */
+    def dynamicAndConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithAnd(cs: _*)}")
+    }
+    def dynamicOrConditions(conditions: Option[SQLSyntax]*) = {
+      val cs = conditions.flatten.map(c => sqls"(${c})")
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithOr(cs: _*)}")
+    }
+
+  }
+
+  trait SubQuerySQLBuilder[A] extends SQLBuilder[A] {
+
+    /**
+     * Converts SQLBuilder to sub-query part sqls.
      * e.g.
      *   val x = SubQuery.syntax("x").include(u, g)
      *   withSQL { select.from(select.from(User as u).leftJoin(Group as g).on(u.groupId, g.id).where.eq(u.groupId, 234).as(x)) }
      */
-    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${sql}) ${SubQuery.as(sq)}")
+    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}")
+  }
+
+  trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union ${anotherQuery}")
+    def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union all ${anotherQuery}")
+    def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(anotherQuery.toSQLSyntax)
+    def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(anotherQuery.toSQLSyntax)
   }
 
   /**
    * SQLBuilder for select queries.
    */
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
-      extends SortAndPagingBuilder[A](sql) with WhereSQLBuilder[A] with SubQuerySQLBuilder[A] {
+      extends SQLBuilder[A]
+      with PagingSQLBuilder[A]
+      with GroupBySQLBuilder[A]
+      with UnionQuerySQLBuilder[A]
+      with WhereSQLBuilder[A]
+      with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
       table.resultAllProvider.map(provider => provider :: resultAllProviders).getOrElse(resultAllProviders)
@@ -306,32 +376,29 @@ object SQLInterpolation {
      */
     def map(mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]): SelectSQLBuilder[A] = mapper.apply(this)
 
-    def groupBy(columns: SQLSyntax*): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} ${SQLSyntax.groupBy(columns: _*)}")
-    def having(condition: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} ${SQLSyntax.having(condition)}")
-
     override def where: ConditionSQLBuilder[A] = {
       if (lazyColumns) {
-        val columns = SQLSyntax.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
-        new ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${SQLSyntax.where}")
+        val columns = sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
+        ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${sqls.where}")
       } else {
-        new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.where}")
+        ConditionSQLBuilder[A](sqls"${sql} ${sqls.where}")
       }
     }
     override def where(where: SQLSyntax): ConditionSQLBuilder[A] = {
       if (lazyColumns) {
-        val columns = SQLSyntax.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
-        new ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${SQLSyntax.where(where)}")
+        val columns = sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
+        ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${sqls.where(where)}")
       } else {
-        new ConditionSQLBuilder[A](sqls"${sql} ${SQLSyntax.where(where)}")
+        ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
       }
     }
 
     override def toSQLSyntax: SQLSyntax = {
-      if (lazyColumns) sqls"select ${SQLSyntax.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
+      if (lazyColumns) sqls"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
       else sqls"${sql}"
     }
     override def toSQL: SQL[A, NoExtractor] = {
-      if (lazyColumns) sql"select ${SQLSyntax.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
+      if (lazyColumns) sql"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
       else sql"${sql}"
     }
 
@@ -341,23 +408,39 @@ object SQLInterpolation {
    * SQLBuilder for insert queries.
    */
   case class InsertSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] {
-    import SQLSyntax.csv
+    import sqls.csv
     def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
     def values(values: Any*): InsertSQLBuilder = this.copy(sql = sqls"${sql} values (${values})")
+
+    def select(columns: SQLSyntax*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = scalikejdbc.SQLInterpolation.select(columns: _*)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
+    def selectAll(providers: ResultAllProvider*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = scalikejdbc.SQLInterpolation.select.all(providers: _*)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
+    def select(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
+      val builder: SelectSQLBuilder[Nothing] = new SelectSQLBuilder[Nothing](sql = sqls"", lazyColumns = true)
+      this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
+    }
   }
 
   /**
    * SQLBuilder for update queries.
    */
-  case class UpdateSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] with WhereSQLBuilder[UpdateOperation] {
+  case class UpdateSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation]
+      with WhereSQLBuilder[UpdateOperation] {
+
     def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
-    def set(tuples: (SQLSyntax, Any)*): UpdateSQLBuilder = set(SQLSyntax.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+    def set(tuples: (SQLSyntax, Any)*): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
   }
 
   /**
    * SQLBuilder for delete queries.
    */
-  case class DeleteSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] with WhereSQLBuilder[UpdateOperation]
+  case class DeleteSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation]
+    with WhereSQLBuilder[UpdateOperation]
 
   // ---------------------------------
   // SQL Interpolation Core Elements
@@ -629,7 +712,8 @@ object SQLInterpolation {
   /**
    * SQLSyntax provider for column names.
    */
-  case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A] {
+  case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S) extends SQLSyntaxProvider[A]
+      with AsteriskProvider {
 
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
@@ -640,6 +724,8 @@ object SQLInterpolation {
     val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
 
     val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
+
+    val asterisk: SQLSyntax = sqls"*"
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(c.value)
@@ -671,17 +757,12 @@ object SQLInterpolation {
   }
 
   /**
-   * A trait which has #resultAll: SQLSyntax
-   */
-  trait ResultAllProvider {
-    def resultAll: SQLSyntax
-  }
-
-  /**
    * SQLSyntax provider for query parts.
    */
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, tableAliasName: String)
-      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultAllProvider {
+      extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
+      with ResultAllProvider
+      with AsteriskProvider {
 
     val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase else tableAliasName
@@ -693,6 +774,8 @@ object SQLInterpolation {
     val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
 
     val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
     def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
@@ -805,9 +888,11 @@ object SQLInterpolation {
   }
 
   case class SubQuerySQLSyntaxProvider(
-      aliasName: String,
-      delimiterForResultName: String,
-      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) extends ResultAllProvider {
+    aliasName: String,
+    delimiterForResultName: String,
+    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]])
+      extends ResultAllProvider
+      with AsteriskProvider {
 
     val result: SubQueryResultSQLSyntaxProvider = SubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
     val resultName: SubQueryResultNameSQLSyntaxProvider = result.name
@@ -819,6 +904,8 @@ object SQLInterpolation {
         s"${aliasName}.${c.value}"
       }
     }.mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
       resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
@@ -900,7 +987,8 @@ object SQLInterpolation {
     aliasName: String,
     override val delimiterForResultName: String,
     underlying: BasicResultNameSQLSyntaxProvider[S, A])
-      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
+      extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
+      with AsteriskProvider {
 
     val result: PartialSubQueryResultSQLSyntaxProvider[S, A] = {
       PartialSubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, underlying)
@@ -909,6 +997,8 @@ object SQLInterpolation {
     val resultName: PartialSubQueryResultNameSQLSyntaxProvider[S, A] = result.name
 
     val * : SQLSyntax = SQLSyntax(resultName.namedColumns.map { c => s"${aliasName}.${c.value}" }.mkString(", "))
+
+    val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
       underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { _ =>
@@ -999,6 +1089,10 @@ object SQLInterpolation {
 
   type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
   val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+  val sqls = scalikejdbc.interpolation.SQLSyntax
+
+  type ResultAllProvider = scalikejdbc.interpolation.ResultAllProvider
+  type AsteriskProvider = scalikejdbc.interpolation.AsteriskProvider
 
 }
 

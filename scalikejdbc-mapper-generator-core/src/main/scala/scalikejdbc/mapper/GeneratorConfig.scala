@@ -18,7 +18,7 @@ package scalikejdbc.mapper
 case class GeneratorConfig(srcDir: String = "src/main/scala",
   testDir: String = "src/test/scala",
   packageName: String = "models",
-  template: GeneratorTemplate = GeneratorTemplate("executableSQL"),
+  template: GeneratorTemplate = GeneratorTemplate("queryDsl"),
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
   encoding: String = "UTF-8")
@@ -29,13 +29,7 @@ object GeneratorTemplate {
   val namedParameters = GeneratorTemplate("namedParameters")
   val executable = GeneratorTemplate("executable")
   val interpolation = GeneratorTemplate("interpolation")
-
-  @deprecated(message = "Use basic instead.", since = "1.4.2")
-  val placeHolderSQL = GeneratorTemplate("placeHolderSQL")
-  @deprecated(message = "Use namedParameters instead.", since = "1.4.2")
-  val anormSQL = GeneratorTemplate("anormSQL")
-  @deprecated(message = "Use executable instead.", since = "1.4.2")
-  val executableSQL = GeneratorTemplate("executableSQL")
+  val queryDsl = GeneratorTemplate("queryDsl")
 
 }
 

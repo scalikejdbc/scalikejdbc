@@ -153,7 +153,13 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
             c
           } else if (!isInsideOfText && c == '?') {
             i += 1
-            toPrintable(params(i - 1))
+            if (params.size >= i) {
+              toPrintable(params(i - 1))
+            } else {
+              // In this case, SQLException will be thrown later.
+              // At least, throwing java.lang.IndexOutOfBoundsException here is meaningless.
+              c
+            }
           } else {
             c
           }

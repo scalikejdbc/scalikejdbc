@@ -15,7 +15,12 @@ sbt \
   clean \
   library/test \
   interpolation-core/test \
-  interpolation/test
+  interpolation/test > logs/test_stdout.log
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
+
+grep "\[error\]"                logs/test_stdout.log
+grep -A 5 "FAILED"              logs/test_stdout.log
+grep -A 5 "Error during tests:" logs/test_stdout.log
+grep -A 5 "Failed tests:"       logs/test_stdout.log
 

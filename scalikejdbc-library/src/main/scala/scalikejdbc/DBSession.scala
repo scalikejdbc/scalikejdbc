@@ -65,8 +65,14 @@ trait DBSession extends LogSupport {
     } catch {
       case e: Exception =>
         val formattedTemplate = if (GlobalSettings.sqlFormatter.formatter.isDefined) {
-          val formatter = GlobalSettings.sqlFormatter.formatter.get
-          formatter.format(template)
+          try {
+            val formatter = GlobalSettings.sqlFormatter.formatter.get
+            formatter.format(template)
+          } catch {
+            case e: Exception =>
+              log.debug("Failed to format SQL because " + e.getMessage, e)
+              template
+          }
         } else {
           template
         }
