@@ -301,7 +301,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // group by after where clause
         val groupByAfterWhereClauseResults = withSQL {
-          select(o.accountId, count(o.*)).from(Order as o)
+          select(o.accountId, count(o)).from(Order as o)
             .where.isNotNull(o.accountId)
             .groupBy(o.accountId)
             .orderBy(o.accountId).desc
