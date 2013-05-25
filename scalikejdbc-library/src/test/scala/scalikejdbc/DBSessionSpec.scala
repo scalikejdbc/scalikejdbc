@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 import java.util.Calendar
 import java.sql._
 
-class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings with LogSupport {
 
   val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis().toString.substring(8)
 
@@ -381,14 +381,15 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
   it should "work with datetime values" in {
 
     val date = new DateTime(2012, 5, 3, 13, 40, 0, 0).toDate
-    execute(date, date, date)
-    execute(date.toDateTime, date.toDateTime, date.toDateTime)
-    execute(date.toLocalDateTime, date.toLocalDateTime, date.toLocalDateTime)
-    execute(date.toLocalDate, date.toLocalTime, date.toLocalDateTime)
-    execute(date.toSqlTimestamp, date.toSqlTimestamp, date.toSqlTimestamp)
-    execute(date.toSqlDate, date.toSqlTime, date)
+    execute("DateTime all", date.toDateTime, date.toDateTime, date.toDateTime)
+    execute("LocalDateTime all", date.toLocalDateTime, date.toLocalDateTime, date.toLocalDateTime)
+    execute("LocalDate and LocalTime all", date.toLocalDate, date.toLocalTime, date.toLocalDateTime)
+    execute("java.sql.Timestamp all", date.toSqlTimestamp, date.toSqlTimestamp, date.toSqlTimestamp)
+    execute("java.sql/java.util mixed", date.toSqlDate, date.toSqlTime, date)
+    execute("java.util.Date all", date, date, date)
 
-    def execute(date: Any, time: Any, timestamp: Any) {
+    def execute(label: String, date: Any, time: Any, timestamp: Any) {
+      log.warn("datetime check: " + label)
       DB autoCommit {
         implicit session =>
           try {
