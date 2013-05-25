@@ -306,8 +306,8 @@ object SQLInterpolation {
   }
 
   trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
-    def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"(${sql}) union (${anotherQuery})")
-    def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"(${sql}) union all (${anotherQuery})")
+    def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union ${anotherQuery}")
+    def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union all ${anotherQuery}")
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(anotherQuery.toSQLSyntax)
     def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(anotherQuery.toSQLSyntax)
   }
