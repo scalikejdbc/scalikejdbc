@@ -213,10 +213,10 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
                 Some(sqls.isNotNull(o.accountId))
               ))
               .or.isNull(o.accountId)
-              .orderBy(o.id)
+              .orderBy(o.id).append(sqls"desc")
           }.map(_.int(o.resultName.id)).list.apply()
 
-          withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
+          withConditionsTestResults should equal(List(26, 15, 14, 13, 12, 11))
         }
 
         {
