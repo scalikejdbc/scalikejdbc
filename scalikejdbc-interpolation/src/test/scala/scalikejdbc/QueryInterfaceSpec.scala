@@ -330,6 +330,13 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
 
+        // between
+        val betweenResults = withSQL {
+          select(o.result.id).from(Order as o).where.between(o.id, 13, 22)
+        }.map(_.int(1)).list.apply()
+
+        betweenResults should equal(List(13, 14, 15, 21, 22))
+
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
 

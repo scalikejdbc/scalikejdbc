@@ -254,7 +254,9 @@ object SQLInterpolation {
     def isNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNull(column)}")
     def isNotNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNotNull(column)}")
 
+    @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
     def between(a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(a, b)}")
+    def between(column: SQLSyntax, a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(column, a, b)}")
     def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
 
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
