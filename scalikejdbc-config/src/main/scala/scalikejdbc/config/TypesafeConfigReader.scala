@@ -95,6 +95,7 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
      ConnectionPoolSettings(
        initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
        maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
+       connectionTimeoutMillis = configMap.get("connectionTimeoutMillis").map(_.toLong).getOrElse(default.connectionTimeoutMillis),
        validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
      )
   }
