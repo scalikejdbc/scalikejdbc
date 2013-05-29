@@ -245,7 +245,7 @@ class CommonsConnectionPool(url: String,
   _pool.setMinIdle(settings.initialSize)
   _pool.setMaxIdle(settings.maxSize)
   _pool.setMaxActive(settings.maxSize)
-  _pool.setMaxWait(5000)
+  _pool.setMaxWait(settings.connectionTimeoutMillis)
   _pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL)
   _pool.setTestOnBorrow(true)
 
