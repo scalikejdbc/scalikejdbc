@@ -257,10 +257,14 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
       super.apply(execute)
     } catch {
       case e: Exception =>
-        if (GlobalSettings.loggingSQLAndTime.singleLineMode) {
-          log.error("[SQL Execution Failed] " + sqlString + " (Reason: " + e.getMessage + ")")
+        if (GlobalSettings.loggingSQLErrors) {
+          if (GlobalSettings.loggingSQLAndTime.singleLineMode) {
+            log.error("[SQL Execution Failed] " + sqlString + " (Reason: " + e.getMessage + ")")
+          } else {
+            log.error("SQL execution failed (Reason: " + e.getMessage + "):" + eol + eol + "   " + sqlString + eol)
+          }
         } else {
-          log.error("SQL execution failed (Reason: " + e.getMessage + "):" + eol + eol + "   " + sqlString + eol)
+          log.debug("Logging SQL errors is disabled.")
         }
         throw e;
     }

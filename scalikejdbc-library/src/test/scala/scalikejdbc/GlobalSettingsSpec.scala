@@ -85,4 +85,20 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
     }
   }
 
+  it should "disable logging SQL errors" in {
+    try {
+      GlobalSettings.loggingSQLErrors = false
+      DB autoCommit { implicit s =>
+        SQL("drop table should_not_be_logged").execute.apply()
+      }
+    } catch { case e: Exception => } finally {
+      GlobalSettings.loggingSQLErrors = true
+    }
+    try {
+      DB autoCommit { implicit s =>
+        SQL("drop table should_be_logged").execute.apply()
+      }
+    } catch { case e: Exception => }
+  }
+
 }
