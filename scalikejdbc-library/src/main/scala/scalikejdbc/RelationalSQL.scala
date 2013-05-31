@@ -43,7 +43,9 @@ object OneToXSQL {
 
   def handleException(e: Exception) = e match {
     case invalidColumn: InvalidColumnNameException =>
-      throw new ResultSetExtractorException("Failed to extract ResultSet because the specified column name (" + invalidColumn.name + ") is invalid.")
+      throw new ResultSetExtractorException(
+        "Failed to extract ResultSet because the specified column name (" + invalidColumn.name + ") is invalid." +
+          " If you're using SQLInterpolation, you may mistake u.id for u.resultName.id.")
     case e: Exception => throw e
   }
 
