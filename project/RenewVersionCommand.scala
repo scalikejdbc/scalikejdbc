@@ -15,17 +15,26 @@ object RenewVersionCommand extends Plugin {
         "lazy val _version = \"[^\"]+\"", 
         "lazy val _version = \"" + version + "\""))
 
-      val sandboxBuild = FilePath("sandbox/build.sbt")
-      sandboxBuild.forceWrite(sandboxBuild.readAsString()
-        .replaceFirst(
-          "\"com.github.seratch\" %% \"scalikejdbc\" % \"[^\"]+\"",
-          "\"com.github.seratch\" %% \"scalikejdbc\" % \"" + version + "\"")
-        .replaceFirst(
-          "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"[^\"]+\"",
-          "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"" + version + "\"")
-        .replaceFirst(
-          "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"[^\"]+\"",
-          "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"" + version + "\""))
+      if (!version.endsWith("SNAPSHOT")) {
+        val sandboxBuild = FilePath("sandbox/build.sbt")
+        sandboxBuild.forceWrite(sandboxBuild.readAsString()
+          .replaceFirst(
+            "\"com.github.seratch\" %% \"scalikejdbc\" % \"[^\"]+\"",
+            "\"com.github.seratch\" %% \"scalikejdbc\" % \"" + version + "\"")
+          .replaceFirst(
+            "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"[^\"]+\"",
+            "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"" + version + "\"")
+          .replaceFirst(
+            "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"[^\"]+\"",
+            "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"" + version + "\"")
+         )
+         val sandboxPlugins = FilePath("sandbox/project/plugins.sbt")
+         sandboxPlugins.forceWrite(sandboxPlugins.readAsString()
+          .replaceFirst(
+            "\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"",
+            "\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\"")
+        )
+      }
 
       val scriptedBuild = FilePath("scalikejdbc-mapper-generator/src/sbt-test/scalikejdbc-mapper-generator/gen/project/Build.scala")
       scriptedBuild.forceWrite(scriptedBuild.readAsString().replaceFirst(
