@@ -38,7 +38,8 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     try {
       op
     } catch {
-      case e: Exception => throw new ResultSetExtractorException(e.getMessage, Some(e))
+      case e: Exception => throw new ResultSetExtractorException(
+        "Failed to retrieve value because " + e.getMessage + ". If you're using SQLInterpolation, you may mistake u.id for u.resultName.id.", Some(e))
     }
   }
 

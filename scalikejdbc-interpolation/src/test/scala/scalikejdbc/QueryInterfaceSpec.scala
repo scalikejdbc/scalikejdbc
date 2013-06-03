@@ -213,10 +213,10 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
                 Some(sqls.isNotNull(o.accountId))
               ))
               .or.isNull(o.accountId)
-              .orderBy(o.id)
+              .orderBy(o.id).append(sqls"desc")
           }.map(_.int(o.resultName.id)).list.apply()
 
-          withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
+          withConditionsTestResults should equal(List(26, 15, 14, 13, 12, 11))
         }
 
         {
@@ -329,6 +329,13 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         }.map(_.int(1)).list.apply()
 
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
+
+        // between
+        val betweenResults = withSQL {
+          select(o.result.id).from(Order as o).where.between(o.id, 13, 22)
+        }.map(_.int(1)).list.apply()
+
+        betweenResults should equal(List(13, 14, 15, 21, 22))
 
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()

@@ -45,6 +45,9 @@ case class Table(name: String,
    * @return describe style string value
    */
   def toDescribeStyleString: String = {
+    if (columns.isEmpty) {
+      return "table " + name + " does not have any columns"
+    }
 
     def withoutCRLF(str: String): String = {
       if (str == null) null

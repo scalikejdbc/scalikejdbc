@@ -67,6 +67,7 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
           "password" -> "secret",
           "poolInitialSize" -> "1",
           "poolMaxSize" -> "2",
+          "connectionTimeoutMillis" -> "1000",
           "poolValidationQuery" -> "select 1 as foo"
         )
         TypesafeConfigReader.readAsMap('foo) should be (expected)
@@ -90,17 +91,17 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
     describe ("#readConnectionPoolSettings") {
 
       it ("should read configuration and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(5, 7, "select 1 as one")
+        val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one")
         TypesafeConfigReader.readConnectionPoolSettings() should be (expected)
       }
 
       it ("should read configuration for foo db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(1, 2, "select 1 as foo")
+        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo")
         TypesafeConfigReader.readConnectionPoolSettings('foo) should be (expected)
       }
 
       it ("should read configuration for bar db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(2, 3, "select 1 as bar")
+        val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar")
         TypesafeConfigReader.readConnectionPoolSettings('bar) should be (expected)
       }
 
