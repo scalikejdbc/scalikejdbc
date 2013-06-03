@@ -1,0 +1,44 @@
+ScalikeJDBC 1.6.2 has been released. Several fixes for Query DSL.
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+http://git.io/scalikejdbc
+
+## interpolation
+
+- Added new #between API to Query DSL
+
+This was the only API to use between in Query DSL.
+
+    select.from(User as u).where.column(u.id).between(101, 200)
+
+The above #between is deprecated since 1.6.2, and the following API is added and recommended.
+
+    select.from(User as u).where.between(u.id, 101, 200) 
+
+- Added #append to all the SQLBuilder
+
+So far, there was no other way even if you needed to use unsupported SQL syntax in Query DSL. 
+
+So #append(SQLSytnax) is added to all the SQLBuilder.
+
+
+## library
+
+- #133 Logging of SQLException should be configurable
+
+Thanks to @rvangsgaard's feedback:
+
+    GlobalSettings.loggingSQLErrors = false
+
+- #134 Adding ConnectionPoolSettings.connectionTimeoutMillis
+
+Thanks to @landtuna's feedback:
+
+    new ConnectionPoolSettings(connectionTimeoutMillis = 1000L)
+
+- Improved error messages for ResultSetExtractorException
+
+
+Enjoy writing typesafe SQL and get things done!
+
