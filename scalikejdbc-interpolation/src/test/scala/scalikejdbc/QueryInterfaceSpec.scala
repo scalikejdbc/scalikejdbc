@@ -235,14 +235,38 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         }
 
         // in clause
-        val inClauseResults = withSQL {
-          select
-            .from(Order as o)
-            .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
-            .orderBy(o.id)
-        }.map(Order(o)).list.apply()
+        {
+          val inClauseResults = withSQL {
+            select
+              .from(Order as o)
+              .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
 
-        inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
+          inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
+        }
+
+        {
+          val inClauseResults = withSQL {
+            select
+              .from(Order as o)
+              .where.in(o.id, select(o.id).from(Order as o).where.between(o.id, 14, 16))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+
+          inClauseResults.map(_.id) should equal(List(14, 15))
+        }
+
+        {
+          val inClauseResults = withSQL {
+            select
+              .from(Order as o)
+              .where.notIn(o.id, select(o.id).from(Order as o).where.between(o.id, 13, 30))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+
+          inClauseResults.map(_.id) should equal(List(11, 12))
+        }
 
         // exists clause
         val existsClauseResults = withSQL {
