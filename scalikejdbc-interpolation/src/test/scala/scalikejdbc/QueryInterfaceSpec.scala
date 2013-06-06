@@ -279,6 +279,16 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
           results.map(_.id) should equal(List(1, 4))
         }
+        {
+          val results = withSQL {
+            select
+              .from(Account as a)
+              .where.notLike(a.name, "%e%")
+              .orderBy(a.id)
+          }.map(Account(a)).list.apply()
+
+          results.map(_.id) should equal(List(2, 3))
+        }
 
         // exists clause
         val existsClauseResults = withSQL {
