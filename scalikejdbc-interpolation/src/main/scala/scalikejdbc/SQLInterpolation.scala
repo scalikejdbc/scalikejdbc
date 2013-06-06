@@ -259,6 +259,9 @@ object SQLInterpolation {
     def notIn(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = not.in(column, values)
     def notIn(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = not.in(column, subQuery)
 
+    def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} like ${value}")
+    def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = not.like(column, value)
+
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
     def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)
 
