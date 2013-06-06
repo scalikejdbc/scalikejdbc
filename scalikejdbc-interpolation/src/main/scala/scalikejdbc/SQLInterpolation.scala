@@ -417,8 +417,13 @@ object SQLInterpolation {
    */
   case class InsertSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] {
     import sqls.csv
+
     def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
     def values(values: Any*): InsertSQLBuilder = this.copy(sql = sqls"${sql} values (${values})")
+    def namedValues(columnsAndValues: (SQLSyntax, Any)*): InsertSQLBuilder = {
+      val (cs, vs) = (columnsAndValues.map(_._1), columnsAndValues.map(_._2))
+      columns(cs: _*).values(vs: _*)
+    }
 
     def select(columns: SQLSyntax*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
       val builder: SelectSQLBuilder[Nothing] = scalikejdbc.SQLInterpolation.select(columns: _*)

@@ -58,7 +58,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
           insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
-          insert.into(Account).columns(ac.id, ac.name).values(4, "Debian"),
+          insert.into(Account).namedValues(ac.id -> 4, ac.name -> "Debian"),
           insert.into(LegacyProduct).values(None, "tmp", 777),
           insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
           insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
