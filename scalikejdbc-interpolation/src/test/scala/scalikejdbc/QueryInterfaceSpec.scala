@@ -245,7 +245,16 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
           inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
         }
+        {
+          val inClauseResults = withSQL {
+            select
+              .from(Order as o)
+              .where.notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
 
+          inClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
+        }
         {
           val inClauseResults = withSQL {
             select
