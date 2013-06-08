@@ -15,11 +15,16 @@
  */
 package scalikejdbc
 
+import scala.language.implicitConversions
+
 /**
- * SQLInterpolation full imports.
+ * Implicit conversion imports.
  */
-object SQLInterpolation
-  extends SQLInterpolationFeature
-  with SQLSyntaxSupportFeature
-  with QueryDSLFeature
+trait SQLInterpolationImplicits {
+
+  @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
+
+  @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
+
+}
 
