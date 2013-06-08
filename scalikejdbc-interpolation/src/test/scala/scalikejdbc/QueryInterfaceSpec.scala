@@ -81,6 +81,14 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Order).values(26, 2, None, DateTime.now)
         ).foreach(sql => applyUpdate(sql))
 
+        // batch insert 
+        val batchInsertQuery = withSQL {
+          insert into Product columns (pc.id, pc.name, pc.price) values (sqls.?, sqls.?, sqls.?)
+        }
+        batchInsertQuery.batch(Seq(3, "Coffee", 90), Seq(4, "Chocolate", 200)).apply()
+
+        withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update.apply()
+
         val (o, p, a) = (Order.syntax("o"), Product.syntax("p"), Account.syntax("a"))
 
         // simple query
