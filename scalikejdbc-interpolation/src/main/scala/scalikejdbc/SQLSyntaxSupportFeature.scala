@@ -20,7 +20,7 @@ import scala.language.experimental.macros
 import scala.language.dynamics
 
 /**
- * SQLSyntaxSupport feature impots.
+ * SQLSyntaxSupport feature
  */
 trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
 
@@ -656,7 +656,7 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
   }
 
   // ---------------------------------
-  // Type aliases
+  // Type aliases for this trait elements
   // ---------------------------------
 
   type ColumnName[A] = ColumnSQLSyntaxProvider[SQLSyntaxSupport[A], A]
