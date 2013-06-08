@@ -399,10 +399,12 @@ trait QueryDSLFeature extends SQLInterpolationFeature with SQLSyntaxSupportFeatu
    * SQLBuilder for insert queries.
    */
   case class InsertSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation] {
-    import sqls.csv
 
-    def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${csv(columns: _*)})")
-    def values(values: Any*): InsertSQLBuilder = this.copy(sql = sqls"${sql} values (${values})")
+    def columns(columns: SQLSyntax*): InsertSQLBuilder = this.copy(sql = sqls"${sql} (${sqls.csv(columns: _*)})")
+    def values(values: Any*): InsertSQLBuilder = {
+      val vs = sqls.csv(values.map(v => sqls"${v}"): _*)
+      this.copy(sql = sqls"${sql} values (${vs})")
+    }
     def namedValues(columnsAndValues: (SQLSyntax, Any)*): InsertSQLBuilder = {
       val (cs, vs) = (columnsAndValues.map(_._1), columnsAndValues.map(_._2))
       columns(cs: _*).values(vs: _*)
