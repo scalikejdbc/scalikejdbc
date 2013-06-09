@@ -127,8 +127,8 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
      * }}}
      */
     def as(provider: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A]): TableAsAliasSQLSyntax = {
-      if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table, Some(provider)) }
-      else { TableAsAliasSQLSyntax(SQLSyntax(tableName + " " + provider.tableAliasName), Some(provider)) }
+      if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table.value, table.parameters, Some(provider)) }
+      else { TableAsAliasSQLSyntax(tableName + " " + provider.tableAliasName, Nil, Some(provider)) }
     }
   }
 
@@ -139,10 +139,6 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
     override val value: String,
     override val parameters: Seq[Any] = Vector(),
     resultAllProvider: Option[ResultAllProvider] = None) extends SQLSyntax(value, parameters)
-
-  object TableAsAliasSQLSyntax {
-    def apply(syntax: SQLSyntax, resultAllProvider: Option[ResultAllProvider]) = new TableAsAliasSQLSyntax(syntax.value, syntax.parameters, resultAllProvider)
-  }
 
   /**
    * Table definition part SQLSyntax
@@ -419,7 +415,7 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
     }.mkString(", "))
 
     val namedColumns: Seq[SQLSyntax] = support.columns.map { columnName: String =>
-      val name = toAliasName(SQLSyntax(columnName), support)
+      val name = toAliasName(columnName, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
 
@@ -487,7 +483,7 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
 
     def apply(name: SQLSyntax): SQLSyntax = {
       resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
-        SQLSyntax(s"${aliasName}.${rn.namedColumn(name).value}")
+        SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})")
@@ -544,8 +540,8 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.toLowerCase).isDefined).map { rn =>
-        SQLSyntax(s"${rn.namedColumn(name).value}${delimiterForResultName}${aliasName}")
+      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
+        SQLSyntax(s"${rn.namedColumn(name.value).value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value)
       }
@@ -579,8 +575,8 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { _ =>
-        SQLSyntax(s"${aliasName}.${underlying.namedColumn(name).value}")
+      underlying.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).map { _ =>
+        SQLSyntax(s"${aliasName}.${underlying.namedColumn(name.value).value}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value, resultName.columns.map(_.value).mkString(","))
       }
@@ -646,7 +642,7 @@ trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { nc =>
+      underlying.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).map { nc =>
         SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value, underlying.columns.map(_.value).mkString(","))

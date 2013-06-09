@@ -22,8 +22,25 @@ import scala.language.implicitConversions
  */
 trait SQLInterpolationImplicits {
 
+  /**
+   * Enables sql"", sqls"" interpolation.
+   *
+   * {{{
+   *   sql"select * from memebrs"
+   *   val whereClause = sqls"where id = ${id}"
+   *   sql"select * from members ${whereClause}"
+   * }}}
+   */
   @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
 
+  /**
+   * Returns String value when String type is expected for [[scalikejdbc.WrappedResultset]].
+   *
+   * {{{
+   *   val c = Company.syntax("c").resultName
+   *   rs.string(c.name)
+   * }}}
+   */
   @inline implicit def scalikejdbcSQLSyntaxToStringImplicitDef(syntax: scalikejdbc.interpolation.SQLSyntax): String = syntax.value
 
 }

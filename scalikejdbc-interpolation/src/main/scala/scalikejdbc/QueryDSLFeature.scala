@@ -302,7 +302,10 @@ trait QueryDSLFeature extends SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *   val x = SubQuery.syntax("x").include(u, g)
      *   withSQL { select.from(select.from(User as u).leftJoin(Group as g).on(u.groupId, g.id).where.eq(u.groupId, 234).as(x)) }
      */
-    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = TableAsAliasSQLSyntax(sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}")
+    def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = {
+      val syntax = sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}"
+      TableAsAliasSQLSyntax(syntax.value, syntax.parameters)
+    }
   }
 
   trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
