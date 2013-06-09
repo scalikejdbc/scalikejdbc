@@ -18,5 +18,7 @@ package scalikejdbc
 /**
  * Basic SQLInterpolation feature.
  */
-trait SQLInterpolationFeature extends SQLInterpolationImplicits with SQLInterpolationCoreTypeAlias
+trait SQLInterpolationFeature
+  extends scalikejdbc.interpolation.Implicits
+  with SQLInterpolationCoreTypeAlias
 

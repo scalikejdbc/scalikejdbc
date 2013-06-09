@@ -87,7 +87,7 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
   }
 
   it should "have #notIn" in {
-    val s = SQLSyntax.in(sqls"id", Seq(1, 2, 3))
+    val s = SQLSyntax.notIn(sqls"id", Seq(1, 2, 3))
     s.value should equal(" id not in (?, ?, ?)")
     s.parameters should equal(Seq(1, 2, 3))
   }
