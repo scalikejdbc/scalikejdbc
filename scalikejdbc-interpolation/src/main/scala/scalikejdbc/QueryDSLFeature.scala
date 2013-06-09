@@ -18,7 +18,7 @@ package scalikejdbc
 /**
  * Query DSL
  */
-trait QueryDSLFeature extends SQLInterpolationFeature with SQLSyntaxSupportFeature {
+trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeature =>
 
   /**
    * Represents UpdateOperation (used as SQLBuilder[UpdateOperation]).

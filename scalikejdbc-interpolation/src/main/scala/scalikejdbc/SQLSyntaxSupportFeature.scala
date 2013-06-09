@@ -22,7 +22,7 @@ import scala.language.dynamics
 /**
  * SQLSyntaxSupport feature
  */
-trait SQLSyntaxSupportFeature extends SQLInterpolationFeature {
+trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
   /**
    * Loaded columns for tables.
