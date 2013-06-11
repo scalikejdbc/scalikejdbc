@@ -1,0 +1,22 @@
+ScalikeJDBC 1.6.3 has been released. Several fixes for Query DSL.
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+http://git.io/scalikejdbc
+
+## interpolation
+
+- Added #in with sub query to Query DSL
+- Added #like, #notLike API to Query DSL
+- Added #namedValues for insert query to Query DSL
+
+    val c = Member.column
+    insert.into(Member).namedValues(c.id -> 123, c.name -> "Alice")
+
+- Changed #notInt from "not id in (?, ?, ?)" to "id not in (?, ?, ?)"a
+- Fixed #values for insert query cannot accept SQLSyntax values
+- Added sqls.? for sqls"?"
+- Refactored SQLInterpolation 
+
+Enjoy writing typesafe SQL and get things done!
+

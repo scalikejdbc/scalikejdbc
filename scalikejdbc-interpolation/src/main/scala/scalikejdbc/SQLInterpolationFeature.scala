@@ -16,10 +16,9 @@
 package scalikejdbc
 
 /**
- * SQLInterpolation full imports.
+ * Basic SQLInterpolation feature.
  */
-object SQLInterpolation
-  extends SQLInterpolationFeature
-  with SQLSyntaxSupportFeature
-  with QueryDSLFeature
+trait SQLInterpolationFeature
+  extends scalikejdbc.interpolation.Implicits
+  with SQLInterpolationCoreTypeAlias
 

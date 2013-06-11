@@ -96,14 +96,17 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
+
         val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
+        count should equal(1)
 
         val before = (s: PreparedStatement) => println("before")
-        val after = (s: PreparedStatement) => println("before")
+        val after = (s: PreparedStatement) => println("after")
         SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdateWithFilters(before, after).apply()
 
         db.rollbackIfActive()
-        count should equal(1)
+
+        // should be updated
         val name = SQL("select name from " + tableName + " where id = ?").bind(1)
           .map(rs => rs.string("name")).toOption().apply().getOrElse("---")
         name should equal("foo")
@@ -119,13 +122,15 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
         val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
+        count should equal(1)
 
         val before = (s: PreparedStatement) => println("before")
-        val after = (s: PreparedStatement) => println("before")
+        val after = (s: PreparedStatement) => println("after")
         SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).updateWithFilters(before, after).apply()
 
         db.rollbackIfActive()
-        count should equal(1)
+
+        // should be updated
         val name = SQL("select name from " + tableName + " where id = ?").bind(1)
           .map(rs => rs.string("name")).toOption().apply().getOrElse("---")
         name should equal("foo")

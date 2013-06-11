@@ -56,6 +56,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
+  def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} not in (${values})"
 
 }
 
@@ -121,6 +122,7 @@ object SQLSyntax {
   def between(a: Any, b: Any) = sqls"".between(a, b)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
+  def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"".notIn(column, values)
 
   def distinct(column: SQLSyntax) = sqls"distinct ${column}"
 
@@ -131,6 +133,8 @@ object SQLSyntax {
   def min(column: SQLSyntax) = sqls"min(${column})"
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"
+
+  def ? = sqls"?"
 
   def currentTimestamp = sqls"current_timestamp"
   def dual = sqls"dual"

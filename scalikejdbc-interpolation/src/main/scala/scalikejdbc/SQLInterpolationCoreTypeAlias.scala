@@ -16,10 +16,19 @@
 package scalikejdbc
 
 /**
- * SQLInterpolation full imports.
+ * Alias for interpolation-core elements.
  */
-object SQLInterpolation
-  extends SQLInterpolationFeature
-  with SQLSyntaxSupportFeature
-  with QueryDSLFeature
+trait SQLInterpolationCoreTypeAlias {
+
+  type SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+
+  val SQLSyntax = scalikejdbc.interpolation.SQLSyntax
+
+  val sqls = scalikejdbc.interpolation.SQLSyntax
+
+  type ResultAllProvider = scalikejdbc.interpolation.ResultAllProvider
+
+  type AsteriskProvider = scalikejdbc.interpolation.AsteriskProvider
+
+}
 

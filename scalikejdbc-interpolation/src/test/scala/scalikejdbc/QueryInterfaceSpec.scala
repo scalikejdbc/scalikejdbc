@@ -58,7 +58,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
           insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
-          insert.into(Account).columns(ac.id, ac.name).values(4, "Debian"),
+          insert.into(Account).namedValues(ac.id -> 4, ac.name -> "Debian"),
           insert.into(LegacyProduct).values(None, "tmp", 777),
           insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
           insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
@@ -80,6 +80,14 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Order).values(25, 2, Some(3), DateTime.now),
           insert.into(Order).values(26, 2, None, DateTime.now)
         ).foreach(sql => applyUpdate(sql))
+
+        // batch insert 
+        val batchInsertQuery = withSQL {
+          insert into Product columns (pc.id, pc.name, pc.price) values (sqls.?, sqls.?, sqls.?)
+        }
+        batchInsertQuery.batch(Seq(3, "Coffee", 90), Seq(4, "Chocolate", 200)).apply()
+
+        withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update.apply()
 
         val (o, p, a) = (Order.syntax("o"), Product.syntax("p"), Account.syntax("a"))
 
@@ -245,7 +253,16 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
           inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
         }
+        {
+          val inClauseResults = withSQL {
+            select
+              .from(Order as o)
+              .where.notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
 
+          inClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
+        }
         {
           val inClauseResults = withSQL {
             select
@@ -266,6 +283,28 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
           }.map(Order(o)).list.apply()
 
           inClauseResults.map(_.id) should equal(List(11, 12))
+        }
+
+        // like search
+        {
+          val results = withSQL {
+            select
+              .from(Account as a)
+              .where.like(a.name, "%e%")
+              .orderBy(a.id)
+          }.map(Account(a)).list.apply()
+
+          results.map(_.id) should equal(List(1, 4))
+        }
+        {
+          val results = withSQL {
+            select
+              .from(Account as a)
+              .where.notLike(a.name, "%e%")
+              .orderBy(a.id)
+          }.map(Account(a)).list.apply()
+
+          results.map(_.id) should equal(List(2, 3))
         }
 
         // exists clause

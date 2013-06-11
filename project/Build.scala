@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.6.2"
+  lazy val _version = "1.6.3"
 
   lazy val scalikejdbc = Project(
     id = "library",
@@ -24,12 +24,12 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val scalatest = "scalatest_" + (scalaVersion match {
-          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
         val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.2-SNAPSHOT" | "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
           case "2.9.3" => "2.9.2"
           case version => version
         })
@@ -149,7 +149,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
-          case "2.10.1" | "2.10.0" => Seq(
+          case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.5"   % "compile",
             "org.scalatest" %% "scalatest"    % "[1.9,)"  % "test",
             "org.specs2"    %% "specs2"       % "[1.13,)" % "test"
@@ -213,7 +213,7 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
-          case "2.10.1" | "2.10.0" => {
+          case "2.10.2" | "2.10.1" | "2.10.0" => {
             val playVersion = "2.1.0"
             Seq(
               "play" % "play_2.10" % playVersion % "provided",
@@ -274,9 +274,9 @@ object ScalikeJDBCProjects extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "com.github.tototoshi" %% "play-flyway"                % "0.1.1",
-      "com.h2database"        % "h2"                        % "[1.3,)",
-      "postgresql"            % "postgresql"                % "9.1-901.jdbc4"
+      "com.github.tototoshi" %% "play-flyway" % "[0.1,)",
+      "com.h2database"       %  "h2"          % "[1.3,)",
+      "postgresql"           %  "postgresql"  % "9.1-901.jdbc4"
     )
 
     play.Project(appName, appVersion, appDependencies,
@@ -312,7 +312,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scalatest"  %% "scalatest"            % "[1.9,)"  % "provided",
           "ch.qos.logback" %  "logback-classic"      % "1.0.11"  % "test"
         ) ++ (scalaVersion match {
-          case "2.10.1" | "2.10.0" => Seq("org.specs2" %% "specs2" % "[1.13,)" % "provided")
+          case "2.10.2" | "2.10.1" | "2.10.0" => Seq("org.specs2" %% "specs2" % "[1.13,)" % "provided")
           case "2.9.3"  => Seq("org.specs2" %  "specs2_2.9.2" % "[1.12,)" % "provided")
           case _ => Seq("org.specs2" %% "specs2" % "[1.12,)"  % "provided")
         }) ++ jdbcDriverDependenciesInTestScope

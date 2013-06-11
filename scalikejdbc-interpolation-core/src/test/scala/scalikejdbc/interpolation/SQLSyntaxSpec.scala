@@ -86,6 +86,12 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(1, 2, 3))
   }
 
+  it should "have #notIn" in {
+    val s = SQLSyntax.notIn(sqls"id", Seq(1, 2, 3))
+    s.value should equal(" id not in (?, ?, ?)")
+    s.parameters should equal(Seq(1, 2, 3))
+  }
+
   it should "have #groupBy and #having" in {
     val groupId = 123
     val s = SQLSyntax.groupBy(sqls"name").having(sqls"group_id = ${groupId}")
