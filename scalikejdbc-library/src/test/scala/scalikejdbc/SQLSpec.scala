@@ -242,4 +242,10 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings()
   }
 
+  it should "return statement and parameters" in {
+    val sql = SQL("select * from company where id = ?").bind(123)
+    sql.statement should equal("select * from company where id = ?")
+    sql.parameters should equal(Seq(123))
+  }
+
 }

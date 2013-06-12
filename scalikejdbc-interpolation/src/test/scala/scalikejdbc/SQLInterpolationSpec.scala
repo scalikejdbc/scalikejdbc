@@ -805,5 +805,12 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
     }
   }
 
+  it should "return statement and parameters" in {
+    val (id, name) = (123, "Alice")
+    val sql = sql"insert into company values (${id}, ${name})"
+    sql.statement should equal("insert into company values (?, ?)")
+    sql.parameters should equal(Seq(123, "Alice"))
+  }
+
 }
 
