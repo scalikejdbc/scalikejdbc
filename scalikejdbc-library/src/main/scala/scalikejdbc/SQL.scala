@@ -416,7 +416,7 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
 class SQLBatch(sql: String)(params: Seq[Any]*) extends StatementAndParameters {
 
   override def statement: String = sql
-  override def parameters: Seq[Any] = params
+  override def parameters: Seq[Seq[Any]] = params
 
   def apply()(implicit session: DBSession): Seq[Int] = session match {
     case AutoSession => DB autoCommit (s => s.batch(sql, params: _*))
