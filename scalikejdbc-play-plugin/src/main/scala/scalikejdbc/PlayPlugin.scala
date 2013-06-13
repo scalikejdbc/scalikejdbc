@@ -48,7 +48,8 @@ class PlayPlugin(implicit app: Application) extends Plugin {
           val settings = ConnectionPoolSettings(
             initialSize = opt(name, "poolInitialSize").map(v => v.toInt).getOrElse(default.initialSize),
             maxSize = opt(name, "poolMaxSize").map(v => v.toInt).getOrElse(default.maxSize),
-            validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery)
+            validationQuery = opt(name, "poolValidationQuery").getOrElse(default.validationQuery),
+            connectionTimeoutMillis = opt(name, "poolConnectionTimeoutMillis").map(v => v.toLong).getOrElse(default.connectionTimeoutMillis)
           )
           (require(name, "url"), opt(name, "user").getOrElse(""), opt(name, "password").getOrElse(""), settings)
         }
