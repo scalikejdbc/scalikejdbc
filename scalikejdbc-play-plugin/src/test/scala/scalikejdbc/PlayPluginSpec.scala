@@ -30,6 +30,10 @@ object PlayPluginSpec extends Specification {
       "db.default.user" -> "sa",
       "db.default.password" -> "sa",
       "db.default.schema" -> "",
+      "db.default.poolInitialSize" -> "1",
+      "db.default.poolMaxSize" -> "2",
+      "db.default.poolValidationQuery" -> "select 1",
+      "db.default.poolConnectionTimeoutMillis" -> "2000",
       "db.legacydb.driver" -> "org.h2.Driver",
       "db.legacydb.url" -> "jdbc:h2:mem:legacy",
       "db.legacydb.user" -> "l",
@@ -117,12 +121,12 @@ object PlayPluginSpec extends Specification {
       val users = DB readOnly { implicit s =>
         SQL("SELECT * FROM " + table).map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
       }
-      users.size should equalTo(3)
+      users.size must_== (3)
 
       val usersInLegacy = NamedDB('legacydb) readOnly { implicit s =>
         SQL("SELECT * FROM " + table).map(rs => User(rs.long("id"), Option(rs.string("name")))).list.apply()
       }
-      usersInLegacy.size should equalTo(4)
+      usersInLegacy.size must_== (4)
 
     } finally {
       DB autoCommit { implicit s =>
@@ -138,7 +142,14 @@ object PlayPluginSpec extends Specification {
   "Play plugin" should {
 
     "be available when DB plugin is not active" in {
-      running(fakeApp) { simpleTest("user_1") }
+      running(fakeApp) {
+        val settings = ConnectionPool.get('default).settings
+        settings.initialSize must_== (1)
+        settings.maxSize must_== (2)
+        settings.validationQuery must_== ("select 1")
+        settings.connectionTimeoutMillis must_== (2000)
+        simpleTest("user_1")
+      }
       running(fakeApp) { simpleTest("user_2") }
       running(fakeApp) { simpleTest("user_3") }
     }
