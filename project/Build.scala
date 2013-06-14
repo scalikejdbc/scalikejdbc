@@ -32,9 +32,12 @@ object ScalikeJDBCProjects extends Build {
         })
         val anorm = "anorm_" + (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
-          case "2.9.3" => "2.9.2"
-          case version => version
+          case _ => "2.9.1"
         })
+        val anormVersion = scalaVersion match {
+          case "2.10.2" | "2.10.1" | "2.10.0" => _defaultPlayVersion
+          case _ => "2.0.4"
+        }
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
@@ -42,11 +45,11 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"         % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.11"            % "test",
-          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final"       % "test",
-          "org.scalatest"           %  scalatest              % "1.9.1"             % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.5"             % "test",
-          "play"                    %  anorm                  % _defaultPlayVersion % "test"
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.11"       % "test",
+          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final"  % "test",
+          "org.scalatest"           %  scalatest              % "1.9.1"        % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.5"        % "test",
+          "play"                    %  anorm                  % anormVersion   % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
