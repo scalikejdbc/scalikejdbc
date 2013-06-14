@@ -11,6 +11,8 @@ object ScalikeJDBCProjects extends Build {
   // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "1.6.4-SNAPSHOT"
 
+  lazy val _defaultPlayVersion = "2.1.1"
+
   lazy val scalikejdbc = Project(
     id = "library",
     base = file("scalikejdbc-library"),
@@ -40,11 +42,11 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"         % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.11"      % "test",
-          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final" % "test",
-          "org.scalatest"           %  scalatest              % "1.9.1"       % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.5"       % "test",
-          "play"                    %  anorm                  % "[2,)"        % "test"
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.11"            % "test",
+          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final"       % "test",
+          "org.scalatest"           %  scalatest              % "1.9.1"             % "test",
+          "org.mockito"             %  "mockito-all"          % "1.9.5"             % "test",
+          "play"                    %  anorm                  % _defaultPlayVersion % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -214,17 +216,16 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => {
-            val playVersion = "2.1.0"
             Seq(
-              "play" % "play_2.10" % playVersion % "provided",
-              "play" % "play-test_2.10" % playVersion % "test",
-              "com.h2database" % "h2" % "[1.3,)" % "test"
+              "play"           % "play_2.10"      % _defaultPlayVersion % "provided",
+              "play"           % "play-test_2.10" % _defaultPlayVersion % "test",
+              "com.h2database" % "h2"             % "[1.3,)"            % "test"
             )
           }
           case _ => {
             val playVersion = "2.0.4"
             Seq(
-              "play" % "play_2.9.1" % playVersion % "provided",
+              "play" % "play_2.9.1"      % playVersion % "provided",
               "play" % "play-test_2.9.1" % playVersion % "test"
             )
           }
@@ -251,9 +252,9 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
-        "play" %% "play" % "2.1.0" % "provided",
-        "play" %% "play-test" % "2.1.0" % "test",
-        "com.h2database" % "h2" % "[1.3,)" % "test"
+        "play"           %% "play"      % _defaultPlayVersion % "provided",
+        "play"           %% "play-test" % _defaultPlayVersion % "test",
+        "com.h2database" %  "h2"        % "[1.3,)"            % "test"
       ),
       testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -281,7 +282,7 @@ object ScalikeJDBCProjects extends Build {
 
     play.Project(appName, appVersion, appDependencies,
                             path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
-      scalaVersion in ThisBuild := "2.10.1",
+      scalaVersion in ThisBuild := "2.10.2",
       resolvers ++= Seq(
         "Sonatype OSS Releases"  at "http://oss.sonatype.org/content/repositories/releases",
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
