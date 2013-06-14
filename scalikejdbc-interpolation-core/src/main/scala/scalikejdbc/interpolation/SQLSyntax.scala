@@ -27,6 +27,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   import Implicits._
   import SQLSyntax._
 
+  def append(syntax: SQLSyntax) = sqls"${this} ${syntax}"
+
   def groupBy(columns: SQLSyntax*) = sqls"${this} group by ${csv(columns: _*)}"
   def having(condition: SQLSyntax) = sqls"${this} having ${condition}"
 
