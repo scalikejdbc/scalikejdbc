@@ -144,8 +144,12 @@ object SQLSyntax {
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"
 
+  def abs(column: SQLSyntax) = sqls"abs(${column})"
+  def floor(column: SQLSyntax) = sqls"floor(${column})"
+
   def ? = sqls"?"
 
+  def currentDate = sqls"current_date"
   def currentTimestamp = sqls"current_timestamp"
   def dual = sqls"dual"
 
