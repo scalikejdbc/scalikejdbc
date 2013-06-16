@@ -197,6 +197,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   trait PagingSQLBuilder[A] extends SQLBuilder[A]
       with UnionQuerySQLBuilder[A]
+      with ExceptQuerySQLBuilder[A]
+      with IntersectQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
@@ -216,6 +218,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with PagingSQLBuilder[A]
       with GroupBySQLBuilder[A]
       with UnionQuerySQLBuilder[A]
+      with ExceptQuerySQLBuilder[A]
+      with IntersectQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
 
     def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
@@ -313,6 +317,20 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union all ${anotherQuery}")
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(anotherQuery.toSQLSyntax)
     def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(anotherQuery.toSQLSyntax)
+  }
+
+  trait ExceptQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def except(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} except ${anotherQuery}")
+    def exceptAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} except all ${anotherQuery}")
+    def except(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = except(anotherQuery.toSQLSyntax)
+    def exceptAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = exceptAll(anotherQuery.toSQLSyntax)
+  }
+
+  trait IntersectQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def intersect(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} intersect ${anotherQuery}")
+    def intersectAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} intersect all ${anotherQuery}")
+    def intersect(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersect(anotherQuery.toSQLSyntax)
+    def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersectAll(anotherQuery.toSQLSyntax)
   }
 
   /**

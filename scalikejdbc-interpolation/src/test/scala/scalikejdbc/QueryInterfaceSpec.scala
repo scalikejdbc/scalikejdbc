@@ -362,7 +362,6 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
             .orderBy(sqls"id").desc
             .limit(3).offset(0)
         }.map(_.int("id")).list.apply()
-
         unionResults should equal(List(4, 3, 2))
 
         // union all
@@ -371,8 +370,37 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
             .unionAll(select(p.id).from(Product as p))
             .unionAll(select(p.id).from(Product as p))
         }.map(_.int(1)).list.apply()
-
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
+
+        // except
+        val exceptResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+            .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+            .except(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
+        }.map(_.int("id")).list.apply()
+        exceptResults should equal(List(1, 3))
+
+        // except all
+        val exceptAllResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+            .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+            .exceptAll(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
+        }.map(_.int("id")).list.apply()
+        exceptAllResults should equal(List(1, 1, 3))
+
+        // intersect
+        val intersectResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+            .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
+        }.map(_.int("id")).list.apply()
+        intersectResults should equal(List(1, 2))
+
+        // intersect all
+        val intersectAllResults = withSQL {
+          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+            .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
+        }.map(_.int("id")).list.apply()
+        intersectAllResults should equal(List(1, 2))
 
         // between
         val betweenResults = withSQL {
