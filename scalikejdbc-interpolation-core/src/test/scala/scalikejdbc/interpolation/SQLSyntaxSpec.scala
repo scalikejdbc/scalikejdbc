@@ -98,6 +98,42 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(1, 2, 3))
   }
 
+  it should "have #any" in {
+    val s = SQLSyntax.any(sqls"id", Seq(1, 2, 3))
+    s.value should equal(" id any (?, ?, ?)")
+    s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #notAny" in {
+    val s = SQLSyntax.notAny(sqls"id", Seq(1, 2, 3))
+    s.value should equal(" id not any (?, ?, ?)")
+    s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #some" in {
+    val s = SQLSyntax.some(sqls"id", Seq(1, 2, 3))
+    s.value should equal(" id some (?, ?, ?)")
+    s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #notSome" in {
+    val s = SQLSyntax.notSome(sqls"id", Seq(1, 2, 3))
+    s.value should equal(" id not some (?, ?, ?)")
+    s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #like" in {
+    val s = SQLSyntax.like(sqls"name", "%abc%")
+    s.value should equal(" name like ?")
+    s.parameters should equal(Seq("%abc%"))
+  }
+
+  it should "have #notLike" in {
+    val s = SQLSyntax.notLike(sqls"name", "%abc%")
+    s.value should equal(" name not like ?")
+    s.parameters should equal(Seq("%abc%"))
+  }
+
   it should "have #groupBy and #having" in {
     val groupId = 123
     val s = SQLSyntax.groupBy(sqls"name").having(sqls"group_id = ${groupId}")

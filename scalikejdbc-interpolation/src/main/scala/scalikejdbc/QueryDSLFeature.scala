@@ -242,8 +242,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def notIn(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(column, values)}")
     def notIn(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not in (${subQuery.toSQLSyntax})")
 
-    def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} like ${value}")
-    def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not like ${value}")
+    def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.like(column, value)}")
+    def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notLike(column, value)}")
 
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
     def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)

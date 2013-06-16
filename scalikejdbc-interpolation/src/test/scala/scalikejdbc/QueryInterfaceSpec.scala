@@ -245,97 +245,78 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
         // in clause
         {
           val inClauseResults = withSQL {
-            select
-              .from(Order as o)
+            select.from(Order as o)
               .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-
           inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
         }
         {
-          val inClauseResults = withSQL {
-            select
-              .from(Order as o)
+          val notInClauseResults = withSQL {
+            select.from(Order as o)
               .where.notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-
-          inClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
+          notInClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
         }
         {
           val inClauseResults = withSQL {
-            select
-              .from(Order as o)
+            select.from(Order as o)
               .where.in(o.id, select(o.id).from(Order as o).where.between(o.id, 14, 16))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-
           inClauseResults.map(_.id) should equal(List(14, 15))
         }
-
         {
           val inClauseResults = withSQL {
-            select
-              .from(Order as o)
+            select.from(Order as o)
               .where.notIn(o.id, select(o.id).from(Order as o).where.between(o.id, 13, 30))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-
           inClauseResults.map(_.id) should equal(List(11, 12))
         }
 
         // like search
         {
           val results = withSQL {
-            select
-              .from(Account as a)
+            select.from(Account as a)
               .where.like(a.name, "%e%")
               .orderBy(a.id)
           }.map(Account(a)).list.apply()
-
           results.map(_.id) should equal(List(1, 4))
         }
         {
           val results = withSQL {
-            select
-              .from(Account as a)
+            select.from(Account as a)
               .where.notLike(a.name, "%e%")
               .orderBy(a.id)
           }.map(Account(a)).list.apply()
-
           results.map(_.id) should equal(List(2, 3))
         }
 
         // exists clause
         val existsClauseResults = withSQL {
-          select(a.id)
-            .from(Account as a)
+          select(a.id).from(Account as a)
             .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
             .orderBy(a.id)
         }.map(_.int(1)).list.apply()
-
         existsClauseResults should equal(List(1, 2, 3))
 
         // not exists clause
         {
           val notExistsClauseResults = withSQL {
-            select(a.id)
-              .from(Account as a)
+            select(a.id).from(Account as a)
               .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
               .orderBy(a.id)
           }.map(_.int(1)).list.apply()
-
           notExistsClauseResults should equal(List(4))
         }
         {
           val notExistsClauseResults = withSQL {
-            select(a.id)
-              .from(Account as a)
+            select(a.id).from(Account as a)
               .where.notExists(sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}")
               .orderBy(a.id)
           }.map(_.int(1)).list.apply()
-
           notExistsClauseResults should equal(List(4))
         }
 

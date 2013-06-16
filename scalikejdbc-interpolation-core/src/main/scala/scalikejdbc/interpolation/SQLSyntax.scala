@@ -57,8 +57,12 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
+
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} not in (${values})"
+
+  def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
+  def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
 
 }
 
@@ -123,8 +127,12 @@ object SQLSyntax {
   @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"".between(a, b)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
+
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"".notIn(column, values)
+
+  def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
+  def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
 
   def distinct(column: SQLSyntax) = sqls"distinct ${column}"
 
