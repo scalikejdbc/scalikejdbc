@@ -397,10 +397,14 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
         // intersect all
         val intersectAllResults = withSQL {
-          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
-            .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
+          select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2))
+            .intersectAll {
+              select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+                .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+            }
+            .orderBy(sqls"id")
         }.map(_.int("id")).list.apply()
-        intersectAllResults should equal(List(1, 2))
+        intersectAllResults should equal(List(1, 1, 2))
 
         // between
         val betweenResults = withSQL {
