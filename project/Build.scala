@@ -42,7 +42,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
           "org.slf4j"               %  "slf4j-api"            % "1.7.5"       % "compile",
-          "joda-time"               %  "joda-time"            % "2.1"         % "compile",
+          "joda-time"               %  "joda-time"            % "2.2"         % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
           "ch.qos.logback"          %  "logback-classic"      % "1.0.13"       % "test",
