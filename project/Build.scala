@@ -45,7 +45,7 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"            % "2.1"         % "compile",
           "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.11"       % "test",
+          "ch.qos.logback"          %  "logback-classic"      % "1.0.13"       % "test",
           "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final"  % "test",
           "org.scalatest"           %  scalatest              % "1.9.1"        % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"        % "test",
@@ -74,9 +74,9 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"        % "1.7.4"       % "compile",
-          "ch.qos.logback" %  "logback-classic"  % "1.0.10"      % "test",
-          "org.scalatest"  %% "scalatest"        % "[1.9,)"      % "test"
+          "org.slf4j"      %  "slf4j-api"        % "1.7.4"   % "compile",
+          "ch.qos.logback" %  "logback-classic"  % "1.0.13"  % "test",
+          "org.scalatest"  %% "scalatest"        % "1.9.1"   % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -129,9 +129,9 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"      %  "slf4j-api"        % "1.7.5"       % "compile",
-          "ch.qos.logback" %  "logback-classic"  % "1.0.11"      % "test",
+          "ch.qos.logback" %  "logback-classic"  % "1.0.13"      % "test",
           "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
-          "org.scalatest"  %% "scalatest"        % "[1.9,)"      % "test"
+          "org.scalatest"  %% "scalatest"        % "1.9.3"       % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -156,17 +156,17 @@ object ScalikeJDBCProjects extends Build {
         (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.5"   % "compile",
-            "org.scalatest" %% "scalatest"    % "[1.9,)"  % "test",
+            "org.scalatest" %% "scalatest"    % "1.9.1"   % "test",
             "org.specs2"    %% "specs2"       % "[1.13,)" % "test"
            )
           case "2.9.3" => Seq(
             "org.slf4j"     %  "slf4j-simple"    % "1.7.5"   % "compile",
-            "org.scalatest" %  "scalatest_2.9.2" % "[1.9,)"  % "test",
+            "org.scalatest" %  "scalatest_2.9.2" % "1.9.1"   % "test",
             "org.specs2"    %  "specs2_2.9.2"    % "[1.12,)" % "test"
            )
           case _ => Seq(
             "org.slf4j"     %  "slf4j-simple" % "1.7.5"   % "compile",
-            "org.scalatest" %% "scalatest"    % "[1.9,)"  % "test",
+            "org.scalatest" %% "scalatest"    % "1.9.1"   % "test",
             "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
            )
         }) ++ jdbcDriverDependenciesInTestScope
@@ -193,7 +193,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"     %  "slf4j-simple" % "1.7.5"   % "compile",
-          "org.scalatest" %% "scalatest"    % "[1.9,)"  % "test",
+          "org.scalatest" %% "scalatest"    % "1.9.1"   % "test",
           "org.specs2"    %% "specs2"       % "[1.12,)" % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
@@ -313,8 +313,8 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-          "org.scalatest"  %% "scalatest"            % "[1.9,)"  % "provided",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.11"  % "test"
+          "org.scalatest"  %% "scalatest"            % "1.9.1"   % "provided",
+          "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
         ) ++ (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => Seq("org.specs2" %% "specs2" % "[1.13,)" % "provided")
           case "2.9.3"  => Seq("org.specs2" %  "specs2_2.9.2" % "[1.12,)" % "provided")
@@ -346,14 +346,14 @@ object ScalikeJDBCProjects extends Build {
           case "2.9.3" => Seq(
             "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
             "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-            "org.scalatest"  %  "scalatest_2.9.2"      % "[1.9,)"  % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.11"  % "test"
+            "org.scalatest"  %  "scalatest_2.9.2"      % "1.9.1"   % "provided",
+            "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
            )
           case _ => Seq(
             "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
             "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-            "org.scalatest"  %% "scalatest"            % "[1.9,)"  % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.11"  % "test"
+            "org.scalatest"  %% "scalatest"            % "1.9.1"   % "provided",
+            "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
            )
         }) ++ jdbcDriverDependenciesInTestScope
       },
