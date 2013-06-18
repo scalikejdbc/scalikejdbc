@@ -3,7 +3,7 @@ package scalikejdbc.interpolation
 import org.scalatest._
 import org.scalatest.matchers._
 
-class SQLSyntaxSpec extends FlatSpec with Matchers {
+class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
 
   import Implicits._
 

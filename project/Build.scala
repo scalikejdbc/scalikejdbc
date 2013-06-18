@@ -131,7 +131,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"        % "1.7.5"       % "compile",
           "ch.qos.logback" %  "logback-classic"  % "1.0.13"      % "test",
           "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
-          "org.scalatest"  %% "scalatest"        % "1.9.3"       % "test"
+          "org.scalatest"  %% "scalatest"        % "1.9.1"       % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
