@@ -298,16 +298,20 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nullableInt(columnIndex: Int): java.lang.Integer = {
     ensureCursor()
-    Option(any(columnIndex))
-      .map(v => java.lang.Integer.valueOf(v.toString))
-      .orNull[java.lang.Integer]
+    Option(any(columnIndex)).map {
+      case v: Float => v.toInt.asInstanceOf[java.lang.Integer]
+      case v: Double => v.toInt.asInstanceOf[java.lang.Integer]
+      case v => java.lang.Integer.valueOf(v.toString)
+    }.orNull[java.lang.Integer]
   }
 
   def nullableInt(columnLabel: String): java.lang.Integer = {
     ensureCursor()
-    Option(any(columnLabel))
-      .map(v => java.lang.Integer.valueOf(v.toString))
-      .orNull[java.lang.Integer]
+    Option(any(columnLabel)).map {
+      case v: Float => v.toInt.asInstanceOf[java.lang.Integer]
+      case v: Double => v.toInt.asInstanceOf[java.lang.Integer]
+      case v => java.lang.Integer.valueOf(v.toString)
+    }.orNull[java.lang.Integer]
   }
 
   def int(columnIndex: Int): Int = nullableInt(columnIndex).asInstanceOf[Int]
@@ -320,16 +324,20 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nullableLong(columnIndex: Int): java.lang.Long = {
     ensureCursor()
-    Option(any(columnIndex))
-      .map(v => java.lang.Long.valueOf(v.toString))
-      .orNull[java.lang.Long]
+    Option(any(columnIndex)).map {
+      case v: Float => v.toLong.asInstanceOf[java.lang.Long]
+      case v: Double => v.toLong.asInstanceOf[java.lang.Long]
+      case v => java.lang.Long.valueOf(v.toString)
+    }.orNull[java.lang.Long]
   }
 
   def nullableLong(columnLabel: String): java.lang.Long = {
     ensureCursor()
-    Option(any(columnLabel))
-      .map(v => java.lang.Long.valueOf(v.toString))
-      .orNull[java.lang.Long]
+    Option(any(columnLabel)).map {
+      case v: Float => v.toLong.asInstanceOf[java.lang.Long]
+      case v: Double => v.toLong.asInstanceOf[java.lang.Long]
+      case v => java.lang.Long.valueOf(v.toString)
+    }.orNull[java.lang.Long]
   }
 
   def long(columnIndex: Int): Long = nullableLong(columnIndex).asInstanceOf[Long]
@@ -446,16 +454,20 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nullableShort(columnIndex: Int): java.lang.Short = {
     ensureCursor()
-    Option(any(columnIndex))
-      .map(v => java.lang.Short.valueOf(v.toString))
-      .orNull[java.lang.Short]
+    Option(any(columnIndex)).map {
+      case v: Float => v.toShort.asInstanceOf[java.lang.Short]
+      case v: Double => v.toShort.asInstanceOf[java.lang.Short]
+      case v => java.lang.Short.valueOf(v.toString)
+    }.orNull[java.lang.Short]
   }
 
   def nullableShort(columnLabel: String): java.lang.Short = {
     ensureCursor()
-    Option(any(columnLabel))
-      .map(v => java.lang.Short.valueOf(v.toString))
-      .orNull[java.lang.Short]
+    Option(any(columnLabel)).map {
+      case v: Float => v.toShort.asInstanceOf[java.lang.Short]
+      case v: Double => v.toShort.asInstanceOf[java.lang.Short]
+      case v => java.lang.Short.valueOf(v.toString)
+    }.orNull[java.lang.Short]
   }
 
   def short(columnIndex: Int): Short = nullableShort(columnIndex).asInstanceOf[Short]
@@ -574,19 +586,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getWarnings
   }
 
-  def toMap(): Map[String, Any] = {
-    (1 to metaData.getColumnCount).foldLeft(Map[String, Any]()) {
-      (result, i) =>
-        val label = metaData.getColumnLabel(i)
-        Option(any(label)).map {
-          value => result + (label -> value)
-        }.getOrElse(result)
-    }
+  def toMap(): Map[String, Any] = (1 to metaData.getColumnCount).foldLeft(Map[String, Any]()) { (result, i) =>
+    val label = metaData.getColumnLabel(i)
+    Option(any(label)).map { value => result + (label -> value) }.getOrElse(result)
   }
 
-  def toSymbolMap(): Map[Symbol, Any] = toMap().map {
-    case (k, v) => Symbol(k) -> v
-  }
+  def toSymbolMap(): Map[Symbol, Any] = toMap().map { case (k, v) => Symbol(k) -> v }
 
 }
 
