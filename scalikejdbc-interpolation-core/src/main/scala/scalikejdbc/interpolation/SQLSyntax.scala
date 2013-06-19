@@ -137,15 +137,19 @@ object SQLSyntax {
   def distinct(column: SQLSyntax) = sqls"distinct ${column}"
 
   def avg(column: SQLSyntax) = sqls"avg(${column})"
+
   def count = sqls"count(1)"
   def count(column: SQLSyntax) = sqls"count(${column})"
   def count(asteriskProvider: AsteriskProvider) = sqls"count(${asteriskProvider.asterisk})"
+
   def min(column: SQLSyntax) = sqls"min(${column})"
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"
 
   def abs(column: SQLSyntax) = sqls"abs(${column})"
   def floor(column: SQLSyntax) = sqls"floor(${column})"
+  def ceil(column: SQLSyntax) = sqls"ceil(${column})"
+  def ceiling(column: SQLSyntax) = sqls"ceiling(${column})"
 
   def ? = sqls"?"
 

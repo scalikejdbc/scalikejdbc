@@ -147,6 +147,18 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val longResult = sql"select ${floor(v)} from sqlsyntax_spec limit 1".map(_.long(1)).single.apply().get
           longResult should equal(123L)
         }
+        // ceiling
+        {
+          val v = sqls"${123.4}"
+          val doubleResult = sql"select ${ceiling(v)} from sqlsyntax_spec limit 1".map(_.double(1)).single.apply().get
+          doubleResult should equal(124.0d)
+          val floatResult = sql"select ${ceiling(v)} from sqlsyntax_spec limit 1".map(_.float(1)).single.apply().get
+          floatResult should equal(124.0d)
+          val intResult = sql"select ${ceiling(v)} from sqlsyntax_spec limit 1".map(_.int(1)).single.apply().get
+          intResult should equal(124)
+          val longResult = sql"select ${ceiling(v)} from sqlsyntax_spec limit 1".map(_.long(1)).single.apply().get
+          longResult should equal(124L)
+        }
         // current_date
         {
           val t = sql"select ${currentDate} from sqlsyntax_spec limit 1".map(_.date(1).toLocalDate).single.apply().get
