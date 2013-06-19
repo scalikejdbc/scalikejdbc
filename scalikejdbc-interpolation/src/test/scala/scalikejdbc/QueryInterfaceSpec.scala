@@ -382,12 +382,15 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         exceptResults should equal(List(1, 3))
 
         // except all
-        val exceptAllResults = withSQL {
-          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
-            .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
-            .exceptAll(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
-        }.map(_.int("id")).list.apply()
-        exceptAllResults should equal(List(1, 1, 3))
+        // H2 Database doesn't support except all
+        if (driverClassName != "org.h2.Driver") {
+          val exceptAllResults = withSQL {
+            select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+              .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+              .exceptAll(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
+          }.map(_.int("id")).list.apply()
+          exceptAllResults should equal(List(1, 1, 3))
+        }
 
         // intersect
         val intersectResults = withSQL {
