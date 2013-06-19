@@ -43,10 +43,10 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
           "org.slf4j"               %  "slf4j-api"            % "1.7.5"       % "compile",
           "joda-time"               %  "joda-time"            % "2.2"         % "compile",
-          "org.joda"                %  "joda-convert"         % "1.2"         % "compile",
+          "org.joda"                %  "joda-convert"         % "1.3.1"       % "compile",
           // scope: test
           "ch.qos.logback"          %  "logback-classic"      % "1.0.13"       % "test",
-          "org.hibernate"           %  "hibernate-core"       % "4.1.9.Final"  % "test",
+          "org.hibernate"           %  "hibernate-core"       % "4.1.12.Final" % "test",
           "org.scalatest"           %  scalatest              % "1.9.1"        % "test",
           "org.mockito"             %  "mockito-all"          % "1.9.5"        % "test",
           "play"                    %  anorm                  % anormVersion   % "test"
@@ -257,7 +257,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= Seq(
         "play"           %% "play"      % _defaultPlayVersion % "provided",
         "play"           %% "play-test" % _defaultPlayVersion % "test",
-        "com.h2database" %  "h2"        % "[1.3,)"            % "test"
+        "com.h2database" %  "h2"        % "1.3.172"           % "test"
       ),
       testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -279,8 +279,8 @@ object ScalikeJDBCProjects extends Build {
 
     val appDependencies = Seq(
       "com.github.tototoshi" %% "play-flyway" % "[0.1,)",
-      "com.h2database"       %  "h2"          % "[1.3,)",
-      "postgresql"           %  "postgresql"  % "9.1-901.jdbc4"
+      "com.h2database"       %  "h2"          % "1.3.172",
+      "postgresql"           %  "postgresql"  % "9.2-1002.jdbc4"
     )
 
     play.Project(appName, appVersion, appDependencies,
@@ -377,12 +377,12 @@ object ScalikeJDBCProjects extends Build {
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
-    "com.h2database"    % "h2"                   % "[1.3,)"        % "test",
-    "org.apache.derby"  % "derby"                % "[10.8.2,)"     % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"         % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.2.9"         % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.23"        % "test",
-    "postgresql"        % "postgresql"           % "9.1-901.jdbc4" % "test"
+    "com.h2database"    % "h2"                   % "1.3.172"        % "test",
+    "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"          % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.2.9"          % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.23"         % "test",
+    "postgresql"        % "postgresql"           % "9.2-1002.jdbc4" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked")
