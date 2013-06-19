@@ -147,6 +147,16 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
           val longResult = sql"select ${floor(v)} from sqlsyntax_spec limit 1".map(_.long(1)).single.apply().get
           longResult should equal(123L)
         }
+        // current_date
+        {
+          val t = sql"select ${currentDate} from sqlsyntax_spec limit 1".map(_.date(1).toLocalDate).single.apply().get
+          t should equal(LocalDate.now)
+        }
+        // current_timestamp
+        {
+          val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1).toDateTime).single.apply().get
+          t.getMillis should be < (DateTime.now.getMillis)
+        }
       }
     } finally {
       DB autoCommit { implicit s =>
