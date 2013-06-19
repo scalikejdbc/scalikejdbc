@@ -374,16 +374,20 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
 
         // except
-        val exceptResults = withSQL {
-          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
-            .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
-            .except(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
-        }.map(_.int("id")).list.apply()
-        exceptResults should equal(List(1, 3))
+        // MySQL doesn't support except
+        if (driverClassName != "com.mysql.jdbc.Driver") {
+          val exceptResults = withSQL {
+            select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+              .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+              .except(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
+          }.map(_.int("id")).list.apply()
+          exceptResults should equal(List(1, 3))
+        }
 
         // except all
         // H2 Database doesn't support except all
-        if (driverClassName != "org.h2.Driver") {
+        // MySQL doesn't support except all
+        if (driverClassName != "org.h2.Driver" && driverClassName != "com.mysql.jdbc.Driver") {
           val exceptAllResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
@@ -393,22 +397,28 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         }
 
         // intersect
-        val intersectResults = withSQL {
-          select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
-            .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
-        }.map(_.int("id")).list.apply()
-        intersectResults should equal(List(1, 2))
+        // MySQL doesn't support intersect
+        if (driverClassName != "com.mysql.jdbc.Driver") {
+          val intersectResults = withSQL {
+            select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+              .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
+          }.map(_.int("id")).list.apply()
+          intersectResults should equal(List(1, 2))
+        }
 
-        // intersect all
-        val intersectAllResults = withSQL {
-          select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2))
-            .intersectAll {
-              select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
-                .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
-            }
-            .orderBy(sqls"id")
-        }.map(_.int("id")).list.apply()
-        intersectAllResults should equal(List(1, 1, 2))
+        // intersect all  
+        // MySQL doesn't support intersect all
+        if (driverClassName != "com.mysql.jdbc.Driver") {
+          val intersectAllResults = withSQL {
+            select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2))
+              .intersectAll {
+                select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
+                  .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
+              }
+              .orderBy(sqls"id")
+          }.map(_.int("id")).list.apply()
+          intersectAllResults should equal(List(1, 1, 2))
+        }
 
         // between
         val betweenResults = withSQL {
