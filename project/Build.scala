@@ -222,7 +222,7 @@ object ScalikeJDBCProjects extends Build {
             Seq(
               "play"           % "play_2.10"      % _defaultPlayVersion % "provided",
               "play"           % "play-test_2.10" % _defaultPlayVersion % "test",
-              "com.h2database" % "h2"             % "[1.3,)"            % "test"
+              "com.h2database" % "h2"             % "1.3.172"           % "test"
             )
           }
           case _ => {
@@ -381,7 +381,7 @@ object ScalikeJDBCProjects extends Build {
     "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"          % "test",
     "org.hsqldb"        % "hsqldb"               % "2.2.9"          % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.23"         % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.25"         % "test",
     "postgresql"        % "postgresql"           % "9.2-1002.jdbc4" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
