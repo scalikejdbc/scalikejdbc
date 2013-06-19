@@ -451,9 +451,11 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
 
                 // java.sql.Date
-                d.toLocalDate.getYear should equal(2012)
-                d.toLocalDate.getMonthOfYear should equal(5)
-                d.toLocalDate.getDayOfMonth should equal(3)
+                if (driverClassName != "org.h2.Driver") {
+                  d.toLocalDate.getYear should equal(2012)
+                  d.toLocalDate.getMonthOfYear should equal(5)
+                  d.toLocalDate.getDayOfMonth should equal(3)
+                }
 
                 // java.sql.Time
                 t.toLocalTime.getHourOfDay should equal(13)
