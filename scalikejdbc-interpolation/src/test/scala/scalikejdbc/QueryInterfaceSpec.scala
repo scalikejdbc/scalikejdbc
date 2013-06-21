@@ -100,6 +100,9 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
 
         ordersByAlice.size should equal(4)
 
+        val allAccounts = withSQL { select.from(Account as a).orderBy(a.id) }.map(Account(a)).list.apply()
+        allAccounts.size should equal(4)
+
         // join query
         val cookieOrders = withSQL {
           select
