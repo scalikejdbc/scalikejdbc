@@ -55,7 +55,15 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     /**
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
-    def columns: Seq[String] = SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
+    def columns: Seq[String] = {
+      if (columnNames.isEmpty) SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
+      else columnNames
+    }
+
+    /**
+     * If you prefer columnNames than columns, override this method to customize.
+     */
+    def columnNames: Seq[String] = Nil
 
     /**
      * True if you need forcing upper column names in SQL.

@@ -26,7 +26,11 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
   object User extends SQLSyntaxSupport[User] {
 
     override val tableName = "users"
-    override val columns = Seq("id", "first_name", "group_id")
+
+    // Both of columns and columnNames are OK
+    //override val columns = Seq("id", "first_name", "group_id")
+    override val columnNames = Seq("id", "first_name", "group_id")
+
     override val nameConverters = Map("uid" -> "id")
     override val delimiterForResultName = "_Z_"
     override val forceUpperCase = true
