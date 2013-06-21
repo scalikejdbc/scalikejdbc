@@ -450,27 +450,28 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
             }.first().apply().map {
               case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
 
-                // java.sql.Date
                 if (driverClassName != "org.h2.Driver") {
+                  // Since H2's behavior is quite strange, so skipped.
+                  // java.sql.Date
                   d.toLocalDate.getYear should equal(2012)
                   d.toLocalDate.getMonthOfYear should equal(5)
                   d.toLocalDate.getDayOfMonth should equal(3)
+
+                  // java.sql.Time
+                  t.toLocalTime.getHourOfDay should equal(13)
+                  t.toLocalTime.getMinuteOfHour should equal(40)
+                  t.toLocalTime.getSecondOfMinute should equal(0)
+                  t.toLocalTime.getMillisOfSecond should equal(0)
+
+                  // java.sql.Timestamp
+                  ts.toDateTime.getYear should equal(2012)
+                  ts.toDateTime.getMonthOfYear should equal(5)
+                  ts.toDateTime.getDayOfMonth should equal(3)
+                  ts.toDateTime.getHourOfDay should equal(13)
+                  ts.toDateTime.getMinuteOfHour should equal(40)
+                  ts.toDateTime.getSecondOfMinute should equal(0)
+                  ts.toDateTime.getMillisOfSecond should equal(0)
                 }
-
-                // java.sql.Time
-                t.toLocalTime.getHourOfDay should equal(13)
-                t.toLocalTime.getMinuteOfHour should equal(40)
-                t.toLocalTime.getSecondOfMinute should equal(0)
-                t.toLocalTime.getMillisOfSecond should equal(0)
-
-                // java.sql.Timestamp
-                ts.toDateTime.getYear should equal(2012)
-                ts.toDateTime.getMonthOfYear should equal(5)
-                ts.toDateTime.getDayOfMonth should equal(3)
-                ts.toDateTime.getHourOfDay should equal(13)
-                ts.toDateTime.getMinuteOfHour should equal(40)
-                ts.toDateTime.getSecondOfMinute should equal(0)
-                ts.toDateTime.getMillisOfSecond should equal(0)
 
             } orElse {
               fail("Expected value is not found.")

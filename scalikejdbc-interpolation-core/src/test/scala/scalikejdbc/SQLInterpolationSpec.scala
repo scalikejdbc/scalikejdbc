@@ -167,7 +167,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         // current_timestamp
         {
           val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1).toDateTime).single.apply().get
-          t.getMillis should be < (DateTime.now.getMillis)
+          t.getMillis should be < (DateTime.now.plusHours(6).getMillis)
         }
       }
     } finally {
