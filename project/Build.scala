@@ -11,8 +11,20 @@ object ScalikeJDBCProjects extends Build {
   // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "1.6.4-SNAPSHOT"
 
+  // published dependency version
+  lazy val _slf4jApiVersion = "1.7.5"
   lazy val _defaultPlayVersion = "2.1.1"
+  lazy val _typesafeConfigVersion = "1.0.1"
 
+  // internal only
+  lazy val _logbackVersion = "1.0.13"
+  lazy val _h2Version = "1.3.172"
+  lazy val _hibernateVersion = "4.1.12.Final"
+  lazy val _scalatestVersion = "1.9.1"
+  lazy val _specs2Scala29Version = "1.12.4.1"
+  lazy val _specs2Scala210Version = "1.14"
+
+  // scalikejdbc (core library)
   lazy val scalikejdbc = Project(
     id = "library",
     base = file("scalikejdbc-library"),
@@ -25,11 +37,6 @@ object ScalikeJDBCProjects extends Build {
       publishMavenStyle := true,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        val scalatest = "scalatest_" + (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
-          case "2.9.3" => "2.9.2"
-          case version => version
-        })
         val anorm = "anorm_" + (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
           case _ => "2.9.1"
@@ -40,16 +47,16 @@ object ScalikeJDBCProjects extends Build {
         }
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"         % "1.4"         % "compile",
-          "org.slf4j"               %  "slf4j-api"            % "1.7.5"       % "compile",
-          "joda-time"               %  "joda-time"            % "2.2"         % "compile",
-          "org.joda"                %  "joda-convert"         % "1.3.1"       % "compile",
+          "commons-dbcp"            %  "commons-dbcp"    % "1.4"            % "compile",
+          "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion % "compile",
+          "joda-time"               %  "joda-time"       % "2.2"            % "compile",
+          "org.joda"                %  "joda-convert"    % "1.3.1"          % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic"      % "1.0.13"       % "test",
-          "org.hibernate"           %  "hibernate-core"       % "4.1.12.Final" % "test",
-          "org.scalatest"           %  scalatest              % "1.9.1"        % "test",
-          "org.mockito"             %  "mockito-all"          % "1.9.5"        % "test",
-          "play"                    %  anorm                  % anormVersion   % "test"
+          "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
+          "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
+          "org.scalatest"           %% "scalatest"       % _scalatestVersion % "test",
+          "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test",
+          "play"                    %  anorm             % anormVersion      % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -61,6 +68,8 @@ object ScalikeJDBCProjects extends Build {
     )
   )
 
+  // scalikejdbc-interpolation-core
+  // basic modules that are used by interpolation-macro
   lazy val scalikejdbcInterpolationCore = Project(
     id = "interpolation-core",
     base = file("scalikejdbc-interpolation-core"),
@@ -74,9 +83,9 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"        % "1.7.4"   % "compile",
-          "ch.qos.logback" %  "logback-classic"  % "1.0.13"  % "test",
-          "org.scalatest"  %% "scalatest"        % "1.9.1"   % "test"
+          "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
+          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
+          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -88,6 +97,7 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
+  // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(
     id = "interpolation-macro",
     base = file("scalikejdbc-interpolation-macro"),
@@ -101,9 +111,9 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.scala-lang" %  "scala-reflect"    % scalaVersion  % "compile",
-          "org.scala-lang" %  "scala-compiler"   % scalaVersion  % "optional",
-          "org.scalatest"  %% "scalatest"        % "1.9.1"       % "test"
+          "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
+          "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional",
+          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
         )
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -115,6 +125,7 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbcInterpolationCore)
 
+  // scalikejdbc-interpolation
   lazy val scalikejdbcInterpolation = Project(
     id = "interpolation",
     base = file("scalikejdbc-interpolation"),
@@ -128,10 +139,10 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"      %  "slf4j-api"        % "1.7.5"       % "compile",
-          "ch.qos.logback" %  "logback-classic"  % "1.0.13"      % "test",
-          "org.hibernate"  %  "hibernate-core"   % "4.1.9.Final" % "test",
-          "org.scalatest"  %% "scalatest"        % "1.9.1"       % "test"
+          "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
+          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
+          "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test",
+          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -143,6 +154,8 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc, scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
+  // scalikejdbc-mapper-generator-core
+  // core library for mapper-generator
   lazy val scalikejdbcMapperGeneratorCore = Project(
     id = "mapper-generator-core",
     base = file("scalikejdbc-mapper-generator-core"),
@@ -155,19 +168,14 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
-            "org.slf4j"     %  "slf4j-simple" % "1.7.5"   % "compile",
-            "org.scalatest" %% "scalatest"    % "1.9.1"   % "test",
-            "org.specs2"    %% "specs2"       % "1.14"    % "test"
-           )
-          case "2.9.3" => Seq(
-            "org.slf4j"     %  "slf4j-simple"    % "1.7.5"    % "compile",
-            "org.scalatest" %  "scalatest_2.9.2" % "1.9.1"    % "test",
-            "org.specs2"    %  "specs2_2.9.2"    % "1.12.4.1" % "test"
+            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion       % "compile",
+            "org.scalatest" %% "scalatest" % _scalatestVersion      % "test",
+            "org.specs2"    %% "specs2"    % _specs2Scala210Version % "test"
            )
           case _ => Seq(
-            "org.slf4j"     %  "slf4j-simple" % "1.7.5"    % "compile",
-            "org.scalatest" %% "scalatest"    % "1.9.1"    % "test",
-            "org.specs2"    %% "specs2"       % "1.12.4.1" % "test"
+            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion      % "compile",
+            "org.scalatest" %% "scalatest" % _scalatestVersion     % "test",
+            "org.specs2"    %% "specs2"    % _specs2Scala29Version % "test"
            )
         }) ++ jdbcDriverDependenciesInTestScope
       },
@@ -180,6 +188,7 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest)
 
+  // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
     id = "mapper-generator",
     base = file("scalikejdbc-mapper-generator"),
@@ -192,9 +201,9 @@ object ScalikeJDBCProjects extends Build {
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
-          "org.slf4j"     %  "slf4j-simple" % "1.7.5"    % "compile",
-          "org.scalatest" %% "scalatest"    % "1.9.1"    % "test",
-          "org.specs2"    %% "specs2"       % "1.12.4.1" % "test"
+          "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion      % "compile",
+          "org.scalatest" %% "scalatest"    % _scalatestVersion     % "test",
+          "org.specs2"    %% "specs2"       % _specs2Scala29Version % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -206,6 +215,8 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
 
+  // scalikejdbc-play-plugin
+  // support: Play 2.0.x, 2.1.x
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
     base = file("scalikejdbc-play-plugin"),
@@ -222,14 +233,14 @@ object ScalikeJDBCProjects extends Build {
             Seq(
               "play"           % "play_2.10"      % _defaultPlayVersion % "provided",
               "play"           % "play-test_2.10" % _defaultPlayVersion % "test",
-              "com.h2database" % "h2"             % "1.3.172"           % "test"
+              "com.h2database" % "h2"             % _h2Version          % "test"
             )
           }
           case _ => {
-            val playVersion = "2.0.4"
+            val play20Version = "2.0.4"
             Seq(
-              "play" % "play_2.9.1"      % playVersion % "provided",
-              "play" % "play-test_2.9.1" % playVersion % "test"
+              "play" % "play_2.9.1"      % play20Version % "provided",
+              "play" % "play-test_2.9.1" % play20Version % "test"
             )
           }
         }
@@ -244,6 +255,8 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
+  // scalikejdbc-play-fixture-plugin
+  // support: Play 2.1.x 
   lazy val scalikejdbcPlayFixturePlugin = Project(
     id = "play-fixture-plugin",
     base = file("scalikejdbc-play-fixture-plugin"),
@@ -257,7 +270,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= Seq(
         "play"           %% "play"      % _defaultPlayVersion % "provided",
         "play"           %% "play-test" % _defaultPlayVersion % "test",
-        "com.h2database" %  "h2"        % "1.3.172"           % "test"
+        "com.h2database" %  "h2"        % _h2Version          % "test"
       ),
       testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -273,22 +286,22 @@ object ScalikeJDBCProjects extends Build {
     scalikejdbcPlayPlugin
   )
 
+  // play zentasks example
   lazy val scalikejdbcPlayPluginTestZentasks = {
     val appName         = "play-plugin-test-zentasks"
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
       "com.github.tototoshi" %% "play-flyway" % "[0.1,)",
-      "com.h2database"       %  "h2"          % "1.3.172",
+      "com.h2database"       %  "h2"          % _h2Version,
       "postgresql"           %  "postgresql"  % "9.2-1002.jdbc4"
     )
 
-    play.Project(appName, appVersion, appDependencies,
-                            path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
+    play.Project(appName, appVersion, appDependencies, path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
       scalaVersion in ThisBuild := "2.10.2",
       resolvers ++= Seq(
-        "Sonatype OSS Releases"  at "http://oss.sonatype.org/content/repositories/releases",
-        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+        "sonatype releases"  at "http://oss.sonatype.org/content/repositories/releases",
+        "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
       )
     ).dependsOn(
       scalikejdbcPlayFixturePlugin,
@@ -300,6 +313,7 @@ object ScalikeJDBCProjects extends Build {
     )
   }
 
+  // scalikejdbc-test
   lazy val scalikejdbcTest = Project(
     id = "test",
     base = file("scalikejdbc-test"),
@@ -311,14 +325,20 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := _crossScalaVersions,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        Seq(
-          "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-          "org.scalatest"  %% "scalatest"            % "1.9.1"   % "provided",
-          "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
-        ) ++ (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => Seq("org.specs2" %% "specs2" % "1.14" % "provided")
-          case _ => Seq("org.specs2" %% "specs2" % "1.12.4.1"  % "provided")
-        }) ++ jdbcDriverDependenciesInTestScope
+        (scalaVersion match {
+          case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
+            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
+            "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
+            "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
+            "org.specs2"     %% "specs2"          % _specs2Scala210Version % "provided"
+          )
+          case _ => Seq(
+            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion      % "compile",
+            "ch.qos.logback" %  "logback-classic" % _logbackVersion       % "test",
+            "org.scalatest"  %% "scalatest"       % _scalatestVersion     % "provided",
+            "org.specs2"     %% "specs2"          % _specs2Scala29Version % "provided"
+          )
+        })
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -329,7 +349,7 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbc)
 
-
+  // scalikejdbc-config
   lazy val scalikejdbcConfig = Project(
     id = "config",
     base = file("scalikejdbc-config"),
@@ -341,20 +361,12 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := _crossScalaVersions,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        (scalaVersion match {
-          case "2.9.3" => Seq(
-            "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
-            "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-            "org.scalatest"  %  "scalatest_2.9.2"      % "1.9.1"   % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
-           )
-          case _ => Seq(
-            "com.typesafe"   %  "config"               % "1.0.0"   % "compile",
-            "org.slf4j"      %  "slf4j-api"            % "1.7.5"   % "compile",
-            "org.scalatest"  %% "scalatest"            % "1.9.1"   % "provided",
-            "ch.qos.logback" %  "logback-classic"      % "1.0.13"  % "test"
-           )
-        }) ++ jdbcDriverDependenciesInTestScope
+        Seq(
+          "com.typesafe"   %  "config"          % _typesafeConfigVersion % "compile",
+          "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
+          "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
+          "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -364,6 +376,7 @@ object ScalikeJDBCProjects extends Build {
       scalacOptions ++= _scalacOptions
     )
   ) dependsOn(scalikejdbc)
+
 
   val _crossScalaVersions = Seq("2.10.0", "2.9.3", "2.9.2", "2.9.1")
   def _publishTo(v: String) = {
@@ -376,7 +389,7 @@ object ScalikeJDBCProjects extends Build {
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
-    "com.h2database"    % "h2"                   % "1.3.172"        % "test",
+    "com.h2database"    % "h2"                   % _h2Version       % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"          % "test",
     "org.hsqldb"        % "hsqldb"               % "2.2.9"          % "test",
