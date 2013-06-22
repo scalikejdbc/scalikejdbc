@@ -21,6 +21,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.3.172"
   lazy val _hibernateVersion = "4.1.12.Final"
   lazy val _scalatestVersion = "1.9.1"
+  lazy val _specs2Scala291Version = "1.12.4"
   lazy val _specs2Scala29Version = "1.12.4.1"
   lazy val _specs2Scala210Version = "1.14"
 
@@ -171,7 +172,12 @@ object ScalikeJDBCProjects extends Build {
             "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion       % "compile",
             "org.scalatest" %% "scalatest" % _scalatestVersion      % "test",
             "org.specs2"    %% "specs2"    % _specs2Scala210Version % "test"
-           )
+          )
+          case "2.9.1" => Seq(
+            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion      % "compile",
+            "org.scalatest" %% "scalatest" % _scalatestVersion     % "test",
+            "org.specs2"    %% "specs2"    % _specs2Scala291Version % "test"
+          )
           case _ => Seq(
             "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion      % "compile",
             "org.scalatest" %% "scalatest" % _scalatestVersion     % "test",
@@ -200,6 +206,7 @@ object ScalikeJDBCProjects extends Build {
       scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        // sbt 0.12.x uses Scala 2.9.2
         Seq(
           "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion      % "compile",
           "org.scalatest" %% "scalatest"    % _scalatestVersion     % "test",
@@ -331,6 +338,12 @@ object ScalikeJDBCProjects extends Build {
             "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
             "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
             "org.specs2"     %% "specs2"          % _specs2Scala210Version % "provided"
+          )
+          case "2.9.1" => Seq(
+            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
+            "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
+            "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
+            "org.specs2"     %% "specs2"          % _specs2Scala291Version % "provided"
           )
           case _ => Seq(
             "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion      % "compile",
