@@ -28,19 +28,25 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
     intercept[IllegalStateException] {
       db.begin()
     }
-    db.rollback()
-    db.close()
+    try {
+      db.rollback()
+    } finally {
+      db.close()
+    }
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
     val db = DB(ConnectionPool('default).borrow())
-    db.begin()
-    db.beginIfNotYet()
-    db.beginIfNotYet()
-    db.beginIfNotYet()
-    db.rollback()
-    db.rollbackIfActive()
-    db.close()
+    try {
+      db.begin()
+      db.beginIfNotYet()
+      db.beginIfNotYet()
+      db.beginIfNotYet()
+      db.rollback()
+      db.rollbackIfActive()
+    } finally {
+      db.close()
+    }
   }
 
   "#tx" should "not be available before beginning tx" in {
@@ -508,47 +514,6 @@ class DB_SessionOperationSpec extends FlatSpec with ShouldMatchers with BeforeAn
       val name = DB(ConnectionPool.borrow()) autoCommit {
         session =>
           session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }
-      assert(name.get == "name1")
-    }
-  }
-
-  it should "work with multi threads when using Anorm API" in {
-    import anorm._
-    import anorm.SqlParser._
-    val conn = ConnectionPool.borrow()
-    val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      spawn {
-        val db = DB(ConnectionPool.borrow())
-        db.begin()
-        db.withinTxWithConnection {
-          implicit conn =>
-            SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
-            Thread.sleep(1000L)
-            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-            assert(name.get == "foo")
-        }
-        db.rollback()
-      }
-      spawn {
-        val db = DB(ConnectionPool.borrow())
-        db.begin()
-        db.withinTxWithConnection {
-          implicit conn =>
-            Thread.sleep(200L)
-            val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-            assert(name.get == "name1")
-        }
-        db.rollback()
-      }
-
-      Thread.sleep(2000L)
-
-      val name = DB(ConnectionPool.borrow()) autoCommitWithConnection {
-        implicit conn =>
-          SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
       }
       assert(name.get == "name1")
     }

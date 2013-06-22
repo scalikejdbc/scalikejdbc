@@ -184,6 +184,22 @@ object GeneralizedTypeConstraintsForWithExtractor {
 }
 
 /**
+ * Statement and parameters
+ */
+private[scalikejdbc] trait StatementAndParameters {
+
+  /**
+   * SQL statement
+   */
+  def statement: String
+
+  /**
+   * Bind params
+   */
+  def parameters: Seq[Any]
+}
+
+/**
  * SQL abstraction.
  *
  * @param sql SQL template
@@ -192,7 +208,11 @@ object GeneralizedTypeConstraintsForWithExtractor {
  * @param output output type
  * @tparam A return type
  */
-abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable) {
+abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+    extends StatementAndParameters {
+
+  override def statement: String = sql
+  override def parameters: Seq[Any] = params
 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
@@ -393,7 +413,10 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(extractor: 
  * @param sql SQL template
  * @param params parameters
  */
-class SQLBatch(sql: String)(params: Seq[Any]*) {
+class SQLBatch(sql: String)(params: Seq[Any]*) extends StatementAndParameters {
+
+  override def statement: String = sql
+  override def parameters: Seq[Seq[Any]] = params
 
   def apply()(implicit session: DBSession): Seq[Int] = session match {
     case AutoSession => DB autoCommit (s => s.batch(sql, params: _*))
@@ -410,7 +433,11 @@ class SQLBatch(sql: String)(params: Seq[Any]*) {
  * @param before before filter
  * @param after after filter
  */
-class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
+class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit)
+    extends StatementAndParameters {
+
+  override def statement: String = sql
+  override def parameters: Seq[Any] = params
 
   def apply()(implicit session: DBSession): Boolean = session match {
     case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
@@ -427,7 +454,11 @@ class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Uni
  * @param before before filter
  * @param after after filter
  */
-class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
+class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit)
+    extends StatementAndParameters {
+
+  override def statement: String = sql
+  override def parameters: Seq[Any] = params
 
   def apply()(implicit session: DBSession): Int = session match {
     case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
@@ -442,7 +473,11 @@ class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(
  * @param sql SQL template
  * @param params parameters
  */
-class SQLUpdateWithGeneratedKey(sql: String)(params: Any*)(key: Any) {
+class SQLUpdateWithGeneratedKey(sql: String)(params: Any*)(key: Any)
+    extends StatementAndParameters {
+
+  override def statement: String = sql
+  override def parameters: Seq[Any] = params
 
   def apply()(implicit session: DBSession): Long = session match {
     case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))

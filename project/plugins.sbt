@@ -26,4 +26,5 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 
 addSbtPlugin("play" % "sbt-plugin" % "2.1.0")
 
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.1")
 

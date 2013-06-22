@@ -27,6 +27,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   import Implicits._
   import SQLSyntax._
 
+  def append(syntax: SQLSyntax) = sqls"${this} ${syntax}"
+
   def groupBy(columns: SQLSyntax*) = sqls"${this} group by ${csv(columns: _*)}"
   def having(condition: SQLSyntax) = sqls"${this} having ${condition}"
 
@@ -55,8 +57,12 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
+
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} not in (${values})"
+
+  def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
+  def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
 
 }
 
@@ -121,21 +127,33 @@ object SQLSyntax {
   @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"".between(a, b)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
+
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"".notIn(column, values)
+
+  def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
+  def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
 
   def distinct(column: SQLSyntax) = sqls"distinct ${column}"
 
   def avg(column: SQLSyntax) = sqls"avg(${column})"
+
   def count = sqls"count(1)"
   def count(column: SQLSyntax) = sqls"count(${column})"
   def count(asteriskProvider: AsteriskProvider) = sqls"count(${asteriskProvider.asterisk})"
+
   def min(column: SQLSyntax) = sqls"min(${column})"
   def max(column: SQLSyntax) = sqls"max(${column})"
   def sum(column: SQLSyntax) = sqls"sum(${column})"
 
+  def abs(column: SQLSyntax) = sqls"abs(${column})"
+  def floor(column: SQLSyntax) = sqls"floor(${column})"
+  def ceil(column: SQLSyntax) = sqls"ceil(${column})"
+  def ceiling(column: SQLSyntax) = sqls"ceiling(${column})"
+
   def ? = sqls"?"
 
+  def currentDate = sqls"current_date"
   def currentTimestamp = sqls"current_timestamp"
   def dual = sqls"dual"
 

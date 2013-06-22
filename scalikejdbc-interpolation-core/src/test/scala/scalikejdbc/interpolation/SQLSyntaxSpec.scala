@@ -3,7 +3,7 @@ package scalikejdbc.interpolation
 import org.scalatest._
 import org.scalatest.matchers._
 
-class SQLSyntaxSpec extends FlatSpec with Matchers {
+class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
 
   import Implicits._
 
@@ -11,6 +11,12 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
 
   it should "be available" in {
     SQLSyntax("where") should not be (null)
+  }
+
+  it should "have #append" in {
+    val s = SQLSyntax.eq(sqls"id", 123).append(sqls"and name is not null")
+    s.value should equal(" id = ? and name is not null")
+    s.parameters should equal(Seq(123))
   }
 
   it should "have #join" in {
@@ -90,6 +96,18 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     val s = SQLSyntax.notIn(sqls"id", Seq(1, 2, 3))
     s.value should equal(" id not in (?, ?, ?)")
     s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #like" in {
+    val s = SQLSyntax.like(sqls"name", "%abc%")
+    s.value should equal(" name like ?")
+    s.parameters should equal(Seq("%abc%"))
+  }
+
+  it should "have #notLike" in {
+    val s = SQLSyntax.notLike(sqls"name", "%abc%")
+    s.value should equal(" name not like ?")
+    s.parameters should equal(Seq("%abc%"))
   }
 
   it should "have #groupBy and #having" in {

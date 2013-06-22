@@ -11,9 +11,8 @@ sbt \
   ++2.9.3 \
   clean \
   library/test \
-  ++2.10.1 \
+  ++2.10.2 \
   clean \
-  library/test \
   interpolation-core/test \
   interpolation/test > logs/test_stdout.log
 

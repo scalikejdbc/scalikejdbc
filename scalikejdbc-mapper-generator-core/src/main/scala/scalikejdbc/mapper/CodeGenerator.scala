@@ -1079,6 +1079,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |%interpolationImport%
           |
           |class %className%Spec extends fixture.FlatSpec with ShouldMatchers with AutoRollback {
+          |  %syntaxObject%
           |
           |  behavior of "%className%"
           |
@@ -1130,6 +1131,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |%interpolationImport%
           |
           |class %className%Spec extends Specification {
+          |  %syntaxObject%
           |
           |  "%className%" should {
           |    "find by primary keys" in new AutoRollback {
@@ -1194,6 +1196,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |                                   end
           |
           |  case class autoRollback() extends AutoRollback {
+          |    %syntaxObject%
           |
           |    def findByPrimaryKeys = this {
           |      val maybeFound = %className%.find(%primaryKeys%)
@@ -1246,6 +1249,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       .replaceAll("%primaryKeys%", table.primaryKeyColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))
+      .replaceFirst("%syntaxObject%",
+        if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else ""
+      )
       .replaceAll("%whereExample%",
         if (isQueryDsl)
           table.primaryKeyColumns.headOption.map { c =>

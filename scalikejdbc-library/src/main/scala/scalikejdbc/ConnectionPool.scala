@@ -173,10 +173,11 @@ object ConnectionPool extends LogSupport {
 /**
  * Connection Pool
  */
-abstract class ConnectionPool(url: String,
-    user: String,
+abstract class ConnectionPool(
+    val url: String,
+    val user: String,
     password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
+    val settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
 
   /**
    * Borrows [[java.sql.Connection]] from pool.
@@ -232,10 +233,11 @@ abstract class ConnectionPool(url: String,
  *
  * @see http://commons.apache.org/dbcp/
  */
-class CommonsConnectionPool(url: String,
-  user: String,
+class CommonsConnectionPool(
+  override val url: String,
+  override val user: String,
   password: String,
-  settings: ConnectionPoolSettings = ConnectionPoolSettings())
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
     extends ConnectionPool(url, user, password, settings) {
 
   import org.apache.commons.pool.impl.GenericObjectPool

@@ -15,11 +15,6 @@
  */
 package scalikejdbc
 
-import scala.language.implicitConversions
-import scala.language.reflectiveCalls
-import scala.language.experimental.macros
-import scala.language.dynamics
-
 private[scalikejdbc] object LastParameter
 
 /**

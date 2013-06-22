@@ -197,6 +197,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   trait PagingSQLBuilder[A] extends SQLBuilder[A]
       with UnionQuerySQLBuilder[A]
+      with ExceptQuerySQLBuilder[A]
+      with IntersectQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
@@ -216,6 +218,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with PagingSQLBuilder[A]
       with GroupBySQLBuilder[A]
       with UnionQuerySQLBuilder[A]
+      with ExceptQuerySQLBuilder[A]
+      with IntersectQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
 
     def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
@@ -242,8 +246,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def notIn(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(column, values)}")
     def notIn(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not in (${subQuery.toSQLSyntax})")
 
-    def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} like ${value}")
-    def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not like ${value}")
+    def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.like(column, value)}")
+    def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notLike(column, value)}")
 
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
     def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(subQuery.toSQLSyntax)
@@ -294,6 +298,9 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   }
 
+  /**
+   * Sub query builder
+   */
   trait SubQuerySQLBuilder[A] extends SQLBuilder[A] {
 
     /**
@@ -308,6 +315,9 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     }
   }
 
+  /**
+   * Union query builder
+   */
   trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union ${anotherQuery}")
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} union all ${anotherQuery}")
@@ -316,86 +326,112 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   }
 
   /**
+   * Except query builder
+   */
+  trait ExceptQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def except(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} except ${anotherQuery}")
+    def exceptAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} except all ${anotherQuery}")
+    def except(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = except(anotherQuery.toSQLSyntax)
+    def exceptAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = exceptAll(anotherQuery.toSQLSyntax)
+  }
+
+  /**
+   * Intersect query builder
+   */
+  trait IntersectQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def intersect(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} intersect ${anotherQuery}")
+    def intersectAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} intersect all ${anotherQuery}")
+    def intersect(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersect(anotherQuery.toSQLSyntax)
+    def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersectAll(anotherQuery.toSQLSyntax)
+  }
+
+  /**
    * SQLBuilder for select queries.
    */
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
-      extends SQLBuilder[A]
-      with PagingSQLBuilder[A]
-      with GroupBySQLBuilder[A]
-      with UnionQuerySQLBuilder[A]
-      with WhereSQLBuilder[A]
-      with SubQuerySQLBuilder[A] {
+      extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
       table.resultAllProvider.map(provider => provider :: resultAllProviders).getOrElse(resultAllProviders)
     }
 
     // e.g. select.from(User as u)
-    def from(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      this.copy(
-        sql = sqls"${sql} from ${table}",
-        resultAllProviders = appendResultAllProvider(table, resultAllProviders)
-      )
-    }
+    def from(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
+      sql = sqls"${sql} from ${table}",
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+    )
 
     // ---
     // join query
 
     def join(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = innerJoin(table)
-    def innerJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      this.copy(
-        sql = sqls"${sql} inner join ${table}",
-        resultAllProviders = appendResultAllProvider(table, resultAllProviders)
-      )
-    }
 
-    def leftJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      this.copy(
-        sql = sqls"${sql} left join ${table}",
-        resultAllProviders = appendResultAllProvider(table, resultAllProviders)
-      )
-    }
+    def innerJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
+      sql = sqls"${sql} inner join ${table}",
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+    )
 
-    def rightJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
-      this.copy(
-        sql = sqls"${sql} right join ${table}",
-        resultAllProviders = appendResultAllProvider(table, resultAllProviders)
-      )
-    }
+    def leftJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
+      sql = sqls"${sql} left join ${table}",
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+    )
+
+    def rightJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
+      sql = sqls"${sql} right join ${table}",
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+    )
 
     def on(onClause: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} on ${onClause}")
     def on(left: SQLSyntax, right: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} on ${left} = ${right}")
 
-    override def where: ConditionSQLBuilder[A] = {
-      if (lazyColumns) {
-        val columns = sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
-        ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${sqls.where}")
-      } else {
-        ConditionSQLBuilder[A](sqls"${sql} ${sqls.where}")
-      }
-    }
-    override def where(where: SQLSyntax): ConditionSQLBuilder[A] = {
-      if (lazyColumns) {
-        val columns = sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")
-        ConditionSQLBuilder[A](sqls"select ${columns} ${sql} ${sqls.where(where)}")
-      } else {
-        ConditionSQLBuilder[A](sqls"${sql} ${sqls.where(where)}")
-      }
-    }
+    // ---
+    // sort, paging
+
+    def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.orderBy(columns: _*)}")
+    def limit(n: Int): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.limit(n)}")
+    def offset(n: Int): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.offset(n)}")
+
+    // ---
+    // group by, having
+
+    def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.groupBy(columns: _*)}")
+    def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.having(condition)}")
+
+    // ---
+    // union, execept, intersect
+
+    def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} union ${anotherQuery}")
+    def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} union all ${anotherQuery}")
+    def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(anotherQuery.toSQLSyntax)
+    def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(anotherQuery.toSQLSyntax)
+
+    def except(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} except ${anotherQuery}")
+    def exceptAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} except all ${anotherQuery}")
+    def except(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = except(anotherQuery.toSQLSyntax)
+    def exceptAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = exceptAll(anotherQuery.toSQLSyntax)
+
+    def intersect(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} intersect ${anotherQuery}")
+    def intersectAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${toSQLSyntax} intersect all ${anotherQuery}")
+    def intersect(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersect(anotherQuery.toSQLSyntax)
+    def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersectAll(anotherQuery.toSQLSyntax)
+
+    // ---
+    // where 
+
+    def where: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where}")
+    def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where(where)}")
+
+    // ---
+    // common functions
 
     override def append(part: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} ${part}")
 
     def map(mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]): SelectSQLBuilder[A] = mapper.apply(this)
 
-    override def toSQLSyntax: SQLSyntax = {
-      if (lazyColumns) sqls"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
-      else sqls"${sql}"
-    }
-    override def toSQL: SQL[A, NoExtractor] = {
-      if (lazyColumns) sql"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")} ${sql}"
-      else sql"${sql}"
-    }
+    private def lazyLoadedPart: SQLSyntax = sqls"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")}"
 
+    override def toSQLSyntax: SQLSyntax = if (lazyColumns) sqls"${lazyLoadedPart} ${sql}" else sqls"${sql}"
+    override def toSQL: SQL[A, NoExtractor] = if (lazyColumns) sql"${lazyLoadedPart} ${sql}" else sql"${sql}"
   }
 
   /**

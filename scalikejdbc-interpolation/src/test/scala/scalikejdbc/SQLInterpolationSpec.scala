@@ -1,10 +1,11 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.matchers._
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
+class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings {
 
   behavior of "SQLInterpolation"
 
@@ -25,7 +26,11 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
   object User extends SQLSyntaxSupport[User] {
 
     override val tableName = "users"
-    override val columns = Seq("id", "first_name", "group_id")
+
+    // Both of columns and columnNames are OK
+    //override val columns = Seq("id", "first_name", "group_id")
+    override val columnNames = Seq("id", "first_name", "group_id")
+
     override val nameConverters = Map("uid" -> "id")
     override val delimiterForResultName = "_Z_"
     override val forceUpperCase = true
@@ -803,6 +808,13 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
         } catch { case e: Exception => }
       }
     }
+  }
+
+  it should "return statement and parameters" in {
+    val (id, name) = (123, "Alice")
+    val sql = sql"insert into company values (${id}, ${name})"
+    sql.statement should equal("insert into company values (?, ?)")
+    sql.parameters should equal(Seq(123, "Alice"))
   }
 
 }
