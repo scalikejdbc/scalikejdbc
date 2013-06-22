@@ -351,7 +351,7 @@ object ScalikeJDBCProjects extends Build {
             "org.scalatest"  %% "scalatest"       % _scalatestVersion     % "provided",
             "org.specs2"     %% "specs2"          % _specs2Scala29Version % "provided"
           )
-        })
+        }) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
