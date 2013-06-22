@@ -4,7 +4,7 @@ import org.scalatest._
 import org.scalatest.matchers._
 import org.joda.time._
 
-class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
+class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport {
 
   import scalikejdbc.interpolation._
   import scalikejdbc.interpolation.Implicits._
@@ -161,13 +161,15 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers {
         }
         // current_date
         {
-          val t = sql"select ${currentDate} from sqlsyntax_spec limit 1".map(_.date(1).toLocalDate).single.apply().get
-          t should equal(LocalDate.now)
+          val t = sql"select ${currentDate} from sqlsyntax_spec limit 1".map(_.date(1)).single.apply().get
+          log.warn("current_date: " + t + "," + t.getTime)
+          t.toLocalDate should equal(LocalDate.now)
         }
         // current_timestamp
         {
-          val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1).toDateTime).single.apply().get
-          t.getMillis should be < (DateTime.now.plusHours(6).getMillis)
+          val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1)).single.apply().get
+          log.warn("current_timestamp: " + t + "," + t.getTime)
+          t.toDateTime.getMillis should be < (DateTime.now.plusDays(1).getMillis)
         }
       }
     } finally {

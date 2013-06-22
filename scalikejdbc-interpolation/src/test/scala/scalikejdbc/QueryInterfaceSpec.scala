@@ -400,7 +400,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         }
 
         // intersect
-        // MySQL doesn't support intersect
+        // MySQL doesn't support intersect 
         if (driverClassName != "com.mysql.jdbc.Driver") {
           val intersectResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
@@ -410,8 +410,8 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         }
 
         // intersect all  
-        // MySQL doesn't support intersect all
-        if (driverClassName != "com.mysql.jdbc.Driver") {
+        // H2 and MySQL don't support intersect all
+        if (driverClassName != "com.mysql.jdbc.Driver" && driverClassName != "org.h2.Driver") {
           val intersectAllResults = withSQL {
             select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2))
               .intersectAll {
