@@ -48,7 +48,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }
 
     /**
-     * [[scalikekdbc.SQLSyntax]] value for table name.
+     * [[scalikekdbc.interpolation.SQLSyntax]] value for table name.
      */
     def table: TableDefSQLSyntax = TableDefSQLSyntax(tableName)
 
@@ -183,17 +183,17 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val useSnakeCaseColumnName: Boolean
 
     /**
-     * Returns [[scalikejdbc.SQLSyntax]] value for the column.
+     * Returns [[scalikejdbc.interpolation.SQLSyntax]] value for the column.
      */
     def c(name: String): SQLSyntax = column(name)
 
     /**
-     * Returns [[scalikejdbc.SQLSyntax]] value for the column.
+     * Returns [[scalikejdbc.interpolation.SQLSyntax]] value for the column.
      */
     def column(name: String): SQLSyntax
 
     /**
-     * Returns [[scalikejdbc.SQLSyntax]] value for the column which is referred by the field.
+     * Returns [[scalikejdbc.interpolation.SQLSyntax]] value for the column which is referred by the field.
      */
     def field(name: String): SQLSyntax = {
       val columnName = {
