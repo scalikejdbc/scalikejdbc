@@ -206,7 +206,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
    * Write the source code to file.
    */
   def writeModelIfNotExist(): Unit = {
-    val file = new File(config.srcDir + "/" + packageName.replaceAll("\\.", "/") + "/" + className + ".scala")
+    val file = new File(config.srcDir + "/" + packageName.replace(".", "/") + "/" + className + ".scala")
     if (file.exists) {
       println("\"" + packageName + "." + className + "\"" + " already exists.")
     } else {
@@ -243,8 +243,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |
         |}
       """.stripMargin
-        .replaceAll("%className%", className)
-        .replaceFirst("%constructorArgs%", table.allColumns.map {
+        .replace("%className%", className)
+        .replace("%constructorArgs%", table.allColumns.map {
           c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
         }.mkString(", " + eol))
 
@@ -264,14 +264,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |
         |}
       """.stripMargin
-        .replaceAll("%className%", className)
-        .replaceFirst("%constructorArgs1%", table.allColumns.map {
+        .replace("%className%", className)
+        .replace("%constructorArgs1%", table.allColumns.map {
           c => 1.indent + "val " + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
         }.mkString(comma + eol))
-        .replaceFirst("%copyArgs%", table.allColumns.map {
+        .replace("%copyArgs%", table.allColumns.map {
           c => 2.indent + c.nameInScala + ": " + c.typeInScala + " = this." + c.nameInScala
         }.mkString(comma + eol))
-        .replaceFirst("%constructorArgs3%", table.allColumns.map {
+        .replace("%constructorArgs3%", table.allColumns.map {
           c => 3.indent + c.nameInScala + " = " + c.nameInScala
         }.mkString(comma + eol))
     }
@@ -313,10 +313,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    val inSQL = all.mkString(", ")
         |  }
       """.stripMargin
-        .replaceAll("%valueDefinitions%", allColumns.map {
+        .replace("%valueDefinitions%", allColumns.map {
           c => 2.indent + "val " + c.nameInScala + " = \"" + c.name + "\""
         }.mkString(eol))
-        .replaceAll("%valueNames%", allColumns.map {
+        .replace("%valueNames%", allColumns.map {
           c => c.nameInScala
         }.mkString(", "))
     }
@@ -348,7 +348,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    import columnNames._
         |%mapper%
         |  }
-      """.stripMargin.replaceFirst("%mapper%", _mapper)
+      """.stripMargin.replace("%mapper%", _mapper)
     }
 
     val _interpolationMapper = allColumns.map {
@@ -361,9 +361,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       """  def apply(%syntaxName%: ResultName[%className%])(rs: WrappedResultSet): %className% = new %className%(
         |%mapper%
         |  )
-      """.stripMargin.replaceAll("%className%", className)
-        .replaceFirst("%syntaxName%", syntaxName)
-        .replaceFirst("%mapper%", _interpolationMapper)
+      """.stripMargin.replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
+        .replace("%mapper%", _interpolationMapper)
     }
 
     /**
@@ -388,10 +388,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    val inSQL = columnNames.all.map(name => tableName + "." + name + " AS " + as(name)).mkString(", ")
         |  }
       """.stripMargin
-        .replaceAll("%valueDefinitions%", allColumns.map {
+        .replace("%valueDefinitions%", allColumns.map {
           c => 2.indent + "val " + c.nameInScala + " = as(columnNames." + c.nameInScala + ")"
         }.mkString(eol))
-        .replaceAll("%valueNames%", allColumns.map {
+        .replace("%valueNames%", allColumns.map {
           c => c.nameInScala
         }.mkString(", "))
     }
@@ -413,7 +413,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    import joinedColumnNames._
         |%mapper%
         |  }
-      """.stripMargin.replaceFirst("%mapper%", _mapper)
+      """.stripMargin.replace("%mapper%", _mapper)
     }
 
     /**
@@ -614,7 +614,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |%placeHolderPart%
           |      ).where%wherePart%
           |    }.update.apply()
-          |    m
+          |    entity 
           |  }
         """
         case GeneratorTemplate.interpolation =>
@@ -627,7 +627,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      where
           |%wherePart%
           |      %3quotes%.update.apply()
-          |    m
+          |    entity 
           |  }
         """
         case _ =>
@@ -641,17 +641,17 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |%wherePart%
         |      %3quotes%)
         |%bindingPart%.update.apply()
-        |    m
+        |    entity 
         |  }
       """
       }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
-        .replaceAll("%tableName%", table.name)
-        .replaceAll("%placeHolderPart%", placeHolderPart)
-        .replaceAll("%wherePart%", wherePart)
-        .replaceAll("%bindingPart%", bindingPart)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
+        .replace("%tableName%", table.name)
+        .replace("%placeHolderPart%", placeHolderPart)
+        .replace("%wherePart%", wherePart)
+        .replace("%bindingPart%", bindingPart)
     }
 
     /**
@@ -704,11 +704,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }
           """
       }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%tableName%", table.name)
-        .replaceAll("%wherePart%", wherePart)
-        .replaceAll("%bindingPart%", bindingPart)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%tableName%", table.name)
+        .replace("%wherePart%", wherePart)
+        .replace("%bindingPart%", bindingPart)
     }
 
     /**
@@ -762,13 +762,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }
           """
       }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%argsPart%", argsPart)
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
-        .replaceAll("%tableName%", table.name)
-        .replaceAll("%wherePart%", wherePart)
-        .replaceAll("%bindingPart%", bindingPart)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%argsPart%", argsPart)
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
+        .replace("%tableName%", table.name)
+        .replace("%wherePart%", wherePart)
+        .replace("%bindingPart%", bindingPart)
     }
 
     /**
@@ -799,10 +799,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }
           """
       }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
-        .replaceAll("%tableName%", table.name)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
+        .replace("%tableName%", table.name)
 
     /**
      * {{{
@@ -831,10 +831,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }
           """
       }).stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
-        .replaceAll("%tableName%", table.name)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
+        .replace("%tableName%", table.name)
 
     /**
      * {{{
@@ -861,11 +861,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |      %bindingPart%.map(*).list.apply()
         |  }
       """.stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%paramsPart%", paramsPart)
-        .replaceAll("%className%", className)
-        .replaceAll("%tableName%", table.name)
-        .replaceAll("%bindingPart%", bindingPart)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%paramsPart%", paramsPart)
+        .replace("%className%", className)
+        .replace("%tableName%", table.name)
+        .replace("%bindingPart%", bindingPart)
     }
 
     val interpolationFindAllByMethod = {
@@ -874,9 +874,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |      .map(%className%(%syntaxName%.resultName)).list.apply()
         |  }
       """.stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
     }
 
     val queryDslFindAllByMethod = {
@@ -886,8 +886,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    }.map(%className%(%syntaxName%.resultName)).list.apply()
         |  }
       """.stripMargin
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
     }
 
     /**
@@ -915,11 +915,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |      %bindingPart%.map(rs => rs.long(1)).single.apply().get
         |  }
       """.stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%paramsPart%", paramsPart)
-        .replaceAll("%className%", className)
-        .replaceAll("%tableName%", table.name)
-        .replaceAll("%bindingPart%", bindingPart)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%paramsPart%", paramsPart)
+        .replace("%className%", className)
+        .replace("%tableName%", table.name)
+        .replace("%bindingPart%", bindingPart)
     }
 
     val interpolationCountByMethod = {
@@ -928,9 +928,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |      .map(_.long(1)).single.apply().get
         |  }
       """.stripMargin
-        .replaceAll("%3quotes%", "\"\"\"")
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
+        .replace("%3quotes%", "\"\"\"")
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
     }
 
     val queryDslCountByMethod = {
@@ -940,8 +940,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |    }.map(_.long(1)).single.apply().get
         |  }
       """.stripMargin
-        .replaceAll("%className%", className)
-        .replaceAll("%syntaxName%", syntaxName)
+        .replace("%className%", className)
+        .replace("%syntaxName%", syntaxName)
     }
 
     val isInterpolation = config.template == GeneratorTemplate.interpolation || config.template == GeneratorTemplate.queryDsl
@@ -1050,7 +1050,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   // -----------------------
 
   def writeSpecIfNotExist(code: Option[String]): Unit = {
-    val file = new File(config.testDir + "/" + packageName.replaceAll("\\.", "/") + "/" + className + "Spec.scala")
+    val file = new File(config.testDir + "/" + packageName.replace(".", "/") + "/" + className + "Spec.scala")
     if (file.exists) {
       println("\"" + packageName + "." + className + "Spec\"" + " already exists.")
     } else {
@@ -1243,16 +1243,16 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   private def replaceVariablesForTestPart(code: String): String = {
     val isInterpolation = config.template == GeneratorTemplate.interpolation || config.template == GeneratorTemplate.queryDsl
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
-    code.replaceAll("%package%", packageName)
-      .replaceAll("%className%", className)
-      .replaceFirst("%interpolationImport%", if (isInterpolation) "import scalikejdbc.SQLInterpolation._" else "")
-      .replaceAll("%primaryKeys%", table.primaryKeyColumns.map {
+    code.replace("%package%", packageName)
+      .replace("%className%", className)
+      .replace("%interpolationImport%", if (isInterpolation) "import scalikejdbc.SQLInterpolation._" else "")
+      .replace("%primaryKeys%", table.primaryKeyColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))
-      .replaceFirst("%syntaxObject%",
+      .replace("%syntaxObject%",
         if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else ""
       )
-      .replaceAll("%whereExample%",
+      .replace("%whereExample%",
         if (isQueryDsl)
           table.primaryKeyColumns.headOption.map { c =>
           "sqls.eq(" + syntaxName + "." + c.nameInScala + ", " + c.defaultValueInScala + ")"
@@ -1266,7 +1266,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             "\"" + c.name + " = {" + c.nameInScala + "}\", '" + c.nameInScala + " -> " + c.defaultValueInScala
           }.getOrElse("")
       )
-      .replaceAll("%createFields%", table.allColumns.filter {
+      .replace("%createFields%", table.allColumns.filter {
         c =>
           c.isNotNull && table.autoIncrementColumns.find(aic => aic.name == c.name).isEmpty
       }.map {
