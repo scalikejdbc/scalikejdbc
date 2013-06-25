@@ -536,7 +536,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
-     * def save(m: Member)(implicit session: DBSession = autoSession): Member = {
+     * def save(entity: Member)(implicit session: DBSession = autoSession): Member = {
      *   SQL("""
      *     update
      *       member
@@ -547,11 +547,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *     where
      *       ID = /*'id*/123
      * """).bindByName(
-     *     'id -> m.id,
-     *     'name -> m.name,
-     *     'birthday -> m.birthday
+     *     'id -> entity.id,
+     *     'name -> entity.name,
+     *     'birthday -> entity.birthday
      *   ).update.apply()
-     *   m
+     *   entity
      * }
      * }}}
      */
@@ -559,11 +559,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val placeHolderPart: String = config.template match {
         case GeneratorTemplate.queryDsl =>
-          // u.id -> m.id, u.name -> m.name
-          allColumns.map(c => 4.indent + syntaxName + "." + c.nameInScala + " -> m." + c.nameInScala).mkString(comma + eol)
+          // u.id -> entity.id, u.name -> entity.name
+          allColumns.map(c => 4.indent + syntaxName + "." + c.nameInScala + " -> entity." + c.nameInScala).mkString(comma + eol)
         case GeneratorTemplate.interpolation =>
-          // ${column.id} = ${m.id}, ${column.name} = ${m.name}
-          allColumns.map(c => 4.indent + "\\${column." + c.nameInScala + "} = \\${m." + c.nameInScala + "}").mkString(comma + eol)
+          // ${column.id} = ${entity.id}, ${column.name} = ${entity.name}
+          allColumns.map(c => 4.indent + "\\${column." + c.nameInScala + "} = \\${entity." + c.nameInScala + "}").mkString(comma + eol)
         case GeneratorTemplate.basic =>
           // id = ?, name = ?
           allColumns.map(c => 4.indent + c.name + " = ?").mkString(comma + eol)
@@ -577,11 +577,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val wherePart = config.template match {
         case GeneratorTemplate.queryDsl =>
-          // .eq(u.id, m.id).and.eq(u.name, m.name)
-          pkColumns.map(pk => ".eq(" + syntaxName + "." + pk.nameInScala + ", m." + pk.nameInScala + ")").mkString(".and")
+          // .eq(u.id, entity.id).and.eq(u.name, entity.name)
+          pkColumns.map(pk => ".eq(" + syntaxName + "." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
         case GeneratorTemplate.interpolation =>
-          // ${column.id} = ${m.id} and ${column.name} = ${m.name}
-          4.indent + pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
+          // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
+          4.indent + pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${entity." + pk.nameInScala + "}").mkString(" and ")
         case GeneratorTemplate.basic =>
           // id = ? and name = ?
           4.indent + pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
@@ -597,18 +597,18 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation | GeneratorTemplate.queryDsl => ""
         case GeneratorTemplate.basic =>
           3.indent + ".bind(" + eol +
-            allColumns.map(c => 4.indent + "m." + c.nameInScala).mkString(comma + eol) + ", " + eol +
-            pkColumns.map(pk => 4.indent + "m." + pk.nameInScala).mkString(comma + eol) + eol +
+            allColumns.map(c => 4.indent + "entity." + c.nameInScala).mkString(comma + eol) + ", " + eol +
+            pkColumns.map(pk => 4.indent + "entity." + pk.nameInScala).mkString(comma + eol) + eol +
             3.indent + ")"
         case _ =>
           3.indent + ".bindByName(" + eol +
-            allColumns.map(c => 4.indent + "'" + c.nameInScala + " -> m." + c.nameInScala).mkString(comma + eol) + eol +
+            allColumns.map(c => 4.indent + "'" + c.nameInScala + " -> entity." + c.nameInScala).mkString(comma + eol) + eol +
             3.indent + ")"
       }
 
       (config.template match {
         case GeneratorTemplate.queryDsl =>
-          """  def save(m: %className%)(implicit session: DBSession = autoSession): %className% = {
+          """  def save(entity: %className%)(implicit session: DBSession = autoSession): %className% = {
           |    withSQL { 
           |      update(%className% as %syntaxName%).set(
           |%placeHolderPart%
@@ -618,7 +618,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |  }
         """
         case GeneratorTemplate.interpolation =>
-          """  def save(m: %className%)(implicit session: DBSession = autoSession): %className% = {
+          """  def save(entity: %className%)(implicit session: DBSession = autoSession): %className% = {
           |    sql%3quotes%
           |      update
           |        ${%className%.table}
@@ -631,7 +631,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |  }
         """
         case _ =>
-          """  def save(m: %className%)(implicit session: DBSession = autoSession): %className% = {
+          """  def save(entity: %className%)(implicit session: DBSession = autoSession): %className% = {
         |    SQL(%3quotes%
         |      update
         |        %tableName%
@@ -656,9 +656,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
-     * def destroy(m: Member)(implicit session: DBSession = autoSession): Unit = {
+     * def destroy(entity: Member)(implicit session: DBSession = autoSession): Unit = {
      *   SQL("""delete from member where id = /*'id*/123""")
-     *     .bindByName('id -> m.id)
+     *     .bindByName('id -> entity.id)
      *     .update.apply()
      * }
      * }}}
@@ -667,11 +667,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val wherePart: String = config.template match {
         case GeneratorTemplate.queryDsl =>
-          // .eq(column.id, m.id).and.eq(column.name, m.name)
-          pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", m." + pk.nameInScala + ")").mkString(".and")
+          // .eq(column.id, entity.id).and.eq(column.name, entity.name)
+          pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
         case GeneratorTemplate.interpolation =>
-          // ${column.id} = ${m.id} and ${column.name} = ${m.name}
-          pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${m." + pk.nameInScala + "}").mkString(" and ")
+          // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
+          pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${entity." + pk.nameInScala + "}").mkString(" and ")
         case GeneratorTemplate.basic =>
           pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
         case GeneratorTemplate.executable =>
@@ -682,23 +682,23 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val bindingPart: String = config.template match {
         case GeneratorTemplate.interpolation | GeneratorTemplate.queryDsl => ""
-        case GeneratorTemplate.basic => ".bind(" + pkColumns.map(pk => "m." + pk.nameInScala).mkString(", ") + ")"
-        case _ => ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> m." + pk.nameInScala).mkString(", ") + ")"
+        case GeneratorTemplate.basic => ".bind(" + pkColumns.map(pk => "entity." + pk.nameInScala).mkString(", ") + ")"
+        case _ => ".bindByName(" + pkColumns.map(pk => "'" + pk.nameInScala + " -> entity." + pk.nameInScala).mkString(", ") + ")"
       }
 
       (config.template match {
         case GeneratorTemplate.queryDsl =>
-          """  def destroy(m: %className%)(implicit session: DBSession = autoSession): Unit = {
+          """  def destroy(entity: %className%)(implicit session: DBSession = autoSession): Unit = {
           |    withSQL { delete.from(%className%).where%wherePart% }.update.apply()
           |  }
         """
         case GeneratorTemplate.interpolation =>
-          """  def destroy(m: %className%)(implicit session: DBSession = autoSession): Unit = {
+          """  def destroy(entity: %className%)(implicit session: DBSession = autoSession): Unit = {
           |    sql%3quotes%delete from ${%className%.table} where %wherePart%%3quotes%.update.apply()
           |  }
         """
         case _ =>
-          """  def destroy(m: %className%)(implicit session: DBSession = autoSession): Unit = {
+          """  def destroy(entity: %className%)(implicit session: DBSession = autoSession): Unit = {
             |    SQL(%3quotes%delete from %tableName% where %wherePart%%3quotes%)
             |      %bindingPart%.update.apply()
             |  }
