@@ -47,11 +47,11 @@ object Task extends SQLSyntaxSupport[Task] {
 
   private val auto = AutoSession
   
-  def findById(id: Long)(implicit session: DBSession = auto): Option[Task] = withSQL {
+  def findById(id: Long)(implicit s: DBSession = auto): Option[Task] = withSQL {
     select.from(Task as t).where.eq(t.id, id)
   }.map(Task(t)).single.apply()
   
-  def findTodoInvolving(user: String)(implicit session: DBSession = auto): Seq[(Task,Project)] = withSQL {
+  def findTodoInvolving(user: String)(implicit s: DBSession = auto): Seq[(Task,Project)] = withSQL {
     select
       .from(Task as t)
       .join(ProjectMember as m).on(m.projectId, t.project)
@@ -59,30 +59,30 @@ object Task extends SQLSyntaxSupport[Task] {
       .where.append(sqls"${t.done} = false").and.eq(m.userEmail, user)
   }.map(Task(t, p)).list.apply()
 
-  def findByProject(project: Long)(implicit session: DBSession = auto): Seq[Task] = withSQL {
+  def findByProject(project: Long)(implicit s: DBSession = auto): Seq[Task] = withSQL {
     select.from(Task as t).where.eq(t.project, project)
   }.map(Task(t)).list.apply()
 
   /**
    * Delete a task
    */
-  def delete(id: Long)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def delete(id: Long)(implicit s: DBSession = auto): Unit = applyUpdate {
     deleteFrom(Task as t).where.eq(t.id, id)
   }
   
-  def deleteInFolder(projectId: Long, folder: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def deleteInFolder(projectId: Long, folder: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     deleteFrom(Task as t).where.eq(t.project, projectId).and.eq(t.folder, folder)
   }
   
-  def markAsDone(taskId: Long, done: Boolean)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def markAsDone(taskId: Long, done: Boolean)(implicit s: DBSession = auto): Unit = applyUpdate {
     update(Task as t).set(t.done -> done).where.eq(t.id, taskId)
   }
   
-  def renameFolder(projectId: Long, folder: String, newName: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def renameFolder(projectId: Long, folder: String, newName: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     update(Task as t).set(t.folder -> newName).where.eq(t.folder, folder).and.eq(t.project, projectId)
   }
  
-  def isOwner(task: Long, user: String)(implicit session: DBSession = auto): Boolean = withSQL {
+  def isOwner(task: Long, user: String)(implicit s: DBSession = auto): Boolean = withSQL {
    select(sqls"count(${t.id}) = 1 as v")
      .from(Task as t)
      .join(Project as p).on(t.project, p.id)
@@ -90,7 +90,7 @@ object Task extends SQLSyntaxSupport[Task] {
      .where.eq(m.userEmail, user).and.eq(t.id, task)
   }.map(rs => rs.boolean("v").asInstanceOf[Boolean]).single.apply().getOrElse(false)
 
-  def create(task: NewTask)(implicit session: DBSession = auto): Task = {
+  def create(task: NewTask)(implicit s: DBSession = auto): Task = {
     val newId = sql"select next value for task_seq as v from dual".map(rs => rs.long("v")).single.apply().get
     applyUpdate { 
       insert.into(Task).values(newId, task.title, task.done, task.dueDate, task.assignedTo, task.project, task.folder)
