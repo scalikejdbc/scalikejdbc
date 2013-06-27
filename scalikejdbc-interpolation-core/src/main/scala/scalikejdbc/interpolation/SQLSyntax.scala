@@ -157,5 +157,15 @@ object SQLSyntax {
   def currentTimestamp = sqls"current_timestamp"
   def dual = sqls"dual"
 
+  def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
+    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
+  }
+
+  def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
+    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
+  }
+
 }
 
