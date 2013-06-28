@@ -283,11 +283,13 @@ https://github.com/seratch/scalikejdbc-cookbook
 
 ## License
 
-Published binary files has the following copyright:
+Published binary files have the following copyright:
 
+```
 Copyright 2013 ScalikeJDBC committers
 
 Apache License, Version 2.0
 
 http://www.apache.org/licenses/LICENSE-2.0.html
+```
 
