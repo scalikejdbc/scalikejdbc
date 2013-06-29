@@ -6,5 +6,6 @@ scalagSettings
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-ScctPlugin.instrumentSettings
+// TODO removed for 2.9.3 build
+// ScctPlugin.instrumentSettings
 
