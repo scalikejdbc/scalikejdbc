@@ -12,6 +12,10 @@ object ScctRestorationCommand extends Plugin {
         val build = FilePath("scalikejdbc-" + projectName + "/build.sbt")
         build.forceWrite(build.readAsString().replaceFirst("//ScctPlugin.instrumentSettings", "ScctPlugin.instrumentSettings"))
       }
+      val build = FilePath("project/Build.scala")
+      build.forceWrite(build.readAsString().replaceFirst(
+        """val scctInTestScope = Seq\(\)""",
+        """val scctInTestScope = Seq("reaktor" %% "scct" % "0.2-SNAPSHOT" % "test")"""))
     }
   )
 
