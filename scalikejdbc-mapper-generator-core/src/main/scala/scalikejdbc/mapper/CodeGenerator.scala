@@ -1074,6 +1074,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         """package %package%
           |
           |import org.scalatest._
+          |import org.scalatest.matchers.ShouldMatchers
           |import org.joda.time._
           |import scalikejdbc.scalatest.AutoRollback
           |%interpolationImport%
