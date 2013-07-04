@@ -199,6 +199,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with UnionQuerySQLBuilder[A]
       with ExceptQuerySQLBuilder[A]
       with IntersectQuerySQLBuilder[A]
+      with ForUpdateQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
@@ -216,11 +217,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   trait ConditionSQLBuilder[A] extends SQLBuilder[A]
       with PagingSQLBuilder[A]
-      with GroupBySQLBuilder[A]
-      with UnionQuerySQLBuilder[A]
-      with ExceptQuerySQLBuilder[A]
-      with IntersectQuerySQLBuilder[A]
-      with SubQuerySQLBuilder[A] {
+      with GroupBySQLBuilder[A] {
 
     def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
 
@@ -323,6 +320,14 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val syntax = sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}"
       TableAsAliasSQLSyntax(syntax.value, syntax.parameters)
     }
+  }
+
+  /**
+   * for update query builder
+   */
+  trait ForUpdateQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def forUpdate: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} for update")
+    def forUpdate(option: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} for update ${option}")
   }
 
   /**

@@ -500,6 +500,13 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         QueryDSL.delete.from(Order).where.isNull(Order.column.field("accountId"))
 
       }
+
+      // for update query
+      val o = Order.syntax("o")
+      DB localTx { implicit s =>
+        withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }.map(Order(o)).single.apply()
+      }
+
     } catch {
       case e: Exception =>
         e.printStackTrace
