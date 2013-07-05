@@ -258,9 +258,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |%constructorArgs3%)
         |  }
         |
-        |  def save()(implicit session: DBSession = %className%.autoSession): %className% = %className%.update(this)(session)
+        |  def save()(implicit session: DBSession = %className%.autoSession): %className% = %className%.save(this)(session)
         |
-        |  def destroy()(implicit session: DBSession = %className%.autoSession): Unit = %className%.delete(this)(session)
+        |  def destroy()(implicit session: DBSession = %className%.autoSession): Unit = %className%.destroy(this)(session)
         |
         |}
       """.stripMargin
