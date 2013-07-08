@@ -36,6 +36,7 @@ build
 null
 tmp*
 temp*
+!templates/
 dist
 test-output
 build.log
