@@ -248,7 +248,7 @@ class CommonsConnectionPool(
   _pool.setMaxIdle(settings.maxSize)
   _pool.setMaxActive(settings.maxSize)
   _pool.setMaxWait(settings.connectionTimeoutMillis)
-  _pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL)
+  _pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK)
   _pool.setTestOnBorrow(true)
 
   // Initialize Connection Factory
