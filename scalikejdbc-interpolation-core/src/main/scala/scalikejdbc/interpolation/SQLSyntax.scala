@@ -157,5 +157,32 @@ object SQLSyntax {
   def currentTimestamp = sqls"current_timestamp"
   def dual = sqls"dual"
 
+  /**
+   * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
+   *
+   * {{{
+   *   val cond: Option[SQLSyntax] = SQLSyntax.toAndConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
+   *   cond.get.statement // "(id = ?) and (name = ?)"
+   *   cond.get.parameters // Seq(123, "Alice")
+   * }}}
+   */
+  def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
+    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
+  }
+
+  /**
+   * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'or'.
+   *
+   * {{{
+   *   val cond: Option[SQLSyntax] = SQLSyntax.toOrConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
+   *   cond.get.statement // "(id = ?) or (name = ?)"
+   *   cond.get.parameters // Seq(123, "Alice")
+   */
+  def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
+    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
+  }
+
 }
 

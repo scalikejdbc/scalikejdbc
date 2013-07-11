@@ -8,7 +8,7 @@ cd ..
 cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
 
 sbt \
-  ++2.9.3 \
+  ++2.9.2 \
   clean \
   library/test \
   ++2.10.2 \
@@ -18,7 +18,7 @@ sbt \
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
 
-grep "\[error\]"                logs/test_stdout.log
+grep "31merror"                 logs/test_stdout.log
 grep -A 5 "FAILED"              logs/test_stdout.log
 grep -A 5 "Error during tests:" logs/test_stdout.log
 grep -A 5 "Failed tests:"       logs/test_stdout.log

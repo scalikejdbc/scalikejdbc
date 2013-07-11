@@ -63,13 +63,13 @@ class PlayPlugin(implicit app: Application) extends Plugin {
               if (!registeredPoolNames.contains("default")) {
                 val (url, user, password, settings) = load(name)
                 ConnectionPool.singleton(url, user, password, settings)
-                registeredPoolNames.append("default")
+                registeredPoolNames.add("default")
               }
             case _ =>
               if (!registeredPoolNames.contains(name)) {
                 val (url, user, password, settings) = load(name)
                 ConnectionPool.add(Symbol(name), url, user, password, settings)
-                registeredPoolNames.append(name)
+                registeredPoolNames.add(name)
               }
           }
         }
@@ -103,7 +103,7 @@ class PlayPlugin(implicit app: Application) extends Plugin {
 
 object PlayPlugin {
 
-  private val registeredPoolNames = new scala.collection.mutable.ListBuffer[String]
+  private val registeredPoolNames = scala.collection.mutable.Set.empty[String]
 
   def opt(name: String, key: String)(implicit config: Configuration): Option[String] = {
     config.getString(name + "." + key)

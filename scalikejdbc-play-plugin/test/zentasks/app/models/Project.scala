@@ -36,56 +36,56 @@ object Project extends SQLSyntaxSupport[Project] {
 
   private val auto = AutoSession
     
-  def findById(id: Long)(implicit session: DBSession = auto): Option[Project] = withSQL { 
+  def findById(id: Long)(implicit s: DBSession = auto): Option[Project] = withSQL { 
     select.from(Project as p).where.eq(p.id, id) 
   }.map(Project(p)).single.apply()
   
-  def findInvolving(user: String)(implicit session: DBSession = auto): Seq[Project] = withSQL {
+  def findInvolving(user: String)(implicit s: DBSession = auto): Seq[Project] = withSQL {
     select
       .from(Project as p)
       .join(ProjectMember as m).on(p.id, m.projectId)
       .where.eq(m.userEmail, user)
   }.map(Project(p)).list.apply()
 
-  def rename(id: Long, newName: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def rename(id: Long, newName: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     update(Project as p).set(p.name -> newName).where.eq(p.id, id)
   }
 
-  def delete(id: Long)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def delete(id: Long)(implicit s: DBSession = auto): Unit = applyUpdate {
     deleteFrom(Project as p).where.eq(p.id, id)
   }
   
-  def deleteInFolder(folder: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def deleteInFolder(folder: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     deleteFrom(Project as p).where.eq(p.folder, folder)
   }
   
-  def renameFolder(folder: String, newName: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def renameFolder(folder: String, newName: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     update(Project as p).set(p.folder -> newName).where.eq(p.folder, folder)
   }
   
-  def membersOf(project: Long)(implicit session: DBSession = auto): Seq[User] = withSQL {
+  def membersOf(project: Long)(implicit s: DBSession = auto): Seq[User] = withSQL {
     select
       .from(User as u)
       .join(ProjectMember as m).on(m.userEmail, u.email)
       .where.eq(m.projectId, project)
   }.map(User(u)).list.apply()
   
-  def addMember(project: Long, user: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def addMember(project: Long, user: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     insert.into(ProjectMember).values(project, user)
   }
   
-  def removeMember(project: Long, user: String)(implicit session: DBSession = auto): Unit = applyUpdate {
+  def removeMember(project: Long, user: String)(implicit s: DBSession = auto): Unit = applyUpdate {
     deleteFrom(ProjectMember as m).where.eq(m.projectId, project).and.eq(m.userEmail, user)
   }
   
-  def isMember(project: Long, user: String)(implicit session: DBSession = auto): Boolean = withSQL {
+  def isMember(project: Long, user: String)(implicit s: DBSession = auto): Boolean = withSQL {
     select(sqls"count(${u.email}) = 1 as is_member")
       .from(User as u)
       .join(ProjectMember as m).on(m.userEmail, u.email)
       .where.eq(m.projectId, project).and.eq(u.email, user)
   }.map(rs => rs.boolean("is_member").asInstanceOf[Boolean]).single.apply().getOrElse(false)
    
-  def create(project: NewProject, members: Seq[String])(implicit session: DBSession = auto): Project = {
+  def create(project: NewProject, members: Seq[String])(implicit s: DBSession = auto): Project = {
      // Insert the project
      val newId = sql"select next value for project_seq as v from dual".map(_.long("v")).single.apply().get
      applyUpdate { insert.into(Project).values(newId, project.name, project.folder) }

@@ -168,4 +168,30 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     s.parameters should equal(Seq(123, "Alice"))
   }
 
+  it should "have #toAndConditionOpt (Some)" in {
+    val (id, name) = (123, "Alice")
+    val s = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name}")).get
+    s.value should equal("(id = ?) and (name = ?)")
+    s.parameters should equal(Seq(123, "Alice"))
+  }
+
+  it should "have #toAndConditionOpt (None)" in {
+    SQLSyntax.toAndConditionOpt(None).isDefined should equal(false)
+    SQLSyntax.toAndConditionOpt(None, None).isDefined should equal(false)
+    SQLSyntax.toAndConditionOpt(None, None, None).isDefined should equal(false)
+  }
+
+  it should "have #toOrConditionOpt (Some)" in {
+    val (id, name) = (123, "Alice")
+    val s = SQLSyntax.toOrConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name}")).get
+    s.value should equal("(id = ?) or (name = ?)")
+    s.parameters should equal(Seq(123, "Alice"))
+  }
+
+  it should "have #toOrConditionOpt (None)" in {
+    SQLSyntax.toOrConditionOpt(None).isDefined should equal(false)
+    SQLSyntax.toOrConditionOpt(None, None).isDefined should equal(false)
+    SQLSyntax.toOrConditionOpt(None, None, None).isDefined should equal(false)
+  }
+
 }

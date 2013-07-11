@@ -90,14 +90,14 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
   }
 
   def readConnectionPoolSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
-     val configMap = self.readAsMap(dbName)
-     val default = new ConnectionPoolSettings
-     ConnectionPoolSettings(
-       initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
-       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
-       connectionTimeoutMillis = configMap.get("connectionTimeoutMillis").map(_.toLong).getOrElse(default.connectionTimeoutMillis),
-       validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
-     )
+    val configMap = self.readAsMap(dbName)
+    val default = new ConnectionPoolSettings
+    ConnectionPoolSettings(
+      initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
+      maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
+      connectionTimeoutMillis = configMap.get("connectionTimeoutMillis").map(_.toLong).getOrElse(default.connectionTimeoutMillis),
+      validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
+    )
   }
 
   def loadGlobalSettings(): Unit = {

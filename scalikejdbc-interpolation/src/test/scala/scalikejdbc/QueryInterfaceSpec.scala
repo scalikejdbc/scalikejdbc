@@ -136,15 +136,28 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         findCookieOrder(true).get.account.isEmpty should be(false)
         findCookieOrder(false).get.account.isEmpty should be(true)
 
+        // NOTE: dynamicAndConditions is deprecated since 1.6.5
         {
           val (productId, accountId) = (Some(1), None)
           val ids = withSQL {
             select(o.result.id).from(Order as o)
-              .where
-              .dynamicAndConditions(
+              .where.dynamicAndConditions(
                 productId.map(id => sqls.eq(o.productId, id)),
                 accountId.map(id => sqls.eq(o.accountId, id))
               )
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(11, 12, 13, 14, 15))
+        }
+
+        {
+          val (productId, accountId) = (Some(1), None)
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where(sqls.toAndConditionOpt(
+                productId.map(id => sqls.eq(o.productId, id)),
+                accountId.map(id => sqls.eq(o.accountId, id))
+              ))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
@@ -153,24 +166,41 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
           val (productId, accountId) = (Some(1), Some(2))
           val ids = withSQL {
             select(o.result.id).from(Order as o)
-              .where
-              .dynamicAndConditions(
+              .where(sqls.toAndConditionOpt(
                 productId.map(id => sqls.eq(o.productId, id)),
                 accountId.map(id => sqls.eq(o.accountId, id))
-              )
+              ))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(12))
         }
+
+        // NOTE: dynamicOrConditions is deprecated since 1.6.5
         {
           val (id1, id2) = (Some(1), None)
           val ids = withSQL {
             select(o.result.id).from(Order as o)
               .where
-              .dynamicOrConditions(
+              .isNotNull(o.accountId)
+              .and.dynamicOrConditions(
                 id1.map(id => sqls.eq(o.productId, id)),
                 id2.map(id => sqls.eq(o.productId, id))
-              ).and.isNotNull(o.accountId)
+              )
+              .orderBy(o.id)
+          }.map(_.int(1)).list.apply()
+          ids should equal(Seq(11, 12, 13, 14, 15))
+        }
+
+        {
+          val (id1, id2) = (Some(1), None)
+          val ids = withSQL {
+            select(o.result.id).from(Order as o)
+              .where
+              .isNotNull(o.accountId)
+              .and(sqls.toOrConditionOpt(
+                id1.map(id => sqls.eq(o.productId, id)),
+                id2.map(id => sqls.eq(o.productId, id))
+              ))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
@@ -180,10 +210,11 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
           val ids = withSQL {
             select(o.result.id).from(Order as o)
               .where
-              .dynamicOrConditions(
+              .isNotNull(o.accountId)
+              .and(sqls.toOrConditionOpt(
                 id1.map(id => sqls.eq(o.productId, id)),
                 id2.map(id => sqls.eq(o.productId, id))
-              ).and.isNotNull(o.accountId)
+              ))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15, 21, 22, 23, 24, 25))
@@ -220,10 +251,10 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
             select(o.result.id)
               .from(Order as o)
               .where
-              .withRoundBracket(_.dynamicAndConditions(
+              .withRoundBracket(sql => sqls.toAndConditionOpt(
                 productId.map(i => sqls.eq(o.productId, i)),
                 Some(sqls.isNotNull(o.accountId))
-              ))
+              ).map(s => sql.append(s)).getOrElse(sql))
               .or.isNull(o.accountId)
               .orderBy(o.id).append(sqls"desc")
           }.map(_.int(o.resultName.id)).list.apply()
@@ -236,11 +267,10 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
           val withConditionsTestResults = withSQL {
             select(o.result.id)
               .from(Order as o)
-              .where
-              .dynamicOrConditions(
+              .where(sqls.toOrConditionOpt(
                 productId.map(i => sqls.eq(o.productId, i)),
                 Some(sqls.isNull(o.accountId))
-              ).orderBy(o.id)
+              )).orderBy(o.id)
           }.map(_.int(o.resultName.id)).list.apply()
 
           withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
@@ -470,6 +500,13 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         QueryDSL.delete.from(Order).where.isNull(Order.column.field("accountId"))
 
       }
+
+      // for update query
+      val o = Order.syntax("o")
+      DB localTx { implicit s =>
+        withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }.map(Order(o)).single.apply()
+      }
+
     } catch {
       case e: Exception =>
         e.printStackTrace

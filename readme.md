@@ -4,7 +4,7 @@
 
 ## Just write SQL and get things done!
 
-ScalikeJDBC is A tidy SQL-based DB access library for Scala developers. This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
+ScalikeJDBC is a tidy SQL-based DB access library for Scala developers. This library naturally wraps JDBC APIs and provides you easy-to-use APIs.
 
 
 ## Supported RDBMS
@@ -69,12 +69,13 @@ val users: List[User] = DB readOnly { implicit session =>
       .offset(0)
   }.map(User(u, g)).list.apply()
 
-  // or sql"""
-  //  select ${u.result.*}, ${g.result.*} 
-  //    from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
-  //    where ${u.id} = ${123}
-  //    order by ${u.createdAt} desc limit ${limit} offset ${offset}
-  //  """.map(User(u, g)).list.apply()
+  // or using SQLInterpolation directly
+  sql"""
+    select ${u.result.*}, ${g.result.*} 
+    from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
+    where ${u.id} = ${123}
+    order by ${u.createdAt} desc limit ${limit} offset ${offset}
+  """.map(User(u, g)).list.apply()
 }
 
 val name = Some("Chris")
@@ -151,7 +152,7 @@ object User {
     sql"select * from users where id = ${id}").map(*).single.apply() 
   }
   def setProfileVerified(member: User)(implicit session: DBSession = AutoSession) = {
-    sql"update users set profile_verified = true where id = ${id}").update.apply()
+    sql"update users set profile_verified = true where id = ${member.id}").update.apply()
   }
 }
 
@@ -195,7 +196,8 @@ Testing support for ScalaTest:
 class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 
   override def fixture(implicit session: DBSession) {
-    sql"insert into users values (${1}, ${"Alice"}, ${DateTime.now})").update.apply()
+    val (id, name, createdAt) = (1, "Alice", DateTime.now)
+    sql"insert into users values (${id}, ${name}, ${createdAt})").update.apply()
   }
 
   it should "create a new record" in { implicit session =>
@@ -283,11 +285,13 @@ https://github.com/seratch/scalikejdbc-cookbook
 
 ## License
 
-Published binary files has the following copyright:
+Published binary files have the following copyright:
 
+```
 Copyright 2013 ScalikeJDBC committers
 
 Apache License, Version 2.0
 
 http://www.apache.org/licenses/LICENSE-2.0.html
+```
 

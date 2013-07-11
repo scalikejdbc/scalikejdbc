@@ -1,2 +1,4 @@
 scalariformSettings
 
+ScctPlugin.instrumentSettings
+

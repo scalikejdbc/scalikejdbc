@@ -4,7 +4,7 @@ resolvers ++= Seq(
 
 addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "[0.2,)")
 
-addSbtPlugin("com.github.seratch" % "testgenerator" % "[1.1,)")
+addSbtPlugin("com.github.seratch" % "testgenerator" % "1.1.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.0")
 
@@ -27,4 +27,8 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 addSbtPlugin("play" % "sbt-plugin" % "2.1.0")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.1")
+
+resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+
+addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
 

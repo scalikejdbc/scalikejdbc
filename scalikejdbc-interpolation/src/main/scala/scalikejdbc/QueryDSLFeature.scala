@@ -199,6 +199,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with UnionQuerySQLBuilder[A]
       with ExceptQuerySQLBuilder[A]
       with IntersectQuerySQLBuilder[A]
+      with ForUpdateQuerySQLBuilder[A]
       with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
@@ -216,14 +217,18 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   trait ConditionSQLBuilder[A] extends SQLBuilder[A]
       with PagingSQLBuilder[A]
-      with GroupBySQLBuilder[A]
-      with UnionQuerySQLBuilder[A]
-      with ExceptQuerySQLBuilder[A]
-      with IntersectQuerySQLBuilder[A]
-      with SubQuerySQLBuilder[A] {
+      with GroupBySQLBuilder[A] {
 
     def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
+
+    // Never append 'and' if sqlPart is empty.
+    def and(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A] { sqlPart.map(part => sqls"${sql} and (${part})").getOrElse(sql) }
+
     def or: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} or")
+
+    // Never append 'or' if sqlPart is empty.
+    def or(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A] { sqlPart.map(part => sqls"${sql} or (${part})").getOrElse(sql) }
+
     def not: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} not")
 
     def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
@@ -265,7 +270,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     }
 
     /**
-     * Appends conditions with delimiter.
+     * Appends conditions with delimiter. This API is depreacted. Use #where/#and/#or(Option[SQLSyntax]) instead.
      *
      * {{{
      * .where
@@ -275,10 +280,12 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      * )
      * }}}
      */
+    @deprecated("use #where(sqls.toAndConditionOpt(conditions)), #and(sqls.toAndConditionOpt(conditions)), #or(sqls.toAndConditionOpt(conditions)) instead", "1.6.5")
     def dynamicAndConditions(conditions: Option[SQLSyntax]*) = {
       val cs = conditions.flatten.map(c => sqls"(${c})")
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithAnd(cs: _*)}")
     }
+    @deprecated("use #where(sqls.toOrConditionOpt(conditions)), #and(sqls.toOrConditionOpt(conditions)), #or(sqls.toOrConditionOpt(conditions)) instead", "1.6.5")
     def dynamicOrConditions(conditions: Option[SQLSyntax]*) = {
       val cs = conditions.flatten.map(c => sqls"(${c})")
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithOr(cs: _*)}")
@@ -313,6 +320,14 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val syntax = sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}"
       TableAsAliasSQLSyntax(syntax.value, syntax.parameters)
     }
+  }
+
+  /**
+   * for update query builder
+   */
+  trait ForUpdateQuerySQLBuilder[A] extends SQLBuilder[A] {
+    def forUpdate: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} for update")
+    def forUpdate(option: SQLSyntax): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} for update ${option}")
   }
 
   /**
@@ -419,7 +434,11 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     // where 
 
     def where: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where}")
+
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where(where)}")
+
+    // Never append 'where' if whereOpt is empty.
+    def where(whereOpt: Option[SQLSyntax]): ConditionSQLBuilder[A] = whereOpt.map(w => this.where(w)).getOrElse(ConditionSQLBuilder[A](toSQLSyntax))
 
     // ---
     // common functions
