@@ -1,0 +1,57 @@
+ScalikeJDBC 1.6.5 has been released. Newly IntelliJ IDEA Live Templates for ScalikeJDBC users is created by @tototoshi.
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+http://git.io/scalikejdbc
+
+## library
+
+- #153 Default ConnectionPool's connection exhaustion behavior
+
+ConnectionPoolSettings.connectionTimeoutMillis didn't work because of DBCP's whenExhaustedAction configuration. Thanks to @landtuna.
+
+## interpolation
+
+- #and, #or and #where accept a Option[SQLSyntax] value is added
+
+Newly added #and, #or and #where accept a Option[SQLSyntax] value. If the optional value is empty, DSL never appends and, or and where.
+
+We will mark #dynamic(And|Or)Conditions as deprecated. #dynamic(And|Or)Conditions will be removed in 1.7.x or later.
+
+    val (id1, id2) = (Some(123), Some(234))
+    where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
+      id1.map(id => sqls.eq(a.id, id),
+      id1.map(id => sqls.eq(a.id, id)
+    ))
+    // will generate "where a.group_id = ? and (a.id = ? or a.id = ?)"
+    
+    val (id1, id2) = (Some(123), None)
+    where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
+      id1.map(id => sqls.eq(a.id, id),
+      id1.map(id => sqls.eq(a.id, id)
+    ))
+    // will generate "where a.group_id = ? and (a.id = ?)"
+    
+    val (id1, id2) = (None, None)
+    where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
+      id1.map(id => sqls.eq(a.id, id),
+      id1.map(id => sqls.eq(a.id, id)
+    ))
+    // will generate "where a.group_id = ?"
+
+- #forUpdate API is added to QueryDSL
+
+
+## mapper-generator
+
+- #147 The names intersection in generated code, thanks to @Tolsi
+- #148 IllegalArgumentException when auto-increment column names or their default values contains $, thanks to @Tolsi
+- Fixed a bug in generated code, thanks to @emalock3 
+- Fixed a missing import in generated ScalaTest code, thanks to @emalock3 
+
+## play-plugin
+
+- Refactored internally, thanks to @xuwei-k
+
+Enjoy writing typesafe SQL and get things done!
+
