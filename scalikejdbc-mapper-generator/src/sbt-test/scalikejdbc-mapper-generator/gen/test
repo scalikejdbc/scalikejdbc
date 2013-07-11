@@ -16,4 +16,4 @@ $ exists src/test/scala/app/models/UserSpec.scala
 
 > scalikejdbc-gen users
 $ newer src/main/scala/app/models/User.scala src/main/scala/app/models/Users.scala
-
+> test
