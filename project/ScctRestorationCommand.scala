@@ -8,7 +8,7 @@ object ScctRestorationCommand extends Plugin {
     namespace = "scct-restoration",
     description = "Restores scct settings",
     operation = { case ScalagInput(Nil, settings) => 
-      Seq("library", "config", "mapper-generator-core", "test") foreach { projectName =>
+      Seq("library", "config", "mapper-generator-core", "play-plugin", "test") foreach { projectName =>
         val build = FilePath("scalikejdbc-" + projectName + "/build.sbt")
         build.forceWrite(build.readAsString().replaceFirst("//ScctPlugin.instrumentSettings", "ScctPlugin.instrumentSettings"))
       }
