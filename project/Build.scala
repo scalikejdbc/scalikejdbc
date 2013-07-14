@@ -308,7 +308,8 @@ object ScalikeJDBCProjects extends Build {
       scalaVersion in ThisBuild := "2.10.2",
       resolvers ++= Seq(
         "sonatype releases"  at "http://oss.sonatype.org/content/repositories/releases",
-        "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+        "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
+        "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
       )
     ).dependsOn(
       scalikejdbcPlayFixturePlugin,
