@@ -413,7 +413,6 @@ class TaskItem extends Backbone.View
 $ -> # document is ready!
 
     app = new AppRouter()
-    el = $("#projects")
     drawer = new Drawer el: $("#projects")
 
     Backbone.history.start
