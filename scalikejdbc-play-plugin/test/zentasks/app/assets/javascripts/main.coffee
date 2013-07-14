@@ -36,11 +36,11 @@ $.fn.editInPlace = (method, options...) ->
                     newValue = @input.val()
                     options.onChange.call(options.context, newValue)
                 cancel = (e) =>
-                    @el.show()
+                    @$el.show()
                     @input.hide()
-                @el = $(this).dblclick(methods.edit)
+                @$el = $(this).dblclick(methods.edit)
                 @input = $("<input type='text' />")
-                    .insertBefore(@el)
+                    .insertBefore(@$el)
                     .keyup (e) ->
                         switch(e.keyCode)
                             # Enter key
@@ -51,13 +51,13 @@ $.fn.editInPlace = (method, options...) ->
                     .hide()
             edit: ->
                 @input
-                    .val(@el.text())
+                    .val(@$el.text())
                     .show()
                     .focus()
                     .select()
-                @el.hide()
+                @$el.hide()
             close: (newName) ->
-                @el.text(newName).show()
+                @$el.text(newName).show()
                 @input.hide()
         # jQuery approach: http://docs.jquery.com/Plugins/Authoring
         if ( methods[method] )
@@ -72,7 +72,7 @@ class Drawer extends Backbone.View
     initialize: ->
         $("#newGroup").click @addGroup
         # HTML is our model
-        @el.children("li").each (i,group) ->
+        @$el.children("li").each (i,group) ->
             new Group
                 el: $(group)
             $("li",group).each (i,project) ->
@@ -83,7 +83,7 @@ class Drawer extends Backbone.View
             success: (data) ->
                 _view = new Group
                     el: $(data).appendTo("#projects")
-                _view.el.find(".groupName").editInPlace("edit")
+                _view.$el.find(".groupName").editInPlace("edit")
             error: (err) ->
                 # TODO: Deal with
 
@@ -94,33 +94,33 @@ class Group extends Backbone.View
         "click    .newProject"      : "newProject"
         "click    .deleteGroup"     : "deleteGroup"
     initialize: ->
-        @id = @el.attr("data-group")
-        @name = $(".groupName", @el).editInPlace
+        @id = @$el.attr("data-group")
+        @name = $(".groupName", @$el).editInPlace
             context: this
             onChange: @renameGroup
     newProject: (e) ->
         e.preventDefault()
-        @el.removeClass("closed")
+        @$el.removeClass("closed")
         jsRoutes.controllers.Projects.add().ajax
             context: this
             data:
-                group: @el.attr("data-group")
+                group: @$el.attr("data-group")
             success: (tpl) ->
-                _list = $("ul",@el)
+                _list = $("ul",@$el)
                 _view = new Project
                     el: $(tpl).appendTo(_list)
-                _view.el.find(".name").editInPlace("edit")
+                _view.$el.find(".name").editInPlace("edit")
             error: (err) ->
                 $.error("Error: " + err)
     deleteGroup: (e) ->
         e.preventDefault()
         false if (!confirm "Remove group and projects inside?")
-        id = @el.attr("data-group-id")
+        id = @$el.attr("data-group-id")
         @loading(true)
         jsRoutes.controllers.Projects.deleteGroup(@id).ajax
             context: this
             success: ->
-                @el.remove()
+                @$el.remove()
                 @loading(false)
             error: (err) ->
                 @loading(false)
@@ -134,30 +134,30 @@ class Group extends Backbone.View
             success: (data) ->
                 @loading(false)
                 @name.editInPlace("close", data)
-                @el.attr("data-group", data)
-                @id = @el.attr("data-group")
+                @$el.attr("data-group", data)
+                @id = @$el.attr("data-group")
             error: (err) ->
                 @loading(false)
                 $.error("Error: " + err)
     toggle: (e) ->
         e.preventDefault()
-        @el.toggleClass("closed")
+        @$el.toggleClass("closed")
         false
     loading: (display) ->
         if (display)
-            @el.children(".options").hide()
-            @el.children(".loader").show()
+            @$el.children(".options").hide()
+            @$el.children(".loader").show()
         else
-            @el.children(".options").show()
-            @el.children(".loader").hide()
+            @$el.children(".options").show()
+            @$el.children(".loader").hide()
 
 # --------------------------------------- PROJECT
 class Project extends Backbone.View
     events:
         "click      .delete"    : "deleteProject"
     initialize: ->
-        @id = @el.attr("data-project")
-        @name = $(".name", @el).editInPlace
+        @id = @$el.attr("data-project")
+        @name = $(".name", @$el).editInPlace
             context: this
             onChange: @renameProject
     renameProject: (name) ->
@@ -178,7 +178,7 @@ class Project extends Backbone.View
         jsRoutes.controllers.Projects.delete(@id).ajax
             context: this
             success: ->
-                @el.remove()
+                @$el.remove()
                 @loading(false)
             error: (err) ->
                 @loading(false)
@@ -186,11 +186,11 @@ class Project extends Backbone.View
         false
     loading: (display) ->
         if (display)
-            @el.children(".delete").hide()
-            @el.children(".loader").show()
+            @$el.children(".delete").hide()
+            @$el.children(".loader").show()
         else
-            @el.children(".delete").show()
-            @el.children(".loader").hide()
+            @$el.children(".delete").show()
+            @$el.children(".loader").hide()
 
 # ---------------------------------------- ROUTER
 class AppRouter extends Backbone.Router
@@ -198,8 +198,8 @@ class AppRouter extends Backbone.Router
         @currentApp = new Tasks
             el: $("#main")
     routes:
-        "/"                          : "index"
-        "/projects/:project/tasks"   : "tasks"
+        ""                          : "index"
+        "projects/:project/tasks"   : "tasks"
     index: ->
         # show dashboard
         $("#main").load "/ #main"
@@ -218,7 +218,7 @@ class Tasks extends Backbone.View
     render: (project) ->
         @project = project
         # HTML is our model
-        @folders = $.map $(".folder", @el), (folder) =>
+        @folders = $.map $(".folder", @$el), (folder) =>
             new TaskFolder
                 el: $(folder)
                 project: @project
@@ -230,7 +230,7 @@ class Tasks extends Backbone.View
                 newFolder = new TaskFolder
                     el: $(tpl).insertBefore(".newFolder")
                     project: @project
-                newFolder.el.find("header > h3").editInPlace("edit")
+                newFolder.$el.find("header > h3").editInPlace("edit")
              error: (err) ->
                 $.error("Error: " + err)
         false
@@ -267,15 +267,15 @@ class TaskFolder extends Backbone.View
         "submit .addTask"               : "newTask"
     initialize: (options) =>
         @project = options.project
-        @tasks = $.map $(".list li",@el), (item)=>
+        @tasks = $.map $(".list li",@$el), (item)=>
             newTask = new TaskItem
                 el: $(item)
                 folder: @
             newTask.bind("change", @refreshCount)
             newTask.bind("delete", @deleteTask)
-        @counter = @el.find(".counter")
-        @id = @el.attr("data-folder-id")
-        @name = $("header > h3", @el).editInPlace
+        @counter = @$el.find(".counter")
+        @id = @$el.attr("data-folder-id")
+        @name = $("header > h3", @$el).editInPlace
             context: this
             onChange: @renameFolder
         @refreshCount()
@@ -295,7 +295,7 @@ class TaskFolder extends Backbone.View
                 assignedTo: $("input[name=assignedTo]", form).val()
             success: (tpl) ->
                 newTask = new TaskItem(el: $(tpl), folder: @)
-                @el.find("ul").append(newTask.el)
+                @$el.find("ul").append(newTask.el)
                 @tasks.push(newTask)
                 form.find("input[type=text]").val("").first().focus()
             error: (err) ->
@@ -310,15 +310,15 @@ class TaskFolder extends Backbone.View
             success: (data) ->
                 @loading(false)
                 @name.editInPlace("close", data)
-                @el.attr("data-folder-id", data)
-                @id = @el.attr("data-folder-id")
+                @$el.attr("data-folder-id", data)
+                @id = @$el.attr("data-folder-id")
             error: (err) ->
                 @loading(false)
                 $.error("Error: " + err)
     deleteCompleteTasks: (e) =>
         e.preventDefault()
         $.each @tasks, (i, item) ->
-            item.deleteTask() if item.el.find(".done:checked").length > 0
+            item.deleteTask() if item.$el.find(".done:checked").length > 0
             true
         false
     deleteAllTasks: (e) =>
@@ -329,7 +329,7 @@ class TaskFolder extends Backbone.View
         false
     deleteFolder: (e) =>
         e.preventDefault()
-        @el.remove()
+        @$el.remove()
         false
     toggleAll: (e) =>
         val = $(e.target).is(":checked")
@@ -346,11 +346,11 @@ class TaskFolder extends Backbone.View
         @refreshCount()
     loading: (display) ->
         if (display)
-            @el.find("header .options").hide()
-            @el.find("header .loader").show()
+            @$el.find("header .options").hide()
+            @$el.find("header .loader").show()
         else
-            @el.find("header .options").show()
-            @el.find("header .loader").hide()
+            @$el.find("header .options").show()
+            @$el.find("header .loader").hide()
 
 # ------------------------------------- TASK ITEM
 class TaskItem extends Backbone.View
@@ -359,8 +359,8 @@ class TaskItem extends Backbone.View
         "click .deleteTask"     : "deleteTask"
         "dblclick h4"           : "editTask"
     initialize: (options) ->
-        @check = @el.find(".done")
-        @id = @el.attr("data-task-id")
+        @check = @$el.find(".done")
+        @id = @$el.attr("data-task-id")
         @folder = options.folder
     deleteTask: (e) =>
         e.preventDefault() if e?
@@ -371,7 +371,7 @@ class TaskItem extends Backbone.View
                 name: name
             success: (data) ->
                 @loading(false)
-                @el.remove()
+                @$el.remove()
                 @trigger("delete", @)
             error: (err) ->
                 @loading(false)
@@ -403,16 +403,17 @@ class TaskItem extends Backbone.View
         false
     loading: (display) ->
         if (display)
-            @el.find(".delete").hide()
-            @el.find(".loader").show()
+            @$el.find(".delete").hide()
+            @$el.find(".loader").show()
         else
-            @el.find(".delete").show()
-            @el.find(".loader").hide()
+            @$el.find(".delete").show()
+            @$el.find(".loader").hide()
 
 # ------------------------------------- INIT APP
 $ -> # document is ready!
 
     app = new AppRouter()
+    el = $("#projects")
     drawer = new Drawer el: $("#projects")
 
     Backbone.history.start
