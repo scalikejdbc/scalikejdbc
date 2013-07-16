@@ -20,22 +20,22 @@ We will mark #dynamic(And|Or)Conditions as deprecated. #dynamic(And|Or)Condition
 
     val (id1, id2) = (Some(123), Some(234))
     where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
-      id1.map(id => sqls.eq(a.id, id),
-      id1.map(id => sqls.eq(a.id, id)
+      id1.map(id => sqls.eq(a.id, id)),
+      id1.map(id => sqls.eq(a.id, id))
     ))
     // will generate "where a.group_id = ? and (a.id = ? or a.id = ?)"
     
     val (id1, id2) = (Some(123), None)
     where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
-      id1.map(id => sqls.eq(a.id, id),
-      id1.map(id => sqls.eq(a.id, id)
+      id1.map(id => sqls.eq(a.id, id)),
+      id1.map(id => sqls.eq(a.id, id))
     ))
     // will generate "where a.group_id = ? and (a.id = ?)"
     
     val (id1, id2) = (None, None)
     where.eq(a.groupId, 111).and(sqls.toOrConditionOpt(
-      id1.map(id => sqls.eq(a.id, id),
-      id1.map(id => sqls.eq(a.id, id)
+      id1.map(id => sqls.eq(a.id, id)),
+      id1.map(id => sqls.eq(a.id, id))
     ))
     // will generate "where a.group_id = ?"
 
