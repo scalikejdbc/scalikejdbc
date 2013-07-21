@@ -36,9 +36,13 @@ trait DBSession extends LogSupport {
   /**
    * Connection
    */
-  val conn: Connection
   lazy val connection: Connection = conn
 
+  private[scalikejdbc] val conn: Connection
+
+  /**
+   * is read-only session
+   */
   val isReadOnly: Boolean
 
   /**
@@ -409,7 +413,7 @@ object DBSession {
  * @param tx transaction
  * @param isReadOnly is read only
  */
-case class ActiveSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
+case class ActiveSession(private[scalikejdbc] val conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false)
     extends DBSession {
 
   tx match {
@@ -425,7 +429,8 @@ case class ActiveSession(conn: Connection, tx: Option[Tx] = None, isReadOnly: Bo
  */
 case object NoSession extends DBSession {
 
-  val conn: Connection = null
+  override private[scalikejdbc] val conn: Connection = null
+
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
@@ -436,7 +441,8 @@ case object NoSession extends DBSession {
  */
 case object AutoSession extends DBSession {
 
-  val conn: Connection = null
+  override private[scalikejdbc] val conn: Connection = null
+
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
@@ -447,7 +453,8 @@ case object AutoSession extends DBSession {
  */
 case class NamedAutoSession(name: Any) extends DBSession {
 
-  val conn: Connection = null
+  override private[scalikejdbc] val conn: Connection = null
+
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
