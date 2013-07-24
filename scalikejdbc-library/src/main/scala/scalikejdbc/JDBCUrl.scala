@@ -28,10 +28,12 @@ object JDBCUrl {
   def apply(url: String): JDBCUrl = try {
     val urlParts = url.split("/")
     val hostAndPort = urlParts(2).split(":")
+    val (host, port) = (hostAndPort.head, hostAndPort.tail.headOption.map(_.toInt).getOrElse(defaultPort(url)))
     val database = urlParts(3)
+
     JDBCUrl(
-      host = hostAndPort.head,
-      port = hostAndPort.tail.headOption.map(_.toInt).getOrElse(defaultPort(url)),
+      host = host,
+      port = port,
       database = database
     )
   } catch {
@@ -44,7 +46,7 @@ object JDBCUrl {
 }
 
 /**
- * JDBC URL
+ * JDBC URL which contains host, port and database name
  *
  * @param host
  * @param port
