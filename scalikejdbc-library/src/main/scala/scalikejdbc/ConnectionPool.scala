@@ -69,11 +69,6 @@ object ConnectionPool extends LogSupport {
     pools.get(name).orNull
   }
 
-  // Heroku support
-  private val HerokuPostgresRegexp = "^postgres://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
-  private val HerokuMySQLRegexp = "^mysql://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
-  private val MysqlCustomProperties = ".*\\?(.*)".r
-
   /**
    * Register new named Connection pool.
    *
@@ -85,6 +80,8 @@ object ConnectionPool extends LogSupport {
    */
   def add(name: Any, url: String, user: String, password: String,
     settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
+
+    import scalikejdbc.JDBCUrl._
 
     pools.synchronized {
       pools.get(name).foreach { pool => pool.close() }
