@@ -499,6 +499,10 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         QueryDSL.update(Account).set(ac.name -> "Bob Marley").where.eq(ac.c("id"), 2)
         QueryDSL.delete.from(Order).where.isNull(Order.column.field("accountId"))
 
+        // returing id for PostgreSQL
+        val returningIdQuery = insert.into(Account).namedValues(ac.name -> "Alice").returningId
+        returningIdQuery.toSQL.statement should equal("insert into qi_accounts (name) values (?) returning id")
+
       }
 
       // for update query
