@@ -248,4 +248,10 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     sql.parameters should equal(Seq(123))
   }
 
+  it should "return extractor" in {
+    val expected = (rs: WrappedResultSet) => rs.long(1)
+    val sql = SQL("select * from company where id = ?").bind(123).map(expected)
+    sql.extractor should equal(expected)
+  }
+
 }
