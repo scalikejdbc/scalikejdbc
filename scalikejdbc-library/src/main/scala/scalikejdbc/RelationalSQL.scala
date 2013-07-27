@@ -24,12 +24,12 @@ import scala.collection.mutable.LinkedHashMap
 
 private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
-  protected def toSingle(rows: Traversable[Z]): Option[Z] = {
+  private[scalikejdbc] def toSingle(rows: Traversable[Z]): Option[Z] = {
     if (rows.size > 1) throw new TooManyRowsException(1, rows.size)
     else rows.headOption
   }
 
-  protected def executeQuery[R[Z]](session: DBSession, op: DBSession => R[Z]): R[Z] = try {
+  private[scalikejdbc] def executeQuery[R[Z]](session: DBSession, op: DBSession => R[Z]): R[Z] = try {
     session match {
       case AutoSession => DB readOnly (s => op(s))
       case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
@@ -95,10 +95,11 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo: WrappedResultSet => Option[B]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B]
+  private[scalikejdbc] def transform: (A, B) => Z
 
-  protected def processResultSet(oneToOne: (LinkedHashMap[A, Option[B]]), rs: WrappedResultSet): LinkedHashMap[A, Option[B]] = {
+  private[scalikejdbc] def processResultSet(oneToOne: (LinkedHashMap[A, Option[B]]), rs: WrappedResultSet): LinkedHashMap[A, Option[B]] = {
     val o = extractOne(rs)
     oneToOne.keys.find(_ == o).map {
       case Some(found) => throw new IllegalRelationshipException(ErrorMessage.INVALID_ONE_TO_ONE_RELATION)
@@ -107,7 +108,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, B) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, B) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
       case (one, Some(to)) => extractor(one, to)
       case (one, None) => one.asInstanceOf[Z]
@@ -148,8 +149,9 @@ class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](sql: String)(params:
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def transform: (A, B) => Z = extractor
 }
 
 class OneToOneSQLToList[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
@@ -163,8 +165,9 @@ class OneToOneSQLToList[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)(
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def transform: (A, B) => Z = extractor
 }
 
 class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
@@ -177,8 +180,9 @@ class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](sql: String)(params: Any*
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toOne
+  private[scalikejdbc] def transform: (A, B) => Z = extractor
 }
 
 //------------------------------------
@@ -189,10 +193,11 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo: WrappedResultSet => Option[B]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B]
+  private[scalikejdbc] def transform: (A, Seq[B]) => Z
 
-  protected def processResultSet(oneToMany: (LinkedHashMap[A, Seq[B]]), rs: WrappedResultSet): LinkedHashMap[A, Seq[B]] = {
+  private[scalikejdbc] def processResultSet(oneToMany: (LinkedHashMap[A, Seq[B]]), rs: WrappedResultSet): LinkedHashMap[A, Seq[B]] = {
     val o = extractOne(rs)
     oneToMany.keys.find(_ == o).map { _ =>
       extractTo(rs).map(many => oneToMany += (o -> (oneToMany.apply(o) :+ many))).getOrElse(oneToMany)
@@ -201,7 +206,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B]) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, (Seq[B])]())(processResultSet).map {
       case (one, (to)) => extractor(one, to)
     }
@@ -240,8 +245,9 @@ class OneToManySQLToList[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def transform: (A, Seq[B]) => Z = extractor
 }
 
 class OneToManySQLToTraversable[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => Z)
@@ -254,8 +260,9 @@ class OneToManySQLToTraversable[A, B, E <: WithExtractor, Z](sql: String)(params
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def transform: (A, Seq[B]) => Z = extractor
 }
 
 class OneToManySQLToOption[A, B, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(toMany: WrappedResultSet => Option[B])(extractor: (A, Seq[B]) => Z)
@@ -268,8 +275,9 @@ class OneToManySQLToOption[A, B, E <: WithExtractor, Z](sql: String)(params: Any
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toMany
+  private[scalikejdbc] def transform: (A, Seq[B]) => Z = extractor
 }
 
 //------------------------------------
@@ -280,11 +288,12 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo1: WrappedResultSet => Option[B1]
-  protected def extractTo2: WrappedResultSet => Option[B2]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1]
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2]
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2]) => Z
 
-  protected def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2])]), rs: WrappedResultSet): LinkedHashMap[A, (Seq[B1], Seq[B2])] = {
+  private[scalikejdbc] def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2])]), rs: WrappedResultSet): LinkedHashMap[A, (Seq[B1], Seq[B2])] = {
     val o = extractOne(rs)
     val (to1, to2) = (extractTo1(rs), extractTo2(rs))
     result.keys.find(_ == o).map { _ =>
@@ -300,7 +309,7 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2]) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2])]())(processResultSet).map {
       case (one, (t1, t2)) => extractor(one, t1, t2)
     }
@@ -336,9 +345,10 @@ class OneToManies2SQLToList[A, B1, B2, E <: WithExtractor, Z](sql: String)(param
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2]) => Z = extractor
 }
 
 class OneToManies2SQLToTraversable[A, B1, B2, E <: WithExtractor, Z](sql: String)(params: Any*)(val one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
@@ -351,9 +361,10 @@ class OneToManies2SQLToTraversable[A, B1, B2, E <: WithExtractor, Z](sql: String
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2]) => Z = extractor
 }
 
 class OneToManies2SQLToOption[A, B1, B2, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
@@ -366,9 +377,10 @@ class OneToManies2SQLToOption[A, B1, B2, E <: WithExtractor, Z](sql: String)(par
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2]) => Z = extractor
 }
 
 //------------------------------------
@@ -379,12 +391,13 @@ private[scalikejdbc] trait OneToManies3Extractor[A, B1, B2, B3, E <: WithExtract
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo1: WrappedResultSet => Option[B1]
-  protected def extractTo2: WrappedResultSet => Option[B2]
-  protected def extractTo3: WrappedResultSet => Option[B3]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1]
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2]
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3]
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3]) => Z
 
-  protected def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3])]),
+  private[scalikejdbc] def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3])]),
     rs: WrappedResultSet): LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3])] = {
     val o = extractOne(rs)
     val (to1, to2, to3) = (extractTo1(rs), extractTo2(rs), extractTo3(rs))
@@ -408,7 +421,7 @@ private[scalikejdbc] trait OneToManies3Extractor[A, B1, B2, B3, E <: WithExtract
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3]) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3])]())(processResultSet).map {
       case (one, (t1, t2, t3)) => extractor(one, t1, t2, t3)
     }
@@ -444,10 +457,11 @@ class OneToManies3SQLToList[A, B1, B2, B3, E <: WithExtractor, Z](sql: String)(p
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3]) => Z = extractor
 }
 
 class OneToManies3SQLToTraversable[A, B1, B2, B3, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3])(extractor: (A, Seq[B1], Seq[B2], Seq[B3]) => Z)
@@ -460,10 +474,11 @@ class OneToManies3SQLToTraversable[A, B1, B2, B3, E <: WithExtractor, Z](sql: St
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3]) => Z = extractor
 }
 
 class OneToManies3SQLToOption[A, B1, B2, B3, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3])(extractor: (A, Seq[B1], Seq[B2], Seq[B3]) => Z)
@@ -476,10 +491,11 @@ class OneToManies3SQLToOption[A, B1, B2, B3, E <: WithExtractor, Z](sql: String)
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3]) => Z = extractor
 }
 
 //------------------------------------
@@ -490,13 +506,14 @@ private[scalikejdbc] trait OneToManies4Extractor[A, B1, B2, B3, B4, E <: WithExt
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo1: WrappedResultSet => Option[B1]
-  protected def extractTo2: WrappedResultSet => Option[B2]
-  protected def extractTo3: WrappedResultSet => Option[B3]
-  protected def extractTo4: WrappedResultSet => Option[B4]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1]
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2]
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3]
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4]
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z
 
-  protected def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4])]),
+  private[scalikejdbc] def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4])]),
     rs: WrappedResultSet): LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4])] = {
     val o = extractOne(rs)
     val (to1, to2, to3, to4) = (extractTo1(rs), extractTo2(rs), extractTo3(rs), extractTo4(rs))
@@ -522,7 +539,7 @@ private[scalikejdbc] trait OneToManies4Extractor[A, B1, B2, B3, B4, E <: WithExt
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4])]())(processResultSet).map {
       case (one, (t1, t2, t3, t4)) => extractor(one, t1, t2, t3, t4)
     }
@@ -558,11 +575,12 @@ class OneToManies4SQLToList[A, B1, B2, B3, B4, E <: WithExtractor, Z](sql: Strin
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z = extractor
 }
 
 class OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
@@ -575,11 +593,12 @@ class OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E <: WithExtractor, Z](sql
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z = extractor
 }
 
 class OneToManies4SQLToOption[A, B1, B2, B3, B4, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
@@ -592,11 +611,12 @@ class OneToManies4SQLToOption[A, B1, B2, B3, B4, E <: WithExtractor, Z](sql: Str
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z = extractor
 }
 
 //------------------------------------
@@ -607,14 +627,15 @@ private[scalikejdbc] trait OneToManies5Extractor[A, B1, B2, B3, B4, B5, E <: Wit
     extends SQL[Z, E]
     with RelationalSQLResultSetOperations[Z] {
 
-  protected def extractOne: WrappedResultSet => A
-  protected def extractTo1: WrappedResultSet => Option[B1]
-  protected def extractTo2: WrappedResultSet => Option[B2]
-  protected def extractTo3: WrappedResultSet => Option[B3]
-  protected def extractTo4: WrappedResultSet => Option[B4]
-  protected def extractTo5: WrappedResultSet => Option[B5]
+  private[scalikejdbc] def extractOne: WrappedResultSet => A
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1]
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2]
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3]
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4]
+  private[scalikejdbc] def extractTo5: WrappedResultSet => Option[B5]
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z
 
-  protected def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5])]),
+  private[scalikejdbc] def processResultSet(result: (LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5])]),
     rs: WrappedResultSet): LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5])] = {
     val o = extractOne(rs)
     val (to1, to2, to3, to4, to5) = (extractTo1(rs), extractTo2(rs), extractTo3(rs), extractTo4(rs), extractTo5(rs))
@@ -642,7 +663,7 @@ private[scalikejdbc] trait OneToManies5Extractor[A, B1, B2, B3, B4, B5, E <: Wit
     }
   }
 
-  protected def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z): Traversable[Z] = {
     session.foldLeft(sql, params: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5])]())(processResultSet).map {
       case (one, (t1, t2, t3, t4, t5)) => extractor(one, t1, t2, t3, t4, t5)
     }
@@ -678,12 +699,13 @@ class OneToManies5SQLToList[A, B1, B2, B3, B4, B5, E <: WithExtractor, Z](sql: S
     executeQuery[List](session, (session: DBSession) => toTraversable(session, sql, params, extractor).toList)
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
-  protected def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z = extractor
 }
 
 class OneToManies5SQLToTraversable[A, B1, B2, B3, B4, B5, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4], to5: WrappedResultSet => Option[B5])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z)
@@ -696,12 +718,13 @@ class OneToManies5SQLToTraversable[A, B1, B2, B3, B4, B5, E <: WithExtractor, Z]
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, sql, params, extractor))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
-  protected def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z = extractor
 }
 
 class OneToManies5SQLToOption[A, B1, B2, B3, B4, B5, E <: WithExtractor, Z](sql: String)(params: Any*)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4], to5: WrappedResultSet => Option[B5])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z)
@@ -714,10 +737,11 @@ class OneToManies5SQLToOption[A, B1, B2, B3, B4, B5, E <: WithExtractor, Z](sql:
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, sql, params, extractor)))
   }
 
-  protected def extractOne: WrappedResultSet => A = one
-  protected def extractTo1: WrappedResultSet => Option[B1] = to1
-  protected def extractTo2: WrappedResultSet => Option[B2] = to2
-  protected def extractTo3: WrappedResultSet => Option[B3] = to3
-  protected def extractTo4: WrappedResultSet => Option[B4] = to4
-  protected def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def extractTo5: WrappedResultSet => Option[B5] = to5
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4], Seq[B5]) => Z = extractor
 }
