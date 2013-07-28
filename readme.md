@@ -257,6 +257,15 @@ This is an easy-to-use configuration loader for ScalikeJDBC which reads typesafe
 https://github.com/seratch/scalikejdbc/tree/develop/scalikejdbc-config
 
 
+### ScalikeJDBC-Async (Extension)
+
+ScalikeJDBC-Async provides non-blocking APIs to talk with PostgreSQL and MySQL in the JDBC way.
+
+This library is built with postgrsql-async and mysql-async,incredible works by @mauricio.
+
+https://github.com/seratch/scalikejdbc-async
+
+
 ### dbconsole
 
 `dbconsole` is an extended sbt console to connect database. Try it now!

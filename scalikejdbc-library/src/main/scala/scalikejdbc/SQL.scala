@@ -17,7 +17,6 @@ package scalikejdbc
 
 import scalikejdbc.SQL.Output
 import java.sql.PreparedStatement
-import scala.collection.immutable.ListMap
 
 /**
  * SQL abstraction's companion object.
@@ -78,16 +77,16 @@ private[scalikejdbc] object createSQL {
   /**
    * Provides a [[scalikejdbc.SQL]] instance.
    * @param sql SQL template
-   * @param params   parameters
+   * @param parameters   parameters
    * @param f extractor function
    * @param output output type
    * @tparam A return type
    * @return SQL instance
    */
-  def apply[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
-    case Output.single | Output.first => new SQLToOption[A, E](sql)(params: _*)(f)(output)
-    case Output.list => new SQLToList[A, E](sql)(params: _*)(f)(output)
-    case Output.traversable => new SQLToTraversable[A, E](sql)(params: _*)(f)(output)
+  def apply[A, E <: WithExtractor](sql: String)(parameters: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
+    case Output.single | Output.first => new SQLToOptionImpl[A, E](sql)(parameters: _*)(f)(output)
+    case Output.list => new SQLToListImpl[A, E](sql)(parameters: _*)(f)(output)
+    case Output.traversable => new SQLToTraversableImpl[A, E](sql)(parameters: _*)(f)(output)
   }
 
 }
@@ -97,7 +96,7 @@ private[scalikejdbc] object createSQL {
  */
 private[scalikejdbc] object createNameBindingSQL extends LogSupport {
 
-  def validateAndConvertToNormalStatement(sql: String, params: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def validateAndConvertToNormalStatement(sql: String, parameters: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = SQLTemplateParser.extractAllParameters(sql)
 
     // check all the parameters passed by #bindByName are actually used
@@ -105,7 +104,7 @@ private[scalikejdbc] object createNameBindingSQL extends LogSupport {
     GlobalSettings.nameBindingSQLValidator.ignoredParams match {
       case NoCheckForIgnoredParams => // no op
       case validation =>
-        params.foreach {
+        parameters.foreach {
           param =>
             if (!names.contains(param._1)) {
               validation match {
@@ -121,7 +120,7 @@ private[scalikejdbc] object createNameBindingSQL extends LogSupport {
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     (sqlWithPlaceHolders, names.map {
       name =>
-        params.find(_._1 == name).orElse {
+        parameters.find(_._1 == name).orElse {
           throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
         }.map(_._2).orNull[Any]
     })
@@ -130,24 +129,24 @@ private[scalikejdbc] object createNameBindingSQL extends LogSupport {
   /**
    * Provides a [[scalikejdbc.SQL]] instance.
    * @param sql SQL template
-   * @param params named parameters
+   * @param parameters named parameters
    * @param f extractor function
    * @param output output type
    * @tparam A return type
    * @return SQL instance
    */
-  def apply[A, E <: WithExtractor](sql: String)(params: (Symbol, Any)*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
+  def apply[A, E <: WithExtractor](sql: String)(parameters: (Symbol, Any)*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
     case Output.single | Output.first => {
-      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToOption[A, E](_sql)(_params: _*)(f)(output)
+      val (_sql, _parameters) = validateAndConvertToNormalStatement(sql, parameters)
+      new SQLToOptionImpl[A, E](_sql)(_parameters: _*)(f)(output)
     }
     case Output.list => {
-      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToList[A, E](_sql)(_params: _*)(f)(output)
+      val (_sql, _parameters) = validateAndConvertToNormalStatement(sql, parameters)
+      new SQLToListImpl[A, E](_sql)(_parameters: _*)(f)(output)
     }
     case Output.traversable => {
-      val (_sql, _params) = validateAndConvertToNormalStatement(sql, params)
-      new SQLToTraversable[A, E](_sql)(_params: _*)(f)(output)
+      val (_sql, _parameters) = validateAndConvertToNormalStatement(sql, parameters)
+      new SQLToTraversableImpl[A, E](_sql)(_parameters: _*)(f)(output)
     }
   }
 
@@ -184,22 +183,6 @@ object GeneralizedTypeConstraintsForWithExtractor {
 }
 
 /**
- * Statement and parameters
- */
-private[scalikejdbc] trait StatementAndParameters {
-
-  /**
-   * SQL statement
-   */
-  def statement: String
-
-  /**
-   * Bind params
-   */
-  def parameters: Seq[Any]
-}
-
-/**
  * Extractor
  */
 private[scalikejdbc] trait Extractor[A] {
@@ -211,60 +194,58 @@ private[scalikejdbc] trait Extractor[A] {
 /**
  * SQL abstraction.
  *
- * @param sql SQL template
- * @param params parameters
+ * @param statement SQL template
+ * @param parameters parameters
  * @param f  extractor function
  * @param output output type
  * @tparam A return type
  */
-abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable)
-    extends StatementAndParameters with Extractor[A] {
+abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+    extends Extractor[A] {
 
-  override def statement: String = sql
-  override def parameters: Seq[Any] = params
   override def extractor: (WrappedResultSet) => A = f
 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
 
-  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](sql)(params: _*)(output)(f)
+  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement)(parameters: _*)(output)(f)
 
   /**
    * Binds parameters to SQL template in order.
-   * @param params parameters
+   * @param parameters parameters
    * @return SQL instance
    */
-  def bind(params: Any*): SQL[A, E] = createSQL[A, E](sql)(params: _*)(f)(output)
+  def bind(parameters: Any*): SQL[A, E] = createSQL[A, E](statement)(parameters: _*)(f)(output)
 
   /**
    * Binds named parameters to SQL template.
-   * @param paramsByName named parameters
+   * @param parametersByName named parameters
    * @return SQL instance
    */
-  def bindByName(paramsByName: (Symbol, Any)*): SQL[A, E] = {
-    createNameBindingSQL(sql)(paramsByName: _*)(f)(output)
+  def bindByName(parametersByName: (Symbol, Any)*): SQL[A, E] = {
+    createNameBindingSQL(statement)(parametersByName: _*)(f)(output)
   }
 
   /**
-   * Binds params for batch
-   * @param params params
+   * Binds parameters for batch
+   * @param parameters parameters
    * @return SQL for batch
    */
-  def batch(params: Seq[Any]*): SQLBatch = {
-    new SQLBatch(sql)(params: _*)
+  def batch(parameters: Seq[Any]*): SQLBatch = {
+    new SQLBatch(statement)(parameters: _*)
   }
 
   /**
-   * Binds params for batch
-   * @param params params
+   * Binds parameters for batch
+   * @param parameters parameters
    * @return SQL for batch
    */
-  def batchByName(params: Seq[(Symbol, Any)]*): SQLBatch = {
-    val _sql = createNameBindingSQL.validateAndConvertToNormalStatement(sql, params.head)._1
-    val _params: Seq[Seq[Any]] = params.map { p =>
-      createNameBindingSQL.validateAndConvertToNormalStatement(sql, p)._2
+  def batchByName(parameters: Seq[(Symbol, Any)]*): SQLBatch = {
+    val _sql = createNameBindingSQL.validateAndConvertToNormalStatement(statement, parameters.head)._1
+    val _parameters: Seq[Seq[Any]] = parameters.map { p =>
+      createNameBindingSQL.validateAndConvertToNormalStatement(statement, p)._2
     }
-    new SQLBatch(_sql)(_params: _*)
+    new SQLBatch(_sql)(_parameters: _*)
   }
 
   /**
@@ -272,9 +253,9 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
-    case AutoSession => DB autoCommit (s => s.foreach(sql, params: _*)(op))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foreach(sql, params: _*)(op))
-    case _ => session.foreach(sql, params: _*)(op)
+    case AutoSession => DB autoCommit (s => s.foreach(statement, parameters: _*)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foreach(statement, parameters: _*)(op))
+    case _ => session.foreach(statement, parameters: _*)(op)
   }
 
   /**
@@ -283,9 +264,9 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = session match {
-    case AutoSession => DB autoCommit (_.foldLeft(sql, params: _*)(z)(op))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.foldLeft(sql, params: _*)(z)(op))
-    case _ => session.foldLeft(sql, params: _*)(z)(op)
+    case AutoSession => DB autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
+    case _ => session.foldLeft(statement, parameters: _*)(z)(op)
   }
 
   /**
@@ -295,71 +276,63 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @return SQL instance
    */
   def map[A](f: (WrappedResultSet => A)): SQL[A, HasExtractor] = {
-    createSQL[A, HasExtractor](sql)(params: _*)(f)(output)
+    createSQL[A, HasExtractor](statement)(parameters: _*)(f)(output)
   }
 
   /**
    * Same as #single.
    * @return SQL instance
    */
-  def toOption(): SQLToOption[A, E] = {
-    createSQL(sql)(params: _*)(f)(Output.single).asInstanceOf[SQLToOption[A, E]]
-  }
+  def toOption(): SQLToOption[A, E]
 
   /**
    * Set execution type as single.
    * @return SQL instance
    */
-  def single(): SQLToOption[A, E] = toOption()
+  def single(): SQLToOption[A, E]
 
   /**
    * Same as #first.
    * @return SQL instance
    */
-  def headOption(): SQLToOption[A, E] = {
-    createSQL(sql)(params: _*)(f)(Output.first).asInstanceOf[SQLToOption[A, E]]
-  }
+  def headOption(): SQLToOption[A, E]
 
   /**
    * Set execution type as first.
    * @return SQL instance
    */
-  def first(): SQLToOption[A, E] = headOption()
+  def first(): SQLToOption[A, E]
 
   /**
    * Same as #list
    * @return SQL instance
    */
-  def toList(): SQLToList[A, E] = {
-    createSQL(sql)(params: _*)(f)(Output.list).asInstanceOf[SQLToList[A, E]]
-  }
+  def toList(): SQLToList[A, E]
 
   /**
    * Set execution type as list.
    * @return SQL instance
    */
-  def list(): SQLToList[A, E] = toList()
+  def list(): SQLToList[A, E]
 
   /**
    * Same as #traversable.
    * @return SQL instance
    */
-  def toTraversable(): SQLToTraversable[A, E] = {
-    createSQL[A, E](sql)(params: _*)(f)(Output.traversable).asInstanceOf[SQLToTraversable[A, E]]
-  }
+  def toTraversable(): SQLToTraversable[A, E]
 
   /**
    * Set execution type as traversable.
    * @return SQL instance
    */
-  def traversable(): SQLToTraversable[A, E] = toTraversable()
+  def traversable(): SQLToTraversable[A, E]
 
   /**
    * Set execution type as execute
    * @return SQL instance
    */
   def execute(): SQLExecution = {
-    new SQLExecution(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLExecution(statement)(parameters: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
@@ -369,7 +342,7 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @return SQL instance
    */
   def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = {
-    new SQLExecution(sql)(params: _*)(before)(after)
+    new SQLExecution(statement)(parameters: _*)(before)(after)
   }
 
   /**
@@ -393,7 +366,7 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @return SQL instance
    */
   def update(): SQLUpdate = {
-    new SQLUpdate(sql)(params: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLUpdate(statement)(parameters: _*)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
@@ -403,179 +376,209 @@ abstract class SQL[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedR
    * @return SQL instance
    */
   def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = {
-    new SQLUpdate(sql)(params: _*)(before)(after)
+    new SQLUpdate(statement)(parameters: _*)(before)(after)
   }
 
   /**
    * Set execution type as updateAndreturnGeneratedKey
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = updateAndReturnGeneratedKey(1)
+  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
+    updateAndReturnGeneratedKey(1)
+  }
 
-  def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(name)
+  def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = {
+    new SQLUpdateWithGeneratedKey(statement)(parameters: _*)(name)
+  }
 
-  def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = new SQLUpdateWithGeneratedKey(sql)(params: _*)(index)
+  def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = {
+    new SQLUpdateWithGeneratedKey(statement)(parameters: _*)(index)
+  }
 
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeBatch()]].
- * @param sql SQL template
- * @param params parameters
+ * @param statement SQL template
+ * @param parameters parameters
  */
-class SQLBatch(sql: String)(params: Seq[Any]*) extends StatementAndParameters {
-
-  override def statement: String = sql
-  override def parameters: Seq[Seq[Any]] = params
+class SQLBatch(val statement: String)(val parameters: Seq[Any]*) {
 
   def apply()(implicit session: DBSession): Seq[Int] = session match {
-    case AutoSession => DB autoCommit (s => s.batch(sql, params: _*))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.batch(sql, params: _*))
-    case _ => session.batch(sql, params: _*)
+    case AutoSession => DB autoCommit (s => s.batch(statement, parameters: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.batch(statement, parameters: _*))
+    case _ => session.batch(statement, parameters: _*)
   }
 
 }
 
 /**
  * SQL which execute [[java.sql.Statement#execute()]].
- * @param sql SQL template
- * @param params parameters
+ * @param statement SQL template
+ * @param parameters parameters
  * @param before before filter
  * @param after after filter
  */
-class SQLExecution(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit)
-    extends StatementAndParameters {
-
-  override def statement: String = sql
-  override def parameters: Seq[Any] = params
+class SQLExecution(val statement: String)(val parameters: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Boolean = session match {
-    case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.executeWithFilters(before, after, sql, params: _*))
-    case _ => session.executeWithFilters(before, after, sql, params: _*)
+    case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, statement, parameters: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.executeWithFilters(before, after, statement, parameters: _*))
+    case _ => session.executeWithFilters(before, after, statement, parameters: _*)
   }
 
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeUpdate()]].
- * @param sql SQL template
- * @param params parameters
+ * @param statement SQL template
+ * @param parameters parameters
  * @param before before filter
  * @param after after filter
  */
-class SQLUpdate(sql: String)(params: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit)
-    extends StatementAndParameters {
-
-  override def statement: String = sql
-  override def parameters: Seq[Any] = params
+class SQLUpdate(val statement: String)(val parameters: Any*)(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Int = session match {
-    case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateWithFilters(before, after, sql, params: _*))
-    case _ => session.updateWithFilters(before, after, sql, params: _*)
+    case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, statement, parameters: _*))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateWithFilters(before, after, statement, parameters: _*))
+    case _ => session.updateWithFilters(before, after, statement, parameters: _*)
   }
 
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeUpdate()]] and get generated key value.
- * @param sql SQL template
- * @param params parameters
+ * @param statement SQL template
+ * @param parameters parameters
  */
-class SQLUpdateWithGeneratedKey(sql: String)(params: Any*)(key: Any)
-    extends StatementAndParameters {
-
-  override def statement: String = sql
-  override def parameters: Seq[Any] = params
+class SQLUpdateWithGeneratedKey(val statement: String)(val parameters: Any*)(key: Any) {
 
   def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key)))
-    case _ => (session.updateAndReturnSpecifiedGeneratedKey(sql, params: _*)(key))
+    case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)))
+    case _ => (session.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
   }
 
+}
+
+/**
+ * SQL to Traversable
+ * @tparam A return type
+ * @tparam E extractor settings
+ */
+trait SQLToTraversable[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
+  import GeneralizedTypeConstraintsForWithExtractor._
+  val statement: String
+  val parameters: Seq[Any]
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
+    case AutoSession => DB readOnly (s => s.traversable(statement, parameters: _*)(extractor))
+    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(statement, parameters: _*)(extractor))
+    case _ => session.traversable(statement, parameters: _*)(extractor)
+  }
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.collection.Traversable]] value.
- * @param sql SQL template
- * @param params parameters
- * @param f  extractor function
+ * @param statement SQL template
+ * @param parameters parameters
+ * @param extractor  extractor function
  * @param output output type
  * @tparam A return type
  */
-class SQLToTraversable[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable)
-    extends SQL[A, E](sql)(params: _*)(f)(output) with Extractor[A] {
+class SQLToTraversableImpl[A, E <: WithExtractor](override val statement: String)(override val parameters: Any*)(override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+  extends SQL[A, E](statement)(parameters: _*)(extractor)(output)
+  with OutputDecisions[A, E]
+  with SQLToTraversable[A, E]
 
+/**
+ * SQL to List
+ * @tparam A return type
+ * @tparam E extractor settings
+ */
+trait SQLToList[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
-
-  override def extractor: (WrappedResultSet) => A = f
-
-  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
-    case AutoSession => DB readOnly (s => s.traversable(sql, params: _*)(f))
-    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(sql, params: _*)(f))
-    case _ => session.traversable(sql, params: _*)(f)
+  val statement: String
+  val parameters: Seq[Any]
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
+    case AutoSession => DB readOnly (s => s.list(statement, parameters: _*)(extractor))
+    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(statement, parameters: _*)(extractor))
+    case _ => session.list(statement, parameters: _*)(extractor)
   }
-
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.collection.immutable.List]] value.
- * @param sql SQL template
- * @param params parameters
- * @param f  extractor function
+ * @param statement SQL template
+ * @param parameters parameters
+ * @param extractor  extractor function
  * @param output output type
  * @tparam A return type
  */
-class SQLToList[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.traversable)
-    extends SQL[A, E](sql)(params: _*)(f)(output) with Extractor[A] {
+class SQLToListImpl[A, E <: WithExtractor](override val statement: String)(override val parameters: Any*)(override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
+  extends SQL[A, E](statement)(parameters: _*)(extractor)(output)
+  with OutputDecisions[A, E]
+  with SQLToList[A, E]
 
+/**
+ * SQL to Option
+ * @tparam A return type
+ * @tparam E extractor settings
+ */
+trait SQLToOption[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
-
-  override def extractor: (WrappedResultSet) => A = f
-
-  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
-    case AutoSession => DB readOnly (s => s.list(sql, params: _*)(f))
-    case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(sql, params: _*)(f))
-    case _ => session.list(sql, params: _*)(f)
+  val statement: String
+  val parameters: Seq[Any]
+  val output: Output.Value
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
+    hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
+    case Output.single =>
+      session match {
+        case AutoSession => DB readOnly (s => s.single(statement, parameters: _*)(extractor))
+        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.single(statement, parameters: _*)(extractor))
+        case _ => session.single(statement, parameters: _*)(extractor)
+      }
+    case Output.first =>
+      session match {
+        case AutoSession => DB readOnly (s => s.first(statement, parameters: _*)(extractor))
+        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.first(statement, parameters: _*)(extractor))
+        case _ => session.first(statement, parameters: _*)(extractor)
+      }
   }
-
 }
 
 /**
  * SQL which execute [[java.sql.Statement#executeQuery()]]
  * and returns the result as [[scala.Option]] value.
- * @param sql SQL template
- * @param params parameters
- * @param f  extractor function
+ * @param statement SQL template
+ * @param parameters parameters
+ * @param extractor  extractor function
  * @param output output type
  * @tparam A return type
  */
-class SQLToOption[A, E <: WithExtractor](sql: String)(params: Any*)(f: WrappedResultSet => A)(output: Output.Value = Output.single)
-    extends SQL[A, E](sql)(params: _*)(f)(output) with Extractor[A] {
+class SQLToOptionImpl[A, E <: WithExtractor](override val statement: String)(override val parameters: Any*)(override val extractor: WrappedResultSet => A)(override val output: Output.Value = Output.single)
+  extends SQL[A, E](statement)(parameters: _*)(extractor)(output)
+  with OutputDecisions[A, E]
+  with SQLToOption[A, E]
 
-  import GeneralizedTypeConstraintsForWithExtractor._
+/**
+ * Provides converters for default implementation.
+ *
+ * @tparam A return type
+ * @tparam E extractor constraint
+ */
+private[scalikejdbc] trait OutputDecisions[A, E <: WithExtractor] extends SQL[A, E] {
 
-  override def extractor: (WrappedResultSet) => A = f
+  override def toOption(): SQLToOptionImpl[A, E] = createSQL(statement)(parameters: _*)(extractor)(Output.single).asInstanceOf[SQLToOptionImpl[A, E]]
+  override def single(): SQLToOptionImpl[A, E] = toOption()
+  override def headOption(): SQLToOptionImpl[A, E] = createSQL(statement)(parameters: _*)(extractor)(Output.first).asInstanceOf[SQLToOptionImpl[A, E]]
+  override def first(): SQLToOptionImpl[A, E] = headOption()
 
-  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
-    hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
-    case Output.single =>
-      session match {
-        case AutoSession => DB readOnly (s => s.single(sql, params: _*)(f))
-        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.single(sql, params: _*)(f))
-        case _ => session.single(sql, params: _*)(f)
-      }
-    case Output.first =>
-      session match {
-        case AutoSession => DB readOnly (s => s.first(sql, params: _*)(f))
-        case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.first(sql, params: _*)(f))
-        case _ => session.first(sql, params: _*)(f)
-      }
-  }
+  override def toList(): SQLToListImpl[A, E] = createSQL(statement)(parameters: _*)(extractor)(Output.list).asInstanceOf[SQLToListImpl[A, E]]
+  override def list(): SQLToListImpl[A, E] = toList()
+
+  override def toTraversable(): SQLToTraversableImpl[A, E] = createSQL[A, E](statement)(parameters: _*)(extractor)(Output.traversable).asInstanceOf[SQLToTraversableImpl[A, E]]
+  override def traversable(): SQLToTraversableImpl[A, E] = toTraversable()
 
 }
-
