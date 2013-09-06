@@ -1,6 +1,6 @@
 scalikejdbcSettings
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.2"
 
 resolvers ++= Seq(
   "Sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
