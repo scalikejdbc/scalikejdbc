@@ -270,7 +270,7 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
   }
 
   /**
-   * ListMaps values from each [[scalikejdbc.WrappedResultSet]] object.
+   * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
    * @param f extractor function
    * @tparam A return type
    * @return SQL instance
@@ -278,6 +278,12 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
   def map[A](f: (WrappedResultSet => A)): SQL[A, HasExtractor] = {
     createSQL[A, HasExtractor](statement)(parameters: _*)(f)(output)
   }
+
+  /**
+   * Maps values as a Map value from each [[scalikejdbc.WrappedResultSet]] object.
+   * @return SQL instance
+   */
+  def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap)
 
   /**
    * Same as #single.
