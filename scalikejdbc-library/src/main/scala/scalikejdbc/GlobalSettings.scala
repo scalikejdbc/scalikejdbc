@@ -28,4 +28,8 @@ object GlobalSettings {
 
   var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
 
+  var queryCompletionListener: (String, Seq[Any], Long) => Unit = (statement: String, params: Seq[Any], millis: Long) => ()
+
+  var queryFailureListener: (String, Seq[Any], Exception) => Unit = (statement: String, params: Seq[Any], e: Exception) => ()
+
 }

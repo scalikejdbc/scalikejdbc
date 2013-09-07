@@ -80,11 +80,15 @@ trait DBSession extends LogSupport {
         } else {
           template
         }
+
         if (GlobalSettings.loggingSQLErrors) {
           log.error("Failed preparing the statement (Reason: " + e.getMessage + "):\n\n  " + formattedTemplate + "\n")
         } else {
           log.debug("Logging SQL errors is disabled.")
         }
+
+        GlobalSettings.queryFailureListener.apply(template, params, e)
+
         throw e
     }
   }

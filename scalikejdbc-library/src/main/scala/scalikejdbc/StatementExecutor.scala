@@ -225,11 +225,13 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
           stackTraceInformation
       }
 
+      val before = System.currentTimeMillis
+      val result = super.apply(execute)
+      val after = System.currentTimeMillis
+      val spentMillis = after - before
+
+      // logging SQL and time
       if (loggingSQLAndTime.enabled) {
-        val before = System.currentTimeMillis
-        val result = super.apply(execute)
-        val after = System.currentTimeMillis
-        val spentMillis = after - before
         if (loggingSQLAndTime.warningEnabled &&
           spentMillis >= loggingSQLAndTime.warningThresholdMillis) {
           if (loggingSQLAndTime.singleLineMode) {
@@ -244,10 +246,11 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
             log.withLevel(loggingSQLAndTime.logLevel)(messageInMultiLines(spentMillis))
           }
         }
-        result
-      } else {
-        super.apply(execute)
       }
+      // call event handler
+      GlobalSettings.queryCompletionListener.apply(template, singleParams, spentMillis)
+      // result from super.apply()
+      result
     }
   }
 
@@ -266,6 +269,9 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         } else {
           log.debug("Logging SQL errors is disabled.")
         }
+        // call event handler
+        GlobalSettings.queryFailureListener.apply(template, singleParams, e)
+
         throw e;
     }
   }
