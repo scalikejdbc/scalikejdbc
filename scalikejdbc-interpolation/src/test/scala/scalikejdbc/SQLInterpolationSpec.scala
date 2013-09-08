@@ -764,7 +764,9 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
 
   it should "be available with duplicated shorten names" in {
     try {
-      DB localTx { implicit s =>
+      DB autoCommit { implicit s =>
+        try sql"drop table names".execute.apply()
+        catch { case e: Exception => }
         sql"create table names (full_name varchar(256), first_name varchar(256), last_name varchar(256))".execute.apply()
       }
       DB localTx {
