@@ -30,6 +30,6 @@ object GlobalSettings {
 
   var queryCompletionListener: (String, Seq[Any], Long) => Unit = (statement: String, params: Seq[Any], millis: Long) => ()
 
-  var queryFailureListener: (String, Seq[Any], Exception) => Unit = (statement: String, params: Seq[Any], e: Exception) => ()
+  var queryFailureListener: (String, Seq[Any], Throwable) => Unit = (statement: String, params: Seq[Any], e: Throwable) => ()
 
 }

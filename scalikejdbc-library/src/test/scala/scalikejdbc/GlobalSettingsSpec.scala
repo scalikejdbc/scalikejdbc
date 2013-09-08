@@ -118,7 +118,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
         result.size should be > (0)
 
         var errorResult: String = ""
-        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Exception) => {
+        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => {
           errorResult = sql + params + e.getMessage
         }
         try {
@@ -128,7 +128,7 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
 
       } finally {
         GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => ()
-        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Exception) => ()
+        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => ()
         try {
           SQL("drop table query_completion_listener").execute.apply()
         } catch { case e: Exception => }
