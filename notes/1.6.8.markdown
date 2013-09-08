@@ -1,0 +1,23 @@
+ScalikeJDBC 1.6.8 & ScalikeJDBC-Async 0.2.5 have been released. 
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+https://github.com/seratch/scalikejdbc
+
+## library
+
+- Improved replacing connection pools on runtime
+- Added SQL#toMap as same as SQL#map(rs => rs.toMap)
+- #154 Query completion/failure listeners support
+- Bumped joda-time from 2.2 to 2.3
+
+## scalikejdbc-async 
+
+https://github.com/seratch/scalikejdbc-async
+
+- #5 Omitted additional params for MySQL on Heroku 
+- #6 AsyncConnectionPool settings improvement
+- ScalikeJDBC #154 Query completion/failure listeners support
+
+Enjoy writing typesafe and reactive SQL and get things done!
+
