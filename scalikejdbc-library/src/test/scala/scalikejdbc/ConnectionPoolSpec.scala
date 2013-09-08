@@ -20,15 +20,30 @@ class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
 
   Class.forName(driverClassName)
 
-  // TODO pending for concurrency
-  /*
   it should "be available" in {
     val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
     ConnectionPool.singleton(url, user, password, poolSettings)
     ConnectionPool.borrow() should not be (null)
+
+    Thread.sleep(100L)
+    ConnectionPool.singleton(url, user, password, poolSettings)
+    Thread.sleep(100L)
+    ConnectionPool.singleton(url, user, password, poolSettings)
+    Thread.sleep(100L)
+    ConnectionPool.singleton(url, user, password, poolSettings)
+
     ConnectionPool.add('secondary, url, user, password, poolSettings)
     ConnectionPool.borrow('secondary) should not be (null)
 
+    Thread.sleep(100L)
+    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    Thread.sleep(100L)
+    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    Thread.sleep(100L)
+    ConnectionPool.add('secondary, url, user, password, poolSettings)
+
+    // this test code affects other tests
+    /*
     ConnectionPool.apply(ConnectionPool.DEFAULT_NAME).synchronized {
       // close default connection
       ConnectionPool.close()
@@ -41,8 +56,8 @@ class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
       // recover for concurrent tests
       ConnectionPool.singleton(url, user, password, poolSettings)
     }
-  }
  */
+  }
 
   it should "be acceptable external ConnectionPoolFactory" in {
 

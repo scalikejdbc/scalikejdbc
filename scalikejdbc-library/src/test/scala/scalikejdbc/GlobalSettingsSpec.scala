@@ -101,4 +101,39 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
     } catch { case e: Exception => }
   }
 
+  it should "have queryCompletionListener" in {
+    DB autoCommit { implicit session =>
+      try {
+        try {
+          SQL("drop table query_completion_listener").execute.apply()
+        } catch { case e: Exception => }
+        SQL("create table query_completion_listener (id int primary key, created_at timestamp)").execute.apply()
+        SQL("insert into query_completion_listener values (?,?)").bind(1, DateTime.now).update.apply()
+
+        var result: String = ""
+        GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => {
+          result = sql + params + millis
+        }
+        SQL("select * from query_completion_listener").map(_.toMap).list.apply()
+        result.size should be > (0)
+
+        var errorResult: String = ""
+        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => {
+          errorResult = sql + params + e.getMessage
+        }
+        try {
+          SQL("select * from query_failure_listener").map(_.toMap).list.apply()
+        } catch { case e: Exception => }
+        errorResult.size should be > (0)
+
+      } finally {
+        GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => ()
+        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => ()
+        try {
+          SQL("drop table query_completion_listener").execute.apply()
+        } catch { case e: Exception => }
+      }
+    }
+  }
+
 }

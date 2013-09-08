@@ -242,6 +242,18 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings()
   }
 
+  it should "has #toMap" in {
+    val tableName = tableNamePrefix + "_nameBindingSQLValidator"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val results: List[Map[String, Any]] = DB readOnly { implicit s =>
+        SQL("select 1 from " + tableName).toMap.list.apply()
+      }
+      results.size should be > (0)
+    }
+  }
+
   it should "return statement and parameters" in {
     val sql = SQL("select * from company where id = ?").bind(123)
     sql.statement should equal("select * from company where id = ?")

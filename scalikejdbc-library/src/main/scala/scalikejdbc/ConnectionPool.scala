@@ -83,8 +83,11 @@ object ConnectionPool extends LogSupport {
 
     import scalikejdbc.JDBCUrl._
 
+    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
+
+    // register new pool or replace existing pool
     pools.synchronized {
-      pools.get(name).foreach { pool => pool.close() }
+
       // Heroku support 
       val pool = url match {
         case HerokuPostgresRegexp(_user, _password, _host, _dbname) =>
@@ -103,6 +106,23 @@ object ConnectionPool extends LogSupport {
       // wait a little because rarely NPE occurs when immediately accessed.
       Thread.sleep(100L)
     }
+
+    // asynchronously close the old pool if exists
+    oldPoolOpt.foreach { oldPool =>
+
+      // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
+      scala.concurrent.ops.spawn {
+        log.info("The old pool destruction started. connection pool : " + get(name).toString())
+        var millis = 0L
+        while (millis < 60000L && oldPool.numActive > 0) {
+          Thread.sleep(100L)
+          millis += 100L
+        }
+        oldPool.close()
+        log.info("The old pool is successfully closed. connection pool : " + get(name).toString())
+      }
+    }
+
     log.debug("Registered connection pool : " + get(name).toString())
   }
 

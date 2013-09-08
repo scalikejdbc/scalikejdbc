@@ -1,6 +1,6 @@
 scalikejdbcSettings
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.2"
 
 resolvers ++= Seq(
   "Sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
@@ -8,9 +8,9 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "1.6.7",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.7",
-  "com.github.seratch" %% "scalikejdbc-test" % "1.6.7",
+  "com.github.seratch" %% "scalikejdbc" % "1.6.8",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.8",
+  "com.github.seratch" %% "scalikejdbc-test" % "1.6.8",
   "org.slf4j" % "slf4j-simple" % "[1.7,)",
   "org.hibernate" %  "hibernate-core" % "4.1.9.Final",
   "org.hsqldb" % "hsqldb" % "[2,)",
