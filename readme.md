@@ -25,8 +25,8 @@ We never release without passing all the unit tests with the following RDBMS.
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
-  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+  "org.postgresql"     %  "postgresql"  % "9.2-1003-jdbc4", // your JDBC driver
+  "org.slf4j"          % "slf4j-simple" % "[1.7,)"         // slf4j implementation
 )
 ```
 
@@ -72,8 +72,10 @@ val users: List[User] = DB readOnly { implicit session =>
       .limit(20)
       .offset(0)
   }.map(User(u, g)).list.apply()
+}
 
   // or using SQLInterpolation directly
+val users: List[User] = DB readOnly { implicit session =>
   sql"""
     select ${u.result.*}, ${g.result.*} 
     from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
@@ -89,13 +91,12 @@ val newUser: User = DB localTx { implicit session =>
 }
 
 DB localTx { implicit session =>
-  applyUdate {
-    update(User as u)
-      .set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
+  withSQL {
+    update(User as u).set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
       .where.eq(u.id, 123)
-  } // = withSQL { ... }.update.apply()
+  }.update.apply()
 
-  applyUpdate { delete.from(User).where.eq(User.column.id, 123) }
+  withSQL { delete.from(User).where.eq(User.column.id, 123) }.update.apply()
 }
 ```
 
