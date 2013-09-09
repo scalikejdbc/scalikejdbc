@@ -13,7 +13,7 @@ object ScalikeJDBCProjects extends Build {
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
-  lazy val _defaultPlayVersion = "2.1.3"
+  lazy val _defaultPlayVersion = "2.2.0-RC1"
   lazy val _typesafeConfigVersion = "1.0.1"
 
   // internal only
@@ -42,9 +42,9 @@ object ScalikeJDBCProjects extends Build {
           case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
           case _ => "2.9.1"
         })
-        val anormVersion = scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => _defaultPlayVersion
-          case _ => "2.0.4"
+        val anormDependency = scalaVersion match {
+          case "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion
+          case _ =>                              "play"              % anorm % "2.0.4"
         }
         Seq(
           // scope: compile
@@ -57,7 +57,7 @@ object ScalikeJDBCProjects extends Build {
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.scalatest"           %% "scalatest"       % _scalatestVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test",
-          "play"                    %  anorm             % anormVersion      % "test"
+          anormDependency
         ) ++ jdbcDriverDependenciesInTestScope
       },
       sbtPlugin := false,
@@ -203,14 +203,16 @@ object ScalikeJDBCProjects extends Build {
       organization := _organization,
       name := "scalikejdbc-mapper-generator",
       version := _version,
-      scalaBinaryVersion <<= scalaVersion,
       resolvers ++= _resolvers,
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         // sbt 0.12.x uses Scala 2.9.2
         Seq(
           "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion      % "compile",
           "org.scalatest" %% "scalatest"    % _scalatestVersion     % "test",
-          "org.specs2"    %% "specs2"       % _specs2Scala29Version % "test"
+          (scalaVersion match {
+            case "2.10.2" => "org.specs2" %% "specs2" % _specs2Scala210Version % "test"
+            case "2.9.2"  => "org.specs2" %% "specs2" % _specs2Scala29Version % "test"
+          })
         ) ++ jdbcDriverDependenciesInTestScope
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
@@ -238,9 +240,9 @@ object ScalikeJDBCProjects extends Build {
         (scalaVersion match {
           case "2.10.2" | "2.10.1" | "2.10.0" => {
             Seq(
-              "play"           % "play_2.10"      % _defaultPlayVersion % "provided",
-              "play"           % "play-test_2.10" % _defaultPlayVersion % "test",
-              "com.h2database" % "h2"             % _h2Version          % "test"
+              "com.typesafe.play" % "play_2.10"      % _defaultPlayVersion % "provided",
+              "com.typesafe.play" % "play-test_2.10" % _defaultPlayVersion % "test",
+              "com.h2database"    % "h2"             % _h2Version          % "test"
             )
           }
           case _ => {
@@ -263,7 +265,7 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbc)
 
   // scalikejdbc-play-fixture-plugin
-  // support: Play 2.1.x 
+  // support: Play 2.1.x, 2.2.x
   lazy val scalikejdbcPlayFixturePlugin = Project(
     id = "play-fixture-plugin",
     base = file("scalikejdbc-play-fixture-plugin"),
@@ -275,9 +277,9 @@ object ScalikeJDBCProjects extends Build {
       crossScalaVersions := Seq("2.10.0"),
       resolvers ++= _resolvers,
       libraryDependencies ++= Seq(
-        "play"           %% "play"      % _defaultPlayVersion % "provided",
-        "play"           %% "play-test" % _defaultPlayVersion % "test",
-        "com.h2database" %  "h2"        % _h2Version          % "test"
+        "com.typesafe.play" %% "play"      % _defaultPlayVersion % "provided",
+        "com.typesafe.play" %% "play-test" % _defaultPlayVersion % "test",
+        "com.h2database"    %  "h2"        % _h2Version          % "test"
       ),
       testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential", "true"),
       publishTo <<= version { (v: String) => _publishTo(v) },

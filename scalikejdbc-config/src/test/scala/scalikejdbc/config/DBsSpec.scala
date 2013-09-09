@@ -12,25 +12,25 @@ class DBsSpec extends FunSpec with ShouldMatchers {
 
   describe("DBs") {
 
-    describe ("#setup") {
-      it ("should setup default connection with no argument") {
+    describe("#setup") {
+      it("should setup default connection with no argument") {
         DBs.setup()
         val res = DB readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
-        res should be (Some(1))
+        res should be(Some(1))
         DBs.close()
       }
-      it ("should setup a connection pool") {
+      it("should setup a connection pool") {
         DBs.setup('foo)
         val res = NamedDB('foo) readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
-        res should be (Some(1))
+        res should be(Some(1))
         DBs.close('foo)
       }
-      describe ("When an unknown database name is passed") {
-        it ("throws Configuration Exception") {
+      describe("When an unknown database name is passed") {
+        it("throws Configuration Exception") {
           intercept[ConfigurationException] {
             DBs.setup('unknown)
           }
@@ -38,24 +38,24 @@ class DBsSpec extends FunSpec with ShouldMatchers {
       }
     }
 
-    describe ("#setupAll") {
-      it ("should read application.conf and setup all connection pool") {
+    describe("#setupAll") {
+      it("should read application.conf and setup all connection pool") {
         DBs.setupAll()
         val res = NamedDB('foo) readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
-        res should be (Some(1))
+        res should be(Some(1))
         val res2 = NamedDB('bar) readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
-        res2 should be (Some(1))
+        res2 should be(Some(1))
         DBs.closeAll()
       }
     }
 
-    describe ("#close") {
-      describe ("When no argument is passed") {
-        it ("should close default connection pool") {
+    describe("#close") {
+      describe("When no argument is passed") {
+        it("should close default connection pool") {
           DBs.setup()
           DBs.setup('foo)
           DBs.close()
@@ -67,12 +67,12 @@ class DBsSpec extends FunSpec with ShouldMatchers {
           val res = NamedDB('foo) readOnly { implicit session =>
             SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
           }
-          res should be (Some(1))
+          res should be(Some(1))
           DBs.close('foo)
         }
       }
 
-      it ("should close a connection pool") {
+      it("should close a connection pool") {
         DBs.setup('foo)
         DBs.close('foo)
         intercept[IllegalStateException] {
@@ -83,8 +83,8 @@ class DBsSpec extends FunSpec with ShouldMatchers {
       }
     }
 
-    describe ("#closeAll") {
-      it ("should close all connection pools") {
+    describe("#closeAll") {
+      it("should close all connection pools") {
         DBs.setup('foo)
         DBs.setup('bar)
         DBs.closeAll()

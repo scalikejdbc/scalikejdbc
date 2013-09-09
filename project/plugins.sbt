@@ -1,10 +1,9 @@
 resolvers ++= Seq(
-  "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
+  "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
+  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
 addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "[0.2,)")
-
-addSbtPlugin("com.github.seratch" % "testgenerator" % "1.1.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "[1.0,)")
 
@@ -20,11 +19,7 @@ libraryDependencies <+= (sbtVersion){ sv =>
 
 logLevel := Level.Warn
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0-RC1")
 
-addSbtPlugin("play" % "sbt-plugin" % "2.1.2")
-
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.1")
-
-addSbtPlugin("com.github.seratch.reaktor" % "sbt-scct" % "0.2.001")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "[0.1,)")
 
