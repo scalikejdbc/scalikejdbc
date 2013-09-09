@@ -45,17 +45,21 @@ sbt console
 
 ## Basic usage
 
-### Scala 2.10
+### Scala 2.10.x
 
 SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
 case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
-case class Group(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
-  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group]): User = { ... }
+  def apply(u: SyntaxProvider[User])(rs: WrappedResultSet): User = { ... }
+  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group])(rs: WrappedResultSet): User = { ... }
 }
-object Group extends SQLSyntaxSupport[Group] { ... }
+
+case class Group(id: Long, name: Option[String] = None)
+object Group extends SQLSyntaxSupport[Group] { 
+  def apply(g: SyntaxProvider[Group])(rs: WrappedResultSet): Group = { ... }
+}
 
 val (u, g) = (User.syntax("u"), Group.sytnax("g"))
 val users: List[User] = DB readOnly { implicit session =>
@@ -99,7 +103,7 @@ More examples:
 
 https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
 
-### Scala 2.9
+### Scala 2.9.x
 
 Basically, use string template. Indeed, it's an old style but still good.
 
