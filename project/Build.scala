@@ -14,7 +14,7 @@ object ScalikeJDBCProjects extends Build {
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
   lazy val _defaultPlayVersion = "2.2.0-RC1"
-  lazy val _typesafeConfigVersion = "1.0.1"
+  lazy val _typesafeConfigVersion = "1.0.2"
 
   // internal only
   lazy val _logbackVersion = "1.0.13"
@@ -23,7 +23,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _scalatestVersion = "1.9.1"
   lazy val _specs2Scala291Version = "1.12.4"
   lazy val _specs2Scala29Version = "1.12.4.1"
-  lazy val _specs2Scala210Version = "1.14"
+  lazy val _specs2Scala210Version = "2.2"
 
   // scalikejdbc (core library)
   lazy val scalikejdbc = Project(
@@ -115,7 +115,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
           "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional",
           "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
-        ) //++ scctInTestScope
+        )
       },
       publishTo <<= version { (v: String) => _publishTo(v) },
       publishMavenStyle := true,
@@ -301,7 +301,7 @@ object ScalikeJDBCProjects extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "com.github.tototoshi" %% "play-flyway" % "[0.1,)",
+      "com.github.tototoshi" %% "play-flyway" % "0.2.0",
       "com.h2database"       %  "h2"          % _h2Version,
       "org.postgresql"       %  "postgresql"  % "9.2-1003-jdbc4"
     )
@@ -310,8 +310,7 @@ object ScalikeJDBCProjects extends Build {
       scalaVersion in ThisBuild := "2.10.2",
       resolvers ++= Seq(
         "sonatype releases"  at "http://oss.sonatype.org/content/repositories/releases",
-        "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
-        "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
+        "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
       )
     ).dependsOn(
       scalikejdbcPlayFixturePlugin,

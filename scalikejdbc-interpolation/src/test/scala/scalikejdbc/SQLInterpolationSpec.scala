@@ -66,8 +66,16 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
     DB localTx {
       implicit s =>
         try {
+          try sql"drop table users".execute.apply()
+          catch { case e: Exception => }
           sql"create table users (id int not null, first_name varchar(256), group_id int)".execute.apply()
+
+          try sql"drop table groups".execute.apply()
+          catch { case e: Exception => }
           sql"create table groups (id int not null, website_url varchar(256))".execute.apply()
+
+          try sql"drop table group_members".execute.apply()
+          catch { case e: Exception => }
           sql"create table group_members (user_id int not null, group_id int not null)".execute.apply()
 
           Seq((1, Some("foo"), None), (2, Some("bar"), None), (3, Some("baz"), Some(1))) foreach {
@@ -338,9 +346,12 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
           }
 
         } finally {
-          sql"drop table users".execute.apply()
-          sql"drop table groups".execute.apply()
-          sql"drop table group_members".execute.apply()
+          try sql"drop table users".execute.apply()
+          catch { case e: Exception => }
+          try sql"drop table groups".execute.apply()
+          catch { case e: Exception => }
+          try sql"drop table group_members".execute.apply()
+          catch { case e: Exception => }
         }
     }
   }
@@ -473,9 +484,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
           }
       }
     } finally {
-      DB.autoCommit { implicit s => sql"drop table issue".execute.apply() }
-      DB.autoCommit { implicit s => sql"drop table tag".execute.apply() }
-      DB.autoCommit { implicit s => sql"drop table issue_tag".execute.apply() }
+      DB.autoCommit { implicit s =>
+        try sql"drop table issue".execute.apply()
+        catch { case e: Exception => }
+        try sql"drop table tag".execute.apply()
+        catch { case e: Exception => }
+        try sql"drop table issue_tag".execute.apply()
+        catch { case e: Exception => }
+      }
     }
   }
 
@@ -676,10 +692,14 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
             throw e
 
         } finally {
-          sql"drop table customers".execute.apply()
-          sql"drop table customer_group".execute.apply()
-          sql"drop table products".execute.apply()
-          sql"drop table orders".execute.apply()
+          try sql"drop table customers".execute.apply()
+          catch { case e: Exception => }
+          try sql"drop table customer_group".execute.apply()
+          catch { case e: Exception => }
+          try sql"drop table products".execute.apply()
+          catch { case e: Exception => }
+          try sql"drop table orders".execute.apply()
+          catch { case e: Exception => }
         }
     }
   }
@@ -715,7 +735,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
           user.get.full should equal("Bob Lee")
 
         } finally {
-          sql"drop table users".execute.apply()
+          try sql"drop table users".execute.apply()
+          catch { case e: Exception => }
         }
     }
   }
@@ -747,9 +768,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
       }
     } finally {
       DB localTx { implicit s =>
-        try {
-          sql"drop table x_names".execute.apply()
-        } catch { case e: Exception => }
+        try sql"drop table x_names".execute.apply()
+        catch { case e: Exception => }
       }
     }
   }
@@ -805,9 +825,8 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
       }
     } finally {
       DB localTx { implicit s =>
-        try {
-          sql"drop table names".execute.apply()
-        } catch { case e: Exception => }
+        try sql"drop table names".execute.apply()
+        catch { case e: Exception => }
       }
     }
   }
