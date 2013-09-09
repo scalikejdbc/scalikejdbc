@@ -6,9 +6,7 @@ addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "[0.2,)")
 
 addSbtPlugin("com.github.seratch" % "testgenerator" % "1.1.1")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.0")
-
-resolvers += Resolver.url("sbt-plugin-releases for Travis CI", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
+addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "[1.0,)")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "[0.6,)")
 
@@ -28,7 +26,5 @@ addSbtPlugin("play" % "sbt-plugin" % "2.1.2")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.1")
 
-resolvers += "scct-github-repository" at "http://mtkopone.github.com/scct/maven-repo"
-
-addSbtPlugin("reaktor" % "sbt-scct" % "0.2-SNAPSHOT")
+addSbtPlugin("com.github.seratch.reaktor" % "sbt-scct" % "0.2.001")
 
