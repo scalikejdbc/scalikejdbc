@@ -23,10 +23,10 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
+  "com.github.seratch" %% "scalikejdbc"  % "[1.6,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
-  "org.postgresql"     %  "postgresql"  % "9.2-1003-jdbc4", // your JDBC driver
-  "org.slf4j"          % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+  "org.postgresql"     %  "postgresql"   % "9.2-1003-jdbc4", // your JDBC driver
+  "org.slf4j"          %  "slf4j-simple" % "[1.7,)"          // slf4j implementation
 )
 ```
 
@@ -47,7 +47,7 @@ sbt console
 
 ### Scala 2.10.x
 
-SQLInterpolation and SQLSyntaxSupport is much powerful.
+The combination of SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
 case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
