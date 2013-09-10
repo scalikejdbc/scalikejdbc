@@ -136,4 +136,32 @@ class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
     }
   }
 
+  it should "have stacktrace logging configuration" in {
+    DB autoCommit { implicit session =>
+      try {
+        try SQL("drop table logging_stacktrace").execute.apply()
+        catch { case e: Exception => }
+
+        SQL("create table logging_stacktrace (id int primary key, name varchar(13) not null)").execute.apply()
+
+        1 to 20000 foreach { i =>
+          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+          SQL("insert into logging_stacktrace values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
+        }
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+          enabled = true,
+          logLevel = 'WARN,
+          printUnprocessedStackTrace = true,
+          stackTraceDepth = 500
+        )
+        SQL("select  * from logging_stacktrace").map(rs => rs.int("id")).list.apply()
+
+      } finally {
+        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        try SQL("drop table logging_stacktrace").execute.apply()
+        catch { case e: Exception => }
+      }
+    }
+  }
+
 }
