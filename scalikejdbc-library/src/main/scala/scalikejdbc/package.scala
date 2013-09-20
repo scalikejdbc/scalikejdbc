@@ -81,27 +81,27 @@ package object scalikejdbc {
   /**
    * Unix Time Converter to several types.
    *
-   * @param t something has #getTime(): Long
+   * @param ms the milliseconds from 1970-01-01T00:00:00Z
    */
-  class UnixTimeInMillisConverter(t: { def getTime(): Long }) {
+  class UnixTimeInMillisConverter(ms: Long) {
 
-    def toJavaUtilDate: utilDate = new java.util.Date(t.getTime)
+    def toJavaUtilDate: utilDate = new java.util.Date(ms)
 
-    def toDateTime: DateTime = new DateTime(t.getTime)
+    def toDateTime: DateTime = new DateTime(ms)
 
-    def toDateTimeWithTimeZone(timezone: DateTimeZone): DateTime = new DateTime(t.getTime, timezone)
+    def toDateTimeWithTimeZone(timezone: DateTimeZone): DateTime = new DateTime(ms, timezone)
 
-    def toLocalDateTime: LocalDateTime = new LocalDateTime(t.getTime)
+    def toLocalDateTime: LocalDateTime = new LocalDateTime(ms)
 
-    def toLocalDateTimeWithTimeZone(timezone: DateTimeZone): LocalDateTime = new LocalDateTime(t.getTime, timezone)
+    def toLocalDateTimeWithTimeZone(timezone: DateTimeZone): LocalDateTime = new LocalDateTime(ms, timezone)
 
-    def toLocalDate: LocalDate = new LocalDate(t.getTime)
+    def toLocalDate: LocalDate = new LocalDate(ms)
 
-    def toLocalDateWithTimeZone(timezone: DateTimeZone): LocalDate = new LocalDate(t.getTime, timezone)
+    def toLocalDateWithTimeZone(timezone: DateTimeZone): LocalDate = new LocalDate(ms, timezone)
 
-    def toLocalTime: LocalTime = new LocalTime(t.getTime)
+    def toLocalTime: LocalTime = new LocalTime(ms)
 
-    def toLocalTimeWithTimeZone(timezone: DateTimeZone): LocalTime = new LocalTime(t.getTime, timezone)
+    def toLocalTimeWithTimeZone(timezone: DateTimeZone): LocalTime = new LocalTime(ms, timezone)
 
     def toSqlDate: java.sql.Date = {
       // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html
@@ -112,7 +112,7 @@ package object scalikejdbc {
       // in the particular time zone with which the instance is associated.
       // -----
       val cal = Calendar.getInstance()
-      cal.setTimeInMillis(t.getTime)
+      cal.setTimeInMillis(ms)
       cal.set(Calendar.HOUR_OF_DAY, 0)
       cal.set(Calendar.MINUTE, 0)
       cal.set(Calendar.SECOND, 0)
@@ -120,19 +120,19 @@ package object scalikejdbc {
       new java.sql.Date(cal.getTimeInMillis)
     }
 
-    def toSqlTime: java.sql.Time = new java.sql.Time(t.getTime)
+    def toSqlTime: java.sql.Time = new java.sql.Time(ms)
 
-    def toSqlTimestamp: java.sql.Timestamp = new java.sql.Timestamp(t.getTime)
+    def toSqlTimestamp: java.sql.Timestamp = new java.sql.Timestamp(ms)
 
   }
 
-  implicit def convertJavaUtilDateToConverter(t: utilDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
+  implicit def convertJavaUtilDateToConverter(t: utilDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlDateToConverter(t: sqlDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
+  implicit def convertJavaSqlDateToConverter(t: sqlDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlTimeToConverter(t: sqlTime): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
+  implicit def convertJavaSqlTimeToConverter(t: sqlTime): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t)
+  implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
   /**
    * [[org.joda.time.LocalTime]] converter.
