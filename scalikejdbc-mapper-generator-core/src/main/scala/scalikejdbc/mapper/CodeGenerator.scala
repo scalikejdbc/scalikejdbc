@@ -449,7 +449,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      */
     val createMethod = {
       val createColumns: List[Column] = allColumns.filterNot {
-        c => table.autoIncrementColumns.find(aic => aic.name == c.name).isDefined
+        c => table.autoIncrementColumns.exists(_.name == c.name)
       }
 
       val placeHolderPart: String = config.template match {
@@ -1269,7 +1269,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       )
       .replace("%createFields%", table.allColumns.filter {
         c =>
-          c.isNotNull && table.autoIncrementColumns.find(aic => aic.name == c.name).isEmpty
+          c.isNotNull && table.autoIncrementColumns.forall(_.name != c.name)
       }.map {
         c =>
           c.nameInScala + " = " + c.defaultValueInScala
