@@ -59,7 +59,7 @@ trait FixtureSupport {
         }
       }
 
-      (dbName -> fixtureFiles)
+      dbName -> fixtureFiles
     }).toMap
   }
 
