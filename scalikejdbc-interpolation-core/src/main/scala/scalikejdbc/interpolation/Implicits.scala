@@ -16,9 +16,6 @@
 package scalikejdbc.interpolation
 
 import scala.language.implicitConversions
-import scalikejdbc.SQLInterpolationString
-
-import scala.language.implicitConversions
 
 /**
  * object to import.

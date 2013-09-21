@@ -17,7 +17,7 @@ package scalikejdbc.config
 
 import scalikejdbc._
 import com.typesafe.config.{ Config, ConfigFactory, ConfigException }
-import scala.collection.mutable.{ Map => MutableMap, ListBuffer }
+import scala.collection.mutable.{ Map => MutableMap }
 import scala.collection.JavaConverters._
 
 /**

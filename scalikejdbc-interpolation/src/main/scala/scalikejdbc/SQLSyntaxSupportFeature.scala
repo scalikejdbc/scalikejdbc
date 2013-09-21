@@ -160,7 +160,6 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
-    import scala.reflect.runtime.universe._
 
     /**
      * Rule to convert field names to column names.
