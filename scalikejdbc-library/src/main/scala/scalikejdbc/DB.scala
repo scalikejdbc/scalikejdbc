@@ -29,7 +29,7 @@ import scalikejdbc.metadata._
  * Using DBSession:
  *
  * {{{
- *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
  *   val users = DB readOnly { session =>
@@ -63,7 +63,7 @@ import scalikejdbc.metadata._
  * Using SQL:
  *
  * {{{
- *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
  *   val users = DB readOnly { session =>

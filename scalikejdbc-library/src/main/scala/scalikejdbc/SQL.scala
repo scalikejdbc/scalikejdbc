@@ -22,7 +22,7 @@ import java.sql.PreparedStatement
  * SQL abstraction's companion object.
  *
  * {{{
- *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
  *   val users = DB readOnly { session =>
