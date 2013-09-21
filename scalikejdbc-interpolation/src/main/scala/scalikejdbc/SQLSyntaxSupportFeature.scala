@@ -160,7 +160,6 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
-    import scala.reflect.runtime.universe._
 
     /**
      * Rule to convert field names to column names.
@@ -253,7 +252,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
       val shortenedName = shorten(toAlphabetOnly(name))
       val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))
-      if (shortenedNames.filter(_ == shortenedName).size > 1) {
+      if (shortenedNames.count(_ == shortenedName) > 1) {
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
             if (found) {
@@ -490,7 +489,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.toLowerCase == name.value.toLowerCase)).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
@@ -518,7 +517,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }.mkString(", "))
 
     def column(name: String): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.toLowerCase == name.toLowerCase)).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
@@ -548,7 +547,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.toLowerCase == name.value.toLowerCase)).map { rn =>
         SQLSyntax(s"${rn.namedColumn(name.value).value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value)

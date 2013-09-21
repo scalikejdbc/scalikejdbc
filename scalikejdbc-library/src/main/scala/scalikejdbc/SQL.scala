@@ -460,9 +460,9 @@ class SQLUpdate(val statement: String)(val parameters: Any*)(before: (PreparedSt
 class SQLUpdateWithGeneratedKey(val statement: String)(val parameters: Any*)(key: Any) {
 
   def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession => DB autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => (s.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)))
-    case _ => (session.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+    case AutoSession => DB autoCommit (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+    case _ => session.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
   }
 
 }
