@@ -81,6 +81,37 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
         }
       }
 
+      it("should read configuration by env and return as Map") {
+        val expected = Map(
+          "driver" -> "org.h2.Driver",
+          "url" -> "jdbc:h2:mem:dev",
+          "user" -> "dev",
+          "password" -> "secret"
+        )
+        val configReader = new TypesafeConfigReaderWithEnv("dev")
+        configReader.readAsMap() should be(expected)
+      }
+      it("should read configuration by env(prod) and return as Map") {
+        val expected = Map(
+          "driver" -> "org.h2.Driver3",
+          "url" -> "jdbc:h2:mem:prod",
+          "user" -> "prod",
+          "password" -> "secret3"
+        )
+        val configReader = new TypesafeConfigReaderWithEnv("prod")
+        configReader.readAsMap() should be(expected)
+      }
+      it("should read configuration by env and db name and return as Map") {
+        val expected = Map(
+          "driver" -> "org.h2.Driver2",
+          "url" -> "jdbc:h2:mem:dev-foo",
+          "user" -> "dev-foo",
+          "password" -> "secret2"
+        )
+        val configReader = new TypesafeConfigReaderWithEnv("dev")
+        configReader.readAsMap('foo) should be(expected)
+      }
+
     }
 
     it("should get db names") {

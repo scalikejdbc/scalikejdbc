@@ -41,34 +41,29 @@ trait StandardTypesafeConfig extends TypesafeConfig {
   lazy val config: Config = ConfigFactory.load()
 }
 
-/*
- * Typesafe TypesafeConfig reader
- *
- * It follows standard behavior of typesafe-config
- */
-object TypesafeConfigReader extends TypesafeConfigReader with StandardTypesafeConfig
-
 /**
  * Typesafe TypesafeConfig reader
  */
-trait TypesafeConfigReader { self: TypesafeConfig =>
+trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
+
+  def envPrefix: String = env.map(_ + ".").getOrElse("")
 
   lazy val dbNames: List[String] = {
-    if (config.hasPath("db")) {
-      config.getConfig("db").root.keySet.asScala.toList
+    if (config.hasPath(envPrefix + "db")) {
+      config.getConfig(envPrefix + "db").root.keySet.asScala.toList
     } else {
       Nil
     }
   }
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
-    val dbConfig = config.getConfig("db." + dbName.name)
+    val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
     val iter = dbConfig.entrySet.iterator
     val configMap: MutableMap[String, String] = MutableMap.empty
     while (iter.hasNext) {
       val entry = iter.next()
       val key = entry.getKey
-      configMap(key) = config.getString("db." + dbName.name + "." + key)
+      configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
     }
     configMap.toMap
   } catch {
@@ -102,7 +97,7 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
 
   def loadGlobalSettings(): Unit = {
     for {
-      globalConfig <- readConfig(config, "scalikejdbc.global")
+      globalConfig <- readConfig(config, envPrefix + "scalikejdbc.global")
       logConfig <- readConfig(globalConfig, "loggingSQLAndTime")
     } {
       val enabled = readBoolean(logConfig, "enabled").getOrElse(false)
@@ -134,3 +129,24 @@ trait TypesafeConfigReader { self: TypesafeConfig =>
   }
 
 }
+
+/**
+ * Typesafe config reader
+ *
+ * It follows standard behavior of typesafe-config
+ */
+object TypesafeConfigReader extends TypesafeConfigReader
+  with StandardTypesafeConfig
+  with NoEnvPrefix
+
+/**
+ * Typesafe config reader with env prefix.
+ */
+case class TypesafeConfigReaderWithEnv(envValue: String)
+    extends TypesafeConfigReader
+    with StandardTypesafeConfig
+    with EnvPrefix {
+
+  override val env = Option(envValue)
+}
+
