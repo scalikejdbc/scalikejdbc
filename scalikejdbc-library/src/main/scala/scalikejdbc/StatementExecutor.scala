@@ -280,7 +280,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         // call event handler
         GlobalSettings.queryFailureListener.apply(template, singleParams, e)
 
-        throw e;
+        throw e
     }
   }
 

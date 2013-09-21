@@ -722,7 +722,7 @@ case class DB(conn: Connection) extends LogSupport {
             typeName = rs.string("TYPE_NAME"),
             size = rs.int("COLUMN_SIZE"),
             isRequired = rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO",
-            isPrimaryKey = pkNames.find(pk => pk == rs.string("COLUMN_NAME")).isDefined,
+            isPrimaryKey = pkNames.exists(_ == rs.string("COLUMN_NAME")),
             isAutoIncrement = {
               // Oracle throws java.sql.SQLException: Invalid column name
               try {
