@@ -48,7 +48,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }
 
     /**
-     * [[scalikekdbc.interpolation.SQLSyntax]] value for table name.
+     * [[scalikejdbc.interpolation.SQLSyntax]] value for table name.
      */
     def table: TableDefSQLSyntax = TableDefSQLSyntax(tableName)
 
@@ -204,7 +204,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }
 
     /**
-     * Returns [[scalikejdbc.SQLSyntax]] value for the column which is referred by the field.
+     * Returns [[scalikejdbc.interpolation.SQLSyntax]] value for the column which is referred by the field.
      */
     def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A]
 

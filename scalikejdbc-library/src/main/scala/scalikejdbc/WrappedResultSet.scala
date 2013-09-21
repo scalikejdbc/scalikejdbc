@@ -20,7 +20,7 @@ import java.util.Calendar
 import collection.JavaConverters._
 
 /**
- * {@link java.sql.ResultSet} wrapper
+ * [[java.sql.ResultSet]] wrapper
  */
 case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
 
