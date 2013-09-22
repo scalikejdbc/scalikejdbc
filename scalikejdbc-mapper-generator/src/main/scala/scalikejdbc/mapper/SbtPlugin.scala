@@ -19,6 +19,7 @@ import sbt._
 import sbt.Keys._
 import util.control.Exception._
 import java.io.FileNotFoundException
+import java.util.Locale.{ ENGLISH => en }
 
 object SbtPlugin extends Plugin {
 
@@ -62,8 +63,8 @@ object SbtPlugin extends Plugin {
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
     model.table(jdbc.schema, tableName)
-      .orElse(model.table(jdbc.schema, tableName.toUpperCase))
-      .orElse(model.table(jdbc.schema, tableName.toLowerCase))
+      .orElse(model.table(jdbc.schema, tableName.toUpperCase(en)))
+      .orElse(model.table(jdbc.schema, tableName.toLowerCase(en)))
       .map { table =>
         val config = GeneratorConfig(
           srcDir = srcDir.getAbsolutePath,

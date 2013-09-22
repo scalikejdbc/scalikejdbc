@@ -17,6 +17,7 @@ package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection }
 import java.lang.IllegalStateException
+import java.util.Locale.{ ENGLISH => en }
 import scala.util.control.Exception._
 
 import scalikejdbc.metadata._
@@ -680,8 +681,8 @@ case class DB(conn: Connection) extends LogSupport {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       _getTableName(meta, schema, table, tableTypes)
-        .orElse(_getTableName(meta, schema, table.toUpperCase, tableTypes))
-        .orElse(_getTableName(meta, schema, table.toLowerCase, tableTypes)).map { tableName =>
+        .orElse(_getTableName(meta, schema, table.toUpperCase(en), tableTypes))
+        .orElse(_getTableName(meta, schema, table.toLowerCase(en), tableTypes)).map { tableName =>
           new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
         }
     }.getOrElse(Nil)
@@ -695,7 +696,7 @@ case class DB(conn: Connection) extends LogSupport {
    */
   def getTable(table: String): Option[Table] = readOnlyWithConnection { conn =>
     val meta = conn.getMetaData
-    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase)).orElse(_getTable(meta, table.toLowerCase))
+    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase(en))).orElse(_getTable(meta, table.toLowerCase(en)))
   }
 
   /**
