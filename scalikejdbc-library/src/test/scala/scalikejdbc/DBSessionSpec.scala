@@ -474,6 +474,39 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
               fail("Expected value is not found.")
             }
 
+            // joda-time API support
+            {
+              import org.joda.time._
+              SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
+                rs => (rs.localDate("date_value"), rs.localTime("time_value"), rs.dateTime("timestamp_value"))
+              }.first().apply().map {
+                case (d: LocalDate, t: LocalTime, ts: DateTime) =>
+
+                  // LocalDate
+                  d.getYear should equal(2012)
+                  d.getMonthOfYear should equal(5)
+                  d.getDayOfMonth should equal(3)
+
+                  // LocalTime
+                  t.getHourOfDay should equal(13)
+                  t.getMinuteOfHour should equal(40)
+                  t.getSecondOfMinute should equal(0)
+                  t.getMillisOfSecond should equal(0)
+
+                  // DateTime
+                  ts.getYear should equal(2012)
+                  ts.getMonthOfYear should equal(5)
+                  ts.getDayOfMonth should equal(3)
+                  ts.getHourOfDay should equal(13)
+                  ts.getMinuteOfHour should equal(40)
+                  ts.getSecondOfMinute should equal(0)
+                  ts.getMillisOfSecond should equal(0)
+
+              } orElse {
+                fail("Expected value is not found.")
+              }
+            }
+
           } finally {
             try {
               SQL("drop table dbsessionspec_dateTimeValues").execute.apply()
