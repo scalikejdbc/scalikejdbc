@@ -43,8 +43,21 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
-      val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
+      val className = getClassSimpleName(this).replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
       SQLSyntaxProvider.toColumnName(className, nameConverters, useSnakeCaseColumnName)
+    }
+
+    private[this] def getClassSimpleName(obj: Any): String = {
+      try obj.getClass.getSimpleName
+      catch {
+        case e: InternalError =>
+          // working on the Scala REPL
+          val clazz = obj.getClass
+          val classOfClazz = clazz.getClass
+          val getSimpleBinaryName = classOfClazz.getDeclaredMethods.find(_.getName == "getSimpleBinaryName").get
+          getSimpleBinaryName.setAccessible(true)
+          getSimpleBinaryName.invoke(clazz).toString
+      }
     }
 
     /**
@@ -223,7 +236,10 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Returns the snake_case name after applying nameConverters.
      */
     def toColumnName(str: String, nameConverters: Map[String, String], useSnakeCaseColumnName: Boolean): String = {
-      val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
+      val convertersApplied = {
+        if (nameConverters != null) nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
+        else str
+      }
       if (useSnakeCaseColumnName) {
         val acronymsFiltered = acronymRegExp.replaceAllIn(
           acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
