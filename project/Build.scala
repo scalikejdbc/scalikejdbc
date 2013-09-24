@@ -43,8 +43,8 @@ object ScalikeJDBCProjects extends Build {
           case _ => "2.9.1"
         })
         val anormDependency = scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion
-          case _ =>                              "play"              % anorm % "2.0.4"
+          case "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion % "test"
+          case _ =>                              "play"              % anorm % "2.0.8" % "test"
         }
         Seq(
           // scope: compile
@@ -246,7 +246,7 @@ object ScalikeJDBCProjects extends Build {
             )
           }
           case _ => {
-            val play20Version = "2.0.4"
+            val play20Version = "2.0.8"
             Seq(
               "play" % "play_2.9.1"      % play20Version % "provided",
               "play" % "play-test_2.9.1" % play20Version % "test"
