@@ -63,7 +63,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
   // class GroupMember(userId: Int) // compilation error
 
   it should "be available with SQLSyntaxSupport" in {
-    DB localTx {
+    DB autoCommit {
       implicit s =>
         try {
           try sql"drop table users".execute.apply()
