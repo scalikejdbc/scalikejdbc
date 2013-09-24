@@ -1,0 +1,60 @@
+ScalikeJDBC 1.6.9 has been released. 
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+https://github.com/seratch/scalikejdbc
+
+## library
+
+- #157 Enable showing full stack trace in query logs by @seratch
+
+Now you can specify printUnprocesssedStackTrace flag and stack trace depth to show.
+
+    GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+      printUnprocessedStackTrace = true,
+      stackTraceDepth = 500
+    )
+
+- #158, #159 scaladoc fixes & refactoring by @kxbmap
+
+- Added joda-time API support to WrappedResultSet by @serath
+
+Previously, you need to call rs.timestamp("created_at").toDateTime. Now you can call rs.dateTime("created_at") instead.
+
+    def extract(rs: WrappedResultSet) = new Member(
+      alertTime = rs.localTime("alert_time"),
+      birthday = rs.localDate("birthday"),
+      createdAt = rs.dateTime("created_at"),
+      updatedAt = rs.dateTimeOpt("updated_at")
+    )
+
+- #161 Avoid reflective calls by structural subtyping by @kxbmap
+
+Implicit conversions on date time objects are changed. If you're using UnixTimeInMillisConverter directly, this change affects. 
+
+## config 
+
+- Introduced env prefix to scalikejdbc-config by @seratch
+
+Enabled appending env prefix to application.conf like this.
+
+    prod.db.default.url="jdbc:h2:mem:prod"
+    prod.db.default.driver="org.h2.Driver"
+    prod.db.default.user="username"
+    prod.db.default.password="secret"
+
+Your code will be:
+
+    val values = new TypesafeConfigReaderWithEnv("prod").readAsMap()
+    DBsWithEnv("prod").setupAll()
+
+## interpolation
+
+- Improvement about working on the Scala REPL by @seratch
+
+If you suffered java.lang.InternalError, this issue is fixed.
+
+- #160 refactoring about String#toUpperCase by @kxbmap
+
+Enjoy writing typesafe and reactive SQL and get things done!
+
