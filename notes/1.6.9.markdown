@@ -17,7 +17,7 @@ Now you can specify printUnprocesssedStackTrace flag and stack trace depth to sh
 
 - #158, #159 scaladoc fixes & refactoring by @kxbmap
 
-- Added joda-time API support to WrappedResultSet by @serath
+- Added joda-time API support to WrappedResultSet by @seratch
 
 Previously, you need to call rs.timestamp("created_at").toDateTime. Now you can call rs.dateTime("created_at") instead.
 
