@@ -3,8 +3,8 @@
 cd `dirname $0`/..
 
 sbt "g sbt012" 
-sbt "project mapper-generator" 'set scalaVersion := "2.9.2"' publish 
+sbt "project mapper-generator" 'set scalaVersion := "2.9.2"' 'set scalaBinaryVersion := "2.9.2"' publish-signed
 
 sbt "g sbt013" 
-sbt "project mapper-generator" 'set scalaVersion := "2.10.2"' publish 
+sbt "project mapper-generator" 'set scalaVersion := "2.10.2"' 'set scalaBinaryVersion := "2.10"' publish-signed
 
