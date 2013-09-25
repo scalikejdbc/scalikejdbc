@@ -15,6 +15,7 @@
  */
 package scalikejdbc
 
+import java.util.Locale.{ ENGLISH => en }
 import scala.language.reflectiveCalls
 import scala.language.experimental.macros
 import scala.language.dynamics
@@ -43,12 +44,25 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
-      val className = this.getClass.getName.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
+      val className = getClassSimpleName(this).replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
       SQLSyntaxProvider.toColumnName(className, nameConverters, useSnakeCaseColumnName)
     }
 
+    private[this] def getClassSimpleName(obj: Any): String = {
+      try obj.getClass.getSimpleName
+      catch {
+        case e: InternalError =>
+          // working on the Scala REPL
+          val clazz = obj.getClass
+          val classOfClazz = clazz.getClass
+          val getSimpleBinaryName = classOfClazz.getDeclaredMethods.find(_.getName == "getSimpleBinaryName").get
+          getSimpleBinaryName.setAccessible(true)
+          getSimpleBinaryName.invoke(clazz).toString
+      }
+    }
+
     /**
-     * [[scalikekdbc.interpolation.SQLSyntax]] value for table name.
+     * [[scalikejdbc.interpolation.SQLSyntax]] value for table name.
      */
     def table: TableDefSQLSyntax = TableDefSQLSyntax(tableName)
 
@@ -56,7 +70,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
     def columns: Seq[String] = {
-      if (columnNames.isEmpty) SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase))
+      if (columnNames.isEmpty) SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase(en)))
       else columnNames
     }
 
@@ -109,7 +123,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax = {
-      val _name = if (forceUpperCase) tableName.toUpperCase else tableName
+      val _name = if (forceUpperCase) tableName.toUpperCase(en) else tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
@@ -123,7 +137,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax(name: String) = {
-      val _name = if (forceUpperCase) name.toUpperCase else name
+      val _name = if (forceUpperCase) name.toUpperCase(en) else name
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
@@ -160,7 +174,6 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait SQLSyntaxProvider[A] extends Dynamic {
     import SQLSyntaxProvider._
-    import scala.reflect.runtime.universe._
 
     /**
      * Rule to convert field names to column names.
@@ -197,14 +210,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def field(name: String): SQLSyntax = {
       val columnName = {
-        if (forceUpperCase) toColumnName(name, nameConverters, useSnakeCaseColumnName).toUpperCase
+        if (forceUpperCase) toColumnName(name, nameConverters, useSnakeCaseColumnName).toUpperCase(en)
         else toColumnName(name, nameConverters, useSnakeCaseColumnName)
       }
       c(columnName)
     }
 
     /**
-     * Returns [[scalikejdbc.SQLSyntax]] value for the column which is referred by the field.
+     * Returns [[scalikejdbc.interpolation.SQLSyntax]] value for the column which is referred by the field.
      */
     def selectDynamic(name: String): SQLSyntax = macro scalikejdbc.SQLInterpolationMacro.selectDynamic[A]
 
@@ -224,15 +237,18 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Returns the snake_case name after applying nameConverters.
      */
     def toColumnName(str: String, nameConverters: Map[String, String], useSnakeCaseColumnName: Boolean): String = {
-      val convertersApplied = nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
+      val convertersApplied = {
+        if (nameConverters != null) nameConverters.foldLeft(str) { case (s, (from, to)) => s.replaceAll(from, to) }
+        else str
+      }
       if (useSnakeCaseColumnName) {
         val acronymsFiltered = acronymRegExp.replaceAllIn(
           acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
-            convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase)
+            convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase(en))
           }.getOrElse(convertersApplied), // might end with an acronym
-          { m => "_" + m.matched.init.toLowerCase + "_" + m.matched.last.toString.toLowerCase }
+          { m => "_" + m.matched.init.toLowerCase(en) + "_" + m.matched.last.toString.toLowerCase(en) }
         )
-        val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase })
+        val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase(en) })
           .replaceFirst("^_", "")
           .replaceFirst("_$", "")
 
@@ -253,7 +269,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
       val shortenedName = shorten(toAlphabetOnly(name))
       val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))
-      if (shortenedNames.filter(_ == shortenedName).size > 1) {
+      if (shortenedNames.count(_ == shortenedName) > 1) {
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
             if (found) {
@@ -303,13 +319,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
-    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
+    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
     val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
 
     val asterisk: SQLSyntax = sqls"*"
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       SQLSyntax(c.value)
     }.getOrElse {
       throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
@@ -328,7 +344,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val forceUpperCase = support.forceUpperCase
     val useSnakeCaseColumnName = support.useSnakeCaseColumnName
     val delimiterForResultName = support.delimiterForResultName
-    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase else c }.map(c => SQLSyntax(c))
+    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
     def notFoundInColumns(aliasName: String, name: String): InvalidColumnNameException = notFoundInColumns(aliasName, name, columns.map(_.value).mkString(","))
 
@@ -347,7 +363,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       with AsteriskProvider {
 
     val result: ResultSQLSyntaxProvider[S, A] = {
-      val table = if (support.forceUpperCase) tableAliasName.toUpperCase else tableAliasName
+      val table = if (support.forceUpperCase) tableAliasName.toUpperCase(en) else tableAliasName
       ResultSQLSyntaxProvider[S, A](support, table)
     }
 
@@ -359,7 +375,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
     }.getOrElse {
       throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
@@ -384,7 +400,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def apply(syntax: SQLSyntax): PartialResultSQLSyntaxProvider[S, A] = PartialResultSQLSyntaxProvider(support, tableAliasName, syntax)
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       val name = toAliasName(c.value, support)
       SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
@@ -394,7 +410,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       extends SQLSyntaxProviderCommonImpl[S, A](support, aliasName) {
     import SQLSyntaxProvider._
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       val name = toAliasName(c.value, support)
       SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
     }.getOrElse(throw notFoundInColumns(aliasName, name))
@@ -427,12 +443,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
 
-    def namedColumn(name: String) = namedColumns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
+    def namedColumn(name: String) = namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
       throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
         s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
     }
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).map { c =>
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       val name = toAliasName(c.value, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
@@ -490,7 +506,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name.value))).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
@@ -518,7 +534,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }.mkString(", "))
 
     def column(name: String): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name))).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
@@ -543,12 +559,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       rn.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
     }
 
-    def column(name: String): SQLSyntax = columns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
+    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).getOrElse {
       throw notFoundInColumns(aliasName, name)
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).isDefined).map { rn =>
+      resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name.value))).map { rn =>
         SQLSyntax(s"${rn.namedColumn(name.value).value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value)
@@ -583,7 +599,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      underlying.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).map { _ =>
+      underlying.namedColumns.find(_.value.equalsIgnoreCase(name.value)).map { _ =>
         SQLSyntax(s"${aliasName}.${underlying.namedColumn(name.value).value}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value, resultName.columns.map(_.value).mkString(","))
@@ -611,7 +627,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }.mkString(", "))
 
     def column(name: String): SQLSyntax = {
-      underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).map { nc =>
+      underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).map { nc =>
         SQLSyntax(s"${aliasName}.${nc.value} as ${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
@@ -634,7 +650,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     override val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
 
-    def column(name: String): SQLSyntax = underlying.columns.find(_.value.toLowerCase == name.toLowerCase).map { original: SQLSyntax =>
+    def column(name: String): SQLSyntax = underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original: SQLSyntax =>
       val name = toAliasName(original.value, underlying.support)
       SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
     }.getOrElse {
@@ -645,12 +661,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
     }
 
-    def namedColumn(name: String) = underlying.namedColumns.find(_.value.toLowerCase == name.toLowerCase).getOrElse {
+    def namedColumn(name: String) = underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
       throw notFoundInColumns(aliasName, name, namedColumns.map(_.value).mkString(","))
     }
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      underlying.namedColumns.find(_.value.toLowerCase == name.value.toLowerCase).map { nc =>
+      underlying.namedColumns.find(_.value.equalsIgnoreCase(name.value)).map { nc =>
         SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name.value, underlying.columns.map(_.value).mkString(","))

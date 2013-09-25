@@ -16,6 +16,7 @@
 package scalikejdbc.mapper
 
 import scalikejdbc._
+import java.util.Locale.{ ENGLISH => en }
 
 /**
  * Active Record like template generator
@@ -27,7 +28,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(toClassName(table))
-  private val syntaxName = "[A-Z]".r.findAllIn(className).mkString.toLowerCase
+  private val syntaxName = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
   private val comma = ","
   private val eol = config.lineBreak.value
 
@@ -449,7 +450,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      */
     val createMethod = {
       val createColumns: List[Column] = allColumns.filterNot {
-        c => table.autoIncrementColumns.find(aic => aic.name == c.name).isDefined
+        c => table.autoIncrementColumns.exists(_.name == c.name)
       }
 
       val placeHolderPart: String = config.template match {
@@ -723,7 +724,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      */
     val findMethod = {
       val argsPart = pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ")
-      val wherePart = (config.template match {
+      val wherePart = config.template match {
         case GeneratorTemplate.queryDsl =>
           pkColumns.map(pk => ".eq(" + syntaxName + "." + pk.nameInScala + ", " + pk.nameInScala + ")").mkString(".and")
         case GeneratorTemplate.interpolation =>
@@ -734,7 +735,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           pkColumns.map(pk => pk.name + " = /*'" + pk.nameInScala + "*/" + pk.dummyValue).mkString(" and ")
         case _ =>
           pkColumns.map(pk => pk.name + " = {" + pk.nameInScala + "}").mkString(" and ")
-      })
+      }
       val bindingPart = (config.template match {
         case GeneratorTemplate.interpolation | GeneratorTemplate.queryDsl => ""
         case GeneratorTemplate.basic => ".bind(" + pkColumns.map(pk => pk.nameInScala).mkString(", ")
@@ -847,10 +848,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * }}}
      */
     val findAllByMethod = {
-      val paramsPart = (config.template match {
+      val paramsPart = config.template match {
         case GeneratorTemplate.basic => "params: Any*"
         case _ => "params: (Symbol, Any)*"
-      })
+      }
       val bindingPart = (config.template match {
         case GeneratorTemplate.basic => ".bind"
         case _ => ".bindByName"
@@ -901,10 +902,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * }}}
      */
     val countByMethod = {
-      val paramsPart = (config.template match {
+      val paramsPart = config.template match {
         case GeneratorTemplate.basic => "params: Any*"
         case _ => "params: (Symbol, Any)*"
-      })
+      }
       val bindingPart = (config.template match {
         case GeneratorTemplate.basic => ".bind"
         case _ => ".bindByName"
@@ -1042,7 +1043,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def toProperCase(s: String): String = {
     if (s == null || s.trim.size == 0) ""
-    else s.substring(0, 1).toUpperCase + s.substring(1).toLowerCase
+    else s.substring(0, 1).toUpperCase(en) + s.substring(1).toLowerCase(en)
   }
 
   // -----------------------
@@ -1269,7 +1270,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       )
       .replace("%createFields%", table.allColumns.filter {
         c =>
-          c.isNotNull && table.autoIncrementColumns.find(aic => aic.name == c.name).isEmpty
+          c.isNotNull && table.autoIncrementColumns.forall(_.name != c.name)
       }.map {
         c =>
           c.nameInScala + " = " + c.defaultValueInScala

@@ -196,16 +196,24 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
    * Returns stack trace information as String value
    * @return stack trace
    */
-  private[this] def stackTraceInformation: String = "  [Stack Trace]" + eol +
-    "    ..." + eol +
-    Thread.currentThread.getStackTrace
-    .dropWhile { trace =>
-      trace.getClassName != getClass.toString &&
-        (trace.getClassName.startsWith("java.lang.") ||
-          trace.getClassName.startsWith("scalikejdbc."))
-    }.take(15).map { trace =>
-      "    " + trace.toString
-    }.mkString(eol) + eol + "    ..." + eol
+  private[this] def stackTraceInformation: String = {
+
+    val stackTrace = Thread.currentThread.getStackTrace
+    val lines = (if (GlobalSettings.loggingSQLAndTime.printUnprocessedStackTrace) {
+      stackTrace.tail
+    } else {
+      stackTrace.dropWhile { trace =>
+        val className = trace.getClassName
+        className != getClass.toString &&
+          (className.startsWith("java.lang.") || className.startsWith("scalikejdbc."))
+      }
+    }).take(GlobalSettings.loggingSQLAndTime.stackTraceDepth).map { trace => "    " + trace.toString }
+
+    "  [Stack Trace]" + eol +
+      "    ..." + eol +
+      lines.mkString(eol) + eol +
+      "    ..." + eol
+  }
 
   /**
    * Logging SQL and timing (this trait depends on this instance)
@@ -272,7 +280,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
         // call event handler
         GlobalSettings.queryFailureListener.apply(template, singleParams, e)
 
-        throw e;
+        throw e
     }
   }
 

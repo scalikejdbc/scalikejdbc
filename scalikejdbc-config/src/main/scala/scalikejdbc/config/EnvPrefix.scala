@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2013 Kazuhiro Sera
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,19 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package scalikejdbc
+package scalikejdbc.config
 
 /**
- * Settings for logging SQL and timing
+ * Env prefix for config reader
  */
-case class LoggingSQLAndTimeSettings(
-  enabled: Boolean = true,
-  singleLineMode: Boolean = false,
-  printUnprocessedStackTrace: Boolean = false,
-  stackTraceDepth: Int = 15,
-  logLevel: Symbol = 'debug,
-  warningEnabled: Boolean = false,
-  warningThresholdMillis: Long = 3000L,
-  warningLogLevel: Symbol = 'warn)
+trait EnvPrefix {
+  val env: Option[String]
+}
+
+/**
+ * No Env prefix for config reader
+ */
+trait NoEnvPrefix extends EnvPrefix {
+  override val env: Option[String] = None
+}
 

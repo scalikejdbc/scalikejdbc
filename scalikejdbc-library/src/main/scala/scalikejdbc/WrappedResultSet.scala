@@ -17,10 +17,11 @@ package scalikejdbc
 
 import java.sql.ResultSet
 import java.util.Calendar
+import org.joda.time._
 import collection.JavaConverters._
 
 /**
- * {@link java.sql.ResultSet} wrapper
+ * [[java.sql.ResultSet]] wrapper
  */
 case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
 
@@ -559,6 +560,18 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     wrapIfError(underlying.getTimestamp(columnLabel, cal))
   }
 
+  def dateTime(columnIndex: Int): DateTime = timestamp(columnIndex).toDateTime
+
+  def dateTime(columnLabel: String): DateTime = timestamp(columnLabel).toDateTime
+
+  def localDate(columnIndex: Int): LocalDate = date(columnIndex).toLocalDate
+
+  def localDate(columnLabel: String): LocalDate = date(columnLabel).toLocalDate
+
+  def localTime(columnIndex: Int): LocalTime = time(columnIndex).toLocalTime
+
+  def localTime(columnLabel: String): LocalTime = time(columnLabel).toLocalTime
+
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex))
 
   def timestampOpt(columnLabel: String): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnLabel))
@@ -566,6 +579,18 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def timestampOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex, cal))
 
   def timestampOpt(columnLabel: String, cal: Calendar): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnLabel, cal))
+
+  def dateTimeOpt(columnIndex: Int): Option[DateTime] = timestampOpt(columnIndex).map(_.toDateTime)
+
+  def dateTimeOpt(columnLabel: String): Option[DateTime] = timestampOpt(columnLabel).map(_.toDateTime)
+
+  def localDateOpt(columnIndex: Int): Option[LocalDate] = dateOpt(columnIndex).map(_.toLocalDate)
+
+  def localDateOpt(columnLabel: String): Option[LocalDate] = dateOpt(columnLabel).map(_.toLocalDate)
+
+  def localTimeOpt(columnIndex: Int): Option[LocalTime] = timeOpt(columnIndex).map(_.toLocalTime)
+
+  def localTimeOpt(columnLabel: String): Option[LocalTime] = timeOpt(columnLabel).map(_.toLocalTime)
 
   def url(columnIndex: Int): java.net.URL = {
     ensureCursor()

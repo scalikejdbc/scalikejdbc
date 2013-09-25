@@ -23,10 +23,10 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc" % "[1.6,)",
+  "com.github.seratch" %% "scalikejdbc"  % "[1.6,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4",  // your JDBC driver
-  "org.slf4j" % "slf4j-simple" % "[1.7,)"         // slf4j implementation
+  "org.postgresql"     %  "postgresql"   % "9.2-1003-jdbc4", // your JDBC driver
+  "org.slf4j"          %  "slf4j-simple" % "[1.7,)"          // slf4j implementation
 )
 ```
 
@@ -45,17 +45,21 @@ sbt console
 
 ## Basic usage
 
-### Scala 2.10
+### Scala 2.10.x
 
-SQLInterpolation and SQLSyntaxSupport is much powerful.
+The combination of SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
 case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
-case class Group(id: Long, name: Option[String] = None)
 object User extends SQLSyntaxSupport[User] {
-  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group]): User = { ... }
+  def apply(u: SyntaxProvider[User])(rs: WrappedResultSet): User = { ... }
+  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group])(rs: WrappedResultSet): User = { ... }
 }
-object Group extends SQLSyntaxSupport[Group] { ... }
+
+case class Group(id: Long, name: Option[String] = None)
+object Group extends SQLSyntaxSupport[Group] { 
+  def apply(g: SyntaxProvider[Group])(rs: WrappedResultSet): Group = { ... }
+}
 
 val (u, g) = (User.syntax("u"), Group.sytnax("g"))
 val users: List[User] = DB readOnly { implicit session =>
@@ -68,8 +72,10 @@ val users: List[User] = DB readOnly { implicit session =>
       .limit(20)
       .offset(0)
   }.map(User(u, g)).list.apply()
+}
 
   // or using SQLInterpolation directly
+val users: List[User] = DB readOnly { implicit session =>
   sql"""
     select ${u.result.*}, ${g.result.*} 
     from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
@@ -85,13 +91,12 @@ val newUser: User = DB localTx { implicit session =>
 }
 
 DB localTx { implicit session =>
-  applyUdate {
-    update(User as u)
-      .set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
+  withSQL {
+    update(User as u).set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
       .where.eq(u.id, 123)
-  } // = withSQL { ... }.update.apply()
+  }.update.apply()
 
-  applyUpdate { delete.from(User).where.eq(User.column.id, 123) }
+  withSQL { delete.from(User).where.eq(User.column.id, 123) }.update.apply()
 }
 ```
 
@@ -99,7 +104,7 @@ More examples:
 
 https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
 
-### Scala 2.9
+### Scala 2.9.x
 
 Basically, use string template. Indeed, it's an old style but still good.
 

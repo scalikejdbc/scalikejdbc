@@ -16,9 +16,6 @@
 package scalikejdbc.interpolation
 
 import scala.language.implicitConversions
-import scalikejdbc.SQLInterpolationString
-
-import scala.language.implicitConversions
 
 /**
  * object to import.
@@ -42,7 +39,7 @@ trait Implicits {
   @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
 
   /**
-   * Returns String value when String type is expected for [[scalikejdbc.WrappedResultset]].
+   * Returns String value when String type is expected for [[scalikejdbc.WrappedResultSet]].
    *
    * {{{
    *   val c = Company.syntax("c").resultName

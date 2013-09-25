@@ -1,7 +1,5 @@
 scalariformSettings
 
-testgeneratorSettings
-
 scalagSettings
 
 ScriptedPlugin.scriptedSettings

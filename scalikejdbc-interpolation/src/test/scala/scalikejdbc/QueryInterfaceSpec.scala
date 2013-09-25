@@ -44,10 +44,21 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
 
   it should "be available with Query Interface" in {
     try {
-      DB localTx { implicit s =>
+      DB autoCommit { implicit s =>
+        try sql"drop table ${Order.table}".execute.apply()
+        catch { case e: Exception => }
         sql"create table ${Order.table} (id int not null, product_id int not null, account_id int, created_at timestamp not null)".execute.apply()
+
+        try sql"drop table ${Product.table}".execute.apply()
+        catch { case e: Exception => }
         sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute.apply()
+
+        try sql"drop table ${LegacyProduct.table}".execute.apply()
+        catch { case e: Exception => }
         sql"create table ${LegacyProduct.table} (id int, name varchar(256), price int not null)".execute.apply()
+
+        try sql"drop table ${Account.table}".execute.apply()
+        catch { case e: Exception => }
         sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
       }
       DB localTx { implicit s =>

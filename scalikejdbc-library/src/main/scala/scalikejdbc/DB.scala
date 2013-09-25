@@ -17,6 +17,7 @@ package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection }
 import java.lang.IllegalStateException
+import java.util.Locale.{ ENGLISH => en }
 import scala.util.control.Exception._
 
 import scalikejdbc.metadata._
@@ -29,7 +30,7 @@ import scalikejdbc.metadata._
  * Using DBSession:
  *
  * {{{
- *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
  *   val users = DB readOnly { session =>
@@ -63,7 +64,7 @@ import scalikejdbc.metadata._
  * Using SQL:
  *
  * {{{
- *   ConnectionPool.singletion("jdbc:...","user","password")
+ *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
  *   val users = DB readOnly { session =>
@@ -680,8 +681,8 @@ case class DB(conn: Connection) extends LogSupport {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       _getTableName(meta, schema, table, tableTypes)
-        .orElse(_getTableName(meta, schema, table.toUpperCase, tableTypes))
-        .orElse(_getTableName(meta, schema, table.toLowerCase, tableTypes)).map { tableName =>
+        .orElse(_getTableName(meta, schema, table.toUpperCase(en), tableTypes))
+        .orElse(_getTableName(meta, schema, table.toLowerCase(en), tableTypes)).map { tableName =>
           new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
         }
     }.getOrElse(Nil)
@@ -695,7 +696,7 @@ case class DB(conn: Connection) extends LogSupport {
    */
   def getTable(table: String): Option[Table] = readOnlyWithConnection { conn =>
     val meta = conn.getMetaData
-    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase)).orElse(_getTable(meta, table.toLowerCase))
+    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase(en))).orElse(_getTable(meta, table.toLowerCase(en)))
   }
 
   /**
@@ -722,7 +723,7 @@ case class DB(conn: Connection) extends LogSupport {
             typeName = rs.string("TYPE_NAME"),
             size = rs.int("COLUMN_SIZE"),
             isRequired = rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO",
-            isPrimaryKey = pkNames.find(pk => pk == rs.string("COLUMN_NAME")).isDefined,
+            isPrimaryKey = pkNames.exists(_ == rs.string("COLUMN_NAME")),
             isAutoIncrement = {
               // Oracle throws java.sql.SQLException: Invalid column name
               try {
