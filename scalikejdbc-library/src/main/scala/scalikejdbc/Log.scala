@@ -18,7 +18,7 @@ package scalikejdbc
 import org.slf4j.Logger
 
 /**
- * Logger which just wraps [[org.slf4j.Logger]] internally.
+ * Logger which just wraps org.slf4j.Logger internally.
  *
  * @param logger logger
  */

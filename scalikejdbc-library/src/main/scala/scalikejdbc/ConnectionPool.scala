@@ -141,7 +141,7 @@ object ConnectionPool extends LogSupport {
   }
 
   /**
-   * Returns [[javax.sql.DataSource]].
+   * Returns javax.sql.DataSource.
    * @param name pool name
    * @return datasource
    */
@@ -151,7 +151,7 @@ object ConnectionPool extends LogSupport {
   }
 
   /**
-   * Borrows a [[java.sql.Connection]] from the specified connection pool.
+   * Borrows a java.sql.Connection from the specified connection pool.
    * @param name pool name
    * @return connection
    */
@@ -197,13 +197,13 @@ abstract class ConnectionPool(
     val settings: ConnectionPoolSettings = ConnectionPoolSettings()) {
 
   /**
-   * Borrows [[java.sql.Connection]] from pool.
+   * Borrows java.sql.Connection from pool.
    * @return connection
    */
   def borrow(): Connection
 
   /**
-   * Returns [[javax.sql.DataSource]] object.
+   * Returns javax.sql.DataSource object.
    * @return datasource
    */
   def dataSource: DataSource

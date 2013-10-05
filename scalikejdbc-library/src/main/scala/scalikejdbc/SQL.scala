@@ -404,7 +404,7 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeBatch()]].
+ * SQL which execute java.sql.Statement#executeBatch().
  * @param statement SQL template
  * @param parameters parameters
  */
@@ -419,7 +419,7 @@ class SQLBatch(val statement: String)(val parameters: Seq[Any]*) {
 }
 
 /**
- * SQL which execute [[java.sql.Statement#execute()]].
+ * SQL which execute java.sql.Statement#execute().
  * @param statement SQL template
  * @param parameters parameters
  * @param before before filter
@@ -436,7 +436,7 @@ class SQLExecution(val statement: String)(val parameters: Any*)(before: (Prepare
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeUpdate()]].
+ * SQL which execute java.sql.Statement#executeUpdate().
  * @param statement SQL template
  * @param parameters parameters
  * @param before before filter
@@ -453,7 +453,7 @@ class SQLUpdate(val statement: String)(val parameters: Any*)(before: (PreparedSt
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeUpdate()]] and get generated key value.
+ * SQL which execute java.sql.Statement#executeUpdate() and get generated key value.
  * @param statement SQL template
  * @param parameters parameters
  */
@@ -484,8 +484,7 @@ trait SQLToTraversable[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeQuery()]]
- * and returns the result as [[scala.collection.Traversable]] value.
+ * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Traversable value.
  * @param statement SQL template
  * @param parameters parameters
  * @param extractor  extractor function
@@ -514,8 +513,7 @@ trait SQLToList[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeQuery()]]
- * and returns the result as [[scala.collection.immutable.List]] value.
+ * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.immutable.List value.
  * @param statement SQL template
  * @param parameters parameters
  * @param extractor  extractor function
@@ -555,8 +553,7 @@ trait SQLToOption[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
 }
 
 /**
- * SQL which execute [[java.sql.Statement#executeQuery()]]
- * and returns the result as [[scala.Option]] value.
+ * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.Option value.
  * @param statement SQL template
  * @param parameters parameters
  * @param extractor  extractor function

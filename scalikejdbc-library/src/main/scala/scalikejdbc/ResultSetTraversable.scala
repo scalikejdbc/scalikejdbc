@@ -19,7 +19,7 @@ package scalikejdbc
 import java.sql.ResultSet
 
 /**
- * [[scala.collection.Traversable]] object which wraps [[java.sql.ResultSet]]
+ * scala.collection.Traversable object which wraps java.sql.ResultSet.
  */
 class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
 

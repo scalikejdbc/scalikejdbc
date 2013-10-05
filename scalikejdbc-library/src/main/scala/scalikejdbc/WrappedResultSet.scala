@@ -21,7 +21,7 @@ import org.joda.time._
 import collection.JavaConverters._
 
 /**
- * [[java.sql.ResultSet]] wrapper
+ * java.sql.ResultSet wrapper.
  */
 case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
 
