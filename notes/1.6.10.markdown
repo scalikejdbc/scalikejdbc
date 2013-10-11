@@ -1,0 +1,24 @@
+ScalikeJDBC 1.6.10 has been released. 
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+https://github.com/seratch/scalikejdbc
+
+## library
+
+- Improved WrappedResultSet#dateTime(..) and so on to avoid NPE
+
+## config 
+
+- Fixed DBsWithEnv (since 1.6.9) doesn't work correctly
+
+## interpolation
+
+- Improved SQLSyntax#toString
+
+- Fixed SQLSyntax's equality 
+
+Unfortunately, sqls"id = ${id}" == sqls"id == ${id}" was not true. Fixed from this version.
+
+Enjoy writing typesafe and reactive SQL and get things done!
+
