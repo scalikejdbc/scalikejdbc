@@ -174,10 +174,10 @@ In addition, passing `AutoSession` as an implicit parameter is quite useful. Lik
 ```scala
 object Member {
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
-    sql"select * from members where id = ${id}").map(*).single.apply() 
+    sql"select * from members where id = ${id}".map(*).single.apply() 
   }
   def setProfileVerified(member: Member)(implicit session: DBSession = AutoSession) = {
-    sql"update members set profile_verified = true where id = ${member.id}").update.apply()
+    sql"update members set profile_verified = true where id = ${member.id}".update.apply()
   }
 }
 
@@ -222,7 +222,7 @@ class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 
   override def fixture(implicit session: DBSession) {
     val (id, name, createdAt) = (1, "Alice", DateTime.now)
-    sql"insert into members values (${id}, ${name}, ${createdAt})").update.apply()
+    sql"insert into members values (${id}, ${name}, ${createdAt})".update.apply()
   }
 
   it should "create a new record" in { implicit session =>
