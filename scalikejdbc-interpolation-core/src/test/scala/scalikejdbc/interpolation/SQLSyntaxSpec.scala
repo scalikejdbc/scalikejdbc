@@ -194,4 +194,15 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     SQLSyntax.toOrConditionOpt(None, None, None).isDefined should equal(false)
   }
 
+  it should "have #equals as expected" in {
+    val (id, id2, name) = (123, 234, "Alice")
+    val sqls1 = sqls"id = ${id} and name = ${name}"
+    val sqls2 = sqls"id = ${id} and name = ${name}"
+    val sqls3 = sqls"id = ${id2} and name = ${name}"
+    val sqls4 = sqls"id = ${id} and name = ${name} and deleted_at is null"
+    sqls1 == sqls2 should be(true)
+    sqls2 == sqls3 should be(false)
+    sqls2 == sqls4 should be(false)
+  }
+
 }

@@ -103,7 +103,7 @@ class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
       }
       it("should read configuration by env and db name and return as Map") {
         val expected = Map(
-          "driver" -> "org.h2.Driver2",
+          "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:dev-foo",
           "user" -> "dev-foo",
           "password" -> "secret2"

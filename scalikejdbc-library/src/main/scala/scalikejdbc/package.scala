@@ -135,7 +135,7 @@ package object scalikejdbc {
   implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
   /**
-   * [[org.joda.time.LocalTime]] converter.
+   * org.joda.time.LocalTime converter.
    * @param t LocalTime object
    */
   class LocalTimeConverter(t: LocalTime) {
@@ -166,7 +166,7 @@ package object scalikejdbc {
   }
 
   /**
-   * [[scala.Option]] value converter.
+   * Option value converter.
    * @param v nullable raw value
    * @tparam A raw type
    * @return optional value

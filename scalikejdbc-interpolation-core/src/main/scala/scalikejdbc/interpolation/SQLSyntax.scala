@@ -27,6 +27,17 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   import Implicits._
   import SQLSyntax._
 
+  override def equals(that: Any): Boolean = {
+    if (that.isInstanceOf[SQLSyntax]) {
+      val thatSqls = that.asInstanceOf[SQLSyntax]
+      value == thatSqls.value && parameters == thatSqls.parameters
+    } else {
+      false
+    }
+  }
+
+  override def toString(): String = s"SQLSyntax(value: ${value}, parameters: ${parameters})"
+
   def append(syntax: SQLSyntax) = sqls"${this} ${syntax}"
 
   def groupBy(columns: SQLSyntax*) = sqls"${this} group by ${csv(columns: _*)}"

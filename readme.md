@@ -16,6 +16,8 @@ We never release without passing all the unit tests with the following RDBMS.
 - H2 Database Engine
 - HSQLDB
 
+ScalikeJDBC uses JDBC drivers, so we believe that ScalikeJDBC basically works with any other RDBMS.
+
 
 ## Setup
 
@@ -23,10 +25,10 @@ We never release without passing all the unit tests with the following RDBMS.
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"  % "[1.6,)",
+  "com.github.seratch" %% "scalikejdbc"               % "[1.6,)",
   "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.6,)",
-  "org.postgresql"     %  "postgresql"   % "9.2-1003-jdbc4", // your JDBC driver
-  "org.slf4j"          %  "slf4j-simple" % "[1.7,)"          // slf4j implementation
+  "org.postgresql"     %  "postgresql"                % "9.2-1003-jdbc4", // your JDBC driver
+  "org.slf4j"          %  "slf4j-simple"              % "[1.7,)"          // slf4j implementation
 )
 ```
 
@@ -40,7 +42,7 @@ cd scalikejdbc/sandbox
 sbt console
 
 // simple query
-// val ids = withSQL { select(u.id).from(User as u).orderBy(u.id) }.map(_.long(1)).list.apply()
+// val ids = withSQL { select(u.id).from(Member as m).orderBy(m.id) }.map(_.long(1)).list.apply()
 ```
 
 ## Basic usage
@@ -50,53 +52,62 @@ sbt console
 The combination of SQLInterpolation and SQLSyntaxSupport is much powerful.
 
 ```scala
-case class User(id: Long, name: String, groupId: Option[Long], group: Option[Group])
-object User extends SQLSyntaxSupport[User] {
-  def apply(u: SyntaxProvider[User])(rs: WrappedResultSet): User = { ... }
-  def apply(u: SyntaxProvider[User], g: SyntaxProvider[Group])(rs: WrappedResultSet): User = { ... }
+case class Member(id: Long, name: String, groupId: Option[Long], group: Option[Group])
+
+object Member extends SQLSyntaxSupport[Member] {
+  // can be omitted if your table name is "member"
+  override val tableName = "members" 
+  // can be omitted if column names are just snake-case'd from fields
+  override val columnNames = Seq("id", "member_name", "group_id")
+  // converts field names to column names
+  override val nameConverters = Map("^name$" -> "member_name")
+
+  def apply(u: SyntaxProvider[Member])(rs: WrappedResultSet): Member = { ... }
+  def apply(u: SyntaxProvider[Member], g: SyntaxProvider[Group])(rs: WrappedResultSet): Member = { ... }
 }
 
 case class Group(id: Long, name: Option[String] = None)
 object Group extends SQLSyntaxSupport[Group] { 
+  override val tableName = "groups" 
   def apply(g: SyntaxProvider[Group])(rs: WrappedResultSet): Group = { ... }
 }
 
-val (u, g) = (User.syntax("u"), Group.sytnax("g"))
-val users: List[User] = DB readOnly { implicit session =>
+val (m, g) = (Member.syntax("m"), Group.sytnax("g"))
+val members: List[Member] = DB readOnly { implicit session =>
   withSQL { 
     select
-      .from(User as u)
-      .leftJoin(Group as g).on(u.groupId, g.id)
-      .where.eq(u.id, 123) 
-      .orderBy(u.createdAt).desc
+      .from(Member as m)
+      .leftJoin(Group as g).on(m.groupId, g.id)
+      .where.eq(m.id, 123) 
+      .orderBy(m.createdAt).desc
       .limit(20)
       .offset(0)
-  }.map(User(u, g)).list.apply()
+  }.map(Member(m, g)).list.apply()
 }
 
-  // or using SQLInterpolation directly
-val users: List[User] = DB readOnly { implicit session =>
+// or using SQLInterpolation directly
+val members: List[Member] = DB readOnly { implicit session =>
   sql"""
-    select ${u.result.*}, ${g.result.*} 
-    from ${User as u} left join ${Group as g} on ${u.groupId} = ${g.id} 
-    where ${u.id} = ${123}
-    order by ${u.createdAt} desc limit ${limit} offset ${offset}
-  """.map(User(u, g)).list.apply()
+    select ${m.result.*}, ${g.result.*} 
+    from ${Member as m} left join ${Group as g} on ${m.groupId} = ${g.id} 
+    where ${m.id} = ${123}
+    order by ${m.createdAt} desc limit ${limit} offset ${offset}
+  """.map(Member(m, g)).list.apply()
 }
 
 val name = Some("Chris")
-val newUser: User = DB localTx { implicit session =>
-  val id = withSQL { insert.into(User).values(name) }.updateAndReturnGeneratedKey.apply()
-  User(id, name)
+val newbie: Member = DB localTx { implicit session =>
+  val id = withSQL { insert.into(Member).values(name) }.updateAndReturnGeneratedKey.apply()
+  Member(id, name)
 }
 
 DB localTx { implicit session =>
   withSQL {
-    update(User as u).set(u.name -> "Bobby", u.updatedAt -> DateTime.now)
-      .where.eq(u.id, 123)
+    update(Member as m).set(m.name -> "Bobby", m.updatedAt -> DateTime.now)
+      .where.eq(m.id, 123)
   }.update.apply()
 
-  withSQL { delete.from(User).where.eq(User.column.id, 123) }.update.apply()
+  withSQL { delete.from(Member).where.eq(Member.column.id, 123) }.update.apply()
 }
 ```
 
@@ -109,23 +120,32 @@ https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src
 Basically, use string template. Indeed, it's an old style but still good.
 
 ```scala
-case class User(id: Long, name: Option[String] = None)
-val * = (rs: WrappedResultSet) => User(rs.long("id"), rs.stringOpt("name"))
-val users: List[User] = DB readOnly { implicit session => 
-  SQL("select id, name from users where id = ?").bind(123).map(*).list.apply()
+case class Member(id: Long, name: Option[String] = None)
+val * = (rs: WrappedResultSet) => Member(rs.long("id"), rs.stringOpt("name"))
+val members: List[Member] = DB readOnly { implicit session => 
+  SQL("select id, name from members where id = ?").bind(123).map(*).list.apply()
 }
 val name = Some("Chris")
 
-val newUser: User = DB localTx { implicit session => 
-  val id = SQL("insert into users values ({name})")
+val newMember: Member = DB localTx { implicit session => 
+  val id = SQL("insert into members values ({name})")
     .bindByName('name -> name)).updateAndReturnGeneratedKey.apply() 
-  User(id, name)
+  Member(id, name)
 }
 ```
 
 If you need more information(connection management, transaction, CRUD), please check the following wiki page or scaladoc in detail.
 
 https://github.com/seratch/scalikejdbc/wiki/GettingStarted
+
+
+### Typesafe Activator template
+
+Also check the [Typesafe Activator](http://typesafe.com/activator) example: 
+
+http://typesafe.com/activator/template/scalikejdbc-activator-template
+
+https://github.com/seratch/hello-scalikejdbc
 
 
 ## Features
@@ -141,7 +161,7 @@ ConnectionPool.singleton("jdbc:h2:file:db/test", "sa", "")
 
 // Now DB operations are available
 val idList: List[Long] = DB readOnly { implicit session =>
-  sql"select id from users".map(_.long("id")).list.apply()
+  sql"select id from members".map(_.long("id")).list.apply()
 }
 ````
 
@@ -152,25 +172,25 @@ val idList: List[Long] = DB readOnly { implicit session =>
 In addition, passing `AutoSession` as an implicit parameter is quite useful. Like this:
 
 ```scala
-object User {
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[User] = {
-    sql"select * from users where id = ${id}").map(*).single.apply() 
+object Member {
+  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
+    sql"select * from members where id = ${id}".map(*).single.apply() 
   }
-  def setProfileVerified(member: User)(implicit session: DBSession = AutoSession) = {
-    sql"update users set profile_verified = true where id = ${member.id}").update.apply()
+  def setProfileVerified(member: Member)(implicit session: DBSession = AutoSession) = {
+    sql"update members set profile_verified = true where id = ${member.id}".update.apply()
   }
 }
 
-User.find(id) // new read-only session provided by AutoSession
+Member.find(id) // new read-only session provided by AutoSession
 
-User.setProfileVerified(member) // new auto-commit session provided by AutoSession
+Member.setProfileVerified(member) // new auto-commit session provided by AutoSession
 
 DB localTx { implicit session =>
   // begin transaction 
-  User.findByName(name).foreach { member => 
+  Member.findByName(name).foreach { member => 
     member.setProfileVerified(member)
   } 
-  val mightBeUpdated = User.find(id) 
+  val mightBeUpdated = Member.find(id) 
   // end transaction
 }
 ```
@@ -202,13 +222,13 @@ class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 
   override def fixture(implicit session: DBSession) {
     val (id, name, createdAt) = (1, "Alice", DateTime.now)
-    sql"insert into users values (${id}, ${name}, ${createdAt})").update.apply()
+    sql"insert into members values (${id}, ${name}, ${createdAt})".update.apply()
   }
 
   it should "create a new record" in { implicit session =>
-    val before = User.count() 
-    User.create(3, "Chris")
-    User.count() should equal(before + 1)
+    val before = Member.count() 
+    Member.create(3, "Chris")
+    Member.count() should equal(before + 1)
   }
 
 }
@@ -217,19 +237,19 @@ class AutoRollbackSpec extends fixture.FlatSpec with AutoRollback {
 for specs2(unit):
 
 ```scala
-object UserSpec extends Specification {
+object MemberSpec extends Specification {
 
-  "User should create a new record" in new AutoRollback {
-    val before = User.count()
-    User.create(3, "Chris")
-    User.count() must_==(before + 1) 
+  "Member should create a new record" in new AutoRollback {
+    val before = Member.count()
+    Member.create(3, "Chris")
+    Member.count() must_==(before + 1) 
   }
 
   trait AutoRollbackWithFixture extends AutoRollback {
     override def fixture(implicit session: DBSession) { ... }
   }
 
-  "User should ..." in new AutoRollbackWithFixture { ... }
+  "Member should ..." in new AutoRollbackWithFixture { ... }
 
 }
 ```

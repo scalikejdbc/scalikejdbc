@@ -18,7 +18,7 @@ package scalikejdbc
 import java.sql.PreparedStatement
 
 /**
- * Companion object
+ * Companion object.
  */
 object StatementExecutor {
 
@@ -36,7 +36,8 @@ object StatementExecutor {
 }
 
 /**
- * [[java.sql.Statement]] Executor
+ * java.sql.Statement Executor.
+ *
  * @param underlying preparedStatement
  * @param template SQL template
  * @param singleParams parameters for single execution (= not batch execution)
@@ -52,7 +53,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
   initialize()
 
   /**
-   * Initializes
+   * Initializes this instance.
    */
   private def initialize() {
     bindParams(singleParams)
@@ -62,7 +63,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String,
   }
 
   /**
-   * Binds parameters to the underlying [[java.sql.PreparedStatement]] object
+   * Binds parameters to the underlying java.sql.PreparedStatement object.
    * @param params parameters
    */
   def bindParams(params: Seq[Any]): Unit = {

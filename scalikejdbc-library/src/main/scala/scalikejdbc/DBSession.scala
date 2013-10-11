@@ -46,7 +46,7 @@ trait DBSession extends LogSupport {
   val isReadOnly: Boolean
 
   /**
-   * Create [[java.sql.Statement]] executor.
+   * Create java.sql.Statement executor.
    *
    * @param conn connection
    * @param template SQL template
@@ -94,7 +94,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Create [[java.sql.Statement]] executor.
+   * Create java.sql.Statement executor.
    * @param conn connection
    * @param template SQL template
    * @return statement executor
@@ -154,7 +154,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Returns query result as [[scala.collection.immutable.List]] object.
+   * Returns query result as scala.List object.
    *
    * @param template SQL template
    * @param params parameters
@@ -198,7 +198,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Returns query result as [[scala.collection.Traversable]] object.
+   * Returns query result as scala.collection.Traversable object.
    *
    * @param template SQL template
    * @param params parameters
@@ -214,7 +214,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#execute()]].
+   * Executes java.sql.PreparedStatement#execute().
    *
    * @param template SQL template
    * @param params  parameters
@@ -229,7 +229,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#execute()]].
+   * Executes java.sql.PreparedStatement#execute().
    *
    * @param before before filter
    * @param after after filter
@@ -252,7 +252,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   * Executes java.sql.PreparedStatement#executeUpdate().
    *
    * @param template SQL template
    * @param params  parameters
@@ -261,7 +261,7 @@ trait DBSession extends LogSupport {
   def executeUpdate(template: String, params: Any*): Int = update(template, params: _*)
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   * Executes java.sql.PreparedStatement#executeUpdate().
    *
    * @param template SQL template
    * @param params parameters
@@ -276,7 +276,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   * Executes java.sql.PreparedStatement#executeUpdate().
    *
    * @param before before filter
    * @param after after filter
@@ -290,7 +290,7 @@ trait DBSession extends LogSupport {
     params: Any*): Int = updateWithFilters(false, before, after, template, params: _*)
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]].
+   * Executes java.sql.PreparedStatement#executeUpdate().
    *
    * @param returnGeneratedKeys is generated keys required
    * @param before before filter
@@ -319,7 +319,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
+   * Executes java.sql.PreparedStatement#executeUpdate() and returns the generated key.
    *
    * @param template SQL template
    * @param params parameters
@@ -328,7 +328,7 @@ trait DBSession extends LogSupport {
   def updateAndReturnGeneratedKey(template: String, params: Any*): Long = updateAndReturnSpecifiedGeneratedKey(template, params: _*)(1)
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeUpdate()]] and returns the generated key.
+   * Executes java.sql.PreparedStatement#executeUpdate() and returns the generated key.
    *
    * @param template SQL template
    * @param params parameters
@@ -364,7 +364,7 @@ trait DBSession extends LogSupport {
   }
 
   /**
-   * Executes [[java.sql.PreparedStatement#executeBatch()]]
+   * Executes java.sql.PreparedStatement#executeBatch().
    * @param template SQL template
    * @param paramsList list of parameters
    * @return count list

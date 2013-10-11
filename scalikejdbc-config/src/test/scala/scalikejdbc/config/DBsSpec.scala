@@ -51,9 +51,17 @@ class DBsSpec extends FunSpec with ShouldMatchers {
         res2 should be(Some(1))
         DBs.closeAll()
       }
-      it("should read application.conf with env") {
+      it("should read application.conf with env (dev)") {
         DBsWithEnv("dev").setupAll()
         val res = DB readOnly { implicit session =>
+          SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+        }
+        res should be(Some(1))
+        DBs.closeAll()
+      }
+      it("should read application.conf with env (dev2)") {
+        DBsWithEnv("dev2").setupAll()
+        val res = NamedDB('hocon) readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res should be(Some(1))

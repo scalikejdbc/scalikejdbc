@@ -21,7 +21,7 @@ import org.joda.time._
 import collection.JavaConverters._
 
 /**
- * [[java.sql.ResultSet]] wrapper
+ * java.sql.ResultSet wrapper.
  */
 case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, index: Int) {
 
@@ -560,17 +560,17 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     wrapIfError(underlying.getTimestamp(columnLabel, cal))
   }
 
-  def dateTime(columnIndex: Int): DateTime = timestamp(columnIndex).toDateTime
+  def dateTime(columnIndex: Int): DateTime = Option(timestamp(columnIndex)).map(_.toDateTime).orNull[DateTime]
 
-  def dateTime(columnLabel: String): DateTime = timestamp(columnLabel).toDateTime
+  def dateTime(columnLabel: String): DateTime = Option(timestamp(columnLabel)).map(_.toDateTime).orNull[DateTime]
 
-  def localDate(columnIndex: Int): LocalDate = date(columnIndex).toLocalDate
+  def localDate(columnIndex: Int): LocalDate = Option(date(columnIndex)).map(_.toLocalDate).orNull[LocalDate]
 
-  def localDate(columnLabel: String): LocalDate = date(columnLabel).toLocalDate
+  def localDate(columnLabel: String): LocalDate = Option(date(columnLabel)).map(_.toLocalDate).orNull[LocalDate]
 
-  def localTime(columnIndex: Int): LocalTime = time(columnIndex).toLocalTime
+  def localTime(columnIndex: Int): LocalTime = Option(time(columnIndex)).map(_.toLocalTime).orNull[LocalTime]
 
-  def localTime(columnLabel: String): LocalTime = time(columnLabel).toLocalTime
+  def localTime(columnLabel: String): LocalTime = Option(time(columnLabel)).map(_.toLocalTime).orNull[LocalTime]
 
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = opt[java.sql.Timestamp](timestamp(columnIndex))
 
