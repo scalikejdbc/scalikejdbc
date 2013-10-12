@@ -117,15 +117,29 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def nullableBoolean(columnIndex: Int): java.lang.Boolean = {
     ensureCursor()
     Option(any(columnIndex))
-      .map(v => java.lang.Boolean.valueOf(v.toString))
-      .orNull[java.lang.Boolean]
+      .map {
+        case b: java.lang.Boolean => b
+        case b: Boolean => b.asInstanceOf[java.lang.Boolean]
+        case s: String => {
+          try s.toInt != 0
+          catch { case e: NumberFormatException => !s.isEmpty }
+        }.asInstanceOf[java.lang.Boolean]
+        case v => (v != 0).asInstanceOf[java.lang.Boolean]
+      }.orNull[java.lang.Boolean]
   }
 
   def nullableBoolean(columnLabel: String): java.lang.Boolean = {
     ensureCursor()
     Option(any(columnLabel))
-      .map(v => java.lang.Boolean.valueOf(v.toString))
-      .orNull[java.lang.Boolean]
+      .map {
+        case b: java.lang.Boolean => b
+        case b: Boolean => b.asInstanceOf[java.lang.Boolean]
+        case s: String => {
+          try s.toInt != 0
+          catch { case e: NumberFormatException => !s.isEmpty }
+        }.asInstanceOf[java.lang.Boolean]
+        case v => (v != 0).asInstanceOf[java.lang.Boolean]
+      }.orNull[java.lang.Boolean]
   }
 
   def boolean(columnIndex: Int): Boolean = nullableBoolean(columnIndex).asInstanceOf[Boolean]
