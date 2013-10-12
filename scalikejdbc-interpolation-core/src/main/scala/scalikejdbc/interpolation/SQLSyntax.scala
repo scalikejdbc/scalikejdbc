@@ -65,7 +65,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def isNull(column: SQLSyntax) = sqls"${this} ${column} is null"
   def isNotNull(column: SQLSyntax) = sqls"${this} ${column} is not null"
-  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
+  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) instead of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
 
@@ -135,7 +135,7 @@ object SQLSyntax {
 
   def isNull(column: SQLSyntax) = sqls"".isNull(column)
   def isNotNull(column: SQLSyntax) = sqls"".isNotNull(column)
-  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) insted of this", "1.6.2")
+  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) instead of this", "1.6.2")
   def between(a: Any, b: Any) = sqls"".between(a, b)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
 
