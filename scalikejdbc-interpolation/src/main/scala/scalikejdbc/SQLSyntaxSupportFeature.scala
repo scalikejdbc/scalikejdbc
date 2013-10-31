@@ -70,8 +70,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
     def columns: Seq[String] = {
-      if (columnNames.isEmpty) SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase(en)))
-      else columnNames
+      if (columnNames.isEmpty) {
+        SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, {
+          DB.getColumnNames(tableName).map(_.toLowerCase(en)) match {
+            case Nil => throw new IllegalStateException("No column found for " + tableName)
+            case cs => cs
+          }
+        })
+      } else columnNames
     }
 
     /**
