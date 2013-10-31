@@ -16,6 +16,18 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
 
   behavior of "DB"
 
+  it should "be a trait" in {
+    val tableName = tableNamePrefix + "_trait"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val db: DBConnection = DB(ConnectionPool.borrow())
+      val result = db readOnly {
+        session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
+      }
+      result.size should be > 0
+    }
+  }
+
   // --------------------
   // readOnly
 
