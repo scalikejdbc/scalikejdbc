@@ -129,7 +129,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax = {
-      val _name = if (forceUpperCase) tableName.toUpperCase(en) else tableName
+      val _tableName = tableName.replaceAll("\\.", "_")
+      val _name = if (forceUpperCase) _tableName.toUpperCase(en) else _tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
