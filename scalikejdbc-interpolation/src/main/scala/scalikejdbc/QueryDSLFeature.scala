@@ -381,8 +381,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def join(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = innerJoin(table)
 
-    def join(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
-      table.map(join) getOrElse copy(ignoreOnClause = true)
+    // if table is none, this join part will be skipped
+    def join(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] = innerJoin(table)
 
     def innerJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} inner join ${table}",
@@ -390,8 +390,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       ignoreOnClause = false
     )
 
-    def innerJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
-      table.map(innerJoin) getOrElse copy(ignoreOnClause = true)
+    // if table is none, this join part will be skipped
+    def innerJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] = table.map(innerJoin) getOrElse copy(ignoreOnClause = true)
 
     def leftJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} left join ${table}",
@@ -399,6 +399,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       ignoreOnClause = false
     )
 
+    // if table is none, this join part will be skipped
     def leftJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
       table.map(leftJoin) getOrElse copy(ignoreOnClause = true)
 
@@ -408,13 +409,19 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       ignoreOnClause = false
     )
 
+    // if table is none, this join part will be skipped
     def rightJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
       table.map(rightJoin) getOrElse copy(ignoreOnClause = true)
 
-    def on(onClause: SQLSyntax): SelectSQLBuilder[A] =
-      if (ignoreOnClause) this else this.copy(sql = sqls"${sql} on ${onClause}")
-    def on(left: SQLSyntax, right: SQLSyntax): SelectSQLBuilder[A] =
-      if (ignoreOnClause) this else this.copy(sql = sqls"${sql} on ${left} = ${right}")
+    def on(onClause: SQLSyntax): SelectSQLBuilder[A] = {
+      if (ignoreOnClause) this.copy(ignoreOnClause = false)
+      else this.copy(sql = sqls"${sql} on ${onClause}", ignoreOnClause = false)
+    }
+
+    def on(left: SQLSyntax, right: SQLSyntax): SelectSQLBuilder[A] = {
+      if (ignoreOnClause) this.copy(ignoreOnClause = false)
+      else this.copy(sql = sqls"${sql} on ${left} = ${right}", ignoreOnClause = false)
+    }
 
     // ---
     // sort, paging
