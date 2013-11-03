@@ -147,6 +147,21 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         findCookieOrder(true).get.account.isEmpty should be(false)
         findCookieOrder(false).get.account.isEmpty should be(true)
 
+        def findByOptionalAccountName(accountName: Option[String]) = withSQL {
+          select
+            .from[Order](Order as o)
+            .innerJoin(Product as p).on(o.productId, p.id)
+            .innerJoin(accountName.map(_ => Account as a)).on(o.accountId, a.id)
+            .where(sqls.toAndConditionOpt(
+              accountName.map(sqls.eq(a.name, _))
+            ))
+        }.map {
+          rs => Order(o, p)(rs)
+        }.list.apply()
+
+        findByOptionalAccountName(Some("Alice")).size should be(4)
+        findByOptionalAccountName(Option.empty).size should be(11)
+
         // NOTE: dynamicAndConditions is deprecated since 1.6.5
         {
           val (productId, accountId) = (Some(1), None)
