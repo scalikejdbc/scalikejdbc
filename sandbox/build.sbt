@@ -9,7 +9,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "com.github.seratch" %% "scalikejdbc"               % "1.6.11-SNAPSHOT",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.11-SNAPSHOT",
+  "com.github.seratch" %% "scalikejdbc-interpolation" % "1.6.11",
   "com.github.seratch" %% "scalikejdbc-test"          % "1.6.11-SNAPSHOT",
   "org.slf4j"          %  "slf4j-simple"              % "[1.7,)",
   "org.hibernate"      %  "hibernate-core"            % "4.1.9.Final",
