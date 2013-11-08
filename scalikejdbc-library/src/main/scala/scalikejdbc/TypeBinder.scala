@@ -97,7 +97,11 @@ object TypeBinder {
   implicit val time: TypeBinder[java.sql.Time] = TypeBinder(_.getTime)(_.getTime)
   implicit val timestamp: TypeBinder[java.sql.Timestamp] = TypeBinder(_.getTimestamp)(_.getTimestamp)
   implicit val url: TypeBinder[java.net.URL] = TypeBinder(_.getURL)(_.getURL)
-  implicit def option[A: TypeBinder]: TypeBinder[Option[A]] = implicitly[TypeBinder[A]].map(Option.apply)
+  implicit def option[A](implicit ev: TypeBinder[A]): TypeBinder[Option[A]] = new TypeBinder[Option[A]] {
+    def apply(rs: ResultSet, columnIndex: Int): Option[A] = wrap(ev(rs, columnIndex))
+    def apply(rs: ResultSet, columnLabel: String): Option[A] = wrap(ev(rs, columnLabel))
+    private def wrap[A](a: => A): Option[A] = try Option(a) catch { case e: NullPointerException => None }
+  }
   implicit val dateTime: TypeBinder[DateTime] = option[java.sql.Timestamp].map(_.map(_.toDateTime).orNull[DateTime])
   implicit val localDate: TypeBinder[LocalDate] = option[java.sql.Date].map(_.map(_.toLocalDate).orNull[LocalDate])
   implicit val localTime: TypeBinder[LocalTime] = option[java.sql.Time].map(_.map(_.toLocalTime).orNull[LocalTime])
