@@ -56,6 +56,9 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
     }
   }
 
+  private val attributeNames = Seq(
+    "url", "driver", "user", "password", "poolInitialSize", "poolMaxSize", "connectionTimeoutMillis", "poolValidationQuery")
+
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
     val iter = dbConfig.entrySet.iterator
@@ -63,7 +66,9 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
     while (iter.hasNext) {
       val entry = iter.next()
       val key = entry.getKey
-      configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+      if (attributeNames.contains(key)) {
+        configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+      }
     }
     configMap.toMap
   } catch {

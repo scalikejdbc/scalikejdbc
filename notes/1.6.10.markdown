@@ -18,7 +18,7 @@ https://github.com/seratch/scalikejdbc
 
 - Fixed SQLSyntax's equality 
 
-Unfortunately, sqls"id = ${id}" == sqls"id == ${id}" was not true. Fixed from this version.
+Unfortunately, sqls"id = ${id}" == sqls"id = ${id}" was not true. Fixed since this version.
 
 Enjoy writing typesafe and reactive SQL and get things done!
 

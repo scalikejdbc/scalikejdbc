@@ -363,7 +363,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   /**
    * SQLBuilder for select queries.
    */
-  case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil)
+  case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil, ignoreOnClause: Boolean = false)
       extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
@@ -381,23 +381,47 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def join(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = innerJoin(table)
 
+    // if table is none, this join part will be skipped
+    def join(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] = innerJoin(table)
+
     def innerJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} inner join ${table}",
-      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders),
+      ignoreOnClause = false
     )
+
+    // if table is none, this join part will be skipped
+    def innerJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] = table.map(innerJoin) getOrElse copy(ignoreOnClause = true)
 
     def leftJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} left join ${table}",
-      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders),
+      ignoreOnClause = false
     )
+
+    // if table is none, this join part will be skipped
+    def leftJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
+      table.map(leftJoin) getOrElse copy(ignoreOnClause = true)
 
     def rightJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} right join ${table}",
-      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders),
+      ignoreOnClause = false
     )
 
-    def on(onClause: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} on ${onClause}")
-    def on(left: SQLSyntax, right: SQLSyntax): SelectSQLBuilder[A] = this.copy(sql = sqls"${sql} on ${left} = ${right}")
+    // if table is none, this join part will be skipped
+    def rightJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
+      table.map(rightJoin) getOrElse copy(ignoreOnClause = true)
+
+    def on(onClause: SQLSyntax): SelectSQLBuilder[A] = {
+      if (ignoreOnClause) this.copy(ignoreOnClause = false)
+      else this.copy(sql = sqls"${sql} on ${onClause}", ignoreOnClause = false)
+    }
+
+    def on(left: SQLSyntax, right: SQLSyntax): SelectSQLBuilder[A] = {
+      if (ignoreOnClause) this.copy(ignoreOnClause = false)
+      else this.copy(sql = sqls"${sql} on ${left} = ${right}", ignoreOnClause = false)
+    }
 
     // ---
     // sort, paging

@@ -70,8 +70,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
     def columns: Seq[String] = {
-      if (columnNames.isEmpty) SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, DB.getColumnNames(tableName).map(_.toLowerCase(en)))
-      else columnNames
+      if (columnNames.isEmpty) {
+        SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, {
+          DB.getColumnNames(tableName).map(_.toLowerCase(en)) match {
+            case Nil => throw new IllegalStateException("No column found for " + tableName)
+            case cs => cs
+          }
+        })
+      } else columnNames
     }
 
     /**
@@ -123,7 +129,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax = {
-      val _name = if (forceUpperCase) tableName.toUpperCase(en) else tableName
+      val _tableName = tableName.replaceAll("\\.", "_")
+      val _name = if (forceUpperCase) _tableName.toUpperCase(en) else _tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
 
@@ -362,18 +369,18 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       with ResultAllProvider
       with AsteriskProvider {
 
-    val result: ResultSQLSyntaxProvider[S, A] = {
+    lazy val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase(en) else tableAliasName
       ResultSQLSyntaxProvider[S, A](support, table)
     }
 
     override def resultAll: SQLSyntax = result.*
 
-    val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
+    lazy val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
 
-    val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
+    lazy val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
 
-    val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
+    lazy val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
     def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")

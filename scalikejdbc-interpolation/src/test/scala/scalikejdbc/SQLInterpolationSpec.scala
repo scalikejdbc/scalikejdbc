@@ -62,6 +62,13 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
   // class GroupMember(userId: Int, groupId: Int) // works!
   // class GroupMember(userId: Int) // compilation error
 
+  class NotFoundEntity(val id: Long, val name: String)
+  object NotFoundEntity extends SQLSyntaxSupport[NotFoundEntity]
+
+  it should "throw exception if table not found" in {
+    intercept[IllegalStateException](NotFoundEntity.columns)
+  }
+
   it should "be available with SQLSyntaxSupport" in {
     DB autoCommit {
       implicit s =>

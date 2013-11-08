@@ -21,6 +21,19 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     }
   }
 
+  it should "be a trait " in {
+    val tableName = tableNamePrefix + "_trait"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val db: DBConnection = NamedDB('named)
+      val result = db readOnly {
+        session =>
+          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      }
+      result.size should be > 0
+    }
+  }
+
   // --------------------
   // tx
 

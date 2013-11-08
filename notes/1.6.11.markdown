@@ -1,0 +1,23 @@
+ScalikeJDBC 1.6.11 has been released. 
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+
+https://github.com/seratch/scalikejdbc
+
+## library
+
+- Improved WrappedResultSet#nullableBoolean to naturally treat tinyint value as boolean value
+- Introduced scalikejdbc.DBConnection trait as a parent of scalikejdbc.DB/NamedDB refs #166
+- TypeBinder to extract values from WrappedResultSet by @gakuzzzz refs #168, #169
+
+## config 
+
+- Fixed the issue that TypesafeConfigReader fails to parse unknown attributes under db.{name}.
+
+## interpolation
+
+- Enabled dynamically appending join conditions by @gakuzzzz refs #167
+- Improved performance of SQLSyntaxSupport#syntax method
+
+Enjoy writing mostly type-safe SQL and get things done!
+

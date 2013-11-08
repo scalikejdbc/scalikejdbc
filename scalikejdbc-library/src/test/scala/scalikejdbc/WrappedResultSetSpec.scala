@@ -2,6 +2,7 @@ package scalikejdbc
 
 import org.scalatest._
 import mock.MockitoSugar
+import org.mockito.Mockito._
 import org.scalatest.matchers._
 import java.sql.ResultSet
 import java.util.Calendar
@@ -30,6 +31,14 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
     import java.net.URL
 
     val underlying: ResultSet = mock[ResultSet]
+    val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) = (new java.lang.Integer(1), new java.lang.Integer(0), new java.lang.Integer(-1))
+    when(underlying.getObject("one")).thenReturn(one, Array[Object](): _*)
+    // TODO this code doesn't work as expected, should I use ScalaMock?
+    // when(underlying.getObject("zero")).thenReturn(zero, Array[Object](): _*)
+    when(underlying.getObject("zero")).thenReturn("0", Array[Object](): _*)
+    when(underlying.getObject("minusOne")).thenReturn(minusOne, Array[Object](): _*)
+    when(underlying.getObject("str")).thenReturn("abc", Array[Object](): _*)
+
     val cursor: ResultSetCursor = new ResultSetCursor(0)
     val rs = new WrappedResultSet(underlying, cursor, cursor.position)
 
@@ -101,6 +110,11 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
       res4 should be(false)
       res5.isDefined should be(false)
       res6.isDefined should be(false)
+
+      rs.boolean("one") should be(true)
+      rs.boolean("zero") should be(false)
+      rs.boolean("minusOne") should be(true)
+      rs.boolean("str") should be(true)
     }
 
     {
