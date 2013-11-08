@@ -13,7 +13,7 @@ object ScalikeJDBCProjects extends Build {
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
-  lazy val _defaultPlayVersion = "2.2.0"
+  lazy val _defaultPlayVersion = "2.2.1"
   lazy val _typesafeConfigVersion = "1.0.2"
 
   // internal only
