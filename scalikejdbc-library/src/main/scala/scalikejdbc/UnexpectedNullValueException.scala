@@ -1,0 +1,3 @@
+package scalikejdbc
+
+class UnexpectedNullValueException extends Exception
