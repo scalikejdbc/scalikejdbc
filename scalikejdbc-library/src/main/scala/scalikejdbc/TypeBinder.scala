@@ -35,7 +35,7 @@ trait TypeBinder[+A] {
 /**
  * Type binder for java.sql.ResultSet.
  */
-object TypeBinder {
+object TypeBinder extends LowPriorityTypeBinderImplicits {
 
   def apply[A](index: ResultSet => Int => A)(label: ResultSet => String => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs)(columnIndex)
@@ -58,16 +58,20 @@ object TypeBinder {
     case v => (v != 0).asInstanceOf[java.lang.Boolean]
   }
   implicit val boolean: TypeBinder[Boolean] = nullableBoolean.map(throwExceptionIfNull(_.asInstanceOf[Boolean]))
+  implicit val optionBoolean: TypeBinder[Option[Boolean]] = nullableBoolean.map(v => Option(v).map(_.asInstanceOf[Boolean]))
   implicit val nullableByte: TypeBinder[java.lang.Byte] = any.map(v => if (v == null) null else java.lang.Byte.valueOf(v.toString))
   implicit val byte: TypeBinder[Byte] = nullableByte.map(throwExceptionIfNull(_.asInstanceOf[Byte]))
+  implicit val optionByte: TypeBinder[Option[Byte]] = nullableByte.map(v => Option(v).map(_.asInstanceOf[Byte]))
   implicit val bytes: TypeBinder[Array[Byte]] = TypeBinder(_.getBytes)(_.getBytes)
   implicit val characterStream: TypeBinder[java.io.Reader] = TypeBinder(_.getCharacterStream)(_.getCharacterStream)
   implicit val clob: TypeBinder[java.sql.Clob] = TypeBinder(_.getClob)(_.getClob)
   implicit val date: TypeBinder[java.sql.Date] = TypeBinder(_.getDate)(_.getDate)
   implicit val nullableDouble: TypeBinder[java.lang.Double] = any.map(v => if (v == null) null else java.lang.Double.valueOf(v.toString))
   implicit val double: TypeBinder[Double] = nullableDouble.map(throwExceptionIfNull(_.asInstanceOf[Double]))
+  implicit val optionDouble: TypeBinder[Option[Double]] = nullableDouble.map(v => Option(v).map(_.asInstanceOf[Double]))
   implicit val nullableFloat: TypeBinder[java.lang.Float] = any.map(v => if (v == null) null else java.lang.Float.valueOf(v.toString))
   implicit val float: TypeBinder[Float] = nullableFloat.map(throwExceptionIfNull(_.asInstanceOf[Float]))
+  implicit val optionFloat: TypeBinder[Option[Float]] = nullableFloat.map(v => Option(v).map(_.asInstanceOf[Float]))
   implicit val nullableInt: TypeBinder[java.lang.Integer] = any.map {
     case v if v == null => v.asInstanceOf[java.lang.Integer]
     case v: Float => v.toInt.asInstanceOf[java.lang.Integer]
@@ -75,6 +79,7 @@ object TypeBinder {
     case v => java.lang.Integer.valueOf(v.toString)
   }
   implicit val int: TypeBinder[Int] = nullableInt.map(throwExceptionIfNull(_.asInstanceOf[Int]))
+  implicit val optionInt: TypeBinder[Option[Int]] = nullableInt.map(v => Option(v).map(_.asInstanceOf[Int]))
   implicit val nullableLong: TypeBinder[java.lang.Long] = any.map {
     case v if v == null => v.asInstanceOf[java.lang.Long]
     case v: Float => v.toLong.asInstanceOf[java.lang.Long]
@@ -82,6 +87,7 @@ object TypeBinder {
     case v => java.lang.Long.valueOf(v.toString)
   }
   implicit val long: TypeBinder[Long] = nullableLong.map(throwExceptionIfNull(_.asInstanceOf[Long]))
+  implicit val optionLong: TypeBinder[Option[Long]] = nullableLong.map(v => Option(v).map(_.asInstanceOf[Long]))
   implicit val nClob: TypeBinder[java.sql.NClob] = TypeBinder(_.getNClob)(_.getNClob)
   implicit val ref: TypeBinder[java.sql.Ref] = TypeBinder(_.getRef)(_.getRef)
   implicit val rowId: TypeBinder[java.sql.RowId] = TypeBinder(_.getRowId)(_.getRowId)
@@ -92,6 +98,7 @@ object TypeBinder {
     case v => java.lang.Short.valueOf(v.toString)
   }
   implicit val short: TypeBinder[Short] = nullableShort.map(throwExceptionIfNull(_.asInstanceOf[Short]))
+  implicit val optionShort: TypeBinder[Option[Short]] = nullableShort.map(v => Option(v).map(_.asInstanceOf[Short]))
   implicit val sqlXml: TypeBinder[java.sql.SQLXML] = TypeBinder(_.getSQLXML)(_.getSQLXML)
   implicit val string: TypeBinder[String] = TypeBinder(_.getString)(_.getString)
   implicit val time: TypeBinder[java.sql.Time] = TypeBinder(_.getTime)(_.getTime)
@@ -104,11 +111,15 @@ object TypeBinder {
   private def throwExceptionIfNull[A <: AnyVal](f: Any => A)(a: Any): A =
     if (a == null) throw new UnexpectedNullValueException else f(a)
 
+}
+
+trait LowPriorityTypeBinderImplicits {
+
   implicit def option[A](implicit ev: TypeBinder[A]): TypeBinder[Option[A]] = new TypeBinder[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] = wrap(ev(rs, columnIndex))
     def apply(rs: ResultSet, columnLabel: String): Option[A] = wrap(ev(rs, columnLabel))
     private def wrap[A](a: => A): Option[A] =
       try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
   }
-}
 
+}

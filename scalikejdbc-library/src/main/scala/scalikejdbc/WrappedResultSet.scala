@@ -314,22 +314,22 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def anyOpt(columnIndex: Int): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    get[Option[Any]](columnIndex)
+    get[Option[Any]](columnIndex)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnLabel: String): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    get[Option[Any]](columnLabel)
+    get[Option[Any]](columnLabel)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnIndex: Int, map: Map[String, Class[_]]): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
-    get[Option[Any]](columnIndex)
+    get[Option[Any]](columnIndex)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnLabel: String, map: Map[String, Class[_]]): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
-    get[Option[Any]](columnLabel)
+    get[Option[Any]](columnLabel)(TypeBinder.option(binder))
   }
 
   def ref(columnIndex: Int): java.sql.Ref = get[java.sql.Ref](columnIndex)
