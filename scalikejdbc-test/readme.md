@@ -1,7 +1,8 @@
 # ScalikeJDBC Testing Support
 
-Please see the wiki page.
+Please see the website.
 
-https://github.com/seratch/scalikejdbc/wiki/Test-Support
+http://scalikejdbc.org/
+
 
 

@@ -1,6 +1,6 @@
 # ScalikeJDBC Play Fixture Plugin
 
-Please see the wiki page.
+Please see the website.
 
-https://github.com/seratch/scalikejdbc/wiki/Play-Fixture-Plugin
+http://scalikejdbc.org/
 
