@@ -36,7 +36,7 @@
                 <li><%= link_to 'Reverse Engineering', '/documentation/reverse-engineering.html' %></li>
                 <li><%= link_to 'Testing', '/documentation/testing.html' %></li>
                 <li><%= link_to 'Play2 Support', '/documentation/playframework-support.html' %></li>
-                <li><%= link_to 'Contribution', '/documentation/contribution.html' %></li>
+                <li><%= link_to 'Contribution', '/contribution.html' %></li>
                 <li><%= link_to 'dbconsole', '/documentation/dbconsole.html' %></li>
               </ul>
             </li>
@@ -62,7 +62,7 @@
             <p><%= link_to 'Reverse Engineering', '/documentation/reverse-engineering.html' %></p>
             <p><%= link_to 'Testing', '/documentation/testing.html' %></p>
             <p><%= link_to 'Play2 Support', '/documentation/playframework-support.html' %></p>
-            <p><%= link_to 'Contribution', '/documentation/contribution.html' %></p>
+            <p><%= link_to 'Contribution', '/contribution.html' %></p>
             <p><%= link_to 'dbconsole', '/documentation/dbconsole.html' %></p>
             <hr/>
             <h5>Links</h5>
@@ -74,6 +74,10 @@
           <div class="content">
 <a href="https://github.com/seratch/scalikejdbc"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
             <%= yield %>
+            <hr/>
+            <div class="alert alert-info small"> 
+              If this webpage has typo or something wrong, Please report or fix. <%= link_to 'How?', '/contribution.html' %>
+            </div> 
           </div>
         </div>
       </div>

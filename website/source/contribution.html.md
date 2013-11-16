@@ -1,12 +1,37 @@
 ## Contribution
 
 <hr/>
-### How to contribute?
+### How to contribute scalikejdbc.org?
 
-<hr/>
 #### fork scalikejdbc project
 
 Fork [https://github.com/seratch/scalikejdbc](https://github.com/seratch/scalikejdbc).
+
+#### change under the website directory
+
+How to debug:
+
+```
+git clone [your forked repository].
+cd website
+gem install bundler
+bundle install
+middleman server
+```
+
+#### make a pull request
+
+Create a branch to request, and send your pull request to `develop` branch (not `master` branch).
+
+
+<hr/>
+### How to contribute libraries?
+
+#### fork scalikejdbc project
+
+Fork [https://github.com/seratch/scalikejdbc](https://github.com/seratch/scalikejdbc).
+
+git clone [your forked repository].
 
 #### modify and write tests
 
