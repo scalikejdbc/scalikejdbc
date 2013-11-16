@@ -77,7 +77,7 @@ val orders: List[Order] = withSQL {
   }.map(Order(o, p, a)).list.apply()
 ```
 
-`.on(o.productId, p.id)` is simply converted to `sqls"${o.productId} = ${p.id"`. If you need to write more complex condition to join tables, use `sqls` directly.
+`.on(o.productId, p.id)` is simply converted to `sqls"${o.productId} = ${p.id}"`. If you need to write more complex condition to join tables, use `sqls` directly.
 
 ```java
   .innerJoin(Product as p).on(sqls"${o.proudctId} = ${p.id} and ${o.deletedAt} is not null")
@@ -118,8 +118,7 @@ val ids = withSQL {
 
 ```java
 val inClauseResults = withSQL {
-  select
-    .from(Order as o)
+  select.from(Order as o)
     .where.in(o.id, Seq(1, 2,3))
 }.map(Order(o)).list.apply()
 ```
@@ -129,8 +128,7 @@ val inClauseResults = withSQL {
 
 ```java
 withSQL {
-  select(a.id)
-    .from(Account as a)
+  select(a.id).from(Account as a)
     .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
 }.map(_.int(1)).list.apply()
 ```
@@ -139,8 +137,7 @@ It's also possible to pass `sqls` values.
 
 ```java
 withSQL {
-  select(a.id)
-    .from(Account as a)
+  select(a.id).from(Account as a)
     .where.notExists(sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}")
 }.map(_.int(1)).list.apply()
 ```
@@ -170,8 +167,7 @@ val productCount = withSQL {
 ```java
 import sqls.count
 withSQL {
-  select(o.accountId, count)
-    .from(Order as o)
+  select(o.accountId, count).from(Order as o)
     .where.isNotNull(o.accountId)
     .groupBy(o.accountId)
 }.map(rs => (rs.int(1), rs.int(2))).list.apply()
@@ -182,8 +178,7 @@ withSQL {
 
 ```java
 withSQL {
-  select(a.id)
-    .from(Account as a)
+  select(a.id).from(Account as a)
     .union(select(p.id).from(Product as p))
     //.unionAll(select(p.id).from(Product as p))
 }.map(_.int(1)).list.apply()
@@ -210,6 +205,15 @@ val preferredClients: List[(Int, Int)] = withSQL {
 ```java
 withSQL {
   insert.into(Member).values(1, "Alice", DateTime.now)
+}.update.apply()
+
+withSQL {
+  val m = Member.column
+  insert.into(Member).namedValues(
+    m.id -> 1, 
+    m.name -> "Alice", 
+    m.createdAt -> DateTime.now
+  )
 }.update.apply()
 ```
 
