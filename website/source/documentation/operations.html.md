@@ -1,3 +1,7 @@
+---
+title: Operations - ScalikeJDBC
+---
+
 ## Operations
 
 <hr/>

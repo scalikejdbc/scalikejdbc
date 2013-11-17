@@ -1,3 +1,7 @@
+---
+title: Setup - ScalikeJDBC
+---
+
 ## Setup
 
 <hr/>

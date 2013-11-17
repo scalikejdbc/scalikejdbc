@@ -1,3 +1,7 @@
+---
+title: Contribution - ScalikeJDBC
+---
+
 ## Contribution
 
 <hr/>

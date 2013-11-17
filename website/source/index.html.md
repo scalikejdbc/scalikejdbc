@@ -65,7 +65,7 @@ object Member extends SQLSyntaxSupport[Member] {
 val members: List[Member] = sql"select * from members".map(rs => Member(rs)).list.apply()
 ```
 
-How did it go? If you'd like to know more details or practical examples, see [documentation](documentation).
+How did it go? If you'd like to know more details or practical examples, see documentation.
 
 #### Typesafe Activator
 
@@ -144,7 +144,7 @@ val memberId: Option[Long] = DB readOnly { implicit session =>
 }
 ```
 
-See in detail: [/documentation/basic-usage](documentation/basic-usage)
+See in detail: [/documentation/operations](documentation/operations.html)
 
 <hr/>
 ### Type-safe DSL
@@ -169,7 +169,7 @@ val programmers: List[Long] = DB readOnly { implicit session =>
 }
 ```
 
-See in detail: [/documentation/query-dsl](documentation/query-dsl)
+See in detail: [/documentation/query-dsl](documentation/query-dsl.html)
 
 Test code: [src/test/scala/scalikejdbc/QueryInterfaceSpec.scala](https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala)
 
@@ -206,7 +206,7 @@ DB localTx { implicit session => // transactional session
 }
 ```
 
-See in detail: [/documentation/basic-usage#transaction](documentation/basic-usage#transaction)
+See in detail: [/documentation/transaction](documentation/transaction.html)
 
 <hr/>
 ### Useful Query Inspections
@@ -227,7 +227,7 @@ By default, ScalikeJDBC shows you what SQL is executed and where it is. We belie
     controllers.Secured$$anonfun$IsAuthenticated$3$$anonfun$apply$3.apply(Application.scala:88)
 ```
 
-See in detail: [/documentation/query-inspector](documentation/query-inspector)
+See in detail: [/documentation/query-inspector](documentation/query-inspector.html)
 
 <hr/>
 ### Testing Support
@@ -237,7 +237,7 @@ Testing support which provides the following functionalities for [ScalaTest](htt
  - Rollback automatically after each test
  - Testing with fixtures
 
-See in detail: [/documentation/testing](documentation/testing)
+See in detail: [/documentation/testing](documentation/testing.html)
 
 <hr/>
 ### Reverse Engineering
@@ -255,7 +255,7 @@ sbt "scalikejdbc-gen company"
 sbt "scalikejdbc-gen companies Company"
 ```
 
-See in detail: [/documentation/mapper-generator](documentation/mapper-generator)
+See in detail: [/documentation/reverse-engineering](documentation/reverse-engineering.html)
 
 <hr/>
 ### Play Framework Support
@@ -264,7 +264,7 @@ See in detail: [/documentation/mapper-generator](documentation/mapper-generator)
 
 You can use ScalikeJDBC with Play framework 2 seamlessly. We promise you that it becomes more productive when using together with scalikejdbc-mapper-generator.
 
-See in detail: [/documentation/playframework-support](documentation/playframework-support)
+See in detail: [/documentation/playframework-support](documentation/playframework-support.html)
 
 <hr/>
 ## License
@@ -297,7 +297,7 @@ curl -L http://git.io/dbconsole | sh
 http://git.io/dbconsole.bat
 ```
 
-See in detail: [/documentation/dbconsole](documentation/dbconsole)
+See in detail: [/documentation/dbconsole](documentation/dbconsole.html)
 
 
 <hr/>

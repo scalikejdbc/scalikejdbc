@@ -1,3 +1,7 @@
+---
+title: dbconsole - ScalikeJDBC
+---
+
 ## dbconsole
 
 <hr/>

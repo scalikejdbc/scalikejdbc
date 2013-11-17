@@ -1,3 +1,7 @@
+---
+title: Testing - ScalikeJDBC
+---
+
 ## Testing
 
 <hr/>

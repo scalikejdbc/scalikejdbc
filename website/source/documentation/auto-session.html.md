@@ -1,3 +1,7 @@
+---
+title: Auto Session - ScalikeJDBC
+---
+
 ## Auto Session
 
 <hr/>

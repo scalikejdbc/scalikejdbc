@@ -1,3 +1,7 @@
+---
+title: SQLInterpolation - ScalikeJDBC
+---
+
 ## SQLInterpolation
 
 <hr/>

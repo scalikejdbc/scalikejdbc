@@ -1,3 +1,7 @@
+---
+title: Connection Pool - ScalikeJDBC
+---
+
 ## Connection Pool
 
 <hr/>

@@ -1,3 +1,7 @@
+---
+title: One-to-X API - ScalikeJDBC
+---
+
 ## One-to-X API
 
 <hr/>

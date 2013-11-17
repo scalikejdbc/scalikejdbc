@@ -1,3 +1,7 @@
+---
+title: Query Inspector - ScalikeJDBC
+---
+
 ## Query Inspector
 
 <hr/>

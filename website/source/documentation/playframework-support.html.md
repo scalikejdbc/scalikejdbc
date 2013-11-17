@@ -1,8 +1,13 @@
+---
+title: Play Framework Support - ScalikeJDBC
+---
+
 ## Play Framework Support
 
-### Setup
+<hr/>
+### How to setup
 
-Usage: [/documentation/setup](/documentation/setup.html)
+See [/documentation/setup](/documentation/setup.html).
 
 <hr/>
 ### Configuration
