@@ -118,7 +118,7 @@ If you can access some datastore via JDBC interface, that means you can access t
 <hr/>
 ### Less dependencies
 
-Core part of ScalikeJDBC has so less dependencies that you won't be bothered by depdenency hell.
+Core part of ScalikeJDBC has so less dependencies that you won't be bothered by dependency hell.
 
 - JDBC Drivers that you need
 - Commons DBCP
