@@ -149,7 +149,7 @@ See in detail: [/documentation/operations](documentation/operations.html)
 <hr/>
 ### Type-safe DSL
 
-Since veresion 1.6, QueryDSL is available. It's a SQL-like and type-safe DSL to build DRY SQLs.
+Since version 1.6, QueryDSL is available. It's a SQL-like and type-safe DSL to build DRY SQLs.
 
 Here is an example:
 
