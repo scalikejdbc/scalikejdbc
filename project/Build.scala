@@ -5,11 +5,11 @@ import play.Project._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _organization = "com.github.seratch"
+  lazy val _organization = "org.scalikejdbc"
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.6.12-SNAPSHOT"
+  lazy val _version = "1.7.0"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
@@ -413,7 +413,7 @@ object ScalikeJDBCProjects extends Build {
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked")
-  val _pomExtra = <url>http://seratch.github.com/scalikejdbc</url>
+  val _pomExtra = <url>http://scalikejdbc.org/</url>
       <licenses>
         <license>
           <name>Apache License, Version 2.0</name>
@@ -422,14 +422,14 @@ object ScalikeJDBCProjects extends Build {
         </license>
       </licenses>
       <scm>
-        <url>git@github.com:seratch/scalikejdbc.git</url>
-        <connection>scm:git:git@github.com:seratch/scalikejdbc.git</connection>
+        <url>git@github.com:scalikejdbc/scalikejdbc.git</url>
+        <connection>scm:git:git@github.com:scalikejdbc/scalikejdbc.git</connection>
       </scm>
       <developers>
         <developer>
           <id>seratch</id>
           <name>Kazuhuiro Sera</name>
-          <url>http://seratch.net/</url>
+          <url>http://git.io/sera</url>
         </developer>
       </developers>
 }

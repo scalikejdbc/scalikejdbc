@@ -61,7 +61,7 @@ val groups: List[Group] = sql"""
 ## How to run
 
 ```sh
-git clone git://github.com/seratch/scalikejdbc.git
+git clone git://github.com/scalikejdbc/scalikejdbc.git
 cd scalikejdbc/sandbox
 sbt console
 ```

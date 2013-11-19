@@ -19,32 +19,32 @@ object RenewVersionCommand extends Plugin {
         val sandboxBuild = FilePath("sandbox/build.sbt")
         sandboxBuild.forceWrite(sandboxBuild.readAsString()
           .replaceFirst(
-            "\"com.github.seratch\" %% \"scalikejdbc\" % \"[^\"]+\"",
-            "\"com.github.seratch\" %% \"scalikejdbc\" % \"" + version + "\"")
+            "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"[^\"]+\"",
+            "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"" + version + "\"")
           .replaceFirst(
-            "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"[^\"]+\"",
-            "\"com.github.seratch\" %% \"scalikejdbc-interpolation\" % \"" + version + "\"")
+            "\"org.scalikejdbc\" %% \"scalikejdbc-interpolation\" % \"[^\"]+\"",
+            "\"org.scalikejdbc\" %% \"scalikejdbc-interpolation\" % \"" + version + "\"")
           .replaceFirst(
-            "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"[^\"]+\"",
-            "\"com.github.seratch\" %% \"scalikejdbc-test\" % \"" + version + "\"")
+            "\"org.scalikejdbc\" %% \"scalikejdbc-test\" % \"[^\"]+\"",
+            "\"org.scalikejdbc\" %% \"scalikejdbc-test\" % \"" + version + "\"")
          )
          val sandboxPlugins = FilePath("sandbox/project/plugins.sbt")
          sandboxPlugins.forceWrite(sandboxPlugins.readAsString()
           .replaceFirst(
-            "\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"",
-            "\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\"")
+            "\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"",
+            "\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\"")
         )
       }
 
       val scriptedBuild = FilePath("scalikejdbc-mapper-generator/src/sbt-test/scalikejdbc-mapper-generator/gen/project/Build.scala")
       scriptedBuild.forceWrite(scriptedBuild.readAsString().replaceFirst(
-        "\"com.github.seratch\" %% \"scalikejdbc\" % \"[^\"]+\"", 
-        "\"com.github.seratch\" %% \"scalikejdbc\" % \"" + version + "\""))
+        "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"[^\"]+\"", 
+        "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"" + version + "\""))
 
       val scriptedPlugins = FilePath("scalikejdbc-mapper-generator/src/sbt-test/scalikejdbc-mapper-generator/gen/project/plugins.sbt")    
       scriptedPlugins.forceWrite(scriptedPlugins.readAsString().replaceFirst(
-        "addSbtPlugin\\(\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"", 
-        "addSbtPlugin\\(\"com.github.seratch\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\""))
+        "addSbtPlugin\\(\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"", 
+        "addSbtPlugin\\(\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\""))
 
     }
   )

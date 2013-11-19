@@ -192,7 +192,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="sj.dependencies" value="libraryDependencies ++= Seq(&#10;  &quot;com.github.seratch&quot; %% &quot;scalikejdbc&quot; % &quot;[1.6,)&quot;,&#10;  &quot;com.github.seratch&quot; %% &quot;scalikejdbc-interpolation&quot; % &quot;[1.6,)&quot;,&#10;  &quot;postgresql&quot; % &quot;postgresql&quot; % &quot;9.1-901.jdbc4&quot;,  // your JDBC driver&#10;  &quot;org.slf4j&quot; % &quot;slf4j-simple&quot; % &quot;[1.7,)&quot;         // slf4j implementation&#10;)" toReformat="false" toShortenFQNames="true">
+  <template name="sj.dependencies" value="libraryDependencies ++= Seq(&#10;  &quot;org.scalikejdbc&quot; %% &quot;scalikejdbc&quot; % &quot;[1.7,)&quot;,&#10;  &quot;org.scalikejdbc&quot; %% &quot;scalikejdbc-interpolation&quot; % &quot;[1.7,)&quot;,&#10;  &quot;postgresql&quot; % &quot;postgresql&quot; % &quot;9.1-901.jdbc4&quot;,  // your JDBC driver&#10;  &quot;org.slf4j&quot; % &quot;slf4j-simple&quot; % &quot;[1.7,)&quot;         // slf4j implementation&#10;)" toReformat="false" toShortenFQNames="true">
     <context>
       <option name="HTML_TEXT" value="false" />
       <option name="HTML" value="false" />
