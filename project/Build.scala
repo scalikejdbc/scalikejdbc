@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.7.0"
+  lazy val _version = "1.7.1-SNAPSHOT"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
