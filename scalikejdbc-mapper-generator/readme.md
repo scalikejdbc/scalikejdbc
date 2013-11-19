@@ -1,6 +1,6 @@
 # ScalikeJDBC Mapper Generator
 
-Please see the wiki page.
+Please see the website.
 
-https://github.com/seratch/scalikejdbc/wiki/Generating-Models
+http://scalikejdbc.org/
 

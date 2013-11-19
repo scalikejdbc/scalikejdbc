@@ -100,16 +100,14 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
     {
       val res1: java.lang.Boolean = rs.nullableBoolean("foo")
       val res2: java.lang.Boolean = rs.nullableBoolean(0)
-      val res3: scala.Boolean = rs.boolean("foo")
-      val res4: scala.Boolean = rs.boolean(0)
-      val res5: Option[scala.Boolean] = rs.booleanOpt("foo")
-      val res6: Option[scala.Boolean] = rs.booleanOpt(0)
+      val res3: Option[scala.Boolean] = rs.booleanOpt("foo")
+      val res4: Option[scala.Boolean] = rs.booleanOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should be(false)
-      res4 should be(false)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+      intercept[ResultSetExtractorException] { rs.boolean("foo") }
+      intercept[ResultSetExtractorException] { rs.boolean(0) }
 
       rs.boolean("one") should be(true)
       rs.boolean("zero") should be(false)
@@ -120,16 +118,14 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
     {
       val res1: java.lang.Byte = rs.nullableByte("foo")
       val res2: java.lang.Byte = rs.nullableByte(0)
-      val res3: Byte = rs.byte("foo")
-      val res4: Byte = rs.byte(0)
-      val res5: Option[scala.Byte] = rs.byteOpt("foo")
-      val res6: Option[scala.Byte] = rs.byteOpt(0)
+      val res3: Option[scala.Byte] = rs.byteOpt("foo")
+      val res4: Option[scala.Byte] = rs.byteOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0)
-      res4 should equal(0)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+      intercept[ResultSetExtractorException] { rs.byte("foo") }
+      intercept[ResultSetExtractorException] { rs.byte(0) }
     }
 
     {
@@ -187,61 +183,57 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
     {
       val res1: java.lang.Double = rs.nullableDouble("foo")
       val res2: java.lang.Double = rs.nullableDouble(0)
-      val res3: Double = rs.double("foo")
-      val res4: Double = rs.double(0)
-      val res5: Option[scala.Double] = rs.doubleOpt("foo")
-      val res6: Option[scala.Double] = rs.doubleOpt(0)
+      val res3: Option[scala.Double] = rs.doubleOpt("foo")
+      val res4: Option[scala.Double] = rs.doubleOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0.0D)
-      res4 should equal(0.0D)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+
+      intercept[ResultSetExtractorException] { rs.double("foo") }
+      intercept[ResultSetExtractorException] { rs.double(0) }
     }
 
     {
       val res1: java.lang.Float = rs.nullableFloat("foo")
       val res2: java.lang.Float = rs.nullableFloat(0)
-      val res3: Float = rs.float("foo")
-      val res4: Float = rs.float(0)
-      val res5: Option[scala.Float] = rs.floatOpt("foo")
-      val res6: Option[scala.Float] = rs.floatOpt(0)
+      val res3: Option[scala.Float] = rs.floatOpt("foo")
+      val res4: Option[scala.Float] = rs.floatOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0.0F)
-      res4 should equal(0.0F)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+
+      intercept[ResultSetExtractorException] { rs.float("foo") }
+      intercept[ResultSetExtractorException] { rs.float(0) }
     }
 
     {
       val res1: java.lang.Integer = rs.nullableInt("foo")
       val res2: java.lang.Integer = rs.nullableInt(0)
-      val res3: Int = rs.int("foo")
-      val res4: Int = rs.int(0)
-      val res5: Option[scala.Int] = rs.intOpt("foo")
-      val res6: Option[scala.Int] = rs.intOpt(0)
+      val res3: Option[scala.Int] = rs.intOpt("foo")
+      val res4: Option[scala.Int] = rs.intOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0)
-      res4 should equal(0)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+
+      intercept[ResultSetExtractorException] { rs.int("foo") }
+      intercept[ResultSetExtractorException] { rs.int(0) }
     }
 
     {
       val res1: java.lang.Long = rs.nullableLong("foo")
       val res2: java.lang.Long = rs.nullableLong(0)
-      val res3: Long = rs.long("foo")
-      val res4: Long = rs.long(0)
-      val res5: Option[scala.Long] = rs.longOpt("foo")
-      val res6: Option[scala.Long] = rs.longOpt(0)
+      val res3: Option[scala.Long] = rs.longOpt("foo")
+      val res4: Option[scala.Long] = rs.longOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0L)
-      res4 should equal(0L)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+
+      intercept[ResultSetExtractorException] { rs.long("foo") }
+      intercept[ResultSetExtractorException] { rs.long(0) }
     }
 
     {
@@ -310,16 +302,15 @@ class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSuga
     {
       val res1: java.lang.Short = rs.nullableShort("foo")
       val res2: java.lang.Short = rs.nullableShort(0)
-      val res3: Short = rs.short("foo")
-      val res4: Short = rs.short(0)
-      val res5: Option[scala.Short] = rs.shortOpt("foo")
-      val res6: Option[scala.Short] = rs.shortOpt(0)
+      val res3: Option[scala.Short] = rs.shortOpt("foo")
+      val res4: Option[scala.Short] = rs.shortOpt(0)
       res1 should be(null)
       res2 should be(null)
-      res3 should equal(0)
-      res4 should equal(0)
-      res5.isDefined should be(false)
-      res6.isDefined should be(false)
+      res3.isDefined should be(false)
+      res4.isDefined should be(false)
+
+      intercept[ResultSetExtractorException] { rs.short("foo") }
+      intercept[ResultSetExtractorException] { rs.short(0) }
     }
 
     {

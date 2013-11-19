@@ -694,17 +694,17 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           }
 
           // should use nullable*** methods
-          assertUnexpected(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
               Result(
-                vBoolean = Option(rs.boolean("v_boolean")),
-                vByte = Option(rs.byte("v_byte")),
-                vDouble = Option(rs.double("v_double")),
-                vFloat = Option(rs.float("v_float")),
-                vInt = Option(rs.int("v_int")),
-                vLong = Option(rs.long("v_long")),
-                vShort = Option(rs.short("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+                vBoolean = rs.booleanOpt("v_boolean"),
+                vByte = rs.byteOpt("v_byte"),
+                vDouble = rs.doubleOpt("v_double"),
+                vFloat = rs.floatOpt("v_float"),
+                vInt = rs.intOpt("v_int"),
+                vLong = rs.longOpt("v_long"),
+                vShort = rs.shortOpt("v_short"),
+                vTimestamp = rs.dateTimeOpt("v_timestamp")
               )
           }.single.apply())
 
@@ -723,7 +723,7 @@ class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter wit
           }.single.apply())
 
           // should use nullable*** methods
-          assertUnexpected(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
+          intercept[ResultSetExtractorException](SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
               Result(
                 vBoolean = opt[Boolean](rs.boolean("v_boolean")),

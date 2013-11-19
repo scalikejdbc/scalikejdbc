@@ -11,14 +11,14 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.3/sbt-launch.jar sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.0/sbt-launch.jar sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
 if not exist "%db_dir%" ( mkdir "%db_dir%" )
 pushd "%db_dir%"
   if exist "sandbox.h2.db" ( del /f /q "sandbox.h2.db" )
-  call cscript "%self_path%" //E:JScript //Nologo https://raw.github.com/seratch/scalikejdbc/master/scalikejdbc-cli/db/sandbox.h2.db sandbox.h2.db
+  call cscript "%self_path%" //E:JScript //Nologo https://raw.github.com/scalikejdbc/scalikejdbc/master/scalikejdbc-cli/db/sandbox.h2.db sandbox.h2.db
 popd
 
 if not exist "%config_props%" (
@@ -120,8 +120,8 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.10.1"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc"               %% "[1.5,)",
->>"%build_sbt%" echo   "com.github.seratch" %%%% "scalikejdbc-interpolation" %% "[1.5,)",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"               %% "[1.7,)",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc-interpolation" %% "[1.7,)",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "[1.7,)",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "[1.3,)", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "[10.8.2,)",

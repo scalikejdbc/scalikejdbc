@@ -10,12 +10,12 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.12.3/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.0/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
 rm -f sandbox.h2.db
-wget https://raw.github.com/seratch/scalikejdbc/master/scalikejdbc-cli/db/sandbox.h2.db
+wget https://raw.github.com/scalikejdbc/scalikejdbc/master/scalikejdbc-cli/db/sandbox.h2.db
 cd -
 
 if [ ! -f ${CONFIG_PROPS} ]; then
@@ -141,8 +141,8 @@ echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/depend
 scalaVersion := "2.10.1"
 
 libraryDependencies ++= Seq(
-  "com.github.seratch" %% "scalikejdbc"               % "[1.5,)",
-  "com.github.seratch" %% "scalikejdbc-interpolation" % "[1.5,)",
+  "org.scalilejdbc"    %% "scalikejdbc"               % "[1.7,)",
+  "org.scalilejdbc"    %% "scalikejdbc-interpolation" % "[1.7,)",
   "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
   "com.h2database"     % "h2"                   % "[1.3,)",
   "org.apache.derby"   % "derby"                % "[10.8.2,)",

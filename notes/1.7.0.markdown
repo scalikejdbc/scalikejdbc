@@ -1,0 +1,14 @@
+ScalikeJDBC 1.7.0 has been released. Since this version, groupId is changed to "org.scalikejdbc" and GitHub repository has been moved to https://github.com/scalikejdbc/scalikejdbc.
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+https://github.com/scalikejdbc/scalikejdbc
+
+## library
+
+- Fixed TypeBinder never returns None for primitive values by @gakuzzzz refs #170
+- Changed the behavor of AnyVal subtypes when the column is null by @gakuzzzz refs #172
+- Changed to avoid allocating intermediate function objects by @xuwei-k refs #174
+
+Enjoy writing mostly type-safe SQL and get things done!
+

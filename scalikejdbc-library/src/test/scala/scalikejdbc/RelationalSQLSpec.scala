@@ -97,7 +97,7 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
             val users = SQL("select u.id as u_id, u.group_id as u_group_id, g.id as g_id, g.name as g_name " +
               " from users_" + suffix + " u left join groups_" + suffix + " g " +
               " on u.group_id = g.id where u.id = 7")
-              .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
+              .one(rs => User(rs.intOpt("u_id").getOrElse(0), rs.intOpt("u_group_id").getOrElse(0), None))
               .toOptionalOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
               .map((u: User, g: Group) => u.copy(group = Some(g)))
               .list.apply()

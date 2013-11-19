@@ -21,7 +21,7 @@ package scalikejdbc.interpolation
  * This value won't be treated as a binding parameter but will be appended as a part of SQL.
  *
  * Note: The constructor should NOT be used by library users at the considerable risk of SQL injection vulnerability.
- * https://github.com/seratch/scalikejdbc/issues/116
+ * https://github.com/scalikejdbc/scalikejdbc/issues/116
  */
 class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any] = Vector()) {
   import Implicits._
@@ -97,7 +97,7 @@ trait AsteriskProvider {
 object SQLSyntax {
 
   // #apply method should NOT be used by library users at the considerable risk of SQL injection vulnerability.
-  // https://github.com/seratch/scalikejdbc/issues/116
+  // https://github.com/scalikejdbc/scalikejdbc/issues/116
   private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLSyntax(value, parameters)
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))

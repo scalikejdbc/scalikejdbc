@@ -1,6 +1,6 @@
 # ScalikeJDBC Config
 
-Please see the wiki page.
+See the website.
 
-https://github.com/seratch/scalikejdbc/wiki/Config
+http://scalikejdbc.org/
 

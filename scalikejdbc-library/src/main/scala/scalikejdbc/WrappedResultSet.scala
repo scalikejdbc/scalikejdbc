@@ -52,23 +52,17 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def arrayOpt(columnLabel: String): Option[java.sql.Array] = get[Option[java.sql.Array]](columnLabel)
 
-  def asciiStream(columnIndex: Int): java.io.InputStream = {
-    implicit val binder: TypeBinder[java.io.InputStream] = TypeBinder(_.getAsciiStream)(_.getAsciiStream)
-    get[java.io.InputStream](columnIndex)
-  }
+  def asciiStream(columnIndex: Int): java.io.InputStream = get[java.io.InputStream](columnIndex)(TypeBinder.asciiStream)
 
-  def asciiStream(columnLabel: String): java.io.InputStream = {
-    implicit val binder: TypeBinder[java.io.InputStream] = TypeBinder(_.getAsciiStream)(_.getAsciiStream)
-    get[java.io.InputStream](columnLabel)
-  }
+  def asciiStream(columnLabel: String): java.io.InputStream = get[java.io.InputStream](columnLabel)(TypeBinder.asciiStream)
 
   def asciiStreamOpt(columnIndex: Int): Option[java.io.InputStream] = {
-    implicit val binder: TypeBinder[java.io.InputStream] = TypeBinder(_.getAsciiStream)(_.getAsciiStream)
+    implicit val binder = TypeBinder.asciiStream
     get[Option[java.io.InputStream]](columnIndex)
   }
 
   def asciiStreamOpt(columnLabel: String): Option[java.io.InputStream] = {
-    implicit val binder: TypeBinder[java.io.InputStream] = TypeBinder(_.getAsciiStream)(_.getAsciiStream)
+    implicit val binder = TypeBinder.asciiStream
     get[Option[java.io.InputStream]](columnLabel)
   }
 
@@ -104,9 +98,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def boolean(columnLabel: String): Boolean = get[Boolean](columnLabel)
 
-  def booleanOpt(columnIndex: Int): Option[Boolean] = get[Option[java.lang.Boolean]](columnIndex).map(_.asInstanceOf[Boolean])
+  def booleanOpt(columnIndex: Int): Option[Boolean] = get[Option[Boolean]](columnIndex)
 
-  def booleanOpt(columnLabel: String): Option[Boolean] = get[Option[java.lang.Boolean]](columnLabel).map(_.asInstanceOf[Boolean])
+  def booleanOpt(columnLabel: String): Option[Boolean] = get[Option[Boolean]](columnLabel)
 
   def nullableByte(columnIndex: Int): java.lang.Byte = get[java.lang.Byte](columnIndex)
 
@@ -116,9 +110,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def byte(columnLabel: String): Byte = get[Byte](columnLabel)
 
-  def byteOpt(columnIndex: Int): Option[Byte] = get[Option[java.lang.Byte]](columnIndex).map(_.asInstanceOf[Byte])
+  def byteOpt(columnIndex: Int): Option[Byte] = get[Option[Byte]](columnIndex)
 
-  def byteOpt(columnLabel: String): Option[Byte] = get[Option[java.lang.Byte]](columnLabel).map(_.asInstanceOf[Byte])
+  def byteOpt(columnLabel: String): Option[Byte] = get[Option[Byte]](columnLabel)
 
   def bytes(columnIndex: Int): Array[Byte] = get[Array[Byte]](columnIndex)
 
@@ -159,12 +153,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def date(columnLabel: String): java.sql.Date = get[java.sql.Date](columnLabel)
 
   def date(columnIndex: Int, cal: Calendar): java.sql.Date = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder(rs => i => rs.getDate(i, cal))(rs => l => rs.getDate(l, cal))
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
     get[java.sql.Date](columnIndex)
   }
 
   def date(columnLabel: String, cal: Calendar): java.sql.Date = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder(rs => i => rs.getDate(i, cal))(rs => l => rs.getDate(l, cal))
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
     get[java.sql.Date](columnLabel)
   }
 
@@ -173,12 +167,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def dateOpt(columnLabel: String): Option[java.sql.Date] = get[Option[java.sql.Date]](columnLabel)
 
   def dateOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Date] = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder(rs => i => rs.getDate(i, cal))(rs => l => rs.getDate(l, cal))
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
     get[Option[java.sql.Date]](columnIndex)
   }
 
   def dateOpt(columnLabel: String, cal: Calendar): Option[java.sql.Date] = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder(rs => i => rs.getDate(i, cal))(rs => l => rs.getDate(l, cal))
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
     get[Option[java.sql.Date]](columnLabel)
   }
 
@@ -190,9 +184,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def double(columnLabel: String): Double = get[Double](columnLabel)
 
-  def doubleOpt(columnIndex: Int): Option[Double] = get[Option[java.lang.Double]](columnIndex).map(_.asInstanceOf[Double])
+  def doubleOpt(columnIndex: Int): Option[Double] = get[Option[Double]](columnIndex)
 
-  def doubleOpt(columnLabel: String): Option[Double] = get[Option[java.lang.Double]](columnLabel).map(_.asInstanceOf[Double])
+  def doubleOpt(columnLabel: String): Option[Double] = get[Option[Double]](columnLabel)
 
   def fetchDirection: Int = {
     ensureCursor()
@@ -212,9 +206,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def float(columnLabel: String): Float = get[Float](columnLabel)
 
-  def floatOpt(columnIndex: Int): Option[Float] = get[Option[java.lang.Float]](columnIndex).map(_.asInstanceOf[Float])
+  def floatOpt(columnIndex: Int): Option[Float] = get[Option[Float]](columnIndex)
 
-  def floatOpt(columnLabel: String): Option[Float] = get[Option[java.lang.Float]](columnLabel).map(_.asInstanceOf[Float])
+  def floatOpt(columnLabel: String): Option[Float] = get[Option[Float]](columnLabel)
 
   def holdability: Int = {
     ensureCursor()
@@ -229,9 +223,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def int(columnLabel: String): Int = get[Int](columnLabel)
 
-  def intOpt(columnIndex: Int): Option[Int] = get[Option[java.lang.Integer]](columnIndex).map(_.asInstanceOf[Int])
+  def intOpt(columnIndex: Int): Option[Int] = get[Option[Int]](columnIndex)
 
-  def intOpt(columnLabel: String): Option[Int] = get[Option[java.lang.Integer]](columnLabel).map(_.asInstanceOf[Int])
+  def intOpt(columnLabel: String): Option[Int] = get[Option[Int]](columnLabel)
 
   def nullableLong(columnIndex: Int): java.lang.Long = get[java.lang.Long](columnIndex)
 
@@ -241,32 +235,26 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def long(columnLabel: String): Long = get[Long](columnLabel)
 
-  def longOpt(columnIndex: Int): Option[Long] = get[Option[java.lang.Long]](columnIndex).map(_.asInstanceOf[Long])
+  def longOpt(columnIndex: Int): Option[Long] = get[Option[Long]](columnIndex)
 
-  def longOpt(columnLabel: String): Option[Long] = get[Option[java.lang.Long]](columnLabel).map(_.asInstanceOf[Long])
+  def longOpt(columnLabel: String): Option[Long] = get[Option[Long]](columnLabel)
 
   def metaData: java.sql.ResultSetMetaData = {
     ensureCursor()
     underlying.getMetaData
   }
 
-  def nCharacterStream(columnIndex: Int): java.io.Reader = {
-    implicit val binder: TypeBinder[java.io.Reader] = TypeBinder(_.getNCharacterStream)(_.getNCharacterStream)
-    get[java.io.Reader](columnIndex)
-  }
+  def nCharacterStream(columnIndex: Int): java.io.Reader = get[java.io.Reader](columnIndex)(TypeBinder.nCharacterStream)
 
-  def nCharacterStream(columnLabel: String): java.io.Reader = {
-    implicit val binder: TypeBinder[java.io.Reader] = TypeBinder(_.getNCharacterStream)(_.getNCharacterStream)
-    get[java.io.Reader](columnLabel)
-  }
+  def nCharacterStream(columnLabel: String): java.io.Reader = get[java.io.Reader](columnLabel)(TypeBinder.nCharacterStream)
 
   def nCharacterStreamOpt(columnIndex: Int): Option[java.io.Reader] = {
-    implicit val binder: TypeBinder[java.io.Reader] = TypeBinder(_.getNCharacterStream)(_.getNCharacterStream)
+    implicit val binder = TypeBinder.nCharacterStream
     get[Option[java.io.Reader]](columnIndex)
   }
 
   def nCharacterStreamOpt(columnLabel: String): Option[java.io.Reader] = {
-    implicit val binder: TypeBinder[java.io.Reader] = TypeBinder(_.getNCharacterStream)(_.getNCharacterStream)
+    implicit val binder = TypeBinder.nCharacterStream
     get[Option[java.io.Reader]](columnLabel)
   }
 
@@ -278,23 +266,17 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def nClobOpt(columnLabel: String): Option[java.sql.NClob] = get[Option[java.sql.NClob]](columnLabel)
 
-  def nString(columnIndex: Int): String = {
-    implicit val binder: TypeBinder[String] = TypeBinder(_.getNString)(_.getNString)
-    get[String](columnIndex)
-  }
+  def nString(columnIndex: Int): String = get[String](columnIndex)(TypeBinder.nString)
 
-  def nString(columnLabel: String): String = {
-    implicit val binder: TypeBinder[String] = TypeBinder(_.getNString)(_.getNString)
-    get[String](columnLabel)
-  }
+  def nString(columnLabel: String): String = get[String](columnLabel)(TypeBinder.nString)
 
   def nStringOpt(columnIndex: Int): Option[String] = {
-    implicit val binder: TypeBinder[String] = TypeBinder(_.getNString)(_.getNString)
+    implicit val binder = TypeBinder.nString
     get[Option[String]](columnIndex)
   }
 
   def nStringOpt(columnLabel: String): Option[String] = {
-    implicit val binder: TypeBinder[String] = TypeBinder(_.getNString)(_.getNString)
+    implicit val binder = TypeBinder.nString
     get[Option[String]](columnLabel)
   }
 
@@ -303,33 +285,33 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def any(columnLabel: String): Any = get[Any](columnLabel)(TypeBinder.any)
 
   def any(columnIndex: Int, map: Map[String, Class[_]]): Any = {
-    implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
+    implicit val binder: TypeBinder[Any] = TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) => rs.getObject(l, map.asJava))
     get[Any](columnIndex)
   }
 
   def any(columnLabel: String, map: Map[String, Class[_]]): Any = {
-    implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
+    implicit val binder: TypeBinder[Any] = TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) => rs.getObject(l, map.asJava))
     get[Any](columnLabel)
   }
 
   def anyOpt(columnIndex: Int): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    get[Option[Any]](columnIndex)
+    get[Option[Any]](columnIndex)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnLabel: String): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    get[Option[Any]](columnLabel)
+    get[Option[Any]](columnLabel)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnIndex: Int, map: Map[String, Class[_]]): Option[Any] = {
-    implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
-    get[Option[Any]](columnIndex)
+    implicit val binder: TypeBinder[Any] = TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) => rs.getObject(l, map.asJava))
+    get[Option[Any]](columnIndex)(TypeBinder.option(binder))
   }
 
   def anyOpt(columnLabel: String, map: Map[String, Class[_]]): Option[Any] = {
-    implicit val binder: TypeBinder[Any] = TypeBinder(rs => i => rs.getObject(i, map.asJava))(rs => l => rs.getObject(l, map.asJava))
-    get[Option[Any]](columnLabel)
+    implicit val binder: TypeBinder[Any] = TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) => rs.getObject(l, map.asJava))
+    get[Option[Any]](columnLabel)(TypeBinder.option(binder))
   }
 
   def ref(columnIndex: Int): java.sql.Ref = get[java.sql.Ref](columnIndex)
@@ -357,9 +339,9 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def short(columnLabel: String): Short = get[Short](columnLabel)
 
-  def shortOpt(columnIndex: Int): Option[Short] = get[Option[java.lang.Short]](columnIndex).map(_.asInstanceOf[Short])
+  def shortOpt(columnIndex: Int): Option[Short] = get[Option[Short]](columnIndex)
 
-  def shortOpt(columnLabel: String): Option[Short] = get[Option[java.lang.Short]](columnLabel).map(_.asInstanceOf[Short])
+  def shortOpt(columnLabel: String): Option[Short] = get[Option[Short]](columnLabel)
 
   def sqlXml(columnIndex: Int): java.sql.SQLXML = get[java.sql.SQLXML](columnIndex)
 
@@ -387,12 +369,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def time(columnLabel: String): java.sql.Time = get[java.sql.Time](columnLabel)
 
   def time(columnIndex: Int, cal: Calendar): java.sql.Time = {
-    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder(rs => i => rs.getTime(i, cal))(rs => l => rs.getTime(l, cal))
+    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder((rs, i) => rs.getTime(i, cal))((rs, l) => rs.getTime(l, cal))
     get[java.sql.Time](columnIndex)
   }
 
   def time(columnLabel: String, cal: Calendar): java.sql.Time = {
-    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder(rs => i => rs.getTime(i, cal))(rs => l => rs.getTime(l, cal))
+    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder((rs, i) => rs.getTime(i, cal))((rs, l) => rs.getTime(l, cal))
     get[java.sql.Time](columnLabel)
   }
 
@@ -401,12 +383,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def timeOpt(columnLabel: String): Option[java.sql.Time] = get[Option[java.sql.Time]](columnLabel)
 
   def timeOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Time] = {
-    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder(rs => i => rs.getTime(i, cal))(rs => l => rs.getTime(l, cal))
+    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder((rs, i) => rs.getTime(i, cal))((rs, l) => rs.getTime(l, cal))
     get[Option[java.sql.Time]](columnIndex)
   }
 
   def timeOpt(columnLabel: String, cal: Calendar): Option[java.sql.Time] = {
-    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder(rs => i => rs.getTime(i, cal))(rs => l => rs.getTime(l, cal))
+    implicit val binder: TypeBinder[java.sql.Time] = TypeBinder((rs, i) => rs.getTime(i, cal))((rs, l) => rs.getTime(l, cal))
     get[Option[java.sql.Time]](columnLabel)
   }
 
@@ -415,12 +397,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def timestamp(columnLabel: String): java.sql.Timestamp = get[java.sql.Timestamp](columnLabel)
 
   def timestamp(columnIndex: Int, cal: Calendar): java.sql.Timestamp = {
-    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder(rs => i => rs.getTimestamp(i, cal))(rs => l => rs.getTimestamp(l, cal))
+    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder((rs, i) => rs.getTimestamp(i, cal))((rs, l) => rs.getTimestamp(l, cal))
     get[java.sql.Timestamp](columnIndex)
   }
 
   def timestamp(columnLabel: String, cal: Calendar): java.sql.Timestamp = {
-    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder(rs => i => rs.getTimestamp(i, cal))(rs => l => rs.getTimestamp(l, cal))
+    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder((rs, i) => rs.getTimestamp(i, cal))((rs, l) => rs.getTimestamp(l, cal))
     get[java.sql.Timestamp](columnLabel)
   }
 
@@ -441,12 +423,12 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def timestampOpt(columnLabel: String): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnLabel)
 
   def timestampOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Timestamp] = {
-    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder(rs => i => rs.getTimestamp(i, cal))(rs => l => rs.getTimestamp(l, cal))
+    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder((rs, i) => rs.getTimestamp(i, cal))((rs, l) => rs.getTimestamp(l, cal))
     get[Option[java.sql.Timestamp]](columnIndex)
   }
 
   def timestampOpt(columnLabel: String, cal: Calendar): Option[java.sql.Timestamp] = {
-    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder(rs => i => rs.getTimestamp(i, cal))(rs => l => rs.getTimestamp(l, cal))
+    implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder((rs, i) => rs.getTimestamp(i, cal))((rs, l) => rs.getTimestamp(l, cal))
     get[Option[java.sql.Timestamp]](columnLabel)
   }
 
