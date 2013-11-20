@@ -12,7 +12,7 @@ object EnableSbt013Command extends Plugin {
       val plugins = FilePath("project/plugins.sbt")
       plugins.forceWrite(plugins.readAsString().replaceFirst(
         """addSbtPlugin\("play" % "sbt-plugin" % "2.1.5"\)""",
-        """addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0")"""))
+        """addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.1")"""))
     }
   )
 
