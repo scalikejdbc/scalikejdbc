@@ -65,8 +65,21 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
   class NotFoundEntity(val id: Long, val name: String)
   object NotFoundEntity extends SQLSyntaxSupport[NotFoundEntity]
 
+  case class NamedDBEntity(id: Long)
+  object NamedDBEntity extends SQLSyntaxSupport[NamedDBEntity] {
+    override def connectionPoolName = 'yetanother
+  }
+
   it should "throw exception if table not found" in {
     intercept[IllegalStateException](NotFoundEntity.columns)
+  }
+
+  it should "load column names from NamedDB" in {
+    NamedDB('yetanother) autoCommit { implicit s =>
+      try sql"select count(1) from named_db_entity".map(_.toMap).single.apply()
+      catch { case e: Exception => sql"create table named_db_entity(id bigint)".execute.apply() }
+    }
+    NamedDBEntity.columns.size should equal(1)
   }
 
   it should "be available with SQLSyntaxSupport" in {
