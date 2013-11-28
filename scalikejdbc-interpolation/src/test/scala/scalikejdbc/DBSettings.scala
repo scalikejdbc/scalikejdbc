@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import scalikejdbc.SQLInterpolation._
+
 trait DBSettings {
 
   val driverClassName = if (!ConnectionPool.isInitialized(ConnectionPool.DEFAULT_NAME)) {
@@ -15,6 +17,9 @@ trait DBSettings {
     Class.forName(driver)
     driver
   }
+
+  Class.forName("org.h2.Driver")
+  ConnectionPool.add('yetanother, "jdbc:h2:mem:yetanother", "sa", "sa")
 
 }
 
