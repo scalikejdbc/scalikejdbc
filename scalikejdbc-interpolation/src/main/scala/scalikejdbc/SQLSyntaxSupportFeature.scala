@@ -41,6 +41,16 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   trait SQLSyntaxSupport[A] {
 
     /**
+     * Connection Pool Name. If you use NamedDB, you must override this method.
+     */
+    def connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
+
+    /**
+     * Auto session for current connection pool.
+     */
+    def autoSession: DBSession = NamedAutoSession(connectionPoolName)
+
+    /**
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
@@ -72,8 +82,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
         SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, {
-          DB.getColumnNames(tableName).map(_.toLowerCase(en)) match {
-            case Nil => throw new IllegalStateException("No column found for " + tableName)
+          NamedDB(connectionPoolName).getColumnNames(tableName).map(_.toLowerCase(en)) match {
+            case Nil => throw new IllegalStateException(
+              "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")
             case cs => cs
           }
         })
