@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.7.1-SNAPSHOT"
+  lazy val _version = "1.7.1"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
@@ -18,7 +18,7 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.0.13"
-  lazy val _h2Version = "1.3.173"
+  lazy val _h2Version = "1.3.174"
   lazy val _hibernateVersion = "4.1.12.Final"
   lazy val _scalatestVersion = "1.9.1"
   lazy val _specs2Scala291Version = "1.12.4"
@@ -407,8 +407,8 @@ object ScalikeJDBCProjects extends Build {
     "com.h2database"    % "h2"                   % _h2Version       % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"          % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.0"          % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.26"         % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.1"          % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.27"         % "test",
     "org.postgresql"    % "postgresql"           % "9.2-1003-jdbc4" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
