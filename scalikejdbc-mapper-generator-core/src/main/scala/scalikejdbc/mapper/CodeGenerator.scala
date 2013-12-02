@@ -422,7 +422,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * val autoSession = AutoSession
      * }}}
      */
-    val autoSession = "  val autoSession = AutoSession" + eol
+    val autoSession = "  override val autoSession = AutoSession" + eol
 
     /**
      * {{{
