@@ -66,7 +66,10 @@ object ConnectionPool extends LogSupport {
    * @return connection pool
    */
   def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
-    pools.get(name).orNull
+    pools.get(name).getOrElse {
+      val message = ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
+      throw new IllegalStateException(message)
+    }
   }
 
   /**
