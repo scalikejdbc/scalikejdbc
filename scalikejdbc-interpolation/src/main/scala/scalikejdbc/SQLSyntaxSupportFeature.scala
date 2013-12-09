@@ -23,12 +23,19 @@ import scala.language.dynamics
 /**
  * SQLSyntaxSupport feature
  */
-trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
+object SQLSyntaxSupportFeature {
 
   /**
    * Loaded columns for tables.
    */
-  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
+  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[(Any, String), Seq[String]]()
+
+}
+
+/**
+ * SQLSyntaxSupport feature
+ */
+trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
   /**
    * SQLSyntaxSupport trait. Companion object needs this trait as follows.
@@ -44,6 +51,26 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Connection Pool Name. If you use NamedDB, you must override this method.
      */
     def connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
+
+    /**
+     * Returns SQLSyntaxSupport with cp name and table name dynamically.
+     * @param connectionPoolName connection pool name
+     * @param tableName table name
+     * @return new SQLSyntaxSupport
+     */
+    def dynamicSQLSyntaxSupport(connectionPoolName: Any = this.connectionPoolName, tableName: String = this.tableName): SQLSyntaxSupport[A] = {
+      val (self, _connectionPoolName, _tableName) = (this, connectionPoolName, tableName)
+      new SQLSyntaxSupport[A] {
+        override def connectionPoolName: Any = _connectionPoolName
+        override def tableName: String = _tableName
+        override def columns: Seq[String] = self.columns
+        override def forceUpperCase: Boolean = self.forceUpperCase
+        override def useShortenedResultName: Boolean = self.useShortenedResultName
+        override def useSnakeCaseColumnName: Boolean = self.useSnakeCaseColumnName
+        override def delimiterForResultName = self.delimiterForResultName
+        override def nameConverters: Map[String, String] = self.nameConverters
+      }
+    }
 
     /**
      * Auto session for current connection pool.
@@ -81,7 +108,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
-        SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, {
+        SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableName), {
           NamedDB(connectionPoolName).getColumnNames(tableName).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
               "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")
