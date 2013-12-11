@@ -52,7 +52,6 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         try sql"drop table ${Product.table}".execute.apply()
         catch { case e: Exception => }
         sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute.apply()
-        sql"create table ${Product.table}2 (id int not null, name varchar(256), price int not null)".execute.apply()
 
         try sql"drop table ${LegacyProduct.table}".execute.apply()
         catch { case e: Exception => }
@@ -539,41 +538,6 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }.map(Order(o)).single.apply()
       }
 
-      // dynamic connection pool/table name replacement
-
-      DB localTx { implicit s =>
-        Seq(
-          insert.into(Product.dynamicSQLSyntaxSupport(tableName = Product.tableName + "2")).values(3, "Cookie", 120),
-          insert.into(Product.dynamicSQLSyntaxSupport(tableName = Product.tableName + "2")).values(4, "Tea", 80)
-        ).foreach(sql => applyUpdate(sql))
-
-        val p2 = Product.dynamicSQLSyntaxSupport(tableName = Product.tableName + "2")
-        val p = p2.syntax("p")
-        val products = withSQL { select.from(p2 as p).orderBy(p.id) }.map(Product(p)).list.apply()
-        products.size should equal(2)
-        products.map(_.id) should equal(Seq(3, 4))
-      }
-
-      NamedDB('yetanother) autoCommit { implicit s =>
-        try sql"drop table ${Product.table}".execute.apply()
-        catch { case e: Exception => }
-        sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute.apply()
-      }
-      NamedDB('yetanother) localTx { implicit s =>
-        Seq(
-          insert.into(Product).values(3, "Coffee", 120),
-          insert.into(Product).values(4, "Chocolate", 90),
-          insert.into(Product).values(5, "Apple Pie", 200)
-        ).foreach(sql => applyUpdate(sql))
-      }
-      val p2 = Product.dynamicSQLSyntaxSupport(connectionPoolName = 'yetanother)
-      using(p2.autoSession) { implicit session =>
-        val p = p2.syntax("p")
-        val products: Seq[Product] = withSQL { select.from(Product as p).orderBy(p.id) }.map(Product(p)).list.apply()
-        products.size should equal(3)
-        products.map(_.id) should equal(Seq(3, 4, 5))
-      }
-
     } catch {
       case e: Exception =>
         e.printStackTrace
@@ -584,13 +548,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
           sql"drop table ${Order.table}".execute.apply()
           sql"drop table ${LegacyProduct.table}".execute.apply()
           sql"drop table ${Product.table}".execute.apply()
-          sql"drop table ${Product.table}2".execute.apply()
           sql"drop table ${Account.table}".execute.apply()
-        } catch { case e: Exception => }
-      }
-      NamedDB('yetanother) localTx { implicit s =>
-        try {
-          sql"drop table ${Product.table}".execute.apply()
         } catch { case e: Exception => }
       }
     }
