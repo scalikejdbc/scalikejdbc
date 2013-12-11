@@ -28,7 +28,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(toClassName(table))
-  private val syntaxName = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
+  private val syntaxName = {
+    val name = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
+    if (name == "rs") "r" else name
+  }
   private val comma = ","
   private val eol = config.lineBreak.value
 
