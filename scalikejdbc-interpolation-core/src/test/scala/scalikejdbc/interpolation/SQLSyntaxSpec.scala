@@ -170,8 +170,8 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
 
   it should "have #toAndConditionOpt (Some)" in {
     val (id, name) = (123, "Alice")
-    val s = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name}")).get
-    s.value should equal("(id = ?) and (name = ?)")
+    val s = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name} or name is null")).get
+    s.value should equal("id = ? and (name = ? or name is null)")
     s.parameters should equal(Seq(123, "Alice"))
   }
 
@@ -183,8 +183,8 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
 
   it should "have #toOrConditionOpt (Some)" in {
     val (id, name) = (123, "Alice")
-    val s = SQLSyntax.toOrConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name}")).get
-    s.value should equal("(id = ?) or (name = ?)")
+    val s = SQLSyntax.toOrConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name} or name is null")).get
+    s.value should equal("id = ? or (name = ? or name is null)")
     s.parameters should equal(Seq(123, "Alice"))
   }
 
@@ -203,6 +203,26 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     sqls1 == sqls2 should be(true)
     sqls2 == sqls3 should be(false)
     sqls2 == sqls4 should be(false)
+  }
+
+  it should "have joinWithAnd" in {
+    val s1 = SQLSyntax.joinWithAnd(sqls"a = ${123}", sqls"b is not null")
+    s1.value should equal("a = ? and b is not null")
+    s1.parameters should equal(Seq(123))
+
+    val s2 = SQLSyntax.joinWithAnd(sqls"a = ${123}", sqls"b = ${234} or c = ${345}", sqls"d is not null", sqls"E IS NULL OR F IS NOT NULL")
+    s2.value should equal("a = ? and (b = ? or c = ?) and d is not null and (E IS NULL OR F IS NOT NULL)")
+    s2.parameters should equal(Seq(123, 234, 345))
+  }
+
+  it should "have joinWithOr" in {
+    val s1 = SQLSyntax.joinWithOr(sqls"a = ${123}", sqls"b is not null")
+    s1.value should equal("a = ? or b is not null")
+    s1.parameters should equal(Seq(123))
+
+    val s2 = SQLSyntax.joinWithOr(sqls"a = ${123}", sqls"b = ${234} or c = ${345}", sqls"d is not null", sqls"E IS NULL OR F IS NOT NULL")
+    s2.value should equal("a = ? or (b = ? or c = ?) or d is not null or (E IS NULL OR F IS NOT NULL)")
+    s2.parameters should equal(Seq(123, 234, 345))
   }
 
 }

@@ -110,8 +110,15 @@ object SQLSyntax {
     case (sql, _) => sql
   }
   def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",")
-  def joinWithAnd(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"and")
-  def joinWithOr(parts: SQLSyntax*): SQLSyntax = join(parts, sqls"or")
+
+  private[this] def hasAndOr(s: SQLSyntax): Boolean = {
+    val statement = s.value.toLowerCase
+    statement.matches(".+\\s+and\\s+.+") ||
+      statement.matches(".+\\s+or\\s+.+")
+  }
+
+  def joinWithAnd(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"and")
+  def joinWithOr(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"or")
 
   def groupBy(columns: SQLSyntax*) = sqls"".groupBy(columns: _*)
   def having(condition: SQLSyntax) = sqls"".having(condition)
@@ -173,12 +180,12 @@ object SQLSyntax {
    *
    * {{{
    *   val cond: Option[SQLSyntax] = SQLSyntax.toAndConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
-   *   cond.get.statement // "(id = ?) and (name = ?)"
+   *   cond.get.statement // "id = ? or (name = ? or name is null)"
    *   cond.get.parameters // Seq(123, "Alice")
    * }}}
    */
   def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    val cs: Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
   }
 
@@ -187,11 +194,11 @@ object SQLSyntax {
    *
    * {{{
    *   val cond: Option[SQLSyntax] = SQLSyntax.toOrConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
-   *   cond.get.statement // "(id = ?) or (name = ?)"
+   *   cond.get.statement // "id = ? or (name = ? or name is null)"
    *   cond.get.parameters // Seq(123, "Alice")
    */
   def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: Seq[SQLSyntax] = conditions.flatten.map(c => sqls"(${c})")
+    val cs: Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
   }
 
