@@ -53,26 +53,6 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
 
     /**
-     * Returns SQLSyntaxSupport with cp name and table name dynamically.
-     * @param connectionPoolName connection pool name
-     * @param tableName table name
-     * @return new SQLSyntaxSupport
-     */
-    def dynamicSQLSyntaxSupport(connectionPoolName: Any = this.connectionPoolName, tableName: String = this.tableName): SQLSyntaxSupport[A] = {
-      val (self, _connectionPoolName, _tableName) = (this, connectionPoolName, tableName)
-      new SQLSyntaxSupport[A] {
-        override def connectionPoolName: Any = _connectionPoolName
-        override def tableName: String = _tableName
-        override def columns: Seq[String] = self.columns
-        override def forceUpperCase: Boolean = self.forceUpperCase
-        override def useShortenedResultName: Boolean = self.useShortenedResultName
-        override def useSnakeCaseColumnName: Boolean = self.useSnakeCaseColumnName
-        override def delimiterForResultName = self.delimiterForResultName
-        override def nameConverters: Map[String, String] = self.nameConverters
-      }
-    }
-
-    /**
      * Auto session for current connection pool.
      */
     def autoSession: DBSession = NamedAutoSession(connectionPoolName)
