@@ -401,7 +401,8 @@ object ScalikeJDBCProjects extends Build {
   }
   val _resolvers = Seq(
     "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
-    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
+    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
+    "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version       % "test",
