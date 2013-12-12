@@ -23,12 +23,26 @@ import scala.language.dynamics
 /**
  * SQLSyntaxSupport feature
  */
-object SQLSyntaxSupportFeature {
+object SQLSyntaxSupportFeature extends LogSupport {
 
   /**
    * Loaded columns for tables.
    */
   private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[(Any, String), Seq[String]]()
+
+  /**
+   * Instant table name validator.
+   *
+   * Notice: Table name is specified with a String value which might be an input value.
+   */
+  def verifyTableName(tableName: String): Unit = if (tableName != null) {
+    val name = tableName.trim
+    val hasWhiteSpace = name.matches(".*\\s+.*")
+    val hasSemicolon = name.matches(".*;.*")
+    if (hasWhiteSpace || hasSemicolon) {
+      log.warn("The table name (${name}) might bring you SQL injection vulnerability.")
+    }
+  }
 
 }
 
@@ -80,8 +94,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     /**
      * [[scalikejdbc.interpolation.SQLSyntax]] value for table name.
+     *
+     * Notice: Table name is specified with a String value which might be an input value.
      */
-    def table: TableDefSQLSyntax = TableDefSQLSyntax(tableName)
+    def table: TableDefSQLSyntax = {
+      SQLSyntaxSupportFeature.verifyTableName(tableName)
+      TableDefSQLSyntax(tableName)
+    }
 
     /**
      * Column names for this table (default: column names that are loaded from JDBC metadata).
