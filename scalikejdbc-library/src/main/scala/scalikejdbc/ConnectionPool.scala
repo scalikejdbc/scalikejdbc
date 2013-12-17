@@ -73,7 +73,7 @@ object ConnectionPool extends LogSupport {
   }
 
   /**
-   * Register new named Connection pool.
+   * Registers new named Connection pool.
    *
    * @param name pool name
    * @param url JDBC URL
@@ -111,22 +111,58 @@ object ConnectionPool extends LogSupport {
     }
 
     // asynchronously close the old pool if exists
-    oldPoolOpt.foreach { oldPool =>
-
-      // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
-      scala.concurrent.ops.spawn {
-        log.info("The old pool destruction started. connection pool : " + get(name).toString())
-        var millis = 0L
-        while (millis < 60000L && oldPool.numActive > 0) {
-          Thread.sleep(100L)
-          millis += 100L
-        }
-        oldPool.close()
-        log.info("The old pool is successfully closed. connection pool : " + get(name).toString())
-      }
-    }
-
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     log.debug("Registered connection pool : " + get(name).toString())
+  }
+
+  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool) = {
+    // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
+    scala.concurrent.ops.spawn {
+      log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+      var millis = 0L
+      while (millis < 60000L && oldPool.numActive > 0) {
+        Thread.sleep(100L)
+        millis += 100L
+      }
+      oldPool.close()
+      log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+    }
+  }
+
+  /**
+   * Registers new named Connection pool.
+   *
+   * @param name pool name
+   * @param dataSource DataSource based ConnectionPool
+   */
+  def add(name: Any, dataSource: DataSourceConnectionPool) = {
+    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
+    // register new pool or replace existing pool
+    pools.synchronized {
+      pools.update(name, dataSource)
+      // wait a little because rarely NPE occurs when immediately accessed.
+      Thread.sleep(100L)
+    }
+    // asynchronously close the old pool if exists
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
+  }
+
+  /**
+   * Registers new named Connection pool.
+   *
+   * @param name pool name
+   * @param dataSource DataSource based ConnectionPool
+   */
+  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool) = {
+    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
+    // register new pool or replace existing pool
+    pools.synchronized {
+      pools.update(name, dataSource)
+      // wait a little because rarely NPE occurs when immediately accessed.
+      Thread.sleep(100L)
+    }
+    // asynchronously close the old pool if exists
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
   }
 
   /**
