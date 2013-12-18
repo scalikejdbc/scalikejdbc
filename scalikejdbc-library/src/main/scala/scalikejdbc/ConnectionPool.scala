@@ -166,7 +166,7 @@ object ConnectionPool extends LogSupport {
   }
 
   /**
-   * Register the default Connection pool.
+   * Registers the default Connection pool.
    *
    * @param url JDBC URL
    * @param user JDBC username
@@ -176,6 +176,24 @@ object ConnectionPool extends LogSupport {
   def singleton(url: String, user: String, password: String,
     settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)(factory)
+    log.debug("Registered singleton connection pool : " + get().toString())
+  }
+
+  /**
+   * Registers the default Connection pool.
+   * @param dataSource DataSource
+   */
+  def singleton(dataSource: DataSourceConnectionPool): Unit = {
+    add(DEFAULT_NAME, dataSource)
+    log.debug("Registered singleton connection pool : " + get().toString())
+  }
+
+  /**
+   * Registers the default Connection pool.
+   * @param dataSource DataSource
+   */
+  def singleton(dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
+    add(DEFAULT_NAME, dataSource)
     log.debug("Registered singleton connection pool : " + get().toString())
   }
 
