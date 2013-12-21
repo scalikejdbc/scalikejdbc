@@ -1,0 +1,32 @@
+ScalikeJDBC 1.7.2 has been released. Several bugs are fixed and SQLInterpolation is improved.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+Special thanks to @lvicentesanchez, @hagikuratakeshi, @k4200, @itoasuka, @kihn and all the ScalikeJDBC users!
+
+## library
+
+- #179 ConnectionPool implementation which uses external DataSource support
+- ConnectionPool.get(Any) should throw exception instead of just returning null 
+
+## Interpolation
+
+- Changed joinWith(And|Or) appends round-brackets automatically and to(And|Or)ConditionOpt won't always append round-brackets 
+- Added table name verifier (just warning when specified table name might bring users SQL injection vulnerability)
+- #182 [scalikejdbc-users-group:123] named schemas support (suggested by @lvicentesanchez)
+
+## mapper-generator
+
+- Fixed that mapper-generator creates incompatible with 1.7.x (RP #177 by @hagikuratakeshi)
+- Fixed #178  mappper-generator creates invalid code when table name's abbreviation is "rs" (reported by @k4200)
+- Fixed #181 mapper-generator generates invalid code for PostgreSQL (reported by @itoasuka)
+
+## dbconsole
+
+- Fixed setup script bug (PR by @kihn)
+
+
+Enjoy writing mostly type-safe SQL and get things done!
+

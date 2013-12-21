@@ -9,7 +9,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.7.1"
+  lazy val _version = "1.7.2"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
@@ -401,7 +401,8 @@ object ScalikeJDBCProjects extends Build {
   }
   val _resolvers = Seq(
     "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
-    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases"
+    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
+    "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version       % "test",

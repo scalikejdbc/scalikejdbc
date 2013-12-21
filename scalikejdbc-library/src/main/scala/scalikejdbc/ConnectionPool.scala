@@ -66,11 +66,14 @@ object ConnectionPool extends LogSupport {
    * @return connection pool
    */
   def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
-    pools.get(name).orNull
+    pools.get(name).getOrElse {
+      val message = ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
+      throw new IllegalStateException(message)
+    }
   }
 
   /**
-   * Register new named Connection pool.
+   * Registers new named Connection pool.
    *
    * @param name pool name
    * @param url JDBC URL
@@ -108,26 +111,62 @@ object ConnectionPool extends LogSupport {
     }
 
     // asynchronously close the old pool if exists
-    oldPoolOpt.foreach { oldPool =>
-
-      // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
-      scala.concurrent.ops.spawn {
-        log.info("The old pool destruction started. connection pool : " + get(name).toString())
-        var millis = 0L
-        while (millis < 60000L && oldPool.numActive > 0) {
-          Thread.sleep(100L)
-          millis += 100L
-        }
-        oldPool.close()
-        log.info("The old pool is successfully closed. connection pool : " + get(name).toString())
-      }
-    }
-
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     log.debug("Registered connection pool : " + get(name).toString())
   }
 
+  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool) = {
+    // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
+    scala.concurrent.ops.spawn {
+      log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+      var millis = 0L
+      while (millis < 60000L && oldPool.numActive > 0) {
+        Thread.sleep(100L)
+        millis += 100L
+      }
+      oldPool.close()
+      log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+    }
+  }
+
   /**
-   * Register the default Connection pool.
+   * Registers new named Connection pool.
+   *
+   * @param name pool name
+   * @param dataSource DataSource based ConnectionPool
+   */
+  def add(name: Any, dataSource: DataSourceConnectionPool) = {
+    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
+    // register new pool or replace existing pool
+    pools.synchronized {
+      pools.update(name, dataSource)
+      // wait a little because rarely NPE occurs when immediately accessed.
+      Thread.sleep(100L)
+    }
+    // asynchronously close the old pool if exists
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
+  }
+
+  /**
+   * Registers new named Connection pool.
+   *
+   * @param name pool name
+   * @param dataSource DataSource based ConnectionPool
+   */
+  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool) = {
+    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
+    // register new pool or replace existing pool
+    pools.synchronized {
+      pools.update(name, dataSource)
+      // wait a little because rarely NPE occurs when immediately accessed.
+      Thread.sleep(100L)
+    }
+    // asynchronously close the old pool if exists
+    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
+  }
+
+  /**
+   * Registers the default Connection pool.
    *
    * @param url JDBC URL
    * @param user JDBC username
@@ -137,6 +176,24 @@ object ConnectionPool extends LogSupport {
   def singleton(url: String, user: String, password: String,
     settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)(factory)
+    log.debug("Registered singleton connection pool : " + get().toString())
+  }
+
+  /**
+   * Registers the default Connection pool.
+   * @param dataSource DataSource
+   */
+  def singleton(dataSource: DataSourceConnectionPool): Unit = {
+    add(DEFAULT_NAME, dataSource)
+    log.debug("Registered singleton connection pool : " + get().toString())
+  }
+
+  /**
+   * Registers the default Connection pool.
+   * @param dataSource DataSource
+   */
+  def singleton(dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
+    add(DEFAULT_NAME, dataSource)
     log.debug("Registered singleton connection pool : " + get().toString())
   }
 
@@ -242,57 +299,6 @@ abstract class ConnectionPool(
    * Close this connection pool.
    */
   def close(): Unit = throw new UnsupportedOperationException
-
-}
-
-/**
- * Commons DBCP Connection Pool
- *
- * @see http://commons.apache.org/dbcp/
- */
-class CommonsConnectionPool(
-  override val url: String,
-  override val user: String,
-  password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
-    extends ConnectionPool(url, user, password, settings) {
-
-  import org.apache.commons.pool.impl.GenericObjectPool
-  import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
-
-  private[this] val _pool = new GenericObjectPool(null)
-  _pool.setMinIdle(settings.initialSize)
-  _pool.setMaxIdle(settings.maxSize)
-  _pool.setMaxActive(settings.maxSize)
-  _pool.setMaxWait(settings.connectionTimeoutMillis)
-  _pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK)
-  _pool.setTestOnBorrow(true)
-
-  // Initialize Connection Factory
-  // (not read-only, auto-commit)
-  new PoolableConnectionFactory(
-    new DriverManagerConnectionFactory(url, user, password),
-    _pool,
-    null,
-    settings.validationQuery,
-    false,
-    true)
-
-  private[this] val _dataSource: DataSource = new PoolingDataSource(_pool)
-
-  override def dataSource: DataSource = _dataSource
-
-  override def borrow(): Connection = dataSource.getConnection()
-
-  override def numActive: Int = _pool.getNumActive
-
-  override def numIdle: Int = _pool.getNumIdle
-
-  override def maxActive: Int = _pool.getMaxActive
-
-  override def maxIdle: Int = _pool.getMaxIdle
-
-  override def close(): Unit = _pool.close()
 
 }
 

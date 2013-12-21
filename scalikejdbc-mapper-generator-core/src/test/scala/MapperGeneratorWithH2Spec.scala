@@ -35,7 +35,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       }
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
-
+      /*
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
@@ -65,7 +65,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
         println(generator.modelAll())
         generator.writeModelIfNotExist()
       }
-
+*/
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
@@ -118,29 +118,26 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
       table =>
         val generator1 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
-          template = GeneratorTemplate("executable"),
+          template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2unit"),
           packageName = "com.example"
         ))
-        println(generator1.modelAll())
         println(generator1.specAll())
         generator1.writeModelIfNotExist()
         val generator2 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
-          template = GeneratorTemplate("basic"),
+          template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
           packageName = "com.example.placeholder"
         ))
-        println(generator2.modelAll())
         println(generator2.specAll())
         generator2.writeModelIfNotExist()
         val generator3 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
-          template = GeneratorTemplate("namedParameters"),
+          template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
           packageName = "com.example.anorm"
         ))
-        println(generator3.modelAll())
         println(generator3.specAll())
         generator3.writeModelIfNotExist()
 

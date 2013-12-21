@@ -28,7 +28,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(toClassName(table))
-  private val syntaxName = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
+  private val syntaxName = {
+    val name = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
+    if (name == "rs") "r" else name
+  }
   private val comma = ","
   private val eol = config.lineBreak.value
 
@@ -422,7 +425,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * val autoSession = AutoSession
      * }}}
      */
-    val autoSession = "  val autoSession = AutoSession" + eol
+    val autoSession = "  override val autoSession = AutoSession" + eol
 
     /**
      * {{{
@@ -560,11 +563,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val placeHolderPart: String = config.template match {
         case GeneratorTemplate.queryDsl =>
-          // u.id -> entity.id, u.name -> entity.name
-          allColumns.map(c => 4.indent + syntaxName + "." + c.nameInScala + " -> entity." + c.nameInScala).mkString(comma + eol)
+          // column.id -> entity.id, column.name -> entity.name
+          allColumns.map(c => 4.indent + "column." + c.nameInScala + " -> entity." + c.nameInScala).mkString(comma + eol)
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id}, ${column.name} = ${entity.name}
-          allColumns.map(c => 4.indent + "\\${column." + c.nameInScala + "} = \\${entity." + c.nameInScala + "}").mkString(comma + eol)
+          allColumns.map(c => 4.indent + "${column." + c.nameInScala + "} = ${entity." + c.nameInScala + "}").mkString(comma + eol)
         case GeneratorTemplate.basic =>
           // id = ?, name = ?
           allColumns.map(c => 4.indent + c.name + " = ?").mkString(comma + eol)
@@ -578,11 +581,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       val wherePart = config.template match {
         case GeneratorTemplate.queryDsl =>
-          // .eq(u.id, entity.id).and.eq(u.name, entity.name)
-          pkColumns.map(pk => ".eq(" + syntaxName + "." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
+          // .eq(column.id, entity.id).and.eq(column.name, entity.name)
+          pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
-          4.indent + pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${entity." + pk.nameInScala + "}").mkString(" and ")
+          4.indent + pkColumns.map(pk => "${" + "column." + pk.nameInScala + "} = ${entity." + pk.nameInScala + "}").mkString(" and ")
         case GeneratorTemplate.basic =>
           // id = ? and name = ?
           4.indent + pkColumns.map(pk => pk.name + " = ?").mkString(" and ")
@@ -611,7 +614,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.queryDsl =>
           """  def save(entity: %className%)(implicit session: DBSession = autoSession): %className% = {
           |    withSQL { 
-          |      update(%className% as %syntaxName%).set(
+          |      update(%className%).set(
           |%placeHolderPart%
           |      ).where%wherePart%
           |    }.update.apply()

@@ -23,12 +23,33 @@ import scala.language.dynamics
 /**
  * SQLSyntaxSupport feature
  */
-trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
+object SQLSyntaxSupportFeature extends LogSupport {
 
   /**
    * Loaded columns for tables.
    */
-  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[String, Seq[String]]()
+  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[(Any, String), Seq[String]]()
+
+  /**
+   * Instant table name validator.
+   *
+   * Notice: Table name is specified with a String value which might be an input value.
+   */
+  def verifyTableName(tableName: String): Unit = if (tableName != null) {
+    val name = tableName.trim
+    val hasWhiteSpace = name.matches(".*\\s+.*")
+    val hasSemicolon = name.matches(".*;.*")
+    if (hasWhiteSpace || hasSemicolon) {
+      log.warn("The table name (${name}) might bring you SQL injection vulnerability.")
+    }
+  }
+
+}
+
+/**
+ * SQLSyntaxSupport feature
+ */
+trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
   /**
    * SQLSyntaxSupport trait. Companion object needs this trait as follows.
@@ -51,12 +72,22 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def autoSession: DBSession = NamedAutoSession(connectionPoolName)
 
     /**
+     * Schema name if exists.
+     */
+    def schemaName: Option[String] = None
+
+    /**
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
       val className = getClassSimpleName(this).replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
       SQLSyntaxProvider.toColumnName(className, nameConverters, useSnakeCaseColumnName)
     }
+
+    /**
+     * Table name with schema name.
+     */
+    def tableNameWithSchema: String = schemaName.map { schema => s"${schema}.${tableName}" }.getOrElse(tableName)
 
     private[this] def getClassSimpleName(obj: Any): String = {
       try obj.getClass.getSimpleName
@@ -73,15 +104,20 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     /**
      * [[scalikejdbc.interpolation.SQLSyntax]] value for table name.
+     *
+     * Notice: Table name is specified with a String value which might be an input value.
      */
-    def table: TableDefSQLSyntax = TableDefSQLSyntax(tableName)
+    def table: TableDefSQLSyntax = {
+      SQLSyntaxSupportFeature.verifyTableName(tableNameWithSchema)
+      TableDefSQLSyntax(tableNameWithSchema)
+    }
 
     /**
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
-        SQLSyntaxSupportLoadedColumns.getOrElseUpdate(tableName, {
+        SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableName), {
           NamedDB(connectionPoolName).getColumnNames(tableName).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
               "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")

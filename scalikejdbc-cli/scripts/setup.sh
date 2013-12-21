@@ -141,8 +141,8 @@ echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/depend
 scalaVersion := "2.10.1"
 
 libraryDependencies ++= Seq(
-  "org.scalilejdbc"    %% "scalikejdbc"               % "[1.7,)",
-  "org.scalilejdbc"    %% "scalikejdbc-interpolation" % "[1.7,)",
+  "org.scalikejdbc"    %% "scalikejdbc"               % "[1.7,)",
+  "org.scalikejdbc"    %% "scalikejdbc-interpolation" % "[1.7,)",
   "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
   "com.h2database"     % "h2"                   % "[1.3,)",
   "org.apache.derby"   % "derby"                % "[10.8.2,)",

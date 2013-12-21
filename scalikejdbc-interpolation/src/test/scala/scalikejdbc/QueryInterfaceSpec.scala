@@ -13,6 +13,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
   case class LegacyProduct(id: Option[Int], name: Option[String], price: Int)
   case class Product(id: Int, name: Option[String], price: Int)
   case class Account(id: Int, name: Option[String])
+  case class SchemaExample(id: Int)
 
   object Order extends SQLSyntaxSupport[Order] {
     override val tableName = "qi_orders"
@@ -41,6 +42,30 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
     def apply(a: ResultName[Account])(rs: WrappedResultSet): Account = new Account(rs.int(a.id), rs.stringOpt(a.name))
     def opt(a: SyntaxProvider[Account])(rs: WrappedResultSet): Option[Account] = rs.intOpt(a.resultName.id).map(_ => apply(a)(rs))
   }
+  object SchemaExample extends SQLSyntaxSupport[SchemaExample] {
+    override val schemaName = Some("public")
+    override val tableName = "qi_schema_example"
+  }
+
+  it should "suport schemaName" in {
+    if (driverClassName != "com.mysql.jdbc.Driver") {
+      try {
+        DB autoCommit { implicit s =>
+          try sql"drop table ${SchemaExample.table}".execute.apply()
+          catch { case e: Exception => }
+          sql"create table ${SchemaExample.table} (id int not null)".execute.apply()
+          withSQL { insert.into(SchemaExample).values(1) }.update.apply()
+          val se = SchemaExample.syntax("se")
+          val count = withSQL { select(sqls.count).from(SchemaExample as se) }.map(_.long(1)).single.apply().get
+          count should equal(1L)
+        }
+      } finally {
+        DB autoCommit { implicit s =>
+          sql"drop table ${SchemaExample.table}".execute.apply()
+        }
+      }
+    }
+  }
 
   it should "be available with Query Interface" in {
     try {
@@ -61,6 +86,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         catch { case e: Exception => }
         sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
       }
+
       DB localTx { implicit s =>
 
         // insert test data
