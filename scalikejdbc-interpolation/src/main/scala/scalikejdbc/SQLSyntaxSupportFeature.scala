@@ -72,12 +72,22 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def autoSession: DBSession = NamedAutoSession(connectionPoolName)
 
     /**
+     * Schema name if exists.
+     */
+    def schemaName: Option[String] = None
+
+    /**
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
       val className = getClassSimpleName(this).replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
       SQLSyntaxProvider.toColumnName(className, nameConverters, useSnakeCaseColumnName)
     }
+
+    /**
+     * Table name with schema name.
+     */
+    def tableNameWithSchema: String = schemaName.map { schema => s"${schema}.${tableName}" }.getOrElse(tableName)
 
     private[this] def getClassSimpleName(obj: Any): String = {
       try obj.getClass.getSimpleName
@@ -98,8 +108,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Notice: Table name is specified with a String value which might be an input value.
      */
     def table: TableDefSQLSyntax = {
-      SQLSyntaxSupportFeature.verifyTableName(tableName)
-      TableDefSQLSyntax(tableName)
+      SQLSyntaxSupportFeature.verifyTableName(tableNameWithSchema)
+      TableDefSQLSyntax(tableNameWithSchema)
     }
 
     /**

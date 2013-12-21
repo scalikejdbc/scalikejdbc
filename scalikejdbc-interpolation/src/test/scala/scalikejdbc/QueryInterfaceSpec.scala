@@ -15,6 +15,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
   case class Account(id: Int, name: Option[String])
 
   object Order extends SQLSyntaxSupport[Order] {
+    override val schemaName = Some("public")
     override val tableName = "qi_orders"
     def apply(o: SyntaxProvider[Order])(rs: WrappedResultSet): Order = apply(o.resultName)(rs)
     def apply(o: ResultName[Order])(rs: WrappedResultSet): Order = {
