@@ -9,7 +9,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc"               % "1.7.0",
-  "org.scalikejdbc" %% "scalikejdbc-interpolation" % "1.7.1",
+  "org.scalikejdbc" %% "scalikejdbc-interpolation" % "1.7.2",
   "org.scalikejdbc" %% "scalikejdbc-test"          % "1.7.0",
   "org.slf4j"       %  "slf4j-simple"              % "[1.7,)",
   "org.hibernate"   %  "hibernate-core"            % "4.1.9.Final",
