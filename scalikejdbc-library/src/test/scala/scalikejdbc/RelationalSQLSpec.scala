@@ -606,9 +606,16 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
           case class Group(id: Int, ownerId: Int, owner: Owner,
             events: Seq[Event] = Nil, news: Seq[News] = Nil,
             members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
-          case class Owner(id: Int)
-          case class News(id: Int, groupId: Int)
-          case class Event(id: Int, groupId: Int)
+
+          class Owner(val id: Int) extends EntityEquality {
+            override val entityIdentity = id
+          }
+          class News(val id: Int, val groupId: Int) extends EntityEquality {
+            override val entityIdentity = (id, groupId)
+          }
+          class Event(val id: Int, val groupId: Int) extends EntityEquality {
+            override val entityIdentity = id
+          }
           case class Member(id: Int, groupId: Int)
           case class Sponsor(id: Int, groupId: Int)
 
@@ -624,9 +631,9 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " order by g.id, n.id, e.id desc, m.id desc")
               .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
               .toManies(
-                rs => rs.intOpt("o_id").map(id => Owner(id)),
-                rs => rs.intOpt("e_id").map(id => Event(id, rs.int("g_id"))),
-                rs => rs.intOpt("n_id").map(id => News(id, rs.int("g_id"))),
+                rs => rs.intOpt("o_id").map(id => new Owner(id)),
+                rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
+                rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, es, ns, ms, ss) =>
@@ -668,9 +675,9 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
               " where g.id = 1 order by g.id, n.id, e.id desc, m.id desc")
               .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
               .toManies(
-                rs => rs.intOpt("o_id").map(id => Owner(id)),
-                rs => rs.intOpt("e_id").map(id => Event(id, rs.int("g_id"))),
-                rs => rs.intOpt("n_id").map(id => News(id, rs.int("g_id"))),
+                rs => rs.intOpt("o_id").map(id => new Owner(id)),
+                rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
+                rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, es, ns, ms, ss) =>
