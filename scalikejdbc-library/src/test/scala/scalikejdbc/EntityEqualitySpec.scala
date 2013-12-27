@@ -69,4 +69,32 @@ class EntityEqualitySpec extends FlatSpec with ShouldMatchers {
     (b1a == f1a) should be(false)
   }
 
+  class Parent(val id: Int) extends EntityEquality {
+    override val entityIdentity: Any = id
+  }
+  class Child(override val id: Int) extends Parent(id)
+
+  it should "satisfy commutative law" in {
+    val p = new Parent(123)
+    val c1 = new Child(123)
+    val c2 = new Child(123)
+    (c1 == p) should be(false)
+    (p == c1) should be(false)
+    (c1 == c2 && c2 == c1) should be(true)
+  }
+
+  class Person(val id: Long) extends EntityEquality { override val entityIdentity = id }
+  class Member(override val id: Long) extends Person(id)
+
+  it should "works as comment" in {
+    val p1 = new Person(123)
+    val p2 = new Person(123)
+    val m1 = new Member(123)
+    val m2 = new Member(123)
+
+    (p1 == p2 && p2 == p1) should be(true)
+    (p1 == m1 || m1 == p1) should be(false)
+    (m1 == m2 && m2 == m1) should be(true)
+  }
+
 }

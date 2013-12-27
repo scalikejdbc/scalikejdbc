@@ -17,6 +17,20 @@ package scalikejdbc
 
 /**
  * Entity identifier provider for equality (especially for scalikejdbc.RelationalSQL operation).
+ *
+ * Notice: Inheritance is not supported.
+ *
+ *   class Person(val id: Long) extends EntityEquality { override val entityIdentity = id }
+ *   class Member(override val id: Long) extends Person(id)
+ *
+ *   val p1 = new Person(123)
+ *   val p2 = new Person(123)
+ *   val m1 = new Member(123)
+ *   val m2 = new Member(123)
+ *
+ *   p1 == p2 && p2 == p1 // true
+ *   p1 == m1 || m1 == p1 // false
+ *   m1 == m2 && m2 == m1 // true
  */
 trait EntityEquality {
 
@@ -27,16 +41,11 @@ trait EntityEquality {
   def entityIdentity: Any
 
   /**
-   * Predicate can be equal (see also scala.Equals).
-   */
-  def canEqual(that: Any): Boolean = that.getClass.isAssignableFrom(this.getClass)
-
-  /**
    * override java.lang.Object#equals
    */
   override def equals(that: Any): Boolean = {
     if (that == null) false
-    else if (!isSubClassOfThis(that)) false
+    else if (!that.isInstanceOf[EntityEquality]) false
     else isEntityIdentitySame(that.asInstanceOf[EntityEquality])
   }
 
@@ -46,17 +55,10 @@ trait EntityEquality {
   override def hashCode: Int = entityIdentity.hashCode
 
   /**
-   * Predicates that one is a sub-class instance of this.
-   */
-  private[this] def isSubClassOfThis(that: Any): Boolean = {
-    this.getClass.isAssignableFrom(that.getClass)
-  }
-
-  /**
    * Predicates entity identity is same.
    */
-  private[this] def isEntityIdentitySame(o: EntityEquality): Boolean = {
-    o.canEqual(this) && entityIdentity == o.entityIdentity
+  private[this] def isEntityIdentitySame(that: EntityEquality): Boolean = {
+    this.getClass == that.getClass && this.entityIdentity == that.entityIdentity
   }
 
 }
