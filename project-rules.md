@@ -8,13 +8,13 @@
 - miner: kept for functionality and APIs compatibility, same version must provide same functionality and APIs
 - fix: to release some improvements, bug fixes and new features
 
-### Coding Rule
+### Coding Rule for project members
 
 - Push only "develop" or "feature/xxx" branch
-- Create "feature/xxx" branch and cresate a pull request when you need code review
-- scalariform must be applied
-- Prefer creating scala source code for each class/object/trait
-- Keep compatibility as far as possible
+- Create "feature/xxx" branch and create a pull request when you need code review
+- Compatibility always must be kept as far as possible
+- scalariform must be applied to all Scala source code
+- Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
 
 ### Testing
 
@@ -43,7 +43,7 @@ scalikejdbc-library/src/test/resources/*.properties
 
 - Sonatype release account
 
-@seratch's personal account.
+Currently @seratch's personal account.
 
 - $HOME/.sbt/0.13/sonatype.sbt
 
@@ -66,6 +66,6 @@ The release manager is @seratch. Currently, all the following operations should 
 - git flow release {version}
 - Run all the `./scripts/release_*.sh` and close/publish on the sonatype console
 - Post to http://notes.implicit.ly/ by using [herald](https://github.com/n8han/herald)
-- Post [ScalikeJDBC Users Group](https://groups.google.com/forum/#!forum/scalikejdbc-users-group)
+- Post to [ScalikeJDBC Users Group](https://groups.google.com/forum/#!forum/scalikejdbc-users-group)
 - Twitter account: @scalikejdbc
 
