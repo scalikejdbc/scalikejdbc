@@ -246,10 +246,38 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def between(column: SQLSyntax, a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(column, a, b)}")
 
     def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
+
     def in(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} in (${subQuery.toSQLSyntax})")
 
+    def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
+    }
+    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
+    }
+    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
+    }
+    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
+    }
+
     def notIn(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(column, values)}")
+
     def notIn(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not in (${subQuery.toSQLSyntax})")
+
+    def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
+    }
+    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
+    }
+    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
+    }
+    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+      ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
+    }
 
     def like(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.like(column, value)}")
     def notLike(column: SQLSyntax, value: String): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notLike(column, value)}")

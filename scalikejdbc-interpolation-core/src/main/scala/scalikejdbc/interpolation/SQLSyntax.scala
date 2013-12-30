@@ -72,6 +72,58 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} not in (${values})"
 
+  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value})")
+    val values = csv(valueSeqs.map { case (v1, v2) => sqls"($v1, $v2)" }: _*)
+    val inClause = sqls"${column} in (${values})"
+    sqls"${this} ${inClause}"
+  }
+  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value})")
+    val values = csv(valueSeqs.map { case (v1, v2) => sqls"($v1, $v2)" }: _*)
+    val inClause = sqls"${column} not in (${values})"
+    sqls"${this} ${inClause}"
+  }
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3) => sqls"($v1, $v2, $v3)" }: _*)
+    val inClause = sqls"${column} in (${values})"
+    sqls"${this} ${inClause}"
+  }
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3) => sqls"($v1, $v2, $v3)" }: _*)
+    val inClause = sqls"${column} not in (${values})"
+    sqls"${this} ${inClause}"
+  }
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3, v4) => sqls"($v1, $v2, $v3, $v4)" }: _*)
+    val inClause = sqls"${column} in (${values})"
+    sqls"${this} ${inClause}"
+  }
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3, v4) => sqls"($v1, $v2, $v3, $v4)" }: _*)
+    val inClause = sqls"${column} not in (${values})"
+    sqls"${this} ${inClause}"
+  }
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value}, ${columns._5.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"($v1, $v2, $v3, $v4, $v5)" }: _*)
+    val inClause = sqls"${column} in (${values})"
+    sqls"${this} ${inClause}"
+  }
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = {
+    val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value}, ${columns._5.value})")
+    val values = csv(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"($v1, $v2, $v3, $v4, $v5)" }: _*)
+    val inClause = sqls"${column} not in (${values})"
+    sqls"${this} ${inClause}"
+  }
+
   def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
   def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
 
@@ -104,12 +156,14 @@ object SQLSyntax {
 
   import Implicits._
 
-  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax): SQLSyntax = parts.foldLeft(sqls"") {
-    case (sql, part) if !sql.isEmpty && !part.isEmpty => sqls"${sql} ${delimiter} ${part}"
+  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = parts.foldLeft(sqls"") {
+    case (sql, part) if !sql.isEmpty && !part.isEmpty =>
+      if (spaceBeforeDelimier) sqls"${sql} ${delimiter} ${part}"
+      else sqls"${sql}${delimiter} ${part}"
     case (sql, part) if sql.isEmpty && !part.isEmpty => part
     case (sql, _) => sql
   }
-  def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",")
+  def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",", false)
 
   private[this] def hasAndOr(s: SQLSyntax): Boolean = {
     val statement = s.value.toLowerCase
@@ -148,6 +202,18 @@ object SQLSyntax {
 
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"".notIn(column, values)
+
+  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = sqls"".in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = sqls"".notIn(columns, valueSeqs)
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = sqls"".in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = sqls"".notIn(columns, valueSeqs)
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = sqls"".in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = sqls"".notIn(columns, valueSeqs)
+
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = sqls"".in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = sqls"".notIn(columns, valueSeqs)
 
   def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
   def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
