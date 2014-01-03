@@ -1,0 +1,24 @@
+ScalikeJDBC 1.7.3 is out. EntityEquality and IN clause with multiple columns in QueryDSL are added.
+
+Official website:
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+Special thanks to @daimatz and all the ScalikeJDBC users!
+
+Contributers' Guide is now available:
+
+https://github.com/scalikejdbc/scalikejdbc/blob/develop/CONTRIBUTING.md
+
+## library
+
+- Added EntityEquality trait support for normal classes
+
+## Interpolation
+
+- #184 QueryDSL: Specifying multiple columns in 'IN' clause (feedback by @daimatz)
+
+Enjoy writing mostly type-safe SQL and get things done!
+
