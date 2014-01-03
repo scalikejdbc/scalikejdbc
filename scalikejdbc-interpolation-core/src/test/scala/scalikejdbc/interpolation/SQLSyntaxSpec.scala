@@ -2,6 +2,7 @@ package scalikejdbc.interpolation
 
 import org.scalatest._
 import org.scalatest.matchers._
+import org.joda.time.DateTime
 
 class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
 
@@ -28,7 +29,7 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
   it should "have #csv" in {
     val (id, name) = (123, "Alice")
     val s = SQLSyntax.csv(sqls"id = ${id}", sqls"name = ${name}")
-    s.value should equal("id = ? , name = ?")
+    s.value should equal("id = ?, name = ?")
     s.parameters should equal(Seq(123, "Alice"))
   }
 
@@ -92,10 +93,54 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     s.parameters should equal(Seq(1, 2, 3))
   }
 
+  it should "have #in for 2 columns" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name"), Seq((1, "Alice"), (2, "Bob")))
+    s.value should equal(" (id, name) in ((?, ?), (?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 2, "Bob"))
+  }
+  it should "have #in for 3 columns" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
+    s.value should equal(" (id, name, age) in ((?, ?, ?), (?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
+  }
+  it should "have #in for 4 columns" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
+    s.value should equal(" (id, name, age, foo) in ((?, ?, ?, ?), (?, ?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
+  }
+  it should "have #in for 5 columns" in {
+    val time = DateTime.now
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
+    s.value should equal(" (id, name, age, foo, created_at) in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
+  }
+
   it should "have #notIn" in {
     val s = SQLSyntax.notIn(sqls"id", Seq(1, 2, 3))
     s.value should equal(" id not in (?, ?, ?)")
     s.parameters should equal(Seq(1, 2, 3))
+  }
+
+  it should "have #notIn for 2 columns" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name"), Seq((1, "Alice"), (2, "Bob")))
+    s.value should equal(" (id, name) not in ((?, ?), (?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 2, "Bob"))
+  }
+  it should "have #notIn for 3 columns" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
+    s.value should equal(" (id, name, age) not in ((?, ?, ?), (?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
+  }
+  it should "have #notIn for 4 columns" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
+    s.value should equal(" (id, name, age, foo) not in ((?, ?, ?, ?), (?, ?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
+  }
+  it should "have #notIn for 5 columns" in {
+    val time = DateTime.now
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
+    s.value should equal(" (id, name, age, foo, created_at) not in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
+    s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
   }
 
   it should "have #like" in {

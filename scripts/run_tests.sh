@@ -11,7 +11,7 @@ sbt \
   ++2.9.2 \
   clean \
   library/test \
-  ++2.10.2 \
+  ++2.10.3 \
   clean \
   interpolation-core/test \
   interpolation/test \
