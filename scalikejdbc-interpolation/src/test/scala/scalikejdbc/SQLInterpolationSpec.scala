@@ -581,7 +581,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
             select
               ${sq.result.*}, ${cg.result.*}
             from
-              (select ${c.result.*} from ${Customer.as(c)} order by ${c.id} limit 5) ${SubQuery.as(sq)}
+              (select ${c.result.*} from ${Customer.as(c)} limit 5) ${SubQuery.as(sq)}
                 left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
             where
               ${sq(c).id} > 3
@@ -593,7 +593,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
               .list
               .apply()
 
-            customers.map(u => u.id) should equal(Seq(4, 5))
             customers(0).id should equal(4)
             customers(1).id should equal(5)
           }
@@ -603,7 +602,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
             val sq = SubQuery.syntax("sq", c.resultName)
             val customers: List[Customer] = withSQL {
               select.all(sq, cg)
-                .from(select.all(c).from(Customer as c).orderBy(c.id).limit(5).as(sq))
+                .from(select.all(c).from(Customer as c).limit(5).as(sq))
                 .leftJoin(CustomerGroup as cg).on(sq(c).groupId, cg.id)
                 .where.gt(sq(c).id, 3)
                 .orderBy(sq(c).id)
@@ -613,7 +612,6 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with DBSettings 
               .list
               .apply()
 
-            customers.map(u => u.id) should equal(Seq(4, 5))
             customers(0).id should equal(4)
             customers(1).id should equal(5)
           }
