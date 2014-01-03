@@ -44,11 +44,11 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
+          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
           case _ => "2.9.1"
         })
         val anormDependency = scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion % "test"
+          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion % "test"
           case _ =>                              "play"              % anorm % "2.0.8" % "test"
         }
         Seq(
@@ -133,7 +133,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
+          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => Seq(
             "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion       % "compile",
             "org.scalatest" %% "scalatest" % _scalatestVersion      % "test",
             "org.specs2"    %% "specs2"    % _specs2Scala210Version % "test"
@@ -166,7 +166,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion      % "compile",
           "org.scalatest" %% "scalatest"    % _scalatestVersion     % "test",
           (scalaVersion match {
-            case "2.10.2" => "org.specs2" %% "specs2" % _specs2Scala210Version % "test"
+            case "2.10.3" | "2.10.2" => "org.specs2" %% "specs2" % _specs2Scala210Version % "test"
             case "2.9.2"  => "org.specs2" %% "specs2" % _specs2Scala29Version % "test"
           })
         ) ++ jdbcDriverDependenciesInTestScope
@@ -183,7 +183,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-play-plugin",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => {
+          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => {
             Seq(
               "com.typesafe.play" % "play_2.10"      % _defaultPlayVersion % "provided",
               "com.typesafe.play" % "play-test_2.10" % _defaultPlayVersion % "test",
@@ -230,7 +230,7 @@ object ScalikeJDBCProjects extends Build {
     )
 
     play.Project(appName, appVersion, appDependencies, path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
-      scalaVersion in ThisBuild := "2.10.2",
+      scalaVersion in ThisBuild := "2.10.3",
       resolvers ++= Seq(
         "sonatype releases"  at "http://oss.sonatype.org/content/repositories/releases",
         "sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
@@ -250,7 +250,7 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-test",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         (scalaVersion match {
-          case "2.10.2" | "2.10.1" | "2.10.0" => Seq(
+          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => Seq(
             "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
             "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
             "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
