@@ -45,6 +45,9 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
   private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
   implicit val array: TypeBinder[java.sql.Array] = TypeBinder(_ getArray _)(_ getArray _)
   implicit val bigDecimal: TypeBinder[java.math.BigDecimal] = TypeBinder(_ getBigDecimal _)(_ getBigDecimal _)
+  implicit val scalaBigDecimal: TypeBinder[BigDecimal] = {
+    TypeBinder((rs, x) => BigDecimal(rs.getBigDecimal(x)))((rs, x) => BigDecimal(rs.getBigDecimal(x)))
+  }
   implicit val binaryStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getBinaryStream _)(_ getBinaryStream _)
   implicit val blob: TypeBinder[java.sql.Blob] = TypeBinder(_ getBlob _)(_ getBlob _)
   implicit val nullableBoolean: TypeBinder[java.lang.Boolean] = any.map {

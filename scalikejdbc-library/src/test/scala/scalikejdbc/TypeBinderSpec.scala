@@ -15,6 +15,12 @@ class TypeBinderSpec extends FlatSpec with ShouldMatchers with MockitoSugar {
     result should be(None)
   }
 
+  it should "have TypeBinder for scala.BigDecimal" in {
+    val rs: ResultSet = mock[ResultSet]
+    when(rs.getBigDecimal("decimal")).thenReturn(new java.math.BigDecimal("1234567"))
+    implicitly[TypeBinder[BigDecimal]].apply(rs, "decimal") should be(BigDecimal("1234567"))
+  }
+
   it should "fix issue #170" in {
     val rs: ResultSet = mock[ResultSet]
     when(rs.getObject("none")).thenReturn(null, Array[Object](): _*)
