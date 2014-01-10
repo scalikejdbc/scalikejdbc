@@ -35,8 +35,8 @@ object SQLSyntaxSupportFeature extends LogSupport {
    *
    * Notice: Table name is specified with a String value which might be an input value.
    */
-  def verifyTableName(tableName: String): Unit = if (tableName != null) {
-    val name = tableName.trim
+  def verifyTableName(tableNameWithSchema: String): Unit = if (tableNameWithSchema != null) {
+    val name = tableNameWithSchema.trim
     val hasWhiteSpace = name.matches(".*\\s+.*")
     val hasSemicolon = name.matches(".*;.*")
     if (hasWhiteSpace || hasSemicolon) {
@@ -117,8 +117,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
-        SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableName), {
-          NamedDB(connectionPoolName).getColumnNames(tableName).map(_.toLowerCase(en)) match {
+        SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableNameWithSchema), {
+          NamedDB(connectionPoolName).getColumnNames(tableNameWithSchema).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
               "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")
             case cs => cs
