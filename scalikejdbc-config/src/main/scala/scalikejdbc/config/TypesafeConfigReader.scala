@@ -83,7 +83,7 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
     } yield {
       val user = configMap.get("user").orNull[String]
       val password = configMap.get("password").orNull[String]
-      JDBCSettings(driver, url, user, password)
+      JDBCSettings(url, user, password, driver)
     }) getOrElse {
       throw new ConfigurationException("Configuration error for database " + dbName + ". " + configMap.toString)
     }
