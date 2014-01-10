@@ -176,7 +176,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax = {
-      val _tableName = tableName.replaceAll("\\.", "_")
+      val _tableName = tableNameWithSchema.replaceAll("\\.", "_")
       val _name = if (forceUpperCase) _tableName.toUpperCase(en) else _tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
@@ -204,7 +204,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def as(provider: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A]): TableAsAliasSQLSyntax = {
       if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table.value, table.parameters, Some(provider)) }
-      else { TableAsAliasSQLSyntax(tableName + " " + provider.tableAliasName, Nil, Some(provider)) }
+      else { TableAsAliasSQLSyntax(tableNameWithSchema + " " + provider.tableAliasName, Nil, Some(provider)) }
     }
   }
 

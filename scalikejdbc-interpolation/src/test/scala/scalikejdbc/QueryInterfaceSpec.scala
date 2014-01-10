@@ -56,6 +56,9 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
           sql"create table ${SchemaExample.table} (id int not null)".execute.apply()
           withSQL { insert.into(SchemaExample).values(1) }.update.apply()
           val se = SchemaExample.syntax("se")
+          select(sqls.count).from(SchemaExample as se).toSQL.statement should equal(
+            "select count(1) from public.qi_schema_example se")
+
           val count = withSQL { select(sqls.count).from(SchemaExample as se) }.map(_.long(1)).single.apply().get
           count should equal(1L)
         }
