@@ -23,7 +23,7 @@ import scalikejdbc._
 trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
 
   def setup(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Unit = {
-    val JDBCSettings(driver, url, user, password) = readJDBCSettings(dbName)
+    val JDBCSettings(url, user, password, driver) = readJDBCSettings(dbName)
     val cpSettings = readConnectionPoolSettings(dbName)
     Class.forName(driver)
     ConnectionPool.add(dbName, url, user, password, cpSettings)
