@@ -16,9 +16,7 @@
 package scalikejdbc
 
 import java.sql.ResultSet
-import java.util.Calendar
 import org.joda.time._
-import collection.JavaConverters._
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -147,7 +145,7 @@ trait LowPriorityTypeBinderImplicits {
   implicit def option[A](implicit ev: TypeBinder[A]): TypeBinder[Option[A]] = new TypeBinder[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] = wrap(ev(rs, columnIndex))
     def apply(rs: ResultSet, columnLabel: String): Option[A] = wrap(ev(rs, columnLabel))
-    private def wrap[A](a: => A): Option[A] =
+    private def wrap(a: => A): Option[A] =
       try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
   }
 
