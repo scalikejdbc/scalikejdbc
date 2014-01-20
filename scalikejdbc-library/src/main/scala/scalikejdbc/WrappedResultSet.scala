@@ -418,6 +418,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def localTime(columnLabel: String): LocalTime = get[LocalTime](columnLabel)
 
+  def localDateTime(columnIndex: Int): LocalDateTime = get[LocalDateTime](columnIndex)
+
+  def localDateTime(columnLabel: String): LocalDateTime = get[LocalDateTime](columnLabel)
+
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnIndex)
 
   def timestampOpt(columnLabel: String): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnLabel)
@@ -443,6 +447,10 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def localTimeOpt(columnIndex: Int): Option[LocalTime] = get[Option[LocalTime]](columnIndex)
 
   def localTimeOpt(columnLabel: String): Option[LocalTime] = get[Option[LocalTime]](columnLabel)
+
+  def localDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
+
+  def localDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
 
   def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
 

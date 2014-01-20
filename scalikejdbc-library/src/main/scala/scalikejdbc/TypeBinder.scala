@@ -130,6 +130,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
   implicit val dateTime: TypeBinder[DateTime] = option[java.sql.Timestamp].map(_.map(_.toDateTime).orNull[DateTime])
   implicit val localDate: TypeBinder[LocalDate] = option[java.sql.Date].map(_.map(_.toLocalDate).orNull[LocalDate])
   implicit val localTime: TypeBinder[LocalTime] = option[java.sql.Time].map(_.map(_.toLocalTime).orNull[LocalTime])
+  implicit val localDateTime: TypeBinder[LocalDateTime] = option[java.sql.Timestamp].map(_.map(_.toLocalDateTime).orNull)
 
   implicit val url: TypeBinder[java.net.URL] = TypeBinder(_ getURL _)(_ getURL _)
 
