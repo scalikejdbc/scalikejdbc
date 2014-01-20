@@ -24,32 +24,33 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   import scalikejdbc.interpolation.SQLSyntax
 
-  def sql[A](params: Any*) = {
+  def sql[A](params: Any*): SQL[A, NoExtractor] = {
     val syntax = sqls(params: _*)
     SQL[A](syntax.value).bind(syntax.parameters: _*)
   }
 
-  def sqls(params: Any*) = {
-    val query: String = s.parts.zipAll(params, "", LastParameter).foldLeft("") {
-      case (query, (previousQueryPart, param)) => query + previousQueryPart + getPlaceholders(param)
-    }
-    SQLSyntax(query, params.flatMap(toSeq))
+  def sqls(params: Any*): SQLSyntax = SQLSyntax(buildQuery(params), buildParams(params))
+
+  private def buildQuery(params: Seq[Any]): String =
+    s.parts.zipAll(params, "", LastParameter).foldLeft(new StringBuilder) {
+      case (sb, (previousQueryPart, param)) =>
+        sb ++= previousQueryPart
+        addPlaceholders(sb, param)
+    }.result()
+
+  private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
+    case _: String => sb += '?'
+    case t: Traversable[_] => t.map(_ => "?").addString(sb, ", ") // e.g. in clause
+    case LastParameter => sb
+    case SQLSyntax(s, _) => sb ++= s
+    case _ => sb += '?'
   }
 
-  private def getPlaceholders(param: Any): String = param match {
-    case _: String => "?"
-    case t: Traversable[_] => t.map(_ => "?").mkString(", ") // e.g. in clause
-    case LastParameter => ""
-    case SQLSyntax(s, _) => s
-    case _ => "?"
-  }
-
-  private def toSeq(param: Any): Traversable[Any] = param match {
-    case s: String => Seq(s)
-    case t: Traversable[_] => t
-    case SQLSyntax(_, params) => params
-    case n => Seq(n)
-  }
+  private def buildParams(params: Seq[Any]): Seq[Any] = params.foldLeft(Seq.newBuilder[Any]) {
+    case (b, s: String) => b += s
+    case (b, t: Traversable[_]) => b ++= t
+    case (b, SQLSyntax(_, params)) => b ++= params
+    case (b, n) => b += n
+  }.result()
 
 }
-
