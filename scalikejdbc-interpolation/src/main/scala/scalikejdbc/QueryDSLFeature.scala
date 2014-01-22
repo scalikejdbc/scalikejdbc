@@ -499,7 +499,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def map(mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]): SelectSQLBuilder[A] = mapper.apply(this)
 
-    private def lazyLoadedPart: SQLSyntax = sqls"select ${sqls.join(resultAllProviders.reverse.map(_.resultAll), sqls",")}"
+    private def lazyLoadedPart: SQLSyntax = sqls"select ${sqls.join(resultAllProviders.reverseMap(_.resultAll), sqls",")}"
 
     override def toSQLSyntax: SQLSyntax = if (lazyColumns) sqls"${lazyLoadedPart} ${sql}" else sqls"${sql}"
     override def toSQL: SQL[A, NoExtractor] = if (lazyColumns) sql"${lazyLoadedPart} ${sql}" else sql"${sql}"
@@ -516,7 +516,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       this.copy(sql = sqls"${sql} values (${vs})")
     }
     def namedValues(columnsAndValues: (SQLSyntax, Any)*): InsertSQLBuilder = {
-      val (cs, vs) = (columnsAndValues.map(_._1), columnsAndValues.map(_._2))
+      val (cs, vs) = columnsAndValues.unzip
       columns(cs: _*).values(vs: _*)
     }
 

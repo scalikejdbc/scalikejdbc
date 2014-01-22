@@ -1039,7 +1039,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def toClassName(table: Table): String = toCamelCase(table.name)
 
-  private def toCamelCase(s: String): String = s.split("_").toList.foldLeft("") {
+  private def toCamelCase(s: String): String = s.split("_").foldLeft("") {
     (camelCaseString, part) =>
       camelCaseString + toProperCase(part)
   }
