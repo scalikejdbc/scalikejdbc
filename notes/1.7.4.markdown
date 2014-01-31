@@ -1,0 +1,28 @@
+ScalikeJDBC 1.7.4 is out. Thanks to @analytically, @Arakaki, @kxbmap and @kalinichenko!
+
+Official website:
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #189 Add ReadOnlyAutoSession (feedback by @analytically)
+- #188 TypeBinder for scala.BigDecimal is absent
+
+## config
+
+- #191: JDBCSetting's parameters order by @Arakaki
+
+## interpolation
+
+- #193 Schema setting is ignored only in select queries
+- #198, #199 Several optimizations by @kxbmap
+
+## mapper-generator
+
+- #194 Fixed invalid generated code for LocalDate by @kalinichenko
+
+Enjoy writing mostly type-safe SQL and get things done!
+

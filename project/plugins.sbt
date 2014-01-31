@@ -19,7 +19,7 @@ libraryDependencies <+= (sbtVersion){ sv =>
 
 logLevel := Level.Warn
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.1")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.2-RC2")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.2")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.3")
 
