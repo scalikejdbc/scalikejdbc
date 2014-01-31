@@ -7,21 +7,21 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.7.3"
+  lazy val _version = "1.7.4"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.5"
-  lazy val _defaultPlayVersion = "2.2.1"
-  lazy val _typesafeConfigVersion = "1.0.2"
+  lazy val _defaultPlayVersion = "2.2.2-RC2"
+  lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
-  lazy val _logbackVersion = "1.0.13"
-  lazy val _h2Version = "1.3.174"
+  lazy val _logbackVersion = "1.1.0"
+  lazy val _h2Version = "1.3.175"
   lazy val _hibernateVersion = "4.1.12.Final"
-  lazy val _scalatestVersion = "1.9.1"
+  lazy val _scalatestVersion = "1.9.2"
   lazy val _specs2Scala291Version = "1.12.4"
   lazy val _specs2Scala29Version = "1.12.4.1"
-  lazy val _specs2Scala210Version = "2.2"
+  lazy val _specs2Scala210Version = "2.3.7"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalikejdbc",
@@ -56,7 +56,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"            % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion % "compile",
           "joda-time"               %  "joda-time"       % "2.3"            % "compile",
-          "org.joda"                %  "joda-convert"    % "1.4"            % "compile",
+          "org.joda"                %  "joda-convert"    % "1.6"            % "compile",
           // scope: test
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
@@ -224,9 +224,9 @@ object ScalikeJDBCProjects extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "com.github.tototoshi" %% "play-flyway" % "0.2.0",
+      "com.github.tototoshi" %% "play-flyway" % "1.0.1",
       "com.h2database"       %  "h2"          % _h2Version,
-      "org.postgresql"       %  "postgresql"  % "9.2-1003-jdbc4"
+      "org.postgresql"       %  "postgresql"  % "9.3-1100-jdbc41"
     )
 
     play.Project(appName, appVersion, appDependencies, path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
@@ -303,9 +303,9 @@ object ScalikeJDBCProjects extends Build {
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version       % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"          % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"      % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.1"          % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.27"         % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.28"         % "test",
     "org.postgresql"    % "postgresql"           % "9.2-1003-jdbc4" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")

@@ -432,35 +432,44 @@ case class ActiveSession(private[scalikejdbc] val conn: Connection, tx: Option[T
  * Represents that there is no active session.
  */
 case object NoSession extends DBSession {
-
   override private[scalikejdbc] val conn: Connection = null
-
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
-
 }
 
 /**
  * Represents that already existing session will be used or a new session will be started.
  */
 case object AutoSession extends DBSession {
-
   override private[scalikejdbc] val conn: Connection = null
-
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
+}
 
+/**
+ * Represents that already existing session will be used or a new read-only session will be started.
+ */
+case object ReadOnlyAutoSession extends DBSession {
+  override private[scalikejdbc] val conn: Connection = null
+  val tx: Option[Tx] = None
+  val isReadOnly: Boolean = true
 }
 
 /**
  * Represents that already existing session will be used or a new session which is retrieved from named connection pool will be started.
  */
 case class NamedAutoSession(name: Any) extends DBSession {
-
   override private[scalikejdbc] val conn: Connection = null
-
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
+}
 
+/**
+ * Represents that already existing session will be used or a new read-only session which is retrieved from named connnection pool will be started.
+ */
+case class ReadOnlyNamedAutoSession(name: Any) extends DBSession {
+  override private[scalikejdbc] val conn: Connection = null
+  val tx: Option[Tx] = None
+  val isReadOnly: Boolean = true
 }
 

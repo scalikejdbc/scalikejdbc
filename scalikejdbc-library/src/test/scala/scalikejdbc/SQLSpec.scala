@@ -4,7 +4,7 @@ import util.control.Exception._
 import org.scalatest._
 import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
-import java.sql.PreparedStatement
+import java.sql.{ SQLException, PreparedStatement }
 
 class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
 
@@ -264,6 +264,47 @@ class SQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Sett
     val expected = (rs: WrappedResultSet) => rs.long(1)
     val sql = SQL("select * from company where id = ?").bind(123).map(expected)
     sql.extractor should equal(expected)
+  }
+
+  it should "work with ReadOnlyAutoSession #189" in {
+    val tableName = tableNamePrefix + "_readOnlyAutoSession"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      implicit val session = ReadOnlyAutoSession
+
+      SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
+
+      intercept[SQLException] {
+        SQL("delete from " + tableName + "").update.apply()
+      }
+      intercept[SQLException] {
+        SQL("update " + tableName + " set name = 'Anonymous'").update.apply()
+      }
+      intercept[SQLException] {
+        SQL("update " + tableName + " set name = ?").batch(Seq("Anonymous")).apply()
+      }
+    }
+  }
+
+  it should "work with NamedReadOnlyAutoSession #189" in {
+    val tableName = tableNamePrefix + "_readOnlyNamedAutoSession"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      implicit val session = ReadOnlyNamedAutoSession('named)
+
+      SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
+
+      intercept[SQLException] {
+        SQL("delete from " + tableName + "").update.apply()
+      }
+      intercept[SQLException] {
+        SQL("update " + tableName + " set name = 'Anonymous'").update.apply()
+      }
+      intercept[SQLException] {
+        SQL("update " + tableName + " set name = ?").batch(Seq("Anonymous")).apply()
+      }
+    }
   }
 
 }

@@ -16,9 +16,7 @@
 package scalikejdbc
 
 import java.sql.ResultSet
-import java.util.Calendar
 import org.joda.time._
-import collection.JavaConverters._
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -44,7 +42,10 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
 
   private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
   implicit val array: TypeBinder[java.sql.Array] = TypeBinder(_ getArray _)(_ getArray _)
+
   implicit val bigDecimal: TypeBinder[java.math.BigDecimal] = TypeBinder(_ getBigDecimal _)(_ getBigDecimal _)
+  implicit val scalaBigDecimal: TypeBinder[BigDecimal] = option(bigDecimal).map(_.map(BigDecimal.apply).orNull[BigDecimal])
+
   implicit val binaryStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getBinaryStream _)(_ getBinaryStream _)
   implicit val blob: TypeBinder[java.sql.Blob] = TypeBinder(_ getBlob _)(_ getBlob _)
   implicit val nullableBoolean: TypeBinder[java.lang.Boolean] = any.map {
@@ -100,13 +101,36 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
   implicit val short: TypeBinder[Short] = nullableShort.map(throwExceptionIfNull(_.asInstanceOf[Short]))
   implicit val optionShort: TypeBinder[Option[Short]] = nullableShort.map(v => Option(v).map(_.asInstanceOf[Short]))
   implicit val sqlXml: TypeBinder[java.sql.SQLXML] = TypeBinder(_ getSQLXML _)(_ getSQLXML _)
+
   implicit val string: TypeBinder[String] = TypeBinder(_ getString _)(_ getString _)
+
   implicit val time: TypeBinder[java.sql.Time] = TypeBinder(_ getTime _)(_ getTime _)
   implicit val timestamp: TypeBinder[java.sql.Timestamp] = TypeBinder(_ getTimestamp _)(_ getTimestamp _)
-  implicit val url: TypeBinder[java.net.URL] = TypeBinder(_ getURL _)(_ getURL _)
+
+  /*
+   * [error] /scalikejdbc/scalikejdbc-library/src/test/scala/scalikejdbc/TypeBinderSpec.scala:40: ambiguous
+   * implicit values:
+   * [error]  both value date in object TypeBinder of type => scalikejdbc.TypeBinder[java.sql.Date]
+   * [error]  and value time in object TypeBinder of type => scalikejdbc.TypeBinder[java.sql.Time]
+   * [error]  match expected type scalikejdbc.TypeBinder[java.util.Date]
+   * [error]     implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
+   * [error]               ^
+   * [error] one error found
+   */
+  //implicit val javaUtilDate: TypeBinder[java.util.Date] = option[java.sql.Timestamp].map(_.map(_.toJavaUtilDate).orNull[java.util.Date])
+  implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] = {
+    option[java.sql.Timestamp].map(_.map { t =>
+      val c = java.util.Calendar.getInstance
+      c.setTime(t.toJavaUtilDate)
+      c
+    }.orNull[java.util.Calendar])
+  }
   implicit val dateTime: TypeBinder[DateTime] = option[java.sql.Timestamp].map(_.map(_.toDateTime).orNull[DateTime])
   implicit val localDate: TypeBinder[LocalDate] = option[java.sql.Date].map(_.map(_.toLocalDate).orNull[LocalDate])
   implicit val localTime: TypeBinder[LocalTime] = option[java.sql.Time].map(_.map(_.toLocalTime).orNull[LocalTime])
+  implicit val localDateTime: TypeBinder[LocalDateTime] = option[java.sql.Timestamp].map(_.map(_.toLocalDateTime).orNull)
+
+  implicit val url: TypeBinder[java.net.URL] = TypeBinder(_ getURL _)(_ getURL _)
 
   private[scalikejdbc] val asciiStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getAsciiStream _)(_ getAsciiStream _)
   private[scalikejdbc] val nCharacterStream: TypeBinder[java.io.Reader] = TypeBinder(_ getNCharacterStream _)(_ getNCharacterStream _)
@@ -122,7 +146,7 @@ trait LowPriorityTypeBinderImplicits {
   implicit def option[A](implicit ev: TypeBinder[A]): TypeBinder[Option[A]] = new TypeBinder[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] = wrap(ev(rs, columnIndex))
     def apply(rs: ResultSet, columnLabel: String): Option[A] = wrap(ev(rs, columnLabel))
-    private def wrap[A](a: => A): Option[A] =
+    private def wrap(a: => A): Option[A] =
       try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
   }
 

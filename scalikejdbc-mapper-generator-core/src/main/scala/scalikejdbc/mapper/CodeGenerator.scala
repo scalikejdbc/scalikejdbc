@@ -183,7 +183,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case TypeName.ByteArray => "Array[Byte]()"
       case TypeName.Boolean => "false"
       case TypeName.String => "\"MyString\""
-      case TypeName.LocalDate => "LocalTime.now"
+      case TypeName.LocalDate => "LocalDate.now"
       case TypeName.BigDecimal => "new java.math.BigDecimal(\"1\")"
       case TypeName.Double => "0.1D"
       case TypeName.Float => "0.1F"
@@ -1039,7 +1039,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def toClassName(table: Table): String = toCamelCase(table.name)
 
-  private def toCamelCase(s: String): String = s.split("_").toList.foldLeft("") {
+  private def toCamelCase(s: String): String = s.split("_").foldLeft("") {
     (camelCaseString, part) =>
       camelCaseString + toProperCase(part)
   }

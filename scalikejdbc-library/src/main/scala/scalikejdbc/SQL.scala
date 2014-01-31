@@ -255,6 +255,8 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
     case AutoSession => DB autoCommit (s => s.foreach(statement, parameters: _*)(op))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foreach(statement, parameters: _*)(op))
+    case ReadOnlyAutoSession => DB readOnly (s => s.foreach(statement, parameters: _*)(op))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.foreach(statement, parameters: _*)(op))
     case _ => session.foreach(statement, parameters: _*)(op)
   }
 
@@ -266,6 +268,8 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = session match {
     case AutoSession => DB autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
+    case ReadOnlyAutoSession => DB readOnly (_.foldLeft(statement, parameters: _*)(z)(op))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (_.foldLeft(statement, parameters: _*)(z)(op))
     case _ => session.foldLeft(statement, parameters: _*)(z)(op)
   }
 
@@ -413,6 +417,8 @@ class SQLBatch(val statement: String)(val parameters: Seq[Any]*) {
   def apply()(implicit session: DBSession): Seq[Int] = session match {
     case AutoSession => DB autoCommit (s => s.batch(statement, parameters: _*))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.batch(statement, parameters: _*))
+    case ReadOnlyAutoSession => DB readOnly (s => s.batch(statement, parameters: _*))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.batch(statement, parameters: _*))
     case _ => session.batch(statement, parameters: _*)
   }
 
@@ -430,6 +436,8 @@ class SQLExecution(val statement: String)(val parameters: Any*)(before: (Prepare
   def apply()(implicit session: DBSession): Boolean = session match {
     case AutoSession => DB autoCommit (s => s.executeWithFilters(before, after, statement, parameters: _*))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.executeWithFilters(before, after, statement, parameters: _*))
+    case ReadOnlyAutoSession => DB readOnly (s => s.executeWithFilters(before, after, statement, parameters: _*))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.executeWithFilters(before, after, statement, parameters: _*))
     case _ => session.executeWithFilters(before, after, statement, parameters: _*)
   }
 
@@ -447,6 +455,8 @@ class SQLUpdate(val statement: String)(val parameters: Any*)(before: (PreparedSt
   def apply()(implicit session: DBSession): Int = session match {
     case AutoSession => DB autoCommit (s => s.updateWithFilters(before, after, statement, parameters: _*))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.updateWithFilters(before, after, statement, parameters: _*))
+    case ReadOnlyAutoSession => DB readOnly (s => s.updateWithFilters(before, after, statement, parameters: _*))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.updateWithFilters(before, after, statement, parameters: _*))
     case _ => session.updateWithFilters(before, after, statement, parameters: _*)
   }
 
@@ -462,6 +472,8 @@ class SQLUpdateWithGeneratedKey(val statement: String)(val parameters: Any*)(key
   def apply()(implicit session: DBSession): Long = session match {
     case AutoSession => DB autoCommit (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case NamedAutoSession(name) => NamedDB(name) autoCommit (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+    case ReadOnlyAutoSession => DB readOnly (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case _ => session.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
   }
 
@@ -477,8 +489,9 @@ trait SQLToTraversable[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A
   val statement: String
   val parameters: Seq[Any]
   def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[A] = session match {
-    case AutoSession => DB readOnly (s => s.traversable(statement, parameters: _*)(extractor))
+    case AutoSession | ReadOnlyAutoSession => DB readOnly (s => s.traversable(statement, parameters: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(statement, parameters: _*)(extractor))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.traversable(statement, parameters: _*)(extractor))
     case _ => session.traversable(statement, parameters: _*)(extractor)
   }
 }
@@ -506,8 +519,9 @@ trait SQLToList[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   val statement: String
   val parameters: Seq[Any]
   def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
-    case AutoSession => DB readOnly (s => s.list(statement, parameters: _*)(extractor))
+    case AutoSession | ReadOnlyAutoSession => DB readOnly (s => s.list(statement, parameters: _*)(extractor))
     case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(statement, parameters: _*)(extractor))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.list(statement, parameters: _*)(extractor))
     case _ => session.list(statement, parameters: _*)(extractor)
   }
 }
@@ -539,14 +553,16 @@ trait SQLToOption[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
     hasExtractor: ThisSQL =:= SQLWithExtractor): Option[A] = output match {
     case Output.single =>
       session match {
-        case AutoSession => DB readOnly (s => s.single(statement, parameters: _*)(extractor))
+        case AutoSession | ReadOnlyAutoSession => DB readOnly (s => s.single(statement, parameters: _*)(extractor))
         case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.single(statement, parameters: _*)(extractor))
+        case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.single(statement, parameters: _*)(extractor))
         case _ => session.single(statement, parameters: _*)(extractor)
       }
     case Output.first =>
       session match {
-        case AutoSession => DB readOnly (s => s.first(statement, parameters: _*)(extractor))
+        case AutoSession | ReadOnlyAutoSession => DB readOnly (s => s.first(statement, parameters: _*)(extractor))
         case NamedAutoSession(name) => NamedDB(name) readOnly (s => s.first(statement, parameters: _*)(extractor))
+        case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.first(statement, parameters: _*)(extractor))
         case _ => session.first(statement, parameters: _*)(extractor)
       }
   }

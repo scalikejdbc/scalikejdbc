@@ -286,7 +286,13 @@ trait DBConnection extends LogSupport {
    * @return schema and table
    */
   private[this] def toSchemaAndTable(name: String): (String, String) = {
-    val schema = if (name.split("\\.").size > 1) name.split("\\.").head else null
+    val schema = {
+      if (name.split("\\.").size > 1) {
+        val s = name.split("\\.").head
+        // H2 Database cannot accept "public" for metadata retrieving
+        if (s == "public") null else s
+      } else null
+    }
     val table = if (name.split("\\.").size > 1) name.split("\\.")(1) else name
     (schema, table)
   }

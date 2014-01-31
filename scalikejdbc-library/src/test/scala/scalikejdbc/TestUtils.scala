@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import java.sql.Connection
 import util.control.Exception._
 
 object TestUtils {
