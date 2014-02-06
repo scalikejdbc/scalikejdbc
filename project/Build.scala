@@ -10,14 +10,15 @@ object ScalikeJDBCProjects extends Build {
   lazy val _version = "1.7.4"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.5"
+  lazy val _slf4jApiVersion = "1.7.6"
   lazy val _defaultPlayVersion = "2.2.2-RC2"
   lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.0"
+  lazy val _logbackVersion = "1.1.1"
   lazy val _h2Version = "1.3.175"
-  lazy val _hibernateVersion = "4.1.12.Final"
+  lazy val _hibernateVersion = "4.3.1.Final"
+  // TODO 2.0
   lazy val _scalatestVersion = "1.9.2"
   lazy val _specs2Scala291Version = "1.12.4"
   lazy val _specs2Scala29Version = "1.12.4.1"
@@ -301,12 +302,12 @@ object ScalikeJDBCProjects extends Build {
     "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
   val jdbcDriverDependenciesInTestScope = Seq(
-    "com.h2database"    % "h2"                   % _h2Version       % "test",
-    "org.apache.derby"  % "derby"                % "10.10.1.1"      % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"      % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.1"          % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.28"         % "test",
-    "org.postgresql"    % "postgresql"           % "9.2-1003-jdbc4" % "test"
+    "com.h2database"    % "h2"                   % _h2Version        % "test",
+    "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.1"           % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.29"          % "test",
+    "org.postgresql"    % "postgresql"           % "9.3-1100-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked")
