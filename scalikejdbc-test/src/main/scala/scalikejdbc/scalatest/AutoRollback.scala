@@ -63,8 +63,7 @@ trait AutoRollback { self: Suite =>
    * Provides transactional block
    * @param test one arg test
    */
-  //override def withFixture(test: OneArgTest): org.scalatest.Outcome = {
-  override def withFixture(test: OneArgTest) {
+  override def withFixture(test: OneArgTest) = {
     using(db()) { db =>
       try {
         db.begin()
