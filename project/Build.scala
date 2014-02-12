@@ -54,7 +54,7 @@ object ScalikeJDBCProjects extends Build {
         }
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"    % "1.4"            % "compile",
+          "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"  % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion % "compile",
           "joda-time"               %  "joda-time"       % "2.3"            % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"            % "compile",
