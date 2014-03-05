@@ -297,7 +297,7 @@ object ScalikeJDBCProjects extends Build {
     else Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
   val _resolvers = Seq(
-    "typesafe repo" at "http://repo.typesafe.com/typesafe/repo",
+    "typesafe repo" at "http://repo.typesafe.com/typesafe/releases",
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
     "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
