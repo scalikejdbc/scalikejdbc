@@ -67,8 +67,8 @@ class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
         catch { case e: Exception => e.printStackTrace }
         SQL("insert into data_source_test values (123)").update.apply()
       }
-      val ds = new org.apache.commons.dbcp.BasicDataSource
-      ds.setUrl(url)
+      val ds = new com.jolbox.bonecp.BoneCPDataSource
+      ds.setJdbcUrl(url)
       ds.setUsername(user)
       ds.setPassword(password)
       ConnectionPool.add('ds, new DataSourceConnectionPool(ds))

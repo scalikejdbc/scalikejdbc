@@ -28,13 +28,13 @@ trait ConnectionPoolFactory {
 /**
  * Connection Pool Factory
  *
- * @see http://commons.apache.org/dbcp/
+ * @see http://jolbox.com/
  */
-object CommonsConnectionPoolFactory extends ConnectionPoolFactory {
+object BoneCPConnectionPoolFactory extends ConnectionPoolFactory {
 
   override def apply(url: String, user: String, password: String,
     settings: ConnectionPoolSettings = ConnectionPoolSettings()) = {
-    new CommonsConnectionPool(url, user, password, settings)
+    new BoneCPConnectionPool(url, user, password, settings)
   }
 
 }

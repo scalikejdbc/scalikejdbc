@@ -21,9 +21,9 @@ import java.sql.Connection
 /**
  * Connection Pool
  *
- * Using Commons DBCP internally.
+ * Using BoneCP internally.
  *
- * @see http://commons.apache.org/dbcp/
+ * @see http://jolbox.com/
  */
 object ConnectionPool extends LogSupport {
 
@@ -82,7 +82,7 @@ object ConnectionPool extends LogSupport {
    * @param settings Settings
    */
   def add(name: Any, url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = BoneCPConnectionPoolFactory) {
 
     import scalikejdbc.JDBCUrl._
 
@@ -174,7 +174,7 @@ object ConnectionPool extends LogSupport {
    * @param settings Settings
    */
   def singleton(url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory): Unit = {
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = BoneCPConnectionPoolFactory): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)(factory)
     log.debug("Registered singleton connection pool : " + get().toString())
   }

@@ -167,7 +167,7 @@ trait DefaultSettings {
 trait InMemoryDB {
   Class.forName("org.h2.Driver")
   implicit val context: ConnectionPoolContext = new MultipleConnectionPoolContext(
-    'CPContextWithAutoSessionSpec -> CommonsConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", "")
+    'CPContextWithAutoSessionSpec -> BoneCPConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", "")
   )
   NamedDB('CPContextWithAutoSessionSpec) localTx { implicit session =>
     SQL("create table users (id bigint primary key, name varchar(256), created_at timestamp not null);")
