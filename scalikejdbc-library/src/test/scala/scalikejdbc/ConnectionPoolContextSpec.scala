@@ -5,7 +5,7 @@ import org.mockito.Mockito._
 
 import java.sql._
 
-class ConnectionPoolContextSpec extends FlatSpec with Matchers {
+class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "ConnectionPoolContext"
 
