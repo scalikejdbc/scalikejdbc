@@ -8,7 +8,5 @@ chmod u+x ./sbt &&
   interpolation-core/test \
   interpolation/test \
   config/test \
-  test/test \
-  play-plugin/test \
-  play-fixture-plugin/test
+  test/test 
 
