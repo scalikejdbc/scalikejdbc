@@ -1,13 +1,12 @@
 import org.joda.time.DateTime
 import org.scalatest._
-import org.scalatest.matchers._
 import java.sql.SQLException
 import scala.Option
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
 
-class BasicUsageSpec extends FlatSpec with ShouldMatchers {
+class BasicUsageSpec extends FlatSpec with Matchers {
 
   behavior of "Basic usage of ScalikeJDBC"
 

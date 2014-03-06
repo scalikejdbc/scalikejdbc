@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.slf4j._
 
-class LogSpec extends FlatSpec with ShouldMatchers {
+class LogSpec extends FlatSpec with Matchers {
 
   behavior of "Log"
 

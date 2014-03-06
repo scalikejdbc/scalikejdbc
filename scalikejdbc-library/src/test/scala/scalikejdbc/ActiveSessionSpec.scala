@@ -1,12 +1,11 @@
 package scalikejdbc
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.mockito.Mockito._
+import org.scalatest._
+import org.mockito.Mockito.{ mock, when }
 
 import java.sql._
 
-class ActiveSessionSpec extends FlatSpec with ShouldMatchers {
+class ActiveSessionSpec extends FlatSpec with Matchers {
 
   behavior of "ActiveSession"
 

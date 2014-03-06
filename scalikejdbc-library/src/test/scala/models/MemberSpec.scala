@@ -4,9 +4,8 @@ import scalikejdbc._
 import org.joda.time._
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class MemberSpec extends FlatSpec with ShouldMatchers with Settings {
+class MemberSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "Active Record like model"
 

@@ -1,9 +1,8 @@
 package scalikejdbc.metadata
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class IndexSpec extends FlatSpec with ShouldMatchers {
+class IndexSpec extends FlatSpec with Matchers {
 
   behavior of "Index"
 

@@ -7,7 +7,7 @@ import org.scalatest.matchers._
 import java.sql.ResultSet
 import java.util.Calendar
 
-class WrappedResultSetSpec extends FlatSpec with ShouldMatchers with MockitoSugar {
+class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
 
   behavior of "WrappedResultSet"
 

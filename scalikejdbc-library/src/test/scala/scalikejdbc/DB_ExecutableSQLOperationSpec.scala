@@ -1,11 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
-import org.scalatest.BeforeAndAfter
 import util.control.Exception._
 
-class DB_ExecutableSQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DB_ExecSQLOp" + System.currentTimeMillis().toString.substring(8)
 
@@ -37,12 +35,12 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with ShouldMatchers with Be
       TestUtils.initialize(tableName)
       DB readOnly {
         implicit session =>
-          intercept[IllegalArgumentException] {
+          intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'")
               .bindByName('id -> 1)
               .map(rs => rs.int("id")).toOption().apply()
           }
-          intercept[IllegalStateException] {
+          intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123")
               .bindByName('idd -> 1)
               .map(rs => rs.int("id")).toOption().apply()

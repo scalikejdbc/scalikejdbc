@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class CommonsConnectionPoolFactorySpec extends FlatSpec with ShouldMatchers {
+class CommonsConnectionPoolFactorySpec extends FlatSpec with Matchers {
 
   behavior of "CommonsConnectionPoolFactory"
 

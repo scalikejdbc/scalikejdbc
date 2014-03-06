@@ -2,10 +2,9 @@ package scalikejdbc
 
 import util.control.Exception._
 import org.scalatest._
-import org.scalatest.matchers._
 import java.sql.ResultSet
 
-class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Settings {
+class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
 
   val tableNamePrefix = "emp_ResultSetTraversableSpec" + System.currentTimeMillis()
 
@@ -17,7 +16,7 @@ class ResultSetTraversableSpec extends FlatSpec with ShouldMatchers with Setting
       TestUtils.initialize(tableName)
       val conn = ConnectionPool.borrow()
       val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-      new ResultSetTraversable(rs).foreach(rs => rs.int("id") should not be null)
+      new ResultSetTraversable(rs).foreach(rs => rs.int("id") should not equal (null))
     }
   }
 

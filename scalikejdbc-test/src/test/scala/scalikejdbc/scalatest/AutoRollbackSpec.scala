@@ -5,9 +5,9 @@ import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
 import org.scalatest.fixture.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 
-trait FlatSpecWithCommonTraits extends FlatSpec with ShouldMatchers with DBSettings with PreparingTables
+trait FlatSpecWithCommonTraits extends FlatSpec with Matchers with DBSettings with PreparingTables
 
 class AutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 

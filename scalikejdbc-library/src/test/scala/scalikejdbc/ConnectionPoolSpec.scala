@@ -1,12 +1,11 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import java.util.Properties
 import javax.sql.DataSource
 import java.sql.Connection
 
-class ConnectionPoolSpec extends FlatSpec with ShouldMatchers {
+class ConnectionPoolSpec extends FlatSpec with Matchers {
 
   behavior of "ConnectionPool"
 

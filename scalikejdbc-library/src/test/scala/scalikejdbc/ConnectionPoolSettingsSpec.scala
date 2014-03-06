@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ConnectionPoolSettingsSpec extends FlatSpec with ShouldMatchers {
+class ConnectionPoolSettingsSpec extends FlatSpec with Matchers {
 
   behavior of "ConnectionPoolSettings"
 

@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class SQLFormatterSettingsSpec extends FlatSpec with ShouldMatchers {
+class SQLFormatterSettingsSpec extends FlatSpec with Matchers {
 
   behavior of "SQLFormatterSettings"
 

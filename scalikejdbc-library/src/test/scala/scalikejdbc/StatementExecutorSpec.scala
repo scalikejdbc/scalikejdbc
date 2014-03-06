@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import java.sql.PreparedStatement
 
-class StatementExecutorSpec extends FlatSpec with ShouldMatchers {
+class StatementExecutorSpec extends FlatSpec with Matchers {
 
   behavior of "StatementExecutor"
 

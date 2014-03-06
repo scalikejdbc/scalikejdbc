@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ResultSetCursorSpec extends FlatSpec with ShouldMatchers {
+class ResultSetCursorSpec extends FlatSpec with Matchers {
 
   behavior of "ResultSetCursor"
 
