@@ -32,6 +32,21 @@ object ScalikeJDBCProjects extends Build {
     pomExtra := _pomExtra
   )
 
+  lazy val root211 = Project(
+    "root211",
+    file("root211")
+  ).settings(
+    baseSettings: _*
+  ).aggregate(
+    scalikejdbc,
+    scalikejdbcConfig,
+    scalikejdbcInterpolation,
+    scalikejdbcMapperGeneratorCore,
+    scalikejdbcTest,
+    scalikejdbcInterpolationCore,
+    scalikejdbcInterpolationMacro
+  )
+
   // scalikejdbc (core library)
   lazy val scalikejdbc = Project(
     id = "library",
@@ -55,7 +70,7 @@ object ScalikeJDBCProjects extends Build {
             case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0" % "compile")
             case _ => Nil
           }
-        } ++ jdbcDriverDependenciesInTestScope 
+        } ++ jdbcDriverDependenciesInTestScope
       }
     )
   )
