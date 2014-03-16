@@ -16,6 +16,7 @@
 import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
 import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
+import scala.language.implicitConversions
 
 /**
  * ScalikeJDBC - SQL-Based DB Access Library for Scala

@@ -15,6 +15,7 @@
  */
 package scalikejdbc
 
+import scala.language.reflectiveCalls
 import util.control.Exception._
 
 /**
