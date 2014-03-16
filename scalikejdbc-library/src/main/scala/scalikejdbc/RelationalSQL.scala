@@ -17,6 +17,7 @@ package scalikejdbc
 
 import scalikejdbc.SQL.Output
 import scala.collection.mutable.LinkedHashMap
+import scala.language.higherKinds
 
 //------------------------------------
 // One-to-one / One-to-many

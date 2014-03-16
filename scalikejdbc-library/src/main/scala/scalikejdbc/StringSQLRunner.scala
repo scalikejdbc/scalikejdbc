@@ -15,6 +15,7 @@
  */
 package scalikejdbc
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 /**
