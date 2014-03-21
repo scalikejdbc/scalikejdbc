@@ -16,8 +16,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.1"
   lazy val _h2Version = "1.3.175"
   lazy val _hibernateVersion = "4.3.1.Final"
-  lazy val _scalatestVersion = "2.1.0"
-  lazy val _specs2Version = "2.3.9"
+  lazy val _scalatestVersion = "2.1.2"
+  lazy val _specs2Version = "2.3.10"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalikejdbc",
@@ -67,7 +67,7 @@ object ScalikeJDBCProjects extends Build {
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
         ) ++ {
           scalaVersion match {
-            case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0" % "compile")
+            case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
             case _ => Nil
           }
         } ++ jdbcDriverDependenciesInTestScope
