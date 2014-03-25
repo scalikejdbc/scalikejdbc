@@ -11,13 +11,13 @@ object ScalikeJDBCProjects extends Build {
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.6"
-  lazy val _defaultPlayVersion = "2.2.2-RC2"
+  lazy val _defaultPlayVersion = "2.2.2"
   lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
   lazy val _logbackVersion = "1.1.1"
   lazy val _h2Version = "1.3.175"
-  lazy val _hibernateVersion = "4.3.1.Final"
+  lazy val _hibernateVersion = "4.3.3.Final"
   // TODO 2.0
   lazy val _scalatestVersion = "1.9.2"
   lazy val _specs2Scala291Version = "1.12.4"
@@ -225,9 +225,9 @@ object ScalikeJDBCProjects extends Build {
     val appVersion      = "1.0"
 
     val appDependencies = Seq(
-      "com.github.tototoshi" %% "play-flyway" % "1.0.1",
+      "com.github.tototoshi" %% "play-flyway" % "1.0.3",
       "com.h2database"       %  "h2"          % _h2Version,
-      "org.postgresql"       %  "postgresql"  % "9.3-1100-jdbc41"
+      "org.postgresql"       %  "postgresql"  % "9.3-1101-jdbc41"
     )
 
     play.Project(appName, appVersion, appDependencies, path = file("scalikejdbc-play-plugin/test/zentasks")).settings(
@@ -305,7 +305,7 @@ object ScalikeJDBCProjects extends Build {
     "com.h2database"    % "h2"                   % _h2Version        % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.1"           % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.29"          % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1100-jdbc41" % "test"
   )
