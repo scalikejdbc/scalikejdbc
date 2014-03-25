@@ -13,9 +13,7 @@ sbt \
   interpolation-core/test \
   interpolation/test \
   config/test \
-  test/test \
-  play-plugin/test \
-  play-fixture-plugin/test > logs/test_stdout.log
+  test/test > logs/test_stdout.log
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
 

@@ -15,7 +15,7 @@ object ScalikeJDBCProjects extends Build {
   // internal only
   lazy val _logbackVersion = "1.1.1"
   lazy val _h2Version = "1.3.175"
-  lazy val _hibernateVersion = "4.3.1.Final"
+  lazy val _hibernateVersion = "4.3.3.Final"
   lazy val _scalatestVersion = "2.1.2"
   lazy val _specs2Version = "2.3.10"
 
@@ -207,9 +207,9 @@ object ScalikeJDBCProjects extends Build {
     "com.h2database"    % "h2"                   % _h2Version        % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.1"           % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.29"          % "test",
-    "org.postgresql"    % "postgresql"           % "9.3-1100-jdbc41" % "test"
+    "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked")
