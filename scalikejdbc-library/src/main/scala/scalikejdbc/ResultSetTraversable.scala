@@ -31,9 +31,11 @@ class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] 
    * @tparam U type
    */
   def foreach[U](f: (WrappedResultSet) => U): Unit = {
-    while (rs.next()) {
-      cursor.position += 1
-      f.apply(new WrappedResultSet(rs, cursor, cursor.position))
+    using(rs) { rs =>
+      while (rs.next()) {
+        cursor.position += 1
+        f.apply(new WrappedResultSet(rs, cursor, cursor.position))
+      }
     }
   }
 
