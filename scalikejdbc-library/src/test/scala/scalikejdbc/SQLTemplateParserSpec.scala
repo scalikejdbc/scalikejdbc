@@ -36,6 +36,16 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE ID = ? AND USER_NAME = ?")
   }
 
+  it should "parse a str select query with backtick quoted columns" in {
+    val sql = "SELECT * FROM USER WHERE `ID` = /* 'id */123 AND `USER_NAME` = /* 'userName */'Alice'"
+    val params = SQLTemplateParser.extractAllParameters(sql)
+    params.size should equal(2)
+    params(0) should equal('id)
+    params(1) should equal('userName)
+    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE `ID` = ? AND `USER_NAME` = ?")
+  }
+
   it should "parse an all capital str select query using functions" in {
     val sql = "SELECT MAX(TEMP_F), MIN(TEMP_F), AVG(RAIN_I), ID, (TEMP_F-32)*5/(9+1) FROM STATS GROUP BY ID;"
     val params = SQLTemplateParser.extractAllParameters(sql)
