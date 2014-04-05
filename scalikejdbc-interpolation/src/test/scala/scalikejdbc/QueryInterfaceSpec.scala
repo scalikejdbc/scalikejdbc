@@ -47,7 +47,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
     override val tableName = "qi_schema_example"
   }
   object AccountId {
-    implicit val typeUnbinder: TypeUnbinder[AccountId] = TypeUnbinder.int.map(_.value)
+    implicit val typeUnbinder: TypeUnbinder[AccountId] = TypeUnbinder.int.contramap(_.value)
   }
 
   it should "suport schemaName" in {

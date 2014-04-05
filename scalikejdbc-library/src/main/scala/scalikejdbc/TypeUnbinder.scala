@@ -8,7 +8,7 @@ import org.joda.time.{ LocalTime, LocalDate, DateTime, LocalDateTime }
 trait TypeUnbinder[-A] { self =>
 
   def apply(value: A): Any
-  def map[B](f: B => A): TypeUnbinder[B] = new TypeUnbinder[B] {
+  def contramap[B](f: B => A): TypeUnbinder[B] = new TypeUnbinder[B] {
     def apply(value: B): Any = self(f(value))
   }
 
