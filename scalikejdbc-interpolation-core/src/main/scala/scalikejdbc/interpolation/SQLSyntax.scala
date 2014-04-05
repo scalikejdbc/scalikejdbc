@@ -15,6 +15,8 @@
  */
 package scalikejdbc.interpolation
 
+import scalikejdbc.TypeUnbinder
+
 /**
  * Value as a part of SQL syntax.
  *
@@ -124,6 +126,12 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
   def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
+
+  /**
+   * *
+   * associate type unbinding value with this
+   */
+  def -->[B: TypeUnbinder](value: B): (SQLSyntax, Any) = this -> implicitly[TypeUnbinder[B]].apply(value)
 
 }
 
