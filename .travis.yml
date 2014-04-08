@@ -1,8 +1,9 @@
 language: scala
 scala:
   - 2.10.4
-  - 2.11.0-RC3
+  - 2.11.0-RC4
 jdk:
   - oraclejdk7
+  - oraclejdk8
 script:
   - ./travis.sh
