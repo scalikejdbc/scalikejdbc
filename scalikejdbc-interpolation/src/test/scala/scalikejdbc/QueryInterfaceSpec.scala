@@ -18,7 +18,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
     override val tableName = "qi_orders"
     def apply(o: SyntaxProvider[Order])(rs: WrappedResultSet): Order = apply(o.resultName)(rs)
     def apply(o: ResultName[Order])(rs: WrappedResultSet): Order = {
-      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.timestamp(o.createdAt).toDateTime)
+      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.timestamp(o.createdAt).toJodaDateTime)
     }
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product])(rs: WrappedResultSet): Order = {
       (apply(o)(rs)).copy(product = Some(Product(p)(rs)))

@@ -16,7 +16,10 @@
 package scalikejdbc
 
 import java.sql.ResultSet
-import org.joda.time._
+import org.joda.time.{ DateTime => JodaDateTime }
+import org.joda.time.{ LocalDate => JodaLocalDate }
+import org.joda.time.{ LocalTime => JodaLocalTime }
+import org.joda.time.{ LocalDateTime => JodaLocalDateTime }
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -125,10 +128,10 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
       c
     }.orNull[java.util.Calendar])
   }
-  implicit val dateTime: TypeBinder[DateTime] = option[java.sql.Timestamp].map(_.map(_.toDateTime).orNull[DateTime])
-  implicit val localDate: TypeBinder[LocalDate] = option[java.sql.Date].map(_.map(_.toLocalDate).orNull[LocalDate])
-  implicit val localTime: TypeBinder[LocalTime] = option[java.sql.Time].map(_.map(_.toLocalTime).orNull[LocalTime])
-  implicit val localDateTime: TypeBinder[LocalDateTime] = option[java.sql.Timestamp].map(_.map(_.toLocalDateTime).orNull)
+  implicit val jodaDateTime: TypeBinder[JodaDateTime] = option[java.sql.Timestamp].map(_.map(_.toJodaDateTime).orNull[JodaDateTime])
+  implicit val jodaLocalDate: TypeBinder[JodaLocalDate] = option[java.sql.Date].map(_.map(_.toJodaLocalDate).orNull[JodaLocalDate])
+  implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = option[java.sql.Time].map(_.map(_.toJodaLocalTime).orNull[JodaLocalTime])
+  implicit val jpdaLocalDateTime: TypeBinder[JodaLocalDateTime] = option[java.sql.Timestamp].map(_.map(_.toJodaLocalDateTime).orNull)
 
   implicit val url: TypeBinder[java.net.URL] = TypeBinder(_ getURL _)(_ getURL _)
 

@@ -380,9 +380,9 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
   it should "work with datetime values" in {
 
     val date = new DateTime(2012, 5, 3, 13, 40, 0, 0).toDate
-    execute("DateTime all", date.toDateTime, date.toDateTime, date.toDateTime)
-    execute("LocalDateTime all", date.toLocalDateTime, date.toLocalDateTime, date.toLocalDateTime)
-    execute("LocalDate and LocalTime all", date.toLocalDate, date.toLocalTime, date.toLocalDateTime)
+    execute("DateTime all", date.toJodaDateTime, date.toJodaDateTime, date.toJodaDateTime)
+    execute("LocalDateTime all", date.toJodaLocalDateTime, date.toJodaLocalDateTime, date.toJodaLocalDateTime)
+    execute("LocalDate and LocalTime all", date.toJodaLocalDate, date.toJodaLocalTime, date.toJodaLocalDateTime)
     execute("java.sql.Timestamp all", date.toSqlTimestamp, date.toSqlTimestamp, date.toSqlTimestamp)
     execute("java.sql/java.util mixed", date.toSqlDate, date.toSqlTime, date)
     execute("java.util.Date all", date, date, date)
@@ -450,24 +450,24 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
               case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
 
                 // java.sql.Date
-                d.toLocalDate.getYear should equal(2012)
-                d.toLocalDate.getMonthOfYear should equal(5)
-                d.toLocalDate.getDayOfMonth should equal(3)
+                d.toJodaLocalDate.getYear should equal(2012)
+                d.toJodaLocalDate.getMonthOfYear should equal(5)
+                d.toJodaLocalDate.getDayOfMonth should equal(3)
 
                 // java.sql.Time
-                t.toLocalTime.getHourOfDay should equal(13)
-                t.toLocalTime.getMinuteOfHour should equal(40)
-                t.toLocalTime.getSecondOfMinute should equal(0)
-                t.toLocalTime.getMillisOfSecond should equal(0)
+                t.toJodaLocalTime.getHourOfDay should equal(13)
+                t.toJodaLocalTime.getMinuteOfHour should equal(40)
+                t.toJodaLocalTime.getSecondOfMinute should equal(0)
+                t.toJodaLocalTime.getMillisOfSecond should equal(0)
 
                 // java.sql.Timestamp
-                ts.toDateTime.getYear should equal(2012)
-                ts.toDateTime.getMonthOfYear should equal(5)
-                ts.toDateTime.getDayOfMonth should equal(3)
-                ts.toDateTime.getHourOfDay should equal(13)
-                ts.toDateTime.getMinuteOfHour should equal(40)
-                ts.toDateTime.getSecondOfMinute should equal(0)
-                ts.toDateTime.getMillisOfSecond should equal(0)
+                ts.toJodaDateTime.getYear should equal(2012)
+                ts.toJodaDateTime.getMonthOfYear should equal(5)
+                ts.toJodaDateTime.getDayOfMonth should equal(3)
+                ts.toJodaDateTime.getHourOfDay should equal(13)
+                ts.toJodaDateTime.getMinuteOfHour should equal(40)
+                ts.toJodaDateTime.getSecondOfMinute should equal(0)
+                ts.toJodaDateTime.getMillisOfSecond should equal(0)
 
             } orElse {
               fail("Expected value is not found.")
@@ -726,7 +726,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = Option(rs.nullableInt("v_int").asInstanceOf[Int]),
                 vLong = Option(rs.nullableLong("v_long").asInstanceOf[Long]),
                 vShort = Option(rs.nullableShort("v_short").asInstanceOf[Short]),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
               )
           }.single.apply())
 
@@ -741,7 +741,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = opt[Int](rs.int("v_int")),
                 vLong = opt[Long](rs.long("v_long")),
                 vShort = opt[Short](rs.short("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
               )
           }.single.apply())
 
@@ -755,7 +755,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = opt[Int](rs.nullableInt("v_int")),
                 vLong = opt[Long](rs.nullableLong("v_long")),
                 vShort = opt[Short](rs.nullableShort("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
               )
           }.single.apply())
 
@@ -769,7 +769,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = rs.intOpt("v_int"),
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toDateTime)
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
               )
           }.single.apply())
 

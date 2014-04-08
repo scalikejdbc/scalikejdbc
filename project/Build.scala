@@ -8,15 +8,15 @@ object ScalikeJDBCProjects extends Build {
   lazy val _version = "2.0.0-SNAPSHOT"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.6"
+  lazy val _slf4jApiVersion = "1.7.7"
   lazy val _defaultPlayVersion = "2.2.2"
   lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.1"
+  lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.3.175"
-  lazy val _hibernateVersion = "4.3.3.Final"
-  lazy val _scalatestVersion = "2.1.2"
+  lazy val _hibernateVersion = "4.3.5.Final"
+  lazy val _scalatestVersion = "2.1.3"
   lazy val _specs2Version = "2.3.10"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
@@ -56,10 +56,10 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"    % "1.4"            % "compile",
-          "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion % "compile",
-          "joda-time"               %  "joda-time"       % "2.3"            % "compile",
-          "org.joda"                %  "joda-convert"    % "1.6"            % "compile",
+          "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
+          "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
+          "joda-time"               %  "joda-time"       % "2.3"             % "compile",
+          "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
           // scope: test
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
@@ -208,7 +208,7 @@ object ScalikeJDBCProjects extends Build {
     "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.29"          % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.30"          % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")

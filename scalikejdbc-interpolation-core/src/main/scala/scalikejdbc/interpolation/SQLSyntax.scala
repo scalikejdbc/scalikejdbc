@@ -214,7 +214,7 @@ object SQLSyntax {
   def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
   def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
 
-  def distinct(column: SQLSyntax) = sqls"distinct ${column}"
+  def distinct(columns: SQLSyntax*) = sqls"distinct ${csv(columns: _*)}"
 
   def avg(column: SQLSyntax) = sqls"avg(${column})"
 

@@ -38,7 +38,7 @@ import scala.language.implicitConversions
  *
  * val activeUsers: List[User] = DB readOnly { session =>
  *   session.list("select * from users where active = ?", true) { rs =>
- *     User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime))
+ *     User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toJodaDateTime))
  *   }
  * }
  * }}}
@@ -53,7 +53,7 @@ import scala.language.implicitConversions
  * val activeUsers: List[User] = DB readOnly { implicit session =>
  *   SQL("select * from users where active = ?")
  *     .bind(true)
- *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime)) }.list.apply()
+ *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toJodaDateTime)) }.list.apply()
  * }
  * }}}
  *
@@ -63,7 +63,7 @@ import scala.language.implicitConversions
  * val activeUsers: List[User] = DB readOnly { implicit session =>
  *   SQL("select * from users where active = /*'active*/true")
  *     .bindByName('active -> true)
- *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toDateTime)) }.list.apply()
+ *     .map { rs => User(id = rs.long("id"), name = rs.string("name"), birthday = Option(rs.date("birthday")).map(_.toJodaDateTime)) }.list.apply()
  * }
  * }}}
  */
@@ -88,21 +88,21 @@ package object scalikejdbc {
 
     def toJavaUtilDate: utilDate = new java.util.Date(ms)
 
-    def toDateTime: DateTime = new DateTime(ms)
+    def toJodaDateTime: DateTime = new DateTime(ms)
 
-    def toDateTimeWithTimeZone(timezone: DateTimeZone): DateTime = new DateTime(ms, timezone)
+    def toJodaDateTimeWithTimeZone(timezone: DateTimeZone): DateTime = new DateTime(ms, timezone)
 
-    def toLocalDateTime: LocalDateTime = new LocalDateTime(ms)
+    def toJodaLocalDateTime: LocalDateTime = new LocalDateTime(ms)
 
-    def toLocalDateTimeWithTimeZone(timezone: DateTimeZone): LocalDateTime = new LocalDateTime(ms, timezone)
+    def toJodaLocalDateTimeWithTimeZone(timezone: DateTimeZone): LocalDateTime = new LocalDateTime(ms, timezone)
 
-    def toLocalDate: LocalDate = new LocalDate(ms)
+    def toJodaLocalDate: LocalDate = new LocalDate(ms)
 
-    def toLocalDateWithTimeZone(timezone: DateTimeZone): LocalDate = new LocalDate(ms, timezone)
+    def toJodaLocalDateWithTimeZone(timezone: DateTimeZone): LocalDate = new LocalDate(ms, timezone)
 
-    def toLocalTime: LocalTime = new LocalTime(ms)
+    def toJodaLocalTime: LocalTime = new LocalTime(ms)
 
-    def toLocalTimeWithTimeZone(timezone: DateTimeZone): LocalTime = new LocalTime(ms, timezone)
+    def toJodaLocalTimeWithTimeZone(timezone: DateTimeZone): LocalTime = new LocalTime(ms, timezone)
 
     def toSqlDate: java.sql.Date = {
       // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html

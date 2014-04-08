@@ -34,8 +34,8 @@ object Member {
       id = rs.long(id),
       name = rs.string(name),
       description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toLocalDate),
-      createdAt = rs.timestamp(createdAt).toDateTime)
+      birthday = Option(rs.date(birthday)).map(_.toJodaLocalDate),
+      createdAt = rs.timestamp(createdAt).toJodaDateTime)
   }
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {

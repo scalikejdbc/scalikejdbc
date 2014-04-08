@@ -8,7 +8,7 @@ cd ..
 cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
 
 sbt \
-  ++2.10.3 \
+  ++2.10.4 \
   clean \
   interpolation-core/test \
   interpolation/test \

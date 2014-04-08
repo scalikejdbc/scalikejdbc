@@ -169,7 +169,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport {
         {
           val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1)).single.apply().get
           log.warn("current_timestamp: " + t + "," + t.getTime)
-          t.toDateTime.getMillis should be < (DateTime.now.plusDays(1).getMillis)
+          t.toJodaDateTime.getMillis should be < (DateTime.now.plusDays(1).getMillis)
         }
       }
     } finally {
