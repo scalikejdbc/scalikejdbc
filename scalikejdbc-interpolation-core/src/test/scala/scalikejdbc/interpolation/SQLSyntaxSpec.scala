@@ -270,4 +270,10 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     s2.parameters should equal(Seq(123, 234, 345))
   }
 
+  it should "have createUnsafe" in {
+    val columnName = "foo"
+    val v = SQLSyntax.createUnsafely(s"${columnName} = ?")
+    v should equal(SQLSyntax("foo = ?"))
+  }
+
 }
