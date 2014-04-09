@@ -139,6 +139,6 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
     (stringLiteral | charLiteral | floatingPointNumber) ^^ (_ => "")
   }
 
-  private def token = "[\\w\\(\\)\\.\\-\\+\\*/=,<>%;`]+".r ^^ (_ => "")
+  private def token = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`]+".r ^^ (_ => "")
 
 }

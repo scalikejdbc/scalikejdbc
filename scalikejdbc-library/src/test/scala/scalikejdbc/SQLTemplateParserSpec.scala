@@ -175,4 +175,18 @@ class SQLTemplateParserSpec extends FlatSpec with ShouldMatchers {
     SQLTemplateParser.convertToSQLWithPlaceHolders(dropTable) should equal(dropTable)
   }
 
+  it should "parse &&, || for MySQL" in {
+    val sql = "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = {id} && USER_RELATED_TO.relType = {relType} || foo = {bar}"
+    SQLTemplateParser.extractAllParameters(sql).size should equal(3)
+    val expected = "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = ? && USER_RELATED_TO.relType = ? || foo = ?"
+    SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
+  }
+
+  it should "parse ! for MySQL" in {
+    val sql = "select ! 1 from foo where bar = {baz}"
+    SQLTemplateParser.extractAllParameters(sql).size should equal(1)
+    val expected = "select ! 1 from foo where bar = ?"
+    SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
+  }
+
 }
