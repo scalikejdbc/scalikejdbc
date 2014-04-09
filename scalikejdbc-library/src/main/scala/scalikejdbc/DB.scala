@@ -371,18 +371,18 @@ trait DBConnection extends LogSupport {
               // Oracle throws java.sql.SQLException: Invalid column name
               try {
                 rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
-              } catch { case e: java.sql.SQLException => false }
+              } catch { case e: ResultSetExtractorException => false }
             },
             description = {
               try {
                 rs.string("REMARKS")
-              } catch { case e: java.sql.SQLException => null }
+              } catch { case e: ResultSetExtractorException => null }
             },
             defaultValue = {
               // for Oracle support
               try {
                 rs.string("COLUMN_DEF")
-              } catch { case e: java.sql.SQLException => null }
+              } catch { case e: ResultSetExtractorException => null }
             }
           )
         }.toList.distinct,
@@ -395,7 +395,7 @@ trait DBConnection extends LogSupport {
                 foreignTableName = rs.string("PKTABLE_NAME")
               )
             }.toList.distinct
-          } catch { case e: java.sql.SQLException => Nil }
+          } catch { case e: ResultSetExtractorException => Nil }
         },
         indices = {
           try {
@@ -413,7 +413,7 @@ trait DBConnection extends LogSupport {
                   }
                   map.updated(indexName, index)
               }.map { case (k, v) => v }.toList.distinct
-          } catch { case e: java.sql.SQLException => Nil }
+          } catch { case e: ResultSetExtractorException => Nil }
         }
       )
     }
