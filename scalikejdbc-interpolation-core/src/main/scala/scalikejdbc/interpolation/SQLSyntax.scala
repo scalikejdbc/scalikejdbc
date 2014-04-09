@@ -150,6 +150,11 @@ object SQLSyntax {
   // https://github.com/scalikejdbc/scalikejdbc/issues/116
   private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLSyntax(value, parameters)
 
+  /**
+   * WARNING: Be aware of SQL injection vulnerability.
+   */
+  def createUnsafely(value: String, parameters: Seq[Any] = Nil): SQLSyntax = apply(value, parameters)
+
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))
 
   import Implicits._
