@@ -180,4 +180,50 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport 
     }
   }
 
+  // issue #215 https://github.com/scalikejdbc/scalikejdbc/issues/215
+  it should "work wih toSeq (#215)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users (id int, name varchar(256))""".execute.apply()
+
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"""insert into interpolation_users values (${id}, ${name})""".update.apply()
+          }
+
+          val names = """.*?""".r.findAllIn("""a&""").toSeq
+          val users = sql"""select * from interpolation_users where name in (${names})""".map {
+            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
+          }.list.apply()
+          users should have size (0)
+        } finally {
+          sql"""drop table interpolation_users""".execute.apply()
+        }
+    }
+  }
+
+  it should "work wih toList (#215)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users (id int, name varchar(256))""".execute.apply()
+
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"""insert into interpolation_users values (${id}, ${name})""".update.apply()
+          }
+
+          //val names = """.*?""".r.findAllIn("""a&""").toSeq
+          val names = """.*?""".r.findAllIn("""a&""").toList
+          val users = sql"""select * from interpolation_users where name in (${names})""".map {
+            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
+          }.list.apply()
+          users should have size (0)
+        } finally {
+          sql"""drop table interpolation_users""".execute.apply()
+        }
+    }
+  }
+
 }
