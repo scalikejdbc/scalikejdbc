@@ -40,6 +40,8 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
     case _: String => sb += '?'
+    // to fix issue #215 due to unexpected Stream#addString behavior
+    case s: Stream[_] => s.toList.map(_ => "?").addString(sb, ", ") // e.g. in clause
     case t: Traversable[_] => t.map(_ => "?").addString(sb, ", ") // e.g. in clause
     case LastParameter => sb
     case SQLSyntax(s, _) => sb ++= s
