@@ -35,17 +35,6 @@ object RenewVersionCommand extends Plugin {
             "\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\"")
         )
       }
-
-      val scriptedBuild = FilePath("scalikejdbc-mapper-generator/src/sbt-test/scalikejdbc-mapper-generator/gen/project/Build.scala")
-      scriptedBuild.forceWrite(scriptedBuild.readAsString().replaceFirst(
-        "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"[^\"]+\"", 
-        "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"" + version + "\""))
-
-      val scriptedPlugins = FilePath("scalikejdbc-mapper-generator/src/sbt-test/scalikejdbc-mapper-generator/gen/project/plugins.sbt")    
-      scriptedPlugins.forceWrite(scriptedPlugins.readAsString().replaceFirst(
-        "addSbtPlugin\\(\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"[^\"]+\"", 
-        "addSbtPlugin\\(\"org.scalikejdbc\" %% \"scalikejdbc-mapper-generator\" % \"" + version + "\""))
-
     }
   )
 

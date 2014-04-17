@@ -1,10 +1,9 @@
 package scalikejdbc.config
 
-import org.scalatest.FunSpec
-import org.scalatest.matchers._
+import org.scalatest._
 import scalikejdbc._
 
-class DBsSpec extends FunSpec with ShouldMatchers {
+class DBsSpec extends FunSpec with Matchers {
 
   def fixture = new {
 

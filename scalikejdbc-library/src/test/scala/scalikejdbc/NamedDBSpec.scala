@@ -1,17 +1,19 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
-import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
 
-class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "NamedDB"
+
+  before {
+    initializeConnectionPools()
+  }
 
   it should "be available" in {
     using(ConnectionPool.borrow('named)) { conn =>
@@ -63,19 +65,6 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
     }
   }
 
-  it should "execute query in readOnlyWithConnection block" in {
-    val tableName = tableNamePrefix + "_queryInReadOnlyWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      val result = NamedDB('named) readOnlyWithConnection {
-        implicit conn =>
-          import anorm._
-          SQL("select * from " + tableName)().toList
-      }
-      result.size should be > 0
-    }
-  }
-
   it should "execute query in readOnly session" in {
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
     ultimately(TestUtils.deleteTable(tableName)) {
@@ -110,19 +99,6 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val result = NamedDB('named) autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-      }
-      result.size should be > 0
-    }
-  }
-
-  it should "execute query in autoCommitWithConnection block" in {
-    val tableName = tableNamePrefix + "_queryInAutoCommitWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      val result = NamedDB('named) autoCommitWithConnection {
-        implicit conn =>
-          import anorm._
-          SQL("select * from " + tableName)().toList
       }
       result.size should be > 0
     }
@@ -172,7 +148,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val name: Option[String] = NamedDB('named) readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
-      name.get should be === "name1"
+      name.get should equal("name1")
     }
   }
 
@@ -211,23 +187,6 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         }).get
         name should equal("foo")
       }
-    }
-  }
-
-  it should "execute update in autoCommitWithConnection block" in {
-    val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      val count = NamedDB('named) autoCommitWithConnection {
-        implicit conn =>
-          import anorm._
-          SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
-      }
-      count should equal(1)
-      val name = (NamedDB('named) autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).get
-      name should equal("foo")
     }
   }
 
@@ -278,24 +237,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val count = NamedDB('named) localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
-      count should be === 1
-      val name = (NamedDB('named) localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).getOrElse("---")
-      name should equal("foo")
-    }
-  }
-
-  it should "execute update in localTxWithConnection block" in {
-    val tableName = tableNamePrefix + "_updateInLocalTxWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      val count = NamedDB('named) localTxWithConnection {
-        implicit conn =>
-          import anorm._
-          SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
-      }
-      count should be === 1
+      count should equal(1)
       val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
@@ -311,7 +253,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         val count = db localTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         db.rollbackIfActive()
         val name = (NamedDB('named) localTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
@@ -346,23 +288,6 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         val result = db withinTx {
           session =>
             session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-        }
-        result.size should be > 0
-        db.rollbackIfActive()
-      }
-    }
-  }
-
-  it should "execute query in withinTxWithConnection block" in {
-    val tableName = tableNamePrefix + "_queryInWithinTxWithConnectionBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      using(NamedDB('named)) { db =>
-        db.begin()
-        val result = db withinTxWithConnection {
-          implicit conn =>
-            import anorm._
-            SQL("select * from " + tableName)().toList
         }
         result.size should be > 0
         db.rollbackIfActive()
@@ -423,7 +348,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         val count = db withinTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         val name = (db withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).get
@@ -466,7 +391,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           val count = db withinTx {
             _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
           }
-          count should be === 1
+          count should equal(1)
           db.rollback()
           db.begin()
           val name = (db withinTx {
@@ -511,7 +436,8 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
             session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
           }
       }
-      spawn {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      scala.concurrent.Future {
         using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
@@ -522,7 +448,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           db.rollback()
         }
       }
-      spawn {
+      scala.concurrent.Future {
         using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
@@ -538,75 +464,6 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val name = NamedDB('named) autoCommit {
         session =>
           session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }
-      assert(name.get == "name1")
-    }
-  }
-
-  it should "work with multi threads when using Anorm API" in {
-    import anorm._
-    import anorm.SqlParser._
-    val tableName = tableNamePrefix + "_testingWithMultiThreadsAnorm"
-    ultimately({
-      ignoring(classOf[Throwable]) {
-        NamedDB('named) autoCommit { _.execute("drop table " + tableName) }
-      }
-    }) {
-      NamedDB('named) autoCommit {
-        session =>
-          handling(classOf[Throwable]) by {
-            t =>
-              try {
-                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
-              } catch {
-                case e: Exception =>
-                  try {
-                    session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
-                  } catch {
-                    case e: Exception =>
-                  }
-              }
-              session.update("delete from " + tableName)
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
-          } apply {
-            session.single("select count(1) from " + tableName)(rs => rs.int(1))
-            session.update("delete from " + tableName)
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
-          }
-      }
-      spawn {
-        using(NamedDB('named)) { db =>
-          db.begin()
-          db.withinTxWithConnection {
-            implicit conn =>
-              SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
-              Thread.sleep(1000L)
-              val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-              assert(name.get == "foo")
-          }
-          db.rollback()
-        }
-      }
-      spawn {
-        using(NamedDB('named)) { db =>
-          db.begin()
-          db.withinTxWithConnection {
-            implicit conn =>
-              Thread.sleep(200L)
-              val name = SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
-              assert(name.get == "name1")
-          }
-          db.rollback()
-        }
-      }
-
-      Thread.sleep(2000L)
-
-      val name = NamedDB('named) autoCommitWithConnection {
-        implicit conn =>
-          SQL("select name from " + tableName + " where id = {id}").on('id -> 1).as(get[String]("name").singleOpt)
       }
       assert(name.get == "name1")
     }

@@ -17,6 +17,7 @@ package scalikejdbc.mapper
 
 import sbt._
 import sbt.Keys._
+import scala.language.reflectiveCalls
 import util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }

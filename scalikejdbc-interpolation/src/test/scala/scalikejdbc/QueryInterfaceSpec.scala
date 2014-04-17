@@ -1,11 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
-class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
+class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
   behavior of "QueryInterface"
 
@@ -19,7 +18,7 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
     override val tableName = "qi_orders"
     def apply(o: SyntaxProvider[Order])(rs: WrappedResultSet): Order = apply(o.resultName)(rs)
     def apply(o: ResultName[Order])(rs: WrappedResultSet): Order = {
-      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.timestamp(o.createdAt).toDateTime)
+      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.timestamp(o.createdAt).toJodaDateTime)
     }
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product])(rs: WrappedResultSet): Order = {
       (apply(o)(rs)).copy(product = Some(Product(p)(rs)))
@@ -191,20 +190,6 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
         findByOptionalAccountName(Some("Alice")).size should be(4)
         findByOptionalAccountName(Option.empty).size should be(11)
 
-        // NOTE: dynamicAndConditions is deprecated since 1.6.5
-        {
-          val (productId, accountId) = (Some(1), None)
-          val ids = withSQL {
-            select(o.result.id).from(Order as o)
-              .where.dynamicAndConditions(
-                productId.map(id => sqls.eq(o.productId, id)),
-                accountId.map(id => sqls.eq(o.accountId, id))
-              )
-              .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
-          ids should equal(Seq(11, 12, 13, 14, 15))
-        }
-
         {
           val (productId, accountId) = (Some(1), None)
           val ids = withSQL {
@@ -228,22 +213,6 @@ class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(12))
-        }
-
-        // NOTE: dynamicOrConditions is deprecated since 1.6.5
-        {
-          val (id1, id2) = (Some(1), None)
-          val ids = withSQL {
-            select(o.result.id).from(Order as o)
-              .where
-              .isNotNull(o.accountId)
-              .and.dynamicOrConditions(
-                id1.map(id => sqls.eq(o.productId, id)),
-                id2.map(id => sqls.eq(o.productId, id))
-              )
-              .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
-          ids should equal(Seq(11, 12, 13, 14, 15))
         }
 
         {

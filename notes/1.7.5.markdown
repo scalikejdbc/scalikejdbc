@@ -1,0 +1,25 @@
+ScalikeJDBC 1.7.5 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- Changed ResultSetTraversable to close ResultSet finally
+- #213 SQLTemplateParser parsing error [scalikejdbc-users-group:149]
+- Fixed bindByName parse error for MySQL dialects [scalikejdbc-users-group:151]
+- Fixed Oracle metadata access failure (skinny-framework #107)
+
+## interpolation
+
+- #206 Fixed macro deprecation in Scala 2.11
+- SQLSyntax.createUnsafely refs #116 (comment)
+
+## test
+
+- Fixed ScalaTest imcompatible overridering error by @tlync
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+

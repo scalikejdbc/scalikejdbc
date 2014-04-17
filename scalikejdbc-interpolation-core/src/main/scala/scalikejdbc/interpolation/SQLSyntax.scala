@@ -65,8 +65,6 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def isNull(column: SQLSyntax) = sqls"${this} ${column} is null"
   def isNotNull(column: SQLSyntax) = sqls"${this} ${column} is not null"
-  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) instead of this", "1.6.2")
-  def between(a: Any, b: Any) = sqls"${this} between ${a} and ${b}"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
 
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
@@ -152,6 +150,11 @@ object SQLSyntax {
   // https://github.com/scalikejdbc/scalikejdbc/issues/116
   private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLSyntax(value, parameters)
 
+  /**
+   * WARNING: Be aware of SQL injection vulnerability.
+   */
+  def createUnsafely(value: String, parameters: Seq[Any] = Nil): SQLSyntax = apply(value, parameters)
+
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))
 
   import Implicits._
@@ -196,8 +199,6 @@ object SQLSyntax {
 
   def isNull(column: SQLSyntax) = sqls"".isNull(column)
   def isNotNull(column: SQLSyntax) = sqls"".isNotNull(column)
-  @deprecated("use between(column: SQLSyntax, a: Any, b: Any) instead of this", "1.6.2")
-  def between(a: Any, b: Any) = sqls"".between(a, b)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
 
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
@@ -218,7 +219,7 @@ object SQLSyntax {
   def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
   def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
 
-  def distinct(column: SQLSyntax) = sqls"distinct ${column}"
+  def distinct(columns: SQLSyntax*) = sqls"distinct ${csv(columns: _*)}"
 
   def avg(column: SQLSyntax) = sqls"avg(${column})"
 

@@ -1,12 +1,11 @@
 package outside
 
 import org.scalatest._
-import org.scalatest.matchers._
 import scalikejdbc._
 import java.util.TimeZone
 import org.joda.time.{ DateTime, DateTimeZone }
 
-class DateTimeConversions_JavaSqlDateSpec extends FlatSpec with ShouldMatchers {
+class DateTimeConversions_JavaSqlDateSpec extends FlatSpec with Matchers {
 
   behavior of "implicit conversions for java.sql.Date"
 

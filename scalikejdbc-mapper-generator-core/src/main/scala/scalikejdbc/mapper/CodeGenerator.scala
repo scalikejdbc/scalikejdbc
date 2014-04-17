@@ -16,6 +16,7 @@
 package scalikejdbc.mapper
 
 import scalikejdbc._
+import scala.language.implicitConversions
 import java.util.Locale.{ ENGLISH => en }
 
 /**
@@ -1078,12 +1079,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         """package %package%
           |
           |import org.scalatest._
-          |import org.scalatest.matchers.ShouldMatchers
           |import org.joda.time._
           |import scalikejdbc.scalatest.AutoRollback
           |%interpolationImport%
           |
-          |class %className%Spec extends fixture.FlatSpec with ShouldMatchers with AutoRollback {
+          |class %className%Spec extends fixture.FlatSpec with Matchers with AutoRollback {
           |  %syntaxObject%
           |
           |  behavior of "%className%"

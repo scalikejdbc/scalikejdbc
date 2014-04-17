@@ -1,10 +1,9 @@
 package scalikejdbc
 
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.FlatSpec
+import org.scalatest._
 import org.joda.time.DateTime
 
-class GlobalSettingsSpec extends FlatSpec with ShouldMatchers with Settings {
+class GlobalSettingsSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "GlobalSettings"
 

@@ -1,14 +1,13 @@
 package scalikejdbc
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest._
 import org.mockito.Mockito._
 
 import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
 import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
 
-class UnixTimeInMillisConverterSpec extends FlatSpec with ShouldMatchers {
+class UnixTimeInMillisConverterSpec extends FlatSpec with Matchers {
 
   import scalikejdbc._
 
@@ -19,43 +18,43 @@ class UnixTimeInMillisConverterSpec extends FlatSpec with ShouldMatchers {
     d should not be null
   }
 
-  it should "have #toDateTime" in {
-    val d: DateTime = new java.util.Date().toDateTime
+  it should "have #toJodaDateTime" in {
+    val d: DateTime = new java.util.Date().toJodaDateTime
     d should not be null
   }
 
-  it should "have #toDateTimeWithTimeZone" in {
-    val d: DateTime = new java.util.Date().toDateTimeWithTimeZone(DateTimeZone.UTC)
+  it should "have #toJodaDateTimeWithTimeZone" in {
+    val d: DateTime = new java.util.Date().toJodaDateTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
-  it should "have #toLocalDateTime" in {
-    val d: LocalDateTime = new java.util.Date().toLocalDateTime
+  it should "have #toJodaLocalDateTime" in {
+    val d: LocalDateTime = new java.util.Date().toJodaLocalDateTime
     d should not be null
   }
 
-  it should "have #toLocalDateTimeWithTimeZone" in {
-    val d: LocalDateTime = new java.util.Date().toLocalDateTimeWithTimeZone(DateTimeZone.UTC)
+  it should "have #toJodaLocalDateTimeWithTimeZone" in {
+    val d: LocalDateTime = new java.util.Date().toJodaLocalDateTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
-  it should "have #toLocalDate" in {
-    val d: LocalDate = new java.util.Date().toLocalDate
+  it should "have #toJodaLocalDate" in {
+    val d: LocalDate = new java.util.Date().toJodaLocalDate
     d should not be null
   }
 
-  it should "have #toLocalDateWithTimeZone" in {
-    val d: LocalDate = new java.util.Date().toLocalDateWithTimeZone(DateTimeZone.UTC)
+  it should "have #toJodaLocalDateWithTimeZone" in {
+    val d: LocalDate = new java.util.Date().toJodaLocalDateWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
-  it should "have #toLocalTime" in {
-    val d: LocalTime = new java.util.Date().toLocalTime
+  it should "have #toJodaLocalTime" in {
+    val d: LocalTime = new java.util.Date().toJodaLocalTime
     d should not be null
   }
 
-  it should "have #toLocalTimeWithTimeZone" in {
-    val d: LocalTime = new java.util.Date().toLocalTimeWithTimeZone(DateTimeZone.UTC)
+  it should "have #toJodaLocalTimeWithTimeZone" in {
+    val d: LocalTime = new java.util.Date().toJodaLocalTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 

@@ -1,13 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
-import org.scalatest.BeforeAndAfter
-import scala.concurrent.ops._
 import java.sql.SQLException
 import util.control.Exception._
 
-class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DB_SQLOp" + System.currentTimeMillis().toString.substring(8)
 
@@ -129,7 +126,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         implicit session =>
           SQL("select * from " + tableName + " where id = ?").bind(1).map(extractName).toOption().apply()
       }
-      name.get should be === "name1"
+      name.get should equal("name1")
     }
   }
 
@@ -247,7 +244,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
-      count should be === 1
+      count should equal(1)
       val name = DB localTx {
         implicit s =>
           SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).toOption().apply().get
@@ -265,7 +262,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
-      count should be === 1
+      count should equal(1)
       db.rollbackIfActive()
       val name = DB localTx {
         implicit s =>
@@ -383,7 +380,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
         implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
       }
-      count should be === 1
+      count should equal(1)
       val name = (db withinTx {
         implicit s =>
           SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
@@ -404,7 +401,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
             implicit s =>
               SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
           }
-          count should be === 1
+          count should equal(1)
           db.rollback()
           db.begin()
           val name = (db withinTx {
@@ -482,7 +479,8 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      spawn {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      scala.concurrent.Future {
         using(DB(ConnectionPool.borrow())) {
           db =>
             db.begin()
@@ -494,7 +492,7 @@ class DB_SQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAft
             db.rollback()
         }
       }
-      spawn {
+      scala.concurrent.Future {
         using(DB(ConnectionPool.borrow())) {
           db =>
             db.begin()

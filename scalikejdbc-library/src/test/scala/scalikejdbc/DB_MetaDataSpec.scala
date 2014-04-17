@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
+class DB_MetaDataSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "DB's metadata operations"
 
@@ -81,16 +80,16 @@ class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
       NamedDB('default).getTableNames("%").size should be >= (2)
 
       // showTables returns string value
-      println(DB.showTables("%"))
-      println(NamedDB('default).showTables("%"))
+      DB.showTables("%")
+      NamedDB('default).showTables("%")
 
       // describe table
       DB.getTable("META_MEMBERS").isDefined should be(true)
       NamedDB('default).getTable("META_MEMBERS").isDefined should be(true)
 
       // describe returns string value
-      println(DB.describe("meta_members"))
-      println(NamedDB('default).describe("meta_members"))
+      DB.describe("meta_members")
+      NamedDB('default).describe("meta_members")
 
       // get column names
       DB.getColumnNames("meta_members").size should equal(6)

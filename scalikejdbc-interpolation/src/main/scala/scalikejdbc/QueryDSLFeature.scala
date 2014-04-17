@@ -241,8 +241,6 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def isNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNull(column)}")
     def isNotNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNotNull(column)}")
 
-    @deprecated("use between(column: SQLSyntax, a: Any, b: Any) instead", "1.6.2")
-    def between(a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(a, b)}")
     def between(column: SQLSyntax, a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(column, a, b)}")
 
     def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
@@ -295,28 +293,6 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def withRoundBracket[A](insidePart: ConditionSQLBuilder[_] => ConditionSQLBuilder[_]): ConditionSQLBuilder[A] = {
       val emptyBuilder = ConditionSQLBuilder[A](sqls"")
       ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
-    }
-
-    /**
-     * Appends conditions with delimiter. This API is depreacted. Use #where/#and/#or(Option[SQLSyntax]) instead.
-     *
-     * {{{
-     * .where
-     * .dynamicAndConditions(
-     *   id.map(i => sqls.eq(u.id, i)),
-     *   Some(sqls.isNotNull(u.name))
-     * )
-     * }}}
-     */
-    @deprecated("use #where(sqls.toAndConditionOpt(conditions)), #and(sqls.toAndConditionOpt(conditions)), #or(sqls.toAndConditionOpt(conditions)) instead", "1.6.5")
-    def dynamicAndConditions(conditions: Option[SQLSyntax]*) = {
-      val cs = conditions.flatten.map(c => sqls"(${c})")
-      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithAnd(cs: _*)}")
-    }
-    @deprecated("use #where(sqls.toOrConditionOpt(conditions)), #and(sqls.toOrConditionOpt(conditions)), #or(sqls.toOrConditionOpt(conditions)) instead", "1.6.5")
-    def dynamicOrConditions(conditions: Option[SQLSyntax]*) = {
-      val cs = conditions.flatten.map(c => sqls"(${c})")
-      ConditionSQLBuilder[A](sqls"${sql} ${sqls.joinWithOr(cs: _*)}")
     }
 
     /**

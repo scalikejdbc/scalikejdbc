@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 if [ $# -ne 1 ]; then
   echo "Please specify db name (i.e. postgresql)"
   exit 1
@@ -8,17 +8,12 @@ cd ..
 cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
 
 sbt \
-  ++2.9.2 \
-  clean \
-  library/test \
-  ++2.10.3 \
+  ++2.10.4 \
   clean \
   interpolation-core/test \
   interpolation/test \
   config/test \
-  test/test \
-  play-plugin/test \
-  play-fixture-plugin/test > logs/test_stdout.log
+  test/test > logs/test_stdout.log
 
 cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
 

@@ -1,10 +1,9 @@
 package scalikejdbc.interpolation
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time.DateTime
 
-class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
+class SQLSyntaxSpec extends FlatSpec with Matchers {
 
   import Implicits._
 
@@ -79,12 +78,6 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     val s = SQLSyntax.isNotNull(sqls"amount")
     s.value should equal(" amount is not null")
     s.parameters should equal(Nil)
-  }
-
-  it should "have #between" in {
-    val s = SQLSyntax.between(1, 2)
-    s.value should equal(" between ? and ?")
-    s.parameters should equal(Seq(1, 2))
   }
 
   it should "have #in" in {
@@ -268,6 +261,12 @@ class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
     val s2 = SQLSyntax.joinWithOr(sqls"a = ${123}", sqls"b = ${234} or c = ${345}", sqls"d is not null", sqls"E IS NULL OR F IS NOT NULL")
     s2.value should equal("a = ? or (b = ? or c = ?) or d is not null or (E IS NULL OR F IS NOT NULL)")
     s2.parameters should equal(Seq(123, 234, 345))
+  }
+
+  it should "have createUnsafe" in {
+    val columnName = "foo"
+    val v = SQLSyntax.createUnsafely(s"${columnName} = ?")
+    v should equal(SQLSyntax("foo = ?"))
   }
 
 }

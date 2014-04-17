@@ -4,9 +4,8 @@ import scalikejdbc._
 import org.joda.time._
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class MemberOnMemorySpec extends FlatSpec with ShouldMatchers {
+class MemberOnMemorySpec extends FlatSpec with Matchers {
 
   behavior of "Testing on memory"
 
