@@ -5,7 +5,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.0-SNAPSHOT"
+  lazy val _version = "2.0.0-beta1"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
@@ -25,6 +25,8 @@ object ScalikeJDBCProjects extends Build {
     publishTo <<= version { (v: String) => _publishTo(v) },
     publishMavenStyle := true,
     resolvers ++= _resolvers,
+    transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
+    incOptions := incOptions.value.withNameHashing(true),
     scalacOptions ++= _scalacOptions,
     publishMavenStyle := true,
     publishArtifact in Test := false,
@@ -63,14 +65,11 @@ object ScalikeJDBCProjects extends Build {
           // scope: test
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.scalatest"           %% "scalatest"       % _scalatestVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
-        ) ++ {
-          scalaVersion match {
-            case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
-            case _ => Nil
-          }
-        } ++ jdbcDriverDependenciesInTestScope
+        ) ++ (scalaVersion match {
+          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
+          case _ => Nil
+        }) ++ scalaTestDependenciesInTestScope(scalaVersion) ++ jdbcDriverDependenciesInTestScope
       }
     )
   )
@@ -85,9 +84,8 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
-          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
-          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test"
+        ) ++ scalaTestDependenciesInTestScope(scalaVersion) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc)
@@ -101,9 +99,8 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
-          "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional",
-          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
-        )
+          "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional"
+        ) ++ scalaTestDependenciesInTestScope(scalaVersion)
       }
     )
   ) dependsOn(scalikejdbcInterpolationCore)
@@ -118,9 +115,8 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
-          "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test",
-          "org.scalatest"  %% "scalatest"        % _scalatestVersion % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+          "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
+        ) ++ scalaTestDependenciesInTestScope(scalaVersion) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc, scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
@@ -133,11 +129,10 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ Seq(
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        Seq(
-          "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile",
-          "org.scalatest" %% "scalatest" % _scalatestVersion  % "test",
-          "org.specs2"    %% "specs2"    % _specs2Version     % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+        Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
+          scalaTestDependenciesInTestScope(scalaVersion) ++
+          specs2DependenciesInTestScope(scalaVersion) ++
+          jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest)
@@ -150,11 +145,10 @@ object ScalikeJDBCProjects extends Build {
       sbtPlugin := true,
       name := "scalikejdbc-mapper-generator",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        Seq(
-          "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile",
-          "org.scalatest" %% "scalatest"    % _scalatestVersion % "test",
-          "org.specs2"    %% "specs2"       % _specs2Version    % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+        Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
+          scalaTestDependenciesInTestScope(scalaVersion) ++
+          specs2DependenciesInTestScope(scalaVersion) ++
+          jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
@@ -168,10 +162,14 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
-          "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
-          "org.specs2"     %% "specs2"          % _specs2Version    % "provided"
-        ) ++ jdbcDriverDependenciesInTestScope
+          "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test"
+        ) ++ (scalaVersion match {
+          case v if v.startsWith("2.11.") => Seq("org.scalatest" % "scalatest_2.11.0-RC4" % _scalatestVersion % "provided")
+          case _ => Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "provided")
+        }) ++ (scalaVersion match {
+          case v if v.startsWith("2.11.") => Seq("org.specs2" % "specs2_2.11.0-RC4" % _specs2Version % "provided")
+          case _ => Seq("org.specs2" %% "specs2" % _specs2Version % "provided")
+        }) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc)
@@ -186,9 +184,8 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "com.typesafe"   %  "config"          % _typesafeConfigVersion % "compile",
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
-          "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
-        ) ++ jdbcDriverDependenciesInTestScope
+        ) ++ scalaTestDependenciesInTestScope(scalaVersion) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc)
@@ -203,6 +200,16 @@ object ScalikeJDBCProjects extends Build {
     "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
     "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
   )
+  def scalaTestDependenciesInTestScope(scalaVersion: String) = scalaVersion match { 
+    // TODO remove after scalatest release
+    case v if v.startsWith("2.11.") => Seq("org.scalatest" % "scalatest_2.11.0-RC4" % _scalatestVersion % "test")
+    case _ => Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "test")
+  }
+  def specs2DependenciesInTestScope(scalaVersion: String) = scalaVersion match { 
+    // TODO remove after scalatest release
+    case v if v.startsWith("2.11.") => Seq("org.specs2" % "specs2_2.11.0-RC4" % _specs2Version % "test")
+    case _ => Seq("org.specs2" %% "specs2" % _specs2Version % "test")
+  }
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version        % "test",
     "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
