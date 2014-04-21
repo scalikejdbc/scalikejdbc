@@ -5,7 +5,7 @@ import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import java.sql.{ SQLException, PreparedStatement }
 
-class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
   val tableNamePrefix = "emp_SQLSpec" + System.currentTimeMillis()
 

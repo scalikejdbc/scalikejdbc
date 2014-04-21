@@ -14,8 +14,7 @@ All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementatio
 
 ```
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"               % "[1.7,)",
-  "org.scalikejdbc" %% "scalikejdbc-interpolation" % "[1.7,)",
+  "org.scalikejdbc" %% "scalikejdbc"               % "2.0.0-beta2-SNAPSHOT",
   "com.h2database"  %  "h2"                        % "[1.3,)",
   "ch.qos.logback"  %  "logback-classic"           % "[1.0,)"
 )

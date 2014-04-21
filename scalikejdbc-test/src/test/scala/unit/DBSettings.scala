@@ -2,7 +2,7 @@ package unit
 
 import scalikejdbc._
 
-trait DBSettings {
+trait DBSettings extends LoanPattern {
 
   try {
     using(ConnectionPool.borrow()) { conn => }

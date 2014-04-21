@@ -6,7 +6,7 @@ import org.mockito.Mockito._
 import java.sql.ResultSet
 import org.joda.time._
 
-class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
+class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixTimeInMillisConverterImplicits {
 
   behavior of "TypeBinder"
 

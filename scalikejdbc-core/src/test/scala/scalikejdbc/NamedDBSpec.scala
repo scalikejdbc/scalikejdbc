@@ -1,24 +1,50 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.BeforeAndAfter
 import java.sql.SQLException
-import scala.util.control.Exception._
+import util.control.Exception._
 
-class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
-  val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(8)
+  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 
-  behavior of "DB"
+  behavior of "NamedDB"
 
-  it should "be a trait" in {
+  before {
+    initializeConnectionPools()
+  }
+
+  it should "be available" in {
+    using(ConnectionPool.borrow('named)) { conn =>
+      using(new DB(conn)) { db =>
+        db should not be null
+      }
+    }
+  }
+
+  it should "be a trait " in {
     val tableName = tableNamePrefix + "_trait"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db: DBConnection = DB(ConnectionPool.borrow())
+      val db: DBConnection = NamedDB('named)
       val result = db readOnly {
-        session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        session =>
+          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
       }
       result.size should be > 0
+    }
+  }
+
+  // --------------------
+  // tx
+
+  "#tx" should "not be available before beginning tx" in {
+    using(NamedDB('named)) { db =>
+      intercept[IllegalStateException] {
+        db.tx.begin()
+      }
+      db.rollbackIfActive()
     }
   }
 
@@ -29,10 +55,13 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB readOnly {
-        session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
+      using(NamedDB('named)) { db =>
+        val result = db readOnly {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        }
+        result.size should be > 0
       }
-      result.size should be > 0
     }
   }
 
@@ -40,20 +69,20 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = DB.readOnlySession()
+      val session = NamedDB('named).readOnlySession()
       try {
-        val result = session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
         result.size should be > 0
       } finally { session.close() }
     }
   }
 
-  it should "execute update in readOnly block" in {
+  it should "not execute update in readOnly block" in {
     val tableName = tableNamePrefix + "_cannotUpdateInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        DB readOnly {
+        NamedDB('named) readOnly {
           session => session.update("update " + tableName + " set name = ?", "xxx")
         }
       }
@@ -67,7 +96,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = NamedDB('named) autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
       }
@@ -79,7 +108,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInAutoCommitSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = DB.autoCommitSession()
+      val session = NamedDB('named).autoCommitSession()
       try {
         val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
         list(0) should equal(1)
@@ -92,7 +121,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = NamedDB('named) autoCommit {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
       }
       result.get should equal(1)
@@ -104,7 +133,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[TooManyRowsException] {
-        DB autoCommit {
+        NamedDB('named) autoCommit {
           _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
         }
       }
@@ -116,7 +145,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = DB readOnly {
+      val name: Option[String] = NamedDB('named) readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
       name.get should equal("name1")
@@ -127,7 +156,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = NamedDB('named) autoCommit {
         _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
       }
       result.size should equal(2)
@@ -138,7 +167,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB autoCommit {
+      NamedDB('named) autoCommit {
         _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
       }
     }
@@ -148,26 +177,28 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB autoCommit {
-        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      using(NamedDB('named)) { db =>
+        val count = NamedDB('named) autoCommit {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        count should equal(1)
+        val name = (db autoCommit {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }).get
+        name should equal("foo")
       }
-      count should equal(1)
-      val name = (DB autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).get
-      name should equal("foo")
     }
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
+    val tableName = tableNamePrefix + "_updatInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = (DB readOnly {
+      val name = (NamedDB('named) readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
       }).get
       name should equal("name1")
-      val count = DB autoCommit {
+      val count = NamedDB('named) autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -181,7 +212,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = NamedDB('named) localTx {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
       }
       result.get should equal("1")
@@ -192,7 +223,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = NamedDB('named) localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
       result.size should equal(2)
@@ -203,28 +234,28 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB localTx {
+      val count = NamedDB('named) localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB localTx {
+      val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
       name should equal("foo")
     }
   }
 
-  it should "not be able to rollback in localTx block" in {
+  it should "rollback in localTx block" in {
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         val count = db localTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
         count should equal(1)
         db.rollbackIfActive()
-        val name = (DB localTx {
+        val name = (NamedDB('named) localTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).getOrElse("---")
         name should equal("foo")
@@ -235,16 +266,14 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
   // --------------------
   // withinTx
 
-  it should "not execute query in withinTx block  before beginning tx" in {
+  it should "not execute query in withinTx block before beginning tx" in {
     val tableName = tableNamePrefix + "_queryInWithinTxBeforeBeginningTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
-        using(DB(ConnectionPool.borrow())) { db =>
-          db withinTx {
-            session =>
-              session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-          }
+        NamedDB('named) withinTx {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
         }
       }
     }
@@ -254,7 +283,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           session =>
@@ -270,7 +299,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         db.begin()
         val session = db.withinTxSession()
         val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
@@ -284,7 +313,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
@@ -299,7 +328,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         db.begin()
         val result = db withinTx {
           _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
@@ -314,7 +343,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) { db =>
+      using(NamedDB('named)) { db =>
         db.begin()
         val count = db withinTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -331,9 +360,32 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   it should "rollback in withinTx block" in {
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) {
+    ultimately({
+      ignoring(classOf[Throwable]) {
+        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+      }
+    }) {
+      NamedDB('named) autoCommit {
+        session =>
+          handling(classOf[Throwable]) by {
+            t =>
+              try {
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              } catch {
+                case e: Exception =>
+                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              }
+              session.update("delete from " + tableName)
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          } apply {
+            session.single("select count(1) from " + tableName)(rs => rs.int(1))
+            session.update("delete from " + tableName)
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          }
+      }
+      using(NamedDB('named)) {
         db =>
           db.begin()
           val count = db withinTx {
@@ -350,43 +402,43 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
     }
   }
 
-  it should "fix issue #41 [library] LoggingSQLAndTime raises IndexOutOfBoundsException when '?' is included in SQL templates" in {
-    val tableName = tableNamePrefix + "_issue41"
-    ultimately({
-      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
-      TestUtils.deleteTable(tableName)
-    }) {
-      TestUtils.initialize(tableName)
-      DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update.apply()
-      }
-      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
-        enabled = true,
-        logLevel = 'info
-      )
-      DB readOnly { implicit s =>
-        val res1 = SQL("select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?")
-          .bind(3)
-          .map(rs => rs.string("name")).list.apply()
-        res1.size should equal(1)
-        val res2 = SQL("select * from " + tableName + " where name = /* why? */ 'so what?' and id = /*'id*/123 /* really? */ -- line?")
-          .bindByName('id -> 3)
-          .map(rs => rs.string("name")).list.apply()
-        res2.size should equal(1)
-      }
-    }
-  }
-
   // --------------------
   // multi threads
 
   it should "work with multi threads" in {
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
+    ultimately({
+      ignoring(classOf[Throwable]) {
+        DB(ConnectionPool.borrow('named)) autoCommit { _.execute("drop table " + tableName) }
+      }
+    }) {
+      NamedDB('named) autoCommit {
+        session =>
+          handling(classOf[Throwable]) by {
+            t =>
+              try {
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              } catch {
+                case e: Exception =>
+                  try {
+                    session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
+                  } catch {
+                    case e: Exception =>
+                  }
+              }
+              session.update("delete from " + tableName)
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          } apply {
+            session.single("select count(1) from " + tableName)(rs => rs.int(1))
+            session.update("delete from " + tableName)
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
+            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+          }
+      }
       import scala.concurrent.ExecutionContext.Implicits.global
       scala.concurrent.Future {
-        using(DB(ConnectionPool.borrow())) { db =>
+        using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
           session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -397,7 +449,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
         }
       }
       scala.concurrent.Future {
-        using(DB(ConnectionPool.borrow())) { db =>
+        using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
           Thread.sleep(200L)
@@ -409,21 +461,11 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
       Thread.sleep(2000L)
 
-      val name = DB(ConnectionPool.borrow()) autoCommit {
+      val name = NamedDB('named) autoCommit {
         session =>
           session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }
       assert(name.get == "name1")
-    }
-  }
-
-  // --------------------
-  // metadata
-  it should "work with db metadat" in {
-    val tableName = tableNamePrefix + "_metadata"
-    ultimately(TestUtils.deleteTable(tableName)) {
-      TestUtils.initialize(tableName)
-      DB.getAllTableNames().size should be > (0)
     }
   }
 

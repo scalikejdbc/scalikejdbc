@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package scalikejdbc
 
-object SQLInterpolation extends SQLInterpolation
+import scala.language.implicitConversions
 
 /**
- * SQLInterpolation full imports.
+ * Implicit conversions for BigDecimal values.
  */
-trait SQLInterpolation
-  extends SQLInterpolationFeature
-  with SQLSyntaxSupportFeature
-  with QueryDSLFeature
+trait ScalaBigDecimalConverterImplicits {
 
+  implicit def convertBigDecimal(bd: java.math.BigDecimal): ScalaBigDecimalConverter = {
+    new ScalaBigDecimalConverter(bd)
+  }
+
+}

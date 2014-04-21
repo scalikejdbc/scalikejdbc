@@ -3,7 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import org.joda.time._
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport {
+class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with UnixTimeInMillisConverterImplicits {
 
   import scalikejdbc.interpolation._
   import scalikejdbc.interpolation.Implicits._
@@ -11,7 +11,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport {
   behavior of "SQLInterpolation"
 
   val props = new java.util.Properties
-  using(new java.io.FileInputStream("scalikejdbc-library/src/test/resources/jdbc.properties")) { in => props.load(in) }
+  using(new java.io.FileInputStream("scalikejdbc-core/src/test/resources/jdbc.properties")) { in => props.load(in) }
   val driverClassName = props.getProperty("driverClassName")
   val url = props.getProperty("url")
   val user = props.getProperty("user")

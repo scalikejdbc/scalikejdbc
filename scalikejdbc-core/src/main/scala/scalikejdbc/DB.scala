@@ -25,7 +25,7 @@ import scalikejdbc.metadata._
 /**
  * Basic Database Accessor
  */
-trait DBConnection extends LogSupport {
+trait DBConnection extends LogSupport with LoanPattern {
 
   type RSTraversable = ResultSetTraversable
 
@@ -570,7 +570,7 @@ case class DB(conn: Connection) extends DBConnection
  *   }
  * }}}
  */
-object DB {
+object DB extends LoanPattern {
 
   type CPContext = ConnectionPoolContext
   val NoCPContext = NoConnectionPoolContext
@@ -581,7 +581,7 @@ object DB {
     }
   }
 
-  private def connectionPool(context: CPContext): ConnectionPool = opt(context match {
+  private def connectionPool(context: CPContext): ConnectionPool = Option(context match {
     case NoCPContext => ConnectionPool()
     case _: MultipleConnectionPoolContext => context.get(ConnectionPool.DEFAULT_NAME)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)

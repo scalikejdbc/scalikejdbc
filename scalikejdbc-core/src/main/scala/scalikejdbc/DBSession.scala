@@ -31,7 +31,7 @@ import util.control.Exception._
  * }
  * }}}
  */
-trait DBSession extends LogSupport {
+trait DBSession extends LogSupport with LoanPattern {
 
   /**
    * Connection
