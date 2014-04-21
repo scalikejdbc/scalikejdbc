@@ -18,10 +18,12 @@ package scalikejdbc
 import scala.language.reflectiveCalls
 import util.control.Exception._
 
+object LoanPattern extends LoanPattern
+
 /**
  * Loan pattern implementation
  */
-object LoanPattern {
+trait LoanPattern {
 
   type Closable = { def close() }
 

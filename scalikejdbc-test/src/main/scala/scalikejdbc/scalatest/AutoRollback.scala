@@ -43,7 +43,7 @@ import scalikejdbc._
  * }
  * }}}
  */
-trait AutoRollback { self: Suite =>
+trait AutoRollback extends LoanPattern { self: Suite =>
 
   type FixtureParam = DBSession
 

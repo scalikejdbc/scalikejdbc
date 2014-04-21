@@ -36,7 +36,7 @@ trait TypeBinder[+A] {
 /**
  * Type binder for java.sql.ResultSet.
  */
-object TypeBinder extends LowPriorityTypeBinderImplicits {
+object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisConverterImplicits {
 
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)

@@ -3,7 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.DriverManager
 
-class LoanPatternSpec extends FlatSpec with Matchers with Settings {
+class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPattern {
 
   behavior of "LoanPattern"
 
