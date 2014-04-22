@@ -451,7 +451,7 @@ trait DBConnection extends LogSupport with LoanPattern {
  *   import scalikejdbc._
  *   case class User(id: Int, name: String)
  *
- *   using(connectionPool(context).borrow()) { conn =>
+ *   using(ConnectionPool(name).borrow()) { conn =>
  *
  *     val users = DB(conn) readOnly { session =>
  *       session.list("select * from user") { rs =>
