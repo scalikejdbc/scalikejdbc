@@ -1,22 +1,21 @@
-package com.example.anorm
+package com.example.placeholder
 
 import scalikejdbc._
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{ LocalDate, DateTime }
 
 case class Member(
-  id: Int, 
-  name: String, 
-  memberGroupId: Option[Int] = None, 
-  description: Option[String] = None, 
-  birthday: Option[LocalDate] = None, 
-  createdAt: DateTime) {
+    id: Int,
+    name: String,
+    memberGroupId: Option[Int] = None,
+    description: Option[String] = None,
+    birthday: Option[LocalDate] = None,
+    createdAt: DateTime) {
 
   def save()(implicit session: DBSession = Member.autoSession): Member = Member.save(this)(session)
 
   def destroy()(implicit session: DBSession = Member.autoSession): Unit = Member.destroy(this)(session)
 
 }
-      
 
 object Member extends SQLSyntaxSupport[Member] {
 
@@ -33,37 +32,37 @@ object Member extends SQLSyntaxSupport[Member] {
     birthday = rs.get(m.birthday),
     createdAt = rs.get(m.createdAt)
   )
-      
+
   val m = Member.syntax("m")
 
   override val autoSession = AutoSession
 
   def find(id: Int)(implicit session: DBSession = autoSession): Option[Member] = {
-    withSQL { 
+    withSQL {
       select.from(Member as m).where.eq(m.id, id)
     }.map(Member(m.resultName)).single.apply()
   }
-          
+
   def findAll()(implicit session: DBSession = autoSession): List[Member] = {
     withSQL(select.from(Member as m)).map(Member(m.resultName)).list.apply()
   }
-          
+
   def countAll()(implicit session: DBSession = autoSession): Long = {
     withSQL(select(sqls"count(1)").from(Member as m)).map(rs => rs.long(1)).single.apply().get
   }
-          
+
   def findAllBy(where: SQLSyntax)(implicit session: DBSession = autoSession): List[Member] = {
-    withSQL { 
+    withSQL {
       select.from(Member as m).where.append(sqls"${where}")
     }.map(Member(m.resultName)).list.apply()
   }
-      
+
   def countBy(where: SQLSyntax)(implicit session: DBSession = autoSession): Long = {
-    withSQL { 
+    withSQL {
       select(sqls"count(1)").from(Member as m).where.append(sqls"${where}")
     }.map(_.long(1)).single.apply().get
   }
-      
+
   def create(
     name: String,
     memberGroupId: Option[Int] = None,
@@ -78,16 +77,16 @@ object Member extends SQLSyntaxSupport[Member] {
         column.birthday,
         column.createdAt
       ).values(
-        name,
-        memberGroupId,
-        description,
-        birthday,
-        createdAt
-      )
+          name,
+          memberGroupId,
+          description,
+          birthday,
+          createdAt
+        )
     }.updateAndReturnGeneratedKey.apply()
 
     Member(
-      id = generatedKey.toInt, 
+      id = generatedKey.toInt,
       name = name,
       memberGroupId = memberGroupId,
       description = description,
@@ -96,7 +95,7 @@ object Member extends SQLSyntaxSupport[Member] {
   }
 
   def save(entity: Member)(implicit session: DBSession = autoSession): Member = {
-    withSQL { 
+    withSQL {
       update(Member).set(
         column.id -> entity.id,
         column.name -> entity.name,
@@ -106,11 +105,11 @@ object Member extends SQLSyntaxSupport[Member] {
         column.createdAt -> entity.createdAt
       ).where.eq(column.id, entity.id)
     }.update.apply()
-    entity 
+    entity
   }
-        
+
   def destroy(entity: Member)(implicit session: DBSession = autoSession): Unit = {
     withSQL { delete.from(Member).where.eq(column.id, entity.id) }.update.apply()
   }
-        
+
 }

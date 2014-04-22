@@ -146,7 +146,7 @@ object ScalikeJDBCProjects extends Build {
           jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcCore, scalikejdbcTest)
+  ) dependsOn(scalikejdbcLibrary, scalikejdbcTest)
 
   // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
