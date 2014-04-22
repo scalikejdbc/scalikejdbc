@@ -2,9 +2,8 @@ package scalikejdbc
 
 import org.scalatest._
 import org.joda.time._
-import scalikejdbc.SQLInterpolation._
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
+class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   behavior of "SQLInterpolation"
 

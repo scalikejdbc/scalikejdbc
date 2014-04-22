@@ -111,40 +111,6 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       else "Option[" + rawTypeInScala + "]"
     }
 
-    lazy val extractorName: String = underlying.dataType match {
-      case JavaSqlTypes.ARRAY => "array"
-      case JavaSqlTypes.BIGINT => "long"
-      case JavaSqlTypes.BINARY => "bytes"
-      case JavaSqlTypes.BIT => "boolean"
-      case JavaSqlTypes.BLOB => "blob"
-      case JavaSqlTypes.BOOLEAN => "boolean"
-      case JavaSqlTypes.CHAR => "string"
-      case JavaSqlTypes.CLOB => "clob"
-      case JavaSqlTypes.DATALINK => "any"
-      case JavaSqlTypes.DATE => "date"
-      case JavaSqlTypes.DECIMAL => "bigDecimal"
-      case JavaSqlTypes.DISTINCT => "any"
-      case JavaSqlTypes.DOUBLE => "double"
-      case JavaSqlTypes.FLOAT => "float"
-      case JavaSqlTypes.INTEGER => "int"
-      case JavaSqlTypes.JAVA_OBJECT => "any"
-      case JavaSqlTypes.LONGVARBINARY => "bytes"
-      case JavaSqlTypes.LONGVARCHAR => "string"
-      case JavaSqlTypes.NULL => "any"
-      case JavaSqlTypes.NUMERIC => "bigDecimal"
-      case JavaSqlTypes.OTHER => "any"
-      case JavaSqlTypes.REAL => "float"
-      case JavaSqlTypes.REF => "ref"
-      case JavaSqlTypes.SMALLINT => "short"
-      case JavaSqlTypes.STRUCT => "any"
-      case JavaSqlTypes.TIME => "time"
-      case JavaSqlTypes.TIMESTAMP => "timestamp"
-      case JavaSqlTypes.TINYINT => "byte"
-      case JavaSqlTypes.VARBINARY => "bytes"
-      case JavaSqlTypes.VARCHAR => "string"
-      case _ => "any"
-    }
-
     lazy val dummyValue: String = underlying.dataType match {
       case JavaSqlTypes.ARRAY => "null"
       case JavaSqlTypes.BIGINT => "1"
@@ -342,11 +308,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     val _mapper = {
       2.indent + "(rs: WrappedResultSet) => " + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
-        allColumns.map {
-          c =>
-            if (c.isNotNull) 3.indent + c.nameInScala + " = rs." + c.extractorName + "(" + c.nameInScala + ")" + cast(c, false)
-            else 3.indent + c.nameInScala + " = " + "rs." + c.extractorName + "Opt(" + c.nameInScala + ")" + cast(c, true)
-        }.mkString(comma + eol) + ")"
+        allColumns.map { c => 3.indent + c.nameInScala + " = rs.get(" + c.nameInScala + ")" }
+        .mkString(comma + eol) + ")"
     }
 
     val mapper = {
@@ -357,14 +320,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       """.stripMargin.replace("%mapper%", _mapper)
     }
 
-    val _interpolationMapper = allColumns.map {
-      c =>
-        if (c.isNotNull) 2.indent + c.nameInScala + " = rs." + c.extractorName + "(" + syntaxName + "." + c.nameInScala + ")" + cast(c, false)
-        else 2.indent + c.nameInScala + " = " + "rs." + c.extractorName + "Opt(" + syntaxName + "." + c.nameInScala + ")" + cast(c, true)
-    }.mkString(comma + eol)
+    val _interpolationMapper = allColumns.map { c => 2.indent + c.nameInScala + " = rs.get(" + syntaxName + "." + c.nameInScala + ")" }
+      .mkString(comma + eol)
 
     val interpolationMapper = {
-      """  def apply(%syntaxName%: ResultName[%className%])(rs: WrappedResultSet): %className% = new %className%(
+      """  def apply(%syntaxName%: SyntaxProvider[%className%])(rs: WrappedResultSet): %className% = apply(%syntaxName%.resultName)(rs)
+        |  def apply(%syntaxName%: ResultName[%className%])(rs: WrappedResultSet): %className% = new %className%(
         |%mapper%
         |  )
       """.stripMargin.replace("%className%", className)
@@ -1013,30 +974,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     "package " + config.packageName + eol +
       eol +
       "import scalikejdbc._" + eol +
-      (config.template match {
-        case GeneratorTemplate.interpolation | GeneratorTemplate.queryDsl => "import scalikejdbc.SQLInterpolation._" + eol
-        case _ => ""
-      }) +
       jodaTimeImport +
       javaSqlImport +
       eol +
       classPart + eol +
       eol +
       objectPart + eol
-  }
-
-  private def cast(column: Column, optional: Boolean): String = column.dataType match {
-    case JavaSqlTypes.DATE if optional => ".map(_.toLocalDate)"
-    case JavaSqlTypes.DATE => ".toLocalDate"
-    case JavaSqlTypes.DECIMAL if optional => ".map(_.toScalaBigDecimal)"
-    case JavaSqlTypes.DECIMAL => ".toScalaBigDecimal"
-    case JavaSqlTypes.NUMERIC if optional => ".map(_.toScalaBigDecimal)"
-    case JavaSqlTypes.NUMERIC => ".toScalaBigDecimal"
-    case JavaSqlTypes.TIME if optional => ".map(_.toLocalTime)"
-    case JavaSqlTypes.TIME => ".toLocalTime"
-    case JavaSqlTypes.TIMESTAMP if optional => ".map(_.toDateTime)"
-    case JavaSqlTypes.TIMESTAMP => ".toDateTime"
-    case _ => ""
   }
 
   private def toClassName(table: Table): String = toCamelCase(table.name)

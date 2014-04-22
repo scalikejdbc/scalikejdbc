@@ -1,19 +1,18 @@
 package com.example
 
 import scalikejdbc._
-import org.joda.time.{DateTime}
+import org.joda.time.{ DateTime }
 
 case class WithoutPk(
-  aaa: String, 
-  bbb: Option[Int] = None, 
-  createdAt: DateTime) {
+    aaa: String,
+    bbb: Option[Int] = None,
+    createdAt: DateTime) {
 
   def save()(implicit session: DBSession = WithoutPk.autoSession): WithoutPk = WithoutPk.save(this)(session)
 
   def destroy()(implicit session: DBSession = WithoutPk.autoSession): Unit = WithoutPk.destroy(this)(session)
 
 }
-      
 
 object WithoutPk extends SQLSyntaxSupport[WithoutPk] {
 
@@ -27,37 +26,37 @@ object WithoutPk extends SQLSyntaxSupport[WithoutPk] {
     bbb = rs.get(wp.bbb),
     createdAt = rs.get(wp.createdAt)
   )
-      
+
   val wp = WithoutPk.syntax("wp")
 
   override val autoSession = AutoSession
 
   def find(aaa: String, bbb: Option[Int], createdAt: DateTime)(implicit session: DBSession = autoSession): Option[WithoutPk] = {
-    withSQL { 
+    withSQL {
       select.from(WithoutPk as wp).where.eq(wp.aaa, aaa).and.eq(wp.bbb, bbb).and.eq(wp.createdAt, createdAt)
     }.map(WithoutPk(wp.resultName)).single.apply()
   }
-          
+
   def findAll()(implicit session: DBSession = autoSession): List[WithoutPk] = {
     withSQL(select.from(WithoutPk as wp)).map(WithoutPk(wp.resultName)).list.apply()
   }
-          
+
   def countAll()(implicit session: DBSession = autoSession): Long = {
     withSQL(select(sqls"count(1)").from(WithoutPk as wp)).map(rs => rs.long(1)).single.apply().get
   }
-          
+
   def findAllBy(where: SQLSyntax)(implicit session: DBSession = autoSession): List[WithoutPk] = {
-    withSQL { 
+    withSQL {
       select.from(WithoutPk as wp).where.append(sqls"${where}")
     }.map(WithoutPk(wp.resultName)).list.apply()
   }
-      
+
   def countBy(where: SQLSyntax)(implicit session: DBSession = autoSession): Long = {
-    withSQL { 
+    withSQL {
       select(sqls"count(1)").from(WithoutPk as wp).where.append(sqls"${where}")
     }.map(_.long(1)).single.apply().get
   }
-      
+
   def create(
     aaa: String,
     bbb: Option[Int] = None,
@@ -68,10 +67,10 @@ object WithoutPk extends SQLSyntaxSupport[WithoutPk] {
         column.bbb,
         column.createdAt
       ).values(
-        aaa,
-        bbb,
-        createdAt
-      )
+          aaa,
+          bbb,
+          createdAt
+        )
     }.update.apply()
 
     WithoutPk(
@@ -81,18 +80,18 @@ object WithoutPk extends SQLSyntaxSupport[WithoutPk] {
   }
 
   def save(entity: WithoutPk)(implicit session: DBSession = autoSession): WithoutPk = {
-    withSQL { 
+    withSQL {
       update(WithoutPk).set(
         column.aaa -> entity.aaa,
         column.bbb -> entity.bbb,
         column.createdAt -> entity.createdAt
       ).where.eq(column.aaa, entity.aaa).and.eq(column.bbb, entity.bbb).and.eq(column.createdAt, entity.createdAt)
     }.update.apply()
-    entity 
+    entity
   }
-        
+
   def destroy(entity: WithoutPk)(implicit session: DBSession = autoSession): Unit = {
     withSQL { delete.from(WithoutPk).where.eq(column.aaa, entity.aaa).and.eq(column.bbb, entity.bbb).and.eq(column.createdAt, entity.createdAt) }.update.apply()
   }
-        
+
 }
