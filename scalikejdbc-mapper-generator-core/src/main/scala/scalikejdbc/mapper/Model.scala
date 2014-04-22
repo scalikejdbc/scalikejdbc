@@ -21,7 +21,9 @@ import scalikejdbc.{ ResultSetTraversable => RSTraversable }
 
 case class Model(url: String, username: String, password: String) {
 
-  ConnectionPool.singleton(url, username, password)
+  if (!ConnectionPool.isInitialized()) {
+    ConnectionPool.singleton(url, username, password)
+  }
 
   private def columnName(implicit rs: WrappedResultSet): String = rs.string("COLUMN_NAME")
 
@@ -43,7 +45,8 @@ case class Model(url: String, username: String, password: String) {
     DB readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       new RSTraversable(meta.getColumns(catalog, _schema, tableName, "%"))
-        .map { implicit rs => Column(columnName, columnDataType, isNotNull, isAutoIncrement) }.toList.distinct match {
+        .map { implicit rs => Column(columnName, columnDataType, isNotNull, isAutoIncrement) }
+        .toList.distinct match {
           case Nil => None
           case allColumns =>
             Some(Table(
@@ -52,9 +55,8 @@ case class Model(url: String, username: String, password: String) {
               autoIncrementColumns = allColumns.filter(c => c.isAutoIncrement).distinct,
               primaryKeyColumns = {
                 new RSTraversable(meta.getPrimaryKeys(catalog, _schema, tableName))
-                  .flatMap { implicit rs =>
-                    allColumns.find(column => column.name == columnName)
-                  }.toList.distinct
+                  .flatMap { implicit rs => allColumns.find(column => column.name == columnName) }
+                  .toList.distinct
               }
             ))
         }
