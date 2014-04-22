@@ -1,0 +1,50 @@
+ScalikeJDBC 2.0.0-beta2 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Topics
+
+#### Support only Scala 2.10 and 2.11
+
+Finally Scala 2.9.x (and Play 2.0.x) is dropped in version 2.0.x.
+
+mapper-generator (sbt plugin) for sbt 0.12.x is already dropped.
+
+#### Renamed joda-time APIs due to JSR-310
+
+UnixTimeInMillisConverter#toDateTime is renamed to #toJodaDateTime (#toLocalDate, #toLocalTime, #toLocalDateTime too)
+
+WrappedResultSet#dateTime, #localDate, #localTime and #localDateTime are deprecated and #jodaDateTime and #jodaXXX are added.
+
+#### Modules structure improvements
+
+Now "org.scalikejdbc" %% "scalikejdbc" includes SQL interpolation feature. 
+
+`import SQLInterpolation._` no longer required. Just `import scalikejdbc._` works fine.
+
+#### Separated Play2 support into another project
+
+Versioning policy will follow Play's versions. 
+
+(e.g.) 2.2.x for Play 2.2.x, 2.3.x for Play 2.3.x
+
+https://github.com/scalikejdbc/scalikejdbc-play-support
+
+#### mapper-generator changes
+
+- enabled generating case classe for 22+ columns table
+- GeneratorTemplate.basic, executable are removed
+
+#### Library Improvements
+
+- #218 Enable handling PreparedStatement by library users
+- #216 Interpolation support for Traversable[SQLSyntax]
+- #215 in operation doesn't work well with Stream and ampersand
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
