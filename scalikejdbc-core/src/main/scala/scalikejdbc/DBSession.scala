@@ -93,6 +93,10 @@ trait DBSession extends LogSupport with LoanPattern {
     }
   }
 
+  def toStatementExecutor(template: String, params: Seq[Any], returnGeneratedKeys: Boolean = false): StatementExecutor = {
+    createStatementExecutor(conn, template, params, returnGeneratedKeys)
+  }
+
   /**
    * Create java.sql.Statement executor.
    * @param conn connection
@@ -104,6 +108,10 @@ trait DBSession extends LogSupport with LoanPattern {
       underlying = conn.prepareStatement(template),
       template = template,
       isBatch = true)
+  }
+
+  def toBatchStatementExecutor(template: String): StatementExecutor = {
+    createBatchStatementExecutor(conn, template)
   }
 
   /**
