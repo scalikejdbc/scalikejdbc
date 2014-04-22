@@ -21,16 +21,12 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   template: GeneratorTemplate = GeneratorTemplate("queryDsl"),
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
+  caseClassOnly: Boolean = false,
   encoding: String = "UTF-8")
 
 object GeneratorTemplate {
-
-  val basic = GeneratorTemplate("basic")
-  val namedParameters = GeneratorTemplate("namedParameters")
-  val executable = GeneratorTemplate("executable")
   val interpolation = GeneratorTemplate("interpolation")
   val queryDsl = GeneratorTemplate("queryDsl")
-
 }
 
 case class GeneratorTemplate(name: String)

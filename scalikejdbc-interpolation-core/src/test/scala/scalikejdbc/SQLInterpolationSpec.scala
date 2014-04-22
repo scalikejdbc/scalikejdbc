@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time._
 
-class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport {
+class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with UnixTimeInMillisConverterImplicits {
 
   import scalikejdbc.interpolation._
   import scalikejdbc.interpolation.Implicits._
@@ -12,7 +11,7 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport 
   behavior of "SQLInterpolation"
 
   val props = new java.util.Properties
-  using(new java.io.FileInputStream("scalikejdbc-library/src/test/resources/jdbc.properties")) { in => props.load(in) }
+  using(new java.io.FileInputStream("scalikejdbc-core/src/test/resources/jdbc.properties")) { in => props.load(in) }
   val driverClassName = props.getProperty("driverClassName")
   val url = props.getProperty("url")
   val user = props.getProperty("user")
@@ -170,13 +169,82 @@ class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport 
         {
           val t = sql"select ${currentTimestamp} from sqlsyntax_spec limit 1".map(_.timestamp(1)).single.apply().get
           log.warn("current_timestamp: " + t + "," + t.getTime)
-          t.toDateTime.getMillis should be < (DateTime.now.plusDays(1).getMillis)
+          t.toJodaDateTime.getMillis should be < (DateTime.now.plusDays(1).getMillis)
         }
       }
     } finally {
       DB autoCommit { implicit s =>
         sql"drop table sqlsyntax_spec".execute.apply()
       }
+    }
+  }
+
+  // issue #215 https://github.com/scalikejdbc/scalikejdbc/issues/215
+  it should "work wih toSeq (#215)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users (id int, name varchar(256))""".execute.apply()
+
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"""insert into interpolation_users values (${id}, ${name})""".update.apply()
+          }
+
+          val names = """.*?""".r.findAllIn("""a&""").toSeq
+          val users = sql"""select * from interpolation_users where name in (${names})""".map {
+            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
+          }.list.apply()
+          users should have size (0)
+        } finally {
+          sql"""drop table interpolation_users""".execute.apply()
+        }
+    }
+  }
+
+  it should "work wih toList (#215)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users (id int, name varchar(256))""".execute.apply()
+
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) =>
+              sql"""insert into interpolation_users values (${id}, ${name})""".update.apply()
+          }
+
+          //val names = """.*?""".r.findAllIn("""a&""").toSeq
+          val names = """.*?""".r.findAllIn("""a&""").toList
+          val users = sql"""select * from interpolation_users where name in (${names})""".map {
+            rs => User(id = rs.int("id"), name = rs.stringOpt("name"))
+          }.list.apply()
+          users should have size (0)
+        } finally {
+          sql"""drop table interpolation_users""".execute.apply()
+        }
+    }
+  }
+
+  it should "accept Traversable[SQLSyntax] (#216)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users_216 (id int, name varchar(256))""".execute.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) => sql"""insert into interpolation_users_216 values (${id}, ${name})""".update.apply()
+          }
+          val columns: Seq[SQLSyntax] = Seq("id", "name").map(SQLSyntax.createUnsafely(_, Nil))
+          val values: Seq[SQLSyntax] = Seq(Seq(1, "foo"), Seq(2, "bar"), Seq(3, "bazzzz")).map { xs => sqls"($xs)" }
+          val sql = sql"select count(1) from interpolation_users_216 where ${columns} in (${values})"
+
+          sql.statement should equal("select count(1) from interpolation_users_216 where id, name in ((?, ?), (?, ?), (?, ?))")
+          sql.parameters should equal(Seq(1, "foo", 2, "bar", 3, "bazzzz"))
+          // fails with h2/hsqldb
+          //sql.map(_.long(1)).single.apply() should equal(Some(2))
+
+        } finally {
+          sql"""drop table interpolation_users_216""".execute.apply()
+        }
     }
   }
 

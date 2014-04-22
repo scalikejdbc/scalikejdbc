@@ -17,6 +17,7 @@ package scalikejdbc.mapper
 
 import sbt._
 import sbt.Keys._
+import scala.language.reflectiveCalls
 import util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
@@ -27,9 +28,9 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSetings(packageName: String, template: String, testTemplate: String, lineBreak: String, encoding: String)
+  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String)
 
-  def loadSettings(): (JDBCSettings, GeneratorSetings) = {
+  def loadSettings(): (JDBCSettings, GeneratorSettings) = {
     val props = new java.util.Properties
     try {
       using(new java.io.FileInputStream("project/scalikejdbc-mapper-generator.properties")) {
@@ -49,11 +50,12 @@ object SbtPlugin extends Plugin {
       username = Option(props.get("jdbc.username")).map(_.toString).getOrElse(""),
       password = Option(props.get("jdbc.password")).map(_.toString).getOrElse(""),
       schema = Option(props.get("jdbc.schema")).map(_.toString).orNull[String]
-    ), GeneratorSetings(
+    ), GeneratorSettings(
         packageName = Option(props.get("generator.packageName")).map(_.toString).getOrElse("models"),
         template = Option(props.get("generator.template")).map(_.toString).getOrElse("executableSQL"),
         testTemplate = Option(props.get("generator.testTemplate")).map(_.toString).getOrElse("specs2unit"),
         lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse("LF"),
+        caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(false),
         encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse("UTF-8")
       ))
   }
@@ -73,6 +75,7 @@ object SbtPlugin extends Plugin {
           template = GeneratorTemplate(generatorSettings.template),
           testTemplate = GeneratorTestTemplate(generatorSettings.testTemplate),
           lineBreak = LineBreak(generatorSettings.lineBreak),
+          caseClassOnly = generatorSettings.caseClassOnly,
           encoding = generatorSettings.encoding
         )
         Option(new CodeGenerator(table, className)(config))

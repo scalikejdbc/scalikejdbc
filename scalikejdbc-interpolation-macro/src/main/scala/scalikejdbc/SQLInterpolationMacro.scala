@@ -29,7 +29,7 @@ object SQLInterpolationMacro {
     import c.universe._
 
     val nameOpt: Option[String] = try {
-      Some(c.eval(c.Expr[String](c.resetAllAttrs(name.tree.duplicate))))
+      Some(c.eval(c.Expr[String](c.resetLocalAttrs(name.tree.duplicate))))
     } catch {
       case t: Throwable => None
     }
