@@ -6,6 +6,7 @@ import org.scalatest.BeforeAndAfter
 import org.joda.time.DateTime
 import java.util.Calendar
 import java.sql._
+import scala.concurrent.ExecutionContext
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
     with LoanPattern with UnixTimeInMillisConverterImplicits {
@@ -870,6 +871,40 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           SQL("drop table image_data2").execute.apply()
         } catch { case e: Exception => }
       }
+    }
+  }
+
+  // https://github.com/scalikejdbc/scalikejdbc/issues/218
+  it should "expose StatementExecutor" in {
+    DB autoCommit {
+      implicit session =>
+        try {
+          try {
+            SQL("create table dbsession_issue_218 (id bigint generated always as identity, s bigint)").execute.apply()
+          } catch {
+            case e: Exception =>
+              try {
+                SQL("create table dbsession_issue_218 (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+              } catch {
+                case e: Exception =>
+                  SQL("create table dbsession_issue_218 (id serial not null, s bigint, primary key(id))").execute.apply()
+              }
+          }
+          val sql = SQL("insert into dbsession_issue_218 (s) values (?)").bind(123).update
+          val executor = session.toStatementExecutor(sql.statement, sql.parameters)
+          import ExecutionContext.Implicits.global
+          scala.concurrent.future {
+            Thread.sleep(10L)
+            executor.executeUpdate()
+          }
+          executor.underlying.cancel()
+        } finally {
+          try {
+            SQL("drop table dbsession_issue_218").execute.apply()
+          } catch {
+            case e: Exception => e.printStackTrace
+          }
+        }
     }
   }
 
