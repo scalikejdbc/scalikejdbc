@@ -225,4 +225,27 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
     }
   }
 
+  it should "accept Traversable[SQLSyntax] (#216)" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users_216 (id int, name varchar(256))""".execute.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) => sql"""insert into interpolation_users_216 values (${id}, ${name})""".update.apply()
+          }
+          val columns: Seq[SQLSyntax] = Seq("id", "name").map(SQLSyntax.createUnsafely(_, Nil))
+          val values: Seq[SQLSyntax] = Seq(Seq(1, "foo"), Seq(2, "bar"), Seq(3, "bazzzz")).map { xs => sqls"($xs)" }
+          val sql = sql"select count(1) from interpolation_users_216 where ${columns} in (${values})"
+
+          sql.statement should equal("select count(1) from interpolation_users_216 where id, name in ((?, ?), (?, ?), (?, ?))")
+          sql.parameters should equal(Seq(1, "foo", 2, "bar", 3, "bazzzz"))
+          // fails with h2/hsqldb
+          //sql.map(_.long(1)).single.apply() should equal(Some(2))
+
+        } finally {
+          sql"""drop table interpolation_users_216""".execute.apply()
+        }
+    }
+  }
+
 }
