@@ -14,7 +14,7 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.3.175"
+  lazy val _h2Version = "1.4.177"
   lazy val _hibernateVersion = "4.3.5.Final"
   lazy val _scalatestVersion = "2.1.3"
   lazy val _specs2Version = "2.3.11"
