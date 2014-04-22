@@ -19,11 +19,11 @@ package scalikejdbc
  * BigDecimal converter.
  * @param bd big decimal value
  */
-class ScalaBigDecimalConverter(bd: java.math.BigDecimal) {
+class ScalaBigDecimalConverter(val value: java.math.BigDecimal) extends AnyVal {
 
   def toScalaBigDecimal: scala.math.BigDecimal = {
-    if (bd == null) null.asInstanceOf[scala.math.BigDecimal]
-    else new scala.math.BigDecimal(bd)
+    if (value == null) null.asInstanceOf[scala.math.BigDecimal]
+    else new scala.math.BigDecimal(value)
   }
 
 }
