@@ -21,6 +21,7 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   template: GeneratorTemplate = GeneratorTemplate("queryDsl"),
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
+  caseClassOnly: Boolean = false,
   encoding: String = "UTF-8")
 
 object GeneratorTemplate {

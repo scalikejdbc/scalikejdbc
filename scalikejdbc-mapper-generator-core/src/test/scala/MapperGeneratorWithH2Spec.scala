@@ -141,6 +141,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          //caseClassOnly = true,
           packageName = "com.example"
         ))
         generator.writeModelIfNotExist()

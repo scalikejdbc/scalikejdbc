@@ -205,7 +205,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
    * }}}
    */
   def classPart: String = {
-    if (table.allColumns.size <= 22) {
+    if (config.caseClassOnly || table.allColumns.size <= 22) {
       val constructorArgs = table.allColumns.map {
         c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
       }.mkString(", " + eol)
