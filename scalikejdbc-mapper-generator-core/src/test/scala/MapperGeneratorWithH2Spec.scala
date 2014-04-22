@@ -28,7 +28,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.interpolation,
           packageName = "com.example.interpolation"
         ))
@@ -38,7 +38,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
 
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
           packageName = "com.example.querydsl"
         ))
@@ -71,7 +71,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "MEMBER").map {
       table =>
         val generator1 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2unit"),
           packageName = "com.example"
@@ -79,7 +79,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         generator1.specAll()
         generator1.writeModelIfNotExist()
         val generator2 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
           packageName = "com.example.placeholder"
@@ -87,7 +87,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         generator2.specAll()
         generator2.writeModelIfNotExist()
         val generator3 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
           packageName = "com.example.anorm"
@@ -140,7 +140,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "UN_NORMALIZED").map {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           packageName = "com.example"
         ))
         generator.writeModelIfNotExist()
@@ -165,7 +165,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "WITHOUT_PK").map {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/test/generated_src",
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           packageName = "com.example"
         ))
         generator.writeModelIfNotExist()
