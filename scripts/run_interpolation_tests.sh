@@ -5,14 +5,14 @@ if [ $# -ne 1 ]; then
 fi
 cd `dirname $0`
 cd ..
-cp -p scalikejdbc-library/src/test/resources/jdbc_$1.properties scalikejdbc-library/src/test/resources/jdbc.properties
+cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/src/test/resources/jdbc.properties
 
 sbt ++2.10.3 clean                        > logs/test_stdout.log
 sbt ++2.10.3 interpolation-core/test     >> logs/test_stdout.log
 sbt ++2.10.3 interpolation-macro/compile >> logs/test_stdout.log
 sbt ++2.10.3 interpolation/test          >> logs/test_stdout.log
 
-cp -p scalikejdbc-library/src/test/resources/jdbc_hsqldb.properties scalikejdbc-library/src/test/resources/jdbc.properties
+cp -p scalikejdbc-core/src/test/resources/jdbc_hsqldb.properties scalikejdbc-core/src/test/resources/jdbc.properties
 
 grep "31merror"                 logs/test_stdout.log
 grep -A 5 "FAILED"              logs/test_stdout.log

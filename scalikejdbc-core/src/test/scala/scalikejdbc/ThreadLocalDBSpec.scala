@@ -4,7 +4,7 @@ import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
 
-class ThreadLocalDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class ThreadLocalDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
   val tableNamePrefix = "emp_ThreadLocalDBSpec" + System.currentTimeMillis()
 

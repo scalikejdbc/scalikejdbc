@@ -697,7 +697,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
               order by ${c.id}
             """
               .one(rs => Customer(rs.int(c.resultName.id), rs.string(c.resultName.name)))
-              .toMany(rs => Some(Order(rs.int(x(o).resultName.customerId), rs.int(x(o).resultName.productId), rs.timestamp(x(o).resultName.orderedAt).toJodaDateTime)))
+              .toMany(rs => Some(Order(rs.int(x(o).resultName.customerId), rs.int(x(o).resultName.productId), rs.get(x(o).resultName.orderedAt))))
               .map { (c, os) => c.copy(orders = os) }.list.apply()
 
             customers.size should equal(3)

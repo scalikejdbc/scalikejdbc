@@ -40,7 +40,7 @@ object ScalikeJDBCProjects extends Build {
   ).settings(
     baseSettings: _*
   ).aggregate(
-    scalikejdbc,
+    scalikejdbcCore,
     scalikejdbcConfig,
     scalikejdbcInterpolation,
     scalikejdbcMapperGeneratorCore,
@@ -49,12 +49,23 @@ object ScalikeJDBCProjects extends Build {
     scalikejdbcInterpolationMacro
   )
 
-  // scalikejdbc (core library)
-  lazy val scalikejdbc = Project(
+  // scalikejdbc library
+  lazy val scalikejdbcLibrary = Project(
     id = "library",
     base = file("scalikejdbc-library"),
     settings = baseSettings ++ Seq(
       name := "scalikejdbc",
+      libraryDependencies ++= scalaTestDependenciesInTestScope ++
+        Seq("com.h2database" % "h2" % _h2Version % "test")
+    )
+  ) dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
+
+  // scalikejdbc (core library)
+  lazy val scalikejdbcCore = Project(
+    id = "core",
+    base = file("scalikejdbc-core"),
+    settings = baseSettings ++ Seq(
+      name := "scalikejdbc-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           // scope: compile
@@ -88,7 +99,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc)
+  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(
@@ -119,7 +130,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc, scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
+  ) dependsOn(scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
   // scalikejdbc-mapper-generator-core
   // core library for mapper-generator
@@ -135,7 +146,7 @@ object ScalikeJDBCProjects extends Build {
           jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc, scalikejdbcTest)
+  ) dependsOn(scalikejdbcCore, scalikejdbcTest)
 
   // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
@@ -151,7 +162,7 @@ object ScalikeJDBCProjects extends Build {
           jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
+  ) dependsOn(scalikejdbcCore, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
 
   // scalikejdbc-test
   lazy val scalikejdbcTest = Project(
@@ -168,7 +179,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc)
+  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-config
   lazy val scalikejdbcConfig = Project(
@@ -184,7 +195,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbc)
+  ) dependsOn(scalikejdbcCore)
 
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
@@ -211,7 +222,7 @@ object ScalikeJDBCProjects extends Build {
     "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
-  val _scalacOptions = Seq("-deprecation", "-unchecked")
+  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
   val _pomExtra = <url>http://scalikejdbc.org/</url>
       <licenses>
         <license>

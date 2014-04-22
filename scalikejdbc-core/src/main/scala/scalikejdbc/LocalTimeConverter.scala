@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,16 @@
  */
 package scalikejdbc
 
-object SQLInterpolation extends SQLInterpolation
+import org.joda.time.LocalTime
 
 /**
- * SQLInterpolation full imports.
+ * org.joda.time.LocalTime converter.
+ * @param t LocalTime object
  */
-trait SQLInterpolation
-  extends SQLInterpolationFeature
-  with SQLSyntaxSupportFeature
-  with QueryDSLFeature
+class LocalTimeConverter(val value: LocalTime) extends AnyVal {
 
+  def toSqlTime: java.sql.Time = new java.sql.Time(value.toDateTimeToday.getMillis)
+
+  def toSqlTimestamp: java.sql.Timestamp = new java.sql.Timestamp(value.toDateTimeToday.getMillis)
+
+}

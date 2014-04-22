@@ -6,7 +6,7 @@ import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
 
-class BasicUsageSpec extends FlatSpec with Matchers {
+class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
 
   behavior of "Basic usage of ScalikeJDBC"
 

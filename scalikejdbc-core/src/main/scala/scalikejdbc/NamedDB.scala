@@ -32,7 +32,7 @@ import scalikejdbc.metadata.Table
  */
 case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
 
-  private[this] def connectionPool(): ConnectionPool = opt(context match {
+  private[this] def connectionPool(): ConnectionPool = Option(context match {
     case NoConnectionPoolContext => ConnectionPool(name)
     case _: MultipleConnectionPoolContext => context.get(name)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)

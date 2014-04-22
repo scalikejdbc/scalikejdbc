@@ -21,7 +21,7 @@ import java.sql.ResultSet
 /**
  * scala.collection.Traversable object which wraps java.sql.ResultSet.
  */
-class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] {
+class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] with LoanPattern {
 
   private[this] val cursor: ResultSetCursor = new ResultSetCursor(0)
 

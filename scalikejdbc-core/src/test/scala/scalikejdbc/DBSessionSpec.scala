@@ -7,7 +7,10 @@ import org.joda.time.DateTime
 import java.util.Calendar
 import java.sql._
 
-class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport {
+class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
+    with LoanPattern with UnixTimeInMillisConverterImplicits {
+
+  def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
   val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis().toString.substring(8)
 

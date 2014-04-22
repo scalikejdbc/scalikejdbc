@@ -22,7 +22,8 @@ import java.util.Locale.{ ENGLISH => en }
 /**
  * Active Record like template generator
  */
-class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig()) {
+class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig())
+    extends LoanPattern {
 
   import java.sql.{ Types => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }

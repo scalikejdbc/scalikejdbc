@@ -1,12 +1,10 @@
 package scalikejdbc
 
-import scalikejdbc.SQLInterpolation._
-
-trait DBSettings {
+trait DBSettings extends LoanPattern {
 
   val driverClassName = if (!ConnectionPool.isInitialized(ConnectionPool.DEFAULT_NAME)) {
     val props = new java.util.Properties
-    using(new java.io.FileInputStream("scalikejdbc-library/src/test/resources/jdbc.properties")) { in => props.load(in) }
+    using(new java.io.FileInputStream("scalikejdbc-core/src/test/resources/jdbc.properties")) { in => props.load(in) }
     val url = props.getProperty("url")
     val user = props.getProperty("user")
     val password = props.getProperty("password")

@@ -4,7 +4,7 @@ import org.scalatest._
 import java.sql.SQLException
 import util.control.Exception._
 
-class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
   val tableNamePrefix = "emp_DB_SQLOp" + System.currentTimeMillis().toString.substring(8)
 
