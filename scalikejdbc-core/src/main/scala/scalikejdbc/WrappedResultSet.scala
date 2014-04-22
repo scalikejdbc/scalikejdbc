@@ -406,21 +406,37 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     get[java.sql.Timestamp](columnLabel)
   }
 
-  def dateTime(columnIndex: Int): DateTime = get[DateTime](columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def dateTime(columnIndex: Int): DateTime = jodaDateTime(columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def dateTime(columnLabel: String): DateTime = jodaDateTime(columnLabel)
 
-  def dateTime(columnLabel: String): DateTime = get[DateTime](columnLabel)
+  def jodaDateTime(columnIndex: Int): DateTime = get[DateTime](columnIndex)
+  def jodaDateTime(columnLabel: String): DateTime = get[DateTime](columnLabel)
 
-  def localDate(columnIndex: Int): LocalDate = get[LocalDate](columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localDate(columnIndex: Int): LocalDate = jodaLocalDate(columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localDate(columnLabel: String): LocalDate = jodaLocalDate(columnLabel)
 
-  def localDate(columnLabel: String): LocalDate = get[LocalDate](columnLabel)
+  def jodaLocalDate(columnIndex: Int): LocalDate = get[LocalDate](columnIndex)
+  def jodaLocalDate(columnLabel: String): LocalDate = get[LocalDate](columnLabel)
 
-  def localTime(columnIndex: Int): LocalTime = get[LocalTime](columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localTime(columnIndex: Int): LocalTime = jodaLocalTime(columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localTime(columnLabel: String): LocalTime = jodaLocalTime(columnLabel)
 
-  def localTime(columnLabel: String): LocalTime = get[LocalTime](columnLabel)
+  def jodaLocalTime(columnIndex: Int): LocalTime = get[LocalTime](columnIndex)
+  def jodaLocalTime(columnLabel: String): LocalTime = get[LocalTime](columnLabel)
 
-  def localDateTime(columnIndex: Int): LocalDateTime = get[LocalDateTime](columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localDateTime(columnIndex: Int): LocalDateTime = jodaLocalDateTime(columnIndex)
+  @deprecated("Use #jodaDateTime or just #get instead.", since = "2.0.0")
+  def localDateTime(columnLabel: String): LocalDateTime = jodaLocalDateTime(columnLabel)
 
-  def localDateTime(columnLabel: String): LocalDateTime = get[LocalDateTime](columnLabel)
+  def jodaLocalDateTime(columnIndex: Int): LocalDateTime = get[LocalDateTime](columnIndex)
+  def jodaLocalDateTime(columnLabel: String): LocalDateTime = get[LocalDateTime](columnLabel)
 
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnIndex)
 
@@ -436,21 +452,37 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     get[Option[java.sql.Timestamp]](columnLabel)
   }
 
-  def dateTimeOpt(columnIndex: Int): Option[DateTime] = get[Option[DateTime]](columnIndex)
+  @deprecated("Use #jodaDateTimeOpt or just #get instead.", since = "2.0.0")
+  def dateTimeOpt(columnIndex: Int): Option[DateTime] = jodaDateTimeOpt(columnIndex)
+  @deprecated("Use #jodaDateTimeOpt or just #get instead.", since = "2.0.0")
+  def dateTimeOpt(columnLabel: String): Option[DateTime] = jodaDateTimeOpt(columnLabel)
 
-  def dateTimeOpt(columnLabel: String): Option[DateTime] = get[Option[DateTime]](columnLabel)
+  def jodaDateTimeOpt(columnIndex: Int): Option[DateTime] = get[Option[DateTime]](columnIndex)
+  def jodaDateTimeOpt(columnLabel: String): Option[DateTime] = get[Option[DateTime]](columnLabel)
 
-  def localDateOpt(columnIndex: Int): Option[LocalDate] = get[Option[LocalDate]](columnIndex)
+  @deprecated("Use #jodaLocalDateOpt or just #get instead.", since = "2.0.0")
+  def localDateOpt(columnIndex: Int): Option[LocalDate] = jodaLocalDateOpt(columnIndex)
+  @deprecated("Use #jodaLocalDateOpt or just #get instead.", since = "2.0.0")
+  def localDateOpt(columnLabel: String): Option[LocalDate] = jodaLocalDateOpt(columnLabel)
 
-  def localDateOpt(columnLabel: String): Option[LocalDate] = get[Option[LocalDate]](columnLabel)
+  def jodaLocalDateOpt(columnIndex: Int): Option[LocalDate] = get[Option[LocalDate]](columnIndex)
+  def jodaLocalDateOpt(columnLabel: String): Option[LocalDate] = get[Option[LocalDate]](columnLabel)
 
-  def localTimeOpt(columnIndex: Int): Option[LocalTime] = get[Option[LocalTime]](columnIndex)
+  @deprecated("Use #jodaLocalTimeOpt or just #get instead.", since = "2.0.0")
+  def localTimeOpt(columnIndex: Int): Option[LocalTime] = jodaLocalTimeOpt(columnIndex)
+  @deprecated("Use #jodaLocalTimeOpt or just #get instead.", since = "2.0.0")
+  def localTimeOpt(columnLabel: String): Option[LocalTime] = jodaLocalTimeOpt(columnLabel)
 
-  def localTimeOpt(columnLabel: String): Option[LocalTime] = get[Option[LocalTime]](columnLabel)
+  def jodaLocalTimeOpt(columnIndex: Int): Option[LocalTime] = get[Option[LocalTime]](columnIndex)
+  def jodaLocalTimeOpt(columnLabel: String): Option[LocalTime] = get[Option[LocalTime]](columnLabel)
 
-  def localDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
+  @deprecated("Use #jodaLocalDateTimeOpt or just #get instead.", since = "2.0.0")
+  def localDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = jodaLocalDateTimeOpt(columnIndex)
+  @deprecated("Use #jodaLocalDateTimeOpt or just #get instead.", since = "2.0.0")
+  def localDateTimeOpt(columnLabel: String): Option[LocalDateTime] = jodaLocalDateTimeOpt(columnLabel)
 
-  def localDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
+  def jodaLocalDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
+  def jodaLocalDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
 
   def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
 
