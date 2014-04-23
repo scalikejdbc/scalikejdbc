@@ -90,15 +90,15 @@ object ConnectionPool extends LogSupport {
 
     import scalikejdbc.JDBCUrl._
 
-    val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
     val _factory = Option(settings.connectionPoolFactoryName).flatMap { name =>
       ConnectionPoolFactoryRepository.get(name)
     }.getOrElse(factory)
 
     // register new pool or replace existing pool
     pools.synchronized {
+      val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
 
-      // Heroku support 
+      // Heroku support
       val pool = url match {
         case HerokuPostgresRegexp(_user, _password, _host, _dbname) =>
           val _url = "jdbc:postgresql://%s/%s".format(_host, _dbname)
@@ -115,10 +115,11 @@ object ConnectionPool extends LogSupport {
 
       // wait a little because rarely NPE occurs when immediately accessed.
       Thread.sleep(100L)
+
+      // asynchronously close the old pool if exists
+      oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     }
 
-    // asynchronously close the old pool if exists
-    oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     log.debug("Registered connection pool : " + get(name).toString())
   }
 
