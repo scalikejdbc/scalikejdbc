@@ -200,8 +200,8 @@ if [[ "$SHELL" == *zsh* ]]; then
   SHELL_PROFILE=${HOME_DIR}/.zprofile
 fi
 
-if [ ! `grep 'PATH=${PATH}:${HOME_DIR}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; then
-  echo "PATH=\${PATH}:\${HOME_DIR}/bin/scalikejdbc-cli" >> ${SHELL_PROFILE}
+if [ ! `grep 'PATH=${PATH}:${HOME}/bin/scalikejdbc-cli' ${SHELL_PROFILE}` ]; then
+  echo "PATH=\${PATH}:\${HOME}/bin/scalikejdbc-cli" >> ${SHELL_PROFILE}
 fi
 
 chmod +x ${DBCONSOLE_COMMAND}
