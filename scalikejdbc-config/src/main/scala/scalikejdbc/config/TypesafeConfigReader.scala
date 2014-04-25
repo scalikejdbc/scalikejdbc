@@ -44,7 +44,7 @@ trait StandardTypesafeConfig extends TypesafeConfig {
 /**
  * Typesafe TypesafeConfig reader
  */
-trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
+trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeConfig =>
 
   def envPrefix: String = env.map(_ + ".").getOrElse("")
 
@@ -57,7 +57,8 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
   }
 
   private val attributeNames = Seq(
-    "url", "driver", "user", "password", "poolInitialSize", "poolMaxSize", "connectionTimeoutMillis", "poolValidationQuery")
+    "url", "driver", "user", "password",
+    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
@@ -92,10 +93,20 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
   def readConnectionPoolSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
     val configMap = self.readAsMap(dbName)
     val default = new ConnectionPoolSettings
+
+    def readTimeoutMillis(): Option[Long] = {
+      val timeout = configMap.get("poolConnectionTimeoutMillis")
+      val oldTimeout = configMap.get("connectionTimeoutMillis")
+      oldTimeout.foreach { _ =>
+        log.info("connectionTimeoutMillis is deprecated. Use poolConnectionTimeoutMillis instead.")
+      }
+      timeout.orElse(oldTimeout).map(_.toLong)
+    }
+
     ConnectionPoolSettings(
       initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
-      connectionTimeoutMillis = configMap.get("connectionTimeoutMillis").map(_.toLong).getOrElse(default.connectionTimeoutMillis),
+      connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
       validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
     )
   }
@@ -110,9 +121,12 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
         val default = LoggingSQLAndTimeSettings()
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = enabled,
+          singleLineMode = readBoolean(logConfig, "singleLineMode").getOrElse(default.singleLineMode),
+          printUnprocessedStackTrace = readBoolean(logConfig, "printUnprocessedStackTrace").getOrElse(default.printUnprocessedStackTrace),
+          stackTraceDepth = readInt(logConfig, "stackTraceDepth").getOrElse(default.stackTraceDepth),
           logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
-          warningEnabled = readString(logConfig, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
-          warningThresholdMillis = readString(logConfig, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
+          warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
+          warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
           warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
         )
       } else {
@@ -131,6 +145,14 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
 
   private def readString(config: Config, path: String): Option[String] = {
     if (config.hasPath(path)) Some(config.getString(path)) else None
+  }
+
+  private def readInt(config: Config, path: String): Option[Int] = {
+    if (config.hasPath(path)) Some(config.getInt(path)) else None
+  }
+
+  private def readLong(config: Config, path: String): Option[Long] = {
+    if (config.hasPath(path)) Some(config.getLong(path)) else None
   }
 
 }

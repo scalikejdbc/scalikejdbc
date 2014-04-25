@@ -14,10 +14,9 @@ All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementatio
 
 ```
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"               % "[1.7,)",
-  "org.scalikejdbc" %% "scalikejdbc-interpolation" % "[1.7,)",
-  "com.h2database"  %  "h2"                        % "[1.3,)",
-  "ch.qos.logback"  %  "logback-classic"           % "[1.0,)"
+  "org.scalikejdbc" %% "scalikejdbc"               % "2.0.0-beta2",
+  "com.h2database"  %  "h2"                        % "1.4.177",
+  "ch.qos.logback"  %  "logback-classic"           % "1.1.2"
 )
 ```
 
@@ -26,7 +25,8 @@ libraryDependencies ++= Seq(
 Put above dependencies into your `build.sbt` and run `sbt console` now.
 
 ```java
-import scalikejdbc._, SQLInterpolation._
+//import scalikejdbc._, SQLInterpolation._
+import scalikejdbc._
 
 // initialize JDBC driver & connection pool
 Class.forName("org.h2.Driver")

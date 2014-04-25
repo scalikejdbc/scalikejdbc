@@ -2,9 +2,8 @@ package scalikejdbc
 
 import org.scalatest._
 import org.joda.time._
-import scalikejdbc.SQLInterpolation._
 
-class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
+class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   behavior of "QueryInterface"
 
@@ -18,7 +17,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
     override val tableName = "qi_orders"
     def apply(o: SyntaxProvider[Order])(rs: WrappedResultSet): Order = apply(o.resultName)(rs)
     def apply(o: ResultName[Order])(rs: WrappedResultSet): Order = {
-      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.timestamp(o.createdAt).toJodaDateTime)
+      new Order(rs.int(o.id), rs.int(o.productId), rs.intOpt(o.accountId), rs.jodaDateTime(o.createdAt))
     }
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product])(rs: WrappedResultSet): Order = {
       (apply(o)(rs)).copy(product = Some(Product(p)(rs)))

@@ -2,7 +2,7 @@ package scalikejdbc
 
 import org.scalatest._
 
-class SQLSyntaxSupportFeatureSpec extends FlatSpec with Matchers {
+class SQLSyntaxSupportFeatureSpec extends FlatSpec with Matchers with SQLInterpolation {
 
   behavior of "SQLSyntaxSupportFeature"
 

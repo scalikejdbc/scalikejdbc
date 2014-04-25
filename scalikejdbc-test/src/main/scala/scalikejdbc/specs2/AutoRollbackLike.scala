@@ -21,7 +21,7 @@ import org.specs2.specification.After
 /**
  * AutoRollback support for specs2
  */
-trait AutoRollbackLike extends After {
+trait AutoRollbackLike extends After with LoanPattern {
 
   /**
    * Creates a [[scalikejdbc.DB]] instance.

@@ -29,5 +29,6 @@ object SbtKeys {
   lazy val scalikejdbcSchema = SettingKey[String]("scalikejdbc-schema")
   lazy val scalikejdbcPackageName = SettingKey[String]("scalikejdbc-package-name")
   lazy val scalikejdbcLineBreak = SettingKey[String]("scalikejdbc-line-break")
+  lazy val scalikejdbcCaseClassOnly = SettingKey[String]("scalikejdbc-case-class-only")
 
 }

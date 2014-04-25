@@ -41,8 +41,11 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
     case _: String => sb += '?'
     // to fix issue #215 due to unexpected Stream#addString behavior
-    case s: Stream[_] => s.toList.map(_ => "?").addString(sb, ", ") // e.g. in clause
-    case t: Traversable[_] => t.map(_ => "?").addString(sb, ", ") // e.g. in clause
+    case s: Stream[_] => addPlaceholders(sb, s.toList) // e.g. in clause
+    case t: Traversable[_] => t.map {
+      case SQLSyntax(s, _) => s
+      case _ => "?"
+    }.addString(sb, ", ") // e.g. in clause
     case LastParameter => sb
     case SQLSyntax(s, _) => sb ++= s
     case _ => sb += '?'
@@ -50,7 +53,10 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   private def buildParams(params: Seq[Any]): Seq[Any] = params.foldLeft(Seq.newBuilder[Any]) {
     case (b, s: String) => b += s
-    case (b, t: Traversable[_]) => b ++= t
+    case (b, t: Traversable[_]) => t.foldLeft(b) {
+      case (b, SQLSyntax(_, params)) => b ++= params
+      case (b, e) => b += e
+    }
     case (b, SQLSyntax(_, params)) => b ++= params
     case (b, n) => b += n
   }.result()
