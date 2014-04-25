@@ -66,7 +66,8 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "password" -> "secret",
           "poolInitialSize" -> "1",
           "poolMaxSize" -> "2",
-          "connectionTimeoutMillis" -> "1000",
+          "connectionTimeoutMillis" -> "2000",
+          "poolConnectionTimeoutMillis" -> "1000",
           "poolValidationQuery" -> "select 1 as foo"
         )
         TypesafeConfigReader.readAsMap('foo) should be(expected)
