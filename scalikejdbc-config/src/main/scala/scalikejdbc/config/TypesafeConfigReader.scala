@@ -110,9 +110,12 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
         val default = LoggingSQLAndTimeSettings()
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = enabled,
+          singleLineMode = readBoolean(logConfig, "singleLineMode").getOrElse(default.singleLineMode),
+          printUnprocessedStackTrace = readBoolean(logConfig, "printUnprocessedStackTrace").getOrElse(default.printUnprocessedStackTrace),
+          stackTraceDepth = readInt(logConfig, "stackTraceDepth").getOrElse(default.stackTraceDepth),
           logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
-          warningEnabled = readString(logConfig, "warningEnabled").map(_.toBoolean).getOrElse(default.warningEnabled),
-          warningThresholdMillis = readString(logConfig, "warningThresholdMillis").map(_.toLong).getOrElse(default.warningThresholdMillis),
+          warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
+          warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
           warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
         )
       } else {
@@ -131,6 +134,14 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
 
   private def readString(config: Config, path: String): Option[String] = {
     if (config.hasPath(path)) Some(config.getString(path)) else None
+  }
+
+  private def readInt(config: Config, path: String): Option[Int] = {
+    if (config.hasPath(path)) Some(config.getInt(path)) else None
+  }
+
+  private def readLong(config: Config, path: String): Option[Long] = {
+    if (config.hasPath(path)) Some(config.getLong(path)) else None
   }
 
 }
