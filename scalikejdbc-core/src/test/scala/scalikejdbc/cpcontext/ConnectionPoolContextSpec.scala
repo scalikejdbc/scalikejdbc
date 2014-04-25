@@ -111,7 +111,7 @@ object ConnectionPoolContextSpecUtils {
 }
 
 trait NamedCPContextAsDefault {
-  implicit val context = MultipleConnectionPoolContext(
+  implicit lazy val context = MultipleConnectionPoolContext(
     ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
     'ConnectionPoolContextSpec -> ConnectionPool.get()
   )
