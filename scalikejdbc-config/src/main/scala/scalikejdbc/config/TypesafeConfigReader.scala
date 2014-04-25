@@ -44,7 +44,7 @@ trait StandardTypesafeConfig extends TypesafeConfig {
 /**
  * Typesafe TypesafeConfig reader
  */
-trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
+trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeConfig =>
 
   def envPrefix: String = env.map(_ + ".").getOrElse("")
 
@@ -57,7 +57,8 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
   }
 
   private val attributeNames = Seq(
-    "url", "driver", "user", "password", "poolInitialSize", "poolMaxSize", "connectionTimeoutMillis", "poolValidationQuery")
+    "url", "driver", "user", "password",
+    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
@@ -92,10 +93,20 @@ trait TypesafeConfigReader extends NoEnvPrefix { self: TypesafeConfig =>
   def readConnectionPoolSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
     val configMap = self.readAsMap(dbName)
     val default = new ConnectionPoolSettings
+
+    def readTimeoutMillis(): Option[Long] = {
+      val timeout = configMap.get("poolConnectionTimeoutMillis")
+      val oldTimeout = configMap.get("connectionTimeoutMillis")
+      oldTimeout.foreach { _ =>
+        log.info("connectionTimeoutMillis is deprecated. Use poolConnectionTimeoutMillis instead.")
+      }
+      timeout.orElse(oldTimeout).map(_.toLong)
+    }
+
     ConnectionPoolSettings(
       initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
-      connectionTimeoutMillis = configMap.get("connectionTimeoutMillis").map(_.toLong).getOrElse(default.connectionTimeoutMillis),
+      connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
       validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
     )
   }
