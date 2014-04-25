@@ -1,0 +1,18 @@
+ScalikeJDBC 2.0.0-beta3 is out. .@tkawachi is the MVP developer for this release!
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #227 Get an old pool in a synchronized block by @tkawachi
+- [config] #232 Read poolConnectionTimeoutMillis by @tkawachi
+- [config] #230 Read all of defined global configuration by @tkawachi
+- [dbconsole] #228 Changed to refer $HOME instead of $HOME_DIR by @tkawachi
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
