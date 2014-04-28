@@ -85,47 +85,31 @@ object SbtPlugin extends Plugin {
       }
   }
 
-  val genTask = inputTask {
-    (task: TaskKey[Seq[String]]) =>
-      (task, scalaSource in Compile, scalaSource in Test) map {
-        case (args, srcDir, testDir) =>
-          args match {
-            case Nil => println("Usage: scalikejdbc-gen [table-name (class-name)]")
-            case tableName :: Nil =>
-              val gen = generator(tableName = tableName, srcDir = srcDir, testDir = testDir)
-              gen.foreach(_.writeModelIfNotExist())
-              gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
-            case tableName :: className :: Nil =>
-              val gen = generator(tableName = tableName, className = Some(className), srcDir = srcDir, testDir = testDir)
-              gen.foreach(_.writeModelIfNotExist())
-              gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
-            case _ => println("Usage: scalikejdbc-gen [table-name (class-name)]")
-          }
-      }
-  }
+  private final case class GenTaskParameter(table: String, clazz: Option[String])
 
-  val echoTask = inputTask {
-    (task: TaskKey[Seq[String]]) =>
-      (task, scalaSource in Compile, scalaSource in Test) map {
-        case (args, srcDir, testDir) =>
-          args match {
-            case Nil => println("Usage: scalikejdbc-gen-echo [table-name (class-name)]")
-            case tableName :: Nil =>
-              val gen = generator(tableName = tableName, srcDir = srcDir, testDir = testDir)
-              gen.foreach(g => println(g.modelAll()))
-              gen.foreach(g => g.specAll().foreach(spec => println(spec)))
-            case tableName :: className :: Nil =>
-              val gen = generator(tableName = tableName, className = Some(className), srcDir = srcDir, testDir = testDir)
-              gen.foreach(g => println(g.modelAll()))
-              gen.foreach(g => g.specAll().foreach(spec => println(spec)))
-            case _ => println("Usage: scalikejdbc-gen-echo [table-name (class-name)]")
-          }
-      }
-  }
+  import complete.DefaultParsers._
+
+  private def genTaskParser(keyName: String): complete.Parser[GenTaskParameter] = (
+    Space ~> token(StringBasic, "tableName") ~ (Space ~> token(StringBasic, "(class-name)")).?
+  ).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
   val scalikejdbcSettings = inConfig(Compile)(Seq(
-    scalikejdbcGen <<= genTask,
-    scalikejdbcGenEcho <<= echoTask
+    scalikejdbcGen := {
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      val args = genTaskParser(scalikejdbcGen.key.label).parsed
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      gen.foreach(_.writeModelIfNotExist())
+      gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
+    },
+    scalikejdbcGenEcho := {
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      val args = genTaskParser(scalikejdbcGenEcho.key.label).parsed
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      gen.foreach(g => println(g.modelAll()))
+      gen.foreach(g => g.specAll().foreach(spec => println(spec)))
+    }
   ))
 
   def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {
