@@ -33,7 +33,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           packageName = "com.example.interpolation"
         ))
         generator.modelAll()
-        generator.writeModelIfNotExist()
+        generator.writeModel()
       }
 
       {
@@ -43,7 +43,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           packageName = "com.example.querydsl"
         ))
         generator.modelAll()
-        generator.writeModelIfNotExist()
+        generator.writeModel()
       }
 
     } getOrElse {
@@ -77,7 +77,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           packageName = "com.example"
         ))
         generator1.specAll()
-        generator1.writeModelIfNotExist()
+        generator1.writeModel()
         val generator2 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
@@ -85,7 +85,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           packageName = "com.example.placeholder"
         ))
         generator2.specAll()
-        generator2.writeModelIfNotExist()
+        generator2.writeModel()
         val generator3 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           template = GeneratorTemplate.queryDsl,
@@ -93,7 +93,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           packageName = "com.example.anorm"
         ))
         generator3.specAll()
-        generator3.writeModelIfNotExist()
+        generator3.writeModel()
 
     } getOrElse {
       fail("The table is not found.")
@@ -144,7 +144,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           //caseClassOnly = true,
           packageName = "com.example"
         ))
-        generator.writeModelIfNotExist()
+        generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -169,9 +169,23 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
           packageName = "com.example"
         ))
-        generator.writeModelIfNotExist()
+        generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
+    }
+    Thread.sleep(500)
+  }
+
+  it should "work fine for all tables defined above" in {
+    val allTables = Model(url, username, password).allTables(null)
+    allTables should have size 4
+    allTables.map {
+      table =>
+        val generator = new CodeGenerator(table)(GeneratorConfig(
+          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          packageName = "com.example.alltables"
+        ))
+        generator.writeModel()
     }
     Thread.sleep(500)
   }

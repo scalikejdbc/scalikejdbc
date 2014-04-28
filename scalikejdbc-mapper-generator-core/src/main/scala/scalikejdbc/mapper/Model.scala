@@ -39,6 +39,21 @@ case class Model(url: String, username: String, password: String) {
     isAutoIncrement == "YES" || isAutoIncrement == "Y"
   } catch { case e: Exception => false }
 
+  private[this] def listAllTables(schema: String): Seq[String] = {
+    val catalog = null
+    val _schema = if (schema == null || schema.size == 0) null else schema
+    val types = Array("TABLE")
+    DB readOnlyWithConnection { conn =>
+      val meta = conn.getMetaData
+      new RSTraversable(meta.getTables(catalog, _schema, "%", types))
+        .map { rs => rs.string("TABLE_NAME") }
+        .toList
+    }
+  }
+
+  def allTables(schema: String = null): Seq[Table] =
+    listAllTables(schema).map(table(schema, _)).flatten
+
   def table(schema: String = null, tableName: String): Option[Table] = {
     val catalog = null
     val _schema = if (schema == null || schema.size == 0) null else schema

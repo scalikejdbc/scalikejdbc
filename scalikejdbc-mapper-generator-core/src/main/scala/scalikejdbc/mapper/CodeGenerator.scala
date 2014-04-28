@@ -174,23 +174,33 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   implicit def convertColumnToColumnInScala(column: Column): ColumnInScala = ColumnInScala(column)
 
+  private[this] def outputFile =
+    new File(config.srcDir + "/" + packageName.replace(".", "/") + "/" + className + ".scala")
+
   /**
-   * Write the source code to file.
+   * Write the source code if outputFile does not exists.
    */
   def writeModelIfNotExist(): Unit = {
-    val file = new File(config.srcDir + "/" + packageName.replace(".", "/") + "/" + className + ".scala")
-    if (file.exists) {
+    if (outputFile.exists) {
       println("\"" + packageName + "." + className + "\"" + " already exists.")
     } else {
-      mkdirRecursively(file.getParentFile)
-      using(new FileOutputStream(file)) {
-        fos =>
-          using(new OutputStreamWriter(fos)) {
-            writer =>
-              writer.write(modelAll())
-              println("\"" + packageName + "." + className + "\"" + " created.")
-          }
-      }
+      writeModel()
+    }
+  }
+
+  /**
+   * Write the source code to outputFile.
+   * It overwrites a file if it already exists.
+   */
+  def writeModel(): Unit = {
+    mkdirRecursively(outputFile.getParentFile)
+    using(new FileOutputStream(outputFile)) {
+      fos =>
+        using(new OutputStreamWriter(fos)) {
+          writer =>
+            writer.write(modelAll())
+            println("\"" + packageName + "." + className + "\"" + " created.")
+        }
     }
   }
 
