@@ -60,29 +60,43 @@ object SbtPlugin extends Plugin {
       ))
   }
 
+  private[this] def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
+    GeneratorConfig(
+      srcDir = srcDir.getAbsolutePath,
+      testDir = testDir.getAbsolutePath,
+      packageName = generatorSettings.packageName,
+      template = GeneratorTemplate(generatorSettings.template),
+      testTemplate = GeneratorTestTemplate(generatorSettings.testTemplate),
+      lineBreak = LineBreak(generatorSettings.lineBreak),
+      caseClassOnly = generatorSettings.caseClassOnly,
+      encoding = generatorSettings.encoding
+    )
+
   def generator(tableName: String, className: Option[String] = None, srcDir: File, testDir: File): Option[CodeGenerator] = {
     val (jdbc, generatorSettings) = loadSettings()
+    val config = generatorConfig(srcDir, testDir, generatorSettings)
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
     model.table(jdbc.schema, tableName)
       .orElse(model.table(jdbc.schema, tableName.toUpperCase(en)))
       .orElse(model.table(jdbc.schema, tableName.toLowerCase(en)))
       .map { table =>
-        val config = GeneratorConfig(
-          srcDir = srcDir.getAbsolutePath,
-          testDir = testDir.getAbsolutePath,
-          packageName = generatorSettings.packageName,
-          template = GeneratorTemplate(generatorSettings.template),
-          testTemplate = GeneratorTestTemplate(generatorSettings.testTemplate),
-          lineBreak = LineBreak(generatorSettings.lineBreak),
-          caseClassOnly = generatorSettings.caseClassOnly,
-          encoding = generatorSettings.encoding
-        )
         Option(new CodeGenerator(table, className)(config))
       } getOrElse {
         println("The table is not found.")
         None
       }
+  }
+
+  def allGenerators(srcDir: File, testDir: File): Seq[CodeGenerator] = {
+    val (jdbc, generatorSettings) = loadSettings()
+    val config = generatorConfig(srcDir, testDir, generatorSettings)
+    val className = None
+    Class.forName(jdbc.driver) // load specified jdbc driver
+    val model = Model(jdbc.url, jdbc.username, jdbc.password)
+    model.allTables(jdbc.schema).map { table =>
+      new CodeGenerator(table, className)(config)
+    }
   }
 
   private final case class GenTaskParameter(table: String, clazz: Option[String])
@@ -99,8 +113,36 @@ object SbtPlugin extends Plugin {
       val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGen.key.label).parsed
       val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
-      gen.foreach(_.writeModelIfNotExist())
-      gen.foreach(g => g.writeSpecIfNotExist(g.specAll()))
+      gen.foreach { g =>
+        g.writeModelIfNotExist()
+        g.writeSpecIfNotExist(g.specAll())
+      }
+    },
+    scalikejdbcGenForce := {
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      val args = genTaskParser(scalikejdbcGen.key.label).parsed
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      gen.foreach { g =>
+        g.writeModel()
+        g.writeSpec(g.specAll())
+      }
+    },
+    scalikejdbcGenAll := {
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      allGenerators(srcDir, testDir).foreach { g =>
+        g.writeModelIfNotExist()
+        g.writeSpecIfNotExist(g.specAll())
+      }
+    },
+    scalikejdbcGenAllForce := {
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      allGenerators(srcDir, testDir).foreach { g =>
+        g.writeModel()
+        g.writeSpec(g.specAll())
+      }
     },
     scalikejdbcGenEcho := {
       val srcDir = (scalaSource in Compile).value

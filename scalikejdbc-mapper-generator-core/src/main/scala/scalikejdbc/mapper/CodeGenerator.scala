@@ -174,14 +174,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   implicit def convertColumnToColumnInScala(column: Column): ColumnInScala = ColumnInScala(column)
 
-  private[this] def outputFile =
+  private[this] def outputModelFile =
     new File(config.srcDir + "/" + packageName.replace(".", "/") + "/" + className + ".scala")
 
   /**
    * Write the source code if outputFile does not exists.
    */
   def writeModelIfNotExist(): Unit = {
-    if (outputFile.exists) {
+    if (outputModelFile.exists) {
       println("\"" + packageName + "." + className + "\"" + " already exists.")
     } else {
       writeModel()
@@ -193,8 +193,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
    * It overwrites a file if it already exists.
    */
   def writeModel(): Unit = {
-    mkdirRecursively(outputFile.getParentFile)
-    using(new FileOutputStream(outputFile)) {
+    mkdirRecursively(outputModelFile.getParentFile)
+    using(new FileOutputStream(outputModelFile)) {
       fos =>
         using(new OutputStreamWriter(fos)) {
           writer =>
@@ -896,21 +896,27 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   // Spec
   // -----------------------
 
+  private[this] def outputSpecFile =
+    new File(config.testDir + "/" + packageName.replace(".", "/") + "/" + className + "Spec.scala")
+
   def writeSpecIfNotExist(code: Option[String]): Unit = {
-    val file = new File(config.testDir + "/" + packageName.replace(".", "/") + "/" + className + "Spec.scala")
-    if (file.exists) {
+    if (outputSpecFile.exists) {
       println("\"" + packageName + "." + className + "Spec\"" + " already exists.")
     } else {
-      code.map { code =>
-        mkdirRecursively(file.getParentFile)
-        using(new FileOutputStream(file)) {
-          fos =>
-            using(new OutputStreamWriter(fos)) {
-              writer =>
-                writer.write(code)
-                println("\"" + packageName + "." + className + "Spec\"" + " created.")
-            }
-        }
+      writeSpec(code)
+    }
+  }
+
+  def writeSpec(code: Option[String]): Unit = {
+    code.map { code =>
+      mkdirRecursively(outputSpecFile.getParentFile)
+      using(new FileOutputStream(outputSpecFile)) {
+        fos =>
+          using(new OutputStreamWriter(fos)) {
+            writer =>
+              writer.write(code)
+              println("\"" + packageName + "." + className + "Spec\"" + " created.")
+          }
       }
     }
   }
