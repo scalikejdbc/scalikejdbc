@@ -72,6 +72,9 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.3"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
+          // scope: provided
+          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "provided",
+          "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
