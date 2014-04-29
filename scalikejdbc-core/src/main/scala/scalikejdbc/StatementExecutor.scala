@@ -80,6 +80,7 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, si
         case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
         case p: Boolean => underlying.setBoolean(i, p)
         case p: Byte => underlying.setByte(i, p)
+        case p: Array[Byte] => underlying.setBytes(i, p)
         case p: java.sql.Date => underlying.setDate(i, p)
         case p: Double => underlying.setDouble(i, p)
         case p: Float => underlying.setFloat(i, p)
