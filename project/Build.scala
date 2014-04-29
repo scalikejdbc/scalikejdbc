@@ -52,6 +52,7 @@ object ScalikeJDBCProjects extends Build {
           "org.apache.commons"      %  "commons-dbcp2"   % "2.0.1"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
+          "com.zaxxer"              %  "HikariCP"        % "1.3.8"             % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion     % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion   % "test",
           "org.scalatest"           %% "scalatest"       % _scalatestVersion   % "test",

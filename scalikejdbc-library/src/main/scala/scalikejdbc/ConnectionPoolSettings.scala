@@ -18,8 +18,10 @@ package scalikejdbc
 /**
  * Settings for ConnectionPool
  */
-case class ConnectionPoolSettings(initialSize: Int = 0,
+case class ConnectionPoolSettings(
+  initialSize: Int = 0,
   maxSize: Int = 8,
   connectionTimeoutMillis: Long = 5000L,
-  validationQuery: String = null)
+  validationQuery: String = null,
+  connectionPoolFactoryName: String = null)
 
