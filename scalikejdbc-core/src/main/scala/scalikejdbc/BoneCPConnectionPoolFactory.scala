@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Kazuhiro Sera
+ * Copyright 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 package scalikejdbc
 
 /**
- * Settings for ConnectionPool
+ * Connection Pool Factory
+ *
+ * @see http://jolbox.com/
  */
-case class ConnectionPoolSettings(
-  initialSize: Int = 0,
-  maxSize: Int = 8,
-  connectionTimeoutMillis: Long = 5000L,
-  validationQuery: String = null,
-  connectionPoolFactoryName: String = null)
+object BoneCPConnectionPoolFactory extends ConnectionPoolFactory {
 
+  override def apply(
+    url: String, user: String, password: String, settings: ConnectionPoolSettings = ConnectionPoolSettings()) = {
+    new BoneCPConnectionPool(url, user, password, settings)
+  }
+
+}

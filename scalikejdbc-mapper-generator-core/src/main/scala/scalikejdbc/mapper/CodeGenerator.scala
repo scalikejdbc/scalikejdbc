@@ -913,7 +913,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import org.scalatest._
           |import org.joda.time._
           |import scalikejdbc.scalatest.AutoRollback
-          |%interpolationImport%
+          |import scalikejdbc._
           |
           |class %className%Spec extends fixture.FlatSpec with Matchers with AutoRollback {
           |  %syntaxObject%
@@ -946,7 +946,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |  }
           |  it should "save a record" in { implicit session =>
           |    val entity = %className%.findAll().head
-          |    val updated = %className%.save(entity)
+          |    // TODO modify something
+          |    val modified = entity
+          |    val updated = %className%.save(modified)
           |    updated should not equal(entity)
           |  }
           |  it should "destroy a record" in { implicit session =>
@@ -965,7 +967,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import scalikejdbc.specs2.mutable.AutoRollback
           |import org.specs2.mutable._
           |import org.joda.time._
-          |%interpolationImport%
+          |import scalikejdbc._
           |
           |class %className%Spec extends Specification {
           |  %syntaxObject%
@@ -997,7 +999,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |    "save a record" in new AutoRollback {
           |      val entity = %className%.findAll().head
-          |      val updated = %className%.save(entity)
+          |      // TODO modify something
+          |      val modified = entity
+          |      val updated = %className%.save(modified)
           |      updated should not equalTo(entity)
           |    }
           |    "destroy a record" in new AutoRollback {
@@ -1017,7 +1021,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import scalikejdbc.specs2.AutoRollback
           |import org.specs2._
           |import org.joda.time._
-          |%interpolationImport%
+          |import scalikejdbc._
           |
           |class %className%Spec extends Specification { def is =
           |
@@ -1061,7 +1065,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |    def save = this {
           |      val entity = %className%.findAll().head
-          |      val updated = %className%.save(entity)
+          |      // TODO modify something
+          |      val modified = entity
+          |      val updated = %className%.save(modified)
           |      updated should not equalTo(entity)
           |    }
           |    def destroy = this {
@@ -1082,7 +1088,6 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     code.replace("%package%", packageName)
       .replace("%className%", className)
-      .replace("%interpolationImport%", if (isInterpolation) "import scalikejdbc.SQLInterpolation._" else "")
       .replace("%primaryKeys%", table.primaryKeyColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))

@@ -17,7 +17,8 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
       } catch {
         case e: Exception =>
       }
-      SQL("""
+      try {
+        SQL("""
             create table member (
               id bigint primary key,
               name varchar(30) not null,
@@ -25,7 +26,10 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
               birthday date,
               created_at timestamp not null
             )
-          """).execute.apply()
+            """).execute.apply()
+      } catch {
+        case e: Exception =>
+      }
     }
 
     // use model

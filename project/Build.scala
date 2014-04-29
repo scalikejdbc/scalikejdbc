@@ -5,11 +5,10 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.0-beta3"
+  lazy val _version = "2.0.0-RC2"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
-  lazy val _defaultPlayVersion = "2.2.2"
   lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
@@ -73,6 +72,9 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.3"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
+          // scope: provided
+          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "provided",
+          "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",

@@ -22,9 +22,6 @@ object RenewVersionCommand extends Plugin {
             "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"[^\"]+\"",
             "\"org.scalikejdbc\" %% \"scalikejdbc\" % \"" + version + "\"")
           .replaceFirst(
-            "\"org.scalikejdbc\" %% \"scalikejdbc-interpolation\" % \"[^\"]+\"",
-            "\"org.scalikejdbc\" %% \"scalikejdbc-interpolation\" % \"" + version + "\"")
-          .replaceFirst(
             "\"org.scalikejdbc\" %% \"scalikejdbc-test\" % \"[^\"]+\"",
             "\"org.scalikejdbc\" %% \"scalikejdbc-test\" % \"" + version + "\"")
          )

@@ -86,6 +86,10 @@ object ConnectionPool extends LogSupport {
 
     import scalikejdbc.JDBCUrl._
 
+    val _factory = Option(settings.connectionPoolFactoryName).flatMap { name =>
+      ConnectionPoolFactoryRepository.get(name)
+    }.getOrElse(factory)
+
     // register new pool or replace existing pool
     pools.synchronized {
       val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
@@ -94,14 +98,14 @@ object ConnectionPool extends LogSupport {
       val pool = url match {
         case HerokuPostgresRegexp(_user, _password, _host, _dbname) =>
           val _url = "jdbc:postgresql://%s/%s".format(_host, _dbname)
-          factory.apply(_url, _user, _password, settings)
+          _factory.apply(_url, _user, _password, settings)
         case url @ HerokuMySQLRegexp(_user, _password, _host, _dbname) =>
           val defaultProperties = """?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci"""
           val addDefaultPropertiesIfNeeded = MysqlCustomProperties.findFirstMatchIn(url).map(_ => "").getOrElse(defaultProperties)
           val _url = "jdbc:mysql://%s/%s".format(_host, _dbname + addDefaultPropertiesIfNeeded)
-          factory.apply(_url, _user, _password, settings)
+          _factory.apply(_url, _user, _password, settings)
         case _ =>
-          factory.apply(url, user, password, settings)
+          _factory.apply(url, user, password, settings)
       }
       pools.update(name, pool)
 

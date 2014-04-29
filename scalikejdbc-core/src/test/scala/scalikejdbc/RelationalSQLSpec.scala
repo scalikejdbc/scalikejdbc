@@ -697,11 +697,11 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
     } finally {
       DB autoCommit {
         implicit s =>
-          SQL("drop table groups_" + suffix)
-          SQL("drop table owners_" + suffix)
-          SQL("drop table events_" + suffix)
-          SQL("drop table members_" + suffix)
-          SQL("drop table sponsors_" + suffix)
+          SQL("drop table groups_" + suffix).execute.apply()
+          SQL("drop table owners_" + suffix).execute.apply()
+          SQL("drop table events_" + suffix).execute.apply()
+          SQL("drop table members_" + suffix).execute.apply()
+          SQL("drop table sponsors_" + suffix).execute.apply()
       }
     }
   }
