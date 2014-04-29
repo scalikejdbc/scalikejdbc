@@ -58,7 +58,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 
   private val attributeNames = Seq(
     "url", "driver", "user", "password",
-    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery")
+    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
@@ -107,7 +107,8 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
       connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
-      validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery)
+      validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery),
+      connectionPoolFactoryName = configMap.get("poolFactoryName").getOrElse(default.connectionPoolFactoryName)
     )
   }
 
