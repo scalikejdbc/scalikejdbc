@@ -77,24 +77,82 @@ class OneToXSQL[A, E <: WithExtractor, Z](override val statement: String)(overri
     new OneToManySQL(statement)(parameters: _*)(output)(one)(to)((a, bs) => a.asInstanceOf[Z])
   }
 
-  def toManies[B1, B2](to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2]): OneToManies2SQL[A, B1, B2, E, Z] = {
+  def toManies[B1, B2](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2]): OneToManies2SQL[A, B1, B2, E, Z] = {
     new OneToManies2SQL(statement)(parameters: _*)(output)(one)(to1, to2)((a, bs1, bs2) => a.asInstanceOf[Z])
   }
 
-  def toManies[B1, B2, B3](to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3]): OneToManies3SQL[A, B1, B2, B3, E, Z] = {
+  def toManies[B1, B2, B3](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3]): OneToManies3SQL[A, B1, B2, B3, E, Z] = {
     new OneToManies3SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3)((a, bs1, bs2, bs3) => a.asInstanceOf[Z])
   }
 
-  def toManies[B1, B2, B3, B4](to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2],
-    to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4]): OneToManies4SQL[A, B1, B2, B3, B4, E, Z] = {
+  def toManies[B1, B2, B3, B4](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4]): OneToManies4SQL[A, B1, B2, B3, B4, E, Z] = {
     new OneToManies4SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4)((a, bs1, bs2, bs3, bs4) => a.asInstanceOf[Z])
   }
 
-  def toManies[B1, B2, B3, B4, B5](to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2],
-    to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4],
+  def toManies[B1, B2, B3, B4, B5](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4],
     to5: WrappedResultSet => Option[B5]): OneToManies5SQL[A, B1, B2, B3, B4, B5, E, Z] = {
     new OneToManies5SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4, to5)((a, bs1, bs2, bs3, bs4, bs5) => a.asInstanceOf[Z])
   }
+
+  def toManies[B1, B2, B3, B4, B5, B6](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4],
+    to5: WrappedResultSet => Option[B5],
+    to6: WrappedResultSet => Option[B6]): OneToManies6SQL[A, B1, B2, B3, B4, B5, B6, E, Z] = {
+    new OneToManies6SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4, to5, to6)((a, bs1, bs2, bs3, bs4, bs5, bs6) => a.asInstanceOf[Z])
+  }
+
+  def toManies[B1, B2, B3, B4, B5, B6, B7](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4],
+    to5: WrappedResultSet => Option[B5],
+    to6: WrappedResultSet => Option[B6],
+    to7: WrappedResultSet => Option[B7]): OneToManies7SQL[A, B1, B2, B3, B4, B5, B6, B7, E, Z] = {
+    new OneToManies7SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4, to5, to6, to7)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7) => a.asInstanceOf[Z])
+  }
+
+  def toManies[B1, B2, B3, B4, B5, B6, B7, B8](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4],
+    to5: WrappedResultSet => Option[B5],
+    to6: WrappedResultSet => Option[B6],
+    to7: WrappedResultSet => Option[B7],
+    to8: WrappedResultSet => Option[B8]): OneToManies8SQL[A, B1, B2, B3, B4, B5, B6, B7, B8, E, Z] = {
+    new OneToManies8SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4, to5, to6, to7, to8)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7, bs8) => a.asInstanceOf[Z])
+  }
+
+  def toManies[B1, B2, B3, B4, B5, B6, B7, B8, B9](
+    to1: WrappedResultSet => Option[B1],
+    to2: WrappedResultSet => Option[B2],
+    to3: WrappedResultSet => Option[B3],
+    to4: WrappedResultSet => Option[B4],
+    to5: WrappedResultSet => Option[B5],
+    to6: WrappedResultSet => Option[B6],
+    to7: WrappedResultSet => Option[B7],
+    to8: WrappedResultSet => Option[B8],
+    to9: WrappedResultSet => Option[B9]): OneToManies9SQL[A, B1, B2, B3, B4, B5, B6, B7, B8, B9, E, Z] = {
+    new OneToManies9SQL(statement)(parameters: _*)(output)(one)(to1, to2, to3, to4, to5, to6, to7, to8, to9)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7, bs8, bs9) => a.asInstanceOf[Z])
+  }
+
 }
 
 object OneToXSQL {
