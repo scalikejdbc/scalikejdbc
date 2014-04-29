@@ -5,10 +5,10 @@ import org.scalatest.BeforeAndAfter
 
 class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
-  behavior of "OneToManies8SQL"
+  behavior of "OneToManies9SQL"
 
   it should "execute one-to-manies queries" in {
-    val suffix = "_OneToManies8SQLSpec" + System.currentTimeMillis()
+    val suffix = "_OneToManies9SQLSpec" + System.currentTimeMillis()
     try {
       DB autoCommit {
         implicit s =>
