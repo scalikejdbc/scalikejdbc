@@ -1,0 +1,54 @@
+ScalikeJDBC 2.0.0-RC2 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #223 Supporting multiple connection pool implementations
+
+Default:
+
+```scala
+ConnectionPool.add('dbcp, url, user, password, 
+  ConnectionPoolSettings(connectionPoolFactoryName = "commons-dbcp"))
+BoneCP users:
+```
+
+```scala
+ConnectionPool.add('bonecp, url, user, password, 
+  ConnectionPoolSettings(connectionPoolFactoryName = "bonecp"))
+```
+
+For HikariCP users:
+
+```scala
+val dataSource: DataSource = {
+  val ds = new HikariDataSource()
+  ds.setDataSourceClassName(dataSourceClassName)
+  ds.addDataSourceProperty("url", url)
+  ds.addDataSourceProperty("user", user)
+  ds.addDataSourceProperty("password", password)
+  ds
+}
+ConnectionPool.add('hikaricp, new DataSourceConnectionPool(dataSource))
+```
+
+- [core] #226 Enabling more toManies relations
+
+Previously, to-manies accepts 5 tables. Now we can join 9 tables within same query.
+
+- [mapper-generator] #225 mapper-generator inputTask deprecation warning
+
+Thanks to @xuwei-k as usual.
+
+- [mapper-generator] #234 Generated tests don't compile (2.0.0-beta3)
+
+Thanks to @tkawachi's feedback.
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
