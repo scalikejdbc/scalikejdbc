@@ -8,17 +8,15 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"               % "1.7.0",
-  "org.scalikejdbc" %% "scalikejdbc-interpolation" % "2.0.0-beta3",
-  "org.scalikejdbc" %% "scalikejdbc-test"          % "1.7.0",
-  "org.slf4j"       %  "slf4j-simple"              % "[1.7,)",
-  "org.hibernate"   %  "hibernate-core"            % "4.1.9.Final",
-  "org.hsqldb"      %  "hsqldb"                    % "[2,)",
-  "org.specs2"      %% "specs2"                    % "1.14"             % "test"
+  "org.scalikejdbc" %% "scalikejdbc"       % "2.0.0-beta4-SNAPSHOT",
+  "org.scalikejdbc" %% "scalikejdbc-test"  % "2.0.0-beta4-SNAPSHOT",
+  "org.slf4j"       %  "slf4j-simple"      % "[1.7,)",
+  "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
+  "org.hsqldb"      %  "hsqldb"            % "[2,)",
+  "org.specs2"      %% "specs2"            % "1.14"             % "test"
 )
 
 initialCommands := """import scalikejdbc._
-import scalikejdbc.SQLInterpolation._
 // classes
 case class User(id: Long, name: Option[String], companyId: Option[Long] = None, company: Option[Company] = None)
 object User extends SQLSyntaxSupport[User] {
