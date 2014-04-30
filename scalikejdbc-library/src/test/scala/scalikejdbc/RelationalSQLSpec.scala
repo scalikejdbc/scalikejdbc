@@ -601,108 +601,111 @@ class RelationalSQLSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
           SQL("insert into sponsors_" + suffix + " values (3, 3)").update.apply()
           SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
           SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
-
-          case class GroupEntity(id: Int, ownerId: Int)
-          case class Group(id: Int, ownerId: Int, owner: Owner,
-            events: Seq[Event] = Nil, news: Seq[News] = Nil,
-            members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
-
-          class Owner(val id: Int) extends EntityEquality {
-            override val entityIdentity = id
-          }
-          class News(val id: Int, val groupId: Int) extends EntityEquality {
-            override val entityIdentity = (id, groupId)
-          }
-          class Event(val id: Int, val groupId: Int) extends EntityEquality {
-            override val entityIdentity = id
-          }
-          case class Member(id: Int, groupId: Int)
-          case class Sponsor(id: Int, groupId: Int)
-
-          {
-            val groups: List[Group] = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
-              " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
-              " from groups_" + suffix + " g " +
-              " inner join owners_" + suffix + " o on g.owner_id = o.id " +
-              " left join events_" + suffix + " e on g.id = e.group_id " +
-              " left join news_" + suffix + " n on g.id = n.group_id " +
-              " left join members_" + suffix + " m on g.id = m.group_id " +
-              " left join sponsors_" + suffix + " s on g.id = s.group_id " +
-              " order by g.id, n.id, e.id desc, m.id desc")
-              .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
-              .toManies(
-                rs => rs.intOpt("o_id").map(id => new Owner(id)),
-                rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
-                rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
-                rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
-              .map { (g, os, es, ns, ms, ss) =>
-                Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
-              }.list.apply()
-
-            groups.size should equal(4)
-            groups(0).id should equal(1)
-
-            groups(0).owner.id should equal(2)
-
-            groups(0).news.size should equal(3)
-            groups(0).news(0).id should equal(2)
-            groups(0).news(1).id should equal(7)
-            groups(0).news(2).id should equal(8)
-
-            groups(0).events.size should equal(2)
-            groups(0).events(0).id should equal(3)
-            groups(0).events(1).id should equal(2)
-
-            groups(0).members.size should equal(3)
-            groups(0).members(0).id should equal(5)
-            groups(0).members(1).id should equal(3)
-            groups(0).members(2).id should equal(2)
-
-            groups(0).sponsors.size should equal(1)
-            groups(0).sponsors(0).id should equal(1)
-          }
-
-          {
-            val group: Group = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
-              " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
-              " from groups_" + suffix + " g " +
-              " inner join owners_" + suffix + " o on g.owner_id = o.id " +
-              " left join events_" + suffix + " e on g.id = e.group_id " +
-              " left join news_" + suffix + " n on g.id = n.group_id " +
-              " left join members_" + suffix + " m on g.id = m.group_id " +
-              " left join sponsors_" + suffix + " s on g.id = s.group_id " +
-              " where g.id = 1 order by g.id, n.id, e.id desc, m.id desc")
-              .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
-              .toManies(
-                rs => rs.intOpt("o_id").map(id => new Owner(id)),
-                rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
-                rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
-                rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
-              .map { (g, os, es, ns, ms, ss) =>
-                Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
-              }.single.apply().get
-
-            group.id should equal(1)
-
-            group.members.size should equal(3)
-            group.members(0).id should equal(5)
-            group.members(1).id should equal(3)
-            group.members(2).id should equal(2)
-
-            group.sponsors.size should equal(1)
-            group.sponsors(0).id should equal(1)
-          }
       }
+
+      case class GroupEntity(id: Int, ownerId: Int)
+      case class Group(id: Int, ownerId: Int, owner: Owner,
+        events: Seq[Event] = Nil, news: Seq[News] = Nil,
+        members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+
+      class Owner(val id: Int) extends EntityEquality {
+        override val entityIdentity = id
+      }
+      class News(val id: Int, val groupId: Int) extends EntityEquality {
+        override val entityIdentity = (id, groupId)
+      }
+      class Event(val id: Int, val groupId: Int) extends EntityEquality {
+        override val entityIdentity = id
+      }
+      case class Member(id: Int, groupId: Int)
+      case class Sponsor(id: Int, groupId: Int)
+
+      implicit val session = ReadOnlyAutoSession
+
+      {
+        val groups: List[Group] = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
+          " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
+          " from groups_" + suffix + " g " +
+          " inner join owners_" + suffix + " o on g.owner_id = o.id " +
+          " left join events_" + suffix + " e on g.id = e.group_id " +
+          " left join news_" + suffix + " n on g.id = n.group_id " +
+          " left join members_" + suffix + " m on g.id = m.group_id " +
+          " left join sponsors_" + suffix + " s on g.id = s.group_id " +
+          " order by g.id, n.id, e.id desc, m.id desc")
+          .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
+          .toManies(
+            rs => rs.intOpt("o_id").map(id => new Owner(id)),
+            rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
+            rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
+            rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
+            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+          .map { (g, os, es, ns, ms, ss) =>
+            Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
+          }.list.apply()
+
+        groups.size should equal(4)
+        groups(0).id should equal(1)
+
+        groups(0).owner.id should equal(2)
+
+        groups(0).news.size should equal(3)
+        groups(0).news(0).id should equal(2)
+        groups(0).news(1).id should equal(7)
+        groups(0).news(2).id should equal(8)
+
+        groups(0).events.size should equal(2)
+        groups(0).events(0).id should equal(3)
+        groups(0).events(1).id should equal(2)
+
+        groups(0).members.size should equal(3)
+        groups(0).members(0).id should equal(5)
+        groups(0).members(1).id should equal(3)
+        groups(0).members(2).id should equal(2)
+
+        groups(0).sponsors.size should equal(1)
+        groups(0).sponsors(0).id should equal(1)
+      }
+
+      {
+        val group: Group = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
+          " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
+          " from groups_" + suffix + " g " +
+          " inner join owners_" + suffix + " o on g.owner_id = o.id " +
+          " left join events_" + suffix + " e on g.id = e.group_id " +
+          " left join news_" + suffix + " n on g.id = n.group_id " +
+          " left join members_" + suffix + " m on g.id = m.group_id " +
+          " left join sponsors_" + suffix + " s on g.id = s.group_id " +
+          " where g.id = 1 order by g.id, n.id, e.id desc, m.id desc")
+          .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
+          .toManies(
+            rs => rs.intOpt("o_id").map(id => new Owner(id)),
+            rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
+            rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
+            rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
+            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+          .map { (g, os, es, ns, ms, ss) =>
+            Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
+          }.single.apply().get
+
+        group.id should equal(1)
+
+        group.members.size should equal(3)
+        group.members(0).id should equal(5)
+        group.members(1).id should equal(3)
+        group.members(2).id should equal(2)
+
+        group.sponsors.size should equal(1)
+        group.sponsors(0).id should equal(1)
+      }
+
     } finally {
       DB autoCommit {
         implicit s =>
-          SQL("drop table groups_" + suffix)
-          SQL("drop table owners_" + suffix)
-          SQL("drop table events_" + suffix)
-          SQL("drop table members_" + suffix)
-          SQL("drop table sponsors_" + suffix)
+          SQL("drop table groups_" + suffix).execute.apply()
+          SQL("drop table owners_" + suffix).execute.apply()
+          SQL("drop table events_" + suffix).execute.apply()
+          SQL("drop table members_" + suffix).execute.apply()
+          SQL("drop table sponsors_" + suffix).execute.apply()
       }
     }
   }

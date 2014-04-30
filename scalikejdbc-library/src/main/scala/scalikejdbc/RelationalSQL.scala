@@ -31,8 +31,9 @@ private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def executeQuery[R[Z]](session: DBSession, op: DBSession => R[Z]): R[Z] = try {
     session match {
-      case AutoSession => DB readOnly (s => op(s))
+      case AutoSession | ReadOnlyAutoSession => DB readOnly (s => op(s))
       case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
       case _ => op(session)
     }
   } catch { case e: Exception => OneToXSQL.handleException(e) }
