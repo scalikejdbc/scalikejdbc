@@ -1,0 +1,13 @@
+ScalikeJDBC 1.7.6 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #237 NPE when using ReadOnlyAutoSession with RelationalSQL
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
