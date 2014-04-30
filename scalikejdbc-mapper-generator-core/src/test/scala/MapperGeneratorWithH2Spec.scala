@@ -14,6 +14,8 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
   val password = ""
   ConnectionPool.singleton(url, username, password)
 
+  val srcDir = "scalikejdbc-mapper-generator-core/target/generated_src"
+
   it should "work fine with member_group" in {
     DB autoCommit { implicit session =>
       SQL("""
@@ -28,22 +30,22 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           template = GeneratorTemplate.interpolation,
           packageName = "com.example.interpolation"
         ))
         generator.modelAll()
-        generator.writeModelIfNotExist()
+        generator.writeModel()
       }
 
       {
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           packageName = "com.example.querydsl"
         ))
         generator.modelAll()
-        generator.writeModelIfNotExist()
+        generator.writeModel()
       }
 
     } getOrElse {
@@ -71,29 +73,29 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "MEMBER").map {
       table =>
         val generator1 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2unit"),
           packageName = "com.example"
         ))
         generator1.specAll()
-        generator1.writeModelIfNotExist()
+        generator1.writeModel()
         val generator2 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
           packageName = "com.example.placeholder"
         ))
         generator2.specAll()
-        generator2.writeModelIfNotExist()
+        generator2.writeModel()
         val generator3 = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
           packageName = "com.example.anorm"
         ))
         generator3.specAll()
-        generator3.writeModelIfNotExist()
+        generator3.writeModel()
 
     } getOrElse {
       fail("The table is not found.")
@@ -140,11 +142,11 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "UN_NORMALIZED").map {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           //caseClassOnly = true,
           packageName = "com.example"
         ))
-        generator.writeModelIfNotExist()
+        generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -166,12 +168,26 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Model(url, username, password).table(null, "WITHOUT_PK").map {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = "scalikejdbc-mapper-generator-core/src/test/scala",
+          srcDir = srcDir,
           packageName = "com.example"
         ))
-        generator.writeModelIfNotExist()
+        generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
+    }
+    Thread.sleep(500)
+  }
+
+  it should "work fine for all tables defined above" in {
+    val allTables = Model(url, username, password).allTables(null)
+    allTables should have size 4
+    allTables.map {
+      table =>
+        val generator = new CodeGenerator(table)(GeneratorConfig(
+          srcDir = srcDir,
+          packageName = "com.example.alltables"
+        ))
+        generator.writeModel()
     }
     Thread.sleep(500)
   }
