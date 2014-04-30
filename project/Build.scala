@@ -73,9 +73,9 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"       % "2.3"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
           // scope: provided
-          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
+          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
