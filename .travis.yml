@@ -2,6 +2,7 @@ language: scala
 scala:
   - 2.10.4
   - 2.11.0
+  - scripted-test
 jdk:
   - oraclejdk7
   - oraclejdk8

@@ -154,8 +154,13 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcMapperGenerator = Project(
     id = "mapper-generator",
     base = file("scalikejdbc-mapper-generator"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ ScriptedPlugin.scriptedSettings ++ Seq(
       sbtPlugin := true,
+      ScriptedPlugin.scriptedBufferLog := false,
+      ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
+        a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
+      ),
+      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
