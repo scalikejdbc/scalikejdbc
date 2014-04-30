@@ -121,7 +121,7 @@ object SbtPlugin extends Plugin {
     scalikejdbcGenForce := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
-      val args = genTaskParser(scalikejdbcGen.key.label).parsed
+      val args = genTaskParser(scalikejdbcGenForce.key.label).parsed
       val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
       gen.foreach { g =>
         g.writeModel()
