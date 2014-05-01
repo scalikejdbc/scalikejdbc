@@ -893,7 +893,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           val sql = SQL("insert into dbsession_issue_218 (s) values (?)").bind(123).update
           val executor = session.toStatementExecutor(sql.statement, sql.parameters)
           import ExecutionContext.Implicits.global
-          scala.concurrent.future {
+          scala.concurrent.Future {
             Thread.sleep(10L)
             executor.executeUpdate()
           }
