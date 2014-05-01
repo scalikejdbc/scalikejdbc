@@ -28,10 +28,9 @@ object SQLInterpolationMacro {
   def selectDynamic[E: c.WeakTypeTag](c: Context)(name: c.Expr[String]): c.Expr[SQLSyntax] = {
     import c.universe._
 
-    val nameOpt: Option[String] = try {
-      Some(c.eval(c.Expr[String](c.resetLocalAttrs(name.tree.duplicate))))
-    } catch {
-      case t: Throwable => None
+    val nameOpt: Option[String] = name.tree match {
+      case Literal(Constant(value: String)) => Some(value)
+      case _ => None
     }
 
     // primary constructor args of type E
