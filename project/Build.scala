@@ -33,19 +33,16 @@ object ScalikeJDBCProjects extends Build {
     pomExtra := _pomExtra
   )
 
+  val root211Id = "root211"
+  val mapperGeneratorId = "mapper-generator"
+
   lazy val root211 = Project(
-    "root211",
+    root211Id,
     file("root211")
   ).settings(
     baseSettings: _*
-  ).aggregate(
-    scalikejdbcCore,
-    scalikejdbcConfig,
-    scalikejdbcInterpolation,
-    scalikejdbcMapperGeneratorCore,
-    scalikejdbcTest,
-    scalikejdbcInterpolationCore,
-    scalikejdbcInterpolationMacro
+  ).copy(
+    aggregate = projects.filterNot(p => Set(root211Id, mapperGeneratorId).contains(p.id)).map(p => p: ProjectReference)
   )
 
   // scalikejdbc library
@@ -152,7 +149,7 @@ object ScalikeJDBCProjects extends Build {
 
   // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator",
+    id = mapperGeneratorId,
     base = file("scalikejdbc-mapper-generator"),
     settings = baseSettings ++ ScriptedPlugin.scriptedSettings ++ Seq(
       sbtPlugin := true,
