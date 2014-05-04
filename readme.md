@@ -16,11 +16,15 @@ All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementatio
 
 ```
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"               % "2.0.0-beta3",
-  "com.h2database"  %  "h2"                        % "1.4.177",
-  "ch.qos.logback"  %  "logback-classic"           % "1.1.2"
+  "org.scalikejdbc" %% "scalikejdbc"        % "2.0.0-RC3",
+  "com.h2database"  %  "h2"                 % "1.4.177",
+  "ch.qos.logback"  %  "logback-classic"    % "1.1.2"
 )
 ```
+
+If you're a Play2 user, take a look at play-support project, too.
+
+https://github.com/scalikejdbc/scalikejdbc-play-support
 
 #### First example
 
