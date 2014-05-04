@@ -8,6 +8,8 @@ ScalikeJDBC is a practical and production-ready one. Use this library for your r
 
 http://scalikejdbc.org/
 
+[![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=develop)](https://travis-ci.org/scalikejdbc/scalikejdbc)
+
 ## Getting Started
 
 All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementation.
