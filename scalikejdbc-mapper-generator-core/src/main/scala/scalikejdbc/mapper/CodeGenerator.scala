@@ -421,14 +421,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation =>
           // ${id}, ${name}
           createColumns.map(c => 4.indent + "${" + c.nameInScala + "}").mkString(comma + eol)
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           // id, name
           createColumns.map(c => 4.indent + c.nameInScala).mkString(comma + eol)
       }
 
       val bindingPart: String = config.template match {
         case GeneratorTemplate.interpolation => ""
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           // .bindByName('id -> id, 'name -> name
           3.indent + ".bindByName(" + eol +
             createColumns.map { c => 4.indent + "'" + c.nameInScala + " -> " + c.nameInScala }.mkString(comma + eol)
@@ -444,21 +444,21 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         (config.template match {
           case GeneratorTemplate.interpolation =>
             "sql\"\"\"" + eol + 3.indent + "insert into ${" + className + ".table} ("
-          case _ =>
+          case GeneratorTemplate.queryDsl =>
             // withSQL { insert.into(User).columns(
             "withSQL {" + eol + 3.indent + "insert.into(" + className + ").columns("
         }) + eol +
         (config.template match {
           case GeneratorTemplate.interpolation =>
             createColumns.map(c => 4.indent + "${" + "column." + c.nameInScala + "}").mkString(comma + eol) + eol + 3.indent + ") values (" + eol
-          case _ =>
+          case GeneratorTemplate.queryDsl =>
             createColumns.map(c => 4.indent + "column." + c.nameInScala).mkString(comma + eol) + eol + 3.indent + ").values(" + eol
         }) +
         placeHolderPart + eol + 3.indent + ")" + eol +
         (config.template match {
           case GeneratorTemplate.interpolation =>
             3.indent + "\"\"\"" + table.autoIncrementColumns.headOption.map(_ => ".updateAndReturnGeneratedKey.apply()").getOrElse(".update.apply()")
-          case _ =>
+          case GeneratorTemplate.queryDsl =>
             2.indent + table.autoIncrementColumns.headOption.map(_ => "}.updateAndReturnGeneratedKey.apply()").getOrElse("}.update.apply()")
         }) +
         eol +
@@ -508,7 +508,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id}, ${column.name} = ${entity.name}
           allColumns.map(c => 4.indent + "${column." + c.nameInScala + "} = ${entity." + c.nameInScala + "}").mkString(comma + eol)
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           // column.id -> entity.id, column.name -> entity.name
           allColumns.map(c => 4.indent + "column." + c.nameInScala + " -> entity." + c.nameInScala).mkString(comma + eol)
       }
@@ -517,7 +517,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
           4.indent + pkColumns.map(pk => "${" + "column." + pk.nameInScala + "} = ${entity." + pk.nameInScala + "}").mkString(" and ")
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           // .eq(column.id, entity.id).and.eq(column.name, entity.name)
           pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
       }
@@ -536,7 +536,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    entity 
           |  }
         """
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           s"""  def save(entity: ${className})(implicit session: DBSession = autoSession): ${className} = {
           |    withSQL {
           |      update(${className}).set(
@@ -564,7 +564,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
           pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${entity." + pk.nameInScala + "}").mkString(" and ")
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           // .eq(column.id, entity.id).and.eq(column.name, entity.name)
           pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
       }
@@ -575,7 +575,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    sql\"\"\"delete from $${${className}.table} where ${wherePart}\"\"\".update.apply()
           |  }
         """
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           s"""  def destroy(entity: ${className})(implicit session: DBSession = autoSession): Unit = {
           |    withSQL { delete.from(${className}).where${wherePart} }.update.apply()
           |  }
@@ -598,7 +598,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val wherePart = config.template match {
         case GeneratorTemplate.interpolation =>
           pkColumns.map(pk => s"${pk.name} = \\$${${syntaxName}.${pk.nameInScala}}").mkString(" and ")
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           pkColumns.map(pk => s".eq(${syntaxName}.${pk.nameInScala}, ${pk.nameInScala})").mkString(".and")
       }
 
@@ -609,7 +609,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |      .map(${className}(${syntaxName}.resultName)).single.apply()
             |  }
           """
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           s"""  def find(${argsPart})(implicit session: DBSession = autoSession): Option[${className}] = {
             |    withSQL {
             |      select.from(${className} as ${syntaxName}).where${wherePart}
@@ -636,7 +636,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |    sql\"\"\"select count(1) from $${${className}.table}\"\"\".map(rs => rs.long(1)).single.apply().get
             |  }
           """
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           s"""  def countAll()(implicit session: DBSession = autoSession): Long = {
             |    withSQL(select(sqls"count(1)").from(${className} as ${syntaxName})).map(rs => rs.long(1)).single.apply().get
             |  }
@@ -659,7 +659,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}}\"\"\".map(${className}(${syntaxName}.resultName)).list.apply()
             |  }
           """
-        case _ =>
+        case GeneratorTemplate.queryDsl =>
           s"""  def findAll()(implicit session: DBSession = autoSession): List[${className}] = {
             |    withSQL(select.from(${className} as ${syntaxName})).map(${className}(${syntaxName}.resultName)).list.apply()
             |  }
