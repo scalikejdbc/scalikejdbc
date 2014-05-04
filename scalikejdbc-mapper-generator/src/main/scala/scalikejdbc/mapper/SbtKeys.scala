@@ -19,8 +19,11 @@ import sbt.{ SettingKey, InputKey }
 
 object SbtKeys {
 
-  lazy val scalikejdbcGen = InputKey[Unit]("scalikejdbc-gen")
-  lazy val scalikejdbcGenEcho = InputKey[Unit]("scalikejdbc-gen-echo")
+  lazy val scalikejdbcGen = InputKey[Unit]("scalikejdbc-gen", "Generates a model for a specified table")
+  lazy val scalikejdbcGenForce = InputKey[Unit]("scalikejdbc-gen-force", "Generates and overwrites a model for a specified table")
+  lazy val scalikejdbcGenAll = InputKey[Unit]("scalikejdbc-gen-all", "Generates models for all tables")
+  lazy val scalikejdbcGenAllForce = InputKey[Unit]("scalikejdbc-gen-all-force", "Generates and overwrites models for all tables")
+  lazy val scalikejdbcGenEcho = InputKey[Unit]("scalikejdbc-gen-echo", "Prints a model for a specified table")
 
   lazy val scalikejdbcDriver = SettingKey[String]("scalikejdbc-driver")
   lazy val scalikejdbcUrl = SettingKey[String]("scalikejdbc-url")

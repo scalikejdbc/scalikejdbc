@@ -31,9 +31,7 @@ object ConnectionPoolFactoryRepository {
   /**
    * Registers a connection pool factory to repository.
    */
-  def add(name: String, factory: ConnectionPoolFactory): Unit = {
-    factories.synchronized { factories.update(name, factory) }
-  }
+  def add(name: String, factory: ConnectionPoolFactory): Unit = factories.update(name, factory)
 
   /**
    * Returns a connection pool factory.
@@ -43,8 +41,6 @@ object ConnectionPoolFactoryRepository {
   /**
    * Removes a connection pool factory from repository.
    */
-  def remove(name: String): Unit = {
-    factories.remove(name)
-  }
+  def remove(name: String): Unit = factories.remove(name)
 
 }

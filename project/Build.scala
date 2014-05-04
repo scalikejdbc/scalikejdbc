@@ -5,7 +5,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.0-RC2"
+  lazy val _version = "2.0.0-RC3"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
@@ -30,22 +30,20 @@ object ScalikeJDBCProjects extends Build {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
+    parallelExecution in Test := false,
     pomExtra := _pomExtra
   )
 
+  val root211Id = "root211"
+  val mapperGeneratorId = "mapper-generator"
+
   lazy val root211 = Project(
-    "root211",
+    root211Id,
     file("root211")
   ).settings(
     baseSettings: _*
-  ).aggregate(
-    scalikejdbcCore,
-    scalikejdbcConfig,
-    scalikejdbcInterpolation,
-    scalikejdbcMapperGeneratorCore,
-    scalikejdbcTest,
-    scalikejdbcInterpolationCore,
-    scalikejdbcInterpolationMacro
+  ).copy(
+    aggregate = projects.filterNot(p => Set(root211Id, mapperGeneratorId).contains(p.id)).map(p => p: ProjectReference)
   )
 
   // scalikejdbc library
@@ -73,9 +71,9 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"       % "2.3"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
           // scope: provided
-          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
+          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
@@ -152,10 +150,15 @@ object ScalikeJDBCProjects extends Build {
 
   // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator",
+    id = mapperGeneratorId,
     base = file("scalikejdbc-mapper-generator"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ ScriptedPlugin.scriptedSettings ++ Seq(
       sbtPlugin := true,
+      ScriptedPlugin.scriptedBufferLog := false,
+      ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
+        a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
+      ),
+      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
@@ -181,7 +184,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcCore)
+  ) dependsOn(scalikejdbcLibrary)
 
   // scalikejdbc-config
   lazy val scalikejdbcConfig = Project(
@@ -240,7 +243,7 @@ object ScalikeJDBCProjects extends Build {
       <developers>
         <developer>
           <id>seratch</id>
-          <name>Kazuhuiro Sera</name>
+          <name>Kazuhiro Sera</name>
           <url>http://git.io/sera</url>
         </developer>
       </developers>

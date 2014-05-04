@@ -1,0 +1,13 @@
+ScalikeJDBC 1.7.7 is out. @todesking sped up the compilation time. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #241 Optimize macro: Extract string literal with pattern matching instead of context.eval() by @todesking
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
