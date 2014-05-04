@@ -1,0 +1,18 @@
+ScalikeJDBC 2.0.0-RC3 is out. We hope this version will be the last RC version for 2.0.0 final.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #241 Compliation time improvement by @todesking
+
+When using SQLInterpolation, compilation is more than two times faster than RC2. Great contribution!
+
+- [mapper-generator] #240 scripted-test for mapper-generator has been fixed
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+

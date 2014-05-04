@@ -9,6 +9,6 @@ sbt 'set scalaVersion := "2.11.0"' \
   "project interpolation-macro" 'set scalaVersion := "2.11.0"' publishSigned \
   "project interpolation" 'set scalaVersion := "2.11.0"' publishSigned \
   "project library" 'set scalaVersion := "2.11.0"' publishSigned \
-  #"project test" 'set scalaVersion := "2.11.0"' publishSigned \
-  #"project mapper-generator-core" 'set scalaVersion := "2.11.0"' publishSigned 
+  "project test" 'set scalaVersion := "2.11.0"' publishSigned \
+  "project mapper-generator-core" 'set scalaVersion := "2.11.0"' publishSigned 
 
