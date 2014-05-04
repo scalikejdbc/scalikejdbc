@@ -15,7 +15,7 @@
  */
 package scalikejdbc.mapper
 
-import sbt.{ SettingKey, InputKey }
+import sbt.{ SettingKey, InputKey, TaskKey }
 
 object SbtKeys {
 
@@ -25,4 +25,6 @@ object SbtKeys {
   lazy val scalikejdbcGenAllForce = InputKey[Unit]("scalikejdbc-gen-all-force", "Generates and overwrites models for all tables")
   lazy val scalikejdbcGenEcho = InputKey[Unit]("scalikejdbc-gen-echo", "Prints a model for a specified table")
 
+  lazy val scalikejdbcJDBCSettings = TaskKey[SbtPlugin.JDBCSettings]("scalikejdbcJDBCSettings")
+  lazy val scalikejdbcGeneratorSettings = TaskKey[SbtPlugin.GeneratorSettings]("scalikejdbcGeneratorSettings")
 }
