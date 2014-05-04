@@ -8,12 +8,12 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc" % "2.0.0-RC2",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "2.0.0-RC2",
-  "org.slf4j"       %  "slf4j-simple"      % "[1.7,)",
+  "org.scalikejdbc" %% "scalikejdbc" % "2.0.0-RC3-SNAPSHOT",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "2.0.0-RC3-SNAPSHOT",
+  "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
   "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
-  "org.hsqldb"      %  "hsqldb"            % "[2,)",
-  "org.specs2"      %% "specs2"            % "1.14"             % "test"
+  "org.hsqldb"      %  "hsqldb"            % "2.3.+",
+  "org.specs2"      %% "specs2"            % "2.1.+"             % "test"
 )
 
 initialCommands := """import scalikejdbc._

@@ -1,18 +1,20 @@
-> scalikejdbcGenEcho users
--$ exists src/main/scala/app/models/Users.scala
--$ exists src/test/scala/app/models/UsersSpec.scala
-> scalikejdbcGenEcho users User
--$ exists src/main/scala/app/models/User.scala
--$ exists src/test/scala/app/models/UserSpec.scala
+> run
 
-> scalikejdbcGen users
-$ exists src/main/scala/app/models/Users.scala
-$ exists src/test/scala/app/models/UsersSpec.scala
-> scalikejdbcGen users User
-$ exists src/main/scala/app/models/User.scala
-$ exists src/test/scala/app/models/UserSpec.scala
+> scalikejdbcGenEcho members
+-$ exists src/main/scala/app/models/Members.scala
+-$ exists src/test/scala/app/models/MembersSpec.scala
+> scalikejdbcGenEcho members Member
+-$ exists src/main/scala/app/models/Member.scala
+-$ exists src/test/scala/app/models/MemberSpec.scala
 
-> scalikejdbcGen users
-$ newer src/main/scala/app/models/User.scala src/main/scala/app/models/Users.scala
+> scalikejdbcGen members
+$ exists src/main/scala/app/models/Members.scala
+$ exists src/test/scala/app/models/MembersSpec.scala
+> scalikejdbcGen members Member
+$ exists src/main/scala/app/models/Member.scala
+$ exists src/test/scala/app/models/MemberSpec.scala
+
+> scalikejdbcGen members
+$ newer src/main/scala/app/models/Member.scala src/main/scala/app/models/Members.scala
 > + compile
 > + test:compile
