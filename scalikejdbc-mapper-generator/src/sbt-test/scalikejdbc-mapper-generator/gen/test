@@ -1,0 +1,18 @@
+> scalikejdbcGenEcho users
+-$ exists src/main/scala/app/models/Users.scala
+-$ exists src/test/scala/app/models/UsersSpec.scala
+> scalikejdbcGenEcho users User
+-$ exists src/main/scala/app/models/User.scala
+-$ exists src/test/scala/app/models/UserSpec.scala
+
+> scalikejdbcGen users
+$ exists src/main/scala/app/models/Users.scala
+$ exists src/test/scala/app/models/UsersSpec.scala
+> scalikejdbcGen users User
+$ exists src/main/scala/app/models/User.scala
+$ exists src/test/scala/app/models/UserSpec.scala
+
+> scalikejdbcGen users
+$ newer src/main/scala/app/models/User.scala src/main/scala/app/models/Users.scala
+> + compile
+> + test:compile

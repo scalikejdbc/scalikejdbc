@@ -33,19 +33,16 @@ object ScalikeJDBCProjects extends Build {
     pomExtra := _pomExtra
   )
 
+  val root211Id = "root211"
+  val mapperGeneratorId = "mapper-generator"
+
   lazy val root211 = Project(
-    "root211",
+    root211Id,
     file("root211")
   ).settings(
     baseSettings: _*
-  ).aggregate(
-    scalikejdbcCore,
-    scalikejdbcConfig,
-    scalikejdbcInterpolation,
-    scalikejdbcMapperGeneratorCore,
-    scalikejdbcTest,
-    scalikejdbcInterpolationCore,
-    scalikejdbcInterpolationMacro
+  ).copy(
+    aggregate = projects.filterNot(p => Set(root211Id, mapperGeneratorId).contains(p.id)).map(p => p: ProjectReference)
   )
 
   // scalikejdbc library
@@ -152,10 +149,15 @@ object ScalikeJDBCProjects extends Build {
 
   // mapper-generator sbt plugin
   lazy val scalikejdbcMapperGenerator = Project(
-    id = "mapper-generator",
+    id = mapperGeneratorId,
     base = file("scalikejdbc-mapper-generator"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ ScriptedPlugin.scriptedSettings ++ Seq(
       sbtPlugin := true,
+      ScriptedPlugin.scriptedBufferLog := false,
+      ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
+        a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
+      ),
+      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
