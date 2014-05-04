@@ -30,6 +30,7 @@ object ScalikeJDBCProjects extends Build {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
+    parallelExecution in Test := false,
     pomExtra := _pomExtra
   )
 
