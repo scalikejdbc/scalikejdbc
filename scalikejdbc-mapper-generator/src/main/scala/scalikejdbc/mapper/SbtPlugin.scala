@@ -72,8 +72,7 @@ object SbtPlugin extends Plugin {
       encoding = generatorSettings.encoding
     )
 
-  def generator(tableName: String, className: Option[String] = None, srcDir: File, testDir: File): Option[CodeGenerator] = {
-    val (jdbc, generatorSettings) = loadSettings()
+  private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {
     val config = generatorConfig(srcDir, testDir, generatorSettings)
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
@@ -88,8 +87,7 @@ object SbtPlugin extends Plugin {
       }
   }
 
-  def allGenerators(srcDir: File, testDir: File): Seq[CodeGenerator] = {
-    val (jdbc, generatorSettings) = loadSettings()
+  def allGenerators(srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Seq[CodeGenerator] = {
     val config = generatorConfig(srcDir, testDir, generatorSettings)
     val className = None
     Class.forName(jdbc.driver) // load specified jdbc driver
@@ -112,7 +110,7 @@ object SbtPlugin extends Plugin {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGen.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
       gen.foreach { g =>
         g.writeModelIfNotExist()
         g.writeSpecIfNotExist(g.specAll())
@@ -122,7 +120,7 @@ object SbtPlugin extends Plugin {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGenForce.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
       gen.foreach { g =>
         g.writeModel()
         g.writeSpec(g.specAll())
@@ -131,7 +129,7 @@ object SbtPlugin extends Plugin {
     scalikejdbcGenAll := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
-      allGenerators(srcDir, testDir).foreach { g =>
+      allGenerators(srcDir, testDir, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
         g.writeModelIfNotExist()
         g.writeSpecIfNotExist(g.specAll())
       }
@@ -139,7 +137,7 @@ object SbtPlugin extends Plugin {
     scalikejdbcGenAllForce := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
-      allGenerators(srcDir, testDir).foreach { g =>
+      allGenerators(srcDir, testDir, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
         g.writeModel()
         g.writeSpec(g.specAll())
       }
@@ -148,10 +146,12 @@ object SbtPlugin extends Plugin {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGenEcho.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir)
+      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
       gen.foreach(g => println(g.modelAll()))
       gen.foreach(g => g.specAll().foreach(spec => println(spec)))
-    }
+    },
+    scalikejdbcJDBCSettings := loadSettings._1,
+    scalikejdbcGeneratorSettings := loadSettings._2
   ))
 
   def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {
