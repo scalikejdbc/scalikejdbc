@@ -419,11 +419,28 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
 
   // --------------------
   // metadata
-  it should "work with db metadat" in {
+  it should "work with db metadata" in {
     val tableName = tableNamePrefix + "_metadata"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       DB.getAllTableNames().size should be > (0)
+    }
+  }
+
+  // https://github.com/scalikejdbc/scalikejdbc/issues/245
+  it should "work with no pk table with MySQL" in {
+    if (driverClassName == "com.mysql.jdbc.Driver") {
+      val tableName = s"issue245_${System.currentTimeMillis}"
+      try {
+        DB autoCommit { implicit s =>
+          SQL(s"create table `${tableName}` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute.apply()
+        }
+        val table = DB.getTable(tableName)
+        table.isDefined should equal(true)
+      } finally {
+        try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
+        catch { case e: Exception => }
+      }
     }
   }
 
