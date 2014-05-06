@@ -361,29 +361,22 @@ trait DBConnection extends LogSupport {
         description = new RSTraversable(meta.getTables(null, schema, _table, tableTypes)).map(rs => rs.string("REMARKS")).headOption.orNull[String],
         columns = new RSTraversable(meta.getColumns(null, schema, _table, "%")).map { rs =>
           Column(
-            name = rs.string("COLUMN_NAME"),
-            typeCode = rs.int("DATA_TYPE"),
+            name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
+            typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
             typeName = rs.string("TYPE_NAME"),
-            size = rs.int("COLUMN_SIZE"),
-            isRequired = rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO",
-            isPrimaryKey = pkNames.exists(_ == rs.string("COLUMN_NAME")),
-            isAutoIncrement = {
+            size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
+            isRequired = try {
+              rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
+            } catch { case e: ResultSetExtractorException => false },
+            isPrimaryKey = try {
+              pkNames.exists(_ == rs.string("COLUMN_NAME"))
+            } catch { case e: ResultSetExtractorException => false },
+            isAutoIncrement = try {
               // Oracle throws java.sql.SQLException: Invalid column name
-              try {
-                rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
-              } catch { case e: ResultSetExtractorException => false }
-            },
-            description = {
-              try {
-                rs.string("REMARKS")
-              } catch { case e: ResultSetExtractorException => null }
-            },
-            defaultValue = {
-              // for Oracle support
-              try {
-                rs.string("COLUMN_DEF")
-              } catch { case e: ResultSetExtractorException => null }
-            }
+              rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
+            } catch { case e: ResultSetExtractorException => false },
+            description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
+            defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
           )
         }.toList.distinct,
         foreignKeys = {
