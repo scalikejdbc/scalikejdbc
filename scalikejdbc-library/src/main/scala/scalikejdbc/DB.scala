@@ -337,9 +337,11 @@ trait DBConnection extends LogSupport {
    * @param table table name (with schema optionally)
    * @return table information
    */
-  def getTable(table: String): Option[Table] = readOnlyWithConnection { conn =>
+  def getTable(table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = readOnlyWithConnection { conn =>
     val meta = conn.getMetaData
-    _getTable(meta, table).orElse(_getTable(meta, table.toUpperCase(en))).orElse(_getTable(meta, table.toLowerCase(en)))
+    _getTable(meta, table, tableTypes)
+      .orElse(_getTable(meta, table.toUpperCase(en), tableTypes))
+      .orElse(_getTable(meta, table.toLowerCase(en), tableTypes))
   }
 
   /**
