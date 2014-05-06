@@ -15,7 +15,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.177"
   lazy val _hibernateVersion = "4.3.5.Final"
-  lazy val _scalatestVersion = "2.1.3"
+  lazy val _scalatestVersion = "2.1.5"
   lazy val _specs2Version = "2.3.11"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
@@ -30,7 +30,8 @@ object ScalikeJDBCProjects extends Build {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
-    parallelExecution in Test := false,
+    logBuffered in Test := false,
+    //parallelExecution in Test := false,
     pomExtra := _pomExtra
   )
 
@@ -220,10 +221,10 @@ object ScalikeJDBCProjects extends Build {
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version        % "test",
-    "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.30"          % "test",
+    "org.apache.derby"  % "derby"                % "10.10.1.+"       % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.+"           % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
