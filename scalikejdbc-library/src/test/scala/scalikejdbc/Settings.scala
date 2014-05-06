@@ -15,7 +15,7 @@ trait Settings {
   catch {
     case e: IllegalStateException =>
       Class.forName(driverClassName)
-      val poolSettings = new ConnectionPoolSettings(initialSize = 1, maxSize = 50)
+      val poolSettings = new ConnectionPoolSettings(initialSize = 1, maxSize = 100)
       ConnectionPool.singleton(url, user, password, poolSettings)
 
       try ConnectionPool.get('named)

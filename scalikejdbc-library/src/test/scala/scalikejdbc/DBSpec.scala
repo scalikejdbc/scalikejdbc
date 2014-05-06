@@ -435,15 +435,15 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
   // https://github.com/scalikejdbc/scalikejdbc/issues/245
   it should "work with no pk table with MySQL" in {
     if (driverClassName == "com.mysql.jdbc.Driver") {
-      val tableName = s"issue245_${System.currentTimeMillis}"
+      val tableName = "issue245_" + System.currentTimeMillis
       try {
         DB autoCommit { implicit s =>
-          SQL(s"create table `${tableName}` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute.apply()
+          SQL("create table `" + tableName + "` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute.apply()
         }
         val table = DB.getTable(tableName)
         table.isDefined should equal(true)
       } finally {
-        try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
+        try DB autoCommit { implicit s => SQL("drop table " + tableName).execute.apply() }
         catch { case e: Exception => }
       }
     }
