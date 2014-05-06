@@ -5,7 +5,7 @@ resolvers ++= Seq(
 
 libraryDependencies += "org.hsqldb" % "hsqldb" % "[2,)"
 
-addSbtPlugin("org.scalikejdbc" %% "scalikejdbc-mapper-generator" % "1.7.7")
+addSbtPlugin("org.scalikejdbc" %% "scalikejdbc-mapper-generator" % "1.7.8-SNAPSHOT")
 
 PSHOT")
 
