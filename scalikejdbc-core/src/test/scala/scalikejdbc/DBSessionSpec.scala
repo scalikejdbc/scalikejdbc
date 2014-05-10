@@ -914,11 +914,11 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_parameter_binder (id bigint generated always as identity, data blob)").execute.apply()
+            SQL("create table dbsession_work_with_parameter_binder (id bigint, data blob)").execute.apply()
           } catch {
             case e: Exception =>
               // PostgreSQL doesn't have blob
-              SQL("create table dbsession_work_with_parameter_binder (id bigint auto_increment, data bytea)").execute.apply()
+              SQL("create table dbsession_work_with_parameter_binder (id bigint, data bytea)").execute.apply()
           }
           val bytes = scala.Array[Byte](1, 2, 3, 4, 5, 6, 7)
           val in = new ByteArrayInputStream(bytes)
