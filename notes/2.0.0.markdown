@@ -1,0 +1,125 @@
+ScalikeJDBC 2.0.0 is out for Scala 2.10 & 2.11 users with new useful features.
+
+Though some points are incompatible for improvement, libraries are basically source code compatible with ScalikeJDBC 1.7.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Topics
+
+#### Support only Scala 2.10 and 2.11
+
+Finally Scala 2.9.x (and Play 2.0.x) is dropped in version 2.0.x. mapper-generator (sbt plugin) for sbt 0.12.x is already dropped.
+
+#### Renamed joda-time APIs due to JSR-310
+
+UnixTimeInMillisConverter#toDateTime is renamed to #toJodaDateTime (#toLocalDate, #toLocalTime, #toLocalDateTime too)
+
+WrappedResultSet#dateTime, #localDate, #localTime and #localDateTime are deprecated and #jodaDateTime and #jodaXXX are added.
+
+See also the issue: https://github.com/scalikejdbc/scalikejdbc/issues/222
+
+#### Modules structure improvements
+
+Now "org.scalikejdbc" %% "scalikejdbc" includes SQL interpolation feature.
+
+`import SQLInterpolation._` no longer required. Just `import scalikejdbc._` works fine.
+
+#### Switching connection pool implementation by configuration
+
+Default:
+
+    ConnectionPool.add('dbcp, url, user, password,
+      ConnectionPoolSettings(connectionPoolFactoryName = "commons-dbcp"))
+
+BoneCP users:
+
+    ConnectionPool.add('bonecp, url, user, password,
+      ConnectionPoolSettings(connectionPoolFactoryName = "bonecp"))
+
+For HikariCP users:
+
+    val dataSource: DataSource = {
+      val ds = new HikariDataSource()
+      ds.setDataSourceClassName(dataSourceClassName)
+      ds.addDataSourceProperty("url", url)
+      ds.addDataSourceProperty("user", user)
+      ds.addDataSourceProperty("password", password)
+      ds
+    }
+    ConnectionPool.add('hikaricp, new DataSourceConnectionPool(dataSource))
+
+#### one-to-x API: #toManies improvement
+
+Previously, to-manies accepts 5 tables. Now we can join 9 tables within same query.
+
+#### ParameterBinder to enable customizing StatementExecutor#bindParams
+
+For instance, PostgreSQL JDBC driver expects length of binary data when calling #setBinaryStream.
+
+Previously, ScalikeJDBC users cannot pass extra values when binding params to PreparedStatement.
+
+To resolve this issue, just use ParameterBinder instead of raw value.
+
+    val bytes = Array[Byte](1, 2, 3, 4, 5, 6, 7)
+    val in = new ByteArrayInputStream(bytes)
+    val v = ParameterBinder[InputStream](
+      value = in,
+      binder = (stmt: PreparedStatement, idx: Int) => {
+        stmt.setBinaryStream(idx, in, bytes.length)
+      }
+    )
+    sql"insert into table_name (data) values (${v})".update.apply()
+
+#### Separated Play2 support into another project
+
+Versioning policy will follow Play's versions.
+
+(e.g.) 2.2.x for Play 2.2.x, 2.3.x for Play 2.3.x
+
+https://github.com/scalikejdbc/scalikejdbc-play-support
+
+#### Generating case classes for Scala 2.11 users
+
+Since Scala 2.11, we can use case classes for 22+ columns tables.
+
+When `generator.caseClassOnly` is `true` in configuration, mapper-generator always generates a case class.
+
+#### New tasks to generate models for all the tables
+
+New tasks are added to mapper-generator.
+
+- scalikejdbcGenForce
+- scalikejdbcGenAll
+- scalikejdbcGenAllForce
+
+See also: https://github.com/scalikejdbc/scalikejdbc/pull/238
+
+### Changes
+
+- [core] #218 Enable handling PreparedStatement by library users
+- [core] #216 Interpolation support for Traversable[SQLSyntax]
+- [core] #215 in operation doesn't work well with Stream and ampersand
+- [core] #227 Get an old pool in a synchronized block by @tkawachi
+- [core] #223 Supporting multiple connection pool implementations
+- [core] #226 Enabling more toManies relations (5 -> 9)
+- [core] #116 Added SQLSyntax.createUnsafely
+- [core] #241 Compilation time improvement by @todesking
+- [core] #237 NPE when using ReadOnlyAutoSession with RelationalSQL
+- [core] #238 Implemented Model#allTables() by @tkawachi
+- [core] #244 Added ParameterBinder to enable customizing StatementExecutor#binParams
+- [core] #245 getTable throws UnexpectedNullValueException
+- [core] #246 Add parameter tableTypes to getTable method
+- [config] #232 Read poolConnectionTimeoutMillis by @tkawachi
+- [config] #230 Read all of defined global configuration by @tkawachi
+- [dbconsole] #228 Changed to refer $HOME instead of $HOME_DIR by @tkawachi
+- [mapper-generator] #225 mapper-generator inputTask deprecation warning by @xuwei-k
+- [mapper-generator] #234 Generated tests don't compile (2.0.0-beta3)
+- [mapper-generator] #240 scripted-test for mapper-generator has been fixed
+- [mapper-generator] #238 Generate models for all tables by @tkawachi
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+
