@@ -10,6 +10,7 @@ cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/sr
 sbt \
   ++2.10.4 \
   clean \
+  core/test \
   interpolation-core/test \
   interpolation/test \
   config/test \

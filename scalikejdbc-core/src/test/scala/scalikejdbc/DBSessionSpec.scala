@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import java.util.Calendar
 import java.sql._
 import scala.concurrent.ExecutionContext
+import java.io.{ InputStream, ByteArrayInputStream }
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
     with LoanPattern with UnixTimeInMillisConverterImplicits {
@@ -481,7 +482,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             {
               import org.joda.time._
               SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
-                rs => (rs.localDate("date_value"), rs.localTime("time_value"), rs.dateTime("timestamp_value"), rs.localDateTime("timestamp_value"))
+                rs => (rs.jodaLocalDate("date_value"), rs.jodaLocalTime("time_value"), rs.jodaDateTime("timestamp_value"), rs.jodaLocalDateTime("timestamp_value"))
               }.first().apply().map {
                 case (d: LocalDate, t: LocalTime, ts: DateTime, ldt: LocalDateTime) =>
 
@@ -716,7 +717,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = rs.intOpt("v_int"),
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
-                vTimestamp = rs.dateTimeOpt("v_timestamp")
+                vTimestamp = rs.jodaDateTimeOpt("v_timestamp")
               )
           }.single.apply())
 
@@ -901,6 +902,34 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
         } finally {
           try {
             SQL("drop table dbsession_issue_218").execute.apply()
+          } catch {
+            case e: Exception => e.printStackTrace
+          }
+        }
+    }
+  }
+
+  it should "work with ParameterBinder" in {
+    DB autoCommit {
+      implicit session =>
+        try {
+          try {
+            SQL("create table dbsession_work_with_parameter_binder (id bigint, data blob)").execute.apply()
+          } catch {
+            case e: Exception =>
+              // PostgreSQL doesn't have blob
+              SQL("create table dbsession_work_with_parameter_binder (id bigint, data bytea)").execute.apply()
+          }
+          val bytes = scala.Array[Byte](1, 2, 3, 4, 5, 6, 7)
+          val in = new ByteArrayInputStream(bytes)
+          val v = ParameterBinder[InputStream](
+            value = in,
+            binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length)
+          )
+          SQL("insert into dbsession_work_with_parameter_binder (data) values (?)").bind(v).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_parameter_binder").execute.apply()
           } catch {
             case e: Exception => e.printStackTrace
           }

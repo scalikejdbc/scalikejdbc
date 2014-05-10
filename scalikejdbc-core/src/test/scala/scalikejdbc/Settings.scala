@@ -12,18 +12,13 @@ trait Settings {
   val password = props.getProperty("password")
 
   def initializeConnectionPools() = {
-    try ConnectionPool.get()
-    catch {
-      case e: IllegalStateException =>
-        Class.forName(driverClassName)
-        val poolSettings = new ConnectionPoolSettings(initialSize = 1, maxSize = 50)
-        ConnectionPool.singleton(url, user, password, poolSettings)
+    if (!ConnectionPool.isInitialized()) {
+      Class.forName(driverClassName)
+      val poolSettings = new ConnectionPoolSettings(initialSize = 1, maxSize = 100)
+      ConnectionPool.singleton(url, user, password, poolSettings)
 
-        try ConnectionPool.get('named)
-        catch {
-          case e: IllegalStateException =>
-            ConnectionPool.add('named, url, user, password, poolSettings)
-        }
+      try ConnectionPool.get('named)
+      catch { case e: IllegalStateException => ConnectionPool.add('named, url, user, password, poolSettings) }
     }
   }
 
