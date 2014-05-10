@@ -120,20 +120,18 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.10.1"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"               %% "[1.7,)",
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc-interpolation" %% "[1.7,)",
->>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "[1.7,)",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "[1.3,)", 
->>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "[10.8.2,)",
->>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "[3.7,)",
->>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "[2.2,)",
->>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "[5.1,)",
->>"%build_sbt%" echo   "postgresql"         %% "postgresql"           %% "9.1-901.jdbc4",
->>"%build_sbt%" echo   "oracle"             %% "ojdbc14"              %% "10.2.0.2"
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"               %% "2.0.0",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc-interpolation" %% "2.0.0",
+>>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.7",
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.178", 
+>>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.10.2.0",
+>>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.7.2",
+>>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.3.2",
+>>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.30",
+>>"%build_sbt%" echo   "postgresql"         %% "postgresql"           %% "9.3-1101-jdbc41"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
->>"%build_sbt%" echo import scalikejdbc.SQLInterpolation._
 >>"%build_sbt%" echo import scalikejdbc.StringSQLRunner._
 >>"%build_sbt%" echo def initialize() {
 >>"%build_sbt%" echo   val props = new java.util.Properties
@@ -143,7 +141,6 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo     val url = obj.toString
 >>"%build_sbt%" echo     if (url.startsWith("jdbc:postgresql")) { Class.forName("org.postgresql.Driver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.jdbc.Driver")
->>"%build_sbt%" echo     } else if (url.startsWith("jdbc:oracle")) { Class.forName("oracle.jdbc.driver.OracleDriver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:h2")) { Class.forName("org.h2.Driver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:hsqldb")) { Class.forName("org.hsqldb.jdbc.JDBCDriver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:derby")) { Class.forName("org.apache.derby.jdbc.EmbeddedDriver")

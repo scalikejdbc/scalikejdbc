@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.0/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -19,7 +19,7 @@ wget https://raw.github.com/scalikejdbc/scalikejdbc/master/scalikejdbc-cli/db/sa
 cd -
 
 if [ ! -f ${CONFIG_PROPS} ]; then
-  echo 'sandbox.jdbc.url=jdbc:h2:file:db/sandbox
+  echo 'sandbox.jdbc.url=jdbc:h2:file:./db/sandbox
 sandbox.jdbc.username=
 sandbox.jdbc.password=
 #mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
@@ -136,21 +136,18 @@ run_sbt "console"
 ' > ${DBCONSOLE_COMMAND}
 
 
-echo 'resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
-
-scalaVersion := "2.10.1"
+echo 'scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"    %% "scalikejdbc"               % "[1.7,)",
-  "org.scalikejdbc"    %% "scalikejdbc-interpolation" % "[1.7,)",
-  "org.slf4j"          % "slf4j-simple"         % "[1.7,)",
-  "com.h2database"     % "h2"                   % "[1.3,)",
-  "org.apache.derby"   % "derby"                % "[10.8.2,)",
-  "org.xerial"         % "sqlite-jdbc"          % "[3.7,)",
-  "org.hsqldb"         % "hsqldb"               % "[2.2,)",
-  "mysql"              % "mysql-connector-java" % "[5.1,)",
-  "postgresql"         % "postgresql"           % "9.1-901.jdbc4",
-  "oracle"             % "ojdbc14"              % "10.2.0.2"
+  "org.scalikejdbc"    %% "scalikejdbc"               % "2.0.0",
+  "org.scalikejdbc"    %% "scalikejdbc-interpolation" % "2.0.0",
+  "org.slf4j"          % "slf4j-simple"         % "1.7.7",
+  "com.h2database"     % "h2"                   % "1.4.178",
+  "org.apache.derby"   % "derby"                % "10.10.2.0",
+  "org.xerial"         % "sqlite-jdbc"          % "3.7.2",
+  "org.hsqldb"         % "hsqldb"               % "2.3.2",
+  "mysql"              % "mysql-connector-java" % "5.1.30",
+  "org.postgresql"     % "postgresql"           % "9.3-1101-jdbc41"
 )
 
 initialCommands := {
@@ -175,7 +172,6 @@ def initialize() {
     val url = obj.toString
     if (url.startsWith("jdbc:postgresql")) { Class.forName("org.postgresql.Driver")
     } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.jdbc.Driver")
-    } else if (url.startsWith("jdbc:oracle")) { Class.forName("oracle.jdbc.driver.OracleDriver")
     } else if (url.startsWith("jdbc:h2")) { Class.forName("org.h2.Driver")
     } else if (url.startsWith("jdbc:hsqldb")) { Class.forName("org.hsqldb.jdbc.JDBCDriver")
     } else if (url.startsWith("jdbc:derby")) { Class.forName("org.apache.derby.jdbc.EmbeddedDriver")
