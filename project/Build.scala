@@ -1,11 +1,16 @@
 import sbt._
 import Keys._
+import com.typesafe.tools.mima.plugin.MimaPlugin
+import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIssues}
 
 object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "2.0.1-SNAPSHOT"
+  lazy val compatibleVersion = "2.0.0"
+
+  lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
@@ -18,8 +23,16 @@ object ScalikeJDBCProjects extends Build {
   lazy val _scalatestVersion = "2.1.6"
   lazy val _specs2Version = "2.3.11"
 
+  val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
+    previousArtifact := Some(_organization % s"${name.value}_${scalaBinaryVersion.value}" % compatibleVersion),
+    test in Test := {
+      reportBinaryIssues.value
+      (test in Test).value
+    }
+  )
+
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
-    organization := "org.scalikejdbc",
+    organization := _organization,
     version := _version,
     publishTo <<= version { (v: String) => _publishTo(v) },
     publishMavenStyle := true,
@@ -51,7 +64,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcLibrary = Project(
     id = "library",
     base = file("scalikejdbc-library"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc",
       libraryDependencies ++= scalaTestDependenciesInTestScope ++
         Seq("com.h2database" % "h2" % _h2Version % "test")
@@ -62,7 +75,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcCore = Project(
     id = "core",
     base = file("scalikejdbc-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
@@ -91,7 +104,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolationCore = Project(
     id = "interpolation-core",
     base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation-core",
       libraryDependencies ++= {
         Seq(
@@ -106,7 +119,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolationMacro = Project(
     id = "interpolation-macro",
     base = file("scalikejdbc-interpolation-macro"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation-macro",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
@@ -121,7 +134,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolation = Project(
     id = "interpolation",
     base = file("scalikejdbc-interpolation"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation",
       libraryDependencies ++= {
         Seq(
@@ -138,7 +151,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcMapperGeneratorCore = Project(
     id = "mapper-generator-core",
     base = file("scalikejdbc-mapper-generator-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
@@ -174,7 +187,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcTest = Project(
     id = "test",
     base = file("scalikejdbc-test"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-test",
       libraryDependencies ++= {
         Seq(
@@ -191,7 +204,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcConfig = Project(
     id = "config",
     base = file("scalikejdbc-config"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-config",
       libraryDependencies ++= {
         Seq(
