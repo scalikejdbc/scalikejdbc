@@ -1,11 +1,16 @@
 import sbt._
 import Keys._
+import com.typesafe.tools.mima.plugin.MimaPlugin
+import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIssues}
 
 object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "2.0.1-SNAPSHOT"
+  lazy val compatibleVersion = "2.0.0"
+
+  lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
@@ -18,8 +23,9 @@ object ScalikeJDBCProjects extends Build {
   lazy val _scalatestVersion = "2.1.6"
   lazy val _specs2Version = "2.3.11"
 
-  lazy val baseSettings = Defaults.defaultSettings ++ Seq(
-    organization := "org.scalikejdbc",
+  lazy val baseSettings = Defaults.defaultSettings ++
+    MimaPlugin.mimaDefaultSettings ++ Seq(
+    organization := _organization,
     version := _version,
     publishTo <<= version { (v: String) => _publishTo(v) },
     publishMavenStyle := true,
@@ -31,6 +37,10 @@ object ScalikeJDBCProjects extends Build {
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
     logBuffered in Test := false,
+    test in Test := {
+      reportBinaryIssues.value
+      (test in Test).value
+    },
     //parallelExecution in Test := false,
     pomExtra := _pomExtra
   )
@@ -54,7 +64,8 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ Seq(
       name := "scalikejdbc",
       libraryDependencies ++= scalaTestDependenciesInTestScope ++
-        Seq("com.h2database" % "h2" % _h2Version % "test")
+        Seq("com.h2database" % "h2" % _h2Version % "test"),
+        previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
@@ -82,7 +93,8 @@ object ScalikeJDBCProjects extends Build {
           case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-core_$v" % compatibleVersion) }
     )
   )
 
@@ -98,7 +110,8 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation-core_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcCore)
 
@@ -113,7 +126,8 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
           "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional"
         ) ++ scalaTestDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation-macro_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcInterpolationCore)
 
@@ -129,7 +143,8 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
           "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
@@ -145,7 +160,8 @@ object ScalikeJDBCProjects extends Build {
           scalaTestDependenciesInTestScope ++
           specs2DependenciesInTestScope ++
           jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-mapper-generator-core_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcLibrary, scalikejdbcTest)
 
@@ -183,7 +199,8 @@ object ScalikeJDBCProjects extends Build {
           "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
           "org.specs2"     %% "specs2"          % _specs2Version    % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-test_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcLibrary)
 
@@ -199,7 +216,8 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      },
+      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-config_$v" % compatibleVersion) }
     )
   ) dependsOn(scalikejdbcCore)
 
