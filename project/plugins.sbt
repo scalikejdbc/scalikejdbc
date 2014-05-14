@@ -15,4 +15,6 @@ addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.3")
 
+addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.6")
+
 libraryDependencies += "org.scala-sbt" % "scripted-plugin" % sbtVersion.value
