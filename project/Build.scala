@@ -23,8 +23,15 @@ object ScalikeJDBCProjects extends Build {
   lazy val _scalatestVersion = "2.1.6"
   lazy val _specs2Version = "2.3.11"
 
-  lazy val baseSettings = Defaults.defaultSettings ++
-    MimaPlugin.mimaDefaultSettings ++ Seq(
+  val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
+    previousArtifact := Some(_organization % s"${name.value}_${scalaBinaryVersion.value}" % compatibleVersion),
+    test in Test := {
+      reportBinaryIssues.value
+      (test in Test).value
+    }
+  )
+
+  lazy val baseSettings = Defaults.defaultSettings ++ Seq(
     organization := _organization,
     version := _version,
     publishTo <<= version { (v: String) => _publishTo(v) },
@@ -37,10 +44,6 @@ object ScalikeJDBCProjects extends Build {
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
     logBuffered in Test := false,
-    test in Test := {
-      reportBinaryIssues.value
-      (test in Test).value
-    },
     //parallelExecution in Test := false,
     pomExtra := _pomExtra
   )
@@ -61,11 +64,10 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcLibrary = Project(
     id = "library",
     base = file("scalikejdbc-library"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc",
       libraryDependencies ++= scalaTestDependenciesInTestScope ++
-        Seq("com.h2database" % "h2" % _h2Version % "test"),
-        previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc_$v" % compatibleVersion) }
+        Seq("com.h2database" % "h2" % _h2Version % "test")
     )
   ) dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
@@ -73,7 +75,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcCore = Project(
     id = "core",
     base = file("scalikejdbc-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
@@ -93,8 +95,7 @@ object ScalikeJDBCProjects extends Build {
           case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-core_$v" % compatibleVersion) }
+      }
     )
   )
 
@@ -103,15 +104,14 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolationCore = Project(
     id = "interpolation-core",
     base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation-core",
       libraryDependencies ++= {
         Seq(
           "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation-core_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcCore)
 
@@ -119,15 +119,14 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolationMacro = Project(
     id = "interpolation-macro",
     base = file("scalikejdbc-interpolation-macro"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation-macro",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
           "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional"
         ) ++ scalaTestDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation-macro_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcInterpolationCore)
 
@@ -135,7 +134,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcInterpolation = Project(
     id = "interpolation",
     base = file("scalikejdbc-interpolation"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation",
       libraryDependencies ++= {
         Seq(
@@ -143,8 +142,7 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
           "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-interpolation_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
 
@@ -153,15 +151,14 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcMapperGeneratorCore = Project(
     id = "mapper-generator-core",
     base = file("scalikejdbc-mapper-generator-core"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
           scalaTestDependenciesInTestScope ++
           specs2DependenciesInTestScope ++
           jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-mapper-generator-core_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcLibrary, scalikejdbcTest)
 
@@ -190,7 +187,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcTest = Project(
     id = "test",
     base = file("scalikejdbc-test"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-test",
       libraryDependencies ++= {
         Seq(
@@ -199,8 +196,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
           "org.specs2"     %% "specs2"          % _specs2Version    % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-test_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcLibrary)
 
@@ -208,7 +204,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcConfig = Project(
     id = "config",
     base = file("scalikejdbc-config"),
-    settings = baseSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-config",
       libraryDependencies ++= {
         Seq(
@@ -216,8 +212,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      },
-      previousArtifact <<= scalaBinaryVersion  { v => Some(_organization % s"scalikejdbc-config_$v" % compatibleVersion) }
+      }
     )
   ) dependsOn(scalikejdbcCore)
 
