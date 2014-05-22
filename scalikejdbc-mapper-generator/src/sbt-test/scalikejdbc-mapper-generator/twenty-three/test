@@ -1,0 +1,24 @@
+> run
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = false)}
+> set scalaVersion :="2.10.4"
+> scalikejdbcGenEcho twenty_three
+> scalikejdbcGenForce twenty_three
+> compile
+> test:compile
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = true)}
+> scalikejdbcGenEcho twenty_three
+> scalikejdbcGenForce twenty_three
+
+-> compile
+> set scalaVersion :="2.11.1"
+> compile
+> test:compile
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
+> scalikejdbcGenEcho twenty_three
+> scalikejdbcGenForce twenty_three
+> compile
+> test:compile
