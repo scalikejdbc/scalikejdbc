@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class PackageObjectSpec extends FlatSpec with ShouldMatchers {
+class PackageObjectSpec extends FlatSpec with Matchers {
 
   behavior of "package object"
 

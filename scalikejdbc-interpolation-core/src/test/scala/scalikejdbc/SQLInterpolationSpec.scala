@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time._
 
-class SQLInterpolationSpec extends FlatSpec with ShouldMatchers with LogSupport {
+class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport {
 
   import scalikejdbc.interpolation._
   import scalikejdbc.interpolation.Implicits._

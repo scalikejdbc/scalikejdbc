@@ -17,6 +17,7 @@ package scalikejdbc
 
 import javax.sql.DataSource
 import java.sql.Connection
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Connection Pool
@@ -116,8 +117,7 @@ object ConnectionPool extends LogSupport {
   }
 
   private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool) = {
-    // TODO concurrent.ops is deprecated in Scala 2.10. When we give up supporting 2.9, rewrite this code.
-    scala.concurrent.ops.spawn {
+    scala.concurrent.Future {
       log.debug("The old pool destruction started. connection pool : " + get(name).toString())
       var millis = 0L
       while (millis < 60000L && oldPool.numActive > 0) {

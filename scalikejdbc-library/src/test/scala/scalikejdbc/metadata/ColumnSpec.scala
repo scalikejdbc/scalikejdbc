@@ -1,9 +1,8 @@
 package scalikejdbc.metadata
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ColumnSpec extends FlatSpec with ShouldMatchers {
+class ColumnSpec extends FlatSpec with Matchers {
 
   behavior of "Column"
 

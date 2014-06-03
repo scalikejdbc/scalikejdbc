@@ -1,10 +1,9 @@
 package scalikejdbc.interpolation
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time.DateTime
 
-class SQLSyntaxSpec extends FlatSpec with ShouldMatchers {
+class SQLSyntaxSpec extends FlatSpec with Matchers {
 
   import Implicits._
 

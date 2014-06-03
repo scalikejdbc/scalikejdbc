@@ -16,6 +16,8 @@
 import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
 import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * ScalikeJDBC - SQL-Based DB Access Library for Scala
@@ -74,6 +76,7 @@ package object scalikejdbc {
   type Closable = { def close() }
 
   def using[R <: Closable, A](resource: R)(f: R => A): A = LoanPattern.using(resource)(f)
+  def futureUsing[R <: Closable, A](resource: R)(f: R => Future[A]): Future[A] = LoanPattern.futureUsing(resource)(f)
 
   // -----
   // enable implicit conversions for date/time

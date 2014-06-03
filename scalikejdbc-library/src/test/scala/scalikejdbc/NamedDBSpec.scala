@@ -1,13 +1,13 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
-import scala.concurrent.ops._
+import scala.concurrent.Future
 import java.sql.SQLException
 import util.control.Exception._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 
@@ -172,7 +172,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val name: Option[String] = NamedDB('named) readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
-      name.get should be === "name1"
+      name.get should equal("name1")
     }
   }
 
@@ -278,7 +278,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
       val count = NamedDB('named) localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
-      count should be === 1
+      count should equal(1)
       val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
@@ -295,7 +295,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           import anorm._
           SQL("update " + tableName + " set name = {name} where id = {id}").on('name -> "foo", 'id -> 1).executeUpdate()
       }
-      count should be === 1
+      count should equal(1)
       val name = (NamedDB('named) localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
@@ -311,7 +311,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         val count = db localTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         db.rollbackIfActive()
         val name = (NamedDB('named) localTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
@@ -423,7 +423,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
         val count = db withinTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         val name = (db withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).get
@@ -466,7 +466,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           val count = db withinTx {
             _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
           }
-          count should be === 1
+          count should equal(1)
           db.rollback()
           db.begin()
           val name = (db withinTx {
@@ -511,7 +511,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
             session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
           }
       }
-      spawn {
+      Future {
         using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
@@ -522,7 +522,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           db.rollback()
         }
       }
-      spawn {
+      Future {
         using(NamedDB('named)) { db =>
           db.begin()
           val session = db.withinTxSession()
@@ -576,7 +576,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
             session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
           }
       }
-      spawn {
+      Future {
         using(NamedDB('named)) { db =>
           db.begin()
           db.withinTxWithConnection {
@@ -589,7 +589,7 @@ class NamedDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with 
           db.rollback()
         }
       }
-      spawn {
+      Future {
         using(NamedDB('named)) { db =>
           db.begin()
           db.withinTxWithConnection {

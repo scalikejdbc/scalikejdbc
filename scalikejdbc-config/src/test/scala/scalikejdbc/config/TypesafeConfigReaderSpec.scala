@@ -1,11 +1,10 @@
 package scalikejdbc.config
 
-import org.scalatest.FunSpec
-import org.scalatest.matchers._
+import org.scalatest._
 import scalikejdbc._
 import com.typesafe.config._
 
-class TypesafeConfigReaderSpec extends FunSpec with ShouldMatchers {
+class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
   val emptyConfigReader = new TypesafeConfigReader with TypesafeConfig {
     override lazy val config: Config = ConfigFactory.load("empty.conf")

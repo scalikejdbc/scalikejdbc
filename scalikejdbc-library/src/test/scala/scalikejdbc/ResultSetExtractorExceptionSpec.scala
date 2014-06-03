@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ResultSetExtractorExceptionSpec extends FlatSpec with ShouldMatchers {
+class ResultSetExtractorExceptionSpec extends FlatSpec with Matchers {
 
   behavior of "ResultSetExtractorException"
 

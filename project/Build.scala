@@ -7,21 +7,18 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.7.8-SNAPSHOT"
+  lazy val _version = "1.8.0-SNAPSHOT"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.6"
-  lazy val _defaultPlayVersion = "2.2.2"
+  lazy val _slf4jApiVersion = "1.7.7"
+  lazy val _defaultPlayVersion = "2.3.0"
   lazy val _typesafeConfigVersion = "1.2.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.1"
-  lazy val _h2Version = "1.3.175"
-  lazy val _hibernateVersion = "4.3.3.Final"
-  // TODO 2.0
-  lazy val _scalatestVersion = "1.9.2"
-  lazy val _specs2Scala291Version = "1.12.4"
-  lazy val _specs2Scala29Version = "1.12.4.1"
+  lazy val _logbackVersion = "1.1.2"
+  lazy val _h2Version = "1.4.178"
+  lazy val _hibernateVersion = "4.3.5.Final"
+  lazy val _scalatestVersion = "2.1.7"
   lazy val _specs2Scala210Version = "2.3.7"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
@@ -44,14 +41,6 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ Seq(
       name := "scalikejdbc",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        val anorm = "anorm_" + (scalaVersion match {
-          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => "2.10"
-          case _ => "2.9.1"
-        })
-        val anormDependency = scalaVersion match {
-          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => "com.typesafe.play" % anorm % _defaultPlayVersion % "test"
-          case _ =>                              "play"              % anorm % "2.0.8" % "test"
-        }
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"            % "compile",
@@ -59,11 +48,11 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"       % "2.3"            % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"            % "compile",
           // scope: test
-          "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
-          "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.scalatest"           %% "scalatest"       % _scalatestVersion % "test",
-          "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test",
-          anormDependency
+          "ch.qos.logback"          %  "logback-classic" % _logbackVersion     % "test",
+          "org.hibernate"           %  "hibernate-core"  % _hibernateVersion   % "test",
+          "org.scalatest"           %% "scalatest"       % _scalatestVersion   % "test",
+          "org.mockito"             %  "mockito-all"     % "1.9.5"             % "test",
+          "com.typesafe.play"       %% "anorm"           % _defaultPlayVersion % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
@@ -133,23 +122,11 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ Seq(
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        (scalaVersion match {
-          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => Seq(
-            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion       % "compile",
-            "org.scalatest" %% "scalatest" % _scalatestVersion      % "test",
-            "org.specs2"    %% "specs2"    % _specs2Scala210Version % "test"
-          )
-          case "2.9.1" => Seq(
-            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion      % "compile",
-            "org.scalatest" %% "scalatest" % _scalatestVersion     % "test",
-            "org.specs2"    %% "specs2"    % _specs2Scala291Version % "test"
-          )
-          case _ => Seq(
-            "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion      % "compile",
-            "org.scalatest" %% "scalatest" % _scalatestVersion     % "test",
-            "org.specs2"    %% "specs2"    % _specs2Scala29Version % "test"
-           )
-        }) ++ jdbcDriverDependenciesInTestScope
+        Seq(
+          "org.slf4j"     %  "slf4j-api" % _slf4jApiVersion       % "compile",
+          "org.scalatest" %% "scalatest" % _scalatestVersion      % "test",
+          "org.specs2"    %% "specs2"    % _specs2Scala210Version % "test"
+        ) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest)
@@ -164,47 +141,33 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         // sbt 0.12.x uses Scala 2.9.2
         Seq(
-          "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion      % "compile",
-          "org.scalatest" %% "scalatest"    % _scalatestVersion     % "test",
-          (scalaVersion match {
-            case "2.10.3" | "2.10.2" => "org.specs2" %% "specs2" % _specs2Scala210Version % "test"
-            case "2.9.2"  => "org.specs2" %% "specs2" % _specs2Scala29Version % "test"
-          })
-        ) ++ jdbcDriverDependenciesInTestScope
+          "org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion       % "compile",
+          "org.scalatest" %% "scalatest"    % _scalatestVersion      % "test",
+          "org.specs2"    %% "specs2"       % _specs2Scala210Version % "test"
+         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc, scalikejdbcTest, scalikejdbcMapperGeneratorCore)
 
   // scalikejdbc-play-plugin
-  // support: Play 2.0.x, 2.1.x
+  // support: Play 2.1.x, 2.2.x, 2.3.x
   lazy val scalikejdbcPlayPlugin = Project(
     id = "play-plugin",
     base = file("scalikejdbc-play-plugin"),
     settings = baseSettings ++ Seq(
       name := "scalikejdbc-play-plugin",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        (scalaVersion match {
-          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => {
-            Seq(
-              "com.typesafe.play" % "play_2.10"      % _defaultPlayVersion % "provided",
-              "com.typesafe.play" % "play-test_2.10" % _defaultPlayVersion % "test",
-              "com.h2database"    % "h2"             % _h2Version          % "test"
-            )
-          }
-          case _ => {
-            val play20Version = "2.0.8"
-            Seq(
-              "play" % "play_2.9.1"      % play20Version % "provided",
-              "play" % "play-test_2.9.1" % play20Version % "test"
-            )
-          }
-        })
+        Seq(
+          "com.typesafe.play" %% "play"      % _defaultPlayVersion % "provided",
+          "com.typesafe.play" %% "play-test" % _defaultPlayVersion % "test",
+          "com.h2database"    %  "h2"        % _h2Version          % "test"
+        )
       }
     )
   ) dependsOn(scalikejdbc)
 
   // scalikejdbc-play-fixture-plugin
-  // support: Play 2.1.x, 2.2.x
+  // support: Play 2.1.x, 2.2.x, 2.3.x
   lazy val scalikejdbcPlayFixturePlugin = Project(
     id = "play-fixture-plugin",
     base = file("scalikejdbc-play-fixture-plugin"),
@@ -250,26 +213,12 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ Seq(
       name := "scalikejdbc-test",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
-        (scalaVersion match {
-          case "2.10.3" | "2.10.2" | "2.10.1" | "2.10.0" => Seq(
-            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
-            "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
-            "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
-            "org.specs2"     %% "specs2"          % _specs2Scala210Version % "provided"
-          )
-          case "2.9.1" => Seq(
-            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
-            "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
-            "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
-            "org.specs2"     %% "specs2"          % _specs2Scala291Version % "provided"
-          )
-          case _ => Seq(
-            "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion      % "compile",
-            "ch.qos.logback" %  "logback-classic" % _logbackVersion       % "test",
-            "org.scalatest"  %% "scalatest"       % _scalatestVersion     % "provided",
-            "org.specs2"     %% "specs2"          % _specs2Scala29Version % "provided"
-          )
-        }) ++ jdbcDriverDependenciesInTestScope
+        Seq(
+          "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
+          "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
+          "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
+          "org.specs2"     %% "specs2"          % _specs2Scala210Version % "provided"
+        ) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbc)
@@ -306,7 +255,7 @@ object ScalikeJDBCProjects extends Build {
     "org.apache.derby"  % "derby"                % "10.10.1.1"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.15-M1"       % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.29"          % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.30"          % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1100-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
@@ -323,12 +272,38 @@ object ScalikeJDBCProjects extends Build {
         <url>git@github.com:scalikejdbc/scalikejdbc.git</url>
         <connection>scm:git:git@github.com:scalikejdbc/scalikejdbc.git</connection>
       </scm>
-      <developers>
-        <developer>
-          <id>seratch</id>
-          <name>Kazuhiro Sera</name>
-          <url>http://git.io/sera</url>
-        </developer>
-      </developers>
+    <developers>
+      <developer>
+        <id>seratch</id>
+        <name>Kazuhiro Sera</name>
+        <url>http://git.io/sera</url>
+      </developer>
+      <developer>
+        <id>tototoshi</id>
+        <name>Toshiyuki Takahashi</name>
+        <url>https://github.com/tototoshi</url>
+      </developer>
+      <developer>
+        <id>xuwei-k</id>
+        <name>Kenji Yoshida</name>
+        <url>https://github.com/xuwei-k</url>
+      </developer>
+      <developer>
+        <id>gakuzzzz</id>
+        <name>Manabu Nakamura</name>
+        <url>https://github.com/gakuzzzz</url>
+      </developer>
+      <developer>
+        <id>kxbmap</id>
+        <name>kxbmap</name>
+        <url>https://github.com/kxbmap</url>
+      </developer>
+      <developer>
+        <id>tkawachi</id>
+        <name>Takashi Kawachi</name>
+        <url>https://github.com/tkawachi</url>
+      </developer>
+    </developers>
+
 }
 

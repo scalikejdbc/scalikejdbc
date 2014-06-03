@@ -15,6 +15,9 @@
  */
 package scalikejdbc
 
+import scala.language.implicitConversions
+import scala.reflect.ClassTag
+
 /**
  * String SQL Runner
  *
@@ -62,15 +65,13 @@ case class StringSQLRunner(sql: String) extends LogSupport {
   /**
    * Casts value to expected type value
    *
-   * TODO: ClassManifest will be deprecated since Scala 2.10.0
-   *
    * @param v value
-   * @param manifest manifest of expected type
+   * @param t ClassTag of expected type
    * @tparam A expected type
    * @return casted value
    */
-  private[scalikejdbc] def cast[A](v: Any)(implicit manifest: ClassManifest[A]): A = {
-    if (manifest == classManifest[Int]) {
+  private[scalikejdbc] def cast[A](v: Any)(implicit t: ClassTag[A]): A = {
+    if (t.runtimeClass == classOf[Int]) {
       v match {
         case null => 0
         case bigDecimal: java.math.BigDecimal => bigDecimal.intValue
@@ -79,7 +80,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
         case short: java.lang.Short => java.lang.Integer.parseInt(short.toString)
         case x => x
       }
-    } else if (manifest == classManifest[Long]) {
+    } else if (t.runtimeClass == classOf[Long]) {
       v match {
         case null => 0L
         case bigDecimal: java.math.BigDecimal => bigDecimal.longValue
@@ -88,7 +89,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
         case short: java.lang.Short => java.lang.Long.parseLong(short.toString)
         case x => x
       }
-    } else if (manifest == classManifest[String]) {
+    } else if (t.runtimeClass == classOf[String]) {
       v match {
         case null => null
         case v => String.valueOf(v)
@@ -104,7 +105,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @tparam A value type
    * @return results as List[A]
    */
-  def asList[A](implicit manifest: ClassManifest[A]): List[A] = run().map(m => cast[A](m.apply(m.keys.head)))
+  def asList[A](implicit t: ClassTag[A]): List[A] = run().map(m => cast[A](m.apply(m.keys.head)))
 
   /**
    * Returns SQL result as single value optionally
@@ -112,7 +113,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @tparam A value type
    * @return a single result as A optionally
    */
-  def asOption[A](implicit manifest: ClassManifest[A]): Option[A] = asList[A].headOption
+  def asOption[A](implicit t: ClassTag[A]): Option[A] = asList[A].headOption
 
   /**
    * Returns SQL result as single value
@@ -120,7 +121,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @tparam A value type
    * @return a single result as A
    */
-  def as[A](implicit manifest: ClassManifest[A]): A = asOption[A].get
+  def as[A](implicit t: ClassTag[A]): A = asOption[A].get
 
 }
 

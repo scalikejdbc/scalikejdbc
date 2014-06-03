@@ -1,11 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
 
-class DB_ExecutableSQLOperationSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_DB_ExecSQLOp" + System.currentTimeMillis().toString.substring(8)
 

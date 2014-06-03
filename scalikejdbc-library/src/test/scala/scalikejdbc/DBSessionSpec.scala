@@ -2,13 +2,12 @@ package scalikejdbc
 
 import util.control.Exception._
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
 import org.joda.time.DateTime
 import java.util.Calendar
 import java.sql._
 
-class DBSessionSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings with LogSupport {
+class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport {
 
   val tableNamePrefix = "emp_DBSessionSpec" + System.currentTimeMillis().toString.substring(8)
 

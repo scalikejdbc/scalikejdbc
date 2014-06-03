@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ErrorMessageSpec extends FlatSpec with ShouldMatchers {
+class ErrorMessageSpec extends FlatSpec with Matchers {
 
   behavior of "ErrorMessage"
 

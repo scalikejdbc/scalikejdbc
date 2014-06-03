@@ -1,10 +1,9 @@
 import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
 
 import scalikejdbc._
 import mapper.{ GeneratorTemplate, GeneratorConfig, CodeGenerator, Model }
 
-class MapperGeneratorWithSQLiteSpec extends FlatSpec with ShouldMatchers {
+class MapperGeneratorWithSQLiteSpec extends FlatSpec with Matchers {
 
   /*
   Class.forName("org.sqlite.JDBC")

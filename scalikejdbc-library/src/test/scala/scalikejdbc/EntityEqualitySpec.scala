@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class EntityEqualitySpec extends FlatSpec with ShouldMatchers {
+class EntityEqualitySpec extends FlatSpec with Matchers {
 
   behavior of "EntityEquality"
 

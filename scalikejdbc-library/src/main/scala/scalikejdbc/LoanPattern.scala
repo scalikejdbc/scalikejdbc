@@ -16,11 +16,14 @@
 package scalikejdbc
 
 import util.control.Exception._
+import scala.concurrent.{ ExecutionContext, Future }
+
+object LoanPattern extends LoanPattern
 
 /**
  * Loan pattern implementation
  */
-object LoanPattern {
+trait LoanPattern {
 
   type Closable = { def close() }
 
@@ -32,6 +35,14 @@ object LoanPattern {
         resource.close()
       }
     }
+  }
+
+  /**
+   * Guarantees a Closeable resource will be closed when given a block that takes
+   * the resource as a parameter and returns out a Future.
+   */
+  def futureUsing[R <: Closable, A](resource: R)(f: R => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+    f(resource) andThen { case _ => resource.close() } // close no matter what
   }
 
 }

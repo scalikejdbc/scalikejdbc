@@ -1,11 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
-import java.sql._
-import util.control.Exception._
 
-class NoSessionSpec extends FlatSpec with ShouldMatchers {
+class NoSessionSpec extends FlatSpec with Matchers {
 
   behavior of "NoSession"
 

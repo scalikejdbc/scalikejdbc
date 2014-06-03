@@ -1,9 +1,8 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class DB_MetaDataSpec extends FlatSpec with ShouldMatchers with Settings {
+class DB_MetaDataSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "DB's metadata operations"
 

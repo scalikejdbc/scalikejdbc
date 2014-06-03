@@ -1,12 +1,12 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
-import scala.concurrent.ops._
+import scala.concurrent.Future
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class ThreadLocalDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_ThreadLocalDBSpec" + System.currentTimeMillis()
 
@@ -22,7 +22,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
     TestUtils.deleteTable(tableName)
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      spawn {
+      Future {
         ThreadLocalDB.create(ConnectionPool.borrow()).begin()
         // ... do something
         using(ThreadLocalDB.load()) {
@@ -36,7 +36,7 @@ class ThreadLocalDBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter
         }
       }
 
-      spawn {
+      Future {
         ThreadLocalDB.create(ConnectionPool.borrow())
         using(ThreadLocalDB.load()) {
           db =>

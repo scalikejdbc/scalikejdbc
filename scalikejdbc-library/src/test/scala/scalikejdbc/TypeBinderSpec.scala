@@ -2,12 +2,11 @@ package scalikejdbc
 
 import org.scalatest._
 import mock.MockitoSugar
-import org.mockito.Mockito._
-import org.scalatest.matchers._
+import org.mockito.Mockito.when
 import java.sql.ResultSet
 import org.joda.time._
 
-class TypeBinderSpec extends FlatSpec with ShouldMatchers with MockitoSugar {
+class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
 
   behavior of "TypeBinder"
 

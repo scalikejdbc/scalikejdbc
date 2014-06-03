@@ -1,9 +1,8 @@
 package scalikejdbc.metadata
 
 import org.scalatest._
-import org.scalatest.matchers._
 
-class ForeignKeySpec extends FlatSpec with ShouldMatchers {
+class ForeignKeySpec extends FlatSpec with Matchers {
 
   behavior of "ForeignKey"
 

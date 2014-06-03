@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import util.control.Exception._
 
-class TxSpec extends FlatSpec with ShouldMatchers with Settings {
+class TxSpec extends FlatSpec with Matchers with Settings {
 
   behavior of "Tx"
 

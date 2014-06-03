@@ -1,16 +1,15 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatest.BeforeAndAfter
-import scala.concurrent.ops._
-// TODO switch when giving up 2.9 support
-//import scala.concurrent._
-//import scala.concurrent.ExecutionContext.Implicits.global
 import java.sql.SQLException
 import scala.util.control.Exception._
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.concurrent.ScalaFutures
 
-class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Settings {
+class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
 
   val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(8)
 
@@ -125,7 +124,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val name: Option[String] = DB readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
-      name.get should be === "name1"
+      name.get should equal("name1")
     }
   }
 
@@ -212,7 +211,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
       val count = DB localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
-      count should be === 1
+      count should equal(1)
       val name = (DB localTx {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).getOrElse("---")
@@ -228,12 +227,77 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         val count = db localTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         db.rollbackIfActive()
         val name = (DB localTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).getOrElse("---")
         name should equal("foo")
+      }
+    }
+  }
+
+  // --------------------
+  // futureLocalTx
+
+  implicit val patienceTimeout = PatienceConfig(30.seconds)
+
+  it should "execute single in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB futureLocalTx { s =>
+        Future(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      }
+      whenReady(fResult) { _ should equal(Some("1")) }
+    }
+  }
+
+  it should "execute list in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB futureLocalTx { s =>
+        Future(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      whenReady(fResult) { _.size should equal(2) }
+    }
+  }
+
+  it should "execute update in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fCount = DB futureLocalTx { s =>
+        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      whenReady(fCount) {
+        _ should equal(1)
+      }
+      val fName = fCount.flatMap { _ =>
+        DB futureLocalTx (s => Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+      }
+      whenReady(fName) { _ should be(Some("foo")) }
+    }
+  }
+
+  it should "not be able to rollback in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      futureUsing(DB(ConnectionPool.borrow())) { db =>
+        val fCount = DB futureLocalTx { s =>
+          Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        whenReady(fCount) {
+          _ should equal(1)
+        }
+        db.rollbackIfActive()
+        val fName = DB futureLocalTx { s =>
+          Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        whenReady(fName) { _ should equal(Some("foo")) }
+        fName
       }
     }
   }
@@ -325,7 +389,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
         val count = db withinTx {
           _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
         }
-        count should be === 1
+        count should equal(1)
         val name = (db withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
         }).get
@@ -345,7 +409,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
           val count = db withinTx {
             _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
           }
-          count should be === 1
+          count should equal(1)
           db.rollback()
           db.begin()
           val name = (db withinTx {
@@ -390,7 +454,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      spawn {
+      Future {
         using(DB(ConnectionPool.borrow())) { db =>
           db.begin()
           val session = db.withinTxSession()
@@ -401,7 +465,7 @@ class DBSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with Setti
           db.rollback()
         }
       }
-      spawn {
+      Future {
         using(DB(ConnectionPool.borrow())) { db =>
           db.begin()
           val session = db.withinTxSession()

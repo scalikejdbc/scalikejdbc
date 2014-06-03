@@ -1,11 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.matchers._
 import org.joda.time._
 import scalikejdbc.SQLInterpolation._
 
-class QueryInterfaceSpec extends FlatSpec with ShouldMatchers with DBSettings {
+class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings {
 
   behavior of "QueryInterface"
 

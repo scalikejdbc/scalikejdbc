@@ -1,12 +1,11 @@
 package scalikejdbc.cpcontext
 
 import org.scalatest._
-import org.scalatest.matchers._
 
 import scalikejdbc._
 import org.joda.time._
 
-class ConnectionPoolContextSpec extends FlatSpec with ShouldMatchers with Settings {
+class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
 
   import ConnectionPoolContextSpecUtils._
 
@@ -119,7 +118,7 @@ trait NamedCPContextAsDefault {
   )
 }
 
-class ConnectionPoolContextMixinSpec extends FlatSpec with ShouldMatchers with Settings with NamedCPContextAsDefault {
+class ConnectionPoolContextMixinSpec extends FlatSpec with Matchers with Settings with NamedCPContextAsDefault {
 
   import ConnectionPoolContextSpecUtils._
 
@@ -194,7 +193,7 @@ object Sample {
 
 }
 
-class CPContextWithAutoSessionSpec extends FlatSpec with ShouldMatchers with DefaultSettings with InMemoryDB {
+class CPContextWithAutoSessionSpec extends FlatSpec with Matchers with DefaultSettings with InMemoryDB {
 
   behavior of "ConnectionPoolContext with AutoSession"
 
