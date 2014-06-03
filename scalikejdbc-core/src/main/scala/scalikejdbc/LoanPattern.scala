@@ -39,8 +39,8 @@ trait LoanPattern {
   }
 
   /**
-   * Guarantees a Closeable resource will be closed when given a block that takes
-   * the resource as a parameter and returns out a Future.
+   * Guarantees a Closeable resource will be closed after being passed to a block that takes
+   * the resource as a parameter and returns a Future.
    */
   def futureUsing[R <: Closable, A](resource: R)(f: R => Future[A])(implicit ec: ExecutionContext): Future[A] = {
     f(resource) andThen { case _ => resource.close() } // close no matter what
