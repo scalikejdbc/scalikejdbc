@@ -3,7 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.SQLException
 import scala.util.control.Exception._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import org.scalatest.concurrent.ScalaFutures
 import ExecutionContext.Implicits.global
@@ -239,7 +239,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
   // --------------------
   // futureLocalTx
 
-  implicit val patienceTimeout = PatienceConfig(30.seconds)
+  implicit val patienceTimeout = PatienceConfig(10.seconds)
 
   it should "execute single in futureLocalTx block" in {
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
@@ -298,6 +298,22 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
         whenReady(fName) { _ should equal(Some("foo")) }
         fName
       }
+    }
+  }
+
+  it should "do rollback in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = DB futureLocalTx { implicit s =>
+        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .map(_ => s.update("update foo should be rolled back"))
+      }
+      intercept[Exception] {
+        Await.result(failure, 10.seconds)
+      }
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
     }
   }
 

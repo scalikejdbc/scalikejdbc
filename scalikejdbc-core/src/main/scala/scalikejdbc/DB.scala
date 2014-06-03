@@ -264,7 +264,7 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   /**
    * Easy way to checkout the current connection to be used in a transaction
-   * that needs to be committed/rolled back depending on Future results
+   * that needs to be committed/rolled back depending on Future results.
    * @param execution block that takes a session and returns a future
    * @tparam A future result type
    * @return future result
@@ -273,12 +273,12 @@ trait DBConnection extends LogSupport with LoanPattern {
     checkedOutConn =>
       val tx = newTx(checkedOutConn)
       begin(tx)
-      val fSession = Future(DBSession(checkedOutConn, Some(tx)))
-      fSession.
-        flatMap(execution).
-        map { r =>
+
+      Future(DBSession(checkedOutConn, Some(tx)))
+        .flatMap(session => execution(session))
+        .map { result =>
           tx.commit()
-          r
+          result
         }.andThen {
           case _: Failure[_] => tx.rollback()
           case _ =>
@@ -702,7 +702,8 @@ object DB extends LoanPattern {
   }
 
   /**
-   * Begins a local-tx block that returns a Future value easily with ConnectionPool
+   * Begins a local-tx block that returns a Future value easily with ConnectionPool.
+   *
    * @param execution execution that returns a future value
    * @param context connection pool context
    * @tparam A future result type
