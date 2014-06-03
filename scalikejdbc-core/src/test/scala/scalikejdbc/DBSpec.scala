@@ -3,8 +3,12 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.SQLException
 import scala.util.control.Exception._
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.duration._
+import org.scalatest.concurrent.ScalaFutures
+import ExecutionContext.Implicits.global
 
-class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
+class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
 
   val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(8)
 
@@ -229,6 +233,87 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
         }).getOrElse("---")
         name should equal("foo")
       }
+    }
+  }
+
+  // --------------------
+  // futureLocalTx
+
+  implicit val patienceTimeout = PatienceConfig(10.seconds)
+
+  it should "execute single in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB futureLocalTx { s =>
+        Future(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      }
+      whenReady(fResult) { _ should equal(Some("1")) }
+    }
+  }
+
+  it should "execute list in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB futureLocalTx { s =>
+        Future(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      whenReady(fResult) { _.size should equal(2) }
+    }
+  }
+
+  it should "execute update in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fCount = DB futureLocalTx { s =>
+        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      whenReady(fCount) {
+        _ should equal(1)
+      }
+      val fName = fCount.flatMap { _ =>
+        DB futureLocalTx (s => Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+      }
+      whenReady(fName) { _ should be(Some("foo")) }
+    }
+  }
+
+  it should "not be able to rollback in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInFutureLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      futureUsing(DB(ConnectionPool.borrow())) { db =>
+        val fCount = DB futureLocalTx { s =>
+          Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        whenReady(fCount) {
+          _ should equal(1)
+        }
+        db.rollbackIfActive()
+        val fName = DB futureLocalTx { s =>
+          Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        whenReady(fName) { _ should equal(Some("foo")) }
+        fName
+      }
+    }
+  }
+
+  it should "do rollback in futureLocalTx block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = DB futureLocalTx { implicit s =>
+        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .map(_ => s.update("update foo should be rolled back"))
+      }
+      intercept[Exception] {
+        Await.result(failure, 10.seconds)
+      }
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
     }
   }
 
