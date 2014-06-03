@@ -21,6 +21,8 @@ import java.util.Locale.{ ENGLISH => en }
 import scala.util.control.Exception._
 
 import scalikejdbc.metadata._
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Failure
 
 /**
  * Basic Database Accessor
@@ -258,6 +260,29 @@ trait DBConnection extends LogSupport with LoanPattern {
         result
       }
     }
+  }
+
+  /**
+   * Easy way to checkout the current connection to be used in a transaction
+   * that needs to be committed/rolled back depending on Future results
+   * @param execution block that takes a session and returns a future
+   * @tparam A future result type
+   * @return future result
+   */
+  def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = futureUsing(conn) {
+    checkedOutConn =>
+      val tx = newTx(checkedOutConn)
+      begin(tx)
+      val fSession = Future(DBSession(checkedOutConn, Some(tx)))
+      fSession.
+        flatMap(execution).
+        map { r =>
+          tx.commit()
+          r
+        }.andThen {
+          case _: Failure[_] => tx.rollback()
+          case _ =>
+        }
   }
 
   /**
@@ -673,6 +698,19 @@ object DB extends LoanPattern {
   def localTx[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
       DB(conn).localTx(execution)
+    }
+  }
+
+  /**
+   * Begins a local-tx block that returns a Future value easily with ConnectionPool
+   * @param execution execution that returns a future value
+   * @param context connection pool context
+   * @tparam A future result type
+   * @return future result value
+   */
+  def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
+    futureUsing(connectionPool(context).borrow()) { conn =>
+      DB(conn).futureLocalTx(execution)
     }
   }
 

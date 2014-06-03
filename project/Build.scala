@@ -1,7 +1,7 @@
 import sbt._
 import Keys._
 import com.typesafe.tools.mima.plugin.MimaPlugin
-import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIssues}
+import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIssues, binaryIssueFilters}
 
 object ScalikeJDBCProjects extends Build {
 
@@ -23,12 +23,21 @@ object ScalikeJDBCProjects extends Build {
   lazy val _scalatestVersion = "2.1.6"
   lazy val _specs2Version = "2.3.11"
 
+  val mimaProblemFilters = {
+    import com.typesafe.tools.mima.core._
+    import com.typesafe.tools.mima.core.ProblemFilters._
+    Seq(
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"))
+  }
+
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     previousArtifact := Some(_organization % s"${name.value}_${scalaBinaryVersion.value}" % compatibleVersion),
     test in Test := {
       reportBinaryIssues.value
       (test in Test).value
-    }
+    },
+    binaryIssueFilters ++= mimaProblemFilters
   )
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
