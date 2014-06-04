@@ -1,0 +1,17 @@
+ScalikeJDBC 1.8.0 is out. @lloydmeta's DB.futureLocalTx is backported.
+
+ScalikeJDBC 1.8.x doesn't support Scala 2.9. The reason is backporting Scala 2.9 incompatible changes from ScalikeJDBC 2.0.
+
+Don't worry. We'll keep maintaining ScalikeJDBC 1.7.x for Scala 2.9 users.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #254 Add futureLocalTx 
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
