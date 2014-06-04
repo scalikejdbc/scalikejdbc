@@ -16,7 +16,6 @@
 package scalikejdbc
 
 import java.sql.Connection
-import scalikejdbc.metadata.Table
 
 /**
  * Named Basic DB Accessor

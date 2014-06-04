@@ -765,9 +765,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |import scalikejdbc._
           |
           |class %className%Spec extends Specification {
-          |  %syntaxObject%
           |
           |  "%className%" should {
+          |
+          |    %syntaxObject%
+          |
           |    "find by primary keys" in new AutoRollback {
           |      val maybeFound = %className%.find(%primaryKeys%)
           |      maybeFound.isDefined should beTrue

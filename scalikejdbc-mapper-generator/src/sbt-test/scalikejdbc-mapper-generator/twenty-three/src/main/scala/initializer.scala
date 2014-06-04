@@ -6,8 +6,8 @@ object initializer extends App {
   ConnectionPool.singleton("jdbc:h2:./db;MODE=PostgreSQL;AUTO_SERVER=TRUE", "u", "p")
 
   DB autoCommit { implicit s =>
-    sql"create table programmers (id bigint generated always as identity, name varchar(128))"
-      .execute.apply()
+    SQL("create table twenty_three(field1 bigint generated always as identity," +
+        (2 to 23).map("field" + _ + " bigint").mkString(",") + ")" ).execute.apply()
   }
 
 }
