@@ -1,0 +1,12 @@
+ScalikeJDBC 1.8.0 is out. Version 1.8.x supports only Scala 2.10.x. @lloydmeta's DB.futureLocalTx is newly added.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #254 Add futureLocalTx 
+
+Enjoy writing mostly type-safe SQL and get things done!
+

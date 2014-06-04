@@ -7,12 +7,12 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "1.8.0-SNAPSHOT"
+  lazy val _version = "1.8.0"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.7"
   lazy val _defaultPlayVersion = "2.3.0"
-  lazy val _typesafeConfigVersion = "1.2.0"
+  lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
@@ -216,7 +216,7 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test",
-          "org.scalatest"  %% "scalatest"       % _scalatestVersion      % "provided",
+          "org.scalatest"  %% "scalatest"       % "1.9.2"                % "provided",
           "org.specs2"     %% "specs2"          % _specs2Scala210Version % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
       }
