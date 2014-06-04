@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.1-SNAPSHOT"
+  lazy val _version = "2.0.1"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -18,10 +18,10 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.4.177"
+  lazy val _h2Version = "1.4.178"
   lazy val _hibernateVersion = "4.3.5.Final"
-  lazy val _scalatestVersion = "2.1.6"
-  lazy val _specs2Version = "2.3.11"
+  lazy val _scalatestVersion = "2.1.7"
+  lazy val _specs2Version = "2.3.12"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
