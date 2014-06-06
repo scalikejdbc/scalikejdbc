@@ -27,7 +27,10 @@ class Tx(val conn: Connection) {
   /**
    * Begins this transaction.
    */
-  def begin(): Unit = conn.setAutoCommit(false)
+  def begin(): Unit = {
+    conn.setReadOnly(false)
+    conn.setAutoCommit(false)
+  }
 
   /**
    * Commits this transaction.
