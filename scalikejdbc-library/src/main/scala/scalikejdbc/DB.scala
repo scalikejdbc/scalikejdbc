@@ -52,6 +52,7 @@ trait DBConnection extends LogSupport {
   def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
 
   private def newTx(conn: Connection): Tx = {
+    conn.setReadOnly(false)
     if (isTxNotActive || isTxAlreadyStarted) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
