@@ -26,6 +26,7 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
     }
   }
 
+  /*
   "futureUsing" should "be available" in {
     val fResult = futureUsing(conn) { conn =>
       Future.successful(3)
@@ -34,5 +35,6 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
       r should be(3)
     }
   }
+  */
 
 }

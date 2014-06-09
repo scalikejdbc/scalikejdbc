@@ -240,6 +240,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
   // --------------------
   // futureLocalTx
 
+  /*
   implicit val patienceTimeout = PatienceConfig(30.seconds)
 
   it should "execute single in futureLocalTx block" in {
@@ -301,6 +302,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
     }
   }
+  */
 
   // --------------------
   // withinTx
