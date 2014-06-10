@@ -3,5 +3,4 @@ scala:
   - 2.10.4
 jdk:
   - oraclejdk7
-script: "./travis.sh"
 
