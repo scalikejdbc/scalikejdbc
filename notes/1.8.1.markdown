@@ -1,0 +1,15 @@
+ScalikeJDBC 1.8.1 is out. Version 1.8.x supports only Scala 2.10.x.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #255 commons-dbcp2 support 
+- #223 Supporting multiple connection pool implementations
+- #230 Read all of defined global configuration by @tkawachi 
+- #232 Read poolConnectionTimeoutMillis by @tkawachi 
+
+Enjoy writing mostly type-safe SQL and get things done!
+
