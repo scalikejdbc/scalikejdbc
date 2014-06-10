@@ -11,7 +11,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with ShouldMatchers {
 
   Class.forName("org.h2.Driver")
 
-  val url = "jdbc:h2:file:db/mapper-generator-h2"
+  val url = "jdbc:h2:file:./db/mapper-generator-h2"
   val username = "sa"
   val password = ""
   ConnectionPool.singleton(url, username, password)
