@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.1"
+  lazy val _version = "2.0.2"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -20,7 +20,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.178"
   lazy val _hibernateVersion = "4.3.5.Final"
-  lazy val _scalatestVersion = "2.1.7"
+  lazy val _scalatestVersion = "2.2.0"
   lazy val _specs2Version = "2.3.12"
 
   val mimaProblemFilters = {
@@ -94,9 +94,11 @@ object ScalikeJDBCProjects extends Build {
           "joda-time"               %  "joda-time"       % "2.3"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
           // scope: provided
+          // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
+          "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "1.3.8"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "1.3.+"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
@@ -246,7 +248,7 @@ object ScalikeJDBCProjects extends Build {
     "org.apache.derby"  % "derby"                % "10.10.2.0"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.30"          % "test",
+    "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")

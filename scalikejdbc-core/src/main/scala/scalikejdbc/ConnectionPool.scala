@@ -32,6 +32,8 @@ object ConnectionPool extends LogSupport {
   type CPFactory = ConnectionPoolFactory
 
   val DEFAULT_NAME: Symbol = 'default
+  // TODO commons-dbcp2 will be the default implementation since ScalikeJDBC 2.1
+  val DEFAULT_CONNECTION_POOL_FACTORY = CommonsConnectionPoolFactory
 
   private[this] val pools = new MutableMap[Any, ConnectionPool]()
 
@@ -82,7 +84,7 @@ object ConnectionPool extends LogSupport {
    * @param settings Settings
    */
   def add(name: Any, url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory) {
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY) {
 
     import scalikejdbc.JDBCUrl._
 
@@ -178,7 +180,7 @@ object ConnectionPool extends LogSupport {
    * @param settings Settings
    */
   def singleton(url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = CommonsConnectionPoolFactory): Unit = {
+    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)(factory)
     log.debug("Registered singleton connection pool : " + get().toString())
   }
