@@ -16,9 +16,9 @@ All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementatio
 
 ```
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"        % "2.0.1",
-  "com.h2database"  %  "h2"                 % "1.4.178",
-  "ch.qos.logback"  %  "logback-classic"    % "1.1.2"
+  "org.scalikejdbc" %% "scalikejdbc"        % "2.0.+",
+  "com.h2database"  %  "h2"                 % "1.4.+",
+  "ch.qos.logback"  %  "logback-classic"    % "1.1.+"
 )
 ```
 
@@ -81,7 +81,7 @@ http://scalikejdbc.org/
 Published binary files have the following copyright:
 
 ```
-Copyright 2013 ScalikeJDBC committers
+Copyright 2014 scalikejdbc.org
 Apache License, Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0.html
 ```
