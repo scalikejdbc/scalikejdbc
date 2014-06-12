@@ -18,23 +18,23 @@
 ##### develop (the default branch)
 
 - git-flow development branch
-- This branch must be able to built for Scala 2.10 and 2.11
+- This branch must be able to build against Scala 2.10 and 2.11
 
 ##### master
 
 - git-flow stable branch
-- This branch must be able to built for Scala 2.10 and 2.11
+- This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 1.8.x
 
-- This branch must be able to built for Scala 2.10 
+- This branch must be able to build against Scala 2.10 
 - This branch must be compatible with ScalaTest 1.9
 - Backport from develop branch which doesn't work on Scala 2.9 can be merged
 - Source code compatibility should be kept with 1.7.x
 
 ##### 1.7.x
 
-- This branch must be able to built for Scala 2.9.1, 2.9.2, 2.9.3 and 2.10
+- This branch must be able to build against Scala 2.9.1, 2.9.2, 2.9.3 and 2.10
 - This branch must be compatible with ScalaTest 1.9
 - Backport from develop branch which doesn't work on Scala 2.9 can NOT be merged
 
