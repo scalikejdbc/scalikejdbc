@@ -16,9 +16,9 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.4.178"
+  lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.5.Final"
-  lazy val _scalatestVersion = "2.1.7"
+  lazy val _scalatestVersion = "2.2.0"
   lazy val _specs2Scala210Version = "2.3.7"
 
   lazy val baseSettings = Defaults.defaultSettings ++ Seq(
@@ -49,14 +49,14 @@ object ScalikeJDBCProjects extends Build {
           "org.joda"                %  "joda-convert"    % "1.6"            % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
-          "org.apache.commons"      %  "commons-dbcp2"   % "2.0.1"           % "provided",
+          "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "1.3.8"             % "test",
+          "com.zaxxer"              %  "HikariCP"        % "1.4.+"             % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion     % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion   % "test",
           "org.scalatest"           %% "scalatest"       % _scalatestVersion   % "test",
-          "org.mockito"             %  "mockito-all"     % "1.9.5"             % "test",
+          "org.mockito"             %  "mockito-all"     % "1.9.+"             % "test",
           "com.typesafe.play"       %% "anorm"           % _defaultPlayVersion % "test"
         ) ++ jdbcDriverDependenciesInTestScope
       }
