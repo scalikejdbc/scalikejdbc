@@ -37,6 +37,7 @@ class Commons2ConnectionPool(
 
   private[this] val _poolFactory = new PoolableConnectionFactory(
     new DriverManagerConnectionFactory(url, user, password), null)
+  _poolFactory.setValidationQuery(settings.validationQuery)
 
   private[this] val _pool: GenericObjectPool[PoolableConnection] = new GenericObjectPool(_poolFactory)
   _poolFactory.setPool(_pool)
