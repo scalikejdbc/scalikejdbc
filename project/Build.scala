@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.3-SNAPSHOT"
+  lazy val _version = "2.0.3"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -48,7 +48,7 @@ object ScalikeJDBCProjects extends Build {
     resolvers ++= _resolvers,
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalaVersion := "2.11.1",
+    //scalaVersion := "2.11.1",
     scalacOptions ++= _scalacOptions,
     publishMavenStyle := true,
     publishArtifact in Test := false,

@@ -3,7 +3,7 @@ resolvers ++= Seq(
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
-addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "[0.2,)")
+addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "0.2.2")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 
