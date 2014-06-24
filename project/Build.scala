@@ -18,7 +18,7 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.4.178"
+  lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.5.Final"
   lazy val _scalatestVersion = "2.2.0"
   lazy val _specs2Version = "2.3.12"
@@ -48,6 +48,7 @@ object ScalikeJDBCProjects extends Build {
     resolvers ++= _resolvers,
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
+    scalaVersion := "2.11.1",
     scalacOptions ++= _scalacOptions,
     publishMavenStyle := true,
     publishArtifact in Test := false,
@@ -98,10 +99,10 @@ object ScalikeJDBCProjects extends Build {
           "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "1.3.+"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "1.4.+"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.mockito"             %  "mockito-all"     % "1.9.5"           % "test"
+          "org.mockito"             %  "mockito-all"     % "1.9.+"           % "test"
         ) ++ (scalaVersion match {
           case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
           case _ => Nil
