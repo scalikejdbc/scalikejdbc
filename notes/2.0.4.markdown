@@ -1,0 +1,13 @@
+ScalikeJDBC 2.0.4 is out. 2.0.3 for Scala 2.10 seems to be invalid built. Please use 2.0.4 or higher.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## library
+
+- #260 java.lang.NoSuchMethodError when using scalikejdbc 2.0.3 in Scala 2.10
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
