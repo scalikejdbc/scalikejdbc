@@ -1,8 +1,10 @@
 #!/bin/sh
 
 cd `dirname $0`/..
+rm -rf */target
 
 sbt 'set scalaVersion := "2.11.0"' \
+  clean \
   "project core" 'set scalaVersion := "2.11.0"' publishSigned \
   "project config" 'set scalaVersion := "2.11.0"' publishSigned \
   "project interpolation-core" 'set scalaVersion := "2.11.0"' publishSigned \
