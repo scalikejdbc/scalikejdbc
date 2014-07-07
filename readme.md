@@ -63,8 +63,8 @@ import org.joda.time._
 case class Member(id: Long, name: Option[String], createdAt: DateTime)
 object Member extends SQLSyntaxSupport[Member] {
   override val tableName = "members"
-  def apply(rs: WrappedResultSet) = new Member(
-    rs.long("id"), rs.stringOpt("name"), rs.dateTime("created_at"))
+  def apply(rs: WrappedResultSet): Member = new Member(
+    rs.long("id"), rs.stringOpt("name"), rs.jodaDateTime("created_at"))
 }
 
 // find all members
