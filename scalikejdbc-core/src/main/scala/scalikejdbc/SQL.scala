@@ -283,11 +283,11 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
-    case AutoSession => DB autoCommit (s => s.foreach(statement, parameters: _*)(op))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.foreach(statement, parameters: _*)(op))
-    case ReadOnlyAutoSession => DB readOnly (s => s.foreach(statement, parameters: _*)(op))
-    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.foreach(statement, parameters: _*)(op))
-    case _ => session.foreach(statement, parameters: _*)(op)
+    case AutoSession => DB autoCommit (s => s.fetchSize(fetchSize).foreach(statement, parameters: _*)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (s => s.fetchSize(fetchSize).foreach(statement, parameters: _*)(op))
+    case ReadOnlyAutoSession => DB readOnly (s => s.fetchSize(fetchSize).foreach(statement, parameters: _*)(op))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => s.fetchSize(fetchSize).foreach(statement, parameters: _*)(op))
+    case _ => session.fetchSize(fetchSize).foreach(statement, parameters: _*)(op)
   }
 
   /**
@@ -296,11 +296,11 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = session match {
-    case AutoSession => DB autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
-    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.foldLeft(statement, parameters: _*)(z)(op))
-    case ReadOnlyAutoSession => DB readOnly (_.foldLeft(statement, parameters: _*)(z)(op))
-    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (_.foldLeft(statement, parameters: _*)(z)(op))
-    case _ => session.foldLeft(statement, parameters: _*)(z)(op)
+    case AutoSession => DB autoCommit (_.fetchSize(fetchSize).foldLeft(statement, parameters: _*)(z)(op))
+    case NamedAutoSession(name) => NamedDB(name) autoCommit (_.fetchSize(fetchSize).foldLeft(statement, parameters: _*)(z)(op))
+    case ReadOnlyAutoSession => DB readOnly (_.fetchSize(fetchSize).foldLeft(statement, parameters: _*)(z)(op))
+    case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (_.fetchSize(fetchSize).foldLeft(statement, parameters: _*)(z)(op))
+    case _ => session.fetchSize(fetchSize).foldLeft(statement, parameters: _*)(z)(op)
   }
 
   /**
@@ -420,7 +420,7 @@ abstract class SQL[A, E <: WithExtractor](val statement: String)(val parameters:
   }
 
   /**
-   * Set execution type as updateAndreturnGeneratedKey
+   * Set execution type as updateAndReturnGeneratedKey
    * @return SQL instance
    */
   def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
