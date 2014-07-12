@@ -4,6 +4,7 @@ import org.scalatest._
 import java.util.Properties
 import javax.sql.DataSource
 import java.sql.Connection
+import scalikejdbc.LoanPattern._
 
 class ConnectionPoolSpec extends FlatSpec with Matchers {
 
@@ -22,7 +23,10 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
   it should "be available" in {
     val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
     ConnectionPool.singleton(url, user, password, poolSettings)
-    ConnectionPool.borrow() should not be (null)
+
+    using(ConnectionPool.borrow()) { conn =>
+      conn should not be (null)
+    }
 
     Thread.sleep(100L)
     ConnectionPool.singleton(url, user, password, poolSettings)
@@ -32,7 +36,10 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
     ConnectionPool.singleton(url, user, password, poolSettings)
 
     ConnectionPool.add('secondary, url, user, password, poolSettings)
-    ConnectionPool.borrow('secondary) should not be (null)
+
+    using(ConnectionPool.borrow('secondary)) { conn =>
+      conn should not be (null)
+    }
 
     Thread.sleep(100L)
     ConnectionPool.add('secondary, url, user, password, poolSettings)

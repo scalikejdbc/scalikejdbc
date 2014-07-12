@@ -30,12 +30,13 @@ object Member extends UnixTimeInMillisConverterImplicits {
 
   val * = {
     import columnNames._
+
     (rs: WrappedResultSet) => Member(
-      id = rs.long(id),
-      name = rs.string(name),
-      description = Option(rs.string(description)),
-      birthday = Option(rs.date(birthday)).map(_.toJodaLocalDate),
-      createdAt = rs.timestamp(createdAt).toJodaDateTime)
+      id = rs.get(id),
+      name = rs.get(name),
+      description = rs.get(description),
+      birthday = rs.get(birthday),
+      createdAt = rs.get(createdAt))
   }
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {

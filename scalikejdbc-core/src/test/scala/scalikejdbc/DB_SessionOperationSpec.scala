@@ -12,48 +12,47 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
   behavior of "DB(Session operation)"
 
   it should "be available" in {
-    val db = DB(ConnectionPool.borrow())
-    db should not be null
-    db.close()
+    using(ConnectionPool.borrow()) { conn =>
+      val db = DB(conn)
+      db should not be null
+      db.close()
+    }
   }
 
   // --------------------
   // tx
 
   it should "be impossible to call #begin twice" in {
-    val db = DB(ConnectionPool.borrow())
-    db.begin()
-    intercept[IllegalStateException] {
+    using(ConnectionPool.borrow()) { conn =>
+      val db = DB(conn)
       db.begin()
-    }
-    try {
+      intercept[IllegalStateException] {
+        db.begin()
+      }
       db.rollback()
-    } finally {
-      db.close()
     }
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
-    val db = DB(ConnectionPool('default).borrow())
-    try {
+    using(ConnectionPool('default).borrow()) { conn =>
+      val db = DB(conn)
       db.begin()
       db.beginIfNotYet()
       db.beginIfNotYet()
       db.beginIfNotYet()
       db.rollback()
       db.rollbackIfActive()
-    } finally {
-      db.close()
     }
   }
 
   "#tx" should "not be available before beginning tx" in {
-    val db = DB(ConnectionPool('named).borrow())
-    intercept[IllegalStateException] {
-      db.tx.begin()
+    using(ConnectionPool('named).borrow()) { conn =>
+      val db = DB(conn)
+      intercept[IllegalStateException] {
+        db.tx.begin()
+      }
+      db.rollbackIfActive()
     }
-    db.rollbackIfActive()
-    db.close()
   }
 
   // --------------------
@@ -458,11 +457,13 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
 
       Thread.sleep(2000L)
 
-      val name = DB(ConnectionPool.borrow()) autoCommit {
-        session =>
-          session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      using(ConnectionPool.borrow()) { conn =>
+        val name = DB(conn) autoCommit {
+          session =>
+            session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }
+        assert(name.get == "name1")
       }
-      assert(name.get == "name1")
     }
   }
 

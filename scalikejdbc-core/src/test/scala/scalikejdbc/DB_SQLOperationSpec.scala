@@ -11,8 +11,10 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
   behavior of "DB(SQL Operation)"
 
   it should "be available" in {
-    val db = DB(ConnectionPool.borrow())
-    db should not be null
+    using(ConnectionPool.borrow()) { conn =>
+      val db = DB(conn)
+      db should not be null
+    }
   }
 
   // --------------------
@@ -257,13 +259,17 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_rollbackInLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val count = db localTx {
-        implicit s =>
-          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val count = db localTx {
+          implicit s =>
+            SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+        }
+        count should equal(1)
+        db.rollbackIfActive()
       }
-      count should equal(1)
-      db.rollbackIfActive()
+
       val name = DB localTx {
         implicit s =>
           SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply().get
@@ -299,10 +305,11 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
-        val db = DB(ConnectionPool.borrow())
-        db withinTx {
-          implicit session =>
-            SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+        using(DB(ConnectionPool.borrow())) { db =>
+          db withinTx {
+            implicit session =>
+              SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+          }
         }
       }
     }
@@ -312,14 +319,16 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        implicit session =>
-          SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val result = db withinTx {
+          implicit session =>
+            SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+        }
+        result.size should be > 0
+        db.rollbackIfActive()
       }
-      result.size should be > 0
-      db.rollbackIfActive()
     }
   }
 
@@ -327,15 +336,17 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      implicit val session = db.withinTxSession()
-      try {
-        val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
-        result.size should be > 0
-        db.rollbackIfActive()
-      } finally {
-        session.close()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        implicit val session = db.withinTxSession()
+        try {
+          val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).list().apply()
+          result.size should be > 0
+          db.rollbackIfActive()
+        } finally {
+          session.close()
+        }
       }
     }
   }
@@ -344,14 +355,16 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        implicit s =>
-          SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).single().apply()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val result = db withinTx {
+          implicit s =>
+            SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).single().apply()
+        }
+        result.get should equal("1")
+        db.rollbackIfActive()
       }
-      result.get should equal("1")
-      db.rollbackIfActive()
     }
   }
 
@@ -359,14 +372,16 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        implicit s =>
-          SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).list().apply()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val result = db withinTx {
+          implicit s =>
+            SQL("select id from " + tableName + "").map(rs => Some(rs.string("id"))).list().apply()
+        }
+        result.size should equal(2)
+        db.rollbackIfActive()
       }
-      result.size should equal(2)
-      db.rollbackIfActive()
     }
   }
 
@@ -374,19 +389,21 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val count = db withinTx {
-        implicit s =>
-          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val count = db withinTx {
+          implicit s =>
+            SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+        }
+        count should equal(1)
+        val name = (db withinTx {
+          implicit s =>
+            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+        }).get
+        name should equal("foo")
+        db.rollback()
       }
-      count should equal(1)
-      val name = (db withinTx {
-        implicit s =>
-          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-      }).get
-      name should equal("foo")
-      db.rollback()
     }
   }
 
@@ -394,21 +411,20 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(DB(ConnectionPool.borrow())) {
-        db =>
-          db.begin()
-          val count = db withinTx {
-            implicit s =>
-              SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
-          }
-          count should equal(1)
-          db.rollback()
-          db.begin()
-          val name = (db withinTx {
-            implicit s =>
-              SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-          }).get
-          name should equal("name1")
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val count = db withinTx {
+          implicit s =>
+            SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+        }
+        count should equal(1)
+        db.rollback()
+        db.begin()
+        val name = (db withinTx {
+          implicit s =>
+            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+        }).get
+        name should equal("name1")
       }
     }
   }
@@ -417,29 +433,32 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_batch"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val count1 = db withinTx {
-        implicit s =>
-          val params: Seq[Seq[Any]] = (1001 to 2000).map {
-            i => Seq(i, "name" + i.toString)
-          }
-          SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params: _*).apply()
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val count1 = db withinTx {
+          implicit s =>
+            val params: Seq[Seq[Any]] = (1001 to 2000).map {
+              i => Seq(i, "name" + i.toString)
+            }
+            SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params: _*).apply()
+        }
+        count1.size should equal(1000)
+
+        val count2 = db withinTx {
+          implicit s =>
+            val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
+              i =>
+                Seq[(Symbol, Any)](
+                  'id -> i,
+                  'name -> ("name" + i.toString)
+                )
+            }
+            SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params: _*).apply()
+        }
+        count2.size should equal(1000)
+        db.rollback()
       }
-      count1.size should equal(1000)
-      val count2 = db withinTx {
-        implicit s =>
-          val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
-            i =>
-              Seq[(Symbol, Any)](
-                'id -> i,
-                'name -> ("name" + i.toString)
-              )
-          }
-          SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params: _*).apply()
-      }
-      count2.size should equal(1000)
-      db.rollback()
     }
   }
 
@@ -448,27 +467,29 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     val tableName = tableNamePrefix + "_gettingstuck"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      implicit val session = db.withinTxSession()
 
-      val params1: Seq[Seq[Any]] = (1001 to 2000).map {
-        i => Seq(i, "name" + i.toString)
-      }
-      val count1 = SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params1: _*).apply()
-      count1.size should equal(1000)
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        implicit val session = db.withinTxSession()
 
-      val params2: Seq[Seq[(Symbol, Any)]] = (2001 to 2003).map {
-        i => Seq[(Symbol, Any)]('id -> i, 'name -> ("name" + i.toString))
+        val params1: Seq[Seq[Any]] = (1001 to 2000).map {
+          i => Seq(i, "name" + i.toString)
+        }
+        val count1 = SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params1: _*).apply()
+        count1.size should equal(1000)
+
+        val params2: Seq[Seq[(Symbol, Any)]] = (2001 to 2003).map {
+          i => Seq[(Symbol, Any)]('id -> i, 'name -> ("name" + i.toString))
+        }
+        try {
+          val count2 = SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(params2: _*).apply()
+          count2.size should equal(1000)
+        } catch {
+          case e: Exception =>
+          // Exception should be catched here. It's not a bug.
+        }
+        db.rollback()
       }
-      try {
-        val count2 = SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(params2: _*).apply()
-        count2.size should equal(1000)
-      } catch {
-        case e: Exception =>
-        // Exception should be catched here. It's not a bug.
-      }
-      db.rollback()
     }
   }
 
@@ -481,36 +502,36 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       import scala.concurrent.ExecutionContext.Implicits.global
       scala.concurrent.Future {
-        using(DB(ConnectionPool.borrow())) {
-          db =>
-            db.begin()
-            implicit val session = db.withinTxSession()
-            SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate()
-            Thread.sleep(1000L)
-            val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-            name.get should equal("foo")
-            db.rollback()
+        using(DB(ConnectionPool.borrow())) { db =>
+          db.begin()
+          implicit val session = db.withinTxSession()
+          SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate()
+          Thread.sleep(1000L)
+          val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+          name.get should equal("foo")
+          db.rollback()
         }
       }
       scala.concurrent.Future {
-        using(DB(ConnectionPool.borrow())) {
-          db =>
-            db.begin()
-            implicit val session = db.withinTxSession()
-            Thread.sleep(200L)
-            val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
-            name.get should equal("name1")
-            db.rollback()
+        using(DB(ConnectionPool.borrow())) { db =>
+          db.begin()
+          implicit val session = db.withinTxSession()
+          Thread.sleep(200L)
+          val name = SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
+          name.get should equal("name1")
+          db.rollback()
         }
       }
 
       Thread.sleep(2000L)
 
-      val name = DB(ConnectionPool.borrow()) autoCommit {
-        implicit session =>
-          SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single.apply()
+      using(ConnectionPool.borrow()) { conn =>
+        val name = DB(conn) autoCommit {
+          implicit session =>
+            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single.apply()
+        }
+        name.get should equal("name1")
       }
-      name.get should equal("name1")
     }
   }
 

@@ -56,22 +56,28 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
     val tableName = tableNamePrefix + "_update"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB(ConnectionPool.borrow()) autoCommit {
-        implicit session =>
-          SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
-            .bindByName(
-              'name -> "foo",
-              'id -> 1
-            ).executeUpdate().apply()
+
+      using(ConnectionPool.borrow()) { conn =>
+        val count = DB(conn) autoCommit {
+          implicit session =>
+            SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
+              .bindByName(
+                'name -> "foo",
+                'id -> 1
+              ).executeUpdate().apply()
+        }
+        count should equal(1)
       }
-      count should equal(1)
-      val name = (DB(ConnectionPool.borrow()) autoCommit {
-        implicit session =>
-          SQL("select name from " + tableName + " where id = /* 'id */123")
-            .bindByName('id -> 1)
-            .map(rs => rs.string("name")).single.apply()
-      }).get
-      name should equal("foo")
+
+      using(ConnectionPool.borrow()) { conn =>
+        val name = (DB(conn) autoCommit {
+          implicit session =>
+            SQL("select name from " + tableName + " where id = /* 'id */123")
+              .bindByName('id -> 1)
+              .map(rs => rs.string("name")).single.apply()
+        }).get
+        name should equal("foo")
+      }
     }
   }
 

@@ -38,8 +38,11 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
 
   it should "borrow a connection from ConnectionPool" in {
     val conn = ConnectionPool.borrow()
-    conn should not be null
-    conn.close() // bring back the connection to the pool
+    try {
+      conn should not be null
+    } finally {
+      conn.close() // bring back the connection to the pool
+    }
   }
 
   it should "use loan pattern for borrowing a connection from ConnectionPool" in {
@@ -161,44 +164,46 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
   // ---------------------------
 
   "SQL" should "be available" in {
-    val conn: Connection = ConnectionPool.borrow()
-    try {
-      TestUtils.initialize("emp_BasicUsageSpec_SQL")
+    using(ConnectionPool.borrow()) { conn: Connection =>
 
-      val eopt: Option[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1)
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
-      }
-      eopt.isDefined should be(true)
+      try {
+        TestUtils.initialize("emp_BasicUsageSpec_SQL")
 
-      val ehead: Option[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_SQL")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
-      }
-      ehead.isDefined should be(true)
+        val eopt: Option[Emp] = DB readOnly { implicit session =>
+          SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1)
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
+        }
+        eopt.isDefined should be(true)
 
-      val es: List[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_SQL")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
-      }
-      es.size should equal(2)
+        val ehead: Option[Emp] = DB readOnly { implicit session =>
+          SQL("select * from emp_BasicUsageSpec_SQL")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
+        }
+        ehead.isDefined should be(true)
 
-      val tr: Traversable[Emp] = DB readOnly { implicit session =>
-        SQL("select * from emp_BasicUsageSpec_SQL")
-          .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
-      }
+        val es: List[Emp] = DB readOnly { implicit session =>
+          SQL("select * from emp_BasicUsageSpec_SQL")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
+        }
+        es.size should equal(2)
 
-      {
-        implicit val session = DB(conn).readOnlySession
-        val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
-          .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
-        e2s.size should equal(2)
-        var sum: Long = 0L
-        SQL("select id from emp_BasicUsageSpec_SQL").foreach { rs => sum += rs.long("id") }
-        sum should equal(3L)
-      }
+        val tr: Traversable[Emp] = DB readOnly { implicit session =>
+          SQL("select * from emp_BasicUsageSpec_SQL")
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
+        }
 
-    } finally { TestUtils.deleteTable("emp_BasicUsageSpec_SQL") }
+        {
+          implicit val session = DB(conn).readOnlySession
+          val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
+            .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
+          e2s.size should equal(2)
+          var sum: Long = 0L
+          SQL("select id from emp_BasicUsageSpec_SQL").foreach { rs => sum += rs.long("id") }
+          sum should equal(3L)
+        }
+
+      } finally { TestUtils.deleteTable("emp_BasicUsageSpec_SQL") }
+    }
   }
 
   "An example of SQL" should "be available" in {

@@ -7,12 +7,13 @@ import org.scalatest._
 
 class MemberOnMemorySpec extends FlatSpec with Matchers {
 
+  Class.forName("org.h2.Driver")
+  ConnectionPool.add('MemberSpec, "jdbc:h2:mem:MemberSpec", "", "")
+
   behavior of "Testing on memory"
 
   it should "be available" in {
 
-    Class.forName("org.h2.Driver")
-    ConnectionPool.add('MemberSpec, "jdbc:h2:mem:MemberSpec", "", "")
     NamedDB('MemberSpec) autoCommit {
       implicit session =>
         try {
