@@ -2,6 +2,7 @@ package scalikejdbc
 
 import org.scalatest._
 import util.control.Exception._
+import scalikejdbc.LoanPattern._
 
 class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
@@ -10,22 +11,24 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
   behavior of "DB(Executable SQL Operation)"
 
   it should "be available" in {
-    val db = DB(ConnectionPool.borrow())
-    db should not be null
+    using(DB(ConnectionPool.borrow())) { db =>
+      db should not be null
+    }
   }
 
   it should "execute queries" in {
     val tableName = tableNamePrefix + "_query"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val idOpt = db autoCommit {
-        implicit session =>
-          SQL("select id from " + tableName + " where id = /*'id*/123")
-            .bindByName('id -> 1)
-            .map(rs => rs.int("id")).toOption().apply()
+      using(DB(ConnectionPool.borrow())) { db =>
+        val idOpt = db autoCommit {
+          implicit session =>
+            SQL("select id from " + tableName + " where id = /*'id*/123")
+              .bindByName('id -> 1)
+              .map(rs => rs.int("id")).toOption().apply()
+        }
+        idOpt.get should equal(1)
       }
-      idOpt.get should equal(1)
     }
   }
 

@@ -3,6 +3,7 @@ package scalikejdbc
 import util.control.Exception._
 import org.scalatest._
 import java.sql.ResultSet
+import scalikejdbc.LoanPattern._
 
 class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
 
@@ -14,9 +15,10 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize0"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-      new ResultSetTraversable(rs).foreach(rs => rs.int("id") should not equal (null))
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
+        new ResultSetTraversable(rs).foreach(rs => rs.int("id") should not equal (null))
+      }
     }
   }
 
@@ -24,16 +26,17 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize1"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = {
-        try {
-          conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
-        } catch {
-          case e: Exception =>
-            conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = {
+          try {
+            conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+          } catch {
+            case e: Exception =>
+              conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+          }
         }
+        new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
       }
-      new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }
 
@@ -41,16 +44,17 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize2"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = {
-        try {
-          conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
-        } catch {
-          case e: Exception =>
-            conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = {
+          try {
+            conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+          } catch {
+            case e: Exception =>
+              conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+          }
         }
+        new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
       }
-      new ResultSetTraversable(rs).foreach(_.int("id") should not equal (null))
     }
   }
 
@@ -58,9 +62,10 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize0"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-      new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
+        new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
+      }
     }
   }
 
@@ -68,16 +73,17 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize1"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = {
-        try {
-          conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
-        } catch {
-          case e: Exception =>
-            conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = {
+          try {
+            conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+          } catch {
+            case e: Exception =>
+              conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+          }
         }
+        new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
       }
-      new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
     }
   }
 
@@ -85,16 +91,17 @@ class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_fetchSize2"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val rs: ResultSet = {
-        try {
-          conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
-        } catch {
-          case e: Exception =>
-            conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+      using(ConnectionPool.borrow()) { conn =>
+        val rs: ResultSet = {
+          try {
+            conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+          } catch {
+            case e: Exception =>
+              conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+          }
         }
+        new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
       }
-      new ResultSetTraversable(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
     }
   }
 

@@ -146,7 +146,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
       implicit val db = DB(ConnectionPool.borrow())
       try {
         db.begin()
-        // with implicit DB instnace
+        // with implicit DB instance
         DB withinTx { session =>
           val emp: Option[Emp] = session.single("select * from " + tableName + " where id = ?", 1)(rs => Emp(rs.int("id"), rs.string("name")))
           val emps: List[Emp] = session.list("select * from " + tableName) { rs => Emp(rs.int("id"), rs.string("name")) }

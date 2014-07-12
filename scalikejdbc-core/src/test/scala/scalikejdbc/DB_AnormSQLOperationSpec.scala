@@ -2,6 +2,7 @@ package scalikejdbc
 
 import org.scalatest._
 import util.control.Exception._
+import scalikejdbc.LoanPattern._
 
 class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
@@ -18,14 +19,15 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
     val tableName = tableNamePrefix + "_query"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val idOpt = db autoCommit {
-        implicit session =>
-          SQL("select id from " + tableName + " where id = {id}")
-            .bindByName('id -> 1)
-            .map(rs => rs.int("id")).toOption().apply()
+      using(DB(ConnectionPool.borrow())) { db =>
+        val idOpt = db autoCommit {
+          implicit session =>
+            SQL("select id from " + tableName + " where id = {id}")
+              .bindByName('id -> 1)
+              .map(rs => rs.int("id")).toOption().apply()
+        }
+        idOpt.get should equal(1)
       }
-      idOpt.get should equal(1)
     }
   }
 
