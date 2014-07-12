@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2013 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package scalikejdbc.config
 
 /**
- * Env prefix for config reader
+ * No Env prefix for config reader
  */
-trait EnvPrefix {
-  val env: Option[String]
-}
+trait NoEnvPrefix extends EnvPrefix {
 
+  override val env: Option[String] = None
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2013 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package scalikejdbc.config
 
-/**
- * Env prefix for config reader
- */
-trait EnvPrefix {
-  val env: Option[String]
-}
+import com.typesafe.config.Config
 
+/*
+ * A Trait that holds configuration
+ */
+trait TypesafeConfig {
+  val config: Config
+}
