@@ -28,6 +28,14 @@ class DBsSpec extends FunSpec with Matchers {
         res should be(Some(1))
         DBs.close('foo)
       }
+      it("should setup env & top level config") {
+        DBs.setup('topLevelDefaults)
+        val res = NamedDB('topLevelDefaults) readOnly { implicit session =>
+          SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
+        }
+        res should be(Some(1))
+        DBs.close('topLevelDefaults)
+      }
       describe("When an unknown database name is passed") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
