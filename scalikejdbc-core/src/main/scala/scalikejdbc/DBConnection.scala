@@ -45,7 +45,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
 
-  private def newTx(conn: Connection): Tx = {
+  private[this] def newTx(conn: Connection): Tx = {
     conn.setReadOnly(false)
     if (isTxNotActive || isTxAlreadyStarted) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
@@ -222,7 +222,7 @@ trait DBConnection extends LogSupport with LoanPattern {
     execution(withinTxSession(currentTx).conn)
   }
 
-  private def begin(tx: Tx): Unit = {
+  private[this] def begin(tx: Tx): Unit = {
     tx.begin()
     if (!tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)

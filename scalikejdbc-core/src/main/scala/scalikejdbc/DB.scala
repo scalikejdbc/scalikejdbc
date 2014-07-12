@@ -152,13 +152,13 @@ object DB extends LoanPattern {
   type CPContext = ConnectionPoolContext
   val NoCPContext = NoConnectionPoolContext
 
-  private def ensureDBInstance(db: DB): Unit = {
+  private[this] def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
       throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
     }
   }
 
-  private def connectionPool(context: CPContext): ConnectionPool = Option(context match {
+  private[this] def connectionPool(context: CPContext): ConnectionPool = Option(context match {
     case NoCPContext => ConnectionPool()
     case _: MultipleConnectionPoolContext => context.get(ConnectionPool.DEFAULT_NAME)
     case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
