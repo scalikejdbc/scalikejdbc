@@ -14,6 +14,17 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   type RSTraversable = ResultSetTraversable
 
+  /**
+   * Connection wil be closed automatically by default.
+   */
+  private[this] var autoCloseEnabled: Boolean = true
+
+  /**
+   * Switches auto close mode.
+   * @param autoClose auto close enabled if true
+   */
+  def autoClose(autoClose: Boolean): Unit = this.autoCloseEnabled = autoClose
+
   def conn: Connection
 
   /**
@@ -132,9 +143,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def readOnly[A](execution: DBSession => A): A = {
-    using(conn) { conn =>
-      execution(readOnlySession())
-    }
+    if (autoCloseEnabled) using(conn)(_ => execution(readOnlySession()))
+    else execution(readOnlySession())
   }
 
   /**
@@ -145,9 +155,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def readOnlyWithConnection[A](execution: Connection => A): A = {
     // cannot control if jdbc drivers ignore the readOnly attribute.
-    using(conn) { conn =>
-      execution(readOnlySession().conn)
-    }
+    if (autoCloseEnabled) using(conn)(_ => execution(readOnlySession().conn))
+    else execution(readOnlySession().conn)
   }
 
   /**
@@ -167,9 +176,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def autoCommit[A](execution: DBSession => A): A = {
-    using(conn) { conn =>
-      execution(autoCommitSession())
-    }
+    if (autoCloseEnabled) using(conn)(_ => execution(autoCommitSession()))
+    else execution(autoCommitSession())
   }
 
   /**
@@ -179,9 +187,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def autoCommitWithConnection[A](execution: Connection => A): A = {
-    using(conn) { conn =>
-      execution(autoCommitSession().conn)
-    }
+    if (autoCloseEnabled) using(conn)(_ => execution(autoCommitSession().conn))
+    else execution(autoCommitSession().conn)
   }
 
   /**
@@ -234,7 +241,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def localTx[A](execution: DBSession => A): A = {
-    using(conn) { conn =>
+    def _localTx[A](execution: DBSession => A): A = {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
@@ -244,6 +251,8 @@ trait DBConnection extends LogSupport with LoanPattern {
         result
       }
     }
+    if (autoCloseEnabled) using(conn)(_ => _localTx(execution))
+    else _localTx(execution)
   }
 
   /**
@@ -253,8 +262,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @tparam A future result type
    * @return future result
    */
-  def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = futureUsing(conn) {
-    checkedOutConn =>
+  def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+    def _futureLocalTx[A](checkedOutConn: Connection, execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
       val tx = newTx(checkedOutConn)
       begin(tx)
 
@@ -267,6 +276,9 @@ trait DBConnection extends LogSupport with LoanPattern {
           case _: Failure[_] => tx.rollback()
           case _ =>
         }
+    }
+    if (autoCloseEnabled) futureUsing(conn) { c => _futureLocalTx(c, execution) }
+    else _futureLocalTx(conn, execution)
   }
 
   /**
@@ -276,7 +288,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def localTxWithConnection[A](execution: Connection => A): A = {
-    using(conn) { conn =>
+    def _localTxWithConnection[A](execution: Connection => A): A = {
       val tx = newTx
       begin(tx)
       rollbackIfThrowable[A] {
@@ -286,6 +298,8 @@ trait DBConnection extends LogSupport with LoanPattern {
         result
       }
     }
+    if (autoCloseEnabled) using(conn)(_ => _localTxWithConnection(execution))
+    else _localTxWithConnection(execution)
   }
 
   /**
@@ -312,14 +326,16 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @param tableNamePattern table name pattern (with schema optionally)
    * @return table information
    */
-  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = readOnlyWithConnection { conn =>
-    val meta = conn.getMetaData
-    val (schema, _tableNamePattern) = toSchemaAndTable(tableNamePattern.replaceAll("\\*", "%"))
-    new RSTraversable(meta.getTables(null, schema, _tableNamePattern, tableTypes))
-      .map { rs =>
-        if (schema != null) schema + "." + rs.string("TABLE_NAME")
-        else rs.string("TABLE_NAME")
-      }.toList
+  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
+    readOnlyWithConnection { conn =>
+      val meta = conn.getMetaData
+      val (schema, _tableNamePattern) = toSchemaAndTable(tableNamePattern.replaceAll("\\*", "%"))
+      new RSTraversable(meta.getTables(null, schema, _tableNamePattern, tableTypes))
+        .map { rs =>
+          if (schema != null) schema + "." + rs.string("TABLE_NAME")
+          else rs.string("TABLE_NAME")
+        }.toList
+    }
   }
 
   /**
@@ -346,11 +362,13 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @param table table name (with schema optionally)
    * @return table information
    */
-  def getTable(table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = readOnlyWithConnection { conn =>
-    val meta = conn.getMetaData
-    _getTable(meta, table, tableTypes)
-      .orElse(_getTable(meta, table.toUpperCase(en), tableTypes))
-      .orElse(_getTable(meta, table.toLowerCase(en), tableTypes))
+  def getTable(table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
+    readOnlyWithConnection { conn =>
+      val meta = conn.getMetaData
+      _getTable(meta, table, tableTypes)
+        .orElse(_getTable(meta, table.toUpperCase(en), tableTypes))
+        .orElse(_getTable(meta, table.toLowerCase(en), tableTypes))
+    }
   }
 
   /**
