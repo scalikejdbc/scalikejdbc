@@ -57,6 +57,11 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, si
    * Initializes this instance.
    */
   private def initialize() {
+    // default: None
+    GlobalSettings.defaultFetchSize.foreach { fetchSize =>
+      log.debug("GlobalSettings.defaultFetchSize: " + fetchSize)
+      underlying.setFetchSize(fetchSize)
+    }
     bindParams(singleParams)
     if (isBatch) {
       batchParamsList.clear()
