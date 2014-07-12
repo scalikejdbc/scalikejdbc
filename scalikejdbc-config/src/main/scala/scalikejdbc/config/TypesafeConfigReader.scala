@@ -40,16 +40,32 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
     "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
-    val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
-    val iter = dbConfig.entrySet.iterator
     val configMap: MutableMap[String, String] = MutableMap.empty
-    while (iter.hasNext) {
-      val entry = iter.next()
-      val key = entry.getKey
-      if (attributeNames.contains(key)) {
-        configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+
+    {
+      val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
+      val iter = dbConfig.entrySet.iterator
+      while (iter.hasNext) {
+        val entry = iter.next()
+        val key = entry.getKey
+        if (attributeNames.contains(key)) {
+          configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+        }
       }
     }
+
+    try {
+      val topLevelConfig = config.getConfig("db." + dbName.name)
+      val iter = topLevelConfig.entrySet.iterator
+      while (iter.hasNext) {
+        val entry = iter.next()
+        val key = entry.getKey
+        if (attributeNames.contains(key) && !configMap.contains(key)) {
+          configMap(key) = config.getString("db." + dbName.name + "." + key)
+        }
+      }
+    } catch { case e: ConfigException => }
+
     configMap.toMap
   } catch {
     case e: ConfigException => throw new ConfigurationException(e)

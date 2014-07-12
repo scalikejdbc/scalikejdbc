@@ -103,6 +103,11 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
       }
       it("should read configuration by env and db name and return as Map") {
         val expected = Map(
+          "poolValidationQuery" -> "select 1 as foo",
+          "poolConnectionTimeoutMillis" -> "1000",
+          "connectionTimeoutMillis" -> "2000",
+          "poolInitialSize" -> "1",
+          "poolMaxSize" -> "2",
           "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:dev-foo",
           "user" -> "dev-foo",
@@ -112,10 +117,31 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
         configReader.readAsMap('foo) should be(expected)
       }
 
+      it("should read top level configuration and return as Map") {
+        val expected = Map(
+          "driver" -> "org.h2.Driver",
+          "url" -> "jdbc:h2:mem:topLevelDefaults",
+          "user" -> "xxx",
+          "password" -> "yyy"
+        )
+        TypesafeConfigReader.readAsMap('topLevelDefaults) should be(expected)
+      }
+
+      it("should read configuration by env and top level defaults and db name and return as Map") {
+        val expected = Map(
+          "driver" -> "org.h2.Driver",
+          "url" -> "jdbc:h2:mem:topLevelDefaults",
+          "user" -> "app",
+          "password" -> "password"
+        )
+        val configReader = new TypesafeConfigReaderWithEnv("prod")
+        configReader.readAsMap('topLevelDefaults) should be(expected)
+      }
+
     }
 
     it("should get db names") {
-      val expected = List("default", "foo", "bar", "baz").sorted
+      val expected = List("default", "foo", "bar", "baz", "topLevelDefaults").sorted
       TypesafeConfigReader.dbNames.sorted should be(expected)
     }
 
@@ -123,7 +149,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
       it("should read configuration and return as ConnectionPoolSettings") {
         val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one", "commons-dbcp")
-        TypesafeConfigReader.readConnectionPoolSettings() should be(expected)
+        TypesafeConfigReaderWithEnv("settings").readConnectionPoolSettings() should be(expected)
       }
 
       it("should read configuration for foo db and return as ConnectionPoolSettings") {
