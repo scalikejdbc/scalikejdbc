@@ -29,6 +29,9 @@ object ScalikeJDBCProjects extends Build {
     Seq(
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
       exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose")

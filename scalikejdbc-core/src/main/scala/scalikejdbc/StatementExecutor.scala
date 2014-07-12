@@ -43,9 +43,12 @@ object StatementExecutor {
  * @param singleParams parameters for single execution (= not batch execution)
  * @param isBatch is batch flag
  */
-case class StatementExecutor(underlying: PreparedStatement, template: String, singleParams: Seq[Any] = Nil, isBatch: Boolean = false)
-    extends LogSupport
-    with UnixTimeInMillisConverterImplicits {
+case class StatementExecutor(
+  underlying: PreparedStatement,
+  template: String,
+  singleParams: Seq[Any] = Nil,
+  isBatch: Boolean = false)
+    extends LogSupport with UnixTimeInMillisConverterImplicits {
 
   import StatementExecutor._
 
@@ -57,11 +60,6 @@ case class StatementExecutor(underlying: PreparedStatement, template: String, si
    * Initializes this instance.
    */
   private def initialize() {
-    // default: None
-    GlobalSettings.defaultFetchSize.foreach { fetchSize =>
-      log.debug("GlobalSettings.defaultFetchSize: " + fetchSize)
-      underlying.setFetchSize(fetchSize)
-    }
     bindParams(singleParams)
     if (isBatch) {
       batchParamsList.clear()

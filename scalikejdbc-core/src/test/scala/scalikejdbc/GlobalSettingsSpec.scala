@@ -163,33 +163,4 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings {
     }
   }
 
-  it should "have default fetchSize configuration" in {
-    DB autoCommit { implicit session =>
-      try {
-        try SQL("drop table default_fetch_size").execute.apply()
-        catch { case e: Exception => }
-
-        SQL("create table default_fetch_size (id int primary key, name varchar(13) not null)").execute.apply()
-
-        1 to 10000 foreach { i =>
-          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
-          SQL("insert into default_fetch_size values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
-        }
-
-        GlobalSettings.defaultFetchSize = None
-        val results1 = SQL("select  * from default_fetch_size").map(rs => rs.int("id")).list.apply()
-        results1.size should equal(10000)
-
-        GlobalSettings.defaultFetchSize = Some(100)
-        val results2 = SQL("select  * from default_fetch_size").map(rs => rs.int("id")).list.apply()
-        results2.size should equal(10000)
-
-      } finally {
-        GlobalSettings.defaultFetchSize = None
-        try SQL("drop table default_fetch_size").execute.apply()
-        catch { case e: Exception => }
-      }
-    }
-  }
-
 }

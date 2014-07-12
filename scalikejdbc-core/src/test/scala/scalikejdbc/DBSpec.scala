@@ -542,7 +542,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
 
-      // default behaivor
+      // default behavior
       using(DB(ConnectionPool.borrow())) {
         db =>
           val db = DB(ConnectionPool.borrow())
@@ -578,6 +578,30 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
             _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
           }.get
           name2 should equal("bar")
+      }
+    }
+  }
+
+  // fetchSize
+
+  it should "execute query with fetchSize" in {
+    val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      {
+        val result: Seq[String] = DB readOnly { session =>
+          session.fetchSize(111)
+          session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        }
+        result.size should be > 0
+      }
+
+      {
+        val result: Seq[String] = DB readOnly { implicit session =>
+          SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list.apply()
+        }
+        result.size should be > 0
       }
     }
   }

@@ -32,6 +32,4 @@ object GlobalSettings {
 
   var queryFailureListener: (String, Seq[Any], Throwable) => Unit = (statement: String, params: Seq[Any], e: Throwable) => ()
 
-  var defaultFetchSize: Option[Int] = None
-
 }
