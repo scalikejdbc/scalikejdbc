@@ -27,15 +27,17 @@ object ScalikeJDBCProjects extends Build {
     import com.typesafe.tools.mima.core._
     import com.typesafe.tools.mima.core.ProblemFilters._
     Seq(
+      // since 2.0.1
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
       exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"),
-      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv"),
+      // since 2.0.5
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose")
+      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv")
     )
   }
 
