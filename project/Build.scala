@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.5-SNAPSHOT"
+  lazy val _version = "2.0.5"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -31,9 +31,9 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
       exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"),
       // since 2.0.5
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),

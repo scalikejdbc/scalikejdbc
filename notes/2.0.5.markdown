@@ -1,0 +1,18 @@
+ScalikeJDBC 2.0.5 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## core
+
+- #263 Add SQL#fetchSize, DBSession#fetchSize to specify JDBC fetchSize
+- Add DB#autoClose(Boolean) to enable disabling auto-close (https://groups.google.com/forum/#!topic/scalikejdbc-users-group/4qIgqXQ-TOY)
+
+## config
+
+- #264 Enable read config with defaults
+
+Enjoy writing mostly type-safe SQL and get things done!
+
+
