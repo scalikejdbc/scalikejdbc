@@ -16,33 +16,12 @@
 package scalikejdbc.config
 
 import scalikejdbc._
-import com.typesafe.config.{ Config, ConfigFactory, ConfigException }
+import com.typesafe.config.{ Config, ConfigException }
 import scala.collection.mutable.{ Map => MutableMap }
 import scala.collection.JavaConverters._
 
 /**
- * Configuration Exception
- */
-class ConfigurationException(val message: String) extends Exception(message) {
-  def this(e: Throwable) = this(e.getMessage)
-}
-
-/*
- * A Trait that holds configuration
- */
-trait TypesafeConfig {
-  val config: Config
-}
-
-/*
- * A Trait that follows the standard behavior of typesafe-config.
- */
-trait StandardTypesafeConfig extends TypesafeConfig {
-  lazy val config: Config = ConfigFactory.load()
-}
-
-/**
- * Typesafe TypesafeConfig reader
+ * TypesafeConfig reader
  */
 trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeConfig =>
 
@@ -61,16 +40,32 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
     "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
-    val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
-    val iter = dbConfig.entrySet.iterator
     val configMap: MutableMap[String, String] = MutableMap.empty
-    while (iter.hasNext) {
-      val entry = iter.next()
-      val key = entry.getKey
-      if (attributeNames.contains(key)) {
-        configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+
+    {
+      val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
+      val iter = dbConfig.entrySet.iterator
+      while (iter.hasNext) {
+        val entry = iter.next()
+        val key = entry.getKey
+        if (attributeNames.contains(key)) {
+          configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+        }
       }
     }
+
+    try {
+      val topLevelConfig = config.getConfig("db." + dbName.name)
+      val iter = topLevelConfig.entrySet.iterator
+      while (iter.hasNext) {
+        val entry = iter.next()
+        val key = entry.getKey
+        if (attributeNames.contains(key) && !configMap.contains(key)) {
+          configMap(key) = config.getString("db." + dbName.name + "." + key)
+        }
+      }
+    } catch { case e: ConfigException => }
+
     configMap.toMap
   } catch {
     case e: ConfigException => throw new ConfigurationException(e)
@@ -166,15 +161,4 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 object TypesafeConfigReader extends TypesafeConfigReader
   with StandardTypesafeConfig
   with NoEnvPrefix
-
-/**
- * Typesafe config reader with env prefix.
- */
-case class TypesafeConfigReaderWithEnv(envValue: String)
-    extends TypesafeConfigReader
-    with StandardTypesafeConfig
-    with EnvPrefix {
-
-  override val env = Option(envValue)
-}
 

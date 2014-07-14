@@ -18,11 +18,13 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     val tableName = tableNamePrefix + "_trait"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db: DBConnection = DB(ConnectionPool.borrow())
-      val result = db readOnly {
-        session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
+
+      using(DB(ConnectionPool.borrow())) { db =>
+        val result = db readOnly {
+          session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        }
+        result.size should be > 0
       }
-      result.size should be > 0
     }
   }
 
@@ -494,11 +496,13 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
 
       Thread.sleep(2000L)
 
-      val name = DB(ConnectionPool.borrow()) autoCommit {
-        session =>
-          session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      using(ConnectionPool.borrow()) { conn =>
+        val name = DB(conn) autoCommit {
+          session =>
+            session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }
+        assert(name.get == "name1")
       }
-      assert(name.get == "name1")
     }
   }
 
@@ -525,6 +529,74 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       } finally {
         try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
         catch { case e: Exception => }
+      }
+    }
+  }
+
+  // --------------------
+  // https://groups.google.com/forum/#!topic/scalikejdbc-users-group/4qIgqXQ-TOY
+
+  it should "be able to disable auto-close mode" in {
+    val tableName = tableNamePrefix + "_disableAutoClose"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      // default behavior
+      using(DB(ConnectionPool.borrow())) { db =>
+        //db.autoClose(false)
+        db.localTx {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        // java.sql.SQLException: Connection is closed.
+        intercept[java.sql.SQLException] {
+          db.readOnly {
+            _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          }
+        }
+      }
+
+      // disable auto-close mode
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.autoClose(false)
+        db.localTx {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        val name1 = db.readOnly {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }.get
+        name1 should equal("foo")
+
+        db.localTx {
+          _.update("update " + tableName + " set name = ? where id = ?", "bar", 1)
+        }
+        val name2 = db.readOnly {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }.get
+        name2 should equal("bar")
+      }
+    }
+  }
+
+  // fetchSize
+
+  it should "execute query with fetchSize" in {
+    val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      {
+        val result: Seq[String] = DB readOnly { session =>
+          session.fetchSize(111)
+          session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        }
+        result.size should be > 0
+      }
+
+      {
+        val result: Seq[String] = DB readOnly { implicit session =>
+          SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list.apply()
+        }
+        result.size should be > 0
       }
     }
   }

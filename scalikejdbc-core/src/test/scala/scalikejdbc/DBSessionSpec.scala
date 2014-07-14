@@ -62,6 +62,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_insertWithNullableValues"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
+
       using(new DB(ConnectionPool.borrow())) {
         db =>
           val session = db.autoCommitSession()
@@ -83,9 +84,9 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
 
   it should "execute single in auto commit mode" in {
     val tableName = tableNamePrefix + "_singleInAutoCommit"
-    val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
+
       using(new DB(ConnectionPool.borrow())) {
         db =>
           val session = db.autoCommitSession()
@@ -99,9 +100,9 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
 
   it should "execute list in auto commit mode" in {
     val tableName = tableNamePrefix + "_listInAutoCommit"
-    val conn = ConnectionPool.borrow()
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
+
       using(new DB(ConnectionPool.borrow())) {
         db =>
           val session = db.autoCommitSession()
@@ -114,45 +115,47 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
   }
 
   it should "execute update in auto commit mode with filters" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_updateInAutoCommit"
-    val db = new DB(ConnectionPool.borrow())
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      try {
-        val before = (stmt: PreparedStatement) => println("before")
-        val after = (stmt: PreparedStatement) => println("after")
-        val count = session.updateWithFilters(before, after, "update " + tableName + " set name = ? where id = ?", "foo", 1)
-        db.rollbackIfActive()
-        count should equal(1)
-        val name = session.single("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.string("name")
-        } getOrElse "---"
-        name should equal("foo")
-      } finally {
-        session.close()
+
+      using(new DB(ConnectionPool.borrow())) { db =>
+        val session = db.autoCommitSession()
+        try {
+          val before = (stmt: PreparedStatement) => println("before")
+          val after = (stmt: PreparedStatement) => println("after")
+          val count = session.updateWithFilters(before, after, "update " + tableName + " set name = ? where id = ?", "foo", 1)
+          db.rollbackIfActive()
+          count should equal(1)
+          val name = session.single("select name from " + tableName + " where id = ?", 1) {
+            rs => rs.string("name")
+          } getOrElse "---"
+          name should equal("foo")
+        } finally {
+          session.close()
+        }
       }
     }
-
   }
 
   it should "execute executeUpdate in auto commit mode" in {
     val tableName = tableNamePrefix + "_executeUpdateInAutoCommit"
-    val db = new DB(ConnectionPool.borrow())
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = new DB(ConnectionPool.borrow()).autoCommitSession()
-      try {
-        val count = session.executeUpdate("update " + tableName + " set name = ? where id = ?", "foo", 1)
-        db.rollbackIfActive()
-        count should equal(1)
-        val name = session.single("select name from " + tableName + " where id = ?", 1) {
-          rs => rs.string("name")
-        } getOrElse "---"
-        name should equal("foo")
-      } finally {
-        session.close()
+
+      using(new DB(ConnectionPool.borrow())) { db =>
+        val session = db.autoCommitSession()
+        try {
+          val count = session.executeUpdate("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          db.rollbackIfActive()
+          count should equal(1)
+          val name = session.single("select name from " + tableName + " where id = ?", 1) {
+            rs => rs.string("name")
+          } getOrElse "---"
+          name should equal("foo")
+        } finally {
+          session.close()
+        }
       }
     }
 
@@ -165,18 +168,20 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_singleInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(ConnectionPool.borrow())
-      db.begin()
-      val session = db.withinTxSession()
-      try {
-        TestUtils.initializeEmpRecords(session, tableName)
-        val result = session.single("select id from " + tableName + " where id = ?", 1) {
-          rs => rs.string("id")
+
+      using(new DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val session = db.withinTxSession()
+        try {
+          TestUtils.initializeEmpRecords(session, tableName)
+          val result = session.single("select id from " + tableName + " where id = ?", 1) {
+            rs => rs.string("id")
+          }
+          result.get should equal("1")
+          db.rollbackIfActive()
+        } finally {
+          session.close()
         }
-        result.get should equal("1")
-        db.rollbackIfActive()
-      } finally {
-        session.close()
       }
     }
   }
@@ -185,18 +190,20 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_listInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = new DB(ConnectionPool.borrow())
-      db.begin()
-      val session = db.withinTxSession()
-      try {
-        TestUtils.initializeEmpRecords(session, tableName)
-        val result = session.list("select id from " + tableName + "") {
-          rs => rs.string("id")
+
+      using(new DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val session = db.withinTxSession()
+        try {
+          TestUtils.initializeEmpRecords(session, tableName)
+          val result = session.list("select id from " + tableName + "") {
+            rs => rs.string("id")
+          }
+          result.size should equal(2)
+          db.rollbackIfActive()
+        } finally {
+          session.close()
         }
-        result.size should equal(2)
-        db.rollbackIfActive()
-      } finally {
-        session.close()
       }
     }
   }
@@ -256,22 +263,21 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_updateInWithinTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(new DB(ConnectionPool.borrow())) {
-        db =>
-          db.begin()
-          val session = db.withinTxSession()
-          TestUtils.initializeEmpRecords(session, tableName)
-          val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
-            rs => rs.string("name")
-          }.get
-          nameBefore should equal("name1")
-          val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-          count should equal(1)
-          db.rollbackIfActive()
-          val name = session.single("select name from " + tableName + " where id = ?", 1) {
-            rs => rs.string("name")
-          }.get
-          name should equal("name1")
+      using(new DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val session = db.withinTxSession()
+        TestUtils.initializeEmpRecords(session, tableName)
+        val nameBefore = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        }.get
+        nameBefore should equal("name1")
+        val count = session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        count should equal(1)
+        db.rollbackIfActive()
+        val name = session.single("select name from " + tableName + " where id = ?", 1) {
+          rs => rs.string("name")
+        }.get
+        name should equal("name1")
       }
     }
   }

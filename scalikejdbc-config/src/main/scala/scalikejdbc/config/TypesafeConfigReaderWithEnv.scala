@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2013 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,20 @@
  */
 package scalikejdbc.config
 
-/**
- * Env prefix for config reader
- */
-trait EnvPrefix {
-  val env: Option[String]
-}
+import com.typesafe.config.{ ConfigFactory, Config }
 
+/**
+ * Typesafe config reader with env prefix.
+ */
+case class TypesafeConfigReaderWithEnv(envValue: String)
+    extends TypesafeConfigReader
+    with StandardTypesafeConfig
+    with EnvPrefix {
+
+  override val env = Option(envValue)
+
+  override lazy val config: Config = {
+    val topLevelConfig = ConfigFactory.load()
+    topLevelConfig.getConfig(envValue).withFallback(topLevelConfig)
+  }
+}

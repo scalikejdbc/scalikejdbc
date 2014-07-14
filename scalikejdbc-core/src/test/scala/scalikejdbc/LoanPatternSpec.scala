@@ -13,19 +13,19 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
 
   behavior of "LoanPattern"
 
-  val conn = DriverManager.getConnection(url, user, password)
-
   it should "be available" in {
     LoanPattern.isInstanceOf[Singleton] should equal(true)
   }
 
   "using" should "be available" in {
+    val conn = DriverManager.getConnection(url, user, password)
     using(conn) {
       conn => println("do something with " + conn.toString)
     }
   }
 
   "futureUsing" should "be available" in {
+    val conn = DriverManager.getConnection(url, user, password)
     val fResult = futureUsing(conn) { conn =>
       Future.successful(3)
     }

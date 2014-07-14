@@ -43,9 +43,12 @@ object StatementExecutor {
  * @param singleParams parameters for single execution (= not batch execution)
  * @param isBatch is batch flag
  */
-case class StatementExecutor(underlying: PreparedStatement, template: String, singleParams: Seq[Any] = Nil, isBatch: Boolean = false)
-    extends LogSupport
-    with UnixTimeInMillisConverterImplicits {
+case class StatementExecutor(
+  underlying: PreparedStatement,
+  template: String,
+  singleParams: Seq[Any] = Nil,
+  isBatch: Boolean = false)
+    extends LogSupport with UnixTimeInMillisConverterImplicits {
 
   import StatementExecutor._
 

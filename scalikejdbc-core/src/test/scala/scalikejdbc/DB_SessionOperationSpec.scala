@@ -3,6 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.SQLException
 import util.control.Exception._
+import scalikejdbc.LoanPattern._
 
 class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
 
@@ -11,48 +12,47 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
   behavior of "DB(Session operation)"
 
   it should "be available" in {
-    val db = DB(ConnectionPool.borrow())
-    db should not be null
-    db.close()
+    using(ConnectionPool.borrow()) { conn =>
+      val db = DB(conn)
+      db should not be null
+      db.close()
+    }
   }
 
   // --------------------
   // tx
 
   it should "be impossible to call #begin twice" in {
-    val db = DB(ConnectionPool.borrow())
-    db.begin()
-    intercept[IllegalStateException] {
+    using(ConnectionPool.borrow()) { conn =>
+      val db = DB(conn)
       db.begin()
-    }
-    try {
+      intercept[IllegalStateException] {
+        db.begin()
+      }
       db.rollback()
-    } finally {
-      db.close()
     }
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
-    val db = DB(ConnectionPool('default).borrow())
-    try {
+    using(ConnectionPool('default).borrow()) { conn =>
+      val db = DB(conn)
       db.begin()
       db.beginIfNotYet()
       db.beginIfNotYet()
       db.beginIfNotYet()
       db.rollback()
       db.rollbackIfActive()
-    } finally {
-      db.close()
     }
   }
 
   "#tx" should "not be available before beginning tx" in {
-    val db = DB(ConnectionPool('named).borrow())
-    intercept[IllegalStateException] {
-      db.tx.begin()
+    using(ConnectionPool('named).borrow()) { conn =>
+      val db = DB(conn)
+      intercept[IllegalStateException] {
+        db.tx.begin()
+      }
+      db.rollbackIfActive()
     }
-    db.rollbackIfActive()
-    db.close()
   }
 
   // --------------------
@@ -62,12 +62,14 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val result = db readOnly {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val result = db readOnly {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        }
+        result.size should be > 0
       }
-      result.size should be > 0
     }
   }
 
@@ -75,12 +77,14 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val session = db.readOnlySession()
-      try {
-        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-        result.size should be > 0
-      } finally { session.close() }
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val session = db.readOnlySession()
+        try {
+          val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          result.size should be > 0
+        } finally { session.close() }
+      }
     }
   }
 
@@ -88,10 +92,12 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_neverUpdateInReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      intercept[SQLException] {
-        db readOnly {
-          session => session.update("update " + tableName + " set name = ?", "xxx")
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        intercept[SQLException] {
+          db readOnly {
+            session => session.update("update " + tableName + " set name = ?", "xxx")
+          }
         }
       }
     }
@@ -104,12 +110,14 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val result = db autoCommit {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val result = db autoCommit {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        }
+        result.size should be > 0
       }
-      result.size should be > 0
     }
   }
 
@@ -117,13 +125,15 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val session = db.autoCommitSession()
-      try {
-        val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
-        list(0) should equal(1)
-        list(1) should equal(2)
-      } finally { session.close() }
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val session = db.autoCommitSession()
+        try {
+          val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
+          list(0) should equal(1)
+          list(1) should equal(2)
+        } finally { session.close() }
+      }
     }
   }
 
@@ -131,11 +141,13 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_singleInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val result = db autoCommit {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val result = db autoCommit {
+          _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
+        }
+        result.get should equal(1)
       }
-      result.get should equal(1)
     }
   }
 
@@ -143,10 +155,12 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_tooManyResultsInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      intercept[TooManyRowsException] {
-        db autoCommit {
-          _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        intercept[TooManyRowsException] {
+          db autoCommit {
+            _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
+          }
         }
       }
     }
@@ -156,12 +170,14 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock2"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = db readOnly {
-        _.single("select * from " + tableName + " where id = ?", 1)(extractName)
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val extractName = (rs: WrappedResultSet) => rs.string("name")
+        val name: Option[String] = db readOnly {
+          _.single("select * from " + tableName + " where id = ?", 1)(extractName)
+        }
+        name.get should equal("name1")
       }
-      name.get should equal("name1")
     }
   }
 
@@ -169,11 +185,13 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      val result = db autoCommit {
-        _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        val result = db autoCommit {
+          _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
+        }
+        result.size should equal(2)
       }
-      result.size should equal(2)
     }
   }
 
@@ -181,9 +199,11 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db = DB(ConnectionPool.borrow())
-      db autoCommit {
-        _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db autoCommit {
+          _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
+        }
       }
     }
   }
@@ -277,16 +297,16 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
   // withinTx
 
   it should "not execute query in withinTx block before beginning tx" in {
-    val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_queryInWithinTxBeforeTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      intercept[IllegalStateException] {
-        db withinTx {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        intercept[IllegalStateException] {
+          db withinTx {
+            session =>
+              session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          }
         }
       }
     }
@@ -296,15 +316,16 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val result = db withinTx {
+          session =>
+            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        }
+        result.size should be > 0
+        db.rollbackIfActive()
       }
-      result.size should be > 0
-      db.rollbackIfActive()
     }
   }
 
@@ -312,15 +333,16 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val session = db.withinTxSession()
-      try {
-        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
-        result.size should be > 0
-        db.rollbackIfActive()
-      } finally { session.close() }
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val session = db.withinTxSession()
+        try {
+          val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          result.size should be > 0
+          db.rollbackIfActive()
+        } finally { session.close() }
+      }
     }
   }
 
@@ -328,14 +350,15 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val result = db withinTx {
+          _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+        }
+        result.get should equal("1")
+        db.rollbackIfActive()
       }
-      result.get should equal("1")
-      db.rollbackIfActive()
     }
   }
 
@@ -343,14 +366,15 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val result = db withinTx {
-        _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val result = db withinTx {
+          _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
+        }
+        result.size should equal(2)
+        db.rollbackIfActive()
       }
-      result.size should equal(2)
-      db.rollbackIfActive()
     }
   }
 
@@ -358,18 +382,19 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val count = db withinTx {
-        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val count = db withinTx {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        count should equal(1)
+        val name = (db withinTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }).get
+        name should equal("foo")
+        db.rollback()
       }
-      count should equal(1)
-      val name = (db withinTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).get
-      name should equal("foo")
-      db.rollback()
     }
   }
 
@@ -377,19 +402,20 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val conn = ConnectionPool.borrow()
-      val db = DB(ConnectionPool.borrow())
-      db.begin()
-      val count = db withinTx {
-        _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      using(ConnectionPool.borrow()) { conn =>
+        val db = DB(conn)
+        db.begin()
+        val count = db withinTx {
+          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+        }
+        count should equal(1)
+        db.rollback()
+        db.begin()
+        val name = (db withinTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }).get
+        name should equal("name1")
       }
-      count should equal(1)
-      db.rollback()
-      db.begin()
-      val name = (db withinTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-      }).get
-      name should equal("name1")
     }
   }
 
@@ -402,39 +428,42 @@ class DB_SessionOperationSpec extends FlatSpec with Matchers with BeforeAndAfter
       TestUtils.initialize(tableName)
       import scala.concurrent.ExecutionContext.Implicits.global
       scala.concurrent.Future {
-        val conn = ConnectionPool.borrow()
-        val db = DB(ConnectionPool.borrow())
-        db.begin()
-        val session = db.withinTxSession()
-        try {
-          session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-          Thread.sleep(1000L)
-          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-          assert(name.get == "foo")
-          db.rollback()
-        } finally { session.close() }
+        using(ConnectionPool.borrow()) { conn =>
+          val db = DB(conn)
+          db.begin()
+          val session = db.withinTxSession()
+          try {
+            session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+            Thread.sleep(1000L)
+            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            assert(name.get == "foo")
+            db.rollback()
+          } finally { session.close() }
+        }
       }
       scala.concurrent.Future {
-        val conn = ConnectionPool.borrow()
-        val db = DB(ConnectionPool.borrow())
-        db.begin()
-        val session = db.withinTxSession()
-        try {
-          Thread.sleep(200L)
-          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-          assert(name.get == "name1")
-          db.rollback()
-        } finally { session.close() }
+        using(ConnectionPool.borrow()) { conn =>
+          val db = DB(conn)
+          db.begin()
+          val session = db.withinTxSession()
+          try {
+            Thread.sleep(200L)
+            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            assert(name.get == "name1")
+            db.rollback()
+          } finally { session.close() }
+        }
       }
 
       Thread.sleep(2000L)
 
-      val conn = ConnectionPool.borrow()
-      val name = DB(ConnectionPool.borrow()) autoCommit {
-        session =>
-          session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      using(ConnectionPool.borrow()) { conn =>
+        val name = DB(conn) autoCommit {
+          session =>
+            session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        }
+        assert(name.get == "name1")
       }
-      assert(name.get == "name1")
     }
   }
 

@@ -40,6 +40,8 @@ trait DBSession extends LogSupport with LoanPattern {
 
   private[scalikejdbc] val conn: Connection
 
+  private[this] var _fetchSize: Option[Int] = None
+
   /**
    * is read-only session
    */
@@ -62,10 +64,12 @@ trait DBSession extends LogSupport with LoanPattern {
       } else {
         conn.prepareStatement(template)
       }
+      this.fetchSize.foreach { size => statement.setFetchSize(size) }
       StatementExecutor(
         underlying = statement,
         template = template,
         singleParams = params)
+
     } catch {
       case e: Exception =>
         val formattedTemplate = if (GlobalSettings.sqlFormatter.formatter.isDefined) {
@@ -104,8 +108,10 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return statement executor
    */
   private def createBatchStatementExecutor(conn: Connection, template: String): StatementExecutor = {
+    val statement = conn.prepareStatement(template)
+    this.fetchSize.foreach { size => statement.setFetchSize(size) }
     StatementExecutor(
-      underlying = conn.prepareStatement(template),
+      underlying = statement,
       template = template,
       isBatch = true)
   }
@@ -124,6 +130,29 @@ trait DBSession extends LogSupport with LoanPattern {
         ErrorMessage.CANNOT_EXECUTE_IN_READ_ONLY_SESSION + " (template:" + template + ")")
     }
   }
+
+  /**
+   * Set fetchSize for this session.
+   *
+   * @param fetchSize fetch size
+   * @return this
+   */
+  def fetchSize(fetchSize: Int): DBSession = {
+    this._fetchSize = Some(fetchSize)
+    this
+  }
+
+  def fetchSize(fetchSize: Option[Int]): DBSession = {
+    this._fetchSize = fetchSize
+    this
+  }
+
+  /**
+   * Returns fetchSize for this session.
+   *
+   * @return fetch size
+   */
+  def fetchSize: Option[Int] = this._fetchSize
 
   /**
    * Returns single result optionally.

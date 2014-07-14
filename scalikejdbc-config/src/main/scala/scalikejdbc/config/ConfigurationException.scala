@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2013 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 package scalikejdbc.config
 
 /**
- * Env prefix for config reader
+ * Configuration Exception
  */
-trait EnvPrefix {
-  val env: Option[String]
+class ConfigurationException(val message: String) extends Exception(message) {
+  def this(e: Throwable) = this(e.getMessage)
 }
-
