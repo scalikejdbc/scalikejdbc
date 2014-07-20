@@ -1,7 +1,13 @@
 package scalikejdbc
 
+import java.util.Date
+
+import java.util.TimeZone
+import org.joda.time._
 import org.scalatest._
 import java.sql.SQLException
+import org.slf4j.LoggerFactory
+
 import scala.util.control.Exception._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
@@ -9,6 +15,8 @@ import org.scalatest.concurrent.ScalaFutures
 import ExecutionContext.Implicits.global
 
 class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
+
+  val logger = LoggerFactory.getLogger(classOf[DBSpec])
 
   val tableNamePrefix = "emp_DBObjectSpec" + System.currentTimeMillis().toString.substring(8)
 
@@ -600,5 +608,65 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
     }
   }
+
+  // TimeZone
+
+  /*
+  it should "work with TimeZone" in {
+    if (driverClassName != "com.mysql.jdbc.Driver") {
+
+      val now = new Date
+      val currentTimeZone = TimeZone.getDefault
+
+      val tableName = tableNamePrefix + "_timezone"
+      try {
+        ultimately(TestUtils.deleteTable(tableName)) {
+          DB autoCommit { implicit s =>
+            SQL(s"create table ${tableName} (id bigint, t timestamp without time zone not null, tz timestamp not null)").execute.apply()
+            SQL(s"insert into ${tableName} (id, t, tz) values (?, ?, ?)").bind(1, now, now).update.apply()
+          }
+
+          case class Record(id: Long, t: DateTime, tz: DateTime)
+
+          val record1: Record = DB readOnly { implicit s =>
+            SQL(s"select * from ${tableName}").map { rs =>
+              Record(rs.get("id"), rs.jodaDateTime("t"), rs.jodaDateTime("tz"))
+            }.list.apply().head
+          }
+          logger.info(s"record: ${record1}")
+
+          record1.id should equal(1)
+          record1.t.toDate should equal(new DateTime(now).toLocalDateTime.toDate)
+          record1.tz.toDate should equal(now)
+          record1.t.getMillis should equal(now.getTime)
+
+          // side effect for other tests
+          val utc = TimeZone.getTimeZone("UTC")
+          TimeZone.setDefault(utc)
+          DateTimeZone.setDefault(DateTimeZone.forTimeZone(utc))
+
+          val record2: Record = DB readOnly { implicit s =>
+            SQL(s"select * from ${tableName}").map { rs =>
+              Record(rs.get("id"), rs.jodaDateTime("t"), rs.jodaDateTime("tz"))
+            }.list.apply().head
+          }
+          logger.info(s"record: ${record2}")
+
+          record2.id should equal(1)
+          if (currentTimeZone.getID == utc.getID) {
+            record2.t.toDate should not equal (new DateTime(now).toLocalDateTime.toDate)
+          } else {
+            record2.t.toDate should equal(new DateTime(now).toLocalDateTime.toDate)
+          }
+          record2.tz.toDate should equal(now)
+          record2.t.getMillis should equal(now.getTime)
+        }
+
+      } finally {
+        TimeZone.setDefault(currentTimeZone)
+      }
+    }
+  }
+  */
 
 }
