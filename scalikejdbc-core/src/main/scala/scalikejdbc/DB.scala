@@ -176,7 +176,7 @@ object DB extends LoanPattern {
    */
   def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).readOnly(execution)
+      DB(conn).autoClose(false).readOnly(execution)
     }
   }
 
@@ -191,7 +191,7 @@ object DB extends LoanPattern {
    */
   def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).readOnlyWithConnection(execution)
+      DB(conn).autoClose(false).readOnlyWithConnection(execution)
     }
   }
 
@@ -215,7 +215,7 @@ object DB extends LoanPattern {
    */
   def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).autoCommit(execution)
+      DB(conn).autoClose(false).autoCommit(execution)
     }
   }
 
@@ -230,7 +230,7 @@ object DB extends LoanPattern {
    */
   def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).autoCommitWithConnection(execution)
+      DB(conn).autoClose(false).autoCommitWithConnection(execution)
     }
   }
 
@@ -254,7 +254,7 @@ object DB extends LoanPattern {
    */
   def localTx[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).localTx(execution)
+      DB(conn).autoClose(false).localTx(execution)
     }
   }
 
@@ -268,7 +268,7 @@ object DB extends LoanPattern {
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
     futureUsing(connectionPool(context).borrow()) { conn =>
-      DB(conn).futureLocalTx(execution)
+      DB(conn).autoClose(false).futureLocalTx(execution)
     }
   }
 
@@ -283,7 +283,7 @@ object DB extends LoanPattern {
    */
   def localTxWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
     using(connectionPool(context).borrow()) { conn =>
-      DB(conn).localTxWithConnection(execution)
+      DB(conn).autoClose(false).localTxWithConnection(execution)
     }
   }
 

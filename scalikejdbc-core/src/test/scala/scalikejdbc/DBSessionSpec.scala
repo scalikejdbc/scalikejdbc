@@ -454,7 +454,6 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
               timestamp
             ).update.apply()
 
-            val c = Calendar.getInstance()
             SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
               rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
             }.first().apply().map {

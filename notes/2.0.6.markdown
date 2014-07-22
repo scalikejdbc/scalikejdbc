@@ -1,0 +1,17 @@
+ScalikeJDBC 2.0.6 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## core
+
+- Fix DB closes connections twice - https://groups.google.com/forum/#!topic/scalikejdbc-users-group/hJ4NeJRMfzc
+- Add LikeConditionEscapeUtil
+
+## interpolation
+
+- Add in, notIn, exists, notExists with subQuery to SQLSyntax
+
+Enjoy writing mostly type-safe SQL and get things done!
+

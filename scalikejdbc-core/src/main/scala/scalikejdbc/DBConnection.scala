@@ -23,7 +23,10 @@ trait DBConnection extends LogSupport with LoanPattern {
    * Switches auto close mode.
    * @param autoClose auto close enabled if true
    */
-  def autoClose(autoClose: Boolean): Unit = this.autoCloseEnabled = autoClose
+  def autoClose(autoClose: Boolean): DBConnection = {
+    this.autoCloseEnabled = autoClose
+    this
+  }
 
   def conn: Connection
 
