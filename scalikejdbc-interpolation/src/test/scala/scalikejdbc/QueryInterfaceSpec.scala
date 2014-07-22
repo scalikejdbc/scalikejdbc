@@ -12,6 +12,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   case class Product(id: Int, name: Option[String], price: Int)
   case class Account(id: Int, name: Option[String])
   case class SchemaExample(id: Int)
+  case class AccountId(value: Int)
 
   object Order extends SQLSyntaxSupport[Order] {
     override val tableName = "qi_orders"
@@ -43,6 +44,9 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   object SchemaExample extends SQLSyntaxSupport[SchemaExample] {
     override val schemaName = Some("public")
     override val tableName = "qi_schema_example"
+  }
+  object AccountId {
+    implicit val typeUnbinder: TypeUnbinder[AccountId] = TypeUnbinder.int.contramap(_.value)
   }
 
   it should "suport schemaName" in {
@@ -96,8 +100,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         Seq(
           insert.into(Account).columns(ac.id, ac.name).values(1, "Alice"),
           insert.into(Account).columns(ac.id, ac.name).values(2, "Bob"),
-          insert.into(Account).columns(ac.id, ac.name).values(3, "Chris"),
-          insert.into(Account).namedValues(ac.id -> 4, ac.name -> "Debian"),
+          insert.into(Account).namedValues(ac.id -> 3, ac.name -> "Chris"),
+          insert.into(Account).namedValues(ac.id --> AccountId(4), ac.name --> "Debian"),
           insert.into(LegacyProduct).values(None, "tmp", 777),
           insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
           insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
