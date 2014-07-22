@@ -70,6 +70,9 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} in (${values})"
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"${this} ${column} not in (${values})"
 
+  def in(column: SQLSyntax, subQuery: SQLSyntax) = sqls"${this} ${column} in (${subQuery})"
+  def notIn(column: SQLSyntax, subQuery: SQLSyntax) = sqls"${this} ${column} not in (${subQuery})"
+
   def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = {
     val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value})")
     val values = csv(valueSeqs.map { case (v1, v2) => sqls"($v1, $v2)" }: _*)
@@ -124,6 +127,9 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
   def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
+
+  def exists(sqlPart: SQLSyntax) = sqls"${this} exists (${sqlPart})"
+  def notExists(sqlPart: SQLSyntax) = sqls"${this} not exists (${sqlPart})"
 
 }
 
@@ -216,8 +222,14 @@ object SQLSyntax {
   def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = sqls"".in(columns, valueSeqs)
   def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = sqls"".notIn(columns, valueSeqs)
 
+  def in(column: SQLSyntax, subQuery: SQLSyntax) = sqls"".in(column, subQuery)
+  def notIn(column: SQLSyntax, subQuery: SQLSyntax) = sqls"".notIn(column, subQuery)
+
   def like(column: SQLSyntax, value: String) = sqls"".like(column, value)
   def notLike(column: SQLSyntax, value: String) = sqls"".notLike(column, value)
+
+  def exists(sqlPart: SQLSyntax) = sqls"".exists(sqlPart)
+  def notExists(sqlPart: SQLSyntax) = sqls"".notExists(sqlPart)
 
   def distinct(columns: SQLSyntax*) = sqls"distinct ${csv(columns: _*)}"
 

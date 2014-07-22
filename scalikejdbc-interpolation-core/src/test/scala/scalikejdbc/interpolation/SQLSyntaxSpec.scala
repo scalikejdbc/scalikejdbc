@@ -136,6 +136,18 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
   }
 
+  it should "have #in with subQuery" in {
+    val s = SQLSyntax.in(sqls"id", sqls"select id from users where deleted = ${false}")
+    s.value should equal(" id in (select id from users where deleted = ?)")
+    s.parameters should equal(Seq(false))
+  }
+
+  it should "have #notIn with subQuery" in {
+    val s = SQLSyntax.notIn(sqls"id", sqls"select id from users where deleted = ${false}")
+    s.value should equal(" id not in (select id from users where deleted = ?)")
+    s.parameters should equal(Seq(false))
+  }
+
   it should "have #like" in {
     val s = SQLSyntax.like(sqls"name", "%abc%")
     s.value should equal(" name like ?")
@@ -146,6 +158,18 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     val s = SQLSyntax.notLike(sqls"name", "%abc%")
     s.value should equal(" name not like ?")
     s.parameters should equal(Seq("%abc%"))
+  }
+
+  it should "have #exists with subQuery" in {
+    val s = SQLSyntax.exists(sqls"select id from users where deleted = ${false}")
+    s.value should equal(" exists (select id from users where deleted = ?)")
+    s.parameters should equal(Seq(false))
+  }
+
+  it should "have #notExists with subQuery" in {
+    val s = SQLSyntax.notExists(sqls"select id from users where deleted = ${false}")
+    s.value should equal(" not exists (select id from users where deleted = ?)")
+    s.parameters should equal(Seq(false))
   }
 
   it should "have #groupBy and #having" in {
