@@ -240,6 +240,24 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Nil)
   }
 
+  it should "have #orderBy for empty values" in {
+    {
+      val s = SQLSyntax.orderBy(sqls"")
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
+    {
+      val s = SQLSyntax.orderBy()
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
+    {
+      val s = SQLSyntax.orderBy(Nil: _*)
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
+  }
+
   it should "have #orderBy and #asc" in {
     val s = SQLSyntax.orderBy(sqls"id").asc
     s.value should equal(" order by id asc")

@@ -40,10 +40,14 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def append(syntax: SQLSyntax) = sqls"${this} ${syntax}"
 
-  def groupBy(columns: SQLSyntax*) = sqls"${this} group by ${csv(columns: _*)}"
+  def groupBy(columns: SQLSyntax*) = {
+    if (columns.isEmpty) this else sqls"${this} group by ${csv(columns: _*)}"
+  }
   def having(condition: SQLSyntax) = sqls"${this} having ${condition}"
 
-  def orderBy(columns: SQLSyntax*) = sqls"${this} order by ${csv(columns: _*)}"
+  def orderBy(columns: SQLSyntax*) = {
+    if (columns.isEmpty) this else sqls"${this} order by ${csv(columns: _*)}"
+  }
   def asc = sqls"${this} asc"
   def desc = sqls"${this} desc"
 
@@ -68,16 +72,18 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
 
   def in(column: SQLSyntax, values: Seq[Any]) = {
-    if (values.isEmpty)
+    if (values.isEmpty) {
       sqls"${this} FALSE"
-    else
+    } else {
       sqls"${this} ${column} in (${values})"
+    }
   }
   def notIn(column: SQLSyntax, values: Seq[Any]) = {
-    if (values.isEmpty)
+    if (values.isEmpty) {
       sqls"${this} TRUE"
-    else
+    } else {
       sqls"${this} ${column} not in (${values})"
+    }
   }
 
   def in(column: SQLSyntax, subQuery: SQLSyntax) = sqls"${this} ${column} in (${subQuery})"
@@ -225,10 +231,10 @@ object SQLSyntax {
   def joinWithAnd(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"and")
   def joinWithOr(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"or")
 
-  def groupBy(columns: SQLSyntax*) = sqls"".groupBy(columns: _*)
+  def groupBy(columns: SQLSyntax*) = sqls"".groupBy(columns.filterNot(_.value.trim.isEmpty): _*)
   def having(condition: SQLSyntax) = sqls"".having(condition)
 
-  def orderBy(columns: SQLSyntax*) = sqls"".orderBy(columns: _*)
+  def orderBy(columns: SQLSyntax*) = sqls"".orderBy(columns.filterNot(_.value.trim.isEmpty): _*)
   def asc = sqls"".asc
   def desc = sqls"".desc
 
