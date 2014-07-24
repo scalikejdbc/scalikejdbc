@@ -309,12 +309,36 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
         }
         {
+          val inClauseResults = withSQL {
+            select.from(Order as o)
+              .where.in(o.id, Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          inClauseResults.map(_.id) should equal(List())
+        }
+        {
           val notInClauseResults = withSQL {
             select.from(Order as o)
               .where.notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
+        }
+        {
+          val notInClauseResults = withSQL {
+            select.from(Order as o)
+              .where.notIn(o.id, Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
+        }
+        {
+          val notInClauseResults = withSQL {
+            select.from(Order as o)
+              .where.not.in(o.id, Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
         {
           val inClauseResults = withSQL {
@@ -342,12 +366,36 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           inClauseResults.map(_.id) should equal(List(11, 21))
         }
         {
+          val inClauseResults = withSQL {
+            select.from(Order as o)
+              .where.in((o.id, o.productId), Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          inClauseResults.map(_.id) should equal(List())
+        }
+        {
           val notInClauseResults = withSQL {
             select.from(Order as o)
               .where.notIn((o.id, o.productId), Seq((11, 1), (12, 2), (13, 1), (14, 1), (15, 1), (21, 2)))
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(12, 22, 23, 24, 25, 26))
+        }
+        {
+          val notInClauseResults = withSQL {
+            select.from(Order as o)
+              .where.notIn((o.id, o.productId), Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
+        }
+        {
+          val notInClauseResults = withSQL {
+            select.from(Order as o)
+              .where.not.in((o.id, o.productId), Seq())
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
 
         // like search

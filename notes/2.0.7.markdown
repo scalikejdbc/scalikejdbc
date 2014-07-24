@@ -1,0 +1,13 @@
+ScalikeJDBC 2.0.7 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+## interpolation
+
+- #262 SQLSyntax.orderBy(Seq) should be skipped when columns are empty
+- #265 Make acceptable empty value at `in` clause by @gakuzzzz
+
+Enjoy writing mostly type-safe SQL and get things done!
+

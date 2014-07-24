@@ -86,20 +86,43 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(1, 2, 3))
   }
 
+  it should "have #in with empty" in {
+    val s = SQLSyntax.in(sqls"id", Seq())
+    s.value should equal(" FALSE")
+    s.parameters should equal(Seq())
+  }
+
   it should "have #in for 2 columns" in {
     val s = SQLSyntax.in((sqls"id", sqls"name"), Seq((1, "Alice"), (2, "Bob")))
     s.value should equal(" (id, name) in ((?, ?), (?, ?))")
     s.parameters should equal(Seq(1, "Alice", 2, "Bob"))
   }
+
+  it should "have #in for 2 columns with empty" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name"), Seq())
+    s.value should equal(" FALSE")
+    s.parameters should equal(Seq())
+  }
+
   it should "have #in for 3 columns" in {
     val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
     s.value should equal(" (id, name, age) in ((?, ?, ?), (?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
   }
+  it should "have #in for 3 columns with empty" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq())
+    s.value should equal(" FALSE")
+    s.parameters should equal(Seq())
+  }
   it should "have #in for 4 columns" in {
     val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
     s.value should equal(" (id, name, age, foo) in ((?, ?, ?, ?), (?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
+  }
+  it should "have #in for 4 columns with empty" in {
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq())
+    s.value should equal(" FALSE")
+    s.parameters should equal(Seq())
   }
   it should "have #in for 5 columns" in {
     val time = DateTime.now
@@ -107,11 +130,22 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.value should equal(" (id, name, age, foo, created_at) in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
   }
+  it should "have #in for 5 columns with empty" in {
+    val time = DateTime.now
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq())
+    s.value should equal(" FALSE")
+    s.parameters should equal(Seq())
+  }
 
   it should "have #notIn" in {
     val s = SQLSyntax.notIn(sqls"id", Seq(1, 2, 3))
     s.value should equal(" id not in (?, ?, ?)")
     s.parameters should equal(Seq(1, 2, 3))
+  }
+  it should "have #notIn woth empty" in {
+    val s = SQLSyntax.notIn(sqls"id", Seq())
+    s.value should equal(" TRUE")
+    s.parameters should equal(Seq())
   }
 
   it should "have #notIn for 2 columns" in {
@@ -119,21 +153,42 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.value should equal(" (id, name) not in ((?, ?), (?, ?))")
     s.parameters should equal(Seq(1, "Alice", 2, "Bob"))
   }
+  it should "have #notIn for 2 columns with empty" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name"), Seq())
+    s.value should equal(" TRUE")
+    s.parameters should equal(Seq())
+  }
   it should "have #notIn for 3 columns" in {
     val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
     s.value should equal(" (id, name, age) not in ((?, ?, ?), (?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
+  }
+  it should "have #notIn for 3 columns with empty" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age"), Seq())
+    s.value should equal(" TRUE")
+    s.parameters should equal(Seq())
   }
   it should "have #notIn for 4 columns" in {
     val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
     s.value should equal(" (id, name, age, foo) not in ((?, ?, ?, ?), (?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
   }
+  it should "have #notIn for 4 columns with empty" in {
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq())
+    s.value should equal(" TRUE")
+    s.parameters should equal(Seq())
+  }
   it should "have #notIn for 5 columns" in {
     val time = DateTime.now
     val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
     s.value should equal(" (id, name, age, foo, created_at) not in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
+  }
+  it should "have #notIn for 5 columns with empty" in {
+    val time = DateTime.now
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq())
+    s.value should equal(" TRUE")
+    s.parameters should equal(Seq())
   }
 
   it should "have #in with subQuery" in {
@@ -183,6 +238,24 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     val s = SQLSyntax.orderBy(sqls"id")
     s.value should equal(" order by id")
     s.parameters should equal(Nil)
+  }
+
+  it should "have #orderBy for empty values" in {
+    {
+      val s = SQLSyntax.orderBy(sqls"")
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
+    {
+      val s = SQLSyntax.orderBy()
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
+    {
+      val s = SQLSyntax.orderBy(Nil: _*)
+      s.value should equal("")
+      s.parameters should equal(Nil)
+    }
   }
 
   it should "have #orderBy and #asc" in {
