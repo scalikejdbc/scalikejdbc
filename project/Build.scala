@@ -19,9 +19,9 @@ object ScalikeJDBCProjects extends Build {
   // internal only
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.+"
-  lazy val _hibernateVersion = "4.3.5.Final"
+  lazy val _hibernateVersion = "4.3.6.Final"
   lazy val _scalatestVersion = "2.2.0"
-  lazy val _specs2Version = "2.3.12"
+  lazy val _specs2Version = "2.3.13"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -114,7 +114,7 @@ object ScalikeJDBCProjects extends Build {
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.+"           % "test"
         ) ++ (scalaVersion match {
-          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
+          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
@@ -260,7 +260,7 @@ object ScalikeJDBCProjects extends Build {
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
-    "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
+    "org.postgresql"    % "postgresql"           % "9.3-1102-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
