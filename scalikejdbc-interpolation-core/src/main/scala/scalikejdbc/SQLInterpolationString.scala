@@ -42,6 +42,8 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
     case _: String => sb += '?'
     // to fix issue #215 due to unexpected Stream#addString behavior
     case s: Stream[_] => addPlaceholders(sb, s.toList) // e.g. in clause
+    // Need to convert a Set to a List before mapping to "?", otherwise we end up with a 1-element Set
+    case s: Set[_] => addPlaceholders(sb, s.toList) // e.g. in clause
     case t: Traversable[_] => t.map {
       case SQLSyntax(s, _) => s
       case _ => "?"

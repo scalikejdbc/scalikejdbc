@@ -248,4 +248,24 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
     }
   }
 
+  it should "interpolate a Set using the correct number of placeholders" in {
+    DB localTx {
+      implicit s =>
+        try {
+          sql"""create table interpolation_users_set (id int, name varchar(256))""".execute.apply()
+          Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
+            case (id, name) => sql"""insert into interpolation_users_set values (${id}, ${name})""".update.apply()
+          }
+          val sql = sql"select count(1) from interpolation_users_set where id in (${Set(1, 3)})"
+
+          sql.statement should equal("select count(1) from interpolation_users_set where id in (?, ?)")
+          sql.parameters should equal(Seq(1, 3))
+          sql.map(_.long(1)).single.apply() should equal(Some(2))
+
+        } finally {
+          sql"""drop table interpolation_users_set""".execute.apply()
+        }
+    }
+  }
+
 }
