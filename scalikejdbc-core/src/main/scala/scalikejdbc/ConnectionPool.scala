@@ -88,9 +88,9 @@ object ConnectionPool extends LogSupport {
 
     import scalikejdbc.JDBCUrl._
 
-    val _factory = Option(settings.connectionPoolFactoryName).flatMap { name =>
-      ConnectionPoolFactoryRepository.get(name)
-    }.getOrElse(factory)
+    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).flatMap { name =>
+      ConnectionPoolFactoryRepository.get(name).map(f => (f, name))
+    }.getOrElse((factory, "<default>"))
 
     // register new pool or replace existing pool
     pools.synchronized {
@@ -118,7 +118,7 @@ object ConnectionPool extends LogSupport {
       oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     }
 
-    log.debug("Registered connection pool : " + get(name).toString())
+    log.debug(s"Registered connection pool : ${get(name)} using factory : $factoryName")
   }
 
   private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool) = {
