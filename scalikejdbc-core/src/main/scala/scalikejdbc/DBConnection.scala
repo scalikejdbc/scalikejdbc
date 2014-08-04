@@ -280,7 +280,7 @@ trait DBConnection extends LogSupport with LoanPattern {
           case _ =>
         }
     }
-    if (autoCloseEnabled) futureUsing(conn) { c => _futureLocalTx(c, execution) }
+    if (autoCloseEnabled) using(conn) { c => _futureLocalTx(c, execution) }
     else _futureLocalTx(conn, execution)
   }
 

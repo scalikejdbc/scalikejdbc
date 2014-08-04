@@ -315,7 +315,7 @@ class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settin
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      futureUsing(DB(ConnectionPool('named).borrow())) { db =>
+      using(DB(ConnectionPool('named).borrow())) { db =>
         val fCount = NamedDB('named) futureLocalTx { s =>
           Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }

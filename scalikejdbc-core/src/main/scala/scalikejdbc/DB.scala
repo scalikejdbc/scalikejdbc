@@ -267,7 +267,7 @@ object DB extends LoanPattern {
    * @return future result value
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
-    futureUsing(connectionPool(context).borrow()) { conn =>
+    using(connectionPool(context).borrow()) { conn =>
       DB(conn).autoClose(false).futureLocalTx(execution)
     }
   }

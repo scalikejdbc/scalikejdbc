@@ -19,30 +19,25 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
     LoanPattern.isInstanceOf[Singleton] should equal(true)
   }
 
-  "using" should "be available" in {
-    val conn = DriverManager.getConnection(url, user, password)
-    using(conn) {
-      conn => println("do something with " + conn.toString)
+  class StatefulCloseable extends Closeable {
+    @volatile
+    var closed: Boolean = false
+
+    def close() = {
+      closed should be(false)
+      closed = true
     }
   }
 
-  "futureUsing" should "be available" in {
-    val conn = DriverManager.getConnection(url, user, password)
-    val fResult = futureUsing(conn) { conn =>
-      Future.successful(3)
+  "using" should "close the resource immediately when its argument is not a future" in {
+    val sc = new StatefulCloseable
+    using(sc) {
+      conn => sc.closed should be(false)
     }
-    whenReady(fResult) { r =>
-      r should be(3)
-    }
+    sc.closed should be(true)
   }
 
   "using" should "not close the resource immediately when its argument is a future" in {
-    class StatefulCloseable extends Closeable {
-      @volatile
-      var closed: Boolean = false
-
-      def close() = closed = true
-    }
     val sc = new StatefulCloseable
     val fResult = using(sc) { conn =>
       Future {
