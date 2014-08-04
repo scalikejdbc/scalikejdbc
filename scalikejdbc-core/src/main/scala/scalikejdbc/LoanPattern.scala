@@ -32,14 +32,19 @@ trait LoanPattern {
     resource.close()
   }
 
-  def using[R <: Closable, A](resource: R)(f: R => A): A = {
+  /**
+   * When `f` returns a [[Future]], closes the resource after the [[Future]] completes.
+   * Else, closes the resource before returning.
+   * In any case, the resource is guaranteed to be closed.
+   */
+  def using[R <: Closable, A](resource: R)(f: R => A)(implicit ec: ExecutionContext = ExecutionContext.global): A = {
     var closeInFuture = false
     try {
       val a = f(resource)
       a match {
         case fut: Future[_] =>
           closeInFuture = true
-          fut.andThen { case _ => forceClose(resource) }(ExecutionContext.global).asInstanceOf[A]
+          fut.andThen { case _ => forceClose(resource) }.asInstanceOf[A]
         case _ =>
           a
       }
