@@ -294,7 +294,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      futureUsing(DB(ConnectionPool.borrow())) { db =>
+      using(DB(ConnectionPool.borrow())) { db =>
         val fCount = DB futureLocalTx { s =>
           Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }

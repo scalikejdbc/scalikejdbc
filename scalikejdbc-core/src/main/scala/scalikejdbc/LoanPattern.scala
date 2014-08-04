@@ -15,9 +15,9 @@
  */
 package scalikejdbc
 
-import scala.language.reflectiveCalls
-import util.control.Exception._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.language.reflectiveCalls
+import scala.util.control.Exception._
 
 object LoanPattern extends LoanPattern
 
@@ -28,12 +28,29 @@ trait LoanPattern {
 
   type Closable = { def close() }
 
-  def using[R <: Closable, A](resource: R)(f: R => A): A = {
+  private def forceClose(resource: Closable) = ignoring(classOf[Throwable]) apply {
+    resource.close()
+  }
+
+  /**
+   * When `f` returns a [[Future]], closes the resource after the [[Future]] completes.
+   * Else, closes the resource before returning.
+   * In any case, the resource is guaranteed to be closed.
+   */
+  def using[R <: Closable, A](resource: R)(f: R => A)(implicit ec: ExecutionContext = ExecutionContext.global): A = {
+    var closeInFuture = false
     try {
-      f(resource)
+      val a = f(resource)
+      a match {
+        case fut: Future[_] =>
+          closeInFuture = true
+          fut.andThen { case _ => forceClose(resource) }.asInstanceOf[A]
+        case _ =>
+          a
+      }
     } finally {
-      ignoring(classOf[Throwable]) apply {
-        resource.close()
+      if (!closeInFuture) {
+        forceClose(resource)
       }
     }
   }
@@ -42,8 +59,9 @@ trait LoanPattern {
    * Guarantees a Closeable resource will be closed after being passed to a block that takes
    * the resource as a parameter and returns a Future.
    */
+  @deprecated("simply use #using")
   def futureUsing[R <: Closable, A](resource: R)(f: R => Future[A])(implicit ec: ExecutionContext): Future[A] = {
-    f(resource) andThen { case _ => resource.close() } // close no matter what
+    f(resource) andThen { case _ => forceClose(resource) } // close no matter what
   }
 
 }
