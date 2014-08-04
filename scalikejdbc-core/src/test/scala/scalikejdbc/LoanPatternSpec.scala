@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import java.io.Closeable
+
 import org.scalatest._
 import java.sql.DriverManager
 import org.scalatest.concurrent.ScalaFutures
@@ -31,6 +33,27 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
     }
     whenReady(fResult) { r =>
       r should be(3)
+    }
+  }
+
+  "using" should "not close the resource immediately when its argument is a future" in {
+    class StatefulCloseable extends Closeable {
+      @volatile
+      var closed: Boolean = false
+
+      def close() = closed = true
+    }
+    val sc = new StatefulCloseable
+    val fResult = using(sc) { conn =>
+      Future {
+        Thread.sleep(15L)
+        3
+      }
+    }
+    sc.closed should be(false)
+    whenReady(fResult) { r =>
+      r should be(3)
+      sc.closed should be(true)
     }
   }
 
