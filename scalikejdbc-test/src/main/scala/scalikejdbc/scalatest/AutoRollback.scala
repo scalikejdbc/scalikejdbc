@@ -36,7 +36,7 @@ import scalikejdbc._
  *     SQL("insert into legacy_accounts values ...").update.apply()
  *   }
  *
- *   it should "create a new record" in { implicit session =?
+ *   it should "create a new record" in { implicit session =>
  *     LegacyAccount.create(2, "Bob")
  *     LegacyAccount.find(2).isDefined should be(true)
  *   }
