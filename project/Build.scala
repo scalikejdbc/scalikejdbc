@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.7"
+  lazy val _version = "2.1.0-SNAPSHOT"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -37,7 +37,16 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),
-      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv")
+      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv"),
+      // since 2.1.0
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDate"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTimeOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTimeOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTimeOpt")
     )
   }
 
@@ -120,6 +129,17 @@ object ScalikeJDBCProjects extends Build {
       }
     )
   )
+
+  lazy val scalikejdbcJSR310 = Project(
+    id = "jsr310",
+    base = file("scalikejdbc-jsr310"),
+    settings = baseSettings ++ /*mimaSettings ++*/ Seq(
+      name := "scalikejdbc-jsr310",
+      libraryDependencies ++= Seq(
+        "com.github.seratch" %  "java-time-backport"  % "1.0.0" % "provided"
+      ) 
+    )
+  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation-core
   // basic modules that are used by interpolation-macro

@@ -1,22 +1,25 @@
 scalikejdbcSettings
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.2"
 
 resolvers ++= Seq(
-  "Sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
-  "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
+  "Sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases",
+  "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc" % "2.0.7",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "2.0.7",
+  "org.scalikejdbc" %% "scalikejdbc" % "2.1.0-SNAPSHOT",
+  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.1.0-SNAPSHOT",
+  "com.github.seratch" %% "java-time-backport" % "1.0.0",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "2.1.0-SNAPSHOT",
   "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
   "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
   "org.hsqldb"      %  "hsqldb"            % "2.3.+",
-  "org.specs2"      %% "specs2"            % "2.1.+"             % "test"
+  "org.specs2"      %% "specs2"            % "2.3.+"             % "test"
 )
 
-initialCommands := """import scalikejdbc._
+initialCommands := """import scalikejdbc._, jsr310._
+import java.time._
 // classes
 case class User(id: Long, name: Option[String], companyId: Option[Long] = None, company: Option[Company] = None)
 object User extends SQLSyntaxSupport[User] {
@@ -38,12 +41,12 @@ object Company extends SQLSyntaxSupport[Company] {
   def apply(c: SyntaxProvider[Company])(rs: WrappedResultSet): Company = apply(c.resultName)(rs)
   def apply(c: ResultName[Company])(rs: WrappedResultSet): Company = Company(rs.long(c.id), rs.stringOpt(c.name))
 }
-case class Group(id: Long, name: Option[String], members: Seq[User] = Nil)
+case class Group(id: Long, name: Option[String], createdAt: ZonedDateTime, members: Seq[User] = Nil)
 object Group extends SQLSyntaxSupport[Group] {
   override val tableName = "groups"
-  override val columns = Seq("id", "name")
+  override val columns = Seq("id", "name", "created_at")
   def apply(g: SyntaxProvider[Group])(rs: WrappedResultSet): Group = apply(g.resultName)(rs)
-  def apply(g: ResultName[Group])(rs: WrappedResultSet): Group = Group(rs.long(g.id), rs.stringOpt(g.name))
+  def apply(g: ResultName[Group])(rs: WrappedResultSet): Group = Group(rs.get(g.id), rs.get(g.name), rs.get(g.createdAt))
 }
 case class GroupMember(groupId: Long, userId: Long)
 object GroupMember extends SQLSyntaxSupport[GroupMember] {
@@ -57,7 +60,7 @@ DB localTx { implicit session =>
   try {
     sql"create table users(id bigint primary key not null, name varchar(255), company_id bigint)".execute.apply()
     sql"create table companies(id bigint primary key not null, name varchar(255))".execute.apply()
-    sql"create table groups(id bigint primary key not null, name varchar(255))".execute.apply()
+    sql"create table groups(id bigint primary key not null, name varchar(255), created_at timestamp not null)".execute.apply()
     sql"create table group_members(group_id bigint not null, user_id bigint not null, primary key(group_id, user_id))".execute.apply()
     Seq(
       insert.into(User).values(1, "Alice", null),
@@ -65,11 +68,11 @@ DB localTx { implicit session =>
       insert.into(User).values(3, "Chris", 1),
       insert.into(Company).values(1, "Typesafe"),
       insert.into(Company).values(2, "Oracle"),
-      insert.into(Group).values(1, "Japan Scala Users Group"),
+      insert.into(Group).values(1, "Japan Scala Users Group", new java.util.Date()),
       insert.into(GroupMember).values(1, 1),
       insert.into(GroupMember).values(1, 2)
     ).foreach(sql => applyUpdate(sql))
-  } catch { case e: Exception => println(e.getMessage) }
+  } catch { case e: Exception => e.printStackTrace }
 }
 GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = true, logLevel = 'info)
 implicit val session = AutoSession
