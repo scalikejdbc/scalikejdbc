@@ -238,6 +238,29 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbcCore)
 
+  // scalikejdbc-support
+  lazy val scalikejdbcSupport = Project(
+    id = "support",
+    base = file("scalikejdbc-support"),
+    settings = baseSettings ++ mimaSettings ++ Seq(
+      name := "scalikejdbc-support",
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "org.scala-lang"  %  "scala-reflect"    % scalaVersion      % "compile",
+          "org.scala-lang"  %  "scala-compiler"   % scalaVersion      % "optional",
+          "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
+          "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
+        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope ++
+          (if (scalaVersion.startsWith("2.10")) Seq("org.scalamacros" %% "quasiquotes" % "2.0.1" % "compile") else Seq())
+      },
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full),
+      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
+        if (v.startsWith("2.10")) dir / "scala2.10"
+        else dir / "scala2.11"
+      }
+    )
+  ) dependsOn(scalikejdbcLibrary)
+
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
