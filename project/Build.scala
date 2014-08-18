@@ -239,11 +239,11 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-support
-  lazy val scalikejdbcSupport = Project(
-    id = "support",
-    base = file("scalikejdbc-support"),
+  lazy val scalikejdbcSyntaxSupportMarco = Project(
+    id = "syntax-support-marco",
+    base = file("scalikejdbc-syntax-support-marco"),
     settings = baseSettings ++ Seq(
-      name := "scalikejdbc-support",
+      name := "scalikejdbc-syntax-support-marco",
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
