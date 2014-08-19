@@ -136,10 +136,11 @@ object ScalikeJDBCProjects extends Build {
     settings = baseSettings ++ /*mimaSettings ++*/ Seq(
       name := "scalikejdbc-jsr310",
       libraryDependencies ++= Seq(
-        "com.github.seratch" %  "java-time-backport"  % "1.0.0" % "provided"
-      ) 
+        "com.github.seratch" %  "java-time-backport" % "1.0.0"    % "provided,test",
+        "com.h2database"     %  "h2"                 % _h2Version % "test"
+      ) ++ scalaTestDependenciesInTestScope
     )
-  ) dependsOn(scalikejdbcCore)
+  ) dependsOn(scalikejdbcLibrary)
 
   // scalikejdbc-interpolation-core
   // basic modules that are used by interpolation-macro
