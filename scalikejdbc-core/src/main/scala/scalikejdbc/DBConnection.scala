@@ -354,7 +354,8 @@ trait DBConnection extends LogSupport with LoanPattern {
       _getTableName(meta, schema, table, tableTypes)
         .orElse(_getTableName(meta, schema, table.toUpperCase(en), tableTypes))
         .orElse(_getTableName(meta, schema, table.toLowerCase(en), tableTypes)).map { tableName =>
-          new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
+          val _schema = if (meta.getURL.startsWith("jdbc:h2")) Option(schema).getOrElse("") else schema
+          new RSTraversable(meta.getColumns(null, _schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
         }
     }.getOrElse(Nil)
   }
