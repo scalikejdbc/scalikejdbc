@@ -1,7 +1,8 @@
 package scalikejdbc
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.blackbox.Context
+import scalikejdbc.MacroCompatible._
 
 object autoConstruct {
 
@@ -27,9 +28,9 @@ object autoConstruct {
 
   private[this] def constructorParams[A: c.WeakTypeTag](c: Context) = {
     import c.universe._
-    val declarations = weakTypeTag[A].tpe.declarations
+    val declarations = decls(c)(weakTypeTag[A].tpe)
     val ctor = declarations.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }.get
-    ctor.paramss.head
+    paramLists(c)(ctor).head
   }
 
   def apply[A](rn: ResultName[A], rs: WrappedResultSet): A = macro applyResultName_impl[A]
