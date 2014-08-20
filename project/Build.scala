@@ -259,6 +259,32 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbcCore)
 
+  // scalikejdbc-support
+  lazy val scalikejdbcSyntaxSupportMacro = Project(
+    id = "syntax-support-macro",
+    base = file("scalikejdbc-syntax-support-macro"),
+    settings = baseSettings ++ Seq(
+      name := "scalikejdbc-syntax-support-macro",
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
+          "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
+        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion)
+      },
+      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
+        if (v.startsWith("2.10")) dir / "scala2.10"
+        else dir / "scala2.11"
+      }
+    )
+  ) dependsOn(scalikejdbcLibrary)
+
+  def macroDependenciesInCompileScope(scalaVersion: String) = {
+    if (scalaVersion.startsWith("2.10")) Seq(
+      "org.scalamacros" %% "quasiquotes" % "2.0.1" % "compile",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+    ) else Seq()
+  }
+
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
