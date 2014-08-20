@@ -14,8 +14,7 @@ class TopPageExampleSpec extends FlatSpec with Matchers {
   case class Member(id: Long, name: Option[String], createdAt: DateTime)
   object Member extends SQLSyntaxSupport[Member] {
     override val tableName = "members"
-    def apply(rs: WrappedResultSet) = new Member(
-      rs.long("id"), rs.stringOpt("name"), rs.dateTime("created_at"))
+    def apply(rs: WrappedResultSet) = new Member(rs.get("id"), rs.get("name"), rs.get("created_at"))
   }
 
   it should "work" in {

@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.0.7"
+  lazy val _version = "2.1.0.RC1"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -19,9 +19,9 @@ object ScalikeJDBCProjects extends Build {
   // internal only
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.+"
-  lazy val _hibernateVersion = "4.3.5.Final"
+  lazy val _hibernateVersion = "4.3.6.Final"
   lazy val _scalatestVersion = "2.2.0"
-  lazy val _specs2Version = "2.3.12"
+  lazy val _specs2Version = "2.3.13"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -37,7 +37,16 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),
-      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv")
+      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv"),
+      // since 2.1.0
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDate"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTime"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTimeOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTimeOpt"),
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTimeOpt")
     )
   }
 
@@ -102,7 +111,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.3"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.4"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
@@ -114,12 +123,24 @@ object ScalikeJDBCProjects extends Build {
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.9.+"           % "test"
         ) ++ (scalaVersion match {
-          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1" % "compile")
+          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
   )
+
+  lazy val scalikejdbcJSR310 = Project(
+    id = "jsr310",
+    base = file("scalikejdbc-jsr310"),
+    settings = baseSettings ++ /*mimaSettings ++*/ Seq(
+      name := "scalikejdbc-jsr310",
+      libraryDependencies ++= Seq(
+        "com.github.seratch" %  "java-time-backport" % "1.0.0"    % "provided,test",
+        "com.h2database"     %  "h2"                 % _h2Version % "test"
+      ) ++ scalaTestDependenciesInTestScope
+    )
+  ) dependsOn(scalikejdbcLibrary)
 
   // scalikejdbc-interpolation-core
   // basic modules that are used by interpolation-macro
@@ -238,6 +259,32 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbcCore)
 
+  // scalikejdbc-support
+  lazy val scalikejdbcSyntaxSupportMacro = Project(
+    id = "syntax-support-macro",
+    base = file("scalikejdbc-syntax-support-macro"),
+    settings = baseSettings ++ Seq(
+      name := "scalikejdbc-syntax-support-macro",
+      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+        Seq(
+          "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
+          "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
+        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion)
+      },
+      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
+        if (v.startsWith("2.10")) dir / "scala2.10"
+        else dir / "scala2.11"
+      }
+    )
+  ) dependsOn(scalikejdbcLibrary)
+
+  def macroDependenciesInCompileScope(scalaVersion: String) = {
+    if (scalaVersion.startsWith("2.10")) Seq(
+      "org.scalamacros" %% "quasiquotes" % "2.0.1" % "compile",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+    ) else Seq()
+  }
+
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
     if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
@@ -245,8 +292,8 @@ object ScalikeJDBCProjects extends Build {
   }
   val _resolvers = Seq(
     "typesafe repo" at "http://repo.typesafe.com/typesafe/releases",
-    "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
-    "sonatype snaphots" at "http://oss.sonatype.org/content/repositories/snapshots"
+    "sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
+    "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
   )
   lazy val scalaTestDependenciesInTestScope =
     Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "test")
@@ -260,7 +307,7 @@ object ScalikeJDBCProjects extends Build {
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
-    "org.postgresql"    % "postgresql"           % "9.3-1101-jdbc41" % "test"
+    "org.postgresql"    % "postgresql"           % "9.3-1102-jdbc41" % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
