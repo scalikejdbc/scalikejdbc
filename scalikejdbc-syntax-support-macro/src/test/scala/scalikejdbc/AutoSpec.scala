@@ -19,6 +19,11 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
 //    def toParams(group: Organization): Seq[(SQLSyntax, Any)] = autoExtract[Organization](this)(group)
   }
 
+  case class Person(id: Long, name: String, organizationId: Option[Long], organization: Option[Organization] = None, gorupId: Long = 0)
+  object Person extends SQLSyntaxSupport[Person] {
+    def apply(s: SyntaxProvider[Person])(rs: WrappedResultSet): Person = autoConstruct(s, rs, "organization")
+  }
+
   behavior of "autoConstruct"
 
   it should "execute" in {
@@ -65,6 +70,10 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
         try sql"drop table organization".execute.apply() catch { case ignore: Exception => }
       }
     }
+  }
+
+  it should "throw a compiler error if unknown field name is decleared in excludes" in {
+    """autoConstruct[Organization](s, rs, "organization", "test")""" shouldNot compile
   }
 
 }
