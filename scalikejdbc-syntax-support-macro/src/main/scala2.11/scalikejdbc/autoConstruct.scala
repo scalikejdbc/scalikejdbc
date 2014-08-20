@@ -7,7 +7,7 @@ object autoConstruct {
 
   def applyResultName_impl[A: c.WeakTypeTag](c: Context)(rn: c.Expr[ResultName[A]], rs: c.Expr[WrappedResultSet]): c.Expr[A] = {
     import c.universe._
-    val constParams = constractorParams[A](c).map { field =>
+    val constParams = constructorParams[A](c).map { field =>
       val fieldType = field.typeSignature
       val name = field.name.decodedName.toString
       q"$rs.get[$fieldType]($rn.field($name))"
@@ -17,7 +17,7 @@ object autoConstruct {
 
   def applySyntaxProvider_impl[A: c.WeakTypeTag](c: Context)(sp: c.Expr[SyntaxProvider[A]], rs: c.Expr[WrappedResultSet]): c.Expr[A] = {
     import c.universe._
-    val constParams = constractorParams[A](c).map { field =>
+    val constParams = constructorParams[A](c).map { field =>
       val fieldType = field.typeSignature
       val name = field.name.decodedName.toString
       q"$rs.get[$fieldType]($sp.resultName.field($name))"
@@ -25,7 +25,7 @@ object autoConstruct {
     c.Expr[A](q"new ${weakTypeTag[A].tpe}(..$constParams)")
   }
 
-  private[this] def constractorParams[A: c.WeakTypeTag](c: Context) = {
+  private[this] def constructorParams[A: c.WeakTypeTag](c: Context) = {
     import c.universe._
     val declarations = weakTypeTag[A].tpe.decls
     val ctor = declarations.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }.get
