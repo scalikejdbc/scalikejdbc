@@ -1,6 +1,6 @@
 package scalikejdbc
 
-trait DBSettings extends LoanPattern {
+trait DBSettings {
 
   val driverClassName = if (!ConnectionPool.isInitialized(ConnectionPool.DEFAULT_NAME)) {
     val props = new java.util.Properties

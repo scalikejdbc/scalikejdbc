@@ -7,16 +7,21 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
 
   case class Issue(id: Long, firstName: String, groupId: Long)
   object Issue extends SQLSyntaxSupport[Issue] {
-    def apply(s: SyntaxProvider[Issue])(rs: WrappedResultSet): Issue = autoConstruct(s, rs)
-    def apply(r: ResultName[Issue])(rs: WrappedResultSet): Issue = autoConstruct(r, rs)
+    def apply(s: SyntaxProvider[Issue])(rs: WrappedResultSet): Issue = autoConstruct(rs, s)
+    def apply(r: ResultName[Issue])(rs: WrappedResultSet): Issue = autoConstruct(rs, r)
 //    def toParams(user: Issue): Seq[(SQLSyntax, Any)] = autoExtract(this, user)
   }
 
   class Organization(val id: Long, val websiteUrl: String)
   object Organization extends SQLSyntaxSupport[Organization] {
-    def apply(s: SyntaxProvider[Organization])(rs: WrappedResultSet): Organization = autoConstruct(s, rs)
-    def apply(r: ResultName[Organization])(rs: WrappedResultSet): Organization = autoConstruct(r, rs)
+    def apply(s: SyntaxProvider[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, s)
+    def apply(r: ResultName[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, r)
 //    def toParams(group: Organization): Seq[(SQLSyntax, Any)] = autoExtract[Organization](this)(group)
+  }
+
+  case class Person(id: Long, name: String, organizationId: Option[Long], organization: Option[Organization] = None, gorupId: Long = 0)
+  object Person extends SQLSyntaxSupport[Person] {
+    def apply(s: SyntaxProvider[Person])(rs: WrappedResultSet): Person = autoConstruct(rs, s, "organization")
   }
 
   behavior of "autoConstruct"
@@ -65,6 +70,10 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
         try sql"drop table organization".execute.apply() catch { case ignore: Exception => }
       }
     }
+  }
+
+  it should "throw a compiler error if unknown field name is decleared in excludes" in {
+    """autoConstruct[Organization](rs, s, "organization", "test")""" shouldNot compile
   }
 
 }
