@@ -6,7 +6,7 @@ import scalikejdbc.MacroCompatible._
 
 object autoConstruct {
 
-  def applyResultName_impl[A: c.WeakTypeTag](c: Context)(rn: c.Expr[ResultName[A]], rs: c.Expr[WrappedResultSet], excludes: c.Expr[String]*): c.Expr[A] = {
+  def applyResultName_impl[A: c.WeakTypeTag](c: Context)(rs: c.Expr[WrappedResultSet], rn: c.Expr[ResultName[A]], excludes: c.Expr[String]*): c.Expr[A] = {
     import c.universe._
     val constParams = constructorParams[A](c)(excludes:_*).map { field =>
       val fieldType = field.typeSignature
@@ -16,14 +16,9 @@ object autoConstruct {
     c.Expr[A](q"new ${weakTypeTag[A].tpe}(..$constParams)")
   }
 
-  def applySyntaxProvider_impl[A: c.WeakTypeTag](c: Context)(sp: c.Expr[SyntaxProvider[A]], rs: c.Expr[WrappedResultSet], excludes: c.Expr[String]*): c.Expr[A] = {
+  def applySyntaxProvider_impl[A: c.WeakTypeTag](c: Context)(rs: c.Expr[WrappedResultSet], sp: c.Expr[SyntaxProvider[A]], excludes: c.Expr[String]*): c.Expr[A] = {
     import c.universe._
-    val constParams = constructorParams[A](c)(excludes:_*).map { field =>
-      val fieldType = field.typeSignature
-      val name = field.name.decodedName.toString
-      q"${field.name.toTermName} = $rs.get[$fieldType]($sp.resultName.field($name))"
-    }
-    c.Expr[A](q"new ${weakTypeTag[A].tpe}(..$constParams)")
+    applyResultName_impl(c)(rs, c.Expr[ResultName[A]](q"${sp}.resultName"), excludes:_*)
   }
 
   private[this] def constructorParams[A: c.WeakTypeTag](c: Context)(excludes: c.Expr[String]*) = {
@@ -42,8 +37,8 @@ object autoConstruct {
     allParams.filterNot(f => excludeStrs(f.name.decodedName.toString))
   }
 
-  def apply[A](rn: ResultName[A], rs: WrappedResultSet, excludes: String*): A = macro applyResultName_impl[A]
+  def apply[A](rs: WrappedResultSet, rn: ResultName[A], excludes: String*): A = macro applyResultName_impl[A]
 
-  def apply[A](sp: SyntaxProvider[A], rs: WrappedResultSet, excludes: String*): A = macro applySyntaxProvider_impl[A]
+  def apply[A](rs: WrappedResultSet, sp: SyntaxProvider[A], excludes: String*): A = macro applySyntaxProvider_impl[A]
 
 }
