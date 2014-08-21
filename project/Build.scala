@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.0.RC2"
+  lazy val _version = "2.1.0-SNAPSHOT"
   lazy val compatibleVersion = "2.0.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -46,7 +46,12 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTimeOpt"),
       exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateOpt"),
       exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTimeOpt"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTimeOpt")
+      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTimeOpt"),
+      exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this")
     )
   }
 

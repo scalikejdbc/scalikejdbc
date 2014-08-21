@@ -272,13 +272,19 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val pkColumns = if (table.primaryKeyColumns.size == 0) allColumns else table.primaryKeyColumns
 
     val interpolationMapper = {
-      val _interpolationMapper = allColumns.map { c => 2.indent + c.nameInScala + " = rs.get(" + syntaxName + "." + c.nameInScala + ")" }
-        .mkString(comma + eol)
-      s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = apply(${syntaxName}.resultName)(rs)
+      if (config.autoConstruct) {
+        s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = autoConstruct(rs, ${syntaxName})
+        |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = autoConstruct(rs, ${syntaxName})
+        |""".stripMargin
+      } else {
+        val _interpolationMapper = allColumns.map { c => 2.indent + c.nameInScala + " = rs.get(" + syntaxName + "." + c.nameInScala + ")" }
+          .mkString(comma + eol)
+        s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = apply(${syntaxName}.resultName)(rs)
         |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = new ${className}(
         |${_interpolationMapper}
         |  )
       """.stripMargin
+      }
     }
 
     /**
