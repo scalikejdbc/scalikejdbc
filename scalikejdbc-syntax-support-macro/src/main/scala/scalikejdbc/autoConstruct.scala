@@ -27,8 +27,11 @@ object autoConstruct {
     val ctor = declarations.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }.get
     val allParams = paramLists(c)(ctor).head
     val excludeStrs: Set[String] = excludes.map(_.tree).flatMap {
-      case Literal(Constant(value: String)) => Some(value)
-      case _                                => None
+      case q"${value: String}" => Some(value)
+      case m                   => {
+        c.error(c.enclosingPosition, s"You must use String literal in autoConstract's excludes parameters. $m could not resolve at compile time.")
+        None
+      }
     }.toSet
     val paramsStrs: Set[String] = allParams.map(_.name.decodedName.toString).toSet
     excludeStrs.foreach { ex =>

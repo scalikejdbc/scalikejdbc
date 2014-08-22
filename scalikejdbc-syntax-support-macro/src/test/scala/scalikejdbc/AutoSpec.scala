@@ -74,6 +74,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
 
   it should "throw a compiler error if unknown field name is decleared in excludes" in {
     """autoConstruct[Organization](rs, s, "organization", "test")""" shouldNot compile
+    """autoConstruct[Organization](rs, s, s"organization")""" shouldNot compile
   }
 
 }
