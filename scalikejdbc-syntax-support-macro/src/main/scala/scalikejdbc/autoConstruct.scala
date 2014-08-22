@@ -29,7 +29,7 @@ object autoConstruct {
     val excludeStrs: Set[String] = excludes.map(_.tree).flatMap {
       case q"${value: String}" => Some(value)
       case m                   => {
-        c.error(c.enclosingPosition, s"You must use String literal in autoConstract's excludes parameters. $m could not resolve at compile time.")
+        c.error(c.enclosingPosition, s"You must use String literal values for field names to exclude from #autoConstruct's targets. $m could not resolve at compile time.")
         None
       }
     }.toSet
