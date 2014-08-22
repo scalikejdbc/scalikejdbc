@@ -2,7 +2,7 @@ scalikejdbcSettings
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.11.0", "2.10.3")
+crossScalaVersions := List("2.11.2", "2.10.3")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked", "-Xfatal-warnings")
 
