@@ -272,13 +272,19 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val pkColumns = if (table.primaryKeyColumns.size == 0) allColumns else table.primaryKeyColumns
 
     val interpolationMapper = {
-      val _interpolationMapper = allColumns.map { c => 2.indent + c.nameInScala + " = rs.get(" + syntaxName + "." + c.nameInScala + ")" }
-        .mkString(comma + eol)
-      s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = apply(${syntaxName}.resultName)(rs)
+      if (config.autoConstruct) {
+        s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = autoConstruct(rs, ${syntaxName})
+        |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = autoConstruct(rs, ${syntaxName})
+        |""".stripMargin
+      } else {
+        val _interpolationMapper = allColumns.map { c => 2.indent + c.nameInScala + " = rs.get(" + syntaxName + "." + c.nameInScala + ")" }
+          .mkString(comma + eol)
+        s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = apply(${syntaxName}.resultName)(rs)
         |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = new ${className}(
         |${_interpolationMapper}
         |  )
       """.stripMargin
+      }
     }
 
     /**
@@ -454,7 +460,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val wherePart: String = config.template match {
         case GeneratorTemplate.interpolation =>
           // ${column.id} = ${entity.id} and ${column.name} = ${entity.name}
-          pkColumns.map(pk => "\\${" + "column." + pk.nameInScala + "} = \\${entity." + pk.nameInScala + "}").mkString(" and ")
+          pkColumns.map(pk => "${" + "column." + pk.nameInScala + "} = ${entity." + pk.nameInScala + "}").mkString(" and ")
         case GeneratorTemplate.queryDsl =>
           // .eq(column.id, entity.id).and.eq(column.name, entity.name)
           pkColumns.map(pk => ".eq(column." + pk.nameInScala + ", entity." + pk.nameInScala + ")").mkString(".and")
@@ -488,7 +494,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val argsPart = pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ")
       val wherePart = config.template match {
         case GeneratorTemplate.interpolation =>
-          pkColumns.map(pk => s"${pk.name} = \\$${${syntaxName}.${pk.nameInScala}}").mkString(" and ")
+          pkColumns.map(pk => s"${pk.name} = $${${syntaxName}.${pk.nameInScala}}").mkString(" and ")
         case GeneratorTemplate.queryDsl =>
           pkColumns.map(pk => s".eq(${syntaxName}.${pk.nameInScala}, ${pk.nameInScala})").mkString(".and")
       }
@@ -897,7 +903,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         }.getOrElse("")
         else
           table.primaryKeyColumns.headOption.map { c =>
-            "sqls\"" + c.name + " = \\${" + c.defaultValueInScala + "}\""
+            "sqls\"" + c.name + " = ${" + c.defaultValueInScala + "}\""
           }.getOrElse("")
       )
       .replace("%createFields%", table.allColumns.filter {

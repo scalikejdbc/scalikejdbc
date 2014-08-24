@@ -1,12 +1,12 @@
 package scalikejdbc.jsr310
 
-import java.util.{GregorianCalendar, Calendar}
+import java.util.{ GregorianCalendar, Calendar }
 
 import scala.language.implicitConversions
 import java.time._
-import scalikejdbc.{TypeBinder, WrappedResultSet}
+import scalikejdbc.{ TypeBinder, WrappedResultSet }
 
-object Implicits extends  Implicits
+object Implicits extends Implicits
 
 trait Implicits {
 

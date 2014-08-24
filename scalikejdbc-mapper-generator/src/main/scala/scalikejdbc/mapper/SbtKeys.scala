@@ -15,7 +15,7 @@
  */
 package scalikejdbc.mapper
 
-import sbt.{ SettingKey, InputKey, TaskKey }
+import sbt.{ InputKey, TaskKey }
 
 object SbtKeys {
 

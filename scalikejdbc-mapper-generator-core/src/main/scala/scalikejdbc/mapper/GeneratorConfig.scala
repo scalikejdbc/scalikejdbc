@@ -22,7 +22,8 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
   caseClassOnly: Boolean = false,
-  encoding: String = "UTF-8")
+  encoding: String = "UTF-8",
+  autoConstruct: Boolean = false)
 
 object GeneratorTemplate {
   val interpolation = GeneratorTemplate("interpolation")
