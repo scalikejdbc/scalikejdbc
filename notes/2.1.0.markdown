@@ -1,0 +1,29 @@
+ScalikeJDBC 2.1.0 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] joda-time 2.3 -> 2.4
+- [core] Bumped scala-parser-combinators to 1.0.2 in Scala 2.11
+- [core] #267 Improve logging to include connection pool factory name by @cb372
+- [interpolation] #266 Add support for Set in SQL interpolation by @cb372
+- [jsr310] #270 Add optional JSR-310 support library (refs #222)
+- [interpolation] #272 Added SQLSyntax Support macro by @gakuzzzz
+- [interpolation] #277 excludes parameter should be string literal by @gakuzzzz
+- [interpolation] #278 add autoConstruct#debug by @xuwei-k
+
+### Migration Guide
+
+#### deprecated methods are removed
+
+Remove depreacated methods from scalikejdbc.WrappedResultSet.
+
+https://github.com/scalikejdbc/scalikejdbc/commit/7112a70a8b8d27e622d2fea807ebd0c0316e701e
+
+See also: https://github.com/scalikejdbc/scalikejdbc/issues/222
+
+Enjoy writing mostly type-safe SQL and get things done!
+
