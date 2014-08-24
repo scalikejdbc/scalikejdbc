@@ -1,6 +1,6 @@
 package documentation
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{ Matchers, FlatSpec }
 
 class TopPageExampleSpec extends FlatSpec with Matchers {
 
@@ -18,7 +18,6 @@ class TopPageExampleSpec extends FlatSpec with Matchers {
   }
 
   it should "work" in {
-
 
     // initialize JDBC driver & connection pool
     Class.forName("org.h2.Driver")
