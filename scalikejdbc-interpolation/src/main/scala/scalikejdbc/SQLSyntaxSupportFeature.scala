@@ -373,9 +373,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
-    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
+    lazy val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
-    val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
+    lazy val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
 
     val asterisk: SQLSyntax = sqls"*"
 
@@ -398,7 +398,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val forceUpperCase = support.forceUpperCase
     val useSnakeCaseColumnName = support.useSnakeCaseColumnName
     val delimiterForResultName = support.delimiterForResultName
-    val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
+    lazy val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
     def notFoundInColumns(aliasName: String, name: String): InvalidColumnNameException = notFoundInColumns(aliasName, name, columns.map(_.value).mkString(","))
 
@@ -416,18 +416,18 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       with ResultAllProvider
       with AsteriskProvider {
 
-    lazy val result: ResultSQLSyntaxProvider[S, A] = {
+    val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase(en) else tableAliasName
       ResultSQLSyntaxProvider[S, A](support, table)
     }
 
     override def resultAll: SQLSyntax = result.*
 
-    lazy val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
+    val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.name
 
     lazy val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
 
-    lazy val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
+    val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
     def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
       SQLSyntax(s"${tableAliasName}.${c.value}")
@@ -447,7 +447,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val name: BasicResultNameSQLSyntaxProvider[S, A] = BasicResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
-    val * : SQLSyntax = SQLSyntax(columns.map { c =>
+    lazy val * : SQLSyntax = SQLSyntax(columns.map { c =>
       val name = toAliasName(c.value, support)
       s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
@@ -487,12 +487,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) with ResultNameSQLSyntaxProvider[S, A] {
     import SQLSyntaxProvider._
 
-    val * : SQLSyntax = SQLSyntax(columns.map { c =>
+    lazy val * : SQLSyntax = SQLSyntax(columns.map { c =>
       val name = toAliasName(c.value, support)
       s"${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
-    val namedColumns: Seq[SQLSyntax] = support.columns.map { columnName: String =>
+    lazy val namedColumns: Seq[SQLSyntax] = support.columns.map { columnName: String =>
       val name = toAliasName(columnName, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
@@ -551,7 +551,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     override def resultAll: SQLSyntax = result.*
 
-    val * : SQLSyntax = SQLSyntax(resultNames.map { resultName =>
+    lazy val * : SQLSyntax = SQLSyntax(resultNames.map { resultName =>
       resultName.namedColumns.map { c =>
         s"${aliasName}.${c.value}"
       }
@@ -603,13 +603,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       delimiterForResultName: String,
       resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
-    val * : SQLSyntax = SQLSyntax(resultNames.map { rn =>
+    lazy val * : SQLSyntax = SQLSyntax(resultNames.map { rn =>
       rn.namedColumns.map { c =>
         s"${c.value}${delimiterForResultName}${aliasName}"
       }.mkString(", ")
     }.mkString(", "))
 
-    val columns: Seq[SQLSyntax] = resultNames.flatMap { rn =>
+    lazy val columns: Seq[SQLSyntax] = resultNames.flatMap { rn =>
       rn.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
     }
 
@@ -648,7 +648,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val resultName: PartialSubQueryResultNameSQLSyntaxProvider[S, A] = result.name
 
-    val * : SQLSyntax = SQLSyntax(resultName.namedColumns.map { c => s"${aliasName}.${c.value}" }.mkString(", "))
+    lazy val * : SQLSyntax = SQLSyntax(resultName.namedColumns.map { c => s"${aliasName}.${c.value}" }.mkString(", "))
 
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
@@ -676,7 +676,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       PartialSubQueryResultNameSQLSyntaxProvider(aliasName, delimiterForResultName, underlying)
     }
 
-    val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
+    lazy val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
       s"${aliasName}.${c.value} as ${c.value}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
@@ -697,12 +697,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) with ResultNameSQLSyntaxProvider[S, A] {
     import SQLSyntaxProvider._
 
-    val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
+    lazy val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
       val name = toAliasName(c.value, underlying.support)
       s"${name}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
-    override val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
+    override lazy val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
 
     def column(name: String): SQLSyntax = underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original: SQLSyntax =>
       val name = toAliasName(original.value, underlying.support)
@@ -711,7 +711,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
     }
 
-    val namedColumns: Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
+    lazy val namedColumns: Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
       SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
     }
 
