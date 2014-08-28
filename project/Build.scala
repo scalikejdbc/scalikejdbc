@@ -7,8 +7,8 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.0"
-  lazy val compatibleVersion = "2.0.0"
+  lazy val _version = "2.1.1"
+  lazy val compatibleVersion = "2.1.0"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -27,6 +27,7 @@ object ScalikeJDBCProjects extends Build {
     import com.typesafe.tools.mima.core._
     import com.typesafe.tools.mima.core.ProblemFilters._
     Seq(
+      /*
       // since 2.0.1
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
       exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"),
@@ -52,6 +53,7 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this")
+      */
     )
   }
 

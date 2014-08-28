@@ -44,6 +44,30 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[java.util.Calendar]].apply(rs, "time") should not be (null)
   }
 
+  it should "handle result values of type java.math.BigDecimal" in {
+    val rs: ResultSet = mock[ResultSet]
+    when(rs.getObject("zero")).thenReturn(java.math.BigDecimal.ZERO, Array[Object](): _*)
+    when(rs.getObject("nonzero")).thenReturn(java.math.BigDecimal.ONE, Array[Object](): _*)
+
+    val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
+    wrapped.boolean("zero") should be(false)
+    wrapped.boolean("nonzero") should be(true)
+    wrapped.booleanOpt("zero") should be(Some(false))
+    wrapped.booleanOpt("nonzero") should be(Some(true))
+    wrapped.int("zero") should be(0)
+    wrapped.int("nonzero") should be(1)
+    wrapped.intOpt("zero") should be(Some(0))
+    wrapped.intOpt("nonzero") should be(Some(1))
+    wrapped.long("zero") should be(0)
+    wrapped.long("nonzero") should be(1L)
+    wrapped.longOpt("zero") should be(Some(0L))
+    wrapped.longOpt("nonzero") should be(Some(1L))
+    wrapped.short("zero") should be(0)
+    wrapped.short("nonzero") should be(1)
+    wrapped.shortOpt("zero") should be(Some(0))
+    wrapped.shortOpt("nonzero") should be(Some(1))
+  }
+
   it should "fix issue #170" in {
     val rs: ResultSet = mock[ResultSet]
     when(rs.getObject("none")).thenReturn(null, Array[Object](): _*)

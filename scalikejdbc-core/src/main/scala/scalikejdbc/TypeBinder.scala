@@ -59,6 +59,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
       try s.toInt != 0
       catch { case e: NumberFormatException => !s.isEmpty }
     }.asInstanceOf[java.lang.Boolean]
+    case n: Number => (n.intValue() != 0).asInstanceOf[java.lang.Boolean]
     case v => (v != 0).asInstanceOf[java.lang.Boolean]
   }
   implicit val boolean: TypeBinder[Boolean] = nullableBoolean.map(throwExceptionIfNull(_.asInstanceOf[Boolean]))
@@ -80,6 +81,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
     case v if v == null => v.asInstanceOf[java.lang.Integer]
     case v: Float => v.toInt.asInstanceOf[java.lang.Integer]
     case v: Double => v.toInt.asInstanceOf[java.lang.Integer]
+    case n: Number => n.intValue()
     case v => java.lang.Integer.valueOf(v.toString)
   }
   implicit val int: TypeBinder[Int] = nullableInt.map(throwExceptionIfNull(_.asInstanceOf[Int]))
@@ -88,6 +90,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
     case v if v == null => v.asInstanceOf[java.lang.Long]
     case v: Float => v.toLong.asInstanceOf[java.lang.Long]
     case v: Double => v.toLong.asInstanceOf[java.lang.Long]
+    case n: Number => n.longValue()
     case v => java.lang.Long.valueOf(v.toString)
   }
   implicit val long: TypeBinder[Long] = nullableLong.map(throwExceptionIfNull(_.asInstanceOf[Long]))
@@ -99,6 +102,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
     case v if v == null => v.asInstanceOf[java.lang.Short]
     case v: Float => v.toShort.asInstanceOf[java.lang.Short]
     case v: Double => v.toShort.asInstanceOf[java.lang.Short]
+    case n: Number => n.shortValue()
     case v => java.lang.Short.valueOf(v.toString)
   }
   implicit val short: TypeBinder[Short] = nullableShort.map(throwExceptionIfNull(_.asInstanceOf[Short]))

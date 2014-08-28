@@ -22,7 +22,7 @@ class InformationSchemaSpec extends FlatSpec with Matchers with SQLInterpolation
       try {
         sql"create table roles (id int not null, name varchar(256) not null)".execute.apply()
         sql"insert into roles (id, name) values (1, 'Alice')".update.apply()
-      } catch { case e: Exception => e.printStackTrace() }
+      } catch { case e: Exception => }
 
       val r = Roles.syntax("r")
       withSQL { select.from(Roles as r) }.map(Roles(r)).list.apply()
