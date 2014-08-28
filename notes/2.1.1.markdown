@@ -1,0 +1,13 @@
+ScalikeJDBC 2.1.1 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #279 Fix boolean values when ResultSet.getObject returns a BigDecimal by @ssowerby
+- [interpolation] #280 Improve SQLSyntaxSupport to access columns lazily by @seratch
+
+Enjoy writing mostly type-safe SQL and get things done!
+
