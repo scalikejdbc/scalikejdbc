@@ -35,8 +35,11 @@ object autoConstruct {
 
   private[this] def constructorParams[A: c.WeakTypeTag](c: Context)(excludes: c.Expr[String]*) = {
     import c.universe._
-    val declarations = decls(c)(weakTypeTag[A].tpe)
-    val ctor = declarations.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }.get
+    val A = weakTypeTag[A].tpe
+    val declarations = decls(c)(A)
+    val ctor = declarations.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }.getOrElse {
+      c.abort(c.enclosingPosition, s"Could not find the primary constructor for $A. type $A must be a class, not trait or type parameter")
+    }
     val allParams = paramLists(c)(ctor).head
     val excludeStrs: Set[String] = excludes.map(_.tree).flatMap {
       case q"${ value: String }" => Some(value)
