@@ -60,8 +60,18 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def and = sqls"${this} and"
   def or = sqls"${this} or"
 
-  def eq(column: SQLSyntax, value: Any) = sqls"${this} ${column} = ${value}"
-  def ne(column: SQLSyntax, value: Any) = sqls"${this} ${column} <> ${value}"
+  def eq(column: SQLSyntax, value: Any) = {
+    value match {
+      case null | None => sqls"${this} ${column} is null"
+      case _ => sqls"${this} ${column} = ${value}"
+    }
+  }
+  def ne(column: SQLSyntax, value: Any) = {
+    value match {
+      case null | None => sqls"${this} ${column} is not null"
+      case _ => sqls"${this} ${column} <> ${value}"
+    }
+  }
   def gt(column: SQLSyntax, value: Any) = sqls"${this} ${column} > ${value}"
   def ge(column: SQLSyntax, value: Any) = sqls"${this} ${column} >= ${value}"
   def lt(column: SQLSyntax, value: Any) = sqls"${this} ${column} < ${value}"

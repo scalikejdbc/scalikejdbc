@@ -38,6 +38,30 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(123))
   }
 
+  it should "have #eq for null values" in {
+    val s = SQLSyntax.eq(sqls"id", null)
+    s.value should equal(" id is null")
+    s.parameters should equal(Nil)
+  }
+
+  it should "have #eq for None values" in {
+    val s = SQLSyntax.eq(sqls"id", None)
+    s.value should equal(" id is null")
+    s.parameters should equal(Nil)
+  }
+
+  it should "have #ne for null values" in {
+    val s = SQLSyntax.ne(sqls"id", null)
+    s.value should equal(" id is not null")
+    s.parameters should equal(Nil)
+  }
+
+  it should "have #ne for None values" in {
+    val s = SQLSyntax.ne(sqls"id", None)
+    s.value should equal(" id is not null")
+    s.parameters should equal(Nil)
+  }
+
   it should "have #eq and #ne" in {
     val s = SQLSyntax.eq(sqls"id", 123).and.ne(sqls"name", "Alice")
     s.value should equal(" id = ? and name <> ?")
