@@ -1,0 +1,15 @@
+ScalikeJDBC 2.1.2 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] Fix SQL logging removes rest part after line comment by @seratch
+- [interpolation] #282 Improve SQLSyntax#eq, #ne to generate "is null" query when accepting null/None values by @seratch
+- [syntax-support-macro] should not use Option#get by @xuwei-k
+- [mapper-generator-core] #281 add defaultAutoSession setting by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!
+

@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.2-SNAPSHOT"
+  lazy val _version = "2.1.2"
   lazy val compatibleVersion = "2.1.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -20,8 +20,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.6.Final"
-  lazy val _scalatestVersion = "2.2.0"
-  lazy val _specs2Version = "2.3.13"
+  lazy val _scalatestVersion = "2.2.2"
+  lazy val _specs2Version = "2.4.2"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -123,7 +123,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.4"             % "compile",
-          "org.joda"                %  "joda-convert"    % "1.6"             % "compile",
+          "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
           "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",
@@ -314,7 +314,7 @@ object ScalikeJDBCProjects extends Build {
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version        % "test",
-    "org.apache.derby"  % "derby"                % "10.10.2.0"       % "test",
+    "org.apache.derby"  % "derby"                % "10.11.1.1"       % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
