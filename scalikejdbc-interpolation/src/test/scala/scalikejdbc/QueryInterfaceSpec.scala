@@ -576,6 +576,12 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         }.map(_.long(1)).single.apply().get
         noAccountIdOrderCount should equal(0)
 
+        val stmt1 = select(count).from(Order as o).where.isNull(o.accountId).toSQL.statement
+        val stmt2 = select(count).from(Order as o).where.eq(o.accountId, None).toSQL.statement
+        val stmt3 = select(count).from(Order as o).where.eq(o.accountId, null).toSQL.statement
+        stmt1 should equal(stmt2)
+        stmt2 should equal(stmt3)
+
         val orders = withSQL { QueryDSL.select.from(Order as o).where.isNotNull(o.accountId) }.map(Order(o)).list.apply()
         orders.size should be > (0)
 

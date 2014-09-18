@@ -48,6 +48,11 @@ $ newer src/main/scala/app/models/Programmer.scala src/main/scala/app/models/Pro
 > scalikejdbcGenForce programmers
 > + test:compile
 
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(defaultAutoSession = false)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + test:compile
+
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="invalid template name")}
 -> scalikejdbcGenEcho programmers
 -> scalikejdbcGenForce programmers

@@ -170,10 +170,10 @@ case class StatementExecutor(
       }
 
       var isInsideOfText = false
-      val sql = SQLTemplateParser.trimComments(trimSpaces(template
+      val sql = trimSpaces(SQLTemplateParser.trimComments(template)
         .replaceAll("\r", " ")
         .replaceAll("\n", " ")
-        .replaceAll("\t", " ")))
+        .replaceAll("\t", " "))
         .map { c =>
           if (c == '\'') {
             isInsideOfText = !isInsideOfText

@@ -28,7 +28,7 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean)
+  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean)
 
   def loadSettings(): (JDBCSettings, GeneratorSettings) = {
     val props = new java.util.Properties
@@ -57,7 +57,8 @@ object SbtPlugin extends Plugin {
         lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse("LF"),
         caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(false),
         encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse("UTF-8"),
-        autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(false)
+        autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(false),
+        defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(true)
       ))
   }
 
@@ -71,7 +72,8 @@ object SbtPlugin extends Plugin {
       lineBreak = LineBreak(generatorSettings.lineBreak),
       caseClassOnly = generatorSettings.caseClassOnly,
       encoding = generatorSettings.encoding,
-      autoConstruct = generatorSettings.autoConstruct
+      autoConstruct = generatorSettings.autoConstruct,
+      defaultAutoSession = generatorSettings.defaultAutoSession
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {
