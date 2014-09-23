@@ -21,7 +21,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.6.Final"
   lazy val _scalatestVersion = "2.2.2"
-  lazy val _specs2Version = "2.4.2"
+  lazy val _specs2Version = "2.4.4"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -248,7 +248,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
           "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
-          "org.specs2"     %% "specs2"          % _specs2Version    % "provided"
+          "org.specs2"     %% "specs2-core"     % _specs2Version    % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
@@ -310,7 +310,7 @@ object ScalikeJDBCProjects extends Build {
     Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "test")
 
   lazy val specs2DependenciesInTestScope =
-    Seq("org.specs2" %% "specs2" % _specs2Version % "test")
+    Seq("org.specs2" %% "specs2-core" % _specs2Version % "test")
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version        % "test",

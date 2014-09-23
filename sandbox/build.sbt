@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
   "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
   "org.hsqldb"      %  "hsqldb"            % "2.3.+",
-  "org.specs2"      %% "specs2"            % "2.3.+"             % "test"
+  "org.specs2"      %% "specs2-core"       % "2.4.4"             % "test"
 )
 
 initialCommands := """import scalikejdbc._, jsr310._
