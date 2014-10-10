@@ -188,4 +188,11 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
   }
 
+  // https://groups.google.com/forum/#!topic/scalikejdbc-users-group/8tOlaKcjHnk
+  it should "fix scalikejdbc-users-group/8tOlaKcjHnk" in {
+    val sql = """select * from
+users"""
+    SQLTemplateParser.trimComments(sql) should equal("select * from users")
+  }
+
 }

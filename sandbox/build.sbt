@@ -9,7 +9,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % "2.1.2",
-  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.1.1",
+  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.1.2",
   "com.github.seratch" % "java-time-backport" % "1.0.0",
   "org.scalikejdbc" %% "scalikejdbc-test" % "2.1.2",
   "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
