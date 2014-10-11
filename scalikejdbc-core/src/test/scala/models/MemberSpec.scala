@@ -13,13 +13,13 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
 
     DB autoCommit { implicit session =>
       try {
-        SQL("drop table member").execute.apply()
+        SQL("drop table MEMBER").execute.apply()
       } catch {
         case e: Exception =>
       }
       try {
         SQL("""
-            create table member (
+            create table MEMBER (
               id bigint primary key,
               name varchar(30) not null,
               description varchar(1000),
@@ -80,12 +80,12 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
 
     NamedDB('named) autoCommit { implicit session =>
       try {
-        SQL("drop table named_member").execute.apply()
+        SQL("drop table NAMED_MEMBER").execute.apply()
       } catch {
         case e: Exception =>
       }
       SQL("""
-            create table named_member (
+            create table NAMED_MEMBER (
               id bigint primary key,
               name varchar(30) not null,
               description varchar(1000),
