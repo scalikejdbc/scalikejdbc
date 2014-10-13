@@ -96,6 +96,10 @@ object ScalikeJDBCProjects extends Build {
     file("root211")
   ).settings(
     baseSettings: _*
+  ).settings(
+    commands += Command.command("testSequential"){
+      projects.map(_.id).filterNot(Set(root211Id, mapperGeneratorId)).map(_ + "/test").sorted ::: _
+    }
   ).copy(
     aggregate = projects.filterNot(p => Set(root211Id, mapperGeneratorId).contains(p.id)).map(p => p: ProjectReference)
   )
