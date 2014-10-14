@@ -8,6 +8,9 @@ jdk:
 addons:
   postgresql: "9.3"
 before_script:
+  - rm project/sbt-idea.sbt
+  - rm project/sbt-pgp.sbt
+  - rm project/sbt-updates.sbt
   - psql -c "CREATE ROLE sa WITH SUPERUSER LOGIN PASSWORD 'sa';" -U postgres
   - psql -c "CREATE DATABASE scalikejdbc;" -U postgres
   - mysql -e 'GRANT ALL ON *.* TO sa@"localhost"IDENTIFIED BY "sa";FLUSH PRIVILEGES;' -uroot
