@@ -1,4 +1,4 @@
-> run
+> createTestDatabase
 
 > scalikejdbcGenEcho programmers
 -$ exists src/main/scala/app/models/Programmers.scala
