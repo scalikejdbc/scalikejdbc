@@ -1,4 +1,4 @@
-> run
+> createTestDatabase
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = false)}
@@ -13,7 +13,7 @@
 > scalikejdbcGenForce twenty_three
 
 -> compile
-> set scalaVersion :="2.11.1"
+> set scalaVersion :="2.11.2"
 > compile
 > test:compile
 

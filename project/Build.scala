@@ -230,7 +230,14 @@ object ScalikeJDBCProjects extends Build {
       ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
         a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
       ),
-      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+      ScriptedPlugin.scriptedLaunchOpts ++= Seq(
+        "-Dplugin.version=" + version.value,
+        "-Dmysql.version=5.1.33",
+        "-Dpostgresql.version=9.3-1102-jdbc41",
+        "-Dh2.version=1.4.181",
+        "-Dspecs2.version=" + _specs2Version,
+        "-Dscalatest.version=" + _scalatestVersion
+      ),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
