@@ -854,5 +854,11 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     sql.parameters should equal(Seq(123, "Alice"))
   }
 
+  it should "clear loaded columns" in {
+    Order.clearLoadedColumns()
+    SQLSyntaxSupport.clearLoadedColumns(ConnectionPool.DEFAULT_NAME)
+    SQLSyntaxSupport.clearAllLoadedColumns()
+  }
+
 }
 

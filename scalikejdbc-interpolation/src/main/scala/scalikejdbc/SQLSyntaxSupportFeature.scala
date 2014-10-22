@@ -51,6 +51,27 @@ object SQLSyntaxSupportFeature extends LogSupport {
  */
 trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
+  object SQLSyntaxSupport {
+
+    /**
+     * Clears all the loaded column names.
+     */
+    def clearAllLoadedColumns(): Unit = {
+      val cache = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
+      cache.clear()
+    }
+
+    /**
+     * Clears all the loaded column names for specified connectionPoolName.
+     */
+    def clearLoadedColumns(connectionPoolName: Any): Unit = {
+      val cache = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
+      cache.keys
+        .filter { case (cp, _) => cp == connectionPoolName }
+        .foreach { case (cp, table) => cache.remove((cp, table)) }
+    }
+  }
+
   /**
    * SQLSyntaxSupport trait. Companion object needs this trait as follows.
    *
@@ -125,6 +146,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
           }
         })
       } else columnNames
+    }
+
+    /**
+     * Clears column names loaded from JDBC metadata.
+     */
+    def clearLoadedColumns(): Unit = {
+      SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.remove((connectionPoolName, tableNameWithSchema))
     }
 
     /**
