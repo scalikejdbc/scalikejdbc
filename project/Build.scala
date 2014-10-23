@@ -57,7 +57,9 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this"),
       exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply")
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature#SQLSyntaxSupport.clearLoadedColumns"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature.SQLSyntaxSupport")
     )
   }
 
