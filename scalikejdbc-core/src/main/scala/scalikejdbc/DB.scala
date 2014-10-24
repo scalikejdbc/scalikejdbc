@@ -259,6 +259,18 @@ object DB extends LoanPattern {
   }
 
   /**
+   * Begins a generalized local-tx block that returns a value easily with ConnectionPool.
+   *
+   * @param execution execution that returns a value
+   * @param context connection pool context
+   * @tparam A result type
+   * @return result value
+   */
+  def generalizedLocalTx[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTx(execution)
+  }
+
+  /**
    * Begins a local-tx block that returns a Future value easily with ConnectionPool.
    *
    * @param execution execution that returns a future value
@@ -267,9 +279,7 @@ object DB extends LoanPattern {
    * @return future result value
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
-    futureUsing(connectionPool(context).borrow()) { conn =>
-      DB(conn).autoClose(false).futureLocalTx(execution)
-    }
+    generalizedLocalTx(execution)
   }
 
   /**
@@ -285,6 +295,18 @@ object DB extends LoanPattern {
     using(connectionPool(context).borrow()) { conn =>
       DB(conn).autoClose(false).localTxWithConnection(execution)
     }
+  }
+
+  /**
+   * Begins a generalized local-tx block that returns a value easily with ConnectionPool.
+   *
+   * @param execution execution that returns a value
+   * @param context connection pool context
+   * @tparam A result type
+   * @return result value
+   */
+  def generalizedLocalTxWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTxWithConnection(execution)
   }
 
   /**
