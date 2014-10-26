@@ -266,8 +266,8 @@ object DB extends LoanPattern {
    * @tparam A result type
    * @return result value
    */
-  def generalizedLocalTx[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTx(execution)
+  def localTxForReturnType[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    DB(connectionPool(context).borrow()).autoClose(true).localTxForReturnType(execution)
   }
 
   /**
@@ -279,7 +279,7 @@ object DB extends LoanPattern {
    * @return future result value
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
-    generalizedLocalTx(execution)
+    localTxForReturnType(execution)
   }
 
   /**
@@ -305,8 +305,8 @@ object DB extends LoanPattern {
    * @tparam A result type
    * @return result value
    */
-  def generalizedLocalTxWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
-    DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTxWithConnection(execution)
+  def localTxForReturnTypeWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    DB(connectionPool(context).borrow()).autoClose(true).localTxForReturnTypeWithConnection(execution)
   }
 
   /**

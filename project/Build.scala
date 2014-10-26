@@ -64,8 +64,8 @@ object ScalikeJDBCProjects extends Build {
       // since 2.1.3
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.generalizedLocalTxWithConnection"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.generalizedLocalTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnTypeWithConnection"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
