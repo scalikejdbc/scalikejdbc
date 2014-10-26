@@ -18,6 +18,7 @@ package scalikejdbc
 import java.sql.Connection
 import scalikejdbc.metadata._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 /**
  * Basic Database Accessor
@@ -266,7 +267,8 @@ object DB extends LoanPattern {
    * @tparam A result type
    * @return result value
    */
-  def generalizedLocalTx[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+  def generalizedLocalTx[A: TxBoundary](execution: DBSession => A)(
+    implicit context: CPContext = NoCPContext): A = {
     DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTx(execution)
   }
 
@@ -278,7 +280,32 @@ object DB extends LoanPattern {
    * @tparam A future result type
    * @return future result value
    */
-  def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
+  def futureLocalTx[A](execution: DBSession => Future[A])(
+    implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
+    generalizedLocalTx(execution)
+  }
+
+  /**
+   * Begins a local-tx block that returns a Try value easily with ConnectionPool.
+   *
+   * @param execution execution that returns a Try value
+   * @tparam A Try result type
+   * @return Try result value
+   */
+  def tryLocalTx[A](execution: DBSession => Try[A])(
+    implicit context: CPContext = NoCPContext): Try[A] = {
+    generalizedLocalTx(execution)
+  }
+
+  /**
+   * Begins a local-tx block that returns a Either value easily with ConnectionPool.
+   *
+   * @param execution execution that returns a Either value
+   * @tparam A Either result type
+   * @return Either result value
+   */
+  def eitherLocalTx[A, B](execution: DBSession => Either[B, A])(
+    implicit context: CPContext = NoCPContext): Either[B, A] = {
     generalizedLocalTx(execution)
   }
 
@@ -305,7 +332,8 @@ object DB extends LoanPattern {
    * @tparam A result type
    * @return result value
    */
-  def generalizedLocalTxWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+  def generalizedLocalTxWithConnection[A: TxBoundary](execution: Connection => A)(
+    implicit context: CPContext = NoCPContext): A = {
     DB(connectionPool(context).borrow()).autoClose(true).generalizedLocalTxWithConnection(execution)
   }
 
@@ -391,7 +419,8 @@ object DB extends LoanPattern {
    * @param context connection pool context as implicit parameter
    * @return table name list
    */
-  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW"))(implicit context: CPContext = NoCPContext): String = {
+  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW"))(
+    implicit context: CPContext = NoCPContext): String = {
     DB(connectionPool(context).borrow()).showTables(tableNamePattern, tableTypes)
   }
 
