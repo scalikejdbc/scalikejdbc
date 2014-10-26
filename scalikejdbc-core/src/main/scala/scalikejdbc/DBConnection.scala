@@ -3,9 +3,9 @@ package scalikejdbc
 import java.sql.{ DatabaseMetaData, Connection }
 import scalikejdbc.metadata.{ Index, ForeignKey, Column, Table }
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Failure
-import scala.util.control.Exception._
+import scala.util.Try
 import scala.util.control.ControlThrowable
+import scala.util.control.Exception._
 import java.util.Locale.{ ENGLISH => en }
 
 /**
@@ -288,6 +288,28 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return future result
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+    generalizedLocalTx(execution)
+  }
+
+  /**
+   * Easy way to checkout the current connection to be used in a transaction
+   * that needs to be committed/rolled back depending on Try results.
+   * @param execution block that takes a session and returns a Try value
+   * @tparam A Try result type
+   * @return future result
+   */
+  def tryLocalTx[A](execution: DBSession => Try[A]): Try[A] = {
+    generalizedLocalTx(execution)
+  }
+
+  /**
+   * Easy way to checkout the current connection to be used in a transaction
+   * that needs to be committed/rolled back depending on Try results.
+   * @param execution block that takes a session and returns a Try value
+   * @tparam A Try result type
+   * @return future result
+   */
+  def eitherLocalTx[A, B](execution: DBSession => Either[B, A]): Either[B, A] = {
     generalizedLocalTx(execution)
   }
 

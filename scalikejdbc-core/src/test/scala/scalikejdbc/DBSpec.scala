@@ -1,13 +1,10 @@
 package scalikejdbc
 
-import java.util.Date
-
-import java.util.TimeZone
-import org.joda.time._
 import org.scalatest._
 import java.sql.SQLException
 import org.slf4j.LoggerFactory
 
+import scala.util.Try
 import scala.util.control.Exception._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
@@ -330,69 +327,307 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
   // --------------------
   // generalizedLocalTx
 
-  import scala.util.control.Exception._
+  // Try
 
-  it should "execute single in generalizedLocalTx block" in {
+  it should "execute single in generalizedLocalTx block for Try" in {
     val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB generalizedLocalTx { s =>
+
+      val result: Try[Option[String]] = DB generalizedLocalTx { s =>
+        allCatch.withTry { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
+      }
+      result.isSuccess should equal(true)
+      result.get should equal(Some("1"))
+    }
+  }
+
+  it should "execute list in generalizedLocalTx block for Try" in {
+    val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val result: Try[List[Some[String]]] = DB generalizedLocalTx { s =>
+        allCatch.withTry(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      result.isSuccess should equal(true)
+      result.get.size should equal(2)
+    }
+  }
+
+  it should "execute update in generalizedLocalTx block for Try" in {
+    val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val count: Try[Int] = DB generalizedLocalTx { s =>
+        allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      count.get should equal(1)
+
+      val name: Try[Option[String]] = count.flatMap { _ =>
+        DB generalizedLocalTx (s => allCatch.withTry(
+          s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        ))
+      }
+      name.get should be(Some("foo"))
+    }
+  }
+
+  it should "not be able to rollback in generalizedLocalTx block for Try" in {
+    val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+
+        val count: Try[Int] = DB generalizedLocalTx { s =>
+          allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        count.get should equal(1)
+
+        db.rollbackIfActive()
+        val name: Try[Option[String]] = DB generalizedLocalTx { s =>
+          allCatch.withTry(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        name.get should equal(Some("foo"))
+      }
+    }
+  }
+
+  it should "roll back in generalizedLocalTx block for Try" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val failure: Try[Int] = DB.generalizedLocalTx[Try[Int]] { implicit s =>
+        allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .flatMap(_ => allCatch.withTry(s.update("update foo should be rolled back")))
+      }
+      failure.isFailure should be(true)
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // Either
+
+  it should "execute single in generalizedLocalTx block for Either" in {
+    val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result: Either[Throwable, Option[String]] = DB generalizedLocalTx { s =>
         allCatch.either { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
       }
       result should equal(Right(Some("1")))
     }
   }
 
-  it should "execute list in generalizedLocalTx block" in {
+  it should "execute list in generalizedLocalTx block for Either" in {
     val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB generalizedLocalTx { s =>
+      val result: Either[Throwable, List[Some[String]]] = DB generalizedLocalTx { s =>
         allCatch.either(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
       }
       result.right.get.size should equal(2)
     }
   }
 
-  it should "execute update in generalizedLocalTx block" in {
+  it should "execute update in generalizedLocalTx block for Either" in {
     val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB generalizedLocalTx { s =>
+      val count: Either[Throwable, Int] = DB generalizedLocalTx { s =>
         allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
       }
       count should equal(Right(1))
-      val name = count.right.flatMap { _ =>
+      val name: Either[Throwable, Option[String]] = count.right.flatMap { _ =>
         DB generalizedLocalTx (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
       }
       name should be(Right(Some("foo")))
     }
   }
 
-  it should "not be able to rollback in generalizedLocalTx block" in {
+  it should "not be able to rollback in generalizedLocalTx block for Either" in {
     val tableName = tableNamePrefix + "_singleInGeneralizedLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
-        val count = DB generalizedLocalTx { s =>
+        val count: Either[Throwable, Int] = DB generalizedLocalTx { s =>
           allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }
         count should equal(Right(1))
         db.rollbackIfActive()
-        val name = DB generalizedLocalTx { s =>
+        val name: Either[Throwable, Option[String]] = DB generalizedLocalTx { s =>
           allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
         }
         name should equal(Right(Some("foo")))
-        name
       }
     }
   }
 
-  it should "do rollback in generalizedLocalTx block" in {
+  it should "do rollback in generalizedLocalTx block for Either" in {
     val tableName = tableNamePrefix + "_rollback"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val failure = DB.generalizedLocalTx[Either[Throwable, Int]] { implicit s =>
+      val failure: Either[Throwable, Int] = DB.generalizedLocalTx[Either[Throwable, Int]] { implicit s =>
+        allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .right.flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
+      }
+      failure should be('left)
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
+  // tryLocalTx
+
+  it should "execute single in tryLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInTryLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val result: Try[Option[String]] = DB tryLocalTx { s =>
+        allCatch.withTry { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
+      }
+      result.isSuccess should equal(true)
+      result.get should equal(Some("1"))
+    }
+  }
+
+  it should "execute list in tryLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInTryLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val result: Try[List[Some[String]]] = DB tryLocalTx { s =>
+        allCatch.withTry(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      result.isSuccess should equal(true)
+      result.get.size should equal(2)
+    }
+  }
+
+  it should "execute update in tryLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInTryLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val count: Try[Int] = DB tryLocalTx { s =>
+        allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      count.get should equal(1)
+
+      val name: Try[Option[String]] = count.flatMap { _ =>
+        DB tryLocalTx (s => allCatch.withTry(
+          s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        ))
+      }
+      name.get should be(Some("foo"))
+    }
+  }
+
+  it should "not be able to rollback in tryLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInTryLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+
+        val count: Try[Int] = DB tryLocalTx { s =>
+          allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        count.get should equal(1)
+
+        db.rollbackIfActive()
+        val name: Try[Option[String]] = DB tryLocalTx { s =>
+          allCatch.withTry(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        name.get should equal(Some("foo"))
+      }
+    }
+  }
+
+  it should "roll back in tryLocalTx block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val failure: Try[Int] = DB.tryLocalTx { implicit s =>
+        allCatch.withTry(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .flatMap(_ => allCatch.withTry(s.update("update foo should be rolled back")))
+      }
+      failure.isFailure should be(true)
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
+  // eitherLocalTx
+
+  it should "execute single in eitherLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInEitherLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result: Either[Throwable, Option[String]] = DB eitherLocalTx { s =>
+        allCatch.either { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
+      }
+      result should equal(Right(Some("1")))
+    }
+  }
+
+  it should "execute list in eitherLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInEitherLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result: Either[Throwable, List[Some[String]]] = DB eitherLocalTx { s =>
+        allCatch.either(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      result.right.get.size should equal(2)
+    }
+  }
+
+  it should "execute update in eitherLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInEitherLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val count: Either[Throwable, Int] = DB eitherLocalTx { s =>
+        allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      count should equal(Right(1))
+      val name: Either[Throwable, Option[String]] = count.right.flatMap { _ =>
+        DB eitherLocalTx (s => allCatch.either(
+          s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        ))
+      }
+      name should be(Right(Some("foo")))
+    }
+  }
+
+  it should "not be able to rollback in eitherLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInEitherLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        val count: Either[Throwable, Int] = DB eitherLocalTx { s =>
+          allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        count should equal(Right(1))
+        db.rollbackIfActive()
+        val name: Either[Throwable, Option[String]] = DB eitherLocalTx { s =>
+          allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        name should equal(Right(Some("foo")))
+      }
+    }
+  }
+
+  it should "do rollback in eitherLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInEitherLocalTxRollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure: Either[Throwable, Int] = DB eitherLocalTx { implicit s =>
         allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
           .right.flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
       }
