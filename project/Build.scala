@@ -59,17 +59,16 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this"),
       exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      // since 2.1.3
       exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature#SQLSyntaxSupport.clearLoadedColumns"),
       exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature.SQLSyntaxSupport"),
-      // since 2.1.3
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.generalizedLocalTxWithConnection"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.generalizedLocalTx"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
-      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_=")
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType")
     )
   }
 

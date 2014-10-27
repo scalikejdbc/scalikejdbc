@@ -34,18 +34,9 @@ trait TxBoundary[A] {
 
 /**
  * Default TxBoundary type class instances.
+ * NOTE:  TxBoundary usage will be disclosed to library users since 2.2 or later.
  */
 object TxBoundary {
-
-  implicit def eitherTxBoundary[A, B] = new TxBoundary[Either[A, B]] {
-    def finishTx(result: Either[A, B], tx: Tx): Either[A, B] = {
-      result match {
-        case Right(_) => tx.commit()
-        case Left(_) => tx.rollback()
-      }
-      result
-    }
-  }
 
   implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
     def finishTx(result: Future[A], tx: Tx): Future[A] = {
@@ -61,13 +52,37 @@ object TxBoundary {
     }
   }
 
-  implicit def tryTxBoundary[A] = new TxBoundary[Try[A]] {
-    def finishTx(result: Try[A], tx: Tx): Try[A] = {
-      result match {
-        case Success(_) => tx.commit()
-        case Failure(_) => tx.rollback()
+  /**
+   * Default TxBoundary type class instances.
+   * This implicit won't be provided by default
+   */
+  object Either {
+
+    implicit def eitherTxBoundary[L, R] = new TxBoundary[Either[L, R]] {
+      def finishTx(result: Either[L, R], tx: Tx): Either[L, R] = {
+        result match {
+          case Right(_) => tx.commit()
+          case Left(_) => tx.rollback()
+        }
+        result
       }
-      result
+    }
+  }
+
+  /**
+   * Default TxBoundary type class instances.
+   * This implicit won't be provided by default
+   */
+  object Try {
+
+    implicit def tryTxBoundary[A] = new TxBoundary[Try[A]] {
+      def finishTx(result: Try[A], tx: Tx): Try[A] = {
+        result match {
+          case Success(_) => tx.commit()
+          case Failure(_) => tx.rollback()
+        }
+        result
+      }
     }
   }
 
