@@ -264,7 +264,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @tparam A  return type
    * @return result value
    */
-  def localTxForReturnType[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
+  private[scalikejdbc] def localTxForReturnType[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
     val doClose = if (autoCloseEnabled) () => conn.close() else () => ()
     val tx = newTx
     begin(tx)
@@ -278,13 +278,6 @@ trait DBConnection extends LogSupport with LoanPattern {
       case e: Throwable => doClose(); throw e
     }
     boundary.closeConnection(txResult, doClose)
-  }
-
-  /**
-   * Shorten name of #localTxForReturnType.
-   */
-  def localTxFor[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
-    localTxForReturnType[A](execution)
   }
 
   /**
@@ -306,20 +299,6 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def localTxWithConnection[A](execution: Connection => A): A = {
     localTx(s => execution(s.conn))
-  }
-
-  /**
-   * Provides generalized local-tx session block.
-   * @param execution block
-   * @tparam A  return type
-   * @return result value
-   */
-  def localTxForReturnTypeWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A]): A = {
-    localTxForReturnType(s => execution(s.conn))
-  }
-
-  def localTxForWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A]): A = {
-    localTxForReturnTypeWithConnection(execution)
   }
 
   /**

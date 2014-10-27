@@ -64,14 +64,11 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature.SQLSyntaxSupport"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnTypeWithConnection"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForWithConnection"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxFor"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
-      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_=")
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType")
     )
   }
 
