@@ -401,6 +401,79 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
   }
 
   // --------------------
+  // localTxFor
+
+  it should "execute single in localTxFor block" in {
+    val tableName = tableNamePrefix + "_singleInLocalTxFor"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result = DB localTxFor { s =>
+        allCatch.either { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
+      }
+      result should equal(Right(Some("1")))
+    }
+  }
+
+  it should "execute list in localTxFor block" in {
+    val tableName = tableNamePrefix + "_singleInLocalTxFor"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val result = DB localTxFor { s =>
+        allCatch.either(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      result.right.get.size should equal(2)
+    }
+  }
+
+  it should "execute update in localTxFor block" in {
+    val tableName = tableNamePrefix + "_singleInLocalTxFor"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val count = DB localTxFor { s =>
+        allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      count should equal(Right(1))
+      val name = count.right.flatMap { _ =>
+        DB localTxFor (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+      }
+      name should be(Right(Some("foo")))
+    }
+  }
+
+  it should "not be able to rollback in localTxFor block" in {
+    val tableName = tableNamePrefix + "_singleInLocalTxFor"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        val count = DB localTxFor { s =>
+          allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        count should equal(Right(1))
+        db.rollbackIfActive()
+        val name = DB localTxFor { s =>
+          allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        name should equal(Right(Some("foo")))
+        name
+      }
+    }
+  }
+
+  it should "do rollback in localTxFor block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = DB.localTxFor[Either[Throwable, Int]] { implicit s =>
+        allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .right.flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
+      }
+      failure should be('left)
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
   // withinTx
 
   it should "not execute query in withinTx block  before beginning tx" in {

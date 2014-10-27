@@ -281,6 +281,13 @@ trait DBConnection extends LogSupport with LoanPattern {
   }
 
   /**
+   * Shorten name of #localTxForReturnType.
+   */
+  def localTxFor[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
+    localTxForReturnType[A](execution)
+  }
+
+  /**
    * Easy way to checkout the current connection to be used in a transaction
    * that needs to be committed/rolled back depending on Future results.
    * @param execution block that takes a session and returns a future
@@ -309,6 +316,10 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def localTxForReturnTypeWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A]): A = {
     localTxForReturnType(s => execution(s.conn))
+  }
+
+  def localTxForWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A]): A = {
+    localTxForReturnTypeWithConnection(execution)
   }
 
   /**

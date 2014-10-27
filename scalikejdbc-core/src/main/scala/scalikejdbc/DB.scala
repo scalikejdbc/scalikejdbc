@@ -271,6 +271,13 @@ object DB extends LoanPattern {
   }
 
   /**
+   * Shorten name of #localTxForReturnType.
+   */
+  def localTxFor[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
+    localTxForReturnType[A](execution)
+  }
+
+  /**
    * Begins a local-tx block that returns a Future value easily with ConnectionPool.
    *
    * @param execution execution that returns a future value
@@ -307,6 +314,13 @@ object DB extends LoanPattern {
    */
   def localTxForReturnTypeWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
     DB(connectionPool(context).borrow()).autoClose(true).localTxForReturnTypeWithConnection(execution)
+  }
+
+  /**
+   * Shorten name of #localTxForReturnTypeWithConnection.
+   */
+  def localTxForWithConnection[A: TxBoundary](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+    localTxForReturnTypeWithConnection[A](execution)
   }
 
   /**
