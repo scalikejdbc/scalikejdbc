@@ -33,28 +33,33 @@ trait TxBoundary[A] {
 }
 
 /**
- * Default TxBoundary type class instances.
+ * TxBoundary type class instances.
  * NOTE:  TxBoundary usage will be disclosed to library users since 2.2 or later.
  */
 object TxBoundary {
 
-  implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
-    def finishTx(result: Future[A], tx: Tx): Future[A] = {
-      result.andThen {
-        case Success(_) => tx.commit()
-        case Failure(_) => tx.rollback()
+  /**
+   * Future TxBoundary type class instances.
+   */
+  object Future {
+
+    implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
+      def finishTx(result: Future[A], tx: Tx): Future[A] = {
+        result.andThen {
+          case Success(_) => tx.commit()
+          case Failure(_) => tx.rollback()
+        }
       }
-    }
-    override def closeConnection(result: Future[A], doClose: () => Unit): Future[A] = {
-      result.andThen {
-        case _ => doClose()
+      override def closeConnection(result: Future[A], doClose: () => Unit): Future[A] = {
+        result.andThen {
+          case _ => doClose()
+        }
       }
     }
   }
 
   /**
-   * Default TxBoundary type class instances.
-   * This implicit won't be provided by default
+   * Either TxBoundary type class instances.
    */
   object Either {
 
@@ -70,8 +75,7 @@ object TxBoundary {
   }
 
   /**
-   * Default TxBoundary type class instances.
-   * This implicit won't be provided by default
+   * Try TxBoundary type class instances.
    */
   object Try {
 

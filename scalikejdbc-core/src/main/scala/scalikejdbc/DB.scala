@@ -279,6 +279,8 @@ object DB extends LoanPattern {
    * @return future result value
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
+    // Enable TxBoundary implicits
+    import scalikejdbc.TxBoundary.Future._
     localTxForReturnType(execution)
   }
 

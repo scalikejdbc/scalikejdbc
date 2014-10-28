@@ -288,6 +288,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return future result
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+    // Enable TxBoundary implicits
+    import scalikejdbc.TxBoundary.Future._
     localTxForReturnType(execution)
   }
 
