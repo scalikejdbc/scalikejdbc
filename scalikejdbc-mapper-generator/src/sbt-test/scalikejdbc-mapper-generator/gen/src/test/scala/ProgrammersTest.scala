@@ -1,0 +1,40 @@
+package app.models
+
+import org.scalatest._
+import scala.util.Random
+import scalikejdbc.scalatest.AutoRollback
+import scalikejdbc._
+
+class ProgrammersTest extends fixture.FlatSpec with Matchers with AutoRollback {
+  private[this] val p = Programmer.syntax("p")
+
+  behavior of "Programmer"
+
+  it should "be available" in { implicit session =>
+    Programmers.findAll().toSet should equal(Set.empty[Programmers])
+    Programmers.countAll() should equal(0)
+
+    val programmers = List(Some("aaa"), Some("bbb"), None).map(Programmers.create(_)).toSet
+    programmers.foreach{ programmer =>
+      Programmers.find(programmer.id) should equal(Some(programmer))
+    }
+    val invalidId = Int.MinValue
+    Programmers.find(invalidId) should equal(None)
+    Programmers.findAll().toSet should equal(programmers)
+    Programmers.countAll() should equal(programmers.size)
+    Programmers.findAllBy(sqls"${p.name} is not null").toSet should equal(programmers.filter(_.name.isDefined))
+    Programmers.countBy(sqls"${p.name} is null") should equal(programmers.count(_.name.isEmpty))
+
+    val destroyProgrammer = Random.shuffle(programmers.toList).head
+
+    Programmers.destroy(destroyProgrammer)
+    Programmers.findAll().toSet should equal(programmers.filter(_ != destroyProgrammer))
+    Programmers.countAll() should equal(programmers.size - 1)
+    Programmers.find(destroyProgrammer.id) should equal(None)
+
+    programmers.foreach(Programmers.destroy(_))
+    Programmers.findAll().toSet should equal(Set.empty[Programmers])
+    Programmers.countAll() should equal(0)
+  }
+
+}
