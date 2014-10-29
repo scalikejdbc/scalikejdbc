@@ -68,7 +68,11 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType")
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType"),
+      exclude[MissingTypesProblem]("scalikejdbc.mapper.Table$"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.copy")
     )
   }
 
