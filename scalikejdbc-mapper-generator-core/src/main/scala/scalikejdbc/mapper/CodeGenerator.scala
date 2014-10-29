@@ -603,6 +603,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     "object " + className + " extends SQLSyntaxSupport[" + className + "] {" + eol +
+      table.schema.filterNot(_.isEmpty).map { schema =>
+        eol + 1.indent + "override val schemaName = Some(\"" + schema + "\")" + eol
+      }.getOrElse("") +
       eol +
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +
