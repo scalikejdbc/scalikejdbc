@@ -85,6 +85,14 @@ object ScalikeJDBCProjects extends Build {
     binaryIssueFilters ++= mimaProblemFilters
   )
 
+  private def gitHash: String = try {
+    sys.process.Process("git rev-parse HEAD").lines_!.head
+  } catch {
+    case e: Exception =>
+      println(e)
+      "develop"
+  }
+
   lazy val baseSettings = Seq(
     organization := _organization,
     version := _version,
@@ -95,6 +103,10 @@ object ScalikeJDBCProjects extends Build {
     incOptions := incOptions.value.withNameHashing(true),
     //scalaVersion := "2.11.1",
     scalacOptions ++= _scalacOptions,
+    scalacOptions in (Compile, doc) ++= Seq(
+      "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+      "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
+    ),
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
