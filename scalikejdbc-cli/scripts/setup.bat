@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.0/sbt-launch.jar sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.6/sbt-launch.jar sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -22,7 +22,7 @@ pushd "%db_dir%"
 popd
 
 if not exist "%config_props%" (
-  >>"%config_props%" echo sandbox.jdbc.url=jdbc:h2:file:db/sandbox
+  >>"%config_props%" echo sandbox.jdbc.url=jdbc:h2:file:./db/sandbox
   >>"%config_props%" echo sandbox.jdbc.username=
   >>"%config_props%" echo sandbox.jdbc.password=
   >>"%config_props%" echo #mysql.jdbc.url=jdbc:mysql://localhost:3306/dbname
@@ -120,15 +120,14 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.10.1"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"               %% "2.0.0",
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc-interpolation" %% "2.0.0",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.1.2",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.7",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.178", 
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.182", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.10.2.0",
->>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.7.2",
+>>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.8.7",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.3.2",
->>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.30",
->>"%build_sbt%" echo   "postgresql"         %% "postgresql"           %% "9.3-1101-jdbc41"
+>>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.33",
+>>"%build_sbt%" echo   "postgresql"         %% "postgresql"           %% "9.3-1102-jdbc41"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
