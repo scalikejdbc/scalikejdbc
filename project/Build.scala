@@ -185,18 +185,12 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbcLibrary)
 
   // scalikejdbc-interpolation-core
-  // basic modules that are used by interpolation-macro
   lazy val scalikejdbcInterpolationCore = Project(
     id = "interpolation-core",
     base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ mimaSettings ++ Seq(
+    settings = baseSettings ++ Seq(
       name := "scalikejdbc-interpolation-core",
-      libraryDependencies ++= {
-        Seq(
-          "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
-          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test"
-        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      description := "deprecated. just use scalikejdbc-core"
     )
   ) dependsOn(scalikejdbcCore)
 
@@ -213,7 +207,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcInterpolationCore)
+  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation
   lazy val scalikejdbcInterpolation = Project(
@@ -229,7 +223,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
+  ) dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
   // scalikejdbc-mapper-generator-core
   // core library for mapper-generator
