@@ -148,6 +148,12 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-core"),
     settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-core",
+      TaskKey[Unit]("checkScalariform") := {
+        val diff = "git diff".!!
+        if(diff.nonEmpty){
+          sys.error("Working directory is dirty!\n" + diff)
+        }
+      },
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           // scope: compile
