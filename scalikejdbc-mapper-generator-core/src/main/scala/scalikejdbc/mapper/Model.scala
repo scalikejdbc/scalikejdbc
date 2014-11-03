@@ -65,6 +65,7 @@ case class Model(url: String, username: String, password: String) {
           case Nil => None
           case allColumns =>
             Some(Table(
+              schema = Option(schema),
               name = tableName,
               allColumns = allColumns,
               autoIncrementColumns = allColumns.filter(c => c.isAutoIncrement).distinct,
