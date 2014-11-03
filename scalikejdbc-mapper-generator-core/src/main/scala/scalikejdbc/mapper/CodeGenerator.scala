@@ -322,7 +322,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * }
      * }}}
      */
-    def createMethod(autoIncrement: Boolean) = {
+    val createMethod = {
+      val autoIncrement = table.autoIncrementColumns.size == 1
       val methodName: String =
         if (autoIncrement)
           "create"
@@ -636,9 +637,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       eol +
       (if (isQueryDsl) queryDslCountByMethod else interpolationCountByMethod) +
       eol +
-      createMethod(autoIncrement = true) +
-      eol +
-      createMethod(autoIncrement = false) +
+      createMethod +
       eol +
       saveMethod +
       eol +
