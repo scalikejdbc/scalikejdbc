@@ -324,11 +324,6 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      */
     val createMethod = {
       val autoIncrement = table.autoIncrementColumns.size == 1
-      val methodName: String =
-        if (autoIncrement)
-          "create"
-        else
-          "createNoAutoincrement"
       val createColumns: List[Column] =
         if (autoIncrement)
           allColumns.filterNot {
@@ -346,7 +341,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }
 
       // def create(
-      1.indent + s"def ${methodName}(" + eol +
+      1.indent + s"def create(" + eol +
         // id: Long, name: Option[String] = None)(implicit session DBSession = autoSession): ClassName = {
         createColumns.map { c => 2.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None") }.mkString(comma + eol) +
         ")(implicit session: DBSession" + defaultAutoSession + "): " + className + " = {" + eol +
