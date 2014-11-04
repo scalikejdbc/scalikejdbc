@@ -1,0 +1,20 @@
+ScalikeJDBC 2.1.3 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] Fix query logging bug (https://groups.google.com/forum/#!topic/scalikejdbc-users-group/8tOlaKcjHnk) by @seratch
+- [interpolation] #298 allow clearing `SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns` by @seratch
+- [interpolation] #300 Enhance Tx boundary for not only Exception but other types by @gakuzzzz
+- [interpolation] #311 Merge scalikejdbc-interpolation-core into scalikejdbc-core by @xuwei-K
+- [mapper-generator] #285 Fix default values in sbt plugin by @xuwei-K
+- [mapper-generator] #304 Fix for #303 issue by @ponythewhite
+- [mapper-generator] #308 Fix #307 Generated code by mapper-generator fails to compile when specifying schema by @seratch
+- [mapper-generator] #309 Add createNoAutoincrement method to allow manual filling of fields with autoincrement by @ponythewhite
+- [test] use specs2-core instead of specs2. update specs2 2.4.4 by @xuwei-k 
+
+Enjoy writing mostly type-safe SQL and get things done!
+
