@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.2/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.6/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -139,15 +139,14 @@ run_sbt "console"
 echo 'scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"    %% "scalikejdbc"               % "2.0.0",
-  "org.scalikejdbc"    %% "scalikejdbc-interpolation" % "2.0.0",
+  "org.scalikejdbc"    %% "scalikejdbc"         % "2.1.2",
   "org.slf4j"          % "slf4j-simple"         % "1.7.7",
-  "com.h2database"     % "h2"                   % "1.4.178",
+  "com.h2database"     % "h2"                   % "1.4.182",
   "org.apache.derby"   % "derby"                % "10.10.2.0",
-  "org.xerial"         % "sqlite-jdbc"          % "3.7.2",
+  "org.xerial"         % "sqlite-jdbc"          % "3.8.7",
   "org.hsqldb"         % "hsqldb"               % "2.3.2",
-  "mysql"              % "mysql-connector-java" % "5.1.30",
-  "org.postgresql"     % "postgresql"           % "9.3-1101-jdbc41"
+  "mysql"              % "mysql-connector-java" % "5.1.33",
+  "org.postgresql"     % "postgresql"           % "9.3-1102-jdbc41"
 )
 
 initialCommands := {
@@ -162,7 +161,6 @@ initialCommands := {
 mkdir ${INIT_DIR} 2> /dev/null
 
 echo 'import scalikejdbc._
-import scalikejdbc.SQLInterpolation._
 import scalikejdbc.StringSQLRunner._
 def initialize() {
   val props = new java.util.Properties

@@ -10,6 +10,11 @@ http://scalikejdbc.org/
 
 [![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=develop)](https://travis-ci.org/scalikejdbc/scalikejdbc)
 
+## Gitter Chat for Casual Q&A
+
+- English: [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/scalikejdbc/en?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+- 日本語 (Japanese): [![Gitter](https://badges.gitter.im/_チャットへ.svg)](https://gitter.im/scalikejdbc/ja?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Getting Started
 
 All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementation.

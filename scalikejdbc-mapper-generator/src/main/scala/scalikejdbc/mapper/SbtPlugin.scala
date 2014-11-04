@@ -21,6 +21,7 @@ import scala.language.reflectiveCalls
 import util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
+import java.util.Properties
 
 object SbtPlugin extends Plugin {
 
@@ -30,7 +31,30 @@ object SbtPlugin extends Plugin {
 
   case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean)
 
-  def loadSettings(): (JDBCSettings, GeneratorSettings) = {
+  private[this] def loadJDBCSettings(props: Properties): JDBCSettings =
+    JDBCSettings(
+      driver = Option(props.get("jdbc.driver")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
+      url = Option(props.get("jdbc.url")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.url to project/scalikejdbc-mapper-generator.properties")),
+      username = Option(props.get("jdbc.username")).map(_.toString).getOrElse(""),
+      password = Option(props.get("jdbc.password")).map(_.toString).getOrElse(""),
+      schema = Option(props.get("jdbc.schema")).map(_.toString).orNull[String]
+    )
+
+  private[this] def loadGeneratorSettings(props: Properties): GeneratorSettings = {
+    val defaultConfig = GeneratorConfig()
+    GeneratorSettings(
+      packageName = Option(props.get("generator.packageName")).map(_.toString).getOrElse(defaultConfig.packageName),
+      template = Option(props.get("generator.template")).map(_.toString).getOrElse(defaultConfig.template.name),
+      testTemplate = Option(props.get("generator.testTemplate")).map(_.toString).getOrElse(GeneratorTestTemplate.specs2unit.name),
+      lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse(defaultConfig.lineBreak.name),
+      caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(defaultConfig.caseClassOnly),
+      encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse(defaultConfig.encoding),
+      autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(defaultConfig.autoConstruct),
+      defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(defaultConfig.defaultAutoSession)
+    )
+  }
+
+  private[this] def loadPropertiesFromFile(): Either[FileNotFoundException, Properties] = {
     val props = new java.util.Properties
     try {
       using(new java.io.FileInputStream("project/scalikejdbc-mapper-generator.properties")) {
@@ -40,26 +64,28 @@ object SbtPlugin extends Plugin {
       case e: FileNotFoundException =>
     }
     if (props.isEmpty) {
-      using(new java.io.FileInputStream("project/scalikejdbc.properties")) {
-        inputStream => props.load(inputStream)
+      try {
+        using(new java.io.FileInputStream("project/scalikejdbc.properties")) {
+          inputStream => props.load(inputStream)
+        }
+        Right(props)
+      } catch {
+        case e: FileNotFoundException =>
+          Left(e)
       }
+    } else {
+      Right(props)
     }
-    (JDBCSettings(
-      driver = Option(props.get("jdbc.driver")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
-      url = Option(props.get("jdbc.url")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.url to project/scalikejdbc-mapper-generator.properties")),
-      username = Option(props.get("jdbc.username")).map(_.toString).getOrElse(""),
-      password = Option(props.get("jdbc.password")).map(_.toString).getOrElse(""),
-      schema = Option(props.get("jdbc.schema")).map(_.toString).orNull[String]
-    ), GeneratorSettings(
-        packageName = Option(props.get("generator.packageName")).map(_.toString).getOrElse("models"),
-        template = Option(props.get("generator.template")).map(_.toString).getOrElse("executableSQL"),
-        testTemplate = Option(props.get("generator.testTemplate")).map(_.toString).getOrElse("specs2unit"),
-        lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse("LF"),
-        caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(false),
-        encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse("UTF-8"),
-        autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(false),
-        defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(true)
-      ))
+  }
+
+  @deprecated("will be removed", "2.1.3")
+  def loadSettings(): (JDBCSettings, GeneratorSettings) = {
+    loadPropertiesFromFile() match {
+      case Right(props) =>
+        (loadJDBCSettings(props), loadGeneratorSettings(props))
+      case Left(e) =>
+        throw e
+    }
   }
 
   private[this] def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
@@ -154,8 +180,8 @@ object SbtPlugin extends Plugin {
       gen.foreach(g => println(g.modelAll()))
       gen.foreach(g => g.specAll().foreach(spec => println(spec)))
     },
-    scalikejdbcJDBCSettings := loadSettings._1,
-    scalikejdbcGeneratorSettings := loadSettings._2
+    scalikejdbcJDBCSettings := loadPropertiesFromFile().fold(throw _, loadJDBCSettings),
+    scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)
   ))
 
   def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {

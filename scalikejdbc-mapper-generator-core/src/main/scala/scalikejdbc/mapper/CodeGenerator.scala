@@ -498,7 +498,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       val argsPart = pkColumns.map(pk => pk.nameInScala + ": " + pk.typeInScala).mkString(", ")
       val wherePart = config.template match {
         case GeneratorTemplate.interpolation =>
-          pkColumns.map(pk => s"${pk.name} = $${${syntaxName}.${pk.nameInScala}}").mkString(" and ")
+          pkColumns.map(pk => s"$${${syntaxName}.${pk.nameInScala}} = $${${pk.nameInScala}}").mkString(" and ")
         case GeneratorTemplate.queryDsl =>
           pkColumns.map(pk => s".eq(${syntaxName}.${pk.nameInScala}, ${pk.nameInScala})").mkString(".and")
       }
@@ -603,6 +603,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     "object " + className + " extends SQLSyntaxSupport[" + className + "] {" + eol +
+      table.schema.filterNot(_.isEmpty).map { schema =>
+        eol + 1.indent + "override val schemaName = Some(\"" + schema + "\")" + eol
+      }.getOrElse("") +
       eol +
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +

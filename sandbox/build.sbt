@@ -1,6 +1,6 @@
 scalikejdbcSettings
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 resolvers ++= Seq(
   "Sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases",
@@ -8,14 +8,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc" % "2.1.2",
-  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.1.1",
+  "org.scalikejdbc" %% "scalikejdbc" % "2.1.3",
+  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.1.3",
   "com.github.seratch" % "java-time-backport" % "1.0.0",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "2.1.2",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "2.1.3",
   "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
   "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
   "org.hsqldb"      %  "hsqldb"            % "2.3.+",
-  "org.specs2"      %% "specs2"            % "2.3.+"             % "test"
+  "org.specs2"      %% "specs2-core"       % "2.4.4"             % "test"
 )
 
 initialCommands := """import scalikejdbc._, jsr310._

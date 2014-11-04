@@ -5,6 +5,7 @@ import scalikejdbc.metadata.{ Index, ForeignKey, Column, Table }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Failure
 import scala.util.control.Exception._
+import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
 
 /**
@@ -157,9 +158,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def readOnlyWithConnection[A](execution: Connection => A): A = {
-    // cannot control if jdbc drivers ignore the readOnly attribute.
-    if (autoCloseEnabled) using(conn)(_ => execution(readOnlySession().conn))
-    else execution(readOnlySession().conn)
+    readOnly(s => execution(s.conn))
   }
 
   /**
@@ -190,8 +189,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def autoCommitWithConnection[A](execution: Connection => A): A = {
-    if (autoCloseEnabled) using(conn)(_ => execution(autoCommitSession().conn))
-    else execution(autoCommitSession().conn)
+    autoCommit(s => execution(s.conn))
   }
 
   /**
@@ -222,7 +220,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def withinTxWithConnection[A](execution: Connection => A): A = {
-    execution(withinTxSession(currentTx).conn)
+    withinTx(s => execution(s.conn))
   }
 
   private[this] def begin(tx: Tx): Unit = {
@@ -232,9 +230,22 @@ trait DBConnection extends LogSupport with LoanPattern {
     }
   }
 
-  private[this] val rollbackIfThrowable = handling(classOf[Throwable]) by { t =>
-    tx.rollback()
-    throw t
+  private[this] def rollbackIfThrowable[A](f: => A): A = try {
+    f
+  } catch {
+    case e: ControlThrowable =>
+      tx.commit()
+      throw e
+    case e: Throwable =>
+      tx.rollback()
+      throw e
+  }
+
+  private[this] def anyTxBoundary[A]: TxBoundary[A] = new TxBoundary[A] {
+    def finishTx(result: A, tx: Tx): A = {
+      tx.commit()
+      result
+    }
   }
 
   /**
@@ -244,18 +255,29 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def localTx[A](execution: DBSession => A): A = {
-    def _localTx[A](execution: DBSession => A): A = {
-      val tx = newTx
-      begin(tx)
+    localTxForReturnType(execution)(anyTxBoundary)
+  }
+
+  /**
+   * Provides generalized local-tx session block.
+   * @param execution block
+   * @tparam A  return type
+   * @return result value
+   */
+  private[scalikejdbc] def localTxForReturnType[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
+    val doClose = if (autoCloseEnabled) () => conn.close() else () => ()
+    val tx = newTx
+    begin(tx)
+    val txResult = try {
       rollbackIfThrowable[A] {
         val session = DBSession(conn, tx = Option(tx))
         val result: A = execution(session)
-        tx.commit()
-        result
+        boundary.finishTx(result, tx)
       }
+    } catch {
+      case e: Throwable => doClose(); throw e
     }
-    if (autoCloseEnabled) using(conn)(_ => _localTx(execution))
-    else _localTx(execution)
+    boundary.closeConnection(txResult, doClose)
   }
 
   /**
@@ -266,22 +288,9 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return future result
    */
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
-    def _futureLocalTx[A](checkedOutConn: Connection, execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
-      val tx = newTx(checkedOutConn)
-      begin(tx)
-
-      Future(DBSession(checkedOutConn, Some(tx)))
-        .flatMap(session => execution(session))
-        .map { result =>
-          tx.commit()
-          result
-        }.andThen {
-          case _: Failure[_] => tx.rollback()
-          case _ =>
-        }
-    }
-    if (autoCloseEnabled) futureUsing(conn) { c => _futureLocalTx(c, execution) }
-    else _futureLocalTx(conn, execution)
+    // Enable TxBoundary implicits
+    import scalikejdbc.TxBoundary.Future._
+    localTxForReturnType(execution)
   }
 
   /**
@@ -291,18 +300,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return result value
    */
   def localTxWithConnection[A](execution: Connection => A): A = {
-    def _localTxWithConnection[A](execution: Connection => A): A = {
-      val tx = newTx
-      begin(tx)
-      rollbackIfThrowable[A] {
-        val session = DBSession(conn, tx = Option(tx))
-        val result: A = execution(session.conn)
-        tx.commit()
-        result
-      }
-    }
-    if (autoCloseEnabled) using(conn)(_ => _localTxWithConnection(execution))
-    else _localTxWithConnection(execution)
+    localTx(s => execution(s.conn))
   }
 
   /**

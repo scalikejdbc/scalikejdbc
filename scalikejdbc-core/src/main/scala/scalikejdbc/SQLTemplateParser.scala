@@ -87,10 +87,10 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
         case i if i > 10 => s
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
       }
-      trimSpaces(str).trim()
+      trimSpaces(str).replaceAll("\\s+;", ";").trim()
     }
 
-    def removeLineComments() = str.split("\n").map(_.replaceFirst("--.+$", "")).mkString
+    def removeLineComments() = str.split("\n").map(_.replaceFirst("--.+$", "")).mkString(" ")
 
     def removeMultipleLineComments() = str.replaceAll("/\\*\\s*.+?\\s*\\*/", "")
 

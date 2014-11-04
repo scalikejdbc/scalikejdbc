@@ -1,4 +1,9 @@
-libraryDependencies += "com.h2database" % "h2" % "1.4.177"
+libraryDependencies ++= (
+  ("com.h2database" % "h2" % System.getProperty("h2.version")) ::
+  ("mysql" % "mysql-connector-java" % System.getProperty("mysql.version")) ::
+  ("org.postgresql" % "postgresql" % System.getProperty("postgresql.version")) ::
+  Nil
+)
 
 {
   val pluginVersion = System.getProperty("plugin.version")

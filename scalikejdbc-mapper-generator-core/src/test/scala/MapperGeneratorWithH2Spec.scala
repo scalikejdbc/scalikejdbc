@@ -88,6 +88,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         ))
         generator2.specAll()
         generator2.writeModel()
+
         val generator3 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -96,6 +97,24 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         ))
         generator3.specAll()
         generator3.writeModel()
+
+        val generator4 = new CodeGenerator(table.copy(schema = Some("public")))(GeneratorConfig(
+          srcDir = srcDir,
+          template = GeneratorTemplate.queryDsl,
+          testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
+          packageName = "com.example.schema"
+        ))
+        generator4.specAll()
+        generator4.writeModel()
+
+        val generator5 = new CodeGenerator(table.copy(schema = Some("")))(GeneratorConfig(
+          srcDir = srcDir,
+          template = GeneratorTemplate.queryDsl,
+          testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
+          packageName = "com.example.schema2"
+        ))
+        generator5.specAll()
+        generator5.writeModel()
 
     } getOrElse {
       fail("The table is not found.")

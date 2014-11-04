@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.2"
+  lazy val _version = "2.1.3"
   lazy val compatibleVersion = "2.1.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -21,7 +21,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.6.Final"
   lazy val _scalatestVersion = "2.2.2"
-  lazy val _specs2Version = "2.4.2"
+  lazy val _specs2Version = "2.4.9"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -54,10 +54,25 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this")
       */
+      // since 2.1.2
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this"),
       exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply")
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      // since 2.1.3
+      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature#SQLSyntaxSupport.clearLoadedColumns"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature.SQLSyntaxSupport"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$rollbackIfThrowable"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
+      exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType"),
+      exclude[MissingTypesProblem]("scalikejdbc.mapper.Table$"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.copy")
     )
   }
 
@@ -70,6 +85,14 @@ object ScalikeJDBCProjects extends Build {
     binaryIssueFilters ++= mimaProblemFilters
   )
 
+  private def gitHash: String = try {
+    sys.process.Process("git rev-parse HEAD").lines_!.head
+  } catch {
+    case e: Exception =>
+      println(e)
+      "develop"
+  }
+
   lazy val baseSettings = Seq(
     organization := _organization,
     version := _version,
@@ -80,6 +103,10 @@ object ScalikeJDBCProjects extends Build {
     incOptions := incOptions.value.withNameHashing(true),
     //scalaVersion := "2.11.1",
     scalacOptions ++= _scalacOptions,
+    scalacOptions in (Compile, doc) ++= Seq(
+      "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+      "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
+    ),
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
@@ -96,6 +123,10 @@ object ScalikeJDBCProjects extends Build {
     file("root211")
   ).settings(
     baseSettings: _*
+  ).settings(
+    commands += Command.command("testSequential"){
+      projects.map(_.id).filterNot(Set(root211Id, mapperGeneratorId)).map(_ + "/test").sorted ::: _
+    }
   ).copy(
     aggregate = projects.filterNot(p => Set(root211Id, mapperGeneratorId).contains(p.id)).map(p => p: ProjectReference)
   )
@@ -122,7 +153,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.4"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.5"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
@@ -132,7 +163,7 @@ object ScalikeJDBCProjects extends Build {
           "com.zaxxer"              %  "HikariCP"        % "1.4.+"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.mockito"             %  "mockito-all"     % "1.9.+"           % "test"
+          "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
         ) ++ (scalaVersion match {
           case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2" % "compile")
           case _ => Nil
@@ -154,18 +185,12 @@ object ScalikeJDBCProjects extends Build {
   ) dependsOn(scalikejdbcLibrary)
 
   // scalikejdbc-interpolation-core
-  // basic modules that are used by interpolation-macro
   lazy val scalikejdbcInterpolationCore = Project(
     id = "interpolation-core",
     base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ mimaSettings ++ Seq(
+    settings = baseSettings ++ Seq(
       name := "scalikejdbc-interpolation-core",
-      libraryDependencies ++= {
-        Seq(
-          "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
-          "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test"
-        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
-      }
+      description := "deprecated. just use scalikejdbc-core"
     )
   ) dependsOn(scalikejdbcCore)
 
@@ -182,7 +207,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcInterpolationCore)
+  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation
   lazy val scalikejdbcInterpolation = Project(
@@ -198,7 +223,7 @@ object ScalikeJDBCProjects extends Build {
         ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
-  ) dependsOn(scalikejdbcInterpolationCore, scalikejdbcInterpolationMacro)
+  ) dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
   // scalikejdbc-mapper-generator-core
   // core library for mapper-generator
@@ -226,7 +251,14 @@ object ScalikeJDBCProjects extends Build {
       ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
         a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
       ),
-      ScriptedPlugin.scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+      ScriptedPlugin.scriptedLaunchOpts ++= Seq(
+        "-Dplugin.version=" + version.value,
+        "-Dmysql.version=5.1.33",
+        "-Dpostgresql.version=9.3-1102-jdbc41",
+        "-Dh2.version=1.4.181",
+        "-Dspecs2.version=" + _specs2Version,
+        "-Dscalatest.version=" + _scalatestVersion
+      ),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
@@ -248,7 +280,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
           "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
-          "org.specs2"     %% "specs2"          % _specs2Version    % "provided"
+          "org.specs2"     %% "specs2-core"     % _specs2Version    % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
@@ -310,12 +342,12 @@ object ScalikeJDBCProjects extends Build {
     Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "test")
 
   lazy val specs2DependenciesInTestScope =
-    Seq("org.specs2" %% "specs2" % _specs2Version % "test")
+    Seq("org.specs2" %% "specs2-core" % _specs2Version % "test")
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version        % "test",
     "org.apache.derby"  % "derby"                % "10.11.1.1"       % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.7.2"           % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.8.7"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
     "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
     "org.postgresql"    % "postgresql"           % "9.3-1102-jdbc41" % "test"

@@ -1,4 +1,4 @@
-> run
+> createTestDatabase
 
 > scalikejdbcGenEcho programmers
 -$ exists src/main/scala/app/models/Programmers.scala
@@ -18,40 +18,48 @@ $ exists src/test/scala/app/models/ProgrammerSpec.scala
 $ newer src/main/scala/app/models/Programmer.scala src/main/scala/app/models/Programmers.scala
 > + compile
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(testTemplate ="specs2unit")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(testTemplate ="specs2acceptance")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(autoConstruct = true)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(defaultAutoSession = false)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
+> + testOnly app.models.ProgrammersTest
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="invalid template name")}
 -> scalikejdbcGenEcho programmers
