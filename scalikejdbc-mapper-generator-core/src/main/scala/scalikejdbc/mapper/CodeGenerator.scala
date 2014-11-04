@@ -323,9 +323,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * }}}
      */
     val createMethod = {
-      val createColumns: List[Column] = allColumns.filterNot {
-        c => table.autoIncrementColumns.exists(_.name == c.name)
-      }
+      val autoIncrement = table.autoIncrementColumns.size == 1
+      val createColumns: List[Column] =
+        if (autoIncrement)
+          allColumns.filterNot {
+            c => table.autoIncrementColumns.exists(_.name == c.name)
+          }
+        else
+          allColumns
       val placeHolderPart: String = config.template match {
         case GeneratorTemplate.interpolation =>
           // ${id}, ${name}
@@ -336,7 +341,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }
 
       // def create(
-      1.indent + "def create(" + eol +
+      1.indent + s"def create(" + eol +
         // id: Long, name: Option[String] = None)(implicit session DBSession = autoSession): ClassName = {
         createColumns.map { c => 2.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None") }.mkString(comma + eol) +
         ")(implicit session: DBSession" + defaultAutoSession + "): " + className + " = {" + eol +
@@ -365,7 +370,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         eol +
         eol +
         2.indent + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
-        table.autoIncrementColumns.headOption.map { c =>
+        (if (autoIncrement)
+          table.autoIncrementColumns.headOption.map { c =>
           3.indent + c.nameInScala +
             (c.typeInScala match {
               case TypeName.Byte => " = generatedKey.toByte, "
@@ -377,7 +383,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
               case TypeName.BigDecimal => " = BigDecimal.valueOf(generatedKey), "
               case _ => " = generatedKey, "
             }) + eol
-        }.getOrElse("") +
+        }.getOrElse("")
+        else
+          ""
+        ) +
         createColumns.map { c => 3.indent + c.nameInScala + " = " + c.nameInScala }.mkString(comma + eol) + ")" + eol +
         1.indent + "}" + eol
     }
