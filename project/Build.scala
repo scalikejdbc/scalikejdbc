@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.3"
+  lazy val _version = "2.1.4"
   lazy val compatibleVersion = "2.1.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -148,6 +148,12 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-core"),
     settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-core",
+      TaskKey[Unit]("checkScalariform") := {
+        val diff = "git diff".!!
+        if(diff.nonEmpty){
+          sys.error("Working directory is dirty!\n" + diff)
+        }
+      },
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           // scope: compile
