@@ -21,7 +21,7 @@ import java.sql.Connection
 /**
  * Commons DBCP Connection Pool
  *
- * @see http://commons.apache.org/dbcp/
+ * @see [[http://commons.apache.org/dbcp/]]
  */
 class CommonsConnectionPool(
   override val url: String,

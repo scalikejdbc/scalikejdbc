@@ -26,7 +26,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 /**
  * Commons DBCP Connection Pool
  *
- * @see http://commons.apache.org/dbcp/
+ * @see [[http://commons.apache.org/dbcp/]]
  */
 class Commons2ConnectionPool(
   override val url: String,
