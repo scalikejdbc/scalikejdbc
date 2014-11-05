@@ -7,7 +7,7 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.5-SNAPSHOT"
+  lazy val _version = "2.2.0-SNAPSHOT"
   lazy val compatibleVersion = "2.1.0"
 
   lazy val _organization = "org.scalikejdbc"
@@ -189,16 +189,6 @@ object ScalikeJDBCProjects extends Build {
       ) ++ scalaTestDependenciesInTestScope
     )
   ) dependsOn(scalikejdbcLibrary)
-
-  // scalikejdbc-interpolation-core
-  lazy val scalikejdbcInterpolationCore = Project(
-    id = "interpolation-core",
-    base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ Seq(
-      name := "scalikejdbc-interpolation-core",
-      description := "deprecated. just use scalikejdbc-core"
-    )
-  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(
