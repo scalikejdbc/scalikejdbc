@@ -21,6 +21,11 @@ trait DBConnection extends LogSupport with LoanPattern {
   private[this] var autoCloseEnabled: Boolean = true
 
   /**
+   * Provides default TxBoundary type class instance.
+   */
+  private[this] def defaultTxBoundary[A]: TxBoundary[A] = TxBoundary.Exception.exceptionTxBoundary[A]
+
+  /**
    * Switches auto close mode.
    * @param autoClose auto close enabled if true
    */
@@ -241,30 +246,13 @@ trait DBConnection extends LogSupport with LoanPattern {
       throw e
   }
 
-  private[this] def anyTxBoundary[A]: TxBoundary[A] = new TxBoundary[A] {
-    def finishTx(result: A, tx: Tx): A = {
-      tx.commit()
-      result
-    }
-  }
-
   /**
    * Provides local-tx session block.
    * @param execution block
    * @tparam A  return type
    * @return result value
    */
-  def localTx[A](execution: DBSession => A): A = {
-    localTxForReturnType(execution)(anyTxBoundary)
-  }
-
-  /**
-   * Provides generalized local-tx session block.
-   * @param execution block
-   * @tparam A  return type
-   * @return result value
-   */
-  private[scalikejdbc] def localTxForReturnType[A](execution: DBSession => A)(implicit boundary: TxBoundary[A]): A = {
+  def localTx[A](execution: DBSession => A)(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     val doClose = if (autoCloseEnabled) () => conn.close() else () => ()
     val tx = newTx
     begin(tx)
@@ -290,7 +278,7 @@ trait DBConnection extends LogSupport with LoanPattern {
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
-    localTxForReturnType(execution)
+    localTx(execution)
   }
 
   /**
@@ -299,7 +287,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @tparam A  return type
    * @return result value
    */
-  def localTxWithConnection[A](execution: Connection => A): A = {
+  def localTxWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     localTx(s => execution(s.conn))
   }
 

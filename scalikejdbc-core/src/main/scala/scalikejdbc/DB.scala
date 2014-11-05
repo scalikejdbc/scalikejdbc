@@ -167,6 +167,11 @@ object DB extends LoanPattern {
   }
 
   /**
+   * Provides default TxBoundary type class instance.
+   */
+  private[this] def defaultTxBoundary[A]: TxBoundary[A] = TxBoundary.Exception.exceptionTxBoundary[A]
+
+  /**
    * Begins a read-only block easily with ConnectionPool.
    *
    * @param execution execution
@@ -252,22 +257,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def localTx[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    using(connectionPool(context).borrow()) { conn =>
-      DB(conn).autoClose(false).localTx(execution)
-    }
-  }
-
-  /**
-   * Begins a generalized local-tx block that returns a value easily with ConnectionPool.
-   *
-   * @param execution execution that returns a value
-   * @param context connection pool context
-   * @tparam A result type
-   * @return result value
-   */
-  private[scalikejdbc] def localTxForReturnType[A: TxBoundary](execution: DBSession => A)(implicit context: CPContext = NoCPContext): A = {
-    DB(connectionPool(context).borrow()).autoClose(true).localTxForReturnType(execution)
+  def localTx[A](execution: DBSession => A)(
+    implicit context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
+    DB(connectionPool(context).borrow()).autoClose(true).localTx(execution)
   }
 
   /**
@@ -281,7 +273,7 @@ object DB extends LoanPattern {
   def futureLocalTx[A](execution: DBSession => Future[A])(implicit context: CPContext = NoCPContext, ec: ExecutionContext): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
-    localTxForReturnType(execution)
+    localTx(execution)
   }
 
   /**
@@ -293,7 +285,8 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def localTxWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext): A = {
+  def localTxWithConnection[A](execution: Connection => A)(
+    implicit context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     using(connectionPool(context).borrow()) { conn =>
       DB(conn).autoClose(false).localTxWithConnection(execution)
     }
