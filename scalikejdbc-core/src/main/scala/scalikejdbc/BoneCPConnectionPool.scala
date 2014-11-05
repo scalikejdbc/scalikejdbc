@@ -21,7 +21,7 @@ import java.sql.Connection
 /**
  * BoneCP Connection Pool
  *
- * @see http://jolbox.com/
+ * @see [[https://github.com/wwadge/bonecp]]
  */
 class BoneCPConnectionPool(
   override val url: String,
