@@ -16,7 +16,7 @@
 package scalikejdbc
 
 /**
- * Alias for interpolation-core elements.
+ * Alias for interpolation core elements.
  */
 trait SQLInterpolationCoreTypeAlias {
 
