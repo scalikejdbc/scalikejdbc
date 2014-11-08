@@ -7,8 +7,8 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.1.4"
-  lazy val compatibleVersion = "2.1.0"
+  lazy val _version = "2.2.0"
+  lazy val compatibleVersion = "2.1.4"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -27,52 +27,23 @@ object ScalikeJDBCProjects extends Build {
     import com.typesafe.tools.mima.core._
     import com.typesafe.tools.mima.core.ProblemFilters._
     Seq(
-      /*
-      // since 2.0.1
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.futureLocalTx"),
-      exclude[MissingMethodProblem]("scalikejdbc.LoanPattern.futureUsing"),
-      // since 2.0.5
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.autoClose"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$autoCloseEnabled_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBSession.fetchSize"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_fetchSize"),
-      exclude[MissingMethodProblem]("scalikejdbc.config.TypesafeConfigReaderWithEnv"),
-      // since 2.1.0
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTime"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDate"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTime"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTime"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.dateTimeOpt"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateOpt"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localTimeOpt"),
-      exclude[MissingMethodProblem]("scalikejdbc.WrappedResultSet.localDateTimeOpt"),
-      exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this")
-      */
-      // since 2.1.2
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this"),
-      exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
-      // since 2.1.3
-      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature#SQLSyntaxSupport.clearLoadedColumns"),
-      exclude[MissingMethodProblem]("scalikejdbc.SQLSyntaxSupportFeature.SQLSyntaxSupport"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$$rollbackIfThrowable"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
-      exclude[MissingMethodProblem]("scalikejdbc.DB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
-      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$$rollbackIfThrowable"),
-      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.scalikejdbc$DBConnection$_setter_$scalikejdbc$DBConnection$$rollbackIfThrowable_="),
+      // since 2.2.0
+      // private[scalikejdbc] methods were removed
+      exclude[MissingMethodProblem]("scalikejdbc.DB.localTxForReturnType"),
+      exclude[MissingMethodProblem]("scalikejdbc.DB.localTxForReturnType$default$3"),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTxForReturnType"),
       exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxForReturnType"),
-      exclude[MissingTypesProblem]("scalikejdbc.mapper.Table$"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.this"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.apply"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.Table.copy")
+      // newly added methods
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxWithConnection"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTx$default$2"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxWithConnection$default$2"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBConnection.localTxWithConnection"),
+      exclude[MissingMethodProblem]("scalikejdbc.DB.localTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.DB.localTxWithConnection"),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTx"),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTxWithConnection")
     )
   }
 
@@ -189,16 +160,6 @@ object ScalikeJDBCProjects extends Build {
       ) ++ scalaTestDependenciesInTestScope
     )
   ) dependsOn(scalikejdbcLibrary)
-
-  // scalikejdbc-interpolation-core
-  lazy val scalikejdbcInterpolationCore = Project(
-    id = "interpolation-core",
-    base = file("scalikejdbc-interpolation-core"),
-    settings = baseSettings ++ Seq(
-      name := "scalikejdbc-interpolation-core",
-      description := "deprecated. just use scalikejdbc-core"
-    )
-  ) dependsOn(scalikejdbcCore)
 
   // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(

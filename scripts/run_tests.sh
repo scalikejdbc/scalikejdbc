@@ -11,7 +11,6 @@ sbt \
   ++2.10.4 \
   clean \
   core/test \
-  interpolation-core/test \
   interpolation/test \
   syntax-support-macro/test \
   jsr310/test \

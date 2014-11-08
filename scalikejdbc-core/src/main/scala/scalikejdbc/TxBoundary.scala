@@ -19,12 +19,18 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Try, Failure, Success }
 
 /**
- * This type class enable users to customize the befavior of transaction boundary(commit/rollback).
+ * This type class enable users to customize the behavior of transaction boundary(commit/rollback).
  */
 trait TxBoundary[A] {
 
+  /**
+   * Finishes the current transaction.
+   */
   def finishTx(result: A, tx: Tx): A
 
+  /**
+   * Closes the current connection if needed.
+   */
   def closeConnection(result: A, doClose: () => Unit): A = {
     doClose()
     result
@@ -34,12 +40,24 @@ trait TxBoundary[A] {
 
 /**
  * TxBoundary type class instances.
- * NOTE:  TxBoundary usage will be disclosed to library users since 2.2 or later.
  */
 object TxBoundary {
 
   /**
-   * Future TxBoundary type class instances.
+   * Exception TxBoundary type class instance.
+   */
+  object Exception {
+
+    implicit def exceptionTxBoundary[A] = new TxBoundary[A] {
+      def finishTx(result: A, tx: Tx): A = {
+        tx.commit()
+        result
+      }
+    }
+  }
+
+  /**
+   * Future TxBoundary type class instance.
    */
   object Future {
 
@@ -59,7 +77,7 @@ object TxBoundary {
   }
 
   /**
-   * Either TxBoundary type class instances.
+   * Either TxBoundary type class instance.
    */
   object Either {
 
@@ -75,7 +93,7 @@ object TxBoundary {
   }
 
   /**
-   * Try TxBoundary type class instances.
+   * Try TxBoundary type class instance.
    */
   object Try {
 

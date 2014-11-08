@@ -23,7 +23,7 @@ import java.sql.Connection
  *
  * Using Commons DBCP internally.
  *
- * @see http://commons.apache.org/dbcp/
+ * @see [[http://commons.apache.org/dbcp/]]
  */
 object ConnectionPool extends LogSupport {
 

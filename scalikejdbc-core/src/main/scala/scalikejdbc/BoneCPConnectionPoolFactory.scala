@@ -18,7 +18,7 @@ package scalikejdbc
 /**
  * Connection Pool Factory
  *
- * @see http://jolbox.com/
+ * @see [[https://github.com/wwadge/bonecp]]
  */
 object BoneCPConnectionPoolFactory extends ConnectionPoolFactory {
 

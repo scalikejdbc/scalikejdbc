@@ -1,0 +1,45 @@
+ScalikeJDBC 2.2.0 is out. This version is source compatible with version 2.1.x.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Topics
+
+#### New Transaction Boundary
+
+https://github.com/scalikejdbc/scalikejdbc/issues/302
+
+Since this version, library users can define and another transaction boundary instead of Exception when using localTx blocks.
+
+    import scalikejdbc._
+    import scala.util.Try
+    import scalikejdbc.TxBoundary.Try._
+
+    val result: Try[Result] = DB localTx { implicit session =>
+      Try { doSomeStaff() }
+    }
+    // localTx rolls back when `result` is `Failure`
+    // http://scala-lang.org/api/current/#scala.util.Try
+
+Built-in type class instances are `Try`, `Either` and `Future`. You can use them by importing `import scalikejdbc.TxBoundary,***._`.
+
+https://github.com/scalikejdbc/scalikejdbc/blob/2.2.0/scalikejdbc-core/src/main/scala/scalikejdbc/TxBoundary.scala
+
+More examples are here:
+
+https://github.com/scalikejdbc/scalikejdbc/blob/2.2.0/scalikejdbc-core/src/test/scala/scalikejdbc/DBSpec.scala#L330-L422
+
+#### Merge scalikejdbc-interpolation-core into scalikejdbc-core
+
+https://github.com/scalikejdbc/scalikejdbc/pull/311
+
+We merged scalikejdbc-interpolation-core into scalikejdbc-core to reduce dependency jar file.
+
+### Changes
+
+- [core] #311 #314 Remove scalikejdbc-interpolation-core project since 2.2 by @seratch
+- [core] #302 #315 new transaction boundary in 2.2 by @seratch
+
+Enjoy writing mostly type-safe SQL and get things done!
+
