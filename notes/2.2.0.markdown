@@ -10,7 +10,7 @@ http://scalikejdbc.org/
 
 https://github.com/scalikejdbc/scalikejdbc/issues/302
 
-Since this version, library users can define and another transaction boundary instead of Exception when using localTx blocks.
+Since this version, library users can define other transaction boundary instead of Exception when using localTx blocks.
 
     import scalikejdbc._
     import scala.util.Try
@@ -22,7 +22,7 @@ Since this version, library users can define and another transaction boundary in
     // localTx rolls back when `result` is `Failure`
     // http://scala-lang.org/api/current/#scala.util.Try
 
-Built-in type class instances are `Try`, `Either` and `Future`. You can use them by importing `import scalikejdbc.TxBoundary,***._`.
+Built-in type class instances are `Try`, `Either` and `Future`. You can use them by importing `scalikejdbc.TxBoundary,***._`.
 
 https://github.com/scalikejdbc/scalikejdbc/blob/2.2.0/scalikejdbc-core/src/main/scala/scalikejdbc/TxBoundary.scala
 
