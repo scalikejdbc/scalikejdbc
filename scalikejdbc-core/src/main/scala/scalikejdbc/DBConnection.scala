@@ -299,11 +299,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   private[this] def toSchemaAndTable(name: String): (String, String) = {
     val schema = {
-      if (name.split("\\.").size > 1) {
-        val s = name.split("\\.").head
-        // H2 Database cannot accept "public" for metadata retrieving
-        if (s == "public") null else s
-      } else null
+      if (name.split("\\.").size > 1) name.split("\\.").head
+      else null
     }
     val table = if (name.split("\\.").size > 1) name.split("\\.")(1) else name
     (schema, table)
@@ -334,13 +331,26 @@ trait DBConnection extends LogSupport with LoanPattern {
     def _getTableName(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String]): Option[String] = {
       new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map(rs => rs.string("TABLE_NAME")).headOption
     }
-    val (schema, table) = toSchemaAndTable(tableName)
+    val (_schema, table) = toSchemaAndTable(tableName)
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
+      val schema = if (meta.getURL.startsWith("jdbc:h2")) {
+        // H2 Database 1.3 cannot accept "public" for metadata retrieving columns 
+        // in tables that name is same as information schema (e.g.) rules
+        if (_schema == "public") null else _schema
+      } else {
+        _schema
+      }
       _getTableName(meta, schema, table, tableTypes)
         .orElse(_getTableName(meta, schema, table.toUpperCase(en), tableTypes))
         .orElse(_getTableName(meta, schema, table.toLowerCase(en), tableTypes)).map { tableName =>
-          val _schema = if (meta.getURL.startsWith("jdbc:hsqldb")) schema else Option(schema).getOrElse("")
+          val _schema = {
+            if (meta.getURL.startsWith("jdbc:hsqldb")) {
+              schema
+            } else {
+              Option(schema).getOrElse("")
+            }
+          }
           new RSTraversable(meta.getColumns(null, _schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
         }
     }.getOrElse(Nil)
