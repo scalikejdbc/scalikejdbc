@@ -43,7 +43,19 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DB.localTx"),
       exclude[MissingMethodProblem]("scalikejdbc.DB.localTxWithConnection"),
       exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTx"),
-      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTxWithConnection")
+      exclude[MissingMethodProblem]("scalikejdbc.NamedDB.localTxWithConnection"),
+      // since 2.2.1
+      exclude[MissingMethodProblem]("scalikejdbc.StatementExecutor.copy"),
+      exclude[MissingMethodProblem]("scalikejdbc.StatementExecutor.apply"),
+      exclude[IncompatibleResultTypeProblem]("scalikejdbc.StatementExecutor.apply$default$4"),
+      exclude[IncompatibleResultTypeProblem]("scalikejdbc.StatementExecutor.<init>$default$4"),
+      exclude[IncompatibleResultTypeProblem]("scalikejdbc.StatementExecutor.copy$default$4"),
+      exclude[MissingMethodProblem]("scalikejdbc.StatementExecutor.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.tags"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.tags"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_tags"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$_setter_$scalikejdbc$DBSession$$_tags_="),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$super$using")
     )
   }
 
