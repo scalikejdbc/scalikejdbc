@@ -47,6 +47,7 @@ case class StatementExecutor(
   underlying: PreparedStatement,
   template: String,
   singleParams: Seq[Any] = Nil,
+  tags: Seq[String] = Nil,
   isBatch: Boolean = false)
     extends LogSupport with UnixTimeInMillisConverterImplicits {
 
@@ -284,6 +285,7 @@ case class StatementExecutor(
       }
       // call event handler
       GlobalSettings.queryCompletionListener.apply(template, singleParams, spentMillis)
+      GlobalSettings.taggedQueryCompletionListener(template, singleParams, spentMillis, tags)
       // result from super.apply()
       result
     }
@@ -306,6 +308,7 @@ case class StatementExecutor(
         }
         // call event handler
         GlobalSettings.queryFailureListener.apply(template, singleParams, e)
+        GlobalSettings.taggedQueryFailureListener.apply(template, singleParams, e, tags)
 
         throw e
     }

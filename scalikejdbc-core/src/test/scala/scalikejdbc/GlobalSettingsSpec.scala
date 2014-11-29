@@ -135,6 +135,41 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings {
     }
   }
 
+  it should "have taggedQueryCompletionListener" in {
+    DB autoCommit { implicit session =>
+      try {
+        try {
+          SQL("drop table tagged_query_completion_listener").tags("foo", "bar").execute.apply()
+        } catch { case e: Exception => }
+        SQL("create table tagged_query_completion_listener (id int primary key, created_at timestamp)").tags("foo", "1").execute.apply()
+        SQL("insert into tagged_query_completion_listener values (?,?)").tags("foo", "2").bind(1, DateTime.now).update.apply()
+
+        var result: Int = -1
+        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags) => {
+          result = tags.size
+        }
+        SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
+        result should equal(2)
+
+        var errorResult: Int = -1
+        GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => {
+          errorResult = tags.size
+        }
+        try {
+          SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
+        } catch { case e: Exception => }
+        errorResult should equal(3)
+
+      } finally {
+        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
+        GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
+        try {
+          SQL("drop table tagged_query_completion_listener").execute.apply()
+        } catch { case e: Exception => }
+      }
+    }
+  }
+
   it should "have stacktrace logging configuration" in {
     DB autoCommit { implicit session =>
       try {
