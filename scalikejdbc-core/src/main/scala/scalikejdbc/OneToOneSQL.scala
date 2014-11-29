@@ -44,22 +44,23 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
 
 }
 
-class OneToOneSQL[A, B, E <: WithExtractor, Z](override val statement: String)(override val parameters: Any*)(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
-    extends SQL[Z, E](statement)(parameters: _*)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(output)
+class OneToOneSQL[A, B, E <: WithExtractor, Z](
+  override val statement: String, override val parameters: Seq[Any])(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(output)
     with AllOutputDecisionsUnsupported[Z, E] {
 
   def map(extractor: (A, B) => Z): OneToOneSQL[A, B, HasExtractor, Z] = {
-    new OneToOneSQL(statement)(parameters: _*)(output)(one)(toOne)(extractor)
+    new OneToOneSQL(statement, parameters)(output)(one)(toOne)(extractor)
   }
 
   override def toTraversable(): OneToOneSQLToTraversable[A, B, E, Z] = {
-    new OneToOneSQLToTraversable[A, B, E, Z](statement)(parameters: _*)(one)(toOne)(extractor)
+    new OneToOneSQLToTraversable[A, B, E, Z](statement, parameters)(one)(toOne)(extractor)
   }
   override def toList(): OneToOneSQLToList[A, B, E, Z] = {
-    new OneToOneSQLToList[A, B, E, Z](statement)(parameters: _*)(one)(toOne)(extractor)
+    new OneToOneSQLToList[A, B, E, Z](statement, parameters)(one)(toOne)(extractor)
   }
   override def toOption(): OneToOneSQLToOption[A, B, E, Z] = {
-    new OneToOneSQLToOption[A, B, E, Z](statement)(parameters: _*)(one)(toOne)(extractor)
+    new OneToOneSQLToOption[A, B, E, Z](statement, parameters)(one)(toOne)(extractor)
   }
 
   override def single(): OneToOneSQLToOption[A, B, E, Z] = toOption()
@@ -69,8 +70,9 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](override val statement: String)(o
   override def traversable(): OneToOneSQLToTraversable[A, B, E, Z] = toTraversable()
 }
 
-class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](override val statement: String)(override val parameters: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(map: (A, B) => Z)
-    extends SQL[Z, E](statement)(parameters: _*)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.traversable)
+class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](
+  override val statement: String, override val parameters: Seq[Any])(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(map: (A, B) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.traversable)
     with SQLToTraversable[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToOneExtractor[A, B, E, Z] {
@@ -86,8 +88,9 @@ class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](override val stateme
   private[scalikejdbc] def transform: (A, B) => Z = map
 }
 
-class OneToOneSQLToList[A, B, E <: WithExtractor, Z](override val statement: String)(override val parameters: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
-    extends SQL[Z, E](statement)(parameters: _*)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.list)
+class OneToOneSQLToList[A, B, E <: WithExtractor, Z](
+  override val statement: String, override val parameters: Seq[Any])(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.list)
     with SQLToList[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToOneExtractor[A, B, E, Z] {
@@ -103,8 +106,9 @@ class OneToOneSQLToList[A, B, E <: WithExtractor, Z](override val statement: Str
   private[scalikejdbc] def transform: (A, B) => Z = extractor
 }
 
-class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](override val statement: String)(override val parameters: Any*)(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
-    extends SQL[Z, E](statement)(parameters: _*)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.single)
+class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](
+  override val statement: String, override val parameters: Seq[Any])(one: WrappedResultSet => A)(toOne: WrappedResultSet => Option[B])(extractor: (A, B) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))(Output.single)
     with SQLToOption[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToOneExtractor[A, B, E, Z] {
