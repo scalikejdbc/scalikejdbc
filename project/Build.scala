@@ -19,9 +19,9 @@ object ScalikeJDBCProjects extends Build {
   // internal only
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.+"
-  lazy val _hibernateVersion = "4.3.6.Final"
+  lazy val _hibernateVersion = "4.3.7.Final"
   lazy val _scalatestVersion = "2.2.2"
-  lazy val _specs2Version = "2.4.9"
+  lazy val _specs2Version = "2.4.13"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -55,7 +55,9 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.tags"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_tags"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$_setter_$scalikejdbc$DBSession$$_tags_="),
-      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$super$using")
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$super$using"),
+      exclude[IncompatibleResultTypeProblem]("scalikejdbc.DBSession.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.unexpectedInvocation")
     )
   }
 

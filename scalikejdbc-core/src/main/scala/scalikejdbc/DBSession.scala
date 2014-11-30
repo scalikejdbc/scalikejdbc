@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Kazuhiro Sera
+ * Copyright 2011 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,10 @@ import util.control.Exception._
  * }}}
  */
 trait DBSession extends LogSupport with LoanPattern {
+
+  protected def unexpectedInvocation[A]: A = {
+    throw new IllegalStateException("This method should not be called.")
+  }
 
   override def using[R <: Closable, A](resource: R)(f: R => A): A = {
     try {
@@ -70,10 +74,12 @@ trait DBSession extends LogSupport with LoanPattern {
   private def createStatementExecutor(conn: Connection, template: String, params: Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
     try {
-      val statement = if (returnGeneratedKeys) {
-        conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
-      } else {
-        conn.prepareStatement(template)
+      val statement = {
+        if (returnGeneratedKeys) {
+          conn.prepareStatement(template, Statement.RETURN_GENERATED_KEYS)
+        } else {
+          conn.prepareStatement(template)
+        }
       }
       this.fetchSize.foreach { size => statement.setFetchSize(size) }
       StatementExecutor(
@@ -126,6 +132,7 @@ trait DBSession extends LogSupport with LoanPattern {
     StatementExecutor(
       underlying = statement,
       template = template,
+      tags = tags,
       isBatch = true)
   }
 
@@ -271,8 +278,7 @@ trait DBSession extends LogSupport with LoanPattern {
    */
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
     using(createStatementExecutor(conn, template, params)) {
-      executor =>
-        new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
+      executor => new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
     }
   }
 
@@ -286,8 +292,7 @@ trait DBSession extends LogSupport with LoanPattern {
   def execute(template: String, params: Any*): Boolean = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(conn, template, params)) {
-      executor =>
-        executor.execute()
+      executor => executor.execute()
     }
   }
 
@@ -333,8 +338,7 @@ trait DBSession extends LogSupport with LoanPattern {
   def update(template: String, params: Any*): Int = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(conn, template, params)) {
-      executor =>
-        executor.executeUpdate()
+      executor => executor.executeUpdate()
     }
   }
 
@@ -434,14 +438,13 @@ trait DBSession extends LogSupport with LoanPattern {
    */
   def batch(template: String, paramsList: Seq[Any]*): Seq[Int] = {
     ensureNotReadOnlySession(template)
-    using(createBatchStatementExecutor(conn = conn, template = template)) {
-      executor =>
-        paramsList.foreach {
-          params =>
-            executor.bindParams(params)
-            executor.addBatch()
-        }
-        executor.executeBatch().toSeq
+    using(createBatchStatementExecutor(conn = conn, template = template)) { executor =>
+      paramsList.foreach {
+        params =>
+          executor.bindParams(params)
+          executor.addBatch()
+      }
+      executor.executeBatch().toSeq
     }
   }
 
@@ -459,7 +462,9 @@ trait DBSession extends LogSupport with LoanPattern {
 
 object DBSession {
 
-  def apply(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false) = ActiveSession(conn, tx, isReadOnly)
+  def apply(conn: Connection, tx: Option[Tx] = None, isReadOnly: Boolean = false): DBSession = {
+    ActiveSession(conn, tx, isReadOnly)
+  }
 
 }
 
@@ -498,41 +503,9 @@ case object NoSession extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
-}
 
-/**
- * Represents that already existing session will be used or a new session will be started.
- */
-case object AutoSession extends DBSession {
-  override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
-  val isReadOnly: Boolean = false
-}
-
-/**
- * Represents that already existing session will be used or a new read-only session will be started.
- */
-case object ReadOnlyAutoSession extends DBSession {
-  override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
-  val isReadOnly: Boolean = true
-}
-
-/**
- * Represents that already existing session will be used or a new session which is retrieved from named connection pool will be started.
- */
-case class NamedAutoSession(name: Any) extends DBSession {
-  override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
-  val isReadOnly: Boolean = false
-}
-
-/**
- * Represents that already existing session will be used or a new read-only session which is retrieved from named connnection pool will be started.
- */
-case class ReadOnlyNamedAutoSession(name: Any) extends DBSession {
-  override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
-  val isReadOnly: Boolean = true
+  override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
+  override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
+  override def tags(tags: String*): DBSession = unexpectedInvocation
 }
 

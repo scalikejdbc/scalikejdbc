@@ -286,6 +286,7 @@ case class StatementExecutor(
       // call event handler
       GlobalSettings.queryCompletionListener.apply(template, singleParams, spentMillis)
       GlobalSettings.taggedQueryCompletionListener(template, singleParams, spentMillis, tags)
+
       // result from super.apply()
       result
     }
