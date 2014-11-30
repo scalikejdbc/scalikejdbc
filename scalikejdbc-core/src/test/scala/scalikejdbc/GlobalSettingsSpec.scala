@@ -145,7 +145,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings {
         SQL("insert into tagged_query_completion_listener values (?,?)").tags("foo", "2").bind(1, DateTime.now).update.apply()
 
         var result: Int = -1
-        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags) => {
+        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => {
           result = tags.size
         }
         SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
