@@ -54,6 +54,7 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.tags"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.tags"),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_tags"),
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$_tags_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$_setter_$scalikejdbc$DBSession$$_tags_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$super$using"),
       exclude[IncompatibleResultTypeProblem]("scalikejdbc.DBSession.apply"),
