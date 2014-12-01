@@ -43,7 +43,7 @@ trait DBSession extends LogSupport with LoanPattern {
     } finally {
       // initialize options
       this._fetchSize = None
-      this._tags.clear
+      this._tags = Vector.empty
     }
   }
 
@@ -54,8 +54,11 @@ trait DBSession extends LogSupport with LoanPattern {
 
   private[scalikejdbc] val conn: Connection
 
+  @volatile
   private[this] var _fetchSize: Option[Int] = None
-  private[this] val _tags = new collection.mutable.ListBuffer[String]()
+
+  @volatile
+  private[this] var _tags: Seq[String] = Vector.empty
 
   /**
    * is read-only session
@@ -178,14 +181,14 @@ trait DBSession extends LogSupport with LoanPattern {
    * Set tags to this session.
    */
   def tags(tags: String*): DBSession = {
-    this._tags ++= tags
+    this._tags = this._tags ++ tags
     this
   }
 
   /**
    * Returns tags for this session.
    */
-  def tags: Seq[String] = this._tags.toSeq
+  def tags: Seq[String] = this._tags
 
   /**
    * Returns single result optionally.
