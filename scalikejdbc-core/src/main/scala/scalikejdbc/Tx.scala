@@ -28,8 +28,10 @@ class Tx(val conn: Connection) {
    * Begins this transaction.
    */
   def begin(): Unit = {
-    conn.setReadOnly(false)
-    conn.setAutoCommit(false)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      conn.setReadOnly(false)
+      conn.setAutoCommit(false)
+    }
   }
 
   /**
@@ -37,7 +39,9 @@ class Tx(val conn: Connection) {
    */
   def commit(): Unit = {
     conn.commit()
-    conn.setAutoCommit(true)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      conn.setAutoCommit(true)
+    }
   }
 
   /**
@@ -52,7 +56,9 @@ class Tx(val conn: Connection) {
   def rollback(): Unit = {
     conn.rollback()
     ignoring(classOf[SQLException]) apply {
-      conn.setAutoCommit(true)
+      if (!GlobalSettings.jtaDataSourceCompatible) {
+        conn.setAutoCommit(true)
+      }
     }
   }
 
@@ -64,7 +70,9 @@ class Tx(val conn: Connection) {
       conn.rollback()
     }
     ignoring(classOf[SQLException]) apply {
-      conn.setAutoCommit(true)
+      if (!GlobalSettings.jtaDataSourceCompatible) {
+        conn.setAutoCommit(true)
+      }
     }
   }
 
