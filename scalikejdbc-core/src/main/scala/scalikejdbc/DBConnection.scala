@@ -55,7 +55,9 @@ trait DBConnection extends LogSupport with LoanPattern {
   def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
 
   private[this] def newTx(conn: Connection): Tx = {
-    conn.setReadOnly(false)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      conn.setReadOnly(false)
+    }
     if (isTxNotActive || isTxAlreadyStarted) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
@@ -141,7 +143,9 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return session
    */
   def readOnlySession(): DBSession = {
-    conn.setReadOnly(true)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      conn.setReadOnly(true)
+    }
     DBSession(conn, isReadOnly = true)
   }
 
@@ -171,8 +175,10 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return session
    */
   def autoCommitSession(): DBSession = {
-    conn.setReadOnly(false)
-    conn.setAutoCommit(true)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      conn.setReadOnly(false)
+      conn.setAutoCommit(true)
+    }
     DBSession(conn)
   }
 
