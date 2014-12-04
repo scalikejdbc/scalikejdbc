@@ -32,4 +32,12 @@ object GlobalSettings {
 
   var queryFailureListener: (String, Seq[Any], Throwable) => Unit = (statement: String, params: Seq[Any], e: Throwable) => ()
 
+  var taggedQueryCompletionListener: (String, Seq[Any], Long, Seq[String]) => Unit = {
+    (statement: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
+  }
+
+  var taggedQueryFailureListener: (String, Seq[Any], Throwable, Seq[String]) => Unit = {
+    (statement: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
+  }
+
 }
