@@ -21,6 +21,11 @@ package scalikejdbc
 object GlobalSettings {
 
   /**
+   * Disables specifying readOnly/autoCommit explicitly to be compatible with JTA DataSource.
+   */
+  var jtaDataSourceCompatible: Boolean = false
+
+  /**
    * Enables error logging for all SQL errors.
    */
   var loggingSQLErrors: Boolean = true
