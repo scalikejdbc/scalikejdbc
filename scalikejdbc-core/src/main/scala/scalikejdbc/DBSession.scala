@@ -493,7 +493,10 @@ case class ActiveSession(private[scalikejdbc] val conn: Connection, tx: Option[T
 
   tx match {
     case Some(tx) if tx.isActive() => // nothing to do
-    case None => conn.setAutoCommit(true)
+    case None =>
+      if (!GlobalSettings.jtaDataSourceCompatible) {
+        conn.setAutoCommit(true)
+      }
     case _ => throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
   }
 
