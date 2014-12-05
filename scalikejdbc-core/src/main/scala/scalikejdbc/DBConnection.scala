@@ -57,9 +57,9 @@ trait DBConnection extends LogSupport with LoanPattern {
   private[this] def newTx(conn: Connection): Tx = {
     if (!GlobalSettings.jtaDataSourceCompatible) {
       conn.setReadOnly(false)
-    }
-    if (isTxNotActive || isTxAlreadyStarted) {
-      throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
+      if (isTxNotActive || isTxAlreadyStarted) {
+        throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
+      }
     }
     new Tx(conn)
   }
@@ -236,8 +236,10 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   private[this] def begin(tx: Tx): Unit = {
     tx.begin()
-    if (!tx.isActive) {
-      throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
+    if (!GlobalSettings.jtaDataSourceCompatible) {
+      if (!tx.isActive) {
+        throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
+      }
     }
   }
 
