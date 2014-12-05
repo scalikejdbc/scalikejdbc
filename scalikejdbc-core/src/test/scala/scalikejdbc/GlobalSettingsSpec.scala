@@ -135,8 +135,6 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
     }
   }
 
-  def isMySQLTestsOnTravis: Boolean = sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "mysql")
-
   it should "have taggedQueryCompletionListener" in {
     DB autoCommit { implicit session =>
       try {
@@ -150,11 +148,8 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => {
           result = tags.size
         }
-        SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
-        if (isMySQLTestsOnTravis) {
-          // TODO: strange failure only when running with MySQL on Travis CI 
-          log.info("tags: " + result)
-        } else {
+        GlobalSettings.taggedQueryCompletionListener.synchronized {
+          SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
           result should equal(2)
         }
 
@@ -162,13 +157,10 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => {
           errorResult = tags.size
         }
-        try {
-          SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
-        } catch { case e: Exception => }
-        if (isMySQLTestsOnTravis) {
-          // TODO: strange failure only when running with MySQL on Travis CI 
-          log.info("tags: " + errorResult)
-        } else {
+        GlobalSettings.taggedQueryFailureListener.synchronized {
+          try {
+            SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
+          } catch { case e: Exception => }
           errorResult should equal(3)
         }
 
