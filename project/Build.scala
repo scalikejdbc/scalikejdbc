@@ -144,7 +144,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.5"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.6"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
