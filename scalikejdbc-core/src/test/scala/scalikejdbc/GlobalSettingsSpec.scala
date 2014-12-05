@@ -146,7 +146,9 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
 
         var result: Int = -1
         GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => {
-          result = tags.size
+          if (result == -1) {
+            result = tags.size
+          }
         }
         GlobalSettings.taggedQueryCompletionListener.synchronized {
           SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
@@ -155,7 +157,9 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
 
         var errorResult: Int = -1
         GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => {
-          errorResult = tags.size
+          if (errorResult == -1) {
+            errorResult = tags.size
+          }
         }
         GlobalSettings.taggedQueryFailureListener.synchronized {
           try {
