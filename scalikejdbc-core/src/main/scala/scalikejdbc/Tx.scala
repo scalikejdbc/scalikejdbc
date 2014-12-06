@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Kazuhiro Sera
+ * Copyright 2011 - 2014 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,10 @@ class Tx(val conn: Connection) {
 
   /**
    * Returns is this transaction active.
+   * Since connections from JTA managed DataSource should not be used as-is, we don't care autoCommit/readOnly props.
    * @return active
    */
-  def isActive(): Boolean = !conn.getAutoCommit
+  def isActive(): Boolean = GlobalSettings.jtaDataSourceCompatible || !conn.getAutoCommit
 
   /**
    * Rolls this transaction back.
