@@ -1,3 +1,18 @@
+/*
+ * Copyright 2011 - 2014 scalikejdbc.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection }
@@ -9,7 +24,7 @@ import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
 
 /**
- * Basic Database Accessor
+ * Basic Database Accessor which holds a JDBC connection.
  */
 trait DBConnection extends LogSupport with LoanPattern {
 
@@ -34,32 +49,50 @@ trait DBConnection extends LogSupport with LoanPattern {
     this
   }
 
+  /**
+   * Returns current JDBC connection.
+   */
   def conn: Connection
 
   /**
    * Returns is the current transaction is active.
    * @return result
    */
-  def isTxNotActive: Boolean = conn == null || conn.isClosed || conn.isReadOnly
+  def isTxNotActive: Boolean = conn == null || conn.isClosed || {
+    // JTA managed connection should be used as-is
+    !GlobalSettings.jtaDataSourceCompatible && conn.isReadOnly
+  }
 
   /**
    * Returns is the current transaction hasn't started yet.
    * @return result
    */
-  def isTxNotYetStarted: Boolean = conn != null && conn.getAutoCommit
+  def isTxNotYetStarted: Boolean = conn != null && {
+    // JTA managed connection should be used as-is
+    !GlobalSettings.jtaDataSourceCompatible && conn.getAutoCommit
+  }
 
   /**
    * Returns is the current transaction already started.
    * @return result
    */
-  def isTxAlreadyStarted: Boolean = conn != null && !conn.getAutoCommit
+  def isTxAlreadyStarted: Boolean = conn != null && {
+    // JTA managed connection should be used as-is
+    GlobalSettings.jtaDataSourceCompatible || !conn.getAutoCommit
+  }
+
+  private[this] def setAutoCommit(conn: Connection, readOnly: Boolean): Unit = {
+    if (!GlobalSettings.jtaDataSourceCompatible) conn.setAutoCommit(readOnly)
+  }
+
+  private[this] def setReadOnly(conn: Connection, readOnly: Boolean): Unit = {
+    if (!GlobalSettings.jtaDataSourceCompatible) conn.setReadOnly(readOnly)
+  }
 
   private[this] def newTx(conn: Connection): Tx = {
-    if (!GlobalSettings.jtaDataSourceCompatible) {
-      conn.setReadOnly(false)
-      if (isTxNotActive || isTxAlreadyStarted) {
-        throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
-      }
+    setReadOnly(conn, false)
+    if (isTxNotActive || isTxAlreadyStarted) {
+      throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
     new Tx(conn)
   }
@@ -143,9 +176,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return session
    */
   def readOnlySession(): DBSession = {
-    if (!GlobalSettings.jtaDataSourceCompatible) {
-      conn.setReadOnly(true)
-    }
+    setReadOnly(conn, true)
     DBSession(conn, isReadOnly = true)
   }
 
@@ -175,10 +206,8 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return session
    */
   def autoCommitSession(): DBSession = {
-    if (!GlobalSettings.jtaDataSourceCompatible) {
-      conn.setReadOnly(false)
-      conn.setAutoCommit(true)
-    }
+    setReadOnly(conn, false)
+    setAutoCommit(conn, true)
     DBSession(conn)
   }
 
@@ -236,10 +265,8 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   private[this] def begin(tx: Tx): Unit = {
     tx.begin()
-    if (!GlobalSettings.jtaDataSourceCompatible) {
-      if (!tx.isActive) {
-        throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
-      }
+    if (!tx.isActive) {
+      throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
   }
 
