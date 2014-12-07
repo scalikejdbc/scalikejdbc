@@ -58,27 +58,38 @@ trait DBConnection extends LogSupport with LoanPattern {
    * Returns is the current transaction is active.
    * @return result
    */
-  def isTxNotActive: Boolean = conn == null || conn.isClosed || {
-    // JTA managed connection should be used as-is
-    !GlobalSettings.jtaDataSourceCompatible && conn.isReadOnly
+  def isTxNotActive: Boolean = {
+    if (GlobalSettings.jtaDataSourceCompatible) {
+      // JTA managed connection should be used as-is
+      false
+    } else {
+      conn == null || conn.isClosed || conn.isReadOnly
+    }
   }
 
   /**
    * Returns is the current transaction hasn't started yet.
    * @return result
    */
-  def isTxNotYetStarted: Boolean = conn != null && {
-    // JTA managed connection should be used as-is
-    !GlobalSettings.jtaDataSourceCompatible && conn.getAutoCommit
+  def isTxNotYetStarted: Boolean = {
+    if (GlobalSettings.jtaDataSourceCompatible) {
+      // JTA managed connection should be used as-is
+      false
+    } else {
+      conn != null && conn.getAutoCommit
+    }
   }
 
   /**
    * Returns is the current transaction already started.
    * @return result
    */
-  def isTxAlreadyStarted: Boolean = conn != null && {
-    // JTA managed connection should be used as-is
-    GlobalSettings.jtaDataSourceCompatible || !conn.getAutoCommit
+  def isTxAlreadyStarted: Boolean = {
+    if (GlobalSettings.jtaDataSourceCompatible) {
+      true
+    } else {
+      conn != null && !conn.getAutoCommit
+    }
   }
 
   private[this] def setAutoCommit(conn: Connection, readOnly: Boolean): Unit = {
@@ -91,7 +102,7 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   private[this] def newTx(conn: Connection): Tx = {
     setReadOnly(conn, false)
-    if (isTxNotActive || isTxAlreadyStarted) {
+    if (!GlobalSettings.jtaDataSourceCompatible && (isTxNotActive || isTxAlreadyStarted)) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
     new Tx(conn)
@@ -109,7 +120,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return tx
    */
   def currentTx: Tx = {
-    if (isTxNotActive || isTxNotYetStarted) {
+    if (!GlobalSettings.jtaDataSourceCompatible && (isTxNotActive || isTxNotYetStarted)) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     new Tx(conn)
@@ -237,7 +248,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    * @return session
    */
   def withinTxSession(tx: Tx = currentTx): DBSession = {
-    if (!tx.isActive) {
+    if (!GlobalSettings.jtaDataSourceCompatible && !tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     DBSession(conn, tx = Some(tx))
@@ -265,7 +276,7 @@ trait DBConnection extends LogSupport with LoanPattern {
 
   private[this] def begin(tx: Tx): Unit = {
     tx.begin()
-    if (!tx.isActive) {
+    if (!GlobalSettings.jtaDataSourceCompatible && !tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
   }
