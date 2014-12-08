@@ -17,10 +17,14 @@ before_script:
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
 script:
   - ./travis.sh
+after_success: 
+  - ./travis_after.sh
 env:
   matrix:
     - SCALIKEJDBC_DATABASE="mysql"
     - SCALIKEJDBC_DATABASE="postgresql"
+  global:
+    secure: TAc7WMfLtdWhGh0ubUULelMqTT45UnvGsSnDMXxCMrQW+4niiUHSxNqYJtm5R/Su1lSOfRug6MFnQpcCZrZ8nkh25pGclZ1kdsb5cuSvuKFIsOc6LY7VcrlGGWG6rvf3zfXpO0IiRRAOjTQE0855M3k2NmOO3JEe+IGgExgWF40=
 matrix:
   include:
     - scala: scripted-test
