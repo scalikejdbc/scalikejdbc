@@ -345,7 +345,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         // id: Long, name: Option[String] = None)(implicit session DBSession = autoSession): ClassName = {
         createColumns.map { c => 2.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None") }.mkString(comma + eol) +
         ")(implicit session: DBSession" + defaultAutoSession + "): " + className + " = {" + eol +
-        // val generatedKey =       
+        // val generatedKey =
         2.indent + table.autoIncrementColumns.headOption.map(_ => "val generatedKey = ").getOrElse("") +
         (config.template match {
           case GeneratorTemplate.interpolation =>
@@ -443,7 +443,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      where
           |${wherePart}
           |      \"\"\".update.apply()
-          |    entity 
+          |    entity
           |  }
         """
         case GeneratorTemplate.queryDsl =>
@@ -529,6 +529,23 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }).stripMargin
     }
 
+    val interpolationFindByMethod = {
+      s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+        |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
+        |      .map(${className}(${syntaxName}.resultName)).single.apply()
+        |  }
+      """.stripMargin
+    }
+
+    val queryDslFindByMethod = {
+      s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+        |    withSQL {
+        |      select.from(${className} as ${syntaxName}).where.append(sqls"$${where}")
+        |    }.map(${className}(${syntaxName}.resultName)).single.apply()
+        |  }
+      """.stripMargin
+    }
+
     /**
      * {{{
      * def countAll(): Long = {
@@ -586,7 +603,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     val queryDslFindAllByMethod = {
       s"""  def findAllBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): List[${className}] = {
-        |    withSQL { 
+        |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(sqls"$${where}")
         |    }.map(${className}(${syntaxName}.resultName)).list.apply()
         |  }
@@ -603,7 +620,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     val queryDslCountByMethod = {
       s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
-        |    withSQL { 
+        |    withSQL {
         |      select(sqls"count(1)").from(${className} as ${syntaxName}).where.append(sqls"$${where}")
         |    }.map(_.long(1)).single.apply().get
         |  }
@@ -630,6 +647,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       findAllMethod +
       eol +
       countAllMethod +
+      eol +
+      (if (isQueryDsl) queryDslFindByMethod else interpolationFindByMethod) +
       eol +
       (if (isQueryDsl) queryDslFindAllByMethod else interpolationFindAllByMethod) +
       eol +
@@ -741,6 +760,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    val maybeFound = %className%.find(%primaryKeys%)
           |    maybeFound.isDefined should be(true)
           |  }
+          |  it should "find by where clauses" in { implicit session =>
+          |    val maybeFound = %className%.findBy(%whereExample%)
+          |    maybeFound.isDefined should be(true)
+          |  }
           |  it should "find all records" in { implicit session =>
           |    val allResults = %className%.findAll()
           |    allResults.size should be >(0)
@@ -749,7 +772,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    val count = %className%.countAll()
           |    count should be >(0L)
           |  }
-          |  it should "find by where clauses" in { implicit session =>
+          |  it should "find all by where clauses" in { implicit session =>
           |    val results = %className%.findAllBy(%whereExample%)
           |    results.size should be >(0)
           |  }
@@ -796,6 +819,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      val maybeFound = %className%.find(%primaryKeys%)
           |      maybeFound.isDefined should beTrue
           |    }
+          |    "find by where clauses" in new AutoRollback {
+          |      val maybeFound = %className%.findBy(%whereExample%)
+          |      maybeFound.isDefined should beTrue
+          |    }
           |    "find all records" in new AutoRollback {
           |      val allResults = %className%.findAll()
           |      allResults.size should be_>(0)
@@ -804,7 +831,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      val count = %className%.countAll()
           |      count should be_>(0L)
           |    }
-          |    "find by where clauses" in new AutoRollback {
+          |    "find all by where clauses" in new AutoRollback {
           |      val results = %className%.findAllBy(%whereExample%)
           |      results.size should be_>(0)
           |    }
@@ -846,9 +873,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |
           |  "The '%className%' model should" ^
           |    "find by primary keys"         ! autoRollback().findByPrimaryKeys ^
+          |    "find by where clauses"        ! autoRollback().findBy ^
           |    "find all records"             ! autoRollback().findAll ^
           |    "count all records"            ! autoRollback().countAll ^
-          |    "find by where clauses"        ! autoRollback().findAllBy ^
+          |    "find all by where clauses"    ! autoRollback().findAllBy ^
           |    "count by where clauses"       ! autoRollback().countBy ^
           |    "create new record"            ! autoRollback().create ^
           |    "save a record"                ! autoRollback().save ^
@@ -860,6 +888,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |
           |    def findByPrimaryKeys = this {
           |      val maybeFound = %className%.find(%primaryKeys%)
+          |      maybeFound.isDefined should beTrue
+          |    }
+          |    def findBy = this {
+          |      val maybeFound = %className%.findBy(%whereExample%)
           |      maybeFound.isDefined should beTrue
           |    }
           |    def findAll = this {
