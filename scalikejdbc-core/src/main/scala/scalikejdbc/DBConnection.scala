@@ -361,12 +361,18 @@ trait DBConnection extends LogSupport with LoanPattern {
   def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
-      val (schema, _tableNamePattern) = toSchemaAndTable(tableNamePattern.replaceAll("\\*", "%"))
-      new RSTraversable(meta.getTables(null, schema, _tableNamePattern, tableTypes))
-        .map { rs =>
-          if (schema != null) schema + "." + rs.string("TABLE_NAME")
-          else rs.string("TABLE_NAME")
-        }.toList
+      getSchemaAndTableName(meta, tableNamePattern.replaceAll("\\*", "%"), tableTypes).map {
+        case (schema, tableNamePattern) =>
+          new RSTraversable(meta.getTables(null, schema, tableNamePattern, tableTypes))
+            .map { rs =>
+              val schemaName = rs.string("TABLE_SCHEM")
+              if (schema != null && schema.nonEmpty && schemaName != null) {
+                schemaName + "." + rs.string("TABLE_NAME")
+              } else {
+                rs.string("TABLE_NAME")
+              }
+            }.toList
+      }.getOrElse(List.empty[String])
     }
   }
 
@@ -374,31 +380,12 @@ trait DBConnection extends LogSupport with LoanPattern {
    * Returns all the column names on the matched table name
    */
   def getColumnNames(tableName: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
-    def _getTableName(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String]): Option[String] = {
-      new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map(rs => rs.string("TABLE_NAME")).headOption
-    }
-    val (_schema, table) = toSchemaAndTable(tableName)
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
-      val schema = if (meta.getURL.startsWith("jdbc:h2")) {
-        // H2 Database 1.3 cannot accept "public" for metadata retrieving columns 
-        // in tables that name is same as information schema (e.g.) rules
-        if (_schema == "public") null else _schema
-      } else {
-        _schema
+      getSchemaAndTableName(meta, tableName, tableTypes).map {
+        case (schema, tableName) =>
+          new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
       }
-      _getTableName(meta, schema, table, tableTypes)
-        .orElse(_getTableName(meta, schema, table.toUpperCase(en), tableTypes))
-        .orElse(_getTableName(meta, schema, table.toLowerCase(en), tableTypes)).map { tableName =>
-          val _schema = {
-            if (meta.getURL.startsWith("jdbc:hsqldb")) {
-              schema
-            } else {
-              Option(schema).getOrElse("")
-            }
-          }
-          new RSTraversable(meta.getColumns(null, _schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
-        }
     }.getOrElse(Nil)
   }
 
@@ -411,9 +398,11 @@ trait DBConnection extends LogSupport with LoanPattern {
   def getTable(table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
-      _getTable(meta, table, tableTypes)
-        .orElse(_getTable(meta, table.toUpperCase(en), tableTypes))
-        .orElse(_getTable(meta, table.toLowerCase(en), tableTypes))
+
+      getSchemaAndTableName(meta, table, tableTypes).flatMap {
+        case (schema, tableName) =>
+          _getTable(meta, schema, tableName, tableTypes)
+      }
     }
   }
 
@@ -421,69 +410,74 @@ trait DBConnection extends LogSupport with LoanPattern {
    * Returns table information if exists
    *
    * @param meta database meta data
-   * @param table table name (with schema optionally)
+   * @param schema schema name
+   * @param table table name
    * @param tableTypes target table types
    * @return table information
    */
-  private[this] def _getTable(meta: DatabaseMetaData, table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
-    val (schema, _table) = toSchemaAndTable(table)
-    new RSTraversable(meta.getTables(null, schema, _table, tableTypes)).map(rs => rs.string("TABLE_NAME")).headOption.map { tableNameFound =>
-      val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, _table)).map(rs => rs.string("COLUMN_NAME"))
+  private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
+    val tableList = new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map {
+      rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
+    }
 
-      Table(
-        name = _table,
-        schema = schema,
-        description = new RSTraversable(meta.getTables(null, schema, _table, tableTypes)).map(rs => rs.string("REMARKS")).headOption.orNull[String],
-        columns = new RSTraversable(meta.getColumns(null, schema, _table, "%")).map { rs =>
-          Column(
-            name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
-            typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
-            typeName = rs.string("TYPE_NAME"),
-            size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
-            isRequired = try {
-              rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
-            } catch { case e: ResultSetExtractorException => false },
-            isPrimaryKey = try {
-              pkNames.exists(_ == rs.string("COLUMN_NAME"))
-            } catch { case e: ResultSetExtractorException => false },
-            isAutoIncrement = try {
-              // Oracle throws java.sql.SQLException: Invalid column name
-              rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
-            } catch { case e: ResultSetExtractorException => false },
-            description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
-            defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
-          )
-        }.toList.distinct,
-        foreignKeys = {
-          try {
-            new RSTraversable(meta.getImportedKeys(null, schema, _table)).map { rs =>
-              ForeignKey(
-                name = rs.string("FKCOLUMN_NAME"),
-                foreignColumnName = rs.string("PKCOLUMN_NAME"),
-                foreignTableName = rs.string("PKTABLE_NAME")
-              )
-            }.toList.distinct
-          } catch { case e: ResultSetExtractorException => Nil }
-        },
-        indices = {
-          try {
-            new RSTraversable(meta.getIndexInfo(null, schema, _table, false, true))
-              .foldLeft(Map[String, Index]()) {
-                case (map, rs) =>
-                  val indexName = rs.string("INDEX_NAME")
-                  val index = map.get(indexName).map { index =>
-                    index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
-                  }.getOrElse {
-                    Index(
-                      name = indexName,
-                      columnNames = List(rs.string("COLUMN_NAME")),
-                      isUnique = !rs.boolean("NON_UNIQUE"))
-                  }
-                  map.updated(indexName, index)
-              }.map { case (k, v) => v }.toList.distinct
-          } catch { case e: ResultSetExtractorException => Nil }
-        }
-      )
+    tableList.headOption.map {
+      case (schema, table, remarks) =>
+        val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME"))
+
+        Table(
+          name = table,
+          schema = schema,
+          description = remarks,
+          columns = new RSTraversable(meta.getColumns(null, schema, table, "%")).map { rs =>
+            Column(
+              name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
+              typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
+              typeName = rs.string("TYPE_NAME"),
+              size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
+              isRequired = try {
+                rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
+              } catch { case e: ResultSetExtractorException => false },
+              isPrimaryKey = try {
+                pkNames.exists(_ == rs.string("COLUMN_NAME"))
+              } catch { case e: ResultSetExtractorException => false },
+              isAutoIncrement = try {
+                // Oracle throws java.sql.SQLException: Invalid column name
+                rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
+              } catch { case e: ResultSetExtractorException => false },
+              description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
+              defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
+            )
+          }.toList.distinct,
+          foreignKeys = {
+            try {
+              new RSTraversable(meta.getImportedKeys(null, schema, table)).map { rs =>
+                ForeignKey(
+                  name = rs.string("FKCOLUMN_NAME"),
+                  foreignColumnName = rs.string("PKCOLUMN_NAME"),
+                  foreignTableName = rs.string("PKTABLE_NAME")
+                )
+              }.toList.distinct
+            } catch { case e: ResultSetExtractorException => Nil }
+          },
+          indices = {
+            try {
+              new RSTraversable(meta.getIndexInfo(null, schema, table, false, true))
+                .foldLeft(Map[String, Index]()) {
+                  case (map, rs) =>
+                    val indexName = rs.string("INDEX_NAME")
+                    val index = map.get(indexName).map { index =>
+                      index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
+                    }.getOrElse {
+                      Index(
+                        name = indexName,
+                        columnNames = List(rs.string("COLUMN_NAME")),
+                        isUnique = !rs.boolean("NON_UNIQUE"))
+                    }
+                    map.updated(indexName, index)
+                }.map { case (k, v) => v }.toList.distinct
+            } catch { case e: ResultSetExtractorException => Nil }
+          }
+        )
     }
   }
 
@@ -506,6 +500,37 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def describe(table: String): String = {
     getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.")
+  }
+
+  /**
+   * Returns schema name and table name
+   *
+   * @param meta database meta data
+   * @param tablePattern table name (with schema optionally)
+   * @param tableTypes target table types
+   * @return schema name and table name
+   */
+  private[this] def getSchemaAndTableName(meta: DatabaseMetaData, tablePattern: String, tableTypes: Array[String]): Option[(String, String)] = {
+    def _getSchemaAndTableName(meta: DatabaseMetaData, tablePattern: String, tableTypes: Array[String]): Option[(String, String)] = {
+      val (_schema, table) = toSchemaAndTable(tablePattern)
+      val schema = if (meta.getURL.startsWith("jdbc:h2")) {
+        // H2 Database 1.4 cannot accept null for metadata retrieving columns
+        // in tables that name is same as information schema (e.g.) rules
+        Option(_schema).getOrElse("")
+      } else {
+        _schema
+      }
+
+      if (new RSTraversable(meta.getTables(null, schema, table, tableTypes)).isEmpty) {
+        None
+      } else {
+        Some((schema, table))
+      }
+    }
+
+    _getSchemaAndTableName(meta, tablePattern, tableTypes)
+      .orElse(_getSchemaAndTableName(meta, tablePattern.toUpperCase(en), tableTypes))
+      .orElse(_getSchemaAndTableName(meta, tablePattern.toLowerCase(en), tableTypes))
   }
 
 }
