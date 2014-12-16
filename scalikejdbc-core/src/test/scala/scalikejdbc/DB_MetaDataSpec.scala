@@ -229,10 +229,10 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
-            lower(act) should (contain ("meta_members") and have size 1)
+            lower(act) should (contain("meta_members") and have size 1)
           } else {
             // public.meta_members, other.meta_members, other,meta_groups
-            lower(act) should (contain allOf("meta_members", "meta_groups") and have size 3)
+            lower(act) should (contain allOf ("meta_members", "meta_groups") and have size 3)
           }
         }
 
@@ -243,7 +243,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           )
         ) {
           // public.meta_members, other.meta_members, other,meta_groups
-          lower(act) should (contain allOf("%.meta_members", "%.meta_groups") and have size 3)
+          lower(act) should (contain allOf ("%.meta_members", "%.meta_groups") and have size 3)
         }
 
         for (
@@ -290,12 +290,11 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             NamedDB('default).getTableNames("OTHER.META_%")
           ).zipWithIndex
         ) withClue(s"No. ${i}") {
-          lower(act) should (contain allOf("other.meta_members", "other.meta_groups") and have size 2)
+          lower(act) should (contain allOf ("other.meta_members", "other.meta_groups") and have size 2)
         }
 
-        lower(DB.getTableNames("dummy.*")) should be (empty)
-        lower(NamedDB('default).getTableNames("dummy.*")) should be (empty)
-
+        lower(DB.getTableNames("dummy.*")) should be(empty)
+        lower(NamedDB('default).getTableNames("dummy.*")) should be(empty)
 
         // showTables returns string value
         for (
@@ -306,7 +305,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
-            lower(act) should (include("meta_members") and not include("meta_groups"))
+            lower(act) should (include("meta_members") and not include ("meta_groups"))
           } else {
             // public.meta_members, other.meta_members, other.meta_groups
             lower(act) should (include("meta_members") and include("meta_groups"))
@@ -358,8 +357,8 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           act.value.columns should have size (6)
         }
 
-        DB.getTable("dummy.*") should be (empty)
-        NamedDB('default).getTable("dummy.*") should be (empty)
+        DB.getTable("dummy.*") should be(empty)
+        NamedDB('default).getTable("dummy.*") should be(empty)
 
         // describe returns string value
         for (
@@ -392,8 +391,8 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           lower(DB.getColumnNames(s"${schema}.${table}")) should equal(exp)
         }
 
-        lower(DB.getColumnNames("dummy.meta_members")) should be (empty)
-        lower(NamedDB('default).getColumnNames("dummy.meta_members")) should be (empty)
+        lower(DB.getColumnNames("dummy.meta_members")) should be(empty)
+        lower(NamedDB('default).getColumnNames("dummy.meta_members")) should be(empty)
 
       } finally {
         DB autoCommit { implicit s =>
@@ -435,7 +434,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             NamedDB('default).getTableNames("%")
           )
         ) {
-          lower(act) should contain ("users")
+          lower(act) should contain("users")
         }
 
         for (

@@ -416,63 +416,64 @@ trait DBConnection extends LogSupport with LoanPattern {
       rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
     }
 
-    tableList.headOption.map { case (schema, table, remarks) =>
-      val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME"))
+    tableList.headOption.map {
+      case (schema, table, remarks) =>
+        val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME"))
 
-      Table(
-        name = table,
-        schema = schema,
-        description = remarks,
-        columns = new RSTraversable(meta.getColumns(null, schema, table, "%")).map { rs =>
-          Column(
-            name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
-            typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
-            typeName = rs.string("TYPE_NAME"),
-            size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
-            isRequired = try {
-              rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
-            } catch { case e: ResultSetExtractorException => false },
-            isPrimaryKey = try {
-              pkNames.exists(_ == rs.string("COLUMN_NAME"))
-            } catch { case e: ResultSetExtractorException => false },
-            isAutoIncrement = try {
-              // Oracle throws java.sql.SQLException: Invalid column name
-              rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
-            } catch { case e: ResultSetExtractorException => false },
-            description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
-            defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
-          )
-        }.toList.distinct,
-        foreignKeys = {
-          try {
-            new RSTraversable(meta.getImportedKeys(null, schema, table)).map { rs =>
-              ForeignKey(
-                name = rs.string("FKCOLUMN_NAME"),
-                foreignColumnName = rs.string("PKCOLUMN_NAME"),
-                foreignTableName = rs.string("PKTABLE_NAME")
-              )
-            }.toList.distinct
-          } catch { case e: ResultSetExtractorException => Nil }
-        },
-        indices = {
-          try {
-            new RSTraversable(meta.getIndexInfo(null, schema, table, false, true))
-              .foldLeft(Map[String, Index]()) {
-                case (map, rs) =>
-                  val indexName = rs.string("INDEX_NAME")
-                  val index = map.get(indexName).map { index =>
-                    index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
-                  }.getOrElse {
-                    Index(
-                      name = indexName,
-                      columnNames = List(rs.string("COLUMN_NAME")),
-                      isUnique = !rs.boolean("NON_UNIQUE"))
-                  }
-                  map.updated(indexName, index)
-              }.map { case (k, v) => v }.toList.distinct
-          } catch { case e: ResultSetExtractorException => Nil }
-        }
-      )
+        Table(
+          name = table,
+          schema = schema,
+          description = remarks,
+          columns = new RSTraversable(meta.getColumns(null, schema, table, "%")).map { rs =>
+            Column(
+              name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
+              typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
+              typeName = rs.string("TYPE_NAME"),
+              size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
+              isRequired = try {
+                rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
+              } catch { case e: ResultSetExtractorException => false },
+              isPrimaryKey = try {
+                pkNames.exists(_ == rs.string("COLUMN_NAME"))
+              } catch { case e: ResultSetExtractorException => false },
+              isAutoIncrement = try {
+                // Oracle throws java.sql.SQLException: Invalid column name
+                rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
+              } catch { case e: ResultSetExtractorException => false },
+              description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
+              defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
+            )
+          }.toList.distinct,
+          foreignKeys = {
+            try {
+              new RSTraversable(meta.getImportedKeys(null, schema, table)).map { rs =>
+                ForeignKey(
+                  name = rs.string("FKCOLUMN_NAME"),
+                  foreignColumnName = rs.string("PKCOLUMN_NAME"),
+                  foreignTableName = rs.string("PKTABLE_NAME")
+                )
+              }.toList.distinct
+            } catch { case e: ResultSetExtractorException => Nil }
+          },
+          indices = {
+            try {
+              new RSTraversable(meta.getIndexInfo(null, schema, table, false, true))
+                .foldLeft(Map[String, Index]()) {
+                  case (map, rs) =>
+                    val indexName = rs.string("INDEX_NAME")
+                    val index = map.get(indexName).map { index =>
+                      index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
+                    }.getOrElse {
+                      Index(
+                        name = indexName,
+                        columnNames = List(rs.string("COLUMN_NAME")),
+                        isUnique = !rs.boolean("NON_UNIQUE"))
+                    }
+                    map.updated(indexName, index)
+                }.map { case (k, v) => v }.toList.distinct
+            } catch { case e: ResultSetExtractorException => Nil }
+          }
+        )
     }
   }
 
