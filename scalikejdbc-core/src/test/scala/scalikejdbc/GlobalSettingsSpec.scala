@@ -135,8 +135,6 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
     }
   }
 
-  def isMySQLTestsOnTravis: Boolean = sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "mysql")
-
   it should "have taggedQueryCompletionListener" in {
     DB autoCommit { implicit session =>
       try {
@@ -154,7 +152,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         }
         GlobalSettings.taggedQueryCompletionListener.synchronized {
           SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
-          if (!isMySQLTestsOnTravis) result should equal(2)
+          result should equal(2)
         }
 
         var errorResult: Int = -1
@@ -167,7 +165,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           try {
             SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
           } catch { case e: Exception => }
-          if (!isMySQLTestsOnTravis) errorResult should equal(3)
+          errorResult should equal(3)
         }
 
       } finally {
