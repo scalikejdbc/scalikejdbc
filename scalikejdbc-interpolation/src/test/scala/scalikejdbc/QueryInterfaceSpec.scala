@@ -5,6 +5,10 @@ import org.joda.time._
 
 class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
 
+  def isH2: Boolean = driverClassName == "org.h2.Driver" || sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "h2")
+
+  def isMySQL: Boolean = driverClassName == "com.mysql.jdbc.Driver" || sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "mysql")
+
   behavior of "QueryInterface"
 
   case class Order(id: Int, productId: Int, accountId: Option[Int], createdAt: DateTime, product: Option[Product] = None, account: Option[Account] = None)
@@ -46,7 +50,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   }
 
   it should "suport schemaName" in {
-    if (driverClassName != "com.mysql.jdbc.Driver") {
+    if (!isMySQL) {
       try {
         DB autoCommit { implicit s =>
           try sql"drop table ${SchemaExample.table}".execute.apply()
@@ -496,7 +500,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         // except
         // MySQL doesn't support except
-        if (driverClassName != "com.mysql.jdbc.Driver") {
+        if (!isMySQL) {
           val exceptResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
@@ -508,7 +512,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         // except all
         // H2 Database doesn't support except all
         // MySQL doesn't support except all
-        if (driverClassName != "org.h2.Driver" && driverClassName != "com.mysql.jdbc.Driver") {
+        if (!isH2 && !isMySQL) {
           val exceptAllResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
@@ -519,7 +523,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         // intersect
         // MySQL doesn't support intersect 
-        if (driverClassName != "com.mysql.jdbc.Driver") {
+        if (!isMySQL) {
           val intersectResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
@@ -529,7 +533,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         // intersect all  
         // H2 and MySQL don't support intersect all
-        if (driverClassName != "com.mysql.jdbc.Driver" && driverClassName != "org.h2.Driver") {
+        if (!isH2 && !isMySQL) {
           val intersectAllResults = withSQL {
             select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2))
               .intersectAll {
