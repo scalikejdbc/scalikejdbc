@@ -8,10 +8,10 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc" % "2.2.0",
-  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.2.0",
+  "org.scalikejdbc" %% "scalikejdbc" % "2.2.1",
+  "org.scalikejdbc" %% "scalikejdbc-jsr310" % "2.2.1",
   "com.github.seratch" % "java-time-backport" % "1.0.0",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "2.2.0",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "2.2.1",
   "org.slf4j"       %  "slf4j-simple"      % "1.7.+",
   "org.hibernate"   %  "hibernate-core"    % "4.1.9.Final",
   "org.hsqldb"      %  "hsqldb"            % "2.3.+",

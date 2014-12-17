@@ -7,13 +7,13 @@ object ScalikeJDBCProjects extends Build {
 
   // [NOTE] Execute the following to bump version
   // sbt "g version 1.3.8-SNAPSHOT"
-  lazy val _version = "2.2.1-SNAPSHOT"
+  lazy val _version = "2.2.1"
   lazy val compatibleVersion = "2.1.4"
 
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.7"
+  lazy val _slf4jApiVersion = "1.7.9"
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
@@ -21,7 +21,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.4.+"
   lazy val _hibernateVersion = "4.3.7.Final"
   lazy val _scalatestVersion = "2.2.2"
-  lazy val _specs2Version = "2.4.13"
+  lazy val _specs2Version = "2.4.15"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
@@ -86,7 +86,7 @@ object ScalikeJDBCProjects extends Build {
     resolvers ++= _resolvers,
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    //scalaVersion := "2.11.1",
+    scalaVersion := "2.11.4",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
@@ -156,7 +156,7 @@ object ScalikeJDBCProjects extends Build {
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
         ) ++ (scalaVersion match {
-          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2" % "compile")
+          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
