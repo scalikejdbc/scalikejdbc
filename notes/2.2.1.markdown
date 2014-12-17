@@ -1,0 +1,16 @@
+ScalikeJDBC 2.2.1 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #324 JTA managed DataSource compatibility by @seratch
+- [core] #321 Adding a "tag" to queryCompletionListener and queryFailureListener by @seratch
+- [core] #318 Fix column names retrieval when same table in multiple (include 'public') schema (PostgreSQL) by @seratch
+- [core] #330 Retrieve metadata with case-insensitive schema name by @namutaka
+- [mapper-generator] #330 Added findBy method and adjusted test message for existing findAllBy by @diceit
+
+Enjoy writing mostly type-safe SQL and get things done!
+
