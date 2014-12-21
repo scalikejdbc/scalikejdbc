@@ -8,7 +8,7 @@
 
 ### Pull Requests
 
-- Send pull requests toward "develop", "1.8.x", "1.7.x" or "feature/xxx" branches
+- Pull requests basically should be sent toward "develop" branch
 - Compatibility always must be kept as far as possible 
 - scalariform must be applied to all Scala source code
 - Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
