@@ -18,11 +18,24 @@
 ##### develop (the default branch)
 
 - git-flow development branch
+- the latest development version
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### master
 
 - git-flow stable branch
+- This branch must be able to build against Scala 2.10 and 2.11
+
+##### 2.1.x
+
+- the version 2.1 series maintainance branch
+- Only security fixes and critical bug fixes in develop branch will be backported
+- This branch must be able to build against Scala 2.10 and 2.11
+
+##### 2.0.x
+
+- the version 2.0 series maintainance branch
+- Only security fixes and critical bug fixes in develop branch will be backported
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 1.8.x
