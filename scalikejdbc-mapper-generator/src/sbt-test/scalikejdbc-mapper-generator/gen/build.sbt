@@ -47,3 +47,21 @@ libraryDependencies ++= Seq(
   "org.scalatest"       %% "scalatest"                        % System.getProperty("scalatest.version") % "test",
   "org.specs2"          %% "specs2-core"                      % System.getProperty("specs2.version") % "test"
 )
+
+TaskKey[Unit]("generateCodeForIssue339") := {
+  import java.sql.Types
+  import scalikejdbc.mapper._
+  val key = Column("key", Types.INTEGER, true, true)
+  val other = List(
+    Column("column1", Types.OTHER, true, false),
+    Column("column2", Types.OTHER, false, false)
+  )
+  val all = key :: other
+  val table = Table("Issue339table", all, all.filter(_.isAutoIncrement), key :: Nil)
+  val generator = new CodeGenerator(table)
+  val code = generator.modelAll()
+  println(code)
+  assert(code.contains("rs.any("))
+  assert(code.contains("rs.anyOpt("))
+  generator.writeModel()
+}
