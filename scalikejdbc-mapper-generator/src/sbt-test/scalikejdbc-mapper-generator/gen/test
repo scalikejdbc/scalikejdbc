@@ -64,3 +64,6 @@ $ newer src/main/scala/app/models/Programmer.scala src/main/scala/app/models/Pro
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="invalid template name")}
 -> scalikejdbcGenEcho programmers
 -> scalikejdbcGenForce programmers
+
+> generateCodeForIssue339
+> compile
