@@ -1,9 +1,6 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.mockito.Mockito._
-
-import java.sql._
 
 class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
 

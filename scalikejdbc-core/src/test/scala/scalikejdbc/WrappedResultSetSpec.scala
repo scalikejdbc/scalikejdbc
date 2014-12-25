@@ -3,7 +3,6 @@ package scalikejdbc
 import org.scalatest._
 import mock.MockitoSugar
 import org.mockito.Mockito._
-import org.scalatest.matchers._
 import java.sql.ResultSet
 import java.util.Calendar
 
