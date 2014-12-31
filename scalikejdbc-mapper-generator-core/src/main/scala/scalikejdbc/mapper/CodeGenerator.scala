@@ -99,7 +99,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case JavaSqlTypes.SMALLINT => TypeName.Short
       case JavaSqlTypes.STRUCT => TypeName.Struct
       case JavaSqlTypes.TIME => TypeName.LocalTime
-      case JavaSqlTypes.TIMESTAMP => TypeName.DateTime
+      case JavaSqlTypes.TIMESTAMP => config.dateTimeClass.simpleName
       case JavaSqlTypes.TINYINT => TypeName.Byte
       case JavaSqlTypes.VARBINARY => TypeName.ByteArray
       case JavaSqlTypes.VARCHAR => TypeName.String
@@ -670,19 +670,25 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       "}"
   }
 
-  def modelAll(): String = {
-    val jodaTimeImport = table.allColumns.flatMap {
-      c =>
-        c.rawTypeInScala match {
-          case TypeName.DateTime => Some("DateTime")
-          case TypeName.LocalDate => Some("LocalDate")
-          case TypeName.LocalTime => Some("LocalTime")
-          case _ => None
+  private val timeImport: String = {
+    val timeClasses = Set(
+      TypeName.LocalDate,
+      TypeName.LocalTime
+    ) ++ DateTimeClass.all.map(_.simpleName)
+
+    table.allColumns.map(_.rawTypeInScala).filter(timeClasses) match {
+      case classes if classes.nonEmpty =>
+        if (config.dateTimeClass == DateTimeClass.JodaDateTime) {
+          "import org.joda.time.{" + classes.distinct.mkString(", ") + "}" + eol
+        } else {
+          "import java.time.{" + classes.distinct.mkString(", ") + "}" + eol +
+            "import scalikejdbc.jsr310._" + eol
         }
-    } match {
-      case classes if classes.size > 0 => "import org.joda.time.{" + classes.distinct.mkString(", ") + "}" + eol
       case _ => ""
     }
+  }
+
+  def modelAll(): String = {
     val javaSqlImport = table.allColumns.flatMap {
       c =>
         c.rawTypeInScala match {
@@ -699,7 +705,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     "package " + config.packageName + eol +
       eol +
       "import scalikejdbc._" + eol +
-      jodaTimeImport +
+      timeImport +
       javaSqlImport +
       eol +
       classPart + eol +
@@ -751,12 +757,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   def specAll(): Option[String] = config.testTemplate match {
     case GeneratorTestTemplate.ScalaTestFlatSpec =>
       Some(replaceVariablesForTestPart(
-        """package %package%
+        s"""package %package%
           |
           |import org.scalatest._
-          |import org.joda.time._
           |import scalikejdbc.scalatest.AutoRollback
           |import scalikejdbc._
+          |$timeImport
           |
           |class %className%Spec extends fixture.FlatSpec with Matchers with AutoRollback {
           |  %syntaxObject%
@@ -809,12 +815,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         """.stripMargin))
     case GeneratorTestTemplate.specs2unit =>
       Some(replaceVariablesForTestPart(
-        """package %package%
+        s"""package %package%
           |
           |import scalikejdbc.specs2.mutable.AutoRollback
           |import org.specs2.mutable._
-          |import org.joda.time._
           |import scalikejdbc._
+          |$timeImport
           |
           |class %className%Spec extends Specification {
           |
@@ -869,12 +875,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         """.stripMargin))
     case GeneratorTestTemplate.specs2acceptance =>
       Some(replaceVariablesForTestPart(
-        """package %package%
+        s"""package %package%
           |
           |import scalikejdbc.specs2.AutoRollback
           |import org.specs2._
-          |import org.joda.time._
           |import scalikejdbc._
+          |$timeImport
           |
           |class %className%Spec extends Specification { def is =
           |
