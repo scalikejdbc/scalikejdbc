@@ -29,7 +29,7 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean)
+  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass)
 
   private[this] def loadJDBCSettings(props: Properties): JDBCSettings =
     JDBCSettings(
@@ -50,7 +50,10 @@ object SbtPlugin extends Plugin {
       caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(defaultConfig.caseClassOnly),
       encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse(defaultConfig.encoding),
       autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(defaultConfig.autoConstruct),
-      defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(defaultConfig.defaultAutoSession)
+      defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
+      dateTimeClass = Option(props.get("generator.dateTimeClass")).map {
+        name => DateTimeClass.map.getOrElse(name.toString, sys.error("does not support " + name))
+      }.getOrElse(defaultConfig.dateTimeClass)
     )
   }
 
@@ -99,7 +102,8 @@ object SbtPlugin extends Plugin {
       caseClassOnly = generatorSettings.caseClassOnly,
       encoding = generatorSettings.encoding,
       autoConstruct = generatorSettings.autoConstruct,
-      defaultAutoSession = generatorSettings.defaultAutoSession
+      defaultAutoSession = generatorSettings.defaultAutoSession,
+      dateTimeClass = generatorSettings.dateTimeClass
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {

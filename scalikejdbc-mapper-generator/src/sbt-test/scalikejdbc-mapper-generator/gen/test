@@ -61,6 +61,18 @@ $ newer src/main/scala/app/models/Programmer.scala src/main/scala/app/models/Pro
 > + test:compile
 > + testOnly app.models.ProgrammersTest
 
+$ delete src/test/scala/ProgrammersTest.scala
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.ZonedDateTime)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + test:compile
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.OffsetDateTime)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + test:compile
+
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="invalid template name")}
 -> scalikejdbcGenEcho programmers
 -> scalikejdbcGenForce programmers
