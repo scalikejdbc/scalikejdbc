@@ -57,7 +57,12 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$_setter_$scalikejdbc$DBSession$$_tags_="),
       exclude[MissingMethodProblem]("scalikejdbc.DBSession.scalikejdbc$DBSession$$super$using"),
       exclude[IncompatibleResultTypeProblem]("scalikejdbc.DBSession.apply"),
-      exclude[MissingMethodProblem]("scalikejdbc.DBSession.unexpectedInvocation")
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.unexpectedInvocation"),
+      // since 2.2.2
+      exclude[MissingTypesProblem]("scalikejdbc.mapper.GeneratorConfig$"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.apply"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.copy"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.this")
     )
   }
 
