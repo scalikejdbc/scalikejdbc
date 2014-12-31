@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templateSet group="scalikejdbc">
-  <template name="sj.import" value="import scalikejdbc._&#10;import scalikejdbc.config._&#10;import scalikejdbc.SQLInterpolation._" description="" toReformat="false" toShortenFQNames="true">
+  <template name="sj.import" value="import scalikejdbc._&#10;import scalikejdbc.config._" description="" toReformat="false" toShortenFQNames="true">
     <context>
       <option name="HTML_TEXT" value="false" />
       <option name="HTML" value="false" />
