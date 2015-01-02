@@ -31,28 +31,36 @@ object SbtPlugin extends Plugin {
 
   case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass)
 
+  private[this] def getString(props: Properties, key: String): Option[String] =
+    Option(props.get(key)).map { value =>
+      val str = value.toString
+      if (str.startsWith("\"") && str.endsWith("\"") && str.length >= 2) {
+        str.substring(1, str.length - 1)
+      } else str
+    }
+
   private[this] def loadJDBCSettings(props: Properties): JDBCSettings =
     JDBCSettings(
-      driver = Option(props.get("jdbc.driver")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
-      url = Option(props.get("jdbc.url")).map(_.toString).getOrElse(throw new IllegalStateException("Add jdbc.url to project/scalikejdbc-mapper-generator.properties")),
-      username = Option(props.get("jdbc.username")).map(_.toString).getOrElse(""),
-      password = Option(props.get("jdbc.password")).map(_.toString).getOrElse(""),
-      schema = Option(props.get("jdbc.schema")).map(_.toString).orNull[String]
+      driver = getString(props, "jdbc.driver").getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
+      url = getString(props, "jdbc.url").getOrElse(throw new IllegalStateException("Add jdbc.url to project/scalikejdbc-mapper-generator.properties")),
+      username = getString(props, "jdbc.username").getOrElse(""),
+      password = getString(props, "jdbc.password").getOrElse(""),
+      schema = getString(props, "jdbc.schema").orNull[String]
     )
 
   private[this] def loadGeneratorSettings(props: Properties): GeneratorSettings = {
     val defaultConfig = GeneratorConfig()
     GeneratorSettings(
-      packageName = Option(props.get("generator.packageName")).map(_.toString).getOrElse(defaultConfig.packageName),
-      template = Option(props.get("generator.template")).map(_.toString).getOrElse(defaultConfig.template.name),
-      testTemplate = Option(props.get("generator.testTemplate")).map(_.toString).getOrElse(GeneratorTestTemplate.specs2unit.name),
-      lineBreak = Option(props.get("generator.lineBreak")).map(_.toString).getOrElse(defaultConfig.lineBreak.name),
-      caseClassOnly = Option(props.get("generator.caseClassOnly")).map(_.toString.toBoolean).getOrElse(defaultConfig.caseClassOnly),
-      encoding = Option(props.get("generator.encoding")).map(_.toString).getOrElse(defaultConfig.encoding),
-      autoConstruct = Option(props.get("generator.autoConstruct")).map(_.toString.toBoolean).getOrElse(defaultConfig.autoConstruct),
-      defaultAutoSession = Option(props.get("generator.defaultAutoSession")).map(_.toString.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
-      dateTimeClass = Option(props.get("generator.dateTimeClass")).map {
-        name => DateTimeClass.map.getOrElse(name.toString, sys.error("does not support " + name))
+      packageName = getString(props, "generator.packageName").getOrElse(defaultConfig.packageName),
+      template = getString(props, "generator.template").getOrElse(defaultConfig.template.name),
+      testTemplate = getString(props, "generator.testTemplate").getOrElse(GeneratorTestTemplate.specs2unit.name),
+      lineBreak = getString(props, "generator.lineBreak").getOrElse(defaultConfig.lineBreak.name),
+      caseClassOnly = getString(props, "generator.caseClassOnly").map(_.toBoolean).getOrElse(defaultConfig.caseClassOnly),
+      encoding = getString(props, "generator.encoding").getOrElse(defaultConfig.encoding),
+      autoConstruct = getString(props, "generator.autoConstruct").map(_.toBoolean).getOrElse(defaultConfig.autoConstruct),
+      defaultAutoSession = getString(props, "generator.defaultAutoSession").map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
+      dateTimeClass = getString(props, "generator.dateTimeClass").map {
+        name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
       }.getOrElse(defaultConfig.dateTimeClass)
     )
   }
