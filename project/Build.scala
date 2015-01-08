@@ -91,7 +91,7 @@ object ScalikeJDBCProjects extends Build {
     resolvers ++= _resolvers,
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    //scalaVersion := "2.11.4",
+    //scalaVersion := "2.11.5",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
