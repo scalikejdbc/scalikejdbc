@@ -19,7 +19,7 @@ import org.joda.time.LocalTime
 
 /**
  * org.joda.time.LocalTime converter.
- * @param t LocalTime object
+ * @param value LocalTime object
  */
 class LocalTimeConverter(val value: LocalTime) extends AnyVal {
 
