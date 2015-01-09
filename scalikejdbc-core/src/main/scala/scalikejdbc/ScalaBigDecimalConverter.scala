@@ -17,7 +17,7 @@ package scalikejdbc
 
 /**
  * BigDecimal converter.
- * @param bd big decimal value
+ * @param value big decimal value
  */
 class ScalaBigDecimalConverter(val value: java.math.BigDecimal) extends AnyVal {
 
