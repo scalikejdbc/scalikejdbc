@@ -39,7 +39,14 @@ case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnec
     throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
   }
 
-  private lazy val db: DB = DB(connectionPool().borrow())
+  override def connectionAttributes: DBConnectionAttributes = {
+    connectionPool().connectionAttributes
+  }
+
+  private lazy val db: DB = {
+    val cp = connectionPool()
+    DB(cp.borrow(), connectionAttributes)
+  }
 
   def toDB(): DB = db
 

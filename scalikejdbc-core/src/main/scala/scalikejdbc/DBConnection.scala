@@ -18,7 +18,6 @@ package scalikejdbc
 import java.sql.{ DatabaseMetaData, Connection }
 import scalikejdbc.metadata.{ Index, ForeignKey, Column, Table }
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Failure
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
@@ -48,6 +47,11 @@ trait DBConnection extends LogSupport with LoanPattern {
     this.autoCloseEnabled = autoClose
     this
   }
+
+  /**
+   * returns the additional attributes of current JDBC connection.
+   */
+  def connectionAttributes: DBConnectionAttributes = DBConnectionAttributes()
 
   /**
    * Returns current JDBC connection.
@@ -188,7 +192,7 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   def readOnlySession(): DBSession = {
     setReadOnly(conn, true)
-    DBSession(conn, isReadOnly = true)
+    DBSession(conn, isReadOnly = true, connectionAttributes = connectionAttributes)
   }
 
   /**
@@ -219,7 +223,7 @@ trait DBConnection extends LogSupport with LoanPattern {
   def autoCommitSession(): DBSession = {
     setReadOnly(conn, false)
     setAutoCommit(conn, true)
-    DBSession(conn)
+    DBSession(conn, connectionAttributes = connectionAttributes)
   }
 
   /**
@@ -251,7 +255,7 @@ trait DBConnection extends LogSupport with LoanPattern {
     if (!GlobalSettings.jtaDataSourceCompatible && !tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    DBSession(conn, tx = Some(tx))
+    DBSession(conn, tx = Some(tx), connectionAttributes = connectionAttributes)
   }
 
   /**
@@ -304,7 +308,7 @@ trait DBConnection extends LogSupport with LoanPattern {
     begin(tx)
     val txResult = try {
       rollbackIfThrowable[A] {
-        val session = DBSession(conn, tx = Option(tx))
+        val session = DBSession(conn, tx = Option(tx), connectionAttributes = connectionAttributes)
         val result: A = execution(session)
         boundary.finishTx(result, tx)
       }
