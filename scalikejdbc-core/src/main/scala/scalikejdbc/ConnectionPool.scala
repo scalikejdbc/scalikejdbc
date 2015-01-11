@@ -306,5 +306,9 @@ abstract class ConnectionPool(
    */
   def close(): Unit = throw new UnsupportedOperationException
 
+  def connectionAttributes: DBConnectionAttributes = {
+    DBConnectionAttributes(driverName = Option(settings.driverName))
+  }
+
 }
 

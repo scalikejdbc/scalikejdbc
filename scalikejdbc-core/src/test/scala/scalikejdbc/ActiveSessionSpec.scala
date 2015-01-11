@@ -13,7 +13,7 @@ class ActiveSessionSpec extends FlatSpec with Matchers {
     val conn: Connection = mock(classOf[Connection])
     val tx: Option[Tx] = None
     val isReadOnly: Boolean = false
-    new ActiveSession(conn, tx, isReadOnly)
+    new ActiveSession(conn, DBConnectionAttributes(), tx, isReadOnly)
   }
 
   it should "be available with inactive tx" in {
@@ -22,7 +22,7 @@ class ActiveSessionSpec extends FlatSpec with Matchers {
     val isReadOnly: Boolean = false
 
     intercept[java.lang.IllegalStateException] {
-      new ActiveSession(conn, tx, isReadOnly)
+      new ActiveSession(conn, DBConnectionAttributes(), tx, isReadOnly)
     }
   }
 
@@ -35,7 +35,7 @@ class ActiveSessionSpec extends FlatSpec with Matchers {
 
     val isReadOnly: Boolean = false
 
-    new ActiveSession(conn, txOpt, isReadOnly)
+    new ActiveSession(conn, DBConnectionAttributes(), txOpt, isReadOnly)
   }
 
 }
