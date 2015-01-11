@@ -141,8 +141,6 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         try {
           SQL("drop table tagged_query_completion_listener").tags("foo", "bar").execute.apply()
         } catch { case e: Exception => }
-        SQL("create table tagged_query_completion_listener (id int primary key, created_at timestamp)").tags("foo", "1").execute.apply()
-        SQL("insert into tagged_query_completion_listener values (?,?)").tags("foo", "2").bind(1, DateTime.now).update.apply()
 
         var result: Int = -1
         GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => {
@@ -150,6 +148,22 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
             result = tags.size
           }
         }
+
+        result = -1
+        GlobalSettings.taggedQueryCompletionListener.synchronized {
+          SQL("create table tagged_query_completion_listener (id int primary key, created_at timestamp)")
+            .tags("1", "2", "3", "4").execute.apply()
+          result should equal(4)
+        }
+
+        result = -1
+        GlobalSettings.taggedQueryCompletionListener.synchronized {
+          SQL("insert into tagged_query_completion_listener values (?,?)")
+            .tags("1", "2", "3").bind(1, DateTime.now).update.apply()
+          result should equal(3)
+        }
+
+        result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
           SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
           result should equal(2)

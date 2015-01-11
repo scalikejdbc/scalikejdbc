@@ -278,7 +278,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL for batch
    */
   def batch(parameters: Seq[Any]*): SQLBatch = {
-    new SQLBatch(statement, parameters)
+    new SQLBatch(statement, parameters, tags)
   }
 
   /**
@@ -291,7 +291,7 @@ abstract class SQL[A, E <: WithExtractor](
     val _parameters: Seq[Seq[Any]] = parameters.map { p =>
       createNameBindingSQL.validateAndConvertToNormalStatement(statement, p)._2
     }
-    new SQLBatch(_sql, _parameters)
+    new SQLBatch(_sql, _parameters, tags)
   }
 
   /**
@@ -398,7 +398,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def execute(): SQLExecution = {
-    new SQLExecution(statement, parameters)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLExecution(statement, parameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
@@ -408,7 +408,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = {
-    new SQLExecution(statement, parameters)(before)(after)
+    new SQLExecution(statement, parameters, tags)(before)(after)
   }
 
   /**
@@ -432,7 +432,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def update(): SQLUpdate = {
-    new SQLUpdate(statement, parameters)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLUpdate(statement, parameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
@@ -442,7 +442,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = {
-    new SQLUpdate(statement, parameters)(before)(after)
+    new SQLUpdate(statement, parameters, tags)(before)(after)
   }
 
   /**
@@ -454,11 +454,11 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, parameters)(name)
+    new SQLUpdateWithGeneratedKey(statement, parameters, this.tags)(name)
   }
 
   def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, parameters)(index)
+    new SQLUpdateWithGeneratedKey(statement, parameters, this.tags)(index)
   }
 
 }
@@ -468,19 +468,19 @@ abstract class SQL[A, E <: WithExtractor](
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]]) {
+class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil) {
 
   def apply()(implicit session: DBSession): Seq[Int] = session match {
     case AutoSession =>
-      DB.autoCommit(_.batch(statement, parameters: _*))
+      DB.autoCommit(_.tags(tags: _*).batch(statement, parameters: _*))
     case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.batch(statement, parameters: _*))
+      NamedDB(name).autoCommit(_.tags(tags: _*).batch(statement, parameters: _*))
     case ReadOnlyAutoSession =>
-      DB.readOnly(_.batch(statement, parameters: _*))
+      DB.readOnly(_.tags(tags: _*).batch(statement, parameters: _*))
     case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.batch(statement, parameters: _*))
+      NamedDB(name).readOnly(_.tags(tags: _*).batch(statement, parameters: _*))
     case _ =>
-      session.batch(statement, parameters: _*)
+      session.tags(tags: _*).batch(statement, parameters: _*)
   }
 
 }
@@ -492,19 +492,21 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]]) {
  * @param before before filter
  * @param after after filter
  */
-class SQLExecution(val statement: String, val parameters: Seq[Any])(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
+class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
+    before: (PreparedStatement) => Unit)(
+        after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Boolean = session match {
     case AutoSession =>
-      DB.autoCommit(_.executeWithFilters(before, after, statement, parameters: _*))
+      DB.autoCommit(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
     case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.executeWithFilters(before, after, statement, parameters: _*))
+      NamedDB(name).autoCommit(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
     case ReadOnlyAutoSession =>
-      DB.readOnly(_.executeWithFilters(before, after, statement, parameters: _*))
+      DB.readOnly(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
     case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.executeWithFilters(before, after, statement, parameters: _*))
+      NamedDB(name).readOnly(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
     case _ =>
-      session.executeWithFilters(before, after, statement, parameters: _*)
+      session.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*)
   }
 
 }
@@ -516,19 +518,21 @@ class SQLExecution(val statement: String, val parameters: Seq[Any])(before: (Pre
  * @param before before filter
  * @param after after filter
  */
-class SQLUpdate(val statement: String, val parameters: Seq[Any])(before: (PreparedStatement) => Unit)(after: (PreparedStatement) => Unit) {
+class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
+    before: (PreparedStatement) => Unit)(
+        after: (PreparedStatement) => Unit) {
 
   def apply()(implicit session: DBSession): Int = session match {
     case AutoSession =>
-      DB.autoCommit(_.updateWithFilters(before, after, statement, parameters: _*))
+      DB.autoCommit(_.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*))
     case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.updateWithFilters(before, after, statement, parameters: _*))
+      NamedDB(name).autoCommit(_.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*))
     case ReadOnlyAutoSession =>
-      DB.readOnly(_.updateWithFilters(before, after, statement, parameters: _*))
+      DB.readOnly(_.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*))
     case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.updateWithFilters(before, after, statement, parameters: _*))
+      NamedDB(name).readOnly(_.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*))
     case _ =>
-      session.updateWithFilters(before, after, statement, parameters: _*)
+      session.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*)
   }
 
 }
@@ -538,19 +542,19 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any])(before: (Prepar
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any])(key: Any) {
+class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(key: Any) {
 
   def apply()(implicit session: DBSession): Long = session match {
     case AutoSession =>
-      DB.autoCommit(_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+      DB.autoCommit(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+      NamedDB(name).autoCommit(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case ReadOnlyAutoSession =>
-      DB.readOnly(_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+      DB.readOnly(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
+      NamedDB(name).readOnly(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
     case _ =>
-      session.updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
+      session.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
   }
 
 }
