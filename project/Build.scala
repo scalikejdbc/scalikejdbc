@@ -85,7 +85,12 @@ object ScalikeJDBCProjects extends Build {
       exclude[IncompatibleResultTypeProblem]("scalikejdbc.ActiveSession.copy$default$2"),
       exclude[IncompatibleResultTypeProblem]("scalikejdbc.ActiveSession.copy$default$3"),
       exclude[IncompatibleResultTypeProblem]("scalikejdbc.ActiveSession.copy$default$3"),
-      exclude[IncompatibleResultTypeProblem]("scalikejdbc.ActiveSession.<init>$default$3")
+      exclude[IncompatibleResultTypeProblem]("scalikejdbc.ActiveSession.<init>$default$3"),
+      // tags for update/execute/batch
+      exclude[MissingMethodProblem]("scalikejdbc.SQLBatch.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLExecution.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLUpdateWithGeneratedKey.this"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLUpdate.this")
     )
   }
 
