@@ -103,7 +103,8 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
       connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
       validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery),
-      connectionPoolFactoryName = configMap.get("poolFactoryName").getOrElse(default.connectionPoolFactoryName)
+      connectionPoolFactoryName = configMap.get("poolFactoryName").getOrElse(default.connectionPoolFactoryName),
+      driverName = configMap.get("driver").orNull[String]
     )
   }
 

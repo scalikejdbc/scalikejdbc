@@ -148,17 +148,17 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     describe("#readConnectionPoolSettings") {
 
       it("should read configuration and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one", "commons-dbcp")
+        val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one", "commons-dbcp", "org.h2.Driver")
         TypesafeConfigReaderWithEnv("settings").readConnectionPoolSettings() should be(expected)
       }
 
       it("should read configuration for foo db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo")
+        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver")
         TypesafeConfigReader.readConnectionPoolSettings('foo) should be(expected)
       }
 
       it("should read configuration for bar db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar")
+        val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar", null, "org.h2.Driver")
         TypesafeConfigReader.readConnectionPoolSettings('bar) should be(expected)
       }
 
