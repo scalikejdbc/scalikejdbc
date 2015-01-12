@@ -23,5 +23,6 @@ case class ConnectionPoolSettings(
   maxSize: Int = 8,
   connectionTimeoutMillis: Long = 5000L,
   validationQuery: String = null,
-  connectionPoolFactoryName: String = null)
+  connectionPoolFactoryName: String = null,
+  driverName: String = null)
 
