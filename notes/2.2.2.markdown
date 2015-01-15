@@ -1,0 +1,18 @@
+ScalikeJDBC 2.2.2 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #332 Using Oracle with updateAndReturnGeneratedKey.apply() by @seratch
+- [core] #348 Add DBConnectionAttributes in DBSession (refs #332) by @seratch
+- [core] #349 Fix #321 tags for update/execute/batch operations by @seratch
+- [core] #347 SQLInterpolation doesn't parse mutable.Set value as in-clause by @ponkotuy
+- [mapper-generator] #339 mapper-generator should avoid creating entity classes with Any/AnyRef fields by @xuwei-k
+- [mapper-generator] #342 mapper-generator's JSR 310 support by @xuwei-k
+- [mapper-generator] #344 quoting JDBC driver name in project/scalikejdbc.properties by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!
+
