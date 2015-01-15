@@ -13,6 +13,11 @@ addons:
 
 sudo: false
 
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+
 before_script:
   - rm project/sbt-idea.sbt
   - rm project/sbt-pgp.sbt
@@ -24,6 +29,8 @@ before_script:
 
 script:
   - ./travis.sh
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
 env:
   matrix:
