@@ -2,10 +2,10 @@
 
 ### Versioning Policy
 
-"{major}.{miner}.{fix}"
+"{major}.{minor}.{fix}"
 
 - major: kept for supported Scala version compatibily, version 1 must support Scala 2.9 & 2.10, version 2 will support only Scala 2.10 & Scala 2.11 and ???
-- miner: kept for functionality and APIs compatibility, same version must provide same functionality and APIs
+- minor: kept for functionality and APIs compatibility, same version must provide same functionality and APIs
 - fix: to release some improvements, bug fixes and new features
 
 ### Coding Rule for project members
@@ -55,7 +55,7 @@ credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.or
 
 ```scala
 // Use latest version
-addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.1")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 ```
 
 #### Operations
