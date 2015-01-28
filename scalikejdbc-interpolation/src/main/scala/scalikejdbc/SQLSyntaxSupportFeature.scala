@@ -534,6 +534,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       val name = toAliasName(c.value, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+
+    private[this] var fields: Map[String, SQLSyntax] = Map.empty
+
+    override def field(name: String): SQLSyntax = fields.getOrElse(name, {
+      val syntax = super.field(name)
+      synchronized(fields = fields + (name -> syntax))
+      syntax
+    })
   }
 
   // subquery syntax providers
