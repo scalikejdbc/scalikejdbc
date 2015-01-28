@@ -360,6 +360,22 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           }.map(Order(o)).list.apply()
           inClauseResults.map(_.id) should equal(List(11, 12))
         }
+        {
+          val inClauseResults = withSQL {
+            select.from(Order as o)
+              .where.in(o.id, select(o.id).from(Order as o).where.notBetween(o.id, 14, 16))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          inClauseResults.map(_.id) should equal(List(11, 12, 13, 21, 22, 23, 24, 25, 26))
+        }
+        {
+          val inClauseResults = withSQL {
+            select.from(Order as o)
+              .where.notIn(o.id, select(o.id).from(Order as o).where.notBetween(o.id, 13, 30))
+              .orderBy(o.id)
+          }.map(Order(o)).list.apply()
+          inClauseResults.map(_.id) should equal(List(13, 14, 15, 21, 22, 23, 24, 25, 26))
+        }
 
         {
           val inClauseResults = withSQL {
@@ -551,6 +567,12 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         }.map(_.int(1)).list.apply()
 
         betweenResults should equal(List(13, 14, 15, 21, 22))
+
+        val notBetweenResults = withSQL {
+          select(o.result.id).from(Order as o).where.notBetween(o.id, 13, 22)
+        }.map(_.int(1)).list.apply()
+
+        notBetweenResults should equal(List(11, 12, 23, 24, 25, 26))
 
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
