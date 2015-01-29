@@ -12,6 +12,7 @@
 - Compatibility always must be kept as far as possible 
 - scalariform must be applied to all Scala source code
 - Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
+- ScalikeJDBC build checks binary compatibility by using [MiMa](https://github.com/typesafehub/migration-manager/wiki/Sbt-plugin). Breaking source code compatibility of existing APIs are not allowed. Adding new methods, fields or any other things are allowed. If you have binary imcompatible changes, please explicitly add exclusions to mimaProblemFilters in `project/Build.scala`.
 
 #### Branches
 
