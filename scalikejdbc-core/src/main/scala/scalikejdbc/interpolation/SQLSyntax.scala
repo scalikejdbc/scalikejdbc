@@ -80,6 +80,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def isNull(column: SQLSyntax) = sqls"${this} ${column} is null"
   def isNotNull(column: SQLSyntax) = sqls"${this} ${column} is not null"
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
+  def notBetween(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} not between ${a} and ${b}"
 
   def in(column: SQLSyntax, values: Seq[Any]) = {
     if (values.isEmpty) {
@@ -264,6 +265,7 @@ object SQLSyntax {
   def isNull(column: SQLSyntax) = sqls"".isNull(column)
   def isNotNull(column: SQLSyntax) = sqls"".isNotNull(column)
   def between(column: SQLSyntax, a: Any, b: Any) = sqls"".between(column, a, b)
+  def notBetween(column: SQLSyntax, a: Any, b: Any) = sqls"".notBetween(column, a, b)
 
   def in(column: SQLSyntax, values: Seq[Any]) = sqls"".in(column, values)
   def notIn(column: SQLSyntax, values: Seq[Any]) = sqls"".notIn(column, values)
