@@ -1,0 +1,13 @@
+ScalikeJDBC 2.2.3 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #353 Add notBetween DSL by @kobtea
+- [core] #354 Performance improvement for BasicResultNameSQLSyntaxProvider by @mosche 
+
+Enjoy writing mostly type-safe SQL and get things done!
+
