@@ -535,13 +535,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }.getOrElse(throw notFoundInColumns(tableAliasName, name))
 
-    private[this] var fields: Map[String, SQLSyntax] = Map.empty
+    private[this] val cachedFields = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
 
-    override def field(name: String): SQLSyntax = fields.getOrElse(name, {
-      val syntax = super.field(name)
-      synchronized(fields = fields + (name -> syntax))
-      syntax
-    })
+    override def field(name: String): SQLSyntax = cachedFields.getOrElseUpdate(name, super.field(name))
   }
 
   // subquery syntax providers
