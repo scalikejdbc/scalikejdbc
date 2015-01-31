@@ -860,5 +860,18 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     SQLSyntaxSupport.clearAllLoadedColumns()
   }
 
+  it should "provide fast dynamic result names" in {
+    val resultName = User.syntax("u").resultName
+
+    val start = System.currentTimeMillis()
+    (1 to 10000) foreach { _ =>
+      resultName.id.value shouldBe "I_Z_U"
+      resultName.firstName.value shouldBe "FN_Z_U"
+      resultName.groupId.value shouldBe "GI_Z_U"
+    }
+    val end = System.currentTimeMillis()
+    (end - start) should be < 100L
+  }
+
 }
 
