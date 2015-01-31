@@ -13,15 +13,15 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.9"
+  lazy val _slf4jApiVersion = "1.7.10"
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
   lazy val _h2Version = "1.4.+"
-  lazy val _hibernateVersion = "4.3.7.Final"
-  lazy val _scalatestVersion = "2.2.2"
-  lazy val _specs2Version = "2.4.15"
+  lazy val _hibernateVersion = "4.3.8.Final"
+  lazy val _scalatestVersion = "2.2.4"
+  lazy val _specs2Version = "2.4.16"
 
   val mimaProblemFilters = {
     import com.typesafe.tools.mima.core._
