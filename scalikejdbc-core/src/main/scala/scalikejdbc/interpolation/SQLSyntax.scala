@@ -318,8 +318,9 @@ object SQLSyntax {
    * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
    *
    * {{{
-   *   val cond: Option[SQLSyntax] = SQLSyntax.toAndConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
-   *   cond.get.statement // "id = ? or (name = ? or name is null)"
+   *   val (id, name) = (123, "Alice")
+   *   val cond: Option[SQLSyntax] = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), None, Some(sqls"name = ${name} or name is null"))
+   *   cond.get.value // "id = ? and (name = ? or name is null)"
    *   cond.get.parameters // Seq(123, "Alice")
    * }}}
    */
@@ -332,9 +333,11 @@ object SQLSyntax {
    * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'or'.
    *
    * {{{
-   *   val cond: Option[SQLSyntax] = SQLSyntax.toOrConditionOpt(Some(sqls"id = $id"), None, Some(sqls"name = $name"))
-   *   cond.get.statement // "id = ? or (name = ? or name is null)"
+   *   val (id, name) = (123, "Alice")
+   *   val cond: Option[SQLSyntax] = SQLSyntax.toOrConditionOpt(Some(sqls"id = ${id}"), None, Some(sqls"name = ${name} or name is null"))
+   *   cond.get.value // "id = ? or (name = ? or name is null)"
    *   cond.get.parameters // Seq(123, "Alice")
+   * }}}
    */
   def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
     val cs: Seq[SQLSyntax] = conditions.flatten
