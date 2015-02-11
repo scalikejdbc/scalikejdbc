@@ -28,7 +28,7 @@ before_script:
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
 
 script:
-  - ./travis.sh
+  - travis_retry ./travis.sh
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
   - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
