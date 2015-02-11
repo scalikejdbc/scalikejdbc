@@ -140,6 +140,7 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
     (stringLiteral | charLiteral | floatingPointNumber) ^^ (_ => "")
   }
 
-  private def token = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`]+".r ^^ (_ => "")
+  // square brackets are allowed in T-SQL
+  private def token = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]]+".r ^^ (_ => "")
 
 }

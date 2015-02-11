@@ -195,4 +195,12 @@ users"""
     SQLTemplateParser.trimComments(sql) should equal("select * from users")
   }
 
+  // https://groups.google.com/forum/#!topic/scalikejdbc-users-group/LQ11kXxeXgg
+  it should "support square brackets for T-SQL" in {
+    val sql = "select [name], [type] from [user] where [name] = {name}"
+    SQLTemplateParser.extractAllParameters(sql).size should equal(1)
+    val expected = "select [name], [type] from [user] where [name] = ?"
+    SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
+  }
+
 }
