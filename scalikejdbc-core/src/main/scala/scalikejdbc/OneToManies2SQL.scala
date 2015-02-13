@@ -82,7 +82,6 @@ class OneToManies2SQLToList[A, B1, B2, E <: WithExtractor, Z](
   override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))(Output.list)
     with SQLToList[Z, E]
-    with OutputDecisions[Z, E]
     with OneToManies2Extractor[A, B1, B2, E, Z] {
 
   import GeneralizedTypeConstraintsForWithExtractor._

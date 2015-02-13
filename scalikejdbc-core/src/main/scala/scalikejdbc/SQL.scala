@@ -65,32 +65,9 @@ object SQL {
     val single, first, list, traversable = Value
   }
 
-  def apply[A](sql: String): SQL[A, NoExtractor] = createSQL(sql, Seq.empty)(noExtractor[A](
+  def apply[A](sql: String): SQL[A, NoExtractor] = new SQLToTraversableImpl[A, NoExtractor](sql, Seq.empty)(noExtractor[A](
     "If you see this message, it's a ScalikeJDBC's bug. Please report us."
-  ))()
-
-}
-
-/**
- * Simple [[scalikejdbc.SQL]] instance factory.
- */
-private[scalikejdbc] object createSQL {
-
-  /**
-   * Provides a [[scalikejdbc.SQL]] instance.
-   * @param sql SQL template
-   * @param parameters   parameters
-   * @param f extractor function
-   * @param output output type
-   * @tparam A return type
-   * @return SQL instance
-   */
-  def apply[A, E <: WithExtractor](
-    sql: String, parameters: Seq[Any])(f: WrappedResultSet => A)(output: Output.Value = Output.traversable): SQL[A, E] = output match {
-    case Output.single | Output.first => new SQLToOptionImpl[A, E](sql, parameters)(f)(output)
-    case Output.list => new SQLToListImpl[A, E](sql, parameters)(f)(output)
-    case Output.traversable => new SQLToTraversableImpl[A, E](sql, parameters)(f)(output)
-  }
+  ))(Output.traversable)
 
 }
 
@@ -216,6 +193,12 @@ abstract class SQL[A, E <: WithExtractor](
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
 
+  protected def withParameters(params: Seq[Any]): SQL[A, E] = ???
+
+  protected def withStatementAndParameters(state: String, params: Seq[Any]): SQL[A, E] = ???
+
+  protected def withExtractor[B](f: WrappedResultSet => B): SQL[B, HasExtractor] = ???
+
   /**
    * Set fetchSize for this query.
    * @param fetchSize fetch size
@@ -260,8 +243,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def bind(parameters: Any*): SQL[A, E] = {
-    createSQL[A, E](statement, parameters)(f)(output)
-      .fetchSize(fetchSize).tags(tags: _*)
+    withParameters(parameters).fetchSize(fetchSize).tags(tags: _*)
   }
 
   /**
@@ -318,17 +300,17 @@ abstract class SQL[A, E <: WithExtractor](
    * @param z initial value
    * @param op operation
    */
-  def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = session match {
-    case AutoSession =>
-      DB.autoCommit(_.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op))
-    case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op))
-    case ReadOnlyAutoSession =>
-      DB.readOnly(_.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op))
-    case _ =>
-      session.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op)
+  def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
+    val f: DBSession => A = _.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
   }
 
   /**
@@ -337,8 +319,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @tparam A return type
    * @return SQL instance
    */
-  def map[A](f: (WrappedResultSet => A)): SQL[A, HasExtractor] = {
-    createSQL[A, HasExtractor](statement, parameters)(f)(output).fetchSize(fetchSize).tags(tags: _*)
+  def map[A](f: WrappedResultSet => A): SQL[A, HasExtractor] = {
+    withExtractor[A](f).fetchSize(fetchSize).tags(tags: _*)
   }
 
   /**
@@ -396,8 +378,8 @@ abstract class SQL[A, E <: WithExtractor](
    * Same as #collection
    * @return SQL instance
    */
-  def toCollection[C[_]](implicit cbf: CanBuildFrom[Nothing, A, C[A]]): SQLToCollection[A, E, C] = {
-    new SQLToCollectionImpl[A, E, C](statement, parameters)(extractor)(Output.traversable)
+  def toCollection: SQLToCollection[A, E] = {
+    new SQLToCollectionImpl[A, E](statement, parameters)(extractor)(Output.traversable)
       .fetchSize(fetchSize).tags(tags: _*)
   }
 
@@ -405,7 +387,7 @@ abstract class SQL[A, E <: WithExtractor](
    * Set execution type as collection.
    * @return SQL instance
    */
-  def collection[C[_]](implicit cbf: CanBuildFrom[Nothing, A, C[A]]): SQLToCollection[A, E, C] = toCollection
+  def collection: SQLToCollection[A, E] = toCollection
 
   /**
    * Same as #traversable.
@@ -624,8 +606,21 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
   override val statement: String, override val parameters: Seq[Any])(
     override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A, E](statement, parameters)(extractor)(output)
-    with OutputDecisions[A, E]
-    with SQLToTraversable[A, E]
+    with SQLToTraversable[A, E] {
+
+  override protected def withParameters(params: Seq[Any]): SQLToTraversable[A, E] = {
+    new SQLToTraversableImpl[A, E](statement, params)(extractor)(output)
+  }
+
+  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToTraversable[A, E] = {
+    new SQLToTraversableImpl[A, E](state, params)(extractor)(output)
+  }
+
+  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToTraversable[B, HasExtractor] = {
+    new SQLToTraversableImpl[B, HasExtractor](statement, parameters)(f)(output)
+  }
+
+}
 
 /**
  * SQL to Collection
@@ -633,12 +628,11 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
  * @tparam E extractor settings
  * @tparam C[_] collection type
  */
-trait SQLToCollection[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[A] {
+trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
-  protected implicit def cbf: CanBuildFrom[Nothing, A, C[A]]
   val statement: String
   val parameters: Seq[Any]
-  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
+  def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
     val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).collection[A, C](statement, parameters: _*)(extractor)
     // format: OFF
     session match {
@@ -652,21 +646,47 @@ trait SQLToCollection[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extrac
 
 }
 
-class SQLToCollectionImpl[A, E <: WithExtractor, C[_]](
+class SQLToCollectionImpl[A, E <: WithExtractor](
   override val statement: String, override val parameters: Seq[Any])(
-    override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)(
-      implicit protected val cbf: CanBuildFrom[Nothing, A, C[A]])
+    override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A, E](statement, parameters)(extractor)(output)
-    with OutputDecisions[A, E]
-    with SQLToCollection[A, E, C]
+    with SQLToCollection[A, E] {
+
+  override protected def withParameters(params: Seq[Any]): SQLToCollection[A, E] = {
+    new SQLToCollectionImpl[A, E](statement, params)(extractor)(output)
+  }
+
+  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToCollection[A, E] = {
+    new SQLToCollectionImpl[A, E](state, params)(extractor)(output)
+  }
+
+  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToCollection[B, HasExtractor] = {
+    new SQLToCollectionImpl[B, HasExtractor](statement, parameters)(f)(output)
+  }
+
+}
 
 /**
  * SQL to List
  * @tparam A return type
  * @tparam E extractor settings
  */
-trait SQLToList[A, E <: WithExtractor] extends SQLToCollection[A, E, List] {
-  protected implicit val cbf: CanBuildFrom[Nothing, A, List[A]] = List.canBuildFrom[A]
+trait SQLToList[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
+  import GeneralizedTypeConstraintsForWithExtractor._
+  val statement: String
+  val parameters: Seq[Any]
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = {
+    val f: DBSession => List[A] = _.fetchSize(fetchSize).tags(tags: _*).list(statement, parameters: _*)(extractor)
+    // format: OFF
+    session match {
+      case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
+      case NamedAutoSession(name)            => NamedDB(name).readOnly(f)
+      case ReadOnlyNamedAutoSession(name)    => NamedDB(name).readOnly(f)
+      case _                                 => f(session)
+    }
+    // format: ON
+  }
+
 }
 
 /**
@@ -681,8 +701,21 @@ class SQLToListImpl[A, E <: WithExtractor](
   override val statement: String, override val parameters: Seq[Any])(
     override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)
     extends SQL[A, E](statement, parameters)(extractor)(output)
-    with OutputDecisions[A, E]
-    with SQLToList[A, E]
+    with SQLToList[A, E] {
+
+  override protected def withParameters(params: Seq[Any]): SQLToList[A, E] = {
+    new SQLToListImpl[A, E](statement, params)(extractor)(output)
+  }
+
+  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToList[A, E] = {
+    new SQLToListImpl[A, E](state, params)(extractor)(output)
+  }
+
+  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToList[B, HasExtractor] = {
+    new SQLToListImpl[B, HasExtractor](statement, parameters)(f)(output)
+  }
+
+}
 
 /**
  * SQL to Option
@@ -733,15 +766,19 @@ class SQLToOptionImpl[A, E <: WithExtractor](
   override val statement: String, override val parameters: Seq[Any])(
     override val extractor: WrappedResultSet => A)(override val output: Output.Value = Output.single)
     extends SQL[A, E](statement, parameters)(extractor)(output)
-    with OutputDecisions[A, E]
-    with SQLToOption[A, E]
+    with SQLToOption[A, E] {
 
-/**
- * Provides converters for default implementation.
- *
- * @tparam A return type
- * @tparam E extractor constraint
- */
-private[scalikejdbc] trait OutputDecisions[A, E <: WithExtractor] extends SQL[A, E] {
+  override protected def withParameters(params: Seq[Any]): SQLToOption[A, E] = {
+    new SQLToOptionImpl[A, E](statement, params)(extractor)(output)
+  }
+
+  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToOption[A, E] = {
+    new SQLToOptionImpl[A, E](state, params)(extractor)(output)
+  }
+
+  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToOption[B, HasExtractor] = {
+    new SQLToOptionImpl[B, HasExtractor](statement, parameters)(f)(output)
+  }
 
 }
+
