@@ -17,6 +17,8 @@ package scalikejdbc
 
 import scalikejdbc.SQL.Output
 import java.sql.PreparedStatement
+import scala.language.higherKinds
+import scala.collection.generic.CanBuildFrom
 
 /**
  * SQL abstraction's companion object.
@@ -209,7 +211,7 @@ abstract class SQL[A, E <: WithExtractor](
   override def extractor: (WrappedResultSet) => A = f
 
   private[this] var _fetchSize: Option[Int] = None
-  private[this] val _tags: collection.mutable.ListBuffer[String] = new collection.mutable.ListBuffer[String]()
+  private[this] val _tags: scala.collection.mutable.ListBuffer[String] = new scala.collection.mutable.ListBuffer[String]()
 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
@@ -219,12 +221,12 @@ abstract class SQL[A, E <: WithExtractor](
    * @param fetchSize fetch size
    * @return this
    */
-  def fetchSize(fetchSize: Int): SQL[A, E] = {
+  def fetchSize(fetchSize: Int): this.type = {
     this._fetchSize = Some(fetchSize)
     this
   }
 
-  def fetchSize(fetchSize: Option[Int]): SQL[A, E] = {
+  def fetchSize(fetchSize: Option[Int]): this.type = {
     this._fetchSize = fetchSize
     this
   }
@@ -234,7 +236,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param tags tags
    * @return this
    */
-  def tags(tags: String*): SQL[A, E] = {
+  def tags(tags: String*): this.type = {
     this._tags ++= tags
     this
   }
@@ -349,49 +351,76 @@ abstract class SQL[A, E <: WithExtractor](
    * Same as #single.
    * @return SQL instance
    */
-  def toOption(): SQLToOption[A, E]
+  def toOption(): SQLToOption[A, E] = {
+    new SQLToOptionImpl[A, E](statement, parameters)(extractor)(Output.single)
+      .fetchSize(fetchSize).tags(tags: _*)
+  }
 
   /**
    * Set execution type as single.
    * @return SQL instance
    */
-  def single(): SQLToOption[A, E]
+  def single(): SQLToOption[A, E] = toOption()
 
   /**
    * Same as #first.
    * @return SQL instance
    */
-  def headOption(): SQLToOption[A, E]
+  def headOption(): SQLToOption[A, E] = {
+    new SQLToOptionImpl[A, E](statement, parameters)(extractor)(Output.first)
+      .fetchSize(fetchSize).tags(tags: _*)
+  }
 
   /**
    * Set execution type as first.
    * @return SQL instance
    */
-  def first(): SQLToOption[A, E]
+  def first(): SQLToOption[A, E] = headOption()
 
   /**
    * Same as #list
    * @return SQL instance
    */
-  def toList(): SQLToList[A, E]
+  def toList(): SQLToList[A, E] = {
+    new SQLToListImpl[A, E](statement, parameters)(extractor)(Output.list)
+      .fetchSize(fetchSize).tags(tags: _*)
+  }
 
   /**
    * Set execution type as list.
    * @return SQL instance
    */
-  def list(): SQLToList[A, E]
+  def list(): SQLToList[A, E] = toList()
+
+  /**
+   * Same as #collection
+   * @return SQL instance
+   */
+  def toCollection[C[_]](implicit cbf: CanBuildFrom[Nothing, A, C[A]]): SQLToCollection[A, E, C] = {
+    new SQLToCollectionImpl[A, E, C](statement, parameters)(extractor)(Output.traversable)
+      .fetchSize(fetchSize).tags(tags: _*)
+  }
+
+  /**
+   * Set execution type as collection.
+   * @return SQL instance
+   */
+  def collection[C[_]](implicit cbf: CanBuildFrom[Nothing, A, C[A]]): SQLToCollection[A, E, C] = toCollection
 
   /**
    * Same as #traversable.
    * @return SQL instance
    */
-  def toTraversable(): SQLToTraversable[A, E]
+  def toTraversable(): SQLToTraversable[A, E] = {
+    new SQLToTraversableImpl[A, E](statement, parameters)(extractor)(Output.traversable)
+      .fetchSize(fetchSize).tags(tags: _*)
+  }
 
   /**
    * Set execution type as traversable.
    * @return SQL instance
    */
-  def traversable(): SQLToTraversable[A, E]
+  def traversable(): SQLToTraversable[A, E] = toTraversable()
 
   /**
    * Set execution type as execute
@@ -599,24 +628,45 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
     with SQLToTraversable[A, E]
 
 /**
+ * SQL to Collection
+ * @tparam A return type
+ * @tparam E extractor settings
+ * @tparam C[_] collection type
+ */
+trait SQLToCollection[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[A] {
+  import GeneralizedTypeConstraintsForWithExtractor._
+  protected implicit def cbf: CanBuildFrom[Nothing, A, C[A]]
+  val statement: String
+  val parameters: Seq[Any]
+  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
+    val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).collection[A, C](statement, parameters: _*)(extractor)
+    // format: OFF
+    session match {
+      case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
+      case NamedAutoSession(name)            => NamedDB(name).readOnly(f)
+      case ReadOnlyNamedAutoSession(name)    => NamedDB(name).readOnly(f)
+      case _                                 => f(session)
+    }
+    // format: ON
+  }
+
+}
+
+class SQLToCollectionImpl[A, E <: WithExtractor, C[_]](
+  override val statement: String, override val parameters: Seq[Any])(
+    override val extractor: WrappedResultSet => A)(output: Output.Value = Output.traversable)(
+      implicit protected val cbf: CanBuildFrom[Nothing, A, C[A]])
+    extends SQL[A, E](statement, parameters)(extractor)(output)
+    with OutputDecisions[A, E]
+    with SQLToCollection[A, E, C]
+
+/**
  * SQL to List
  * @tparam A return type
  * @tparam E extractor settings
  */
-trait SQLToList[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
-  import GeneralizedTypeConstraintsForWithExtractor._
-  val statement: String
-  val parameters: Seq[Any]
-  def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[A] = session match {
-    case AutoSession | ReadOnlyAutoSession =>
-      DB.readOnly(_.fetchSize(fetchSize).tags(tags: _*).list(statement, parameters: _*)(extractor))
-    case NamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.fetchSize(fetchSize).tags(tags: _*).list(statement, parameters: _*)(extractor))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.fetchSize(fetchSize).tags(tags: _*).list(statement, parameters: _*)(extractor))
-    case _ =>
-      session.fetchSize(fetchSize).tags(tags: _*).list(statement, parameters: _*)(extractor)
-  }
+trait SQLToList[A, E <: WithExtractor] extends SQLToCollection[A, E, List] {
+  protected implicit val cbf: CanBuildFrom[Nothing, A, List[A]] = List.canBuildFrom[A]
 }
 
 /**
@@ -693,35 +743,5 @@ class SQLToOptionImpl[A, E <: WithExtractor](
  * @tparam E extractor constraint
  */
 private[scalikejdbc] trait OutputDecisions[A, E <: WithExtractor] extends SQL[A, E] {
-
-  override def toOption(): SQLToOptionImpl[A, E] = {
-    createSQL(statement, parameters)(extractor)(Output.single)
-      .fetchSize(fetchSize).tags(tags: _*)
-      .asInstanceOf[SQLToOptionImpl[A, E]]
-  }
-  override def single(): SQLToOptionImpl[A, E] = toOption()
-
-  override def headOption(): SQLToOptionImpl[A, E] = {
-    createSQL(statement, parameters)(extractor)(Output.first)
-      .fetchSize(fetchSize).tags(tags: _*)
-      .asInstanceOf[SQLToOptionImpl[A, E]]
-  }
-  override def first(): SQLToOptionImpl[A, E] = headOption()
-
-  override def toList(): SQLToListImpl[A, E] = {
-    createSQL(statement, parameters)(extractor)(Output.list)
-      .fetchSize(fetchSize).tags(tags: _*)
-      .asInstanceOf[SQLToListImpl[A, E]]
-  }
-
-  override def list(): SQLToListImpl[A, E] = toList()
-
-  override def toTraversable(): SQLToTraversableImpl[A, E] = {
-    createSQL[A, E](statement, parameters)(extractor)(Output.traversable)
-      .fetchSize(fetchSize).tags(tags: _*)
-      .asInstanceOf[SQLToTraversableImpl[A, E]]
-  }
-
-  override def traversable(): SQLToTraversableImpl[A, E] = toTraversable()
 
 }
