@@ -136,6 +136,57 @@ class OneToManies6SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
           }
 
           {
+            val groups: Vector[Group] = SQL(s"""
+              select g.id as g_id, g.owner_id as g_owner_id,
+              o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id,
+              e6.id as e6_id
+              from groups_${suffix} g
+              inner join owners_${suffix} o on g.owner_id = o.id
+              left join events_${suffix} e on g.id = e.group_id
+              left join news_${suffix} n on g.id = n.group_id
+              left join members_${suffix} m on g.id = m.group_id
+              left join sponsors_${suffix} s on g.id = s.group_id
+              left join entity6_${suffix} e6 on g.id = e6.group_id
+              order by g.id, n.id, e.id desc, m.id desc""")
+              .one(rs => GroupEntity(rs.int("g_id"), rs.int("g_owner_id")))
+              .toManies(
+                rs => rs.intOpt("o_id").map(id => new Owner(id)),
+                rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
+                rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
+                rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))),
+                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))))
+              .map { (g, os, es, ns, ms, ss, e6) =>
+                Group(id = g.id, ownerId = g.ownerId, owner = os.head,
+                  events = es, news = ns, members = ms, sponsors = ss, entity6 = e6)
+              }.collection[Vector]()
+
+            groups.size should equal(4)
+            groups(0).id should equal(1)
+
+            groups(0).owner.id should equal(2)
+
+            groups(0).news.size should equal(3)
+            groups(0).news(0).id should equal(2)
+            groups(0).news(1).id should equal(7)
+            groups(0).news(2).id should equal(8)
+
+            groups(0).events.size should equal(2)
+            groups(0).events(0).id should equal(3)
+            groups(0).events(1).id should equal(2)
+
+            groups(0).members.size should equal(3)
+            groups(0).members(0).id should equal(5)
+            groups(0).members(1).id should equal(3)
+            groups(0).members(2).id should equal(2)
+
+            groups(0).sponsors.size should equal(1)
+            groups(0).sponsors(0).id should equal(1)
+
+            groups(0).entity6.size should equal(2)
+          }
+
+          {
             val group: Group = SQL(s"""
               select g.id as g_id, g.owner_id as g_owner_id,
               o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id,

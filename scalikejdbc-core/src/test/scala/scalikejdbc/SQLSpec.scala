@@ -75,6 +75,18 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
     }
   }
 
+  it should "execute collection in auto commit mode" in {
+    val tableName = tableNamePrefix + "_listInAutoCommit"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        implicit val session = db.autoCommitSession()
+        val result = SQL("select id from " + tableName).map(rs => rs.string("id")).toCollection[Vector]()
+        result.size should equal(2)
+      }
+    }
+  }
+
   it should "execute fold in auto commit mode" in {
     val tableName = tableNamePrefix + "_listInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
@@ -167,6 +179,23 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
         val result = SQL("select id from " + tableName + "").map {
           rs => rs.string("id")
         }.toList().apply()
+        result.size should equal(2)
+        db.rollbackIfActive()
+      }
+    }
+  }
+
+  it should "execute collection in within tx mode" in {
+    val tableName = tableNamePrefix + "_listInWithinTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      using(DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        implicit val session = db.withinTxSession()
+        TestUtils.initializeEmpRecords(session, tableName)
+        val result = SQL("select id from " + tableName + "").map {
+          rs => rs.string("id")
+        }.toCollection[Vector]()
         result.size should equal(2)
         db.rollbackIfActive()
       }
