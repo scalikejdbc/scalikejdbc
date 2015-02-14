@@ -174,6 +174,14 @@ object ScalikeJDBCProjects extends Build {
           sys.error("Working directory is dirty!\n" + diff)
         }
       },
+      (sourceGenerators in Compile) += task[Seq[File]]{
+        val dir = (sourceManaged in Compile).value
+        (3 to 9).map{ n =>
+          val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
+          IO.write(file, GenerateOneToManies(n))
+          file
+        }
+      },
       libraryDependencies <++= (scalaVersion) { scalaVersion =>
         Seq(
           // scope: compile
