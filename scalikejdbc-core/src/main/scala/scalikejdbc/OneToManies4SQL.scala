@@ -16,7 +16,7 @@
 package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
-import scalikejdbc.SQL.Output
+import SQLTypeAliases._
 
 private[scalikejdbc] trait OneToManies4Extractor[A, B1, B2, B3, B4, E <: WithExtractor, Z]
     extends SQL[Z, E]
@@ -65,12 +65,12 @@ private[scalikejdbc] trait OneToManies4Extractor[A, B1, B2, B3, B4, E <: WithExt
 
 class OneToManies4SQL[A, B1, B2, B3, B4, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(output: Output.Value = Output.traversable)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
-    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1]...)) is specified, use #map((A,B) =>Z) instead."))(output)
+  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1]...)) is specified, use #map((A,B) =>Z) instead."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
   def map(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z): OneToManies4SQL[A, B1, B2, B3, B4, HasExtractor, Z] = {
-    new OneToManies4SQL(statement, parameters)(output)(one)(to1, to2, to3, to4)(extractor)
+    new OneToManies4SQL(statement, parameters)(one)(to1, to2, to3, to4)(extractor)
   }
   override def toTraversable(): OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E, Z] = {
     new OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)
@@ -79,12 +79,14 @@ class OneToManies4SQL[A, B1, B2, B3, B4, E <: WithExtractor, Z](
     new OneToManies4SQLToList[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)
   }
   override def toOption(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = {
-    new OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)
+    new OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)(true)
   }
 
   override def single(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = toOption()
-  override def headOption(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = toOption()
-  override def first(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = toOption()
+  override def headOption(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = {
+    new OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)(false)
+  }
+  override def first(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = headOption()
   override def list(): OneToManies4SQLToList[A, B1, B2, B3, B4, E, Z] = toList()
   override def traversable(): OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E, Z] = toTraversable()
 }
@@ -92,7 +94,7 @@ class OneToManies4SQL[A, B1, B2, B3, B4, E <: WithExtractor, Z](
 class OneToManies4SQLToList[A, B1, B2, B3, B4, E <: WithExtractor, Z](
   override val statement: String,
   override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
-    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))(Output.list)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToList[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToManies4Extractor[A, B1, B2, B3, B4, E, Z] {
@@ -114,7 +116,7 @@ class OneToManies4SQLToList[A, B1, B2, B3, B4, E <: WithExtractor, Z](
 class OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E <: WithExtractor, Z](
   override val statement: String,
   override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
-    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))(Output.traversable)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToTraversable[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToManies4Extractor[A, B1, B2, B3, B4, E, Z] {
@@ -135,13 +137,11 @@ class OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E <: WithExtractor, Z](
 
 class OneToManies4SQLToOption[A, B1, B2, B3, B4, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
-    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))(Output.single)
+  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)(protected val isSingle: Boolean = true)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToOption[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
     with OneToManies4Extractor[A, B1, B2, B3, B4, E, Z] {
-
-  val output = Output.single
 
   import GeneralizedTypeConstraintsForWithExtractor._
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[Z] = {
