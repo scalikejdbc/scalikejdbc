@@ -114,6 +114,22 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "execute collection in auto commit mode" in {
+    val tableName = tableNamePrefix + "_listInAutoCommit"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      using(new DB(ConnectionPool.borrow())) {
+        db =>
+          val session = db.autoCommitSession()
+          val result = session.collection[String, Vector]("select id from " + tableName) {
+            rs => rs.string("id")
+          }
+          result.size should equal(2)
+      }
+    }
+  }
+
   it should "execute update in auto commit mode with filters" in {
     val tableName = tableNamePrefix + "_updateInAutoCommit"
     ultimately(TestUtils.deleteTable(tableName)) {
@@ -197,6 +213,28 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
         try {
           TestUtils.initializeEmpRecords(session, tableName)
           val result = session.list("select id from " + tableName + "") {
+            rs => rs.string("id")
+          }
+          result.size should equal(2)
+          db.rollbackIfActive()
+        } finally {
+          session.close()
+        }
+      }
+    }
+  }
+
+  it should "execute collection in within tx mode" in {
+    val tableName = tableNamePrefix + "_listInWithinTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      using(new DB(ConnectionPool.borrow())) { db =>
+        db.begin()
+        val session = db.withinTxSession()
+        try {
+          TestUtils.initializeEmpRecords(session, tableName)
+          val result = session.collection[String, Vector]("select id from " + tableName + "") {
             rs => rs.string("id")
           }
           result.size should equal(2)
