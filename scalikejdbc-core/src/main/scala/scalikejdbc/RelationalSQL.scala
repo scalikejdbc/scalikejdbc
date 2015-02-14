@@ -17,7 +17,6 @@ package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
 import scala.language.higherKinds
-import SQLTypeAliases._
 
 //------------------------------------
 // One-to-one / One-to-many
@@ -32,9 +31,9 @@ private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def executeQuery[R[Z]](session: DBSession, op: DBSession => R[Z]): R[Z] = try {
     session match {
-      case AutoSession | ReadOnlyAutoSession => DB readOnly (s => op(s))
-      case NamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
-      case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly (s => op(s))
+      case AutoSession | ReadOnlyAutoSession => DB readOnly op
+      case NamedAutoSession(name) => NamedDB(name) readOnly op
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name) readOnly op
       case _ => op(session)
     }
   } catch { case e: Exception => OneToXSQL.handleException(e) }
@@ -57,6 +56,8 @@ trait AllOutputDecisionsUnsupported[Z, E <: scalikejdbc.WithExtractor] extends S
   override def list(): SQLToList[Z, E] = throw new UnsupportedOperationException(message)
   override def toTraversable(): SQLToTraversable[Z, E] = throw new UnsupportedOperationException(message)
   override def traversable(): SQLToTraversable[Z, E] = throw new UnsupportedOperationException(message)
+  override def toCollection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
+  override def collection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
 }
 
 /**

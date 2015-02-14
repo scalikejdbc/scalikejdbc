@@ -16,7 +16,8 @@
 package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
-import SQLTypeAliases._
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
 
 private[scalikejdbc] trait OneToManies4Extractor[A, B1, B2, B3, B4, E <: WithExtractor, Z]
     extends SQL[Z, E]
@@ -81,14 +82,18 @@ class OneToManies4SQL[A, B1, B2, B3, B4, E <: WithExtractor, Z](
   override def toOption(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = {
     new OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)(true)
   }
-
-  override def single(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = toOption()
   override def headOption(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = {
     new OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)(false)
   }
+  override def toCollection: OneToManies4SQLToCollection[A, B1, B2, B3, B4, E, Z] = {
+    new OneToManies4SQLToCollection[A, B1, B2, B3, B4, E, Z](statement, parameters)(one)(to1, to2, to3, to4)(extractor)
+  }
+
+  override def single(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = toOption()
   override def first(): OneToManies4SQLToOption[A, B1, B2, B3, B4, E, Z] = headOption()
   override def list(): OneToManies4SQLToList[A, B1, B2, B3, B4, E, Z] = toList()
   override def traversable(): OneToManies4SQLToTraversable[A, B1, B2, B3, B4, E, Z] = toTraversable()
+  override def collection: OneToManies4SQLToCollection[A, B1, B2, B3, B4, E, Z] = toCollection
 }
 
 class OneToManies4SQLToList[A, B1, B2, B3, B4, E <: WithExtractor, Z](
@@ -103,6 +108,28 @@ class OneToManies4SQLToList[A, B1, B2, B3, B4, E <: WithExtractor, Z](
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[Z] = {
     executeQuery[List](session, (session: DBSession) => toTraversable(session, statement, parameters, extractor).toList)
+  }
+
+  private[scalikejdbc] def extractOne: WrappedResultSet => A = one
+  private[scalikejdbc] def extractTo1: WrappedResultSet => Option[B1] = to1
+  private[scalikejdbc] def extractTo2: WrappedResultSet => Option[B2] = to2
+  private[scalikejdbc] def extractTo3: WrappedResultSet => Option[B3] = to3
+  private[scalikejdbc] def extractTo4: WrappedResultSet => Option[B4] = to4
+  private[scalikejdbc] def transform: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z = extractor
+}
+
+class OneToManies4SQLToCollection[A, B1, B2, B3, B4, E <: WithExtractor, Z](
+  override val statement: String,
+  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2], to3: WrappedResultSet => Option[B3], to4: WrappedResultSet => Option[B4])(extractor: (A, Seq[B1], Seq[B2], Seq[B3], Seq[B4]) => Z)
+    extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
+    with SQLToCollection[Z, E]
+    with AllOutputDecisionsUnsupported[Z, E]
+    with OneToManies4Extractor[A, B1, B2, B3, B4, E, Z] {
+
+  import GeneralizedTypeConstraintsForWithExtractor._
+
+  override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, Z, C[Z]]): C[Z] = {
+    executeQuery(session, (session: DBSession) => toTraversable(session, statement, parameters, extractor).to[C])
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one

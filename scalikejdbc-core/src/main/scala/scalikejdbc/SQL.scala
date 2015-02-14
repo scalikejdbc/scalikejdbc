@@ -251,17 +251,17 @@ abstract class SQL[A, E <: WithExtractor](
    * Aplly the operation to all elements of result set
    * @param op operation
    */
-  def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
-    case AutoSession =>
-      DB.autoCommit(_.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op))
-    case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op))
-    case ReadOnlyAutoSession =>
-      DB.readOnly(_.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op))
-    case _ =>
-      session.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op)
+  def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
+    val f: DBSession => Unit = _.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
   }
 
   /**
@@ -362,7 +362,7 @@ abstract class SQL[A, E <: WithExtractor](
    * Same as #traversable.
    * @return SQL instance
    */
-  def toTraversable(): SQLToResult[A, E, Traversable] = {
+  def toTraversable(): SQLToTraversable[A, E] = {
     new SQLToTraversableImpl[A, E](statement, parameters)(extractor)
       .fetchSize(fetchSize).tags(tags: _*)
   }
@@ -371,7 +371,7 @@ abstract class SQL[A, E <: WithExtractor](
    * Set execution type as traversable.
    * @return SQL instance
    */
-  def traversable(): SQLToResult[A, E, Traversable] = toTraversable()
+  def traversable(): SQLToTraversable[A, E] = toTraversable()
 
   /**
    * Set execution type as execute
@@ -450,17 +450,17 @@ abstract class SQL[A, E <: WithExtractor](
  */
 class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil) {
 
-  def apply()(implicit session: DBSession): Seq[Int] = session match {
-    case AutoSession =>
-      DB.autoCommit(_.tags(tags: _*).batch(statement, parameters: _*))
-    case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.tags(tags: _*).batch(statement, parameters: _*))
-    case ReadOnlyAutoSession =>
-      DB.readOnly(_.tags(tags: _*).batch(statement, parameters: _*))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.tags(tags: _*).batch(statement, parameters: _*))
-    case _ =>
-      session.tags(tags: _*).batch(statement, parameters: _*)
+  def apply()(implicit session: DBSession): Seq[Int] = {
+    val f: DBSession => Seq[Int] = _.tags(tags: _*).batch(statement, parameters: _*)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
   }
 
 }
@@ -476,17 +476,17 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
     before: (PreparedStatement) => Unit)(
         after: (PreparedStatement) => Unit) {
 
-  def apply()(implicit session: DBSession): Boolean = session match {
-    case AutoSession =>
-      DB.autoCommit(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
-    case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
-    case ReadOnlyAutoSession =>
-      DB.readOnly(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*))
-    case _ =>
-      session.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*)
+  def apply()(implicit session: DBSession): Boolean = {
+    val f: DBSession => Boolean = _.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
   }
 
 }
@@ -524,31 +524,31 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
  */
 class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(key: Any) {
 
-  def apply()(implicit session: DBSession): Long = session match {
-    case AutoSession =>
-      DB.autoCommit(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
-    case NamedAutoSession(name) =>
-      NamedDB(name).autoCommit(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
-    case ReadOnlyAutoSession =>
-      DB.readOnly(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
-    case ReadOnlyNamedAutoSession(name) =>
-      NamedDB(name).readOnly(_.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key))
-    case _ =>
-      session.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
+  def apply()(implicit session: DBSession): Long = {
+    val f: DBSession => Long = _.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
   }
 
 }
 
 trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
-  def result[AA]: (WrappedResultSet => AA) => DBSession => C[AA]
+  def result[AA](f: WrappedResultSet => AA, session: DBSession): C[AA]
   val statement: String
   val parameters: Seq[Any]
   def apply()(
     implicit session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
-    val f: DBSession => C[A] = s => result[A](extractor)(s.fetchSize(fetchSize).tags(tags: _*))
+    val f: DBSession => C[A] = s => result[A](extractor, s.fetchSize(fetchSize).tags(tags: _*))
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
@@ -567,8 +567,8 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
  */
 trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversable] {
 
-  def result[AA]: (WrappedResultSet => AA) => DBSession => Traversable[AA] = {
-    ext => s => s.traversable[AA](statement, parameters: _*)(ext)
+  def result[AA](f: WrappedResultSet => AA, session: DBSession): Traversable[AA] = {
+    session.traversable[AA](statement, parameters: _*)(f)
   }
 
 }
@@ -651,8 +651,8 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
  */
 trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
 
-  def result[AA]: (WrappedResultSet => AA) => DBSession => List[AA] = {
-    ext => s => s.list[AA](statement, parameters: _*)(ext)
+  def result[AA](f: WrappedResultSet => AA, session: DBSession): List[AA] = {
+    session.list[AA](statement, parameters: _*)(f)
   }
 
 }
@@ -693,13 +693,12 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
 
   protected def isSingle: Boolean
 
-  def result[AA]: (WrappedResultSet => AA) => DBSession => Option[AA] = {
-    ext =>
-      s => if (isSingle) {
-        s.single[AA](statement, parameters: _*)(ext)
-      } else {
-        s.first[AA](statement, parameters: _*)(ext)
-      }
+  def result[AA](f: WrappedResultSet => AA, session: DBSession): Option[AA] = {
+    if (isSingle) {
+      session.single[AA](statement, parameters: _*)(f)
+    } else {
+      session.first[AA](statement, parameters: _*)(f)
+    }
   }
 
 }
@@ -730,8 +729,3 @@ class SQLToOptionImpl[A, E <: WithExtractor](
   }
 
 }
-
-object SQLTypeAliases {
-  //  type SQLToTraversable[A, E] = SQLToResult[A, E, Traversable]
-}
-
