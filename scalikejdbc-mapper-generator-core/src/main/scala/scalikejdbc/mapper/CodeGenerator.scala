@@ -29,7 +29,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
   private val packageName = config.packageName
-  private val className = specifiedClassName.getOrElse(toClassName(table))
+  private val className = specifiedClassName.getOrElse(config.tableNameToClassName(table.name))
   private val syntaxName = {
     val name = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
     if (name == "rs") "r" else name
@@ -712,8 +712,6 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       eol +
       objectPart + eol
   }
-
-  private def toClassName(table: Table): String = toCamelCase(table.name)
 
   private def toCamelCase(s: String): String = s.split("_").foldLeft("") {
     (camelCaseString, part) =>

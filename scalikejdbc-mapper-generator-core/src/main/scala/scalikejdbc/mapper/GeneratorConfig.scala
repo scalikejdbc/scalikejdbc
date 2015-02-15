@@ -25,7 +25,21 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   encoding: String = "UTF-8",
   autoConstruct: Boolean = false,
   defaultAutoSession: Boolean = true,
-  dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime)
+  dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
+  tableNameToClassName: String => String = GeneratorConfig.toCamelCase)
+
+object GeneratorConfig {
+  private def toProperCase(s: String): String = {
+    import java.util.Locale.ENGLISH
+    if (s == null || s.trim.size == 0) ""
+    else s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1).toLowerCase(ENGLISH)
+  }
+
+  private val toCamelCase: String => String = _.split("_").foldLeft("") {
+    (camelCaseString, part) =>
+      camelCaseString + toProperCase(part)
+  }
+}
 
 sealed abstract class DateTimeClass(private[scalikejdbc] val name: String) extends Product with Serializable {
   private[scalikejdbc] val simpleName = name.split('.').last

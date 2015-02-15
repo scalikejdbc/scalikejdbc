@@ -29,7 +29,7 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass)
+  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass, tableNameToClassName: String => String)
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -61,7 +61,8 @@ object SbtPlugin extends Plugin {
       defaultAutoSession = getString(props, "generator.defaultAutoSession").map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
       dateTimeClass = getString(props, "generator.dateTimeClass").map {
         name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
-      }.getOrElse(defaultConfig.dateTimeClass)
+      }.getOrElse(defaultConfig.dateTimeClass),
+      defaultConfig.tableNameToClassName
     )
   }
 
@@ -111,7 +112,8 @@ object SbtPlugin extends Plugin {
       encoding = generatorSettings.encoding,
       autoConstruct = generatorSettings.autoConstruct,
       defaultAutoSession = generatorSettings.defaultAutoSession,
-      dateTimeClass = generatorSettings.dateTimeClass
+      dateTimeClass = generatorSettings.dateTimeClass,
+      tableNameToClassName = generatorSettings.tableNameToClassName
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {

@@ -92,7 +92,10 @@ object ScalikeJDBCProjects extends Build {
       exclude[MissingMethodProblem]("scalikejdbc.SQLUpdateWithGeneratedKey.this"),
       exclude[MissingMethodProblem]("scalikejdbc.SQLUpdate.this"),
       // since 2.2.3
-      exclude[MissingMethodProblem]("scalikejdbc.QueryDSLFeature#ConditionSQLBuilder.notBetween")
+      exclude[MissingMethodProblem]("scalikejdbc.QueryDSLFeature#ConditionSQLBuilder.notBetween"),
+      // since 2.2.4
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.GeneratorConfig.toString"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toClassName")
     )
   }
 
