@@ -7,8 +7,6 @@ addSbtPlugin("com.github.seratch" % "xsbt-scalag-plugin" % "0.2.2")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
-
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.6")
 
 libraryDependencies += "org.scala-sbt" % "scripted-plugin" % sbtVersion.value
