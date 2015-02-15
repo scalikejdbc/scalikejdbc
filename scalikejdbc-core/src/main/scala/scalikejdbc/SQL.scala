@@ -295,7 +295,7 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   /**
-   * Aplly the operation to all elements of result set
+   * Apply the operation to all elements of result set
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = session match {
