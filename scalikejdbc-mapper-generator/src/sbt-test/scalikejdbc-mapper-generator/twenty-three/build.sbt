@@ -19,7 +19,7 @@ TaskKey[Unit]("createTestDatabase") := {
   Class.forName(setting.driver)
   ConnectionPool.singleton(setting.url, setting.username, setting.password)
   DB.autoCommit { implicit s =>
-    SQL("create table twenty_three(field1 SERIAL PRIMARY KEY," +
+    SQL("create table if not exists twenty_three(field1 SERIAL PRIMARY KEY," +
       (2 to 23).map("field" + _ + " bigint").mkString(",") + ")" ).execute.apply()
   }
 }
