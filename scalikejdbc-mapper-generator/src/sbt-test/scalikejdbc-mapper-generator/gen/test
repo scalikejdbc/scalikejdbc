@@ -79,3 +79,18 @@ $ delete src/test/scala/ProgrammersTest.scala
 
 > generateCodeForIssue339
 > compile
+
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {c => c.copy(tableNameToClassName = c.tableNameToClassName.compose(_ * 2), template ="interpolation")}
+> scalikejdbcGenAll
+$ exists src/main/scala/app/models/Programmersprogrammers.scala
+$ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala
+
+$ delete src/main/scala/app/models/Programmersprogrammers.scala
+$ delete src/test/scala/app/models/ProgrammersprogrammersSpec.scala
+-$ exists src/main/scala/app/models/Programmersprogrammers.scala
+-$ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala
+
+> scalikejdbcGen programmers
+$ exists src/main/scala/app/models/Programmersprogrammers.scala
+$ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala
