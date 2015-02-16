@@ -20,6 +20,7 @@ package scalikejdbc
  *
  * Notice: Inheritance is not supported.
  *
+ * @example {{{
  *   class Person(val id: Long) extends EntityEquality { override val entityIdentity = id }
  *   class Member(override val id: Long) extends Person(id)
  *
@@ -31,6 +32,7 @@ package scalikejdbc
  *   p1 == p2 && p2 == p1 // true
  *   p1 == m1 || m1 == p1 // false
  *   m1 == m2 && m2 == m1 // true
+ * }}}
  */
 trait EntityEquality {
 
