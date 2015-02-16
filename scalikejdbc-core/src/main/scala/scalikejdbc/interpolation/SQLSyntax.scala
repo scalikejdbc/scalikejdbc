@@ -315,7 +315,7 @@ object SQLSyntax {
   def dual = sqls"dual"
 
   /**
-   * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
+   * Returns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
    *
    * {{{
    *   val (id, name) = (123, "Alice")
@@ -330,7 +330,7 @@ object SQLSyntax {
   }
 
   /**
-   * Rerturns an optional SQLSyntax which is flatten (from option array) and joined with 'or'.
+   * Returns an optional SQLSyntax which is flatten (from option array) and joined with 'or'.
    *
    * {{{
    *   val (id, name) = (123, "Alice")
