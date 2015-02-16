@@ -280,6 +280,7 @@ object ScalikeJDBCProjects extends Build {
       ),
       ScriptedPlugin.scriptedLaunchOpts ++= Seq(
         "-Dplugin.version=" + version.value,
+        "-Dslf4j.version=" + _slf4jApiVersion,
         "-Dmysql.version=5.1.33",
         "-Dpostgresql.version=9.3-1102-jdbc41",
         "-Dh2.version=1.4.181",

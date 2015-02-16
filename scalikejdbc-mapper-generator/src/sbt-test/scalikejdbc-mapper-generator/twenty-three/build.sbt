@@ -31,6 +31,7 @@ scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked", "-X
 libraryDependencies ++= Seq(
   "org.scalikejdbc"     %% "scalikejdbc"              % scalikejdbcVersion,
   "org.scalikejdbc"     %% "scalikejdbc-test"         % scalikejdbcVersion % "test",
+  "org.slf4j"           %  "slf4j-simple"             % System.getProperty("slf4j.version"),
   "org.scalatest"       %% "scalatest"                % System.getProperty("scalatest.version") % "test",
   "org.specs2"          %% "specs2-core"              % System.getProperty("specs2.version") % "test"
 )
