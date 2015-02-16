@@ -50,7 +50,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
   }
 
   /**
-   * Runs all SQL and returns result as List[Map[String, Any]]
+   * Runs all SQL and returns result as Boolean value
    * @param session DB Session
    * @return results as Boolean
    */
