@@ -17,6 +17,8 @@ package scalikejdbc
 
 import java.sql._
 import util.control.Exception._
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
 
 /**
  * DB Session
@@ -234,7 +236,7 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return result optionally
    */
   def first[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
-    list(template, params: _*)(extract).headOption
+    traversable(template, params: _*)(extract).headOption
   }
 
   /**
@@ -247,7 +249,21 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return result as list
    */
   def list[A](template: String, params: Any*)(extract: WrappedResultSet => A): List[A] = {
-    traversable(template, params: _*)(extract).toList
+    collection[A, List](template, params: _*)(extract)
+  }
+
+  /**
+   * Returns query result as any Collection object.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @param extract extract function
+   * @tparam A return type
+   * @tparam C return collection type
+   * @return result as C[A]
+   */
+  def collection[A, C[_]](template: String, params: Any*)(extract: WrappedResultSet => A)(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
+    traversable(template, params: _*)(extract).to[C]
   }
 
   /**
