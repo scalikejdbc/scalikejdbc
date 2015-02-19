@@ -28,7 +28,7 @@ sandbox.jdbc.password=
 ' > ${CONFIG_PROPS}
 fi
 
-echo '#!/bin/sh
+echo '#!/bin/bash
 
 function edit_config() {
   cd `dirname $0`
