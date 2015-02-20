@@ -35,6 +35,7 @@ trait ParameterBinder[A] {
   /**
    * Parameter value.
    */
+  @deprecated("This unused field will be removed", since = "2.2.4")
   def value: A
 
   /**
