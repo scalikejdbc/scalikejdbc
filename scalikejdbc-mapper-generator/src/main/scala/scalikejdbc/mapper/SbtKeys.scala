@@ -27,4 +27,7 @@ object SbtKeys {
 
   lazy val scalikejdbcJDBCSettings = TaskKey[SbtPlugin.JDBCSettings]("scalikejdbcJDBCSettings")
   lazy val scalikejdbcGeneratorSettings = TaskKey[SbtPlugin.GeneratorSettings]("scalikejdbcGeneratorSettings")
+
+  val scalikejdbcCodeGeneratorSingle = TaskKey[(String, Option[String], SbtPlugin.JDBCSettings, SbtPlugin.GeneratorSettings) => Option[Generator]]("scalikejdbcCodeGeneratorSingle")
+  val scalikejdbcCodeGeneratorAll = TaskKey[(SbtPlugin.JDBCSettings, SbtPlugin.GeneratorSettings) => Seq[Generator]]("scalikejdbcCodeGeneratorAll")
 }

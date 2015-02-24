@@ -150,47 +150,47 @@ object SbtPlugin extends Plugin {
   ).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
   val scalikejdbcSettings = inConfig(Compile)(Seq(
-    scalikejdbcGen := {
+    scalikejdbcCodeGeneratorSingle := { (table, clazz, jdbc, generatorSettings) =>
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
+      generator(tableName = table, className = clazz, srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+    },
+    scalikejdbcCodeGeneratorAll := { (jdbc, generatorSettings) =>
+      val srcDir = (scalaSource in Compile).value
+      val testDir = (scalaSource in Test).value
+      allGenerators(srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+    },
+    scalikejdbcGen := {
       val args = genTaskParser(scalikejdbcGen.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
+      val gen = scalikejdbcCodeGeneratorSingle.value.apply(args.table, args.clazz, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value)
       gen.foreach { g =>
         g.writeModelIfNotExist()
         g.writeSpecIfNotExist(g.specAll())
       }
     },
     scalikejdbcGenForce := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGenForce.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
+      val gen = scalikejdbcCodeGeneratorSingle.value.apply(args.table, args.clazz, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value)
       gen.foreach { g =>
         g.writeModel()
         g.writeSpec(g.specAll())
       }
     },
     scalikejdbcGenAll := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
-      allGenerators(srcDir, testDir, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
+      scalikejdbcCodeGeneratorAll.value.apply(scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
         g.writeModelIfNotExist()
         g.writeSpecIfNotExist(g.specAll())
       }
     },
     scalikejdbcGenAllForce := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
-      allGenerators(srcDir, testDir, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
+      scalikejdbcCodeGeneratorAll.value.apply(scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value).foreach { g =>
         g.writeModel()
         g.writeSpec(g.specAll())
       }
     },
     scalikejdbcGenEcho := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
       val args = genTaskParser(scalikejdbcGenEcho.key.label).parsed
-      val gen = generator(tableName = args.table, className = args.clazz, srcDir = srcDir, testDir = testDir, jdbc = scalikejdbcJDBCSettings.value, generatorSettings = scalikejdbcGeneratorSettings.value)
+      val gen = scalikejdbcCodeGeneratorSingle.value.apply(args.table, args.clazz, scalikejdbcJDBCSettings.value, scalikejdbcGeneratorSettings.value)
       gen.foreach(g => println(g.modelAll()))
       gen.foreach(g => g.specAll().foreach(spec => println(spec)))
     },

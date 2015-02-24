@@ -1,0 +1,3 @@
+> scalikejdbcGenAll
+$ exists src/main/scala/models/Programmers.scala
+> + test:compile
