@@ -92,7 +92,7 @@ object ScalikeJDBCProjects extends Build {
       },
       (sourceGenerators in Compile) += task[Seq[File]]{
         val dir = (sourceManaged in Compile).value
-        (3 to 9).map{ n =>
+        (3 to 21).map{ n =>
           val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
           IO.write(file, GenerateOneToManies(n))
           file
