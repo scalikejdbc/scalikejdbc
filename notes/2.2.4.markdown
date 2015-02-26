@@ -1,0 +1,22 @@
+ScalikeJDBC 2.2.4 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #356 Fix comment on SQLSyntax.toAndConditionOpt and SQLSyntax.toOrConditionOpt by @TAKAyukiatkwsk
+- [core] #358 Support square brackets for T-SQL in SQLTemplateParser by @seratch
+- [core] #361 Improve to generate one-to-manies boilerplate code by @xuwei-k 
+- [core] #366 fix documentation for StringSQLRunner#execute by @pocketberserker
+- [core] #362 Added SQLToCollection and DBSession#collection by @gakuzzzz and @xuwei-k
+- [core] #368 Mark ParameterBinder.value as deprecated by @tkawachi
+- [core] #369 Support driverName in DBConnection also for DataSourceConnectionPool by @seratch
+- [core] #372 Increase number of to-manies tables from 9 to 21 by @seratch
+- [cli] Fix #367 dbconsole has errors on Ubuntu by @seratch
+- [mapper-generator] #365 add GeneratorConfig#tableNameToClassName by @xuwei-k
+- [mapper-generator] #370 add new keys for mapper-generator plugin. be more customizable by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!
+
