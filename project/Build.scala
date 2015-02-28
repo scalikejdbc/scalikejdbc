@@ -4,8 +4,6 @@ import MimaSettings.mimaSettings
 
 object ScalikeJDBCProjects extends Build {
 
-  // [NOTE] Execute the following to bump version
-  // sbt "g version 1.3.8-SNAPSHOT"
   lazy val _version = "2.2.4-SNAPSHOT"
 
   lazy val _organization = "org.scalikejdbc"
@@ -16,7 +14,9 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.4.+"
+  lazy val _h2Version = "1.4.185"
+  lazy val _mysqlVersion = "5.1.34"
+  lazy val _postgresqlVersion = "9.4-1201-jdbc41"
   lazy val _hibernateVersion = "4.3.8.Final"
   lazy val _scalatestVersion = "2.2.4"
   lazy val _specs2Version = "2.4.16"
@@ -103,7 +103,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.6"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.7"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
@@ -194,8 +194,8 @@ object ScalikeJDBCProjects extends Build {
       ScriptedPlugin.scriptedLaunchOpts ++= Seq(
         "-Dplugin.version=" + version.value,
         "-Dslf4j.version=" + _slf4jApiVersion,
-        "-Dmysql.version=5.1.33",
-        "-Dpostgresql.version=9.3-1102-jdbc41",
+        "-Dmysql.version=" + _mysqlVersion,
+        "-Dpostgresql.version=" + _postgresqlVersion,
         "-Dh2.version=1.4.181",
         "-Dspecs2.version=" + _specs2Version,
         "-Dscalatest.version=" + _scalatestVersion
@@ -286,12 +286,12 @@ object ScalikeJDBCProjects extends Build {
     Seq("org.specs2" %% "specs2-core" % _specs2Version % "test")
 
   val jdbcDriverDependenciesInTestScope = Seq(
-    "com.h2database"    % "h2"                   % _h2Version        % "test",
-    "org.apache.derby"  % "derby"                % "10.11.1.1"       % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.8.7"           % "test",
-    "org.hsqldb"        % "hsqldb"               % "2.3.2"           % "test",
-    "mysql"             % "mysql-connector-java" % "5.1.+"           % "test",
-    "org.postgresql"    % "postgresql"           % "9.3-1102-jdbc41" % "test"
+    "com.h2database"    % "h2"                   % _h2Version         % "test",
+    "org.apache.derby"  % "derby"                % "10.11.1.1"        % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.8.7"            % "test",
+    "org.hsqldb"        % "hsqldb"               % "2.3.2"            % "test",
+    "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
+    "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
   val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
