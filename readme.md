@@ -86,7 +86,7 @@ http://scalikejdbc.org/
 Published binary files have the following copyright:
 
 ```
-Copyright 2011 - 2014 scalikejdbc.org
+Copyright scalikejdbc.org
 Apache License, Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0.html
 ```
