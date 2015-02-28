@@ -4,7 +4,7 @@ import MimaSettings.mimaSettings
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.2.4-SNAPSHOT"
+  lazy val _version = "2.2.4"
 
   lazy val _organization = "org.scalikejdbc"
 
