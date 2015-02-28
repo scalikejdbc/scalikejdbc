@@ -1,6 +1,6 @@
 ScalikeJDBC 1.6.0 has been released. New query DSL for SQLSyntaxSupport users is added!
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
 
 http://git.io/scalikejdbc
 

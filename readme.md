@@ -8,7 +8,7 @@ ScalikeJDBC is a practical and production-ready one. Use this library for your r
 
 http://scalikejdbc.org/
 
-[![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=develop)](https://travis-ci.org/scalikejdbc/scalikejdbc)
+[![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=master)](https://travis-ci.org/scalikejdbc/scalikejdbc)
 
 ## Gitter Chat for Casual Q&A
 

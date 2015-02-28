@@ -10,7 +10,7 @@ Special thanks to @daimatz and all the ScalikeJDBC users!
 
 Contributers' Guide is now available:
 
-https://github.com/scalikejdbc/scalikejdbc/blob/develop/CONTRIBUTING.md
+https://github.com/scalikejdbc/scalikejdbc/blob/master/CONTRIBUTING.md
 
 ## library
 

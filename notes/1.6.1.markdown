@@ -1,6 +1,6 @@
 ScalikeJDBC 1.6.1 has been released. Several fixes for Query DSL.
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
 
 http://git.io/scalikejdbc
 

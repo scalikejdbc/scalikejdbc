@@ -1,6 +1,6 @@
 ScalikeJDBC 1.5.3 has been released. interpolation, mapper-generator, config and test are changed.
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/develop/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
 
 http://git.io/scalikejdbc
 

@@ -8,7 +8,7 @@
 
 ### Pull Requests
 
-- Pull requests basically should be sent toward "develop" branch
+- Pull requests basically should be sent toward "master" branch
 - Compatibility always must be kept as far as possible 
 - scalariform must be applied to all Scala source code
 - Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
@@ -16,41 +16,35 @@
 
 #### Branches
 
-##### develop (the default branch)
+##### master (the default branch)
 
-- git-flow development branch
-- the latest development version
-- This branch must be able to build against Scala 2.10 and 2.11
-
-##### master
-
-- git-flow stable branch
+- the latest stable version
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 2.1.x
 
 - the version 2.1 series maintainance branch
-- Only security fixes and critical bug fixes in develop branch will be backported
+- Only security fixes and critical bug fixes in master branch will be backported
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 2.0.x
 
 - the version 2.0 series maintainance branch
-- Only security fixes and critical bug fixes in develop branch will be backported
+- Only security fixes and critical bug fixes in master branch will be backported
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 1.8.x
 
 - This branch must be able to build against Scala 2.10 
 - This branch must be compatible with ScalaTest 1.9
-- Backport from develop branch which doesn't work on Scala 2.9 can be merged
+- Backport from master branch which doesn't work on Scala 2.9 can be merged
 - Source code compatibility should be kept with 1.7.x
 
 ##### 1.7.x
 
 - This branch must be able to build against Scala 2.9.1, 2.9.2, 2.9.3 and 2.10
 - This branch must be compatible with ScalaTest 1.9
-- Backport from develop branch which doesn't work on Scala 2.9 can NOT be merged
+- Backport from master branch which doesn't work on Scala 2.9 can NOT be merged
 
 #### Testing your pull request
 

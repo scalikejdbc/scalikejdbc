@@ -10,7 +10,7 @@
 
 ### Coding Rule for project members
 
-- Push only "develop" or "feature/xxx" branch
+- Basically push "feature/xxx" branch first
 - Create "feature/xxx" branch and create a pull request when you need code review
 - Compatibility always must be kept as far as possible
 - scalariform must be applied to all Scala source code
