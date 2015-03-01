@@ -14,8 +14,9 @@ $ exists src/test/scala/app/models/ProgrammersSpec.scala
 $ exists src/main/scala/app/models/Programmer.scala
 $ exists src/test/scala/app/models/ProgrammerSpec.scala
 
+$ sleep 2000
 > scalikejdbcGenForce programmers
-$ newer src/main/scala/app/models/Programmer.scala src/main/scala/app/models/Programmers.scala
+$ newer src/main/scala/app/models/Programmers.scala src/main/scala/app/models/Programmer.scala
 > + compile
 > + test:compile
 > + testOnly app.models.ProgrammersTest
