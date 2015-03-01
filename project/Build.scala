@@ -189,8 +189,8 @@ object ScalikeJDBCProjects extends Build {
       sbtPlugin := true,
       ScriptedPlugin.scriptedBufferLog := false,
       ScriptedPlugin.scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
-        a => Seq("-Xmx","-Xms","-XX").exists(a.startsWith)
-      ),
+        a => Seq("-XX","-Xss").exists(a.startsWith)
+      ) ++ Seq("-Xmx3G"),
       ScriptedPlugin.scriptedLaunchOpts ++= Seq(
         "-Dplugin.version=" + version.value,
         "-Dslf4j.version=" + _slf4jApiVersion,
