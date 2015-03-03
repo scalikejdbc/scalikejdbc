@@ -13,7 +13,7 @@
 > scalikejdbcGenForce twenty_three
 
 -> compile
-> set scalaVersion :="2.11.5"
+> set scalaVersion :="2.11.6"
 > compile
 > test:compile
 
