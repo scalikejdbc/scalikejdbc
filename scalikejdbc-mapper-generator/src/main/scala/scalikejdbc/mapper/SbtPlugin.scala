@@ -29,7 +29,17 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass, tableNameToClassName: String => String)
+  case class GeneratorSettings(
+    packageName: String,
+    template: String,
+    testTemplate: String,
+    lineBreak: String,
+    caseClassOnly: Boolean,
+    encoding: String,
+    autoConstruct: Boolean,
+    defaultAutoSession: Boolean,
+    dateTimeClass: DateTimeClass,
+    tableNameToClassName: String => String)
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
