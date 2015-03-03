@@ -1,6 +1,6 @@
 scalikejdbcSettings
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 lazy val scalikejdbcVersion = "2.2.4"
 
