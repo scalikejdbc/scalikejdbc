@@ -39,7 +39,8 @@ object SbtPlugin extends Plugin {
     autoConstruct: Boolean,
     defaultAutoSession: Boolean,
     dateTimeClass: DateTimeClass,
-    tableNameToClassName: String => String)
+    tableNameToClassName: String => String,
+    columnNameToFieldName: String => String)
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -72,7 +73,8 @@ object SbtPlugin extends Plugin {
       dateTimeClass = getString(props, "generator.dateTimeClass").map {
         name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
       }.getOrElse(defaultConfig.dateTimeClass),
-      defaultConfig.tableNameToClassName
+      defaultConfig.tableNameToClassName,
+      defaultConfig.columnNameToFieldName
     )
   }
 

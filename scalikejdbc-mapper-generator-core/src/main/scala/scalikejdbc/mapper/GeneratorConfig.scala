@@ -26,7 +26,8 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   autoConstruct: Boolean = false,
   defaultAutoSession: Boolean = true,
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
-  tableNameToClassName: String => String = GeneratorConfig.toCamelCase)
+  tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
+  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {
@@ -39,6 +40,28 @@ object GeneratorConfig {
     (camelCaseString, part) =>
       camelCaseString + toProperCase(part)
   }
+
+  val reservedWords: Set[String] = Set(
+    "abstract", "case", "catch", "class", "def",
+    "do", "else", "extends", "false", "final",
+    "finally", "for", "forSome", "if", "implicit",
+    "import", "lazy", "match", "new", "null", "macro",
+    "object", "override", "package", "private", "protected",
+    "return", "sealed", "super", "then", "this", "throw",
+    "trait", "try", "true", "type", "val",
+    "var", "while", "with", "yield"
+  )
+
+  val quoteReservedWord: String => String = {
+    name =>
+      if (reservedWords(name)) "`" + name + "`"
+      else name
+  }
+
+  val lowerCamelCase: String => String =
+    GeneratorConfig.toCamelCase.andThen {
+      camelCase => camelCase.head.toLower + camelCase.tail
+    }
 }
 
 sealed abstract class DateTimeClass(private[scalikejdbc] val name: String) extends Product with Serializable {
