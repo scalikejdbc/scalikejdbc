@@ -29,7 +29,18 @@ object SbtPlugin extends Plugin {
 
   case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
-  case class GeneratorSettings(packageName: String, template: String, testTemplate: String, lineBreak: String, caseClassOnly: Boolean, encoding: String, autoConstruct: Boolean, defaultAutoSession: Boolean, dateTimeClass: DateTimeClass, tableNameToClassName: String => String)
+  case class GeneratorSettings(
+    packageName: String,
+    template: String,
+    testTemplate: String,
+    lineBreak: String,
+    caseClassOnly: Boolean,
+    encoding: String,
+    autoConstruct: Boolean,
+    defaultAutoSession: Boolean,
+    dateTimeClass: DateTimeClass,
+    tableNameToClassName: String => String,
+    columnNameToFieldName: String => String)
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -62,7 +73,8 @@ object SbtPlugin extends Plugin {
       dateTimeClass = getString(props, "generator.dateTimeClass").map {
         name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
       }.getOrElse(defaultConfig.dateTimeClass),
-      defaultConfig.tableNameToClassName
+      defaultConfig.tableNameToClassName,
+      defaultConfig.columnNameToFieldName
     )
   }
 

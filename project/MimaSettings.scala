@@ -134,7 +134,11 @@ object MimaSettings {
       exclude[MissingMethodProblem]("scalikejdbc.OneToManies" + n + "SQL.this"),
       exclude[MissingMethodProblem]("scalikejdbc.OneToManies" + n + "SQLToOption.output"),
       exclude[MissingMethodProblem]("scalikejdbc.OneToManies" + n + "SQLToOption.this")
-    )}
+    )} ++ Seq(
+      // since 2.2.5
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toCamelCase"),
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toProperCase")
+    )
   }
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(

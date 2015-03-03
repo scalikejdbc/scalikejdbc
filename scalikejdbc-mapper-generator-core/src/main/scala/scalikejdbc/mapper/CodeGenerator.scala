@@ -67,10 +67,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   case class ColumnInScala(underlying: Column) {
 
-    lazy val nameInScala: String = {
-      val camelCase: String = toCamelCase(underlying.name)
-      camelCase.head.toLower + camelCase.tail
-    }
+    lazy val nameInScala: String = config.columnNameToFieldName(underlying.name)
 
     lazy val rawTypeInScala: String = underlying.dataType match {
       case JavaSqlTypes.ARRAY => TypeName.AnyArray
@@ -692,16 +689,6 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       classPart + eol +
       eol +
       objectPart + eol
-  }
-
-  private def toCamelCase(s: String): String = s.split("_").foldLeft("") {
-    (camelCaseString, part) =>
-      camelCaseString + toProperCase(part)
-  }
-
-  private def toProperCase(s: String): String = {
-    if (s == null || s.trim.size == 0) ""
-    else s.substring(0, 1).toUpperCase(en) + s.substring(1).toLowerCase(en)
   }
 
   // -----------------------
