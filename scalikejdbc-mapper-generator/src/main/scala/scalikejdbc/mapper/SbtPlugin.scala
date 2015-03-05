@@ -17,6 +17,7 @@ package scalikejdbc.mapper
 
 import sbt._
 import sbt.Keys._
+import sbt.complete.EditDistance
 import scala.language.reflectiveCalls
 import util.control.Exception._
 import java.io.FileNotFoundException
@@ -50,27 +51,64 @@ object SbtPlugin extends Plugin {
       } else str
     }
 
-  private[this] def loadJDBCSettings(props: Properties): JDBCSettings =
+  private[this] final val JDBC = "jdbc."
+  private[this] final val JDBC_DRIVER = JDBC + "driver"
+  private[this] final val JDBC_URL = JDBC + "url"
+  private[this] final val JDBC_USER_NAME = JDBC + "username"
+  private[this] final val JDBC_PASSWORD = JDBC + "password"
+  private[this] final val JDBC_SCHEMA = JDBC + "schema"
+
+  private[this] final val GENERATOR = "generator."
+  private[this] final val PACKAGE_NAME = GENERATOR + "packageName"
+  private[this] final val TEMPLATE = GENERATOR + "template"
+  private[this] final val TEST_TEMPLATE = GENERATOR + "testTemplate"
+  private[this] final val LINE_BREAK = GENERATOR + "lineBreak"
+  private[this] final val CASE_CLASS_ONLY = GENERATOR + "caseClassOnly"
+  private[this] final val ENCODING = GENERATOR + "encoding"
+  private[this] final val AUTO_CONSTRUCT = GENERATOR + "autoConstruct"
+  private[this] final val DEFAULT_AUTO_SESSION = GENERATOR + "defaultAutoSession"
+  private[this] final val DATETIME_CLASS = GENERATOR + "dateTimeClass"
+
+  private[this] val jdbcKeys = Set(
+    JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA
+  )
+  private[this] val generatorKeys = Set(
+    PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
+    ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS
+  )
+  private[this] val allKeys = jdbcKeys ++ generatorKeys
+
+  private[this] def printWarningIfTypo(props: Properties): Unit = {
+    import scala.collection.convert.decorateAsScala._
+    props.keySet().asScala.map(_.toString).filterNot(allKeys).foreach { typoKey =>
+      val correctKeys = allKeys.toList.sortBy(key => EditDistance.levenshtein(typoKey, key)).take(3).mkString(" or ")
+      println(s"""Not a valid key "$typoKey". did you mean ${correctKeys}?""")
+    }
+  }
+
+  private[this] def loadJDBCSettings(props: Properties): JDBCSettings = {
+    printWarningIfTypo(props)
     JDBCSettings(
-      driver = getString(props, "jdbc.driver").getOrElse(throw new IllegalStateException("Add jdbc.driver to project/scalikejdbc-mapper-generator.properties")),
-      url = getString(props, "jdbc.url").getOrElse(throw new IllegalStateException("Add jdbc.url to project/scalikejdbc-mapper-generator.properties")),
-      username = getString(props, "jdbc.username").getOrElse(""),
-      password = getString(props, "jdbc.password").getOrElse(""),
-      schema = getString(props, "jdbc.schema").orNull[String]
+      driver = getString(props, JDBC_DRIVER).getOrElse(throw new IllegalStateException(s"Add $JDBC_DRIVER to project/scalikejdbc-mapper-generator.properties")),
+      url = getString(props, JDBC_URL).getOrElse(throw new IllegalStateException(s"Add $JDBC_URL to project/scalikejdbc-mapper-generator.properties")),
+      username = getString(props, JDBC_USER_NAME).getOrElse(""),
+      password = getString(props, JDBC_PASSWORD).getOrElse(""),
+      schema = getString(props, JDBC_SCHEMA).orNull[String]
     )
+  }
 
   private[this] def loadGeneratorSettings(props: Properties): GeneratorSettings = {
     val defaultConfig = GeneratorConfig()
     GeneratorSettings(
-      packageName = getString(props, "generator.packageName").getOrElse(defaultConfig.packageName),
-      template = getString(props, "generator.template").getOrElse(defaultConfig.template.name),
-      testTemplate = getString(props, "generator.testTemplate").getOrElse(GeneratorTestTemplate.specs2unit.name),
-      lineBreak = getString(props, "generator.lineBreak").getOrElse(defaultConfig.lineBreak.name),
-      caseClassOnly = getString(props, "generator.caseClassOnly").map(_.toBoolean).getOrElse(defaultConfig.caseClassOnly),
-      encoding = getString(props, "generator.encoding").getOrElse(defaultConfig.encoding),
-      autoConstruct = getString(props, "generator.autoConstruct").map(_.toBoolean).getOrElse(defaultConfig.autoConstruct),
-      defaultAutoSession = getString(props, "generator.defaultAutoSession").map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
-      dateTimeClass = getString(props, "generator.dateTimeClass").map {
+      packageName = getString(props, PACKAGE_NAME).getOrElse(defaultConfig.packageName),
+      template = getString(props, TEMPLATE).getOrElse(defaultConfig.template.name),
+      testTemplate = getString(props, TEST_TEMPLATE).getOrElse(GeneratorTestTemplate.specs2unit.name),
+      lineBreak = getString(props, LINE_BREAK).getOrElse(defaultConfig.lineBreak.name),
+      caseClassOnly = getString(props, CASE_CLASS_ONLY).map(_.toBoolean).getOrElse(defaultConfig.caseClassOnly),
+      encoding = getString(props, ENCODING).getOrElse(defaultConfig.encoding),
+      autoConstruct = getString(props, AUTO_CONSTRUCT).map(_.toBoolean).getOrElse(defaultConfig.autoConstruct),
+      defaultAutoSession = getString(props, DEFAULT_AUTO_SESSION).map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
+      dateTimeClass = getString(props, DATETIME_CLASS).map {
         name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
       }.getOrElse(defaultConfig.dateTimeClass),
       defaultConfig.tableNameToClassName,
