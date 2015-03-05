@@ -9,7 +9,7 @@ if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   cp $SCALIKEJDBC_DATABASE.properties twenty-three/test.properties &&
   cd $TRAVIS_BUILD_DIR &&
   git add . --all &&
-  sbt '++ 2.11.6' root211/publishLocal '++ 2.10.4' publishLocal checkScalariform &&
+  sbt '++ 2.11.6' root211/publishLocal '++ 2.10.5' publishLocal checkScalariform &&
   sbt -J-XX:+CMSClassUnloadingEnabled -J-Xmx512M -J-Xms512M mapper-generator/scripted
 else
   git add . --all &&

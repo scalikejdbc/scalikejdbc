@@ -2,7 +2,7 @@
 
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = false)}
-> set scalaVersion :="2.10.4"
+> set scalaVersion :="2.10.5"
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 > compile
