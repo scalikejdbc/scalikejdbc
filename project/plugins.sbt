@@ -3,6 +3,8 @@ resolvers ++= Seq(
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
+addSbtPlugin("de.heikoseeberger" % "sbt-header" % "1.1.1")
+
 addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.3.0")
 
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.6")

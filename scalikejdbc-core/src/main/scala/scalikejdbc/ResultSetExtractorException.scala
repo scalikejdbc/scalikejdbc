@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,4 +19,3 @@ package scalikejdbc
  * Exception which represents failure on ResultSet extraction.
  */
 case class ResultSetExtractorException(message: String, e: Option[Exception] = None) extends IllegalArgumentException(message, e.orNull[Exception])
-
