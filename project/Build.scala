@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import MimaSettings.mimaSettings
+import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
@@ -82,8 +83,12 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcCore = Project(
     id = "core",
     base = file("scalikejdbc-core"),
-    settings = baseSettings ++ mimaSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ buildInfoSettings ++ Seq(
       name := "scalikejdbc-core",
+      sourceGenerators in Compile <+= buildInfo,
+      buildInfoPackage := "scalikejdbc",
+      buildInfoObject := "ScalikejdbcBuildInfo",
+      buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
       TaskKey[Unit]("checkScalariform") := {
         val diff = "git diff".!!
         if(diff.nonEmpty){
