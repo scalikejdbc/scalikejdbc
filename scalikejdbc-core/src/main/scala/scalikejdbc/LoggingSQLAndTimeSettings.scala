@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Kazuhiro Sera
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,4 +27,3 @@ case class LoggingSQLAndTimeSettings(
   warningEnabled: Boolean = false,
   warningThresholdMillis: Long = 3000L,
   warningLogLevel: Symbol = 'warn)
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Toshiyuki Takahashi, Kazuhiro Sera
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,4 +19,3 @@ package scalikejdbc
  * JDBC Settings
  */
 case class JDBCSettings(url: String, user: String, password: String, driverName: String)
-

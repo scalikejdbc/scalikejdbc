@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Kazuhiro Sera
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,4 +21,3 @@ import scalikejdbc.globalsettings._
  * Settings for Name binding SQL validator
  */
 case class NameBindingSQLValidatorSettings(ignoredParams: IgnoredParamsValidation = ExceptionForIgnoredParams)
-

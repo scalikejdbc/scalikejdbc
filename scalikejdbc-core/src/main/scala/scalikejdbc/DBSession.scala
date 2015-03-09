@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 - 2014 scalikejdbc.org
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -588,4 +588,3 @@ case object NoSession extends DBSession {
   override def tags(tags: String*): DBSession = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
-

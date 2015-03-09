@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 scalikejdbc.org
+ * Copyright 2011 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,4 +66,3 @@ class Commons2ConnectionPool(
   override def close(): Unit = _pool.close()
 
 }
-
