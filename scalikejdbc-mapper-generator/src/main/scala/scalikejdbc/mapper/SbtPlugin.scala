@@ -41,7 +41,8 @@ object SbtPlugin extends Plugin {
     defaultAutoSession: Boolean,
     dateTimeClass: DateTimeClass,
     tableNameToClassName: String => String,
-    columnNameToFieldName: String => String)
+    columnNameToFieldName: String => String,
+    returnCollectionType: ReturnCollectionType)
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -68,13 +69,14 @@ object SbtPlugin extends Plugin {
   private[this] final val AUTO_CONSTRUCT = GENERATOR + "autoConstruct"
   private[this] final val DEFAULT_AUTO_SESSION = GENERATOR + "defaultAutoSession"
   private[this] final val DATETIME_CLASS = GENERATOR + "dateTimeClass"
+  private[this] final val RETURN_COLLECTION_TYPE = GENERATOR + "returnCollectionType"
 
   private[this] val jdbcKeys = Set(
     JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA
   )
   private[this] val generatorKeys = Set(
     PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
-    ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS
+    ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE
   )
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
@@ -112,7 +114,10 @@ object SbtPlugin extends Plugin {
         name => DateTimeClass.map.getOrElse(name, sys.error("does not support " + name))
       }.getOrElse(defaultConfig.dateTimeClass),
       defaultConfig.tableNameToClassName,
-      defaultConfig.columnNameToFieldName
+      defaultConfig.columnNameToFieldName,
+      returnCollectionType = getString(props, RETURN_COLLECTION_TYPE).map { name =>
+        ReturnCollectionType.map.getOrElse(name.toLowerCase(en), sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
+      }.getOrElse(defaultConfig.returnCollectionType)
     )
   }
 
@@ -150,7 +155,7 @@ object SbtPlugin extends Plugin {
     }
   }
 
-  private[this] def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
+  def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
     GeneratorConfig(
       srcDir = srcDir.getAbsolutePath,
       testDir = testDir.getAbsolutePath,
@@ -164,7 +169,8 @@ object SbtPlugin extends Plugin {
       defaultAutoSession = generatorSettings.defaultAutoSession,
       dateTimeClass = generatorSettings.dateTimeClass,
       tableNameToClassName = generatorSettings.tableNameToClassName,
-      columnNameToFieldName = generatorSettings.columnNameToFieldName
+      columnNameToFieldName = generatorSettings.columnNameToFieldName,
+      returnCollectionType = generatorSettings.returnCollectionType
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {

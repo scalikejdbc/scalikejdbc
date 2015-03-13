@@ -27,7 +27,8 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   defaultAutoSession: Boolean = true,
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
-  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord)
+  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord,
+  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {
@@ -63,47 +64,3 @@ object GeneratorConfig {
       camelCase => camelCase.head.toLower + camelCase.tail
     }
 }
-
-sealed abstract class DateTimeClass(private[scalikejdbc] val name: String) extends Product with Serializable {
-  private[scalikejdbc] val simpleName = name.split('.').last
-}
-object DateTimeClass {
-  case object JodaDateTime extends DateTimeClass("org.joda.time.DateTime")
-  case object ZonedDateTime extends DateTimeClass("java.time.ZonedDateTime")
-  case object OffsetDateTime extends DateTimeClass("java.time.OffsetDateTime")
-
-  private[scalikejdbc] val all = Set(
-    JodaDateTime, ZonedDateTime, OffsetDateTime
-  )
-
-  private[scalikejdbc] val map: Map[String, DateTimeClass] =
-    all.map(clazz => clazz.name -> clazz).toMap
-}
-
-object GeneratorTemplate {
-  val interpolation = GeneratorTemplate("interpolation")
-  val queryDsl = GeneratorTemplate("queryDsl")
-}
-
-case class GeneratorTemplate(name: String)
-
-object GeneratorTestTemplate {
-  val ScalaTestFlatSpec = GeneratorTestTemplate("ScalaTestFlatSpec")
-  val specs2unit = GeneratorTestTemplate("specs2unit")
-  val specs2acceptance = GeneratorTestTemplate("specs2acceptance")
-}
-case class GeneratorTestTemplate(name: String)
-
-object LineBreak {
-  def value(name: String) = name match {
-    case "CR" => "\r"
-    case "LF" => "\n"
-    case "CRLF" => "\r\n"
-    case _ => "\n"
-  }
-}
-
-case class LineBreak(name: String) {
-  def value = LineBreak.value(name)
-}
-
