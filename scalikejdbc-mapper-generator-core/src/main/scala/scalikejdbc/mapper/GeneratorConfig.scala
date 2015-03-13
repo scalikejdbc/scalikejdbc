@@ -27,7 +27,8 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   defaultAutoSession: Boolean = true,
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
-  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord)
+  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord,
+  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {

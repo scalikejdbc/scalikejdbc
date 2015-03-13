@@ -561,6 +561,33 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }"""
       }).stripMargin + eol
 
+    val C = "C"
+    val canBuildFromParam = {
+      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
+        s", $C: CanBuildFrom[Nothing, $className, $C[$className]]"
+      else
+        ""
+    }
+    val typeParam = {
+      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
+        s"[$C[_]]"
+      else
+        ""
+    }
+    val returnType = config.returnCollectionType match {
+      case ReturnCollectionType.List => "List"
+      case ReturnCollectionType.Vector => "Vector"
+      case ReturnCollectionType.Array => "Array"
+      case ReturnCollectionType.CanBuildFrom => C
+    }
+
+    val toResult = config.returnCollectionType match {
+      case ReturnCollectionType.List => "list.apply()"
+      case ReturnCollectionType.Vector => "collection.apply[Vector]()"
+      case ReturnCollectionType.Array => "collection.apply[Array]()"
+      case ReturnCollectionType.CanBuildFrom => s"collection.apply[$C]()"
+    }
+
     /**
      * {{{
      * def findAll(): List[Member] = {
@@ -573,27 +600,27 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val findAllMethod =
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def findAll()(implicit session: DBSession$defaultAutoSession): List[${className}] = {
-            |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}}\"\"\".map(${className}(${syntaxName}.resultName)).list.apply()
+          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+            |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}}\"\"\".map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def findAll()(implicit session: DBSession$defaultAutoSession): List[${className}] = {
-            |    withSQL(select.from(${className} as ${syntaxName})).map(${className}(${syntaxName}.resultName)).list.apply()
+          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+            |    withSQL(select.from(${className} as ${syntaxName})).map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
       }).stripMargin + eol
 
     val interpolationFindAllByMethod = {
-      s"""  def findAllBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): List[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
         |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
-        |      .map(${className}(${syntaxName}.resultName)).list.apply()
+        |      .map(${className}(${syntaxName}.resultName)).${toResult}
         |  }""".stripMargin + eol
     }
 
     val queryDslFindAllByMethod = {
-      s"""  def findAllBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): List[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
         |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(sqls"$${where}")
-        |    }.map(${className}(${syntaxName}.resultName)).list.apply()
+        |    }.map(${className}(${syntaxName}.resultName)).${toResult}
         |  }""".stripMargin + eol
     }
 
@@ -680,8 +707,16 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case classes if classes.size > 0 => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
       case _ => ""
     }
+    val canBuildFromImport =
+      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom) {
+        "import scala.collection.generic.CanBuildFrom" + eol
+      } else {
+        ""
+      }
+
     "package " + config.packageName + eol +
       eol +
+      canBuildFromImport +
       "import scalikejdbc._" + eol +
       timeImport +
       javaSqlImport +
