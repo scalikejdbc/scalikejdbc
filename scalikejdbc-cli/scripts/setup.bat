@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.6/sbt-launch.jar sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.7/sbt-launch.jar sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -120,7 +120,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.10.5"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.1.2",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.2.4",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.7",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.182", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.10.2.0",

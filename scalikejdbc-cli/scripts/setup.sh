@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.6/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.7/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -139,7 +139,7 @@ run_sbt "console"
 echo 'scalaVersion := "2.10.5"
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"    %% "scalikejdbc"         % "2.1.2",
+  "org.scalikejdbc"    %% "scalikejdbc"         % "2.2.4",
   "org.slf4j"          % "slf4j-simple"         % "1.7.7",
   "com.h2database"     % "h2"                   % "1.4.182",
   "org.apache.derby"   % "derby"                % "10.10.2.0",
