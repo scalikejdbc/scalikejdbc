@@ -248,13 +248,13 @@ object SQLSyntax {
   def having(condition: SQLSyntax): SQLSyntax = SQLSyntax.empty.having(condition)
 
   def orderBy(columns: SQLSyntax*): SQLSyntax = SQLSyntax.empty.orderBy(columns.filterNot(_.value.trim.isEmpty): _*)
-  def asc: SQLSyntax = SQLSyntax.empty.asc
-  def desc: SQLSyntax = SQLSyntax.empty.desc
+  val asc: SQLSyntax = SQLSyntax.empty.asc
+  val desc: SQLSyntax = SQLSyntax.empty.desc
 
   def limit(n: Int): SQLSyntax = SQLSyntax.empty.limit(n)
   def offset(n: Int): SQLSyntax = SQLSyntax.empty.offset(n)
 
-  def where: SQLSyntax = SQLSyntax.empty.where
+  val where: SQLSyntax = SQLSyntax.empty.where
   def where(where: SQLSyntax): SQLSyntax = SQLSyntax.empty.where(where)
 
   def eq(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.eq(column, value)
@@ -297,7 +297,7 @@ object SQLSyntax {
 
   def avg(column: SQLSyntax): SQLSyntax = sqls"avg(${column})"
 
-  def count: SQLSyntax = sqls"count(1)"
+  val count: SQLSyntax = sqls"count(1)"
   def count(column: SQLSyntax): SQLSyntax = sqls"count(${column})"
   def count(asteriskProvider: AsteriskProvider): SQLSyntax = sqls"count(${asteriskProvider.asterisk})"
 
@@ -310,11 +310,11 @@ object SQLSyntax {
   def ceil(column: SQLSyntax): SQLSyntax = sqls"ceil(${column})"
   def ceiling(column: SQLSyntax): SQLSyntax = sqls"ceiling(${column})"
 
-  def ? : SQLSyntax = sqls"?"
+  val ? : SQLSyntax = sqls"?"
 
-  def currentDate: SQLSyntax = sqls"current_date"
-  def currentTimestamp: SQLSyntax = sqls"current_timestamp"
-  def dual: SQLSyntax = sqls"dual"
+  val currentDate: SQLSyntax = sqls"current_date"
+  val currentTimestamp: SQLSyntax = sqls"current_timestamp"
+  val dual: SQLSyntax = sqls"dual"
 
   /**
    * Returns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
