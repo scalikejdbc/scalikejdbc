@@ -53,7 +53,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
           resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
         )
       }
-      def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = sqls"", lazyColumns = true)
+      def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = SQLSyntax.empty, lazyColumns = true)
       def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
         val columns = sqls.join(providers.map(p => sqls"${p.resultAll}"), sqls",")
         new SelectSQLBuilder[A](sqls"select ${columns}")
@@ -292,7 +292,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      * e.g. select.from(User as u).where.withRoundBracket { _.eq(u.id, 123).and.eq(u.groupId, 234) }.or.eq(u.groupId, 345)
      */
     def withRoundBracket[A](insidePart: ConditionSQLBuilder[_] => ConditionSQLBuilder[_]): ConditionSQLBuilder[A] = {
-      val emptyBuilder = ConditionSQLBuilder[A](sqls"")
+      val emptyBuilder = ConditionSQLBuilder[A](SQLSyntax.empty)
       ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
     }
 
@@ -506,7 +506,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
     }
     def select(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
-      val builder: SelectSQLBuilder[Nothing] = new SelectSQLBuilder[Nothing](sql = sqls"", lazyColumns = true)
+      val builder: SelectSQLBuilder[Nothing] = new SelectSQLBuilder[Nothing](sql = SQLSyntax.empty, lazyColumns = true)
       this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
     }
 
