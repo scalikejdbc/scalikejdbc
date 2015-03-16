@@ -27,7 +27,7 @@ object ScalikeJDBCProjects extends Build {
   } catch {
     case e: Exception =>
       println(e)
-      "develop"
+      "master"
   }
 
   lazy val baseSettings = Seq(
