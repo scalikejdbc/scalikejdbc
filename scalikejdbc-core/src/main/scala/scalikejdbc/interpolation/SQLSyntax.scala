@@ -38,58 +38,58 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   override def toString(): String = s"SQLSyntax(value: ${value}, parameters: ${parameters})"
 
-  def append(syntax: SQLSyntax) = sqls"${this} ${syntax}"
+  def append(syntax: SQLSyntax): SQLSyntax = sqls"${this} ${syntax}"
 
-  def groupBy(columns: SQLSyntax*) = {
+  def groupBy(columns: SQLSyntax*): SQLSyntax = {
     if (columns.isEmpty) this else sqls"${this} group by ${csv(columns: _*)}"
   }
-  def having(condition: SQLSyntax) = sqls"${this} having ${condition}"
+  def having(condition: SQLSyntax): SQLSyntax = sqls"${this} having ${condition}"
 
-  def orderBy(columns: SQLSyntax*) = {
+  def orderBy(columns: SQLSyntax*): SQLSyntax = {
     if (columns.isEmpty) this else sqls"${this} order by ${csv(columns: _*)}"
   }
   def asc = sqls"${this} asc"
   def desc = sqls"${this} desc"
 
-  def limit(n: Int) = sqls"${this} limit ${SQLSyntax(n.toString)}"
-  def offset(n: Int) = sqls"${this} offset ${SQLSyntax(n.toString)}"
+  def limit(n: Int): SQLSyntax = sqls"${this} limit ${SQLSyntax(n.toString)}"
+  def offset(n: Int): SQLSyntax = sqls"${this} offset ${SQLSyntax(n.toString)}"
 
   def where = sqls"${this} where"
-  def where(where: SQLSyntax) = sqls"${this} where ${where}"
+  def where(where: SQLSyntax): SQLSyntax = sqls"${this} where ${where}"
 
   def and = sqls"${this} and"
   def or = sqls"${this} or"
 
-  def eq(column: SQLSyntax, value: Any) = {
+  def eq(column: SQLSyntax, value: Any): SQLSyntax = {
     value match {
       case null | None => sqls"${this} ${column} is null"
       case _ => sqls"${this} ${column} = ${value}"
     }
   }
-  def ne(column: SQLSyntax, value: Any) = {
+  def ne(column: SQLSyntax, value: Any): SQLSyntax = {
     value match {
       case null | None => sqls"${this} ${column} is not null"
       case _ => sqls"${this} ${column} <> ${value}"
     }
   }
-  def gt(column: SQLSyntax, value: Any) = sqls"${this} ${column} > ${value}"
-  def ge(column: SQLSyntax, value: Any) = sqls"${this} ${column} >= ${value}"
-  def lt(column: SQLSyntax, value: Any) = sqls"${this} ${column} < ${value}"
-  def le(column: SQLSyntax, value: Any) = sqls"${this} ${column} <= ${value}"
+  def gt(column: SQLSyntax, value: Any): SQLSyntax = sqls"${this} ${column} > ${value}"
+  def ge(column: SQLSyntax, value: Any): SQLSyntax = sqls"${this} ${column} >= ${value}"
+  def lt(column: SQLSyntax, value: Any): SQLSyntax = sqls"${this} ${column} < ${value}"
+  def le(column: SQLSyntax, value: Any): SQLSyntax = sqls"${this} ${column} <= ${value}"
 
-  def isNull(column: SQLSyntax) = sqls"${this} ${column} is null"
-  def isNotNull(column: SQLSyntax) = sqls"${this} ${column} is not null"
-  def between(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} between ${a} and ${b}"
-  def notBetween(column: SQLSyntax, a: Any, b: Any) = sqls"${this} ${column} not between ${a} and ${b}"
+  def isNull(column: SQLSyntax): SQLSyntax = sqls"${this} ${column} is null"
+  def isNotNull(column: SQLSyntax): SQLSyntax = sqls"${this} ${column} is not null"
+  def between(column: SQLSyntax, a: Any, b: Any): SQLSyntax = sqls"${this} ${column} between ${a} and ${b}"
+  def notBetween(column: SQLSyntax, a: Any, b: Any): SQLSyntax = sqls"${this} ${column} not between ${a} and ${b}"
 
-  def in(column: SQLSyntax, values: Seq[Any]) = {
+  def in(column: SQLSyntax, values: Seq[Any]): SQLSyntax = {
     if (values.isEmpty) {
       sqls"${this} FALSE"
     } else {
       sqls"${this} ${column} in (${values})"
     }
   }
-  def notIn(column: SQLSyntax, values: Seq[Any]) = {
+  def notIn(column: SQLSyntax, values: Seq[Any]): SQLSyntax = {
     if (values.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -97,10 +97,10 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
-  def in(column: SQLSyntax, subQuery: SQLSyntax) = sqls"${this} ${column} in (${subQuery})"
-  def notIn(column: SQLSyntax, subQuery: SQLSyntax) = sqls"${this} ${column} not in (${subQuery})"
+  def in(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = sqls"${this} ${column} in (${subQuery})"
+  def notIn(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = sqls"${this} ${column} not in (${subQuery})"
 
-  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = {
+  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -110,7 +110,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
       sqls"${this} ${inClause}"
     }
   }
-  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = {
+  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -121,7 +121,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = {
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -131,7 +131,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
       sqls"${this} ${inClause}"
     }
   }
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = {
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -142,7 +142,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = {
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -152,7 +152,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
       sqls"${this} ${inClause}"
     }
   }
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = {
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -163,7 +163,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = {
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -173,7 +173,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
       sqls"${this} ${inClause}"
     }
   }
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = {
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -184,11 +184,11 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
-  def like(column: SQLSyntax, value: String) = sqls"${this} ${column} like ${value}"
-  def notLike(column: SQLSyntax, value: String) = sqls"${this} ${column} not like ${value}"
+  def like(column: SQLSyntax, value: String): SQLSyntax = sqls"${this} ${column} like ${value}"
+  def notLike(column: SQLSyntax, value: String): SQLSyntax = sqls"${this} ${column} not like ${value}"
 
-  def exists(sqlPart: SQLSyntax) = sqls"${this} exists (${sqlPart})"
-  def notExists(sqlPart: SQLSyntax) = sqls"${this} not exists (${sqlPart})"
+  def exists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} exists (${sqlPart})"
+  def notExists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} not exists (${sqlPart})"
 
 }
 
@@ -217,7 +217,7 @@ object SQLSyntax {
 
   // #apply method should NOT be used by library users at the considerable risk of SQL injection vulnerability.
   // https://github.com/scalikejdbc/scalikejdbc/issues/116
-  private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLSyntax(value, parameters)
+  private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil): SQLSyntax = new SQLSyntax(value, parameters)
 
   /**
    * WARNING: Be aware of SQL injection vulnerability.
@@ -244,77 +244,77 @@ object SQLSyntax {
   def joinWithAnd(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"and")
   def joinWithOr(parts: SQLSyntax*): SQLSyntax = join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"or")
 
-  def groupBy(columns: SQLSyntax*) = SQLSyntax.empty.groupBy(columns.filterNot(_.value.trim.isEmpty): _*)
-  def having(condition: SQLSyntax) = SQLSyntax.empty.having(condition)
+  def groupBy(columns: SQLSyntax*): SQLSyntax = SQLSyntax.empty.groupBy(columns.filterNot(_.value.trim.isEmpty): _*)
+  def having(condition: SQLSyntax): SQLSyntax = SQLSyntax.empty.having(condition)
 
-  def orderBy(columns: SQLSyntax*) = SQLSyntax.empty.orderBy(columns.filterNot(_.value.trim.isEmpty): _*)
-  def asc = SQLSyntax.empty.asc
-  def desc = SQLSyntax.empty.desc
+  def orderBy(columns: SQLSyntax*): SQLSyntax = SQLSyntax.empty.orderBy(columns.filterNot(_.value.trim.isEmpty): _*)
+  def asc: SQLSyntax = SQLSyntax.empty.asc
+  def desc: SQLSyntax = SQLSyntax.empty.desc
 
-  def limit(n: Int) = SQLSyntax.empty.limit(n)
-  def offset(n: Int) = SQLSyntax.empty.offset(n)
+  def limit(n: Int): SQLSyntax = SQLSyntax.empty.limit(n)
+  def offset(n: Int): SQLSyntax = SQLSyntax.empty.offset(n)
 
-  def where = SQLSyntax.empty.where
-  def where(where: SQLSyntax) = SQLSyntax.empty.where(where)
+  def where: SQLSyntax = SQLSyntax.empty.where
+  def where(where: SQLSyntax): SQLSyntax = SQLSyntax.empty.where(where)
 
-  def eq(column: SQLSyntax, value: Any) = SQLSyntax.empty.eq(column, value)
-  def ne(column: SQLSyntax, value: Any) = SQLSyntax.empty.ne(column, value)
-  def gt(column: SQLSyntax, value: Any) = SQLSyntax.empty.gt(column, value)
-  def ge(column: SQLSyntax, value: Any) = SQLSyntax.empty.ge(column, value)
-  def lt(column: SQLSyntax, value: Any) = SQLSyntax.empty.lt(column, value)
-  def le(column: SQLSyntax, value: Any) = SQLSyntax.empty.le(column, value)
+  def eq(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.eq(column, value)
+  def ne(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.ne(column, value)
+  def gt(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.gt(column, value)
+  def ge(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.ge(column, value)
+  def lt(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.lt(column, value)
+  def le(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.le(column, value)
 
-  def isNull(column: SQLSyntax) = SQLSyntax.empty.isNull(column)
-  def isNotNull(column: SQLSyntax) = SQLSyntax.empty.isNotNull(column)
-  def between(column: SQLSyntax, a: Any, b: Any) = SQLSyntax.empty.between(column, a, b)
-  def notBetween(column: SQLSyntax, a: Any, b: Any) = SQLSyntax.empty.notBetween(column, a, b)
+  def isNull(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.isNull(column)
+  def isNotNull(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.isNotNull(column)
+  def between(column: SQLSyntax, a: Any, b: Any): SQLSyntax = SQLSyntax.empty.between(column, a, b)
+  def notBetween(column: SQLSyntax, a: Any, b: Any): SQLSyntax = SQLSyntax.empty.notBetween(column, a, b)
 
-  def in(column: SQLSyntax, values: Seq[Any]) = SQLSyntax.empty.in(column, values)
-  def notIn(column: SQLSyntax, values: Seq[Any]) = SQLSyntax.empty.notIn(column, values)
+  def in(column: SQLSyntax, values: Seq[Any]): SQLSyntax = SQLSyntax.empty.in(column, values)
+  def notIn(column: SQLSyntax, values: Seq[Any]): SQLSyntax = SQLSyntax.empty.notIn(column, values)
 
-  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]) = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]) = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]) = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]) = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in(column: SQLSyntax, subQuery: SQLSyntax) = SQLSyntax.empty.in(column, subQuery)
-  def notIn(column: SQLSyntax, subQuery: SQLSyntax) = SQLSyntax.empty.notIn(column, subQuery)
+  def in(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = SQLSyntax.empty.in(column, subQuery)
+  def notIn(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = SQLSyntax.empty.notIn(column, subQuery)
 
-  def like(column: SQLSyntax, value: String) = SQLSyntax.empty.like(column, value)
-  def notLike(column: SQLSyntax, value: String) = SQLSyntax.empty.notLike(column, value)
+  def like(column: SQLSyntax, value: String): SQLSyntax = SQLSyntax.empty.like(column, value)
+  def notLike(column: SQLSyntax, value: String): SQLSyntax = SQLSyntax.empty.notLike(column, value)
 
-  def exists(sqlPart: SQLSyntax) = SQLSyntax.empty.exists(sqlPart)
-  def notExists(sqlPart: SQLSyntax) = SQLSyntax.empty.notExists(sqlPart)
+  def exists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.exists(sqlPart)
+  def notExists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.notExists(sqlPart)
 
-  def distinct(columns: SQLSyntax*) = sqls"distinct ${csv(columns: _*)}"
+  def distinct(columns: SQLSyntax*): SQLSyntax = sqls"distinct ${csv(columns: _*)}"
 
-  def avg(column: SQLSyntax) = sqls"avg(${column})"
+  def avg(column: SQLSyntax): SQLSyntax = sqls"avg(${column})"
 
-  def count = sqls"count(1)"
-  def count(column: SQLSyntax) = sqls"count(${column})"
-  def count(asteriskProvider: AsteriskProvider) = sqls"count(${asteriskProvider.asterisk})"
+  def count: SQLSyntax = sqls"count(1)"
+  def count(column: SQLSyntax): SQLSyntax = sqls"count(${column})"
+  def count(asteriskProvider: AsteriskProvider): SQLSyntax = sqls"count(${asteriskProvider.asterisk})"
 
-  def min(column: SQLSyntax) = sqls"min(${column})"
-  def max(column: SQLSyntax) = sqls"max(${column})"
-  def sum(column: SQLSyntax) = sqls"sum(${column})"
+  def min(column: SQLSyntax): SQLSyntax = sqls"min(${column})"
+  def max(column: SQLSyntax): SQLSyntax = sqls"max(${column})"
+  def sum(column: SQLSyntax): SQLSyntax = sqls"sum(${column})"
 
-  def abs(column: SQLSyntax) = sqls"abs(${column})"
-  def floor(column: SQLSyntax) = sqls"floor(${column})"
-  def ceil(column: SQLSyntax) = sqls"ceil(${column})"
-  def ceiling(column: SQLSyntax) = sqls"ceiling(${column})"
+  def abs(column: SQLSyntax): SQLSyntax = sqls"abs(${column})"
+  def floor(column: SQLSyntax): SQLSyntax = sqls"floor(${column})"
+  def ceil(column: SQLSyntax): SQLSyntax = sqls"ceil(${column})"
+  def ceiling(column: SQLSyntax): SQLSyntax = sqls"ceiling(${column})"
 
-  def ? = sqls"?"
+  def ? : SQLSyntax = sqls"?"
 
-  def currentDate = sqls"current_date"
-  def currentTimestamp = sqls"current_timestamp"
-  def dual = sqls"dual"
+  def currentDate: SQLSyntax = sqls"current_date"
+  def currentTimestamp: SQLSyntax = sqls"current_timestamp"
+  def dual: SQLSyntax = sqls"dual"
 
   /**
    * Returns an optional SQLSyntax which is flatten (from option array) and joined with 'and'.
