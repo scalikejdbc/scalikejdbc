@@ -83,7 +83,7 @@ http://scalikejdbc.org/
 
 ## License
 
-Published binary files have the following copyright:
+Published source code and binary files have the following copyright:
 
 ```
 Copyright scalikejdbc.org
