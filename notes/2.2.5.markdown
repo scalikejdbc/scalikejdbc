@@ -1,0 +1,20 @@
+ScalikeJDBC 2.2.5 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [all] #381 Bump Scala version to 2.10.5, 2.11.6 by @xuwei-k
+- [all] #387 add sbt-buildinfo by @xuwei-k
+- [all] #396 Remove copyright from source code by @seratch
+- [core] #394 Improve performance by introducing SQLSyntax.empty by @xuwei-k
+- [core] #395 Use val instead of def when possible by @xuwei-k
+- [mapper-generator] #383 add `columnNameToFieldName` setting. quote reserved words by @xuwei-k
+- [mapper-generator] #384 show warnings if typo by @xuwei-k
+- [mapper-generator] #392 add returnCollectionType settings by @xuwei-k
+- [cli] update scalikejdbc-cli setup script by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!
+
