@@ -542,7 +542,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             |  }"""
         case GeneratorTemplate.queryDsl =>
           s"""  def countAll()(implicit session: DBSession$defaultAutoSession): Long = {
-            |    withSQL(select(sqls"count(1)").from(${className} as ${syntaxName})).map(rs => rs.long(1)).single.apply().get
+            |    withSQL(select(sqls.count).from(${className} as ${syntaxName})).map(rs => rs.long(1)).single.apply().get
             |  }"""
       }).stripMargin + eol
 
@@ -619,7 +619,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val queryDslCountByMethod = {
       s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
         |    withSQL {
-        |      select(sqls"count(1)").from(${className} as ${syntaxName}).where.append(sqls"$${where}")
+        |      select(sqls.count).from(${className} as ${syntaxName}).where.append(sqls"$${where}")
         |    }.map(_.long(1)).single.apply().get
         |  }""".stripMargin + eol
     }
