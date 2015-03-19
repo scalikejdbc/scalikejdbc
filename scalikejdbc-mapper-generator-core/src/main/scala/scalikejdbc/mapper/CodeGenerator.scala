@@ -519,7 +519,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val queryDslFindByMethod = {
       s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
         |    withSQL {
-        |      select.from(${className} as ${syntaxName}).where.append(sqls"$${where}")
+        |      select.from(${className} as ${syntaxName}).where.append(where)
         |    }.map(${className}(${syntaxName}.resultName)).single.apply()
         |  }""".stripMargin + eol
     }
@@ -604,7 +604,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val queryDslFindAllByMethod = {
       s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
         |    withSQL {
-        |      select.from(${className} as ${syntaxName}).where.append(sqls"$${where}")
+        |      select.from(${className} as ${syntaxName}).where.append(where)
         |    }.map(${className}(${syntaxName}.resultName)).${toResult}
         |  }""".stripMargin + eol
     }
@@ -619,7 +619,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val queryDslCountByMethod = {
       s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
         |    withSQL {
-        |      select(sqls.count).from(${className} as ${syntaxName}).where.append(sqls"$${where}")
+        |      select(sqls.count).from(${className} as ${syntaxName}).where.append(where)
         |    }.map(_.long(1)).single.apply().get
         |  }""".stripMargin + eol
     }
