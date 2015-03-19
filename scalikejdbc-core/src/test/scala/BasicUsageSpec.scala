@@ -1,7 +1,6 @@
 import org.joda.time.DateTime
 import org.scalatest._
 import java.sql.SQLException
-import scala.Option
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
