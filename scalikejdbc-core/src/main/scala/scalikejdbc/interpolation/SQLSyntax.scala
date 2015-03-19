@@ -21,6 +21,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
     }
   }
 
+  override def hashCode: Int = (value, parameters).##
+
   override def toString(): String = s"SQLSyntax(value: ${value}, parameters: ${parameters})"
 
   def append(syntax: SQLSyntax): SQLSyntax = sqls"${this} ${syntax}"
