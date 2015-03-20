@@ -360,14 +360,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           table.autoIncrementColumns.headOption.map { c =>
           3.indent + c.nameInScala +
             (c.typeInScala match {
-              case TypeName.Byte => " = generatedKey.toByte, "
-              case TypeName.Int => " = generatedKey.toInt, "
-              case TypeName.Short => " = generatedKey.toShort, "
-              case TypeName.Float => " = generatedKey.toFloat, "
-              case TypeName.Double => " = generatedKey.toDouble, "
-              case TypeName.String => " = generatedKey.toString, "
-              case TypeName.BigDecimal => " = BigDecimal.valueOf(generatedKey), "
-              case _ => " = generatedKey, "
+              case TypeName.Byte => " = generatedKey.toByte,"
+              case TypeName.Int => " = generatedKey.toInt,"
+              case TypeName.Short => " = generatedKey.toShort,"
+              case TypeName.Float => " = generatedKey.toFloat,"
+              case TypeName.Double => " = generatedKey.toDouble,"
+              case TypeName.String => " = generatedKey.toString,"
+              case TypeName.BigDecimal => " = BigDecimal.valueOf(generatedKey),"
+              case _ => " = generatedKey,"
             }) + eol
         }.getOrElse("")
         else
