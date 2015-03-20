@@ -68,5 +68,5 @@ If your change needs testing with MySQL/PostgreSQL
 
 See the required JDBC settings here.
 
-scalikejdbc-library/src/test/resources/*.properties
+scalikejdbc-core/src/test/resources/*.properties
 
