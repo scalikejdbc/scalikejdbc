@@ -25,7 +25,7 @@ object SQLSyntaxSupportFeature extends LogSupport {
     val hasWhiteSpace = name.matches(".*\\s+.*")
     val hasSemicolon = name.matches(".*;.*")
     if (hasWhiteSpace || hasSemicolon) {
-      log.warn("The table name (${name}) might bring you SQL injection vulnerability.")
+      log.warn(s"The table name (${name}) might bring you SQL injection vulnerability.")
     }
   }
 
