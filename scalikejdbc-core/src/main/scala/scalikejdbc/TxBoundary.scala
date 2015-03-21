@@ -41,10 +41,16 @@ object TxBoundary {
     }
   }
 
+  /** This class will tell library users about missing implicit value by compilation error with the explanatory method name. */
+  private[scalikejdbc] sealed abstract class TxBoundaryMissingImplicits {
+    implicit def `"!!! Please read the following error message shown as method name. !!!"`[A]: TxBoundary[A] = sys.error("Don't use this method.")
+    implicit def `"To activate TxBoundary.Future, scala.concurrent.ExecutionContext value in implicit scope is required here."`[A]: TxBoundary[A] = sys.error("Don't use this method.")
+  }
+
   /**
    * Future TxBoundary type class instance.
    */
-  object Future {
+  object Future extends TxBoundaryMissingImplicits {
 
     implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
       def finishTx(result: Future[A], tx: Tx): Future[A] = {
