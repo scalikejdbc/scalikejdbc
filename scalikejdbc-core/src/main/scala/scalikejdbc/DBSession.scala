@@ -3,6 +3,7 @@ package scalikejdbc
 import java.sql._
 import util.control.Exception._
 import scala.collection.generic.CanBuildFrom
+import scala.collection.breakOut
 import scala.language.higherKinds
 
 /**
@@ -248,7 +249,9 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return result as C[A]
    */
   def collection[A, C[_]](template: String, params: Any*)(extract: WrappedResultSet => A)(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
-    traversable(template, params: _*)(extract).to[C]
+    using(createStatementExecutor(conn, template, params)) {
+      executor => new ResultSetTraversable(executor.executeQuery()).map(extract)(breakOut)
+    }
   }
 
   /**
@@ -292,9 +295,7 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return result as traversable
    */
   def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
-    using(createStatementExecutor(conn, template, params)) {
-      executor => new ResultSetTraversable(executor.executeQuery()) map (rs => extract(rs))
-    }
+    collection[A, Traversable](template, params: _*)(extract)
   }
 
   /**
