@@ -2,20 +2,15 @@ package scalikejdbc
 
 import org.scalatest._
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
+class AutoSpec extends FlatSpec with Matchers with DBSettings {
 
   case class Issue(id: Long, firstName: String, groupId: Long)
-  object Issue extends SQLSyntaxSupport[Issue] {
-    def apply(s: SyntaxProvider[Issue])(rs: WrappedResultSet): Issue = autoConstruct(rs, s)
-    def apply(r: ResultName[Issue])(rs: WrappedResultSet): Issue = autoConstruct(rs, r)
-    //    def toParams(user: Issue): Seq[(SQLSyntax, Any)] = autoExtract(this, user)
-  }
+  val IssueTable = SQLSyntaxSupportFactory[Issue]()
 
   class Organization(val id: Long, val websiteUrl: String)
   object Organization extends SQLSyntaxSupport[Organization] {
     def apply(s: SyntaxProvider[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, s)
     def apply(r: ResultName[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, r)
-    //    def toParams(group: Organization): Seq[(SQLSyntax, Any)] = autoExtract[Organization](this)(group)
   }
 
   case class Person(id: Long, name: String, organizationId: Option[Long], organization: Option[Organization] = None, gorupId: Long = 0)
@@ -40,21 +35,21 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings {
         val org1 = new Organization(1L, "http://jp.scala-users.org/")
         val org2 = new Organization(2L, "http://http://www.java-users.jp/")
 
-        val (ic, oc) = (Issue.column, Organization.column)
+        val (ic, oc) = (IssueTable.column, Organization.column)
 
         Seq(
-          insert.into(Issue).columns(ic.id, ic.firstName, ic.groupId).values(issue1.id, issue1.firstName, issue1.groupId),
-          insert.into(Issue).columns(ic.id, ic.firstName, ic.groupId).values(issue2.id, issue2.firstName, issue2.groupId),
-          insert.into(Issue).columns(ic.id, ic.firstName, ic.groupId).values(issue3.id, issue3.firstName, issue3.groupId),
+          insert.into(IssueTable).columns(ic.id, ic.firstName, ic.groupId).values(issue1.id, issue1.firstName, issue1.groupId),
+          insert.into(IssueTable).columns(ic.id, ic.firstName, ic.groupId).values(issue2.id, issue2.firstName, issue2.groupId),
+          insert.into(IssueTable).columns(ic.id, ic.firstName, ic.groupId).values(issue3.id, issue3.firstName, issue3.groupId),
           insert.into(Organization).columns(oc.id, oc.websiteUrl).values(org1.id, org1.websiteUrl),
           insert.into(Organization).columns(oc.id, oc.websiteUrl).values(org2.id, org2.websiteUrl)
         ).foreach(sql => applyUpdate(sql))
 
-        val (i, o) = (Issue.syntax("i"), Organization.syntax("o"))
+        val (i, o) = (IssueTable.syntax("i"), Organization.syntax("o"))
 
-        val i1 = withSQL { select.from(Issue as i).where.eq(i.id, 1) }.map(Issue(i)).single().apply()
+        val i1 = withSQL { select.from(IssueTable as i).where.eq(i.id, 1) }.map(IssueTable(i)).single().apply()
         i1 should equal(Some(issue1))
-        val i2 = withSQL { select.from(Issue as i).where.eq(i.id, 2) }.map(Issue(i.resultName)).single().apply()
+        val i2 = withSQL { select.from(IssueTable as i).where.eq(i.id, 2) }.map(IssueTable(i.resultName)).single().apply()
         i2 should equal(Some(issue2))
 
         val o1 = withSQL { select.from(Organization as o).where.eq(o.id, 1) }.map(Organization(o)).single().apply()
