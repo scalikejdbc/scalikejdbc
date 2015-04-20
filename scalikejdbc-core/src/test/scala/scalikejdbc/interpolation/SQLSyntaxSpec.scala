@@ -390,4 +390,16 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     v should equal(SQLSyntax("foo = ?"))
   }
 
+  it should "strip margin by stripMargin" in {
+    sqls"""a =
+         |${123}
+         |""".stripMargin.value should equal("a =\n?\n")
+  }
+
+  it should "strip margin specifying marginChar by stripMargin" in {
+    sql"""a =
+         /${123}
+         /""".stripMargin('/').statement should equal("a =\n?\n")
+  }
+
 }

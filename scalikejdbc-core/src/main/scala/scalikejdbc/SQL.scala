@@ -426,6 +426,12 @@ abstract class SQL[A, E <: WithExtractor](
     new SQLUpdateWithGeneratedKey(statement, parameters, this.tags)(index)
   }
 
+  def stripMargin(marginChar: Char): SQL[A, E] =
+    withStatementAndParameters(statement.stripMargin(marginChar), parameters).fetchSize(fetchSize).tags(tags: _*)
+
+  def stripMargin: SQL[A, E] =
+    withStatementAndParameters(statement.stripMargin, parameters).fetchSize(fetchSize).tags(tags: _*)
+
 }
 
 /**

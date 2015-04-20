@@ -14,4 +14,17 @@ class SQLInterpolationStringSuite extends FlatSpec with Matchers {
     val s2 = sqls"s in (${mutable.Set(1, 2, 3)}"
     s1.parameters should equal(s2.parameters)
   }
+
+  it should "strip margin by stripMargin" in {
+    sql"""SELECT
+         |${1}
+         |""".stripMargin.statement should equal("SELECT\n?\n")
+  }
+
+  it should "strip margin specifying marginChar by stripMargin" in {
+    sql"""SELECT
+         /${1}
+         /""".stripMargin('/').statement should equal("SELECT\n?\n")
+  }
+
 }

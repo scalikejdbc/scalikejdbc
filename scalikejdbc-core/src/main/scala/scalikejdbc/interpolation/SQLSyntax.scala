@@ -177,6 +177,9 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def exists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} exists (${sqlPart})"
   def notExists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} not exists (${sqlPart})"
 
+  def stripMargin: SQLSyntax = new SQLSyntax(value.stripMargin, parameters)
+
+  def stripMargin(marginChar: Char): SQLSyntax = new SQLSyntax(value.stripMargin(marginChar), parameters)
 }
 
 /**
