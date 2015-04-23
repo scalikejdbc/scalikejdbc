@@ -1,0 +1,21 @@
+ScalikeJDBC 2.2.6 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [all] #406 Avoid to execute "git add" multiple times in Travis builds by @xuwei-k
+- [core] #399 override SQLSyntax#hashCode by @xuwei-k
+- [core] #405 fix missing string interpolator in warn logging by @xuwei-k
+- [core] #401 Detect ExecutionContext absence when using TxBoundary.Future by @gakuzzzz
+- [core] #409 Add stripMargin to SQL and SQLSyntax (fix #403) by @tkawachi
+- [core] #407 Avoid nested loop in DBSession#traversable by @gakuzzzz
+- [syntax-support-macro] #408 Introduce SQLSyntaxSupportFactory
+- [mapper-generator] #398 use sqls.count instead of sqls"count(1)" in gerenated code by @xuwei-k
+- [mapper-generator] #402 remove unnecessary "sqls" interpolation call in generated code by @xuwei-k
+- [mapper-generator] #404 remove trailing space by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!
+
