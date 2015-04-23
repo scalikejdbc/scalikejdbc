@@ -10,17 +10,17 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.10"
+  lazy val _slf4jApiVersion = "1.7.12"
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
-  lazy val _logbackVersion = "1.1.2"
-  lazy val _h2Version = "1.4.186"
-  lazy val _mysqlVersion = "5.1.34"
+  lazy val _logbackVersion = "1.1.3"
+  lazy val _h2Version = "1.4.187"
+  lazy val _mysqlVersion = "5.1.35"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
-  lazy val _hibernateVersion = "4.3.8.Final"
+  lazy val _hibernateVersion = "4.3.9.Final"
   lazy val _scalatestVersion = "2.2.4"
-  lazy val _specs2Version = "2.4.16"
+  lazy val _specs2Version = "2.4.17"
 
   private def gitHash: String = try {
     sys.process.Process("git rev-parse HEAD").lines_!.head
