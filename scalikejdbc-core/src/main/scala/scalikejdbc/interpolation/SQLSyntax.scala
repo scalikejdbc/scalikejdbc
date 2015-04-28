@@ -47,6 +47,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def and = sqls"${this} and"
   def or = sqls"${this} or"
 
+  def roundBracket(inner: SQLSyntax) = sqls"$this ($inner)"
+
   def eq(column: SQLSyntax, value: Any): SQLSyntax = {
     value match {
       case null | None => sqls"${this} ${column} is null"
