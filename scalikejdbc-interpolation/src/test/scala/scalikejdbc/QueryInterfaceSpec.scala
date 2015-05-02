@@ -261,6 +261,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         preferredClients.size should equal(2)
         preferredClients should equal(List((2, 360), (1, 440)))
 
+        // test withRoundBracket(ConditionSQLBuilder => ConditionSQLBuilder)
         val bracketTestResults = withSQL {
           select(o.result.id)
             .from(Order as o)
@@ -271,6 +272,18 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         }.map(_.int(o.resultName.id)).list.apply()
 
         bracketTestResults should equal(List(11, 12, 13, 14, 15, 26))
+
+        // test roundBracket(SQLSyntax)
+        val bracketTestResults2 = withSQL {
+          select(o.result.id)
+            .from(Order as o)
+            .where.roundBracket(
+              sqls.eq(o.productId, 1).and.isNotNull(o.accountId)
+            ).or.isNull(o.accountId)
+            .orderBy(o.id)
+        }.map(_.int(o.resultName.id)).list.apply()
+
+        bracketTestResults2 should equal(List(11, 12, 13, 14, 15, 26))
 
         {
           val productId = Some(1)

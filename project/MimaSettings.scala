@@ -137,7 +137,9 @@ object MimaSettings {
     )} ++ Seq(
       // since 2.2.5
       exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toCamelCase"),
-      exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toProperCase")
+      exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toProperCase"),
+      // since 2.2.7
+      exclude[MissingMethodProblem]("scalikejdbc.QueryDSLFeature#ConditionSQLBuilder.roundBracket")
     )
   }
 
