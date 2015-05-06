@@ -142,7 +142,14 @@ object MimaSettings {
   }
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
-    previousArtifact := Some(organization.value % s"${name.value}_${scalaBinaryVersion.value}" % "2.2.0"),
+    previousArtifact := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, scalaMajor)) if scalaMajor <= 11 =>
+          Some(organization.value % s"${name.value}_${scalaBinaryVersion.value}" % "2.2.0")
+        case _ =>
+          None
+      }
+    },
     test in Test := {
       reportBinaryIssues.value
       (test in Test).value
