@@ -120,7 +120,7 @@ object ScalikeJDBCProjects extends Build {
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
         ) ++ (scalaVersion match {
-          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3" % "compile")
+          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
           case _ => Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
