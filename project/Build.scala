@@ -103,7 +103,7 @@ object ScalikeJDBCProjects extends Build {
           file
         }
       },
-      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+      libraryDependencies ++= {
         Seq(
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
@@ -119,9 +119,11 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
-        ) ++ (scalaVersion match {
-          case v if v.startsWith("2.11.") => Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
-          case _ => Nil
+        ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+            Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
+          case _ =>
+            Nil
         }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
       }
     )
