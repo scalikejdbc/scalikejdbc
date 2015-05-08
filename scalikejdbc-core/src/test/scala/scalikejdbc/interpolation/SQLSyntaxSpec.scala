@@ -327,6 +327,15 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(123, "Alice"))
   }
 
+  it should "have #roundBracket" in {
+    val (id, name, age) = (123, "Alice", 12)
+    val s = SQLSyntax.eq(sqls"id", id).and.roundBracket(
+      SQLSyntax.eq(sqls"name", name).or.eq(sqls"age", age)
+    )
+    s.value should equal(" id = ? and ( name = ? or age = ?)")
+    s.parameters should equal(Seq(123, "Alice", 12))
+  }
+
   it should "have #toAndConditionOpt (Some)" in {
     val (id, name) = (123, "Alice")
     val s = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name} or name is null")).get

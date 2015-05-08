@@ -281,6 +281,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       ConditionSQLBuilder[A](sqls"${sql} (${insidePart(emptyBuilder).toSQLSyntax})")
     }
 
+    def roundBracket(inner: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.roundBracket(inner))
+
     /**
      * Appends SQLSyntax directly.
      * e.g. select.from(User as u).where.eq(u.id, 123).append(sqls"order by ${u.id} desc")
