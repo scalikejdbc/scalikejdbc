@@ -4,12 +4,12 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scalikejdbc.MacroCompatible._
 
-object useField {
+object autoColumns {
 
   def apply_impl[A: c.WeakTypeTag](c: Context)(excludes: c.Expr[String]*): c.Expr[Seq[String]] = {
     import c.universe._
-    val columns = EntityUtil.constructorParams[A](c)("useField", excludes: _*).map { field =>
-      q"scalikejdbc.useField.camelToSnake(${field.name.decodedName.toString}, nameConverters, useSnakeCaseColumnName)"
+    val columns = EntityUtil.constructorParams[A](c)("autoColumns", excludes: _*).map { field =>
+      q"scalikejdbc.autoColumns.camelToSnake(${field.name.decodedName.toString}, nameConverters, useSnakeCaseColumnName)"
     }
     c.Expr[Seq[String]](q"Seq(..$columns)")
   }

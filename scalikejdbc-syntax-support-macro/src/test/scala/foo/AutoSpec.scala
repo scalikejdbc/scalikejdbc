@@ -17,7 +17,7 @@ class AutoSpec extends FlatSpec with Matchers with DBSettings {
   case class Person(id: Long, name: String, organizationId: Option[Long], organization: Option[Organization] = None, groupId: Long = 0)
   object Person extends SQLSyntaxSupport[Person] {
     def apply(s: SyntaxProvider[Person])(rs: WrappedResultSet): Person = autoConstruct(rs, s, "organization")
-    override lazy val columns = useField[Person]("organization")
+    override lazy val columns = autoColumns[Person]("organization")
   }
 
   behavior of "autoConstruct"
