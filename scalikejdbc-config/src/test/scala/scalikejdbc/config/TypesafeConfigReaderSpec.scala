@@ -6,6 +6,10 @@ import com.typesafe.config._
 
 class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
+  val play24ConfigReader = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-play24.conf")
+  }
+
   val emptyConfigReader = new TypesafeConfigReader with TypesafeConfig {
     override lazy val config: Config = ConfigFactory.load("empty.conf")
   }
@@ -36,6 +40,13 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
         it("should return JDBCSettings the user and password of which is null") {
           val expected = JDBCSettings("jdbc:h2:mem:test4", null, null, "org.h2.Driver")
           TypesafeConfigReader.readJDBCSettings('baz) should be(expected)
+        }
+      }
+
+      describe("When configuration file is Play 2.4 or higher compatible") {
+        it("should return JDBCSettings as expected") {
+          val expected = JDBCSettings("jdbc:h2:mem:play24", "un", "p", "org.h2.Driver")
+          play24ConfigReader.readJDBCSettings() should be(expected)
         }
       }
 
