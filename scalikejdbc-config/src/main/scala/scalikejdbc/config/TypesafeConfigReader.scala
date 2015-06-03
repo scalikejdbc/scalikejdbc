@@ -21,7 +21,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
   }
 
   private val attributeNames = Seq(
-    "url", "driver", "user", "password",
+    "url", "driver", "user", "username", "password",
     "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
@@ -62,7 +62,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       driver <- configMap.get("driver")
       url <- configMap.get("url")
     } yield {
-      val user = configMap.get("user").orNull[String]
+      val user = configMap.get("user").orElse(configMap.get("username")).orNull[String]
       val password = configMap.get("password").orNull[String]
       JDBCSettings(url, user, password, driver)
     }) getOrElse {
