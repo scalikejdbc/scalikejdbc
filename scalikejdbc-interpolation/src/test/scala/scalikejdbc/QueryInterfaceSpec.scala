@@ -11,9 +11,14 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
   behavior of "QueryInterface"
 
+  case class Price(value: Int)
+  object Price {
+    implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)
+    implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)
+  }
   case class Order(id: Int, productId: Int, accountId: Option[Int], createdAt: DateTime, product: Option[Product] = None, account: Option[Account] = None)
   case class LegacyProduct(id: Option[Int], name: Option[String], price: Int)
-  case class Product(id: Int, name: Option[String], price: Int)
+  case class Product(id: Int, name: Option[String], price: Price)
   case class Account(id: Int, name: Option[String])
   case class SchemaExample(id: Int)
 
@@ -36,7 +41,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   object Product extends SQLSyntaxSupport[Product] {
     override val tableName = "qi_products"
     def apply(p: SyntaxProvider[Product])(rs: WrappedResultSet): Product = apply(p.resultName)(rs)
-    def apply(p: ResultName[Product])(rs: WrappedResultSet): Product = new Product(rs.int(p.id), rs.stringOpt(p.name), rs.int(p.price))
+    def apply(p: ResultName[Product])(rs: WrappedResultSet): Product = new Product(rs.int(p.id), rs.stringOpt(p.name), rs.get(p.price))
   }
   object Account extends SQLSyntaxSupport[Account] {
     override val tableName = "qi_accounts"
@@ -107,7 +112,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           insert.into(LegacyProduct).values(Some(100), "Old Cookie", 40),
           insert.into(LegacyProduct).values(Some(200), "Green Tea", 20),
           insert.into(Product).values(1, "Cookie", 120),
-          insert.into(Product).values(2, "Tea", 80),
+          insert.into(Product).namedValues(pc.id -> 2, pc.name -> "Tea", pc.price -> Price(80)),
           insert.into(Product).select(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
           insert.into(Product).select(lp.id, lp.name, lp.price)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
           insert.into(Product).selectAll(lp)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
@@ -124,6 +129,14 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           insert.into(Order).values(25, 2, Some(3), DateTime.now),
           insert.into(Order).values(26, 2, None, DateTime.now)
         ).foreach(sql => applyUpdate(sql))
+
+        {
+          val p = Product.syntax("p")
+          val products = withSQL {
+            select.from(Product as p).orderBy(p.id)
+          }.map(Product(p)).list.apply()
+          assert(products === List(Product(1, Some("Cookie"), Price(120)), Product(2, Some("Tea"), Price(80))))
+        }
 
         // batch insert 
         val batchInsertQuery = withSQL {
@@ -195,7 +208,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         findByOptionalAccountName(Option.empty).size should be(11)
 
         {
-          val (productId, accountId) = (Some(1), None)
+          val (productId, accountId): (Option[Int], Option[Int]) = (Some(1), None)
           val ids = withSQL {
             select(o.result.id).from(Order as o)
               .where(sqls.toAndConditionOpt(
@@ -220,7 +233,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         }
 
         {
-          val (id1, id2) = (Some(1), None)
+          val (id1, id2): (Option[Int], Option[Int]) = (Some(1), None)
           val ids = withSQL {
             select(o.result.id).from(Order as o)
               .where
@@ -329,7 +342,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val inClauseResults = withSQL {
             select.from(Order as o)
-              .where.in(o.id, Seq())
+              .where.in(o.id, Seq[Int]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           inClauseResults.map(_.id) should equal(List())
@@ -345,7 +358,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val notInClauseResults = withSQL {
             select.from(Order as o)
-              .where.notIn(o.id, Seq())
+              .where.notIn(o.id, Seq[Int]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
@@ -353,7 +366,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val notInClauseResults = withSQL {
             select.from(Order as o)
-              .where.not.in(o.id, Seq())
+              .where.not.in(o.id, Seq[Int]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
@@ -402,7 +415,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val inClauseResults = withSQL {
             select.from(Order as o)
-              .where.in((o.id, o.productId), Seq())
+              .where.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           inClauseResults.map(_.id) should equal(List())
@@ -418,7 +431,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val notInClauseResults = withSQL {
             select.from(Order as o)
-              .where.notIn((o.id, o.productId), Seq())
+              .where.notIn((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
@@ -426,7 +439,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         {
           val notInClauseResults = withSQL {
             select.from(Order as o)
-              .where.not.in((o.id, o.productId), Seq())
+              .where.not.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))

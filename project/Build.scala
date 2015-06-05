@@ -121,6 +121,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= {
         Seq(
           // scope: compile
+          "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.9.2"           % "compile",
@@ -136,9 +137,17 @@ object ScalikeJDBCProjects extends Build {
         ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, scalaMajor)) if scalaMajor >= 11 =>
             Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
+          case Some((2, 10)) =>
+            libraryDependencies.value ++ Seq(
+              compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+              "org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
           case _ =>
             Nil
         }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
+      },
+      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
+        if (v.startsWith("2.10")) dir / "scala2.10"
+        else dir / "scala2.11"
       }
     )
   )
@@ -275,17 +284,13 @@ object ScalikeJDBCProjects extends Build {
           "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
           "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
         ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion.value)
-      },
-      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
-        if (v.startsWith("2.10")) dir / "scala2.10"
-        else dir / "scala2.11"
       }
     )
   ) dependsOn(scalikejdbcLibrary)
 
   def macroDependenciesInCompileScope(scalaVersion: String) = {
     if (scalaVersion.startsWith("2.10")) Seq(
-      "org.scalamacros" %% "quasiquotes" % "2.1.0" % "compile",
+      "org.scalamacros" % "quasiquotes_2.10" % "2.1.0" % "compile",
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     ) else Seq()
   }

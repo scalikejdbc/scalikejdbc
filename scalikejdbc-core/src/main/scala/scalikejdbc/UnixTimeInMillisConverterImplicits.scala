@@ -22,3 +22,5 @@ trait UnixTimeInMillisConverterImplicits {
   implicit def convertLocalTimeToConverter(t: LocalTime): LocalTimeConverter = new LocalTimeConverter(t)
 
 }
+
+object UnixTimeInMillisConverterImplicits extends UnixTimeInMillisConverterImplicits

@@ -216,50 +216,50 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def not: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} not")
 
-    def eq(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
-    def ne(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ne(column, value)}")
-    def gt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.gt(column, value)}")
-    def ge(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ge(column, value)}")
-    def lt(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.lt(column, value)}")
-    def le(column: SQLSyntax, value: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.le(column, value)}")
+    def eq[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.eq(column, value)}")
+    def ne[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ne(column, value)}")
+    def gt[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.gt(column, value)}")
+    def ge[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.ge(column, value)}")
+    def lt[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.lt(column, value)}")
+    def le[B: ParameterBinderFactory](column: SQLSyntax, value: B): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.le(column, value)}")
 
     def isNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNull(column)}")
     def isNotNull(column: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.isNotNull(column)}")
 
-    def between(column: SQLSyntax, a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(column, a, b)}")
-    def notBetween(column: SQLSyntax, a: Any, b: Any): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notBetween(column, a, b)}")
+    def between[B: ParameterBinderFactory, C: ParameterBinderFactory](column: SQLSyntax, a: B, b: C): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.between(column, a, b)}")
+    def notBetween[B: ParameterBinderFactory, C: ParameterBinderFactory](column: SQLSyntax, a: B, b: C): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notBetween(column, a, b)}")
 
-    def in(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
+    def in[B: ParameterBinderFactory](column: SQLSyntax, values: Seq[B]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
 
     def in(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} in (${subQuery.toSQLSyntax})")
 
-    def in(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): ConditionSQLBuilder[A] = {
+    def in[B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
     }
-    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def in[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
     }
-    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def in[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D, E)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
     }
-    def in(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def in[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory, G: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D, E, G)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(columns, valueSeqs)}")
     }
 
-    def notIn(column: SQLSyntax, values: Seq[Any]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(column, values)}")
+    def notIn[B: ParameterBinderFactory](column: SQLSyntax, values: Seq[B]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(column, values)}")
 
     def notIn(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} ${column} not in (${subQuery.toSQLSyntax})")
 
-    def notIn(columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any)]): ConditionSQLBuilder[A] = {
+    def notIn[B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
     }
-    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def notIn[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
     }
-    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def notIn[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D, E)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
     }
-    def notIn(columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(Any, Any, Any, Any, Any)]): ConditionSQLBuilder[A] = {
+    def notIn[B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory, G: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(B, C, D, E, G)]): ConditionSQLBuilder[A] = {
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.notIn(columns, valueSeqs)}")
     }
 
@@ -479,7 +479,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val vs = sqls.csv(values.map(v => sqls"${v}"): _*)
       this.copy(sql = sqls"${sql} values (${vs})")
     }
-    def namedValues(columnsAndValues: (SQLSyntax, Any)*): InsertSQLBuilder = {
+    def namedValues(columnsAndValues: (SQLSyntax, ParameterBinder)*): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.unzip
       columns(cs: _*).values(vs: _*)
     }
@@ -512,7 +512,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with WhereSQLBuilder[UpdateOperation] {
 
     def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
-    def set(tuples: (SQLSyntax, Any)*): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+    def set(tuples: (SQLSyntax, ParameterBinder)*): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
 
     override def append(part: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }

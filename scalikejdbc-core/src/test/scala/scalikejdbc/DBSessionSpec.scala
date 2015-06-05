@@ -1050,7 +1050,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           try {
             SQL("drop table dbsession_work_with_parameter_binder").execute.apply()
           } catch {
-            case e: Exception => e.printStackTrace
+            case e: Exception => e.printStackTrace()
           }
         }
     }
