@@ -1,0 +1,16 @@
+ScalikeJDBC 2.2.7 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #415 Add SQLSyntax#roundBracket by @tkawachi
+- [config] #420 Support Play 2.4's db settings by @seratch
+- [mapper-generator] #411 mapperGenerator does not need scalikejdbcTest dependency by @xuwei-k
+- [syntax-support-macro] #412 Fixed compile error at using SQLSyntaxSupportFactory by @gakuzzzz
+- [syntax-support-macro] Automatically building column names by using macro by @gakuzzzz
+
+Enjoy writing mostly type-safe SQL and get things done!
+
