@@ -18,8 +18,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.4.187"
   lazy val _mysqlVersion = "5.1.35"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
-  lazy val _hibernateVersion = "4.3.9.Final"
-  lazy val _scalatestVersion = "2.2.4"
+  lazy val _hibernateVersion = "4.3.10.Final"
+  lazy val _scalatestVersion = "2.2.5"
   lazy val _specs2Version = "2.4.17"
 
   private def gitHash: String = try {
@@ -108,7 +108,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.7"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.8"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
