@@ -7,6 +7,7 @@ http://scalikejdbc.org/
 ### Changes
 
 - [core] #415 Add SQLSyntax#roundBracket by @tkawachi
+- [core] Bump joda-time to 2.8 by @seratch
 - [config] #420 Support Play 2.4's db settings by @seratch
 - [mapper-generator] #411 mapperGenerator does not need scalikejdbcTest dependency by @xuwei-k
 - [syntax-support-macro] #412 Fixed compile error at using SQLSyntaxSupportFactory by @gakuzzzz
