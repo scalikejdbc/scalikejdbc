@@ -2,7 +2,7 @@ language: scala
 
 scala:
   - 2.10.5
-  - 2.11.6
+  - 2.11.7
 
 jdk:
   - oraclejdk7
@@ -51,9 +51,9 @@ matrix:
     - scala: scripted-test
       jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.11.6
+    - scala: 2.11.7
       jdk: oraclejdk7
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.11.6
+    - scala: 2.11.7
       jdk: oraclejdk7
       env: SCALIKEJDBC_DATABASE="hsqldb"
