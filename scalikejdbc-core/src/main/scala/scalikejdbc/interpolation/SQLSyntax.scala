@@ -338,5 +338,7 @@ object SQLSyntax {
     if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
   }
 
+  def roundBracket(inner: SQLSyntax) = sqls"($inner)"
+
 }
 
