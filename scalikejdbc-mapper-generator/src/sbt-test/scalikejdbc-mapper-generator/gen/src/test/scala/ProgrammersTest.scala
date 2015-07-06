@@ -15,29 +15,32 @@ class ProgrammersTest extends fixture.FlatSpec with Matchers with AutoRollback {
     Programmers.findAll().toSet should equal(Set.empty[Programmers])
     Programmers.countAll() should equal(0)
 
-    val programmers = List(Some("aaa"), Some("bbb"), None).map(name =>
+    val programmers = Seq(Some("aaa"), Some("bbb"), None).map(name =>
       Programmers.create(name = name, t1 = new DateTime(2014, 12, 31, 20, 0))
-    ).toSet
+    )
     programmers.foreach{ programmer =>
       Programmers.find(programmer.id) should equal(Some(programmer))
     }
     val invalidId = Int.MinValue
     Programmers.find(invalidId) should equal(None)
-    Programmers.findAll().toSet should equal(programmers)
+    Programmers.findAll().toSet should equal(programmers.toSet)
     Programmers.countAll() should equal(programmers.size)
-    Programmers.findAllBy(sqls"${p.name} is not null").toSet should equal(programmers.filter(_.name.isDefined))
+    Programmers.findAllBy(sqls"${p.name} is not null").toSet should equal(programmers.filter(_.name.isDefined).toSet)
     Programmers.countBy(sqls"${p.name} is null") should equal(programmers.count(_.name.isEmpty))
 
-    val destroyProgrammer = Random.shuffle(programmers.toList).head
+    val destroyProgrammer = Random.shuffle(programmers).head
 
     Programmers.destroy(destroyProgrammer)
-    Programmers.findAll().toSet should equal(programmers.filter(_ != destroyProgrammer))
+    Programmers.findAll().toSet should equal(programmers.filter(_ != destroyProgrammer).toSet)
     Programmers.countAll() should equal(programmers.size - 1)
     Programmers.find(destroyProgrammer.id) should equal(None)
 
     programmers.foreach(Programmers.destroy(_))
     Programmers.findAll().toSet should equal(Set.empty[Programmers])
     Programmers.countAll() should equal(0)
+
+    val res = Programmers.batchInsert(programmers)
+    res.size should equal(programmers.size)
   }
 
 }
