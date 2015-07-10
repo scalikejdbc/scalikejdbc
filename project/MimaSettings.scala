@@ -139,7 +139,16 @@ object MimaSettings {
       exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toCamelCase"),
       exclude[MissingMethodProblem]("scalikejdbc.mapper.CodeGenerator.scalikejdbc$mapper$CodeGenerator$$toProperCase"),
       // since 2.2.7
-      exclude[MissingMethodProblem]("scalikejdbc.QueryDSLFeature#ConditionSQLBuilder.roundBracket")
+      exclude[MissingMethodProblem]("scalikejdbc.QueryDSLFeature#ConditionSQLBuilder.roundBracket"),
+      // since 2.2.8
+      exclude[MissingMethodProblem]("scalikejdbc.DBSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.NamedAutoSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.NoSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.ReadOnlyAutoSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.ActiveSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.AutoSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.ReadOnlyNamedAutoSession.batch"),
+      exclude[MissingMethodProblem]("scalikejdbc.SQLBatch.apply")
     )
   }
 

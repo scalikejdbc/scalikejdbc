@@ -441,8 +441,8 @@ abstract class SQL[A, E <: WithExtractor](
  */
 class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil) {
 
-  def apply()(implicit session: DBSession): Seq[Int] = {
-    val f: DBSession => Seq[Int] = _.tags(tags: _*).batch(statement, parameters: _*)
+  def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
+    val f: DBSession => C[Int] = _.tags(tags: _*).batch(statement, parameters: _*)
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
