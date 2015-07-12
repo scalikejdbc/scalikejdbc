@@ -309,7 +309,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * }}}
      */
     val createMethod = {
-      val autoIncrement = table.autoIncrementColumns.size == 1
+      val autoIncrement = table.autoIncrementColumns.nonEmpty
       val createColumns: List[Column] =
         if (autoIncrement)
           allColumns.filterNot {
@@ -624,6 +624,50 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |  }""".stripMargin + eol
     }
 
+    /**
+     * {{{
+     * def batchInsert(entities: Seq[Member])(implicit session: DBSession = autoSession): Seq[Int] = {
+     *   val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>
+     *   Seq(
+     *     'id -> entity.id,
+     *     'name -> entity.name,
+     *     'birthday -> entity.birthday))
+     *   SQL("""insert into member (
+     *     id,
+     *     name,
+     *     birthday
+     *   ) values (
+     *     {id},
+     *     {name},
+     *     {birthday}
+     *   )""").batchByName(params: _*).apply()
+     * }
+     * }}}
+     */
+    val batchInsertMethod = {
+      val autoIncrement = table.autoIncrementColumns.nonEmpty
+      val batchInsertColumns: List[Column] =
+        if (autoIncrement)
+          allColumns.filterNot {
+            c => table.autoIncrementColumns.exists(_.name == c.name)
+          }
+        else
+          allColumns
+
+      // def batchInsert=(
+      1.indent + s"def batchInsert(entities: Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + "): " + "Seq[Int] = {" + eol +
+        2.indent + "val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity => " + eol +
+        3.indent + "Seq(" + eol +
+        batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
+        "))" + eol +
+        4.indent + "SQL(\"\"\"insert into " + table.name + "(" + eol +
+        batchInsertColumns.map(c => 4.indent + c.name.replace("`", "")).mkString(comma + eol) + eol +
+        3.indent + ")" + " values (" + eol +
+        batchInsertColumns.map(c => 4.indent + "{" + c.nameInScala.replace("`", "") + "}").mkString(comma + eol) + eol +
+        3.indent + ")\"\"\").batchByName(params: _*).apply()" + eol +
+        2.indent + "}" + eol
+    }
+
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     "object " + className + " extends SQLSyntaxSupport[" + className + "] {" + eol +
       table.schema.filterNot(_.isEmpty).map { schema =>
@@ -652,6 +696,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       (if (isQueryDsl) queryDslCountByMethod else interpolationCountByMethod) +
       eol +
       createMethod +
+      eol +
+      batchInsertMethod +
       eol +
       saveMethod +
       eol +
@@ -796,7 +842,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    val shouldBeNone = %className%.find(%primaryKeys%)
           |    shouldBeNone.isDefined should be(false)
           |  }
-          |
+          |  it should "perform batch insert" in { implicit session =>
+          |    val entities = %className%.findAll()
+          |    entities.foreach(e => %className%.destroy(e))
+          |    val batchInserted = %className%.batchInsert(entities)
+          |    batchInserted.size should be >(0)
+          |  }
           |}""".stripMargin + eol))
     case GeneratorTestTemplate.specs2unit =>
       Some(replaceVariablesForTestPart(
@@ -854,6 +905,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      val shouldBeNone = %className%.find(%primaryKeys%)
           |      shouldBeNone.isDefined should beFalse
           |    }
+          |    "perform batch insert" in new AutoRollback {
+          |      val entities = %className%.findAll()
+          |      entities.foreach(e => %className%.destroy(e))
+          |      val batchInserted = %className%.batchInsert(entities)
+          |      batchInserted.size should be_>(0)
+          |    }
           |  }
           |
           |}""".stripMargin + eol))
@@ -878,6 +935,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    "create new record"            ! autoRollback().create ^
           |    "save a record"                ! autoRollback().save ^
           |    "destroy a record"             ! autoRollback().destroy ^
+          |    "perform batch insert"         ! autoRollback().batchInsert ^
           |                                   end
           |
           |  case class autoRollback() extends AutoRollback {
@@ -923,6 +981,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      %className%.destroy(entity)
           |      val shouldBeNone = %className%.find(%primaryKeys%)
           |      shouldBeNone.isDefined should beFalse
+          |    }
+          |    def batchInsert = this {
+          |      val entities = %className%.findAll()
+          |      entities.foreach(e => %className%.destroy(e))
+          |      val batchInserted = %className%.batchInsert(entities)
+          |      batchInserted.size should be_>(0)
           |    }
           |  }
           |
