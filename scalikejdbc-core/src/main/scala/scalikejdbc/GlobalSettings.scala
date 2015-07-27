@@ -36,24 +36,24 @@ object GlobalSettings {
   var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
 
   /**
-   * Event hanlder to be called every query completion.
+   * Event handler to be called every query completion.
    */
   var queryCompletionListener: (String, Seq[Any], Long) => Unit = (statement: String, params: Seq[Any], millis: Long) => ()
 
   /**
-   * Event hanlder to be called every query failure.
+   * Event handler to be called every query failure.
    */
   var queryFailureListener: (String, Seq[Any], Throwable) => Unit = (statement: String, params: Seq[Any], e: Throwable) => ()
 
   /**
-   * Event hanlder to be called every query completion when specifying tags.
+   * Event handler to be called every query completion when specifying tags.
    */
   var taggedQueryCompletionListener: (String, Seq[Any], Long, Seq[String]) => Unit = {
     (statement: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
   }
 
   /**
-   * Event hanlder to be called every query failure when specifying tags.
+   * Event handler to be called every query failure when specifying tags.
    */
   var taggedQueryFailureListener: (String, Seq[Any], Throwable, Seq[String]) => Unit = {
     (statement: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
