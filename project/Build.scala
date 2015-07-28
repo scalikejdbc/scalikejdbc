@@ -19,8 +19,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val _mysqlVersion = "5.1.35"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
   lazy val _hibernateVersion = "4.3.10.Final"
-  lazy val _scalatestVersion = "2.2.5"
-  lazy val _specs2Version = "2.4.17"
+  lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
+  lazy val specs2Version = SettingKey[String]("specs2Version")
 
   private def gitHash: String = try {
     sys.process.Process("git rev-parse HEAD").lines_!.head
@@ -38,6 +38,18 @@ object ScalikeJDBCProjects extends Build {
     resolvers ++= _resolvers,
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
+    scalatestVersion := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, v)) if v <= 11 => "2.2.5"
+        case _ => "2.2.5-M2"
+      }
+    },
+    specs2Version := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, v)) if v <= 11 => "2.4.17"
+        case _ => "3.6.3"
+      }
+    },
     //scalaVersion := "2.11.7",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
@@ -74,7 +86,7 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-library"),
     settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc",
-      libraryDependencies ++= scalaTestDependenciesInTestScope ++
+      libraryDependencies ++= scalaTestDependenciesInTestScope(scalatestVersion.value) ++
         Seq("com.h2database" % "h2" % _h2Version % "test")
     )
   ) dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
@@ -124,7 +136,7 @@ object ScalikeJDBCProjects extends Build {
             Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
           case _ =>
             Nil
-        }) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
+        }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       }
     )
   )
@@ -137,7 +149,7 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= Seq(
         "com.github.seratch" %  "java-time-backport" % "1.0.0"    % "provided,test",
         "com.h2database"     %  "h2"                 % _h2Version % "test"
-      ) ++ scalaTestDependenciesInTestScope
+      ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value)
     )
   ) dependsOn(scalikejdbcLibrary)
 
@@ -147,11 +159,11 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-interpolation-macro"),
     settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-interpolation-macro",
-      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+      libraryDependencies ++= {
         Seq(
-          "org.scala-lang" %  "scala-reflect"    % scalaVersion      % "compile",
-          "org.scala-lang" %  "scala-compiler"   % scalaVersion      % "optional"
-        ) ++ scalaTestDependenciesInTestScope
+          "org.scala-lang" %  "scala-reflect"    % scalaVersion.value % "compile",
+          "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
+        ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value)
       }
     )
   ) dependsOn(scalikejdbcCore)
@@ -167,7 +179,7 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"        % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
           "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
-        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
+        ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
@@ -181,8 +193,8 @@ object ScalikeJDBCProjects extends Build {
       name := "scalikejdbc-mapper-generator-core",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
-          scalaTestDependenciesInTestScope ++
-          specs2DependenciesInTestScope ++
+          scalaTestDependenciesInTestScope(scalatestVersion.value) ++
+          specs2DependenciesInTestScope(specs2Version.value) ++
           jdbcDriverDependenciesInTestScope
       }
     )
@@ -204,14 +216,14 @@ object ScalikeJDBCProjects extends Build {
         "-Dmysql.version=" + _mysqlVersion,
         "-Dpostgresql.version=" + _postgresqlVersion,
         "-Dh2.version=1.4.181",
-        "-Dspecs2.version=" + _specs2Version,
-        "-Dscalatest.version=" + _scalatestVersion
+        "-Dspecs2.version=" + specs2Version.value,
+        "-Dscalatest.version=" + scalatestVersion.value
       ),
       name := "scalikejdbc-mapper-generator",
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
-          scalaTestDependenciesInTestScope ++
-          specs2DependenciesInTestScope ++
+          scalaTestDependenciesInTestScope(scalatestVersion.value) ++
+          specs2DependenciesInTestScope(specs2Version.value) ++
           jdbcDriverDependenciesInTestScope
       }
     )
@@ -227,8 +239,8 @@ object ScalikeJDBCProjects extends Build {
         Seq(
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
-          "org.scalatest"  %% "scalatest"       % _scalatestVersion % "provided",
-          "org.specs2"     %% "specs2-core"     % _specs2Version    % "provided"
+          "org.scalatest"  %% "scalatest"       % scalatestVersion.value % "provided",
+          "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided"
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
@@ -245,7 +257,7 @@ object ScalikeJDBCProjects extends Build {
           "com.typesafe"   %  "config"          % _typesafeConfigVersion % "compile",
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
-        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope
+        ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       }
     )
   ) dependsOn(scalikejdbcCore)
@@ -256,11 +268,11 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-syntax-support-macro"),
     settings = baseSettings ++ Seq(
       name := "scalikejdbc-syntax-support-macro",
-      libraryDependencies <++= (scalaVersion) { scalaVersion =>
+      libraryDependencies ++= {
         Seq(
           "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
           "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
-        ) ++ scalaTestDependenciesInTestScope ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion)
+        ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion.value)
       },
       unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
         if (v.startsWith("2.10")) dir / "scala2.10"
@@ -286,11 +298,11 @@ object ScalikeJDBCProjects extends Build {
     "sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
     "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
   )
-  lazy val scalaTestDependenciesInTestScope =
-    Seq("org.scalatest" %% "scalatest" % _scalatestVersion % "test")
+  def scalaTestDependenciesInTestScope(v: String) =
+    Seq("org.scalatest" %% "scalatest" % v % "test")
 
-  lazy val specs2DependenciesInTestScope =
-    Seq("org.specs2" %% "specs2-core" % _specs2Version % "test")
+  def specs2DependenciesInTestScope(v: String) =
+    Seq("org.specs2" %% "specs2-core" % v % "test")
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
