@@ -313,11 +313,45 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(123))
   }
 
+  it should "have #where(Option[SQLSyntax])" in {
+    {
+      val id = 123
+      val s = SQLSyntax.where(Some(sqls"id = ${id}"))
+      s.value should equal(" where id = ?")
+      s.parameters should equal(Seq(123))
+    }
+    {
+      val s = SQLSyntax.where(None)
+      s.value should equal("")
+      s.parameters should equal(Seq())
+    }
+  }
+
   it should "have #and" in {
     val (id, name) = (123, "Alice")
     val s = SQLSyntax.eq(sqls"id", id).and.eq(sqls"name", name)
     s.value should equal(" id = ? and name = ?")
     s.parameters should equal(Seq(123, "Alice"))
+  }
+  it should "have #and(SQLSyntax)" in {
+    val (id, name) = (123, "Alice")
+    val s = SQLSyntax.eq(sqls"id", id).and(SQLSyntax.eq(sqls"name", name))
+    s.value should equal(" id = ? and ( name = ?)")
+    s.parameters should equal(Seq(123, "Alice"))
+  }
+  it should "have #and(Option[SQLSyntax])" in {
+    {
+      val (id, name) = (123, "Alice")
+      val s = SQLSyntax.eq(sqls"id", id).and(Some(SQLSyntax.eq(sqls"name", name)))
+      s.value should equal(" id = ? and ( name = ?)")
+      s.parameters should equal(Seq(123, "Alice"))
+    }
+    {
+      val id = 123
+      val s = SQLSyntax.eq(sqls"id", id).and(None)
+      s.value should equal(" id = ?")
+      s.parameters should equal(Seq(123))
+    }
   }
 
   it should "have #or" in {
@@ -325,6 +359,26 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     val s = SQLSyntax.eq(sqls"id", id).or.eq(sqls"name", name)
     s.value should equal(" id = ? or name = ?")
     s.parameters should equal(Seq(123, "Alice"))
+  }
+  it should "have #or(SQLSyntax)" in {
+    val (id, name) = (123, "Alice")
+    val s = SQLSyntax.eq(sqls"id", id).or(SQLSyntax.eq(sqls"name", name))
+    s.value should equal(" id = ? or ( name = ?)")
+    s.parameters should equal(Seq(123, "Alice"))
+  }
+  it should "have #or(Option[SQLSyntax])" in {
+    {
+      val (id, name) = (123, "Alice")
+      val s = SQLSyntax.eq(sqls"id", id).or(Some(SQLSyntax.eq(sqls"name", name)))
+      s.value should equal(" id = ? or ( name = ?)")
+      s.parameters should equal(Seq(123, "Alice"))
+    }
+    {
+      val id = 123
+      val s = SQLSyntax.eq(sqls"id", id).or(None)
+      s.value should equal(" id = ?")
+      s.parameters should equal(Seq(123))
+    }
   }
 
   it should "have #roundBracket" in {
