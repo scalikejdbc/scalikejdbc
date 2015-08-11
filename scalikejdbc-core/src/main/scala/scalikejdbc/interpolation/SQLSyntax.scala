@@ -43,9 +43,14 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
 
   def where = sqls"${this} where"
   def where(where: SQLSyntax): SQLSyntax = sqls"${this} where ${where}"
+  def where(whereOpt: Option[SQLSyntax]): SQLSyntax = whereOpt.fold(this)(where(_))
 
   def and = sqls"${this} and"
+  def and(sqlPart: SQLSyntax): SQLSyntax = sqls"$this and ($sqlPart)"
+  def and(andOpt: Option[SQLSyntax]): SQLSyntax = andOpt.fold(this)(and(_))
   def or = sqls"${this} or"
+  def or(sqlPart: SQLSyntax): SQLSyntax = sqls"$this or ($sqlPart)"
+  def or(orOpt: Option[SQLSyntax]): SQLSyntax = orOpt.fold(this)(or(_))
 
   def roundBracket(inner: SQLSyntax) = sqls"$this ($inner)"
 
@@ -182,6 +187,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, val parameters: Seq[Any
   def stripMargin: SQLSyntax = new SQLSyntax(value.stripMargin, parameters)
 
   def stripMargin(marginChar: Char): SQLSyntax = new SQLSyntax(value.stripMargin(marginChar), parameters)
+
 }
 
 /**
@@ -248,6 +254,14 @@ object SQLSyntax {
 
   val where: SQLSyntax = SQLSyntax.empty.where
   def where(where: SQLSyntax): SQLSyntax = SQLSyntax.empty.where(where)
+  def where(whereOpt: Option[SQLSyntax]): SQLSyntax = SQLSyntax.empty.where(whereOpt)
+
+  def and: SQLSyntax = SQLSyntax.empty.and
+  def and(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.and(sqlPart)
+  def and(andOpt: Option[SQLSyntax]): SQLSyntax = SQLSyntax.empty.and(andOpt)
+  def or: SQLSyntax = SQLSyntax.empty.or
+  def or(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.or(sqlPart)
+  def or(orOpt: Option[SQLSyntax]): SQLSyntax = SQLSyntax.empty.or(orOpt)
 
   def eq(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.eq(column, value)
   def ne(column: SQLSyntax, value: Any): SQLSyntax = SQLSyntax.empty.ne(column, value)

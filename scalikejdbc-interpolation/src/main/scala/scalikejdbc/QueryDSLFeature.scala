@@ -204,15 +204,15 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with PagingSQLBuilder[A]
       with GroupBySQLBuilder[A] {
 
-    def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} and")
+    def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.and)
 
     // Never append 'and' if sqlPart is empty.
-    def and(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A] { sqlPart.map(part => sqls"${sql} and (${part})").getOrElse(sql) }
+    def and(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.and(sqlPart))
 
-    def or: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} or")
+    def or: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.or)
 
     // Never append 'or' if sqlPart is empty.
-    def or(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A] { sqlPart.map(part => sqls"${sql} or (${part})").getOrElse(sql) }
+    def or(sqlPart: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.or(sqlPart))
 
     def not: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${sql} not")
 
@@ -454,7 +454,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def where(where: SQLSyntax): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where(where)}")
 
     // Never append 'where' if whereOpt is empty.
-    def where(whereOpt: Option[SQLSyntax]): ConditionSQLBuilder[A] = whereOpt.map(w => this.where(w)).getOrElse(ConditionSQLBuilder[A](toSQLSyntax))
+    def where(whereOpt: Option[SQLSyntax]): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where(whereOpt)}")
 
     // ---
     // common functions
