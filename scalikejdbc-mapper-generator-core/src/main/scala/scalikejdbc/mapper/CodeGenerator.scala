@@ -996,9 +996,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def replaceVariablesForTestPart(code: String): String = {
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
+    val pkColumns = if (table.primaryKeyColumns.size == 0) table.allColumns else table.primaryKeyColumns
     code.replace("%package%", packageName)
       .replace("%className%", className)
-      .replace("%primaryKeys%", table.primaryKeyColumns.map {
+      .replace("%primaryKeys%", pkColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))
       .replace("%syntaxObject%",
@@ -1006,11 +1007,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       )
       .replace("%whereExample%",
         if (isQueryDsl)
-          table.primaryKeyColumns.headOption.map { c =>
+          pkColumns.headOption.map { c =>
           "sqls.eq(" + syntaxName + "." + c.nameInScala + ", " + c.defaultValueInScala + ")"
         }.getOrElse("")
         else
-          table.primaryKeyColumns.headOption.map { c =>
+          pkColumns.headOption.map { c =>
             "sqls\"" + c.name + " = ${" + c.defaultValueInScala + "}\""
           }.getOrElse("")
       )
