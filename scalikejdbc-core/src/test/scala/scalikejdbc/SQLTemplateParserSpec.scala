@@ -203,4 +203,12 @@ users"""
     SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
   }
 
+  // https://github.com/scalikejdbc/scalikejdbc/issues/434
+  it should "support postgres type cast" in {
+    val sql = "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = {name}"
+    SQLTemplateParser.extractAllParameters(sql).size should equal(1)
+    val expected = "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = ?"
+    SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
+  }
+
 }
