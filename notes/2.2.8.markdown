@@ -1,0 +1,18 @@
+ScalikeJDBC 2.2.8 is out. 
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #426 Add SQLSyntax.roundBracket(SQLSyntax) by @seratch
+- [core] #425 Bump Scala version to 2.11.7 by @xuwei-k
+- [core] #428 Generalize SQLBatch#apply and DBSession#batch return type by @xuwei-k
+- [core] #433 Added where(Option[SQLSyntax]), or(Option[SQLSyntax]), and(Option[SQLSyntax]) to SQLSyntax by @gakuzzzz
+- [core] #435 Fix #434 adding postgres type cast breaks query parameter binding  by @seratch
+- [mapper-generator] #427 Add batchInsert to generated code by mapper-generator by @letusfly85
+- [mapper-generator] #432 Fix generated test when primaryKeyColumns is empty by @nazoking
+
+Enjoy writing mostly type-safe SQL and get things done!
+
