@@ -1,1 +1,1 @@
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.7")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.9")
