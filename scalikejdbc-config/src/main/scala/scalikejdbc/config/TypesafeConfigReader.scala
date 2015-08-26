@@ -22,7 +22,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 
   private val attributeNames = Seq(
     "url", "driver", "user", "username", "password",
-    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName")
+    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName", "poolWarmUpTimeMillis")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val configMap: MutableMap[String, String] = MutableMap.empty
@@ -89,7 +89,8 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
       validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery),
       connectionPoolFactoryName = configMap.get("poolFactoryName").getOrElse(default.connectionPoolFactoryName),
-      driverName = configMap.get("driver").orNull[String]
+      driverName = configMap.get("driver").orNull[String],
+      warmUpTime = configMap.get("poolWarmUpTimeMillis").map(_.toLong).getOrElse(default.warmUpTime)
     )
   }
 

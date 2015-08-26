@@ -79,7 +79,8 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "poolMaxSize" -> "2",
           "connectionTimeoutMillis" -> "2000",
           "poolConnectionTimeoutMillis" -> "1000",
-          "poolValidationQuery" -> "select 1 as foo"
+          "poolValidationQuery" -> "select 1 as foo",
+          "poolWarmUpTimeMillis" -> "10"
         )
         TypesafeConfigReader.readAsMap('foo) should be(expected)
       }
@@ -122,7 +123,8 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:dev-foo",
           "user" -> "dev-foo",
-          "password" -> "secret2"
+          "password" -> "secret2",
+          "poolWarmUpTimeMillis" -> "10"
         )
         val configReader = new TypesafeConfigReaderWithEnv("dev")
         configReader.readAsMap('foo) should be(expected)
@@ -159,17 +161,17 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     describe("#readConnectionPoolSettings") {
 
       it("should read configuration and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one", "commons-dbcp", "org.h2.Driver")
+        val expected = ConnectionPoolSettings(5, 7, 1000L, "select 1 as one", "commons-dbcp", "org.h2.Driver", 10L)
         TypesafeConfigReaderWithEnv("settings").readConnectionPoolSettings() should be(expected)
       }
 
       it("should read configuration for foo db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver")
+        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver", 10L)
         TypesafeConfigReader.readConnectionPoolSettings('foo) should be(expected)
       }
 
       it("should read configuration for bar db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar", null, "org.h2.Driver")
+        val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar", null, "org.h2.Driver", 10L)
         TypesafeConfigReader.readConnectionPoolSettings('bar) should be(expected)
       }
 
