@@ -97,7 +97,7 @@ object ConnectionPool extends LogSupport {
       pools.update(name, pool)
 
       // wait a little because rarely NPE occurs when immediately accessed.
-      Thread.sleep(100L)
+      Thread.sleep(settings.warmUpTime)
 
       // asynchronously close the old pool if exists
       oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
