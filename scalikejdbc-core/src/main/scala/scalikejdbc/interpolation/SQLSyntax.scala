@@ -224,12 +224,15 @@ object SQLSyntax {
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.parameters))
 
-  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = parts.foldLeft(SQLSyntax.empty) {
-    case (sql, part) if !sql.isEmpty && !part.isEmpty =>
-      if (spaceBeforeDelimier) sqls"${sql} ${delimiter} ${part}"
-      else sqls"${sql}${delimiter} ${part}"
-    case (sql, part) if sql.isEmpty && !part.isEmpty => part
-    case (sql, _) => sql
+  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = {
+    val sep = if (spaceBeforeDelimier) {
+      sqls" ${delimiter} "
+    } else {
+      sqls"${delimiter} "
+    }
+    val value = parts.map(_.value).mkString(sep)
+    val parameters = parts.flatMap(_.parameters)
+    apply(value, parameters)
   }
   def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",", false)
 
