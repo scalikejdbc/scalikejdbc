@@ -231,8 +231,12 @@ object SQLSyntax {
       s"${delimiter.value} "
     }
     val value = parts.map(_.value).mkString(sep)
-    val parameters = parts.tail.foldLeft(parts.headOption.fold(Seq.empty[Any])(_.parameters)) {
-      case (params, part) => params ++ delimiter.parameters ++ part.parameters
+    val parameters = if (delimiter.parameters.isEmpty) {
+      parts.flatMap(_.parameters)
+    } else {
+      parts.tail.foldLeft(parts.headOption.fold(Seq.empty[Any])(_.parameters)) {
+        case (params, part) => params ++ delimiter.parameters ++ part.parameters
+      }
     }
     apply(value, parameters)
   }
