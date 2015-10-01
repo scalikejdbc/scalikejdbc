@@ -25,6 +25,14 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Nil)
   }
 
+  it should "have #join for delimiter with parameters" in {
+    val (id1, id2, id3) = (1, 2, 3)
+    val (name1, name2) = ("Alice", "Bob")
+    val s = SQLSyntax.join(Seq(sqls"id=${id1} or", sqls"id=${id2} or", sqls"id=${id3}"), sqls"name=${name1} or name=${name2} or")
+    s.value should equal("id=? or name=? or name=? or id=? or name=? or name=? or id=?")
+    s.parameters should equal(Seq(1, "Alice", "Bob", 2, "Alice", "Bob", 3))
+  }
+
   it should "have #csv" in {
     val (id, name) = (123, "Alice")
     val s = SQLSyntax.csv(sqls"id = ${id}", sqls"name = ${name}")

@@ -226,12 +226,14 @@ object SQLSyntax {
 
   def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = {
     val sep = if (spaceBeforeDelimier) {
-      sqls" ${delimiter} "
+      s" ${delimiter.value} "
     } else {
-      sqls"${delimiter} "
+      s"${delimiter.value} "
     }
     val value = parts.map(_.value).mkString(sep)
-    val parameters = parts.flatMap(_.parameters)
+    val parameters = parts.tail.foldLeft(parts.headOption.fold(Seq.empty[Any])(_.parameters)) {
+      case (params, part) => params ++ delimiter.parameters ++ part.parameters
+    }
     apply(value, parameters)
   }
   def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",", false)
