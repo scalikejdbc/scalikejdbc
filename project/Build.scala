@@ -15,7 +15,7 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.3"
-  lazy val _h2Version = "1.4.188"
+  lazy val _h2Version = "1.4.189"
   lazy val _mysqlVersion = "5.1.36"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
   lazy val _hibernateVersion = "4.3.11.Final"
@@ -307,7 +307,7 @@ object ScalikeJDBCProjects extends Build {
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
     "org.apache.derby"  % "derby"                % "10.11.1.1"        % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.8.11.1"         % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.8.11.2"         % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.3"            % "test",
     "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
     "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
