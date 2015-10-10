@@ -1,6 +1,9 @@
 package scalikejdbc
 
 import java.util.Locale.{ ENGLISH => en }
+import scalikejdbc.interpolation.SQLSyntax
+
+import scala.collection.concurrent.TrieMap
 import scala.language.reflectiveCalls
 import scala.language.experimental.macros
 import scala.language.dynamics
@@ -13,7 +16,18 @@ object SQLSyntaxSupportFeature extends LogSupport {
   /**
    * Loaded columns for tables.
    */
-  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns = new scala.collection.concurrent.TrieMap[(Any, String), Seq[String]]()
+  private[scalikejdbc] val SQLSyntaxSupportLoadedColumns: TrieMap[(Any, String), Seq[String]] = {
+    new scala.collection.concurrent.TrieMap[(Any, String), Seq[String]]()
+  }
+
+  /**
+   * Cached columns for columns providers.
+   *
+   * NOTE: Don't clear the Map value simply. We should clear only distal TrieMap[String, SQLSyntax] values.
+   */
+  private[scalikejdbc] val SQLSyntaxSupportCachedColumns: TrieMap[(Any, String), TrieMap[Any, TrieMap[String, SQLSyntax]]] = {
+    new scala.collection.concurrent.TrieMap[(Any, String), TrieMap[Any, TrieMap[String, SQLSyntax]]]()
+  }
 
   /**
    * Instant table name validator.
@@ -42,18 +56,30 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Clears all the loaded column names.
      */
     def clearAllLoadedColumns(): Unit = {
-      val cache = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
-      cache.clear()
+      SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.clear()
+
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.foreach { case (_, caches) =>
+        caches.foreach { case (_, cache: TrieMap[String, SQLSyntax]) => cache.clear() }
+      }
     }
 
     /**
      * Clears all the loaded column names for specified connectionPoolName.
      */
-    def clearLoadedColumns(connectionPoolName: Any): Unit = {
-      val cache = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
-      cache.keys
+    def clearLoadedColumns(connectionPoolName: Any = ConnectionPool.DEFAULT_NAME): Unit = {
+      val loadedColumns = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
+      loadedColumns.keys
         .filter { case (cp, _) => cp == connectionPoolName }
-        .foreach { case (cp, table) => cache.remove((cp, table)) }
+        .foreach { case (cp, table) => loadedColumns.remove((cp, table)) }
+
+      val cachedColumns = SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
+      cachedColumns.keys
+        .filter { case (cp, _) => cp == connectionPoolName }
+        .foreach { case (cp, table) =>
+          cachedColumns.get((cp, table)).foreach { caches =>
+            caches.foreach { case (_, cache: TrieMap[String, SQLSyntax]) => cache.clear() }
+          }
+      }
     }
   }
 
@@ -138,6 +164,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def clearLoadedColumns(): Unit = {
       SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.remove((connectionPoolName, tableNameWithSchema))
+      
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
+        .find { case (cp, tb) => cp == connectionPoolName && tb == tableNameWithSchema }
+        .foreach { case (_, caches) =>
+          caches.foreach { case (_, cache: TrieMap[String, SQLSyntax]) => cache.clear() }
+        }
     }
 
     /**
@@ -392,12 +424,22 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val asterisk: SQLSyntax = sqls"*"
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-      SQLSyntax(c.value)
-    }.getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
-        s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
     }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).map { c =>
+        SQLSyntax(c.value)
+      }.getOrElse {
+        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+          s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
+      }
+    })
 
   }
 
@@ -442,12 +484,22 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-      SQLSyntax(s"${tableAliasName}.${c.value}")
-    }.getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
-        s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
     }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).map { c =>
+        SQLSyntax(s"${tableAliasName}.${c.value}")
+      }.getOrElse {
+        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+          s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
+      }
+    })
 
   }
 
@@ -467,20 +519,40 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def apply(syntax: SQLSyntax): PartialResultSQLSyntaxProvider[S, A] = PartialResultSQLSyntaxProvider(support, tableAliasName, syntax)
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-      val name = toAliasName(c.value, support)
-      SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
-    }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
+    }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).map { c =>
+        val name = toAliasName(c.value, support)
+        SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
+      }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+    })
   }
 
   case class PartialResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](support: S, aliasName: String, syntax: SQLSyntax)
       extends SQLSyntaxProviderCommonImpl[S, A](support, aliasName) {
     import SQLSyntaxProvider._
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-      val name = toAliasName(c.value, support)
-      SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
-    }.getOrElse(throw notFoundInColumns(aliasName, name))
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
+    }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).map { c =>
+        val name = toAliasName(c.value, support)
+        SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
+      }.getOrElse(throw notFoundInColumns(aliasName, name))
+    })
   }
 
   /**
@@ -510,15 +582,29 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
 
-    def namedColumn(name: String) = namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
-      throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
-        s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
+    private[this] lazy val cachedNamedColumns = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+
+    def namedColumn(name: String) = cachedNamedColumns.getOrElse(name, {
+      namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
+        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
+          s" (name: ${name}, registered names: ${namedColumns.map(_.value).mkString(",")})")
+      }
+    })
+
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
     }
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-      val name = toAliasName(c.value, support)
-      SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
-    }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).map { c =>
+        val name = toAliasName(c.value, support)
+        SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
+      }.getOrElse(throw notFoundInColumns(tableAliasName, name))
+    })
 
     private[this] val cachedFields = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
 
@@ -604,14 +690,16 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       }.mkString(", ")
     }.mkString(", "))
 
-    def column(name: String): SQLSyntax = {
+    private[this] lazy val cachedColumns = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
       resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name))).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
       }
-    }
+    })
 
   }
 
@@ -630,9 +718,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       rn.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
     }
 
-    def column(name: String): SQLSyntax = columns.find(_.value.equalsIgnoreCase(name)).getOrElse {
-      throw notFoundInColumns(aliasName, name)
-    }
+    private[this] lazy val cachedColumns = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      columns.find(_.value.equalsIgnoreCase(name)).getOrElse {
+        throw notFoundInColumns(aliasName, name)
+      }
+    })
 
     def apply(name: SQLSyntax): SQLSyntax = {
       resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name.value))).map { rn =>
@@ -677,9 +769,17 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       }
     }
 
-    def column(name: String) = {
-      SQLSyntax(s"${aliasName}.${underlying.column(name).value}")
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
     }
+
+    def column(name: String) = cachedColumns.getOrElse(name, {
+      SQLSyntax(s"${aliasName}.${underlying.column(name).value}")
+    })
 
   }
 
@@ -697,13 +797,21 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       s"${aliasName}.${c.value} as ${c.value}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
-    def column(name: String): SQLSyntax = {
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
+      ).put(this, cc)
+      cc
+    }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
       underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).map { nc =>
         SQLSyntax(s"${aliasName}.${nc.value} as ${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
       }
-    }
+    })
 
   }
 
@@ -721,20 +829,40 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     override lazy val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
 
-    def column(name: String): SQLSyntax = underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original: SQLSyntax =>
-      val name = toAliasName(original.value, underlying.support)
-      SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
-    }.getOrElse {
-      throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
+    private[this] lazy val cachedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
+      ).put(this.toString + "_cachedColumns", cc)
+      cc
     }
+
+    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+      underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original: SQLSyntax =>
+        val name = toAliasName(original.value, underlying.support)
+        SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
+      }.getOrElse {
+        throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
+      }
+    })
 
     lazy val namedColumns: Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
       SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
     }
 
-    def namedColumn(name: String) = underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
-      throw notFoundInColumns(aliasName, name, namedColumns.map(_.value).mkString(","))
+    private[this] lazy val cachedNamedColumns = {
+      val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
+      SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
+      ).put(this.toString + "_cachedNamedColumns", cc)
+      cc
     }
+
+    def namedColumn(name: String) = cachedNamedColumns.getOrElse(name, {
+      underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
+        throw notFoundInColumns(aliasName, name, namedColumns.map(_.value).mkString(","))
+      }
+    })
 
     def apply(name: SQLSyntax): SQLSyntax = {
       underlying.namedColumns.find(_.value.equalsIgnoreCase(name.value)).map { nc =>
