@@ -4,6 +4,7 @@ import org.scalatest._
 import org.joda.time._
 
 import scala.collection.concurrent.TrieMap
+import scala.util.control.NonFatal
 
 class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
 
@@ -869,38 +870,43 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   it should "clear loaded columns after db migration" in {
     implicit val session = AutoSession
 
-    sql"create table foo_bar_baz(first_name varchar(64) not null);".execute.apply()
+    try {
+      sql"create table foo_bar_baz(first_name varchar(64) not null);".execute.apply()
 
-    FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
-    intercept[InvalidColumnNameException] { FooBarBaz.column.column("last_name") }
+      FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
+      intercept[InvalidColumnNameException] { FooBarBaz.column.column("last_name") }
 
-    sql"drop table foo_bar_baz;".execute.apply()
+      sql"drop table foo_bar_baz;".execute.apply()
 
-    FooBarBaz.clearLoadedColumns()
+      FooBarBaz.clearLoadedColumns()
 
-    sql"create table foo_bar_baz(first_name varchar(64) not null, last_name varchar(64));".execute.apply()
+      sql"create table foo_bar_baz(first_name varchar(64) not null, last_name varchar(64));".execute.apply()
 
-    FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
-    FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
+      FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
+      FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
 
-    sql"drop table foo_bar_baz;".execute.apply()
-    sql"create table foo_bar_baz(first_name varchar(64) not null);".execute.apply()
+      sql"drop table foo_bar_baz;".execute.apply()
+      sql"create table foo_bar_baz(first_name varchar(64) not null);".execute.apply()
 
-    FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
-    FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
+      FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
+      FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
 
-    FooBarBaz.clearLoadedColumns()
+      FooBarBaz.clearLoadedColumns()
 
-    FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
-    intercept[InvalidColumnNameException] { FooBarBaz.column.column("last_name") }
+      FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
+      intercept[InvalidColumnNameException] { FooBarBaz.column.column("last_name") }
 
-    sql"drop table foo_bar_baz;".execute.apply()
-    sql"create table foo_bar_baz(first_name varchar(64) not null, last_name varchar(64));".execute.apply()
+      sql"drop table foo_bar_baz;".execute.apply()
+      sql"create table foo_bar_baz(first_name varchar(64) not null, last_name varchar(64));".execute.apply()
 
-    SQLSyntaxSupport.clearLoadedColumns()
+      SQLSyntaxSupport.clearLoadedColumns()
 
-    FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
-    FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
+      FooBarBaz.column.column("first_name") should equal(SQLSyntax("first_name"))
+      FooBarBaz.column.column("last_name") should equal(SQLSyntax("last_name"))
+    } finally {
+      try sql"drop table foo_bar_baz;".execute.apply()
+      catch { case NonFatal(_) => }
+    }
   }
 
   it should "provide fast dynamic result names" in {
