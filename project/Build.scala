@@ -11,6 +11,7 @@ object ScalikeJDBCProjects extends Build {
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.12"
+  // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
@@ -306,7 +307,7 @@ object ScalikeJDBCProjects extends Build {
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
-    "org.apache.derby"  % "derby"                % "10.11.1.1"        % "test",
+    "org.apache.derby"  % "derby"                % "10.12.1.1"        % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.8.11.2"         % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.3"            % "test",
     "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
