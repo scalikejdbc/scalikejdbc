@@ -2,7 +2,7 @@ scalikejdbcSettings
 
 scalaVersion := "2.11.7"
 
-lazy val scalikejdbcVersion = "2.2.8"
+lazy val scalikejdbcVersion = scalikejdbc.ScalikejdbcBuildInfo.version
 
 resolvers ++= Seq(
   "Sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases",
