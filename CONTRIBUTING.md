@@ -9,16 +9,23 @@
 ### Pull Requests
 
 - Pull requests basically should be sent toward "master" branch
-- Compatibility always must be kept as far as possible 
+- Source and binary compatibility always must be kept
 - scalariform must be applied to all Scala source code
 - Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
-- ScalikeJDBC build checks binary compatibility by using [MiMa](https://github.com/typesafehub/migration-manager/wiki/Sbt-plugin). Breaking source code compatibility of existing APIs are not allowed. Adding new methods, fields or any other things are allowed. If you have binary imcompatible changes, please explicitly add exclusions to mimaProblemFilters in `project/MimaSettings.scala`.
+- ScalikeJDBC build checks binary compatibility by using [MiMa](https://github.com/typesafehub/migration-manager/wiki/Sbt-plugin). After 2.x.0 release, binary compatibility must be kept while 2.x series release.
 
 #### Branches
 
 ##### master (the default branch)
 
 - the latest stable version
+- Changes that bring binary/source incompatibility are allowed until 2.3.0 release
+- This branch must be able to build against Scala 2.10 and 2.11
+
+##### 2.2.x
+
+- the version 2.2 series maintainance branch
+- Only security fixes and critical bug fixes in master branch will be backported
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 2.1.x
