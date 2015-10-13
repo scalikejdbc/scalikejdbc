@@ -656,7 +656,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       // def batchInsert=(
       1.indent + s"def batchInsert(entities: Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + "): " + "Seq[Int] = {" + eol +
-        2.indent + "val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity => " + eol +
+        2.indent + "val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
         batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
         "))" + eol +
