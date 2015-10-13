@@ -13,6 +13,8 @@ case object ReadOnlyAutoSession extends DBSession {
   override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
   override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
   override def tags(tags: String*): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
 
@@ -28,5 +30,7 @@ case class ReadOnlyNamedAutoSession(name: Any) extends DBSession {
   override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
   override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
   override def tags(tags: String*): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }

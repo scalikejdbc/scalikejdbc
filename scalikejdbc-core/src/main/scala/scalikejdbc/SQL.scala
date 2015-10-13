@@ -143,6 +143,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   private[this] var _fetchSize: Option[Int] = None
   private[this] val _tags: scala.collection.mutable.ListBuffer[String] = new scala.collection.mutable.ListBuffer[String]()
+  private[this] var _queryTimeout: Option[Int] = None
 
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
@@ -187,6 +188,27 @@ abstract class SQL[A, E <: WithExtractor](
   def fetchSize: Option[Int] = this._fetchSize
 
   /**
+   * Set queryTimeout for this query.
+   * @param seconds query timeout seconds
+   * @return this
+   */
+  def queryTimeout(seconds: Int): this.type = {
+    this._queryTimeout = Some(seconds)
+    this
+  }
+
+  def queryTimeout(seconds: Option[Int]): this.type = {
+    this._queryTimeout = seconds
+    this
+  }
+
+  /**
+   * Returns queryTimeout for this query.
+   * @return query timeout seconds
+   */
+  def queryTimeout: Option[Int] = this._queryTimeout
+
+  /**
    * Returns One-to-X API builder.
    */
   def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement, parameters)(f)
@@ -197,7 +219,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def bind(parameters: Any*): SQL[A, E] = {
-    withParameters(parameters).fetchSize(fetchSize).tags(tags: _*)
+    withParameters(parameters).fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -207,7 +229,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def bindByName(parametersByName: (Symbol, Any)*): SQL[A, E] = {
     val (_statement, _parameters) = validateAndConvertToNormalStatement(statement, parametersByName)
-    withStatementAndParameters(_statement, _parameters).fetchSize(fetchSize).tags(tags: _*)
+    withStatementAndParameters(_statement, _parameters).fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -237,7 +259,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
-    val f: DBSession => Unit = _.fetchSize(fetchSize).tags(tags: _*).foreach(statement, parameters: _*)(op)
+    val f: DBSession => Unit =
+      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foreach(statement, parameters: _*)(op)
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
@@ -255,7 +278,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
-    val f: DBSession => A = _.fetchSize(fetchSize).tags(tags: _*).foldLeft(statement, parameters: _*)(z)(op)
+    val f: DBSession => A =
+      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foldLeft(statement, parameters: _*)(z)(op)
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
@@ -274,7 +298,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def map[A](f: WrappedResultSet => A): SQL[A, HasExtractor] = {
-    withExtractor[A](f).fetchSize(fetchSize).tags(tags: _*)
+    withExtractor[A](f).fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -289,7 +313,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def toOption(): SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, parameters)(extractor)(isSingle = true)
-      .fetchSize(fetchSize).tags(tags: _*)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -304,7 +328,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def headOption(): SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, parameters)(extractor)(isSingle = false)
-      .fetchSize(fetchSize).tags(tags: _*)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -319,7 +343,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def toList(): SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, parameters)(extractor)
-      .fetchSize(fetchSize).tags(tags: _*)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -334,7 +358,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def toCollection: SQLToCollection[A, E] = {
     new SQLToCollectionImpl[A, E](statement, parameters)(extractor)
-      .fetchSize(fetchSize).tags(tags: _*)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -349,7 +373,7 @@ abstract class SQL[A, E <: WithExtractor](
    */
   def toTraversable(): SQLToTraversable[A, E] = {
     new SQLToTraversableImpl[A, E](statement, parameters)(extractor)
-      .fetchSize(fetchSize).tags(tags: _*)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
@@ -427,10 +451,12 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   def stripMargin(marginChar: Char): SQL[A, E] =
-    withStatementAndParameters(statement.stripMargin(marginChar), parameters).fetchSize(fetchSize).tags(tags: _*)
+    withStatementAndParameters(statement.stripMargin(marginChar), parameters)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
 
   def stripMargin: SQL[A, E] =
-    withStatementAndParameters(statement.stripMargin, parameters).fetchSize(fetchSize).tags(tags: _*)
+    withStatementAndParameters(statement.stripMargin, parameters)
+      .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
 
 }
 
@@ -539,7 +565,7 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     implicit session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
-    val f: DBSession => C[A] = s => result[A](extractor, s.fetchSize(fetchSize).tags(tags: _*))
+    val f: DBSession => C[A] = s => result[A](extractor, s.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout))
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
@@ -601,7 +627,7 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
   val statement: String
   val parameters: Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
-    val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).collection[A, C](statement, parameters: _*)(extractor)
+    val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).collection[A, C](statement, parameters: _*)(extractor)
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)

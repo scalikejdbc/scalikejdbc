@@ -32,6 +32,7 @@ trait DBSession extends LogSupport with LoanPattern {
       // initialize options
       this._fetchSize = None
       this._tags = Vector.empty
+      this._queryTimeout = None
     }
   }
 
@@ -49,6 +50,9 @@ trait DBSession extends LogSupport with LoanPattern {
 
   @volatile
   private[this] var _tags: Seq[String] = Vector.empty
+
+  @volatile
+  private[this] var _queryTimeout: Option[Int] = None
 
   /**
    * is read-only session
@@ -84,6 +88,7 @@ trait DBSession extends LogSupport with LoanPattern {
         }
       }
       this.fetchSize.foreach { size => statement.setFetchSize(size) }
+      this.queryTimeout.foreach { seconds => statement.setQueryTimeout(seconds) }
       StatementExecutor(
         underlying = statement,
         template = template,
@@ -131,6 +136,7 @@ trait DBSession extends LogSupport with LoanPattern {
   private def createBatchStatementExecutor(conn: Connection, template: String): StatementExecutor = {
     val statement = conn.prepareStatement(template)
     this.fetchSize.foreach { size => statement.setFetchSize(size) }
+    this.queryTimeout.foreach { seconds => statement.setQueryTimeout(seconds) }
     StatementExecutor(
       underlying = statement,
       template = template,
@@ -188,6 +194,28 @@ trait DBSession extends LogSupport with LoanPattern {
    * Returns tags for this session.
    */
   def tags: Seq[String] = this._tags
+
+  /**
+   * Set queryTimeout to this session.
+   * @param seconds query timeout seconds
+   * @return this
+   */
+  def queryTimeout(seconds: Int): DBSession = {
+    this._queryTimeout = Some(seconds)
+    this
+  }
+
+  def queryTimeout(seconds: Option[Int]): DBSession = {
+    this._queryTimeout = seconds
+    this
+  }
+
+  /**
+   * Returns queryTimeout for this session.
+   *
+   * @return query timeout seconds
+   */
+  def queryTimeout: Option[Int] = this._queryTimeout
 
   /**
    * Returns single result optionally.
@@ -572,6 +600,8 @@ case object NoSession extends DBSession {
   override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
   override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
   override def tags(tags: String*): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
 
