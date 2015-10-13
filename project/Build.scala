@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.2.10-SNAPSHOT"
+  lazy val _version = "2.3.0-SNAPSHOT"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -16,7 +16,7 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.3"
-  lazy val _h2Version = "1.4.189"
+  lazy val _h2Version = "1.4.190"
   lazy val _mysqlVersion = "5.1.36"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
   lazy val _hibernateVersion = "4.3.11.Final"
@@ -122,7 +122,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.8.2"           % "compile",
-          "org.joda"                %  "joda-convert"    % "1.7"             % "compile",
+          "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
           "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",

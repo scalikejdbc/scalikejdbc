@@ -912,7 +912,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   it should "provide fast dynamic result names" in {
     val resultName = User.syntax("u").resultName
 
-    val millis = (1 to 5).map { _ =>
+    val millis = (1 to 10).map { _ =>
       val start = System.currentTimeMillis()
       (1 to 10000) foreach { _ =>
         resultName.id.value shouldBe "I_Z_U"
