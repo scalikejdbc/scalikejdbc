@@ -10,11 +10,11 @@ case object AutoSession extends DBSession {
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
-  override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
-  override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
-  override def tags(tags: String*): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
+  override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
+  override def fetchSize(fetchSize: Option[Int]): this.type = unexpectedInvocation
+  override def tags(tags: String*): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
 
@@ -27,10 +27,10 @@ case class NamedAutoSession(name: Any) extends DBSession {
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
-  override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
-  override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
-  override def tags(tags: String*): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
+  override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
+  override def fetchSize(fetchSize: Option[Int]): this.type = unexpectedInvocation
+  override def tags(tags: String*): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }

@@ -179,6 +179,10 @@ abstract class SQL[A, E <: WithExtractor](
     this
   }
 
+  /**
+   * Returns tags for this SQL object.
+   * @return tags
+   */
   def tags: Seq[String] = this._tags.toSeq
 
   /**

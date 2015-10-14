@@ -165,12 +165,12 @@ trait DBSession extends LogSupport with LoanPattern {
    * @param fetchSize fetch size
    * @return this
    */
-  def fetchSize(fetchSize: Int): DBSession = {
+  def fetchSize(fetchSize: Int): this.type = {
     this._fetchSize = Some(fetchSize)
     this
   }
 
-  def fetchSize(fetchSize: Option[Int]): DBSession = {
+  def fetchSize(fetchSize: Option[Int]): this.type = {
     this._fetchSize = fetchSize
     this
   }
@@ -184,28 +184,34 @@ trait DBSession extends LogSupport with LoanPattern {
 
   /**
    * Set tags to this session.
+   *
+   * @param tags tags
+   * @return this
    */
-  def tags(tags: String*): DBSession = {
+  def tags(tags: String*): this.type = {
     this._tags = this._tags ++ tags
     this
   }
 
   /**
    * Returns tags for this session.
+   *
+   * @return tags
    */
   def tags: Seq[String] = this._tags
 
   /**
    * Set queryTimeout to this session.
+   *
    * @param seconds query timeout seconds
    * @return this
    */
-  def queryTimeout(seconds: Int): DBSession = {
+  def queryTimeout(seconds: Int): this.type = {
     this._queryTimeout = Some(seconds)
     this
   }
 
-  def queryTimeout(seconds: Option[Int]): DBSession = {
+  def queryTimeout(seconds: Option[Int]): this.type = {
     this._queryTimeout = seconds
     this
   }
@@ -597,11 +603,11 @@ case object NoSession extends DBSession {
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
-  override def fetchSize(fetchSize: Int): DBSession = unexpectedInvocation
-  override def fetchSize(fetchSize: Option[Int]): DBSession = unexpectedInvocation
-  override def tags(tags: String*): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Int): DBSession = unexpectedInvocation
-  override def queryTimeout(seconds: Option[Int]): DBSession = unexpectedInvocation
+  override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
+  override def fetchSize(fetchSize: Option[Int]): this.type = unexpectedInvocation
+  override def tags(tags: String*): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
 
