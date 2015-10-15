@@ -703,6 +703,39 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     }
   }
 
+  // queryTimeout
+
+  it should "execute query with queryTimeout" in {
+    val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      {
+        val result: Seq[String] = DB readOnly { session =>
+          session.queryTimeout(111)
+          session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        }
+        result.size should be > 0
+      }
+
+      {
+        val result: Seq[String] = DB readOnly { implicit session =>
+          SQL("select * from " + tableName + "").queryTimeout(222).map(rs => rs.string("name")).list.apply()
+        }
+        result.size should be > 0
+      }
+
+      {
+        // set invalid value
+        intercept[java.sql.SQLException] {
+          DB readOnly { implicit session =>
+            SQL("select * from " + tableName + "").queryTimeout(-1).map(rs => rs.string("name")).list.apply()
+          }
+        }
+      }
+    }
+  }
+
   // TimeZone
 
   /*
