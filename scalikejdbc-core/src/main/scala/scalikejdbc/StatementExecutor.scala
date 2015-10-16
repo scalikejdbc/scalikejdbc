@@ -99,6 +99,9 @@ case class StatementExecutor(
               val fromMethod: Method = dateClazz.getMethod("from", Class.forName("java.time.Instant"))
               val dateValue = fromMethod.invoke(null, instant).asInstanceOf[java.util.Date]
               underlying.setTimestamp(i, dateValue.toSqlTimestamp)
+            case "java.time.Instant" =>
+              val millis = clazz.getMethod("toEpochMilli").invoke(p).asInstanceOf[java.lang.Long]
+              underlying.setTimestamp(i, new java.util.Date(millis).toSqlTimestamp)
             case "java.time.LocalDateTime" =>
               underlying.setTimestamp(i, org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp)
             case "java.time.LocalDate" =>
