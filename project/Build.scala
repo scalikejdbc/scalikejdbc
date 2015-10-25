@@ -216,7 +216,7 @@ object ScalikeJDBCProjects extends Build {
         "-Dslf4j.version=" + _slf4jApiVersion,
         "-Dmysql.version=" + _mysqlVersion,
         "-Dpostgresql.version=" + _postgresqlVersion,
-        "-Dh2.version=1.4.181",
+        "-Dh2.version=" + _h2Version,
         "-Dspecs2.version=" + specs2Version.value,
         "-Dscalatest.version=" + scalatestVersion.value
       ),
