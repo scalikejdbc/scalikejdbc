@@ -19,7 +19,7 @@ http://scalikejdbc.org/
 
 All you need to do is just adding ScalikeJDBC, JDBC driver & slf4j implementation.
 
-```
+```scala
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc"        % "2.2.+",
   "com.h2database"  %  "h2"                 % "1.4.+",
@@ -35,7 +35,7 @@ https://github.com/scalikejdbc/scalikejdbc-play-support
 
 Put above dependencies into your `build.sbt` and run `sbt console` now.
 
-```java
+```scala
 //import scalikejdbc._, SQLInterpolation._
 import scalikejdbc._
 
