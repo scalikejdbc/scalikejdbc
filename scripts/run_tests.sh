@@ -7,6 +7,8 @@ cd `dirname $0`
 cd ..
 cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/src/test/resources/jdbc.properties
 
+mkdir -p logs
+
 sbt \
   ++2.10.5 \
   clean \
