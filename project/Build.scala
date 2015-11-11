@@ -10,14 +10,14 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.12"
+  lazy val _slf4jApiVersion = "1.7.13"
   // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
   lazy val _logbackVersion = "1.1.3"
   lazy val _h2Version = "1.4.190"
-  lazy val _mysqlVersion = "5.1.36"
+  lazy val _mysqlVersion = "5.1.37"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
   lazy val _hibernateVersion = "4.3.11.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
@@ -121,7 +121,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.8.2"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
