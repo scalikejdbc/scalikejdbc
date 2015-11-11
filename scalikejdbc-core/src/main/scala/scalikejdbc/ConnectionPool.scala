@@ -6,9 +6,9 @@ import java.sql.Connection
 /**
  * Connection Pool
  *
- * Using Commons DBCP internally.
+ * The default implementation uses Commons DBCP 2 internally.
  *
- * @see [[http://commons.apache.org/dbcp/]]
+ * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 object ConnectionPool extends LogSupport {
 
@@ -17,8 +17,7 @@ object ConnectionPool extends LogSupport {
   type CPFactory = ConnectionPoolFactory
 
   val DEFAULT_NAME: Symbol = 'default
-  // TODO commons-dbcp2 will be the default implementation since ScalikeJDBC 2.1
-  val DEFAULT_CONNECTION_POOL_FACTORY = CommonsConnectionPoolFactory
+  val DEFAULT_CONNECTION_POOL_FACTORY = Commons2ConnectionPoolFactory
 
   private[this] val pools = new MutableMap[Any, ConnectionPool]()
 

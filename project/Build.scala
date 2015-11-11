@@ -119,16 +119,15 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= {
         Seq(
           // scope: compile
-          "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "compile",
+          "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "joda-time"               %  "joda-time"       % "2.9"             % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
-          // commons-dbcp2 will be the default CP implementation since ScalikeJDBC 2.1
-          "org.apache.commons"      %  "commons-dbcp2"   % "2.0.+"           % "provided",
+          "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "1.4.+"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "2.4.2"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
