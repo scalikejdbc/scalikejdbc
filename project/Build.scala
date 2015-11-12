@@ -121,7 +121,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9"             % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.1"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
