@@ -120,7 +120,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.11.7"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.2.4",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.3.0",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.7",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.182", 
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.10.2.0",
