@@ -1,6 +1,6 @@
 import sbt._, Keys._
 import com.typesafe.tools.mima.plugin.MimaPlugin
-import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIssues, binaryIssueFilters}
+import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifacts, reportBinaryIssues, binaryIssueFilters}
 
 /*
  * MiMa settings of ScalikeJDBC libs.
@@ -11,9 +11,6 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifact, reportBinaryIs
  */
 object MimaSettings {
 
-  // TODO: after releasing 2.3.0, the following settings must be enabled.
-  val mimaSettings = Seq.empty
-  /*
   // The `previousVersion` must be exactly the previous version (e.g. "2.3.1" for "2.3.2-SNAPSHOT").
   //
   // The following bad scenario is the reason we must obey the rule:
@@ -26,12 +23,12 @@ object MimaSettings {
   val previousVersion = "2.3.0"
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
-    previousArtifact := {
+    previousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 11 =>
-          Some(organization.value % s"${name.value}_${scalaBinaryVersion.value}" % previousVersion)
+          Set(organization.value % s"${name.value}_${scalaBinaryVersion.value}" % previousVersion)
         case _ =>
-          None
+          Set.empty
       }
     },
     test in Test := {
@@ -39,6 +36,4 @@ object MimaSettings {
       (test in Test).value
     }
   )
-  */
-
 }

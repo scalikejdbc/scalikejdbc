@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.3.0"
+  lazy val _version = "2.3.1-SNAPSHOT"
 
   lazy val _organization = "org.scalikejdbc"
 
