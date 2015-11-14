@@ -4,7 +4,7 @@
 
 "{major}.{minor}.{fix}"
 
-- major: kept for supported Scala version compatibily, version 1 must support Scala 2.9 & 2.10, version 2 will support only Scala 2.10 & Scala 2.11 and ???
+- major: kept for supported Scala version compatibility, version 1 must support Scala 2.9 & 2.10, version 2 will support only Scala 2.10 & Scala 2.11 and ???
 - minor: kept for functionality and APIs compatibility, same version must provide same functionality and APIs
 - fix: to release some improvements, bug fixes and new features
 
