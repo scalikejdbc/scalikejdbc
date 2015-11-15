@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.7/sbt-launch.jar sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -107,7 +107,7 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 >>"%dbconsole_command%" echo exit /b 0
 >>"%dbconsole_command%" echo.
 >>"%dbconsole_command%" echo :run_sbt
->>"%dbconsole_command%" echo   call java -Xms256M -Xmx512M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M ^^
+>>"%dbconsole_command%" echo   call java -Xms256M -Xmx512M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxMetaspaceSize=386M ^^
 >>"%dbconsole_command%" echo     -jar "%%~dp0\sbt-launch.jar" ^^
 >>"%dbconsole_command%" echo     -Dscalikejdbc-cli.config.profile=%%_profile%% ^^
 >>"%dbconsole_command%" echo     %%1
@@ -121,13 +121,13 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
 >>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.3.0",
->>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.7",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.182", 
->>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.10.2.0",
->>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.8.7",
->>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.3.2",
->>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.33",
->>"%build_sbt%" echo   "postgresql"         %% "postgresql"           %% "9.3-1102-jdbc41"
+>>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.13",
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.190",
+>>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.12.1.1",
+>>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.8.11.2",
+>>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.3.3",
+>>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.37",
+>>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "9.4-1201-jdbc41"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._

@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.7/sbt-launch.jar
+wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -50,7 +50,7 @@ function show_help() {
 }
 
 function run_sbt() {
-  java -Xms256M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M \
+  java -Xms256M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxMetaspaceSize=386M \
     -Dfile.encoding=UTF-8 \
     -jar `dirname $0`/sbt-launch.jar \
     -Dscalikejdbc-cli.config.profile=${PROFILE} \
@@ -140,13 +140,13 @@ echo 'scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "2.3.0",
-  "org.slf4j"          % "slf4j-simple"         % "1.7.7",
-  "com.h2database"     % "h2"                   % "1.4.182",
-  "org.apache.derby"   % "derby"                % "10.10.2.0",
-  "org.xerial"         % "sqlite-jdbc"          % "3.8.7",
-  "org.hsqldb"         % "hsqldb"               % "2.3.2",
-  "mysql"              % "mysql-connector-java" % "5.1.33",
-  "org.postgresql"     % "postgresql"           % "9.3-1102-jdbc41"
+  "org.slf4j"          % "slf4j-simple"         % "1.7.13",
+  "com.h2database"     % "h2"                   % "1.4.190",
+  "org.apache.derby"   % "derby"                % "10.12.1.1",
+  "org.xerial"         % "sqlite-jdbc"          % "3.8.11.2",
+  "org.hsqldb"         % "hsqldb"               % "2.3.3",
+  "mysql"              % "mysql-connector-java" % "5.1.37",
+  "org.postgresql"     % "postgresql"           % "9.4-1201-jdbc41"
 )
 
 initialCommands := {
