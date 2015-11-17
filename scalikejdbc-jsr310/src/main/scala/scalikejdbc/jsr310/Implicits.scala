@@ -1,7 +1,5 @@
 package scalikejdbc.jsr310
 
-import java.util.{ GregorianCalendar, Calendar }
-
 import scala.language.implicitConversions
 import java.time._
 import scalikejdbc.{ TypeBinder, WrappedResultSet }
