@@ -9,6 +9,7 @@ ScalikeJDBC is a practical and production-ready one. Use this library for your r
 http://scalikejdbc.org/
 
 [![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=master)](https://travis-ci.org/scalikejdbc/scalikejdbc)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.11)
 
 ## Gitter Chat for Casual Q&A
 
