@@ -25,6 +25,12 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Nil)
   }
 
+  it should "have #join contains empty part" in {
+    val s = SQLSyntax.join(Seq(sqls"id", sqls"", sqls"name", sqls""), sqls"and")
+    s.value should equal("id and name")
+    s.parameters should equal(Nil)
+  }
+
   it should "have #join for delimiter with parameters" in {
     val (id1, id2, id3) = (1, 2, 3)
     val (name1, name2) = ("Alice", "Bob")
