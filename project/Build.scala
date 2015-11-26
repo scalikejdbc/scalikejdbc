@@ -283,8 +283,8 @@ object ScalikeJDBCProjects extends Build {
 
   def macroDependenciesInCompileScope(scalaVersion: String) = {
     if (scalaVersion.startsWith("2.10")) Seq(
-      "org.scalamacros" %% "quasiquotes" % "2.0.1" % "compile",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+      "org.scalamacros" %% "quasiquotes" % "2.1.0" % "compile",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     ) else Seq()
   }
 
