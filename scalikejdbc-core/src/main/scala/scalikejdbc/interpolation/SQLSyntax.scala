@@ -230,7 +230,7 @@ object SQLSyntax {
     } else {
       s"${delimiter.value} "
     }
-    val value = parts.map(_.value).mkString(sep)
+    val value = parts.collect { case p if p.value.nonEmpty => p.value }.mkString(sep)
     val parameters = if (delimiter.parameters.isEmpty) {
       parts.flatMap(_.parameters)
     } else {
