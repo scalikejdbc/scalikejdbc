@@ -315,7 +315,7 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
     }
   }
 
-  it should "work with NamedReadOnlyAutoSession #189" in {
+  it should "work with ReadOnlyNamedAutoSession #189" in {
     val tableName = tableNamePrefix + "_readOnlyNamedAutoSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
