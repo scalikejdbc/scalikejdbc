@@ -1,6 +1,5 @@
 import org.joda.time.DateTime
 import org.scalatest._
-import java.sql.SQLException
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
@@ -356,6 +355,16 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         count should be > 3000L
       }
 
+    } finally { TestUtils.deleteTable(tableName) }
+  }
+
+  it should "execute batch with empty params" in {
+    val tableName = tableNamePrefix + "_batch_with_empty_params"
+    try {
+      TestUtils.initialize(tableName)
+      DB localTx { implicit session =>
+        SQL("insert into " + tableName + " (id, name) values (999, 'Alice')").batchByName(Seq.empty: _*).apply()
+      }
     } finally { TestUtils.deleteTable(tableName) }
   }
 
