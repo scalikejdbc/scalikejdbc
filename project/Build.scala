@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.3.1-SNAPSHOT"
+  lazy val _version = "2.3.1"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -19,7 +19,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _h2Version = "1.4.190"
   lazy val _mysqlVersion = "5.1.37"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
-  lazy val _hibernateVersion = "4.3.11.Final"
+  lazy val _hibernateVersion = "5.0.4.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
