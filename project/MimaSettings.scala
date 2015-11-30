@@ -20,7 +20,7 @@ object MimaSettings {
   //  - you're going to remove some of the methods in 2.3.2
   //  - in this case, the incompatibility won't be detected
   //
-  val previousVersions = Set("2.3.0")
+  val previousVersions = Set("2.3.0", "2.3.1")
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     previousArtifacts := {
