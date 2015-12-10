@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.3.2-SNAPSHOT"
+  lazy val _version = "2.3.2"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -17,9 +17,9 @@ object ScalikeJDBCProjects extends Build {
   // internal only
   lazy val _logbackVersion = "1.1.3"
   lazy val _h2Version = "1.4.190"
-  lazy val _mysqlVersion = "5.1.37"
+  lazy val _mysqlVersion = "5.1.38"
   lazy val _postgresqlVersion = "9.4-1201-jdbc41"
-  lazy val _hibernateVersion = "5.0.4.Final"
+  lazy val _hibernateVersion = "5.0.5.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -127,7 +127,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "2.4.2"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "2.4.3"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"

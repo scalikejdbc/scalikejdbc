@@ -1,0 +1,11 @@
+ScalikeJDBC 2.3.2 is out.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #468 Handling exceptions occurred when finishing transcation by @tkawachi
+
+Enjoy writing mostly type-safe SQL and get things done!
