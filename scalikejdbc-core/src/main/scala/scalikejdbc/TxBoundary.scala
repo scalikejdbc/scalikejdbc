@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ Promise, ExecutionContext, Future }
 import scala.util.{ Try, Failure, Success }
 
 /**
@@ -48,27 +48,54 @@ object TxBoundary {
   }
 
   /**
+   * Applies an operation to finish current transaction to the result.
+   * When the operation throws some exception, the exception will be returned without fail.
+   */
+  private def doFinishTx[A](result: Try[A])(doFinish: Try[A] => Unit): Try[A] =
+    scala.util.Try(doFinish(result)).transform(
+      _ => result,
+      finishError =>
+        Failure(result match {
+          case Success(_) => finishError
+          case Failure(resultError) =>
+            resultError.addSuppressed(finishError)
+            resultError
+        })
+    )
+
+  /**
+   * Applies an operation to finish current transaction to the Future value which holds the result.
+   * When the operation throws some exception, the exception will be returned without fail.
+   */
+  private def onFinishTx[A](resultF: Future[A])(doFinish: Try[A] => Unit)(implicit ec: ExecutionContext): Future[A] = {
+    val p = Promise[A]
+    resultF.onComplete(result => p.complete(doFinishTx(result)(doFinish)))
+    p.future
+  }
+
+  /**
    * Future TxBoundary type class instance.
    */
   object Future extends TxBoundaryMissingImplicits {
 
     implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
+
       def finishTx(result: Future[A], tx: Tx): Future[A] = {
-        result.andThen {
+        onFinishTx(result) {
           case Success(_) => tx.commit()
           case Failure(_) => tx.rollback()
         }
       }
-      override def closeConnection(result: Future[A], doClose: () => Unit): Future[A] = {
-        result.andThen {
-          case _ => doClose()
-        }
-      }
+
+      override def closeConnection(result: Future[A], doClose: () => Unit): Future[A] =
+        onFinishTx(result)(_ => doClose())
     }
   }
 
   /**
    * Either TxBoundary type class instance.
+   *
+   * NOTE: Either TxBoundary may throw an Exception when commit/rollback operation fails.
    */
   object Either {
 
@@ -90,11 +117,14 @@ object TxBoundary {
 
     implicit def tryTxBoundary[A] = new TxBoundary[Try[A]] {
       def finishTx(result: Try[A], tx: Tx): Try[A] = {
-        result match {
+        doFinishTx(result) {
           case Success(_) => tx.commit()
           case Failure(_) => tx.rollback()
         }
-        result
+      }
+
+      override def closeConnection(result: Try[A], doClose: () => Unit): Try[A] = {
+        doFinishTx(result)(_ => doClose())
       }
     }
   }

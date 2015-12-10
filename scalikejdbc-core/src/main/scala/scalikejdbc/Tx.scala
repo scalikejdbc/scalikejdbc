@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.sql.{ SQLException, Connection }
 import scala.util.control.Exception._
+import scala.util.control.NonFatal
 
 /**
  * DB Transaction abstraction.
@@ -23,7 +24,13 @@ class Tx(val conn: Connection) {
    * Commits this transaction.
    */
   def commit(): Unit = {
-    conn.commit()
+    try conn.commit() catch {
+      case NonFatal(e) =>
+        try conn.rollback() catch {
+          case NonFatal(e2) => e.addSuppressed(e2)
+        }
+        throw e
+    }
     conn.setAutoCommit(true)
   }
 
