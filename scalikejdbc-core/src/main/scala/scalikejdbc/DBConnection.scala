@@ -276,9 +276,17 @@ trait DBConnection extends LogSupport with LoanPattern {
     case e: ControlThrowable =>
       tx.commit()
       throw e
-    case e: Throwable =>
-      tx.rollback()
-      throw e
+    case originalException: Throwable =>
+      try {
+        tx.rollback()
+      } catch {
+        case rollbackException: Throwable => {
+          // log rollback exception for application operators
+          log.error("Could not successfully complete local transaction", rollbackException)
+        }
+      }
+      // original exception is likely more valuable to calling code to act upon
+      throw originalException
   }
 
   /**
