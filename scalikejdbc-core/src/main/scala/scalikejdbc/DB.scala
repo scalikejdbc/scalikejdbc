@@ -40,17 +40,17 @@ import scala.concurrent.{ ExecutionContext, Future }
  *
  *   using(ConnectionPool.borrow()) { conn =>
  *
- *     val users = DB(conn) readOnly { session =>
+ *     val users = DB(conn) readOnly { implicit session =>
  *       SQL("select * from user").map { rs =>
  *         User(rs.int("id"), rs.string("name"))
  *       }.list.apply()
  *     }
  *
- *     DB(conn) autoCommit { session =>
+ *     DB(conn) autoCommit { implicit session =>
  *       SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
  *     }
  *
- *     DB(conn) localTx { session =>
+ *     DB(conn) localTx { implicit session =>
  *       SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
  *     }
  *
@@ -107,24 +107,24 @@ case class DB(
  *   ConnectionPool.singleton("jdbc:...","user","password")
  *   case class User(id: Int, name: String)
  *
- *   val users = DB readOnly { session =>
+ *   val users = DB readOnly { implicit session =>
  *     SQL("select * from user").map { rs =>
  *       User(rs.int("id"), rs.string("name"))
  *     }.list.apply()
  *   }
  *
- *   DB autoCommit { session =>
+ *   DB autoCommit { implicit session =>
  *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
  *   }
  *
- *   DB localTx { session =>
+ *   DB localTx { implicit session =>
  *     SQL("insert into user values (?,?)").bind(123, "Alice").update.apply()
  *   }
  *
  *   using(DB(ConnectionPool.borrow())) { db =>
  *     db.begin()
  *     try {
- *       DB withTx { session =>
+ *       DB withTx { implicit session =>
  *         SQL("update user set name = ? where id = ?").bind("Alice", 123).update.apply()
  *       }
  *       db.commit()
