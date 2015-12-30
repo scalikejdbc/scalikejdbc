@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import scala.collection.JavaConverters._
+
 private[scalikejdbc] object LastParameter
 
 /**
@@ -14,7 +16,18 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
     SQL[A](syntax.value).bind(syntax.parameters: _*)
   }
 
-  def sqls(params: Any*): SQLSyntax = SQLSyntax(buildQuery(params), buildParams(params))
+  def sqls(params: Any*): SQLSyntax = {
+    // Convert mutable collections to immutable Lists here to avoid
+    // mutation from another thread, which might cause a mismatch of
+    // the number of placeholders ("?") and parameters.
+    val fixedParams = params.map {
+      case t: Traversable[_] => t.toList
+      case c: java.util.Collection[_] => c.asScala.toList
+      case other => other
+    }
+
+    SQLSyntax(buildQuery(fixedParams), buildParams(fixedParams))
+  }
 
   private def buildQuery(params: Seq[Any]): String =
     s.parts.zipAll(params, "", LastParameter).foldLeft(new StringBuilder) {
@@ -25,10 +38,6 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
     case _: String => sb += '?'
-    // to fix issue #215 due to unexpected Stream#addString behavior
-    case s: Stream[_] => addPlaceholders(sb, s.toList) // e.g. in clause
-    // Need to convert a Set to a List before mapping to "?", otherwise we end up with a 1-element Set
-    case s: scala.collection.Set[_] => addPlaceholders(sb, s.toList) // e.g. in clause
     case t: Traversable[_] => t.map {
       case SQLSyntax(s, _) => s
       case _ => "?"
