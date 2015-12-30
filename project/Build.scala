@@ -18,8 +18,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.3"
   lazy val _h2Version = "1.4.190"
   lazy val _mysqlVersion = "5.1.38"
-  lazy val _postgresqlVersion = "9.4-1201-jdbc41"
-  lazy val _hibernateVersion = "5.0.5.Final"
+  lazy val _postgresqlVersion = "9.4.1207.jre7"
+  lazy val _hibernateVersion = "5.0.6.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
