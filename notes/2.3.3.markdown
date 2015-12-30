@@ -1,0 +1,13 @@
+ScalikeJDBC 2.3.3 is out.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #470 Log rollback exceptions and throw original exceptions by @dinoboy197
+ - [core] #471 Accept java.util.Collection in SQL interpolation (#469 fix) by @tkawachi
+ - [core] #472 Fix sample code in comments by @ukitaka
+
+Enjoy writing mostly type-safe SQL and get things done!
