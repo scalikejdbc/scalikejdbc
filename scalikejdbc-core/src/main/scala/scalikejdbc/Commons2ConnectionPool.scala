@@ -32,7 +32,12 @@ class Commons2ConnectionPool(
   _pool.setBlockWhenExhausted(true)
   _pool.setMaxTotal(settings.maxSize)
   _pool.setMaxWaitMillis(settings.connectionTimeoutMillis)
-  _pool.setTestOnBorrow(true)
+
+  // To fix MS SQLServer jtds driver issue
+  // https://github.com/scalikejdbc/scalikejdbc/issues/461
+  if (Option(settings.validationQuery).exists(_.trim.isEmpty == false)) {
+    _pool.setTestOnBorrow(true)
+  }
 
   private[this] val _dataSource: DataSource = new PoolingDataSource(_pool)
 
