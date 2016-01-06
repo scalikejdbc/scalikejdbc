@@ -1,0 +1,11 @@
+ScalikeJDBC 2.3.4 is out.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #475 Fix #461 java.sql.SQLException: Cannot get a connection, pool error Unable to validate object by @seratch
+
+Enjoy writing mostly type-safe SQL and get things done!
