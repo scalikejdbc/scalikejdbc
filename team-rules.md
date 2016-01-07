@@ -43,7 +43,11 @@ scalikejdbc-library/src/test/resources/*.properties
 
 - Sonatype release account
 
-Currently @seratch's personal account.
+How to add new Sonatype account to release maintainers:
+
+https://issues.sonatype.org/browse/OSSRH-14350
+
+If you're already allowed to release ScalikeJDBC libs, use your own Sonatype account:
 
 - $HOME/.sbt/0.13/sonatype.sbt
 

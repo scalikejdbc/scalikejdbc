@@ -19,7 +19,7 @@
 ##### master (the default branch)
 
 - the latest stable version
-- Changes that bring binary/source incompatibility are allowed until 2.3.0 release
+- Changes that bring binary/source incompatibility are not allowed
 - This branch must be able to build against Scala 2.10 and 2.11
 
 ##### 2.2.x
