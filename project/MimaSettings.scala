@@ -11,7 +11,7 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifacts, reportBinaryI
  */
 object MimaSettings {
 
-  // The `previousVersions` must be the *ALL* previous versions (e.g. Set("2.3.0", "2.3.1") for "2.3.2-SNAPSHOT").
+  // The `previousVersions` must be *ALL* the previous versions to be binary compatible (e.g. Set("2.3.0", "2.3.1") for "2.3.2-SNAPSHOT").
   //
   // The following bad scenario is the reason we must obey the rule:
   //
@@ -26,11 +26,8 @@ object MimaSettings {
     previousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 11 =>
-          previousVersions.map{
-            organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _
-          }
-        case _ =>
-          Set.empty
+          previousVersions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
+        case _ => Set.empty
       }
     },
     test in Test := {
