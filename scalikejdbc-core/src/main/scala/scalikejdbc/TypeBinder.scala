@@ -22,6 +22,13 @@ trait TypeBinder[+A] {
  * Type binder for java.sql.ResultSet.
  */
 object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisConverterImplicits {
+  import java.util.TimeZone
+  import GlobalSettings.serverTimeZone
+
+  private[this] def timeZoneConverter =
+    TimeZoneConverter.from(serverTimeZone.getOrElse(TimeZone.getDefault)).to(TimeZone.getDefault)
+
+  private[this] def timeZoneEnabled = serverTimeZone.isDefined
 
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
@@ -55,7 +62,11 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
   implicit val bytes: TypeBinder[Array[Byte]] = TypeBinder(_ getBytes _)(_ getBytes _)
   implicit val characterStream: TypeBinder[java.io.Reader] = TypeBinder(_ getCharacterStream _)(_ getCharacterStream _)
   implicit val clob: TypeBinder[java.sql.Clob] = TypeBinder(_ getClob _)(_ getClob _)
-  implicit val date: TypeBinder[java.sql.Date] = TypeBinder(_ getDate _)(_ getDate _)
+  implicit val date: TypeBinder[java.sql.Date] = TypeBinder { (rs, i) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getDate(i)) else rs.getDate(i)
+  } { (rs, s) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getDate(s)) else rs.getDate(s)
+  }
   implicit val nullableDouble: TypeBinder[java.lang.Double] = any.map(v => if (v == null) null else java.lang.Double.valueOf(v.toString))
   implicit val double: TypeBinder[Double] = nullableDouble.map(throwExceptionIfNull(_.asInstanceOf[Double]))
   implicit val optionDouble: TypeBinder[Option[Double]] = nullableDouble.map(v => Option(v).map(_.asInstanceOf[Double]))
@@ -96,8 +107,16 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
 
   implicit val string: TypeBinder[String] = TypeBinder(_ getString _)(_ getString _)
 
-  implicit val time: TypeBinder[java.sql.Time] = TypeBinder(_ getTime _)(_ getTime _)
-  implicit val timestamp: TypeBinder[java.sql.Timestamp] = TypeBinder(_ getTimestamp _)(_ getTimestamp _)
+  implicit val time: TypeBinder[java.sql.Time] = TypeBinder { (rs, i) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getTime(i)) else rs.getTime(i)
+  } { (rs, s) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getTime(s)) else rs.getTime(s)
+  }
+  implicit val timestamp: TypeBinder[java.sql.Timestamp] = TypeBinder { (rs, i) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getTimestamp(i)) else rs.getTimestamp(i)
+  } { (rs, s) =>
+    if (timeZoneEnabled) timeZoneConverter.convert(rs.getTimestamp(s)) else rs.getTimestamp(s)
+  }
 
   /*
    * [error] /scalikejdbc/scalikejdbc-library/src/test/scala/scalikejdbc/TypeBinderSpec.scala:40: ambiguous
