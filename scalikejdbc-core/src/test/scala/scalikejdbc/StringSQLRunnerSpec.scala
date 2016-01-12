@@ -63,6 +63,8 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
     val scalaShort: Short = 123
     val javaBigDecimal: java.math.BigDecimal = new java.math.BigDecimal("123")
     val scalaBigDecimal: scala.math.BigDecimal = scala.math.BigDecimal("123")
+    val javaBigInteger: java.math.BigInteger = new java.math.BigInteger("123")
+    val scalaBigInt: scala.math.BigInt = scala.math.BigInt("123")
 
     runner.cast[Int](javaInteger) should equal(expectedInt)
     runner.cast[Int](scalaInt) should equal(expectedInt)
@@ -70,6 +72,8 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
     runner.cast[Int](scalaShort) should equal(expectedInt)
     runner.cast[Int](javaBigDecimal) should equal(expectedInt)
     runner.cast[Int](scalaBigDecimal) should equal(expectedInt)
+    runner.cast[Int](javaBigInteger) should equal(expectedInt)
+    runner.cast[Int](scalaBigInt) should equal(expectedInt)
 
     runner.cast[Long](javaInteger) should equal(expectedLong)
     runner.cast[Long](scalaInt) should equal(expectedLong)
@@ -77,6 +81,8 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
     runner.cast[Long](scalaShort) should equal(expectedLong)
     runner.cast[Long](javaBigDecimal) should equal(expectedLong)
     runner.cast[Long](scalaBigDecimal) should equal(expectedLong)
+    runner.cast[Long](javaBigInteger) should equal(expectedLong)
+    runner.cast[Long](scalaBigInt) should equal(expectedLong)
 
     runner.cast[String](javaInteger) should equal(expectedString)
     runner.cast[String](scalaInt) should equal(expectedString)
@@ -84,6 +90,8 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
     runner.cast[String](scalaShort) should equal(expectedString)
     runner.cast[String](javaBigDecimal) should equal(expectedString)
     runner.cast[String](scalaBigDecimal) should equal(expectedString)
+    runner.cast[String](javaBigInteger) should equal(expectedString)
+    runner.cast[String](scalaBigInt) should equal(expectedString)
 
   }
 

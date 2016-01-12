@@ -656,6 +656,60 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "work with Scala BigInt values" in {
+    DB autoCommit {
+      implicit session =>
+        try {
+          try {
+            SQL("create table dbsession_work_with_scala_big_int_values (id bigint generated always as identity, s bigint)").execute.apply()
+          } catch {
+            case e: Exception =>
+              try {
+                SQL("create table dbsession_work_with_scala_big_int_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+              } catch {
+                case e: Exception =>
+                  SQL("create table dbsession_work_with_scala_big_int_values (id serial not null, s bigint, primary key(id))").execute.apply()
+              }
+          }
+          val s: BigInt = BigInt(123)
+          SQL("insert into dbsession_work_with_scala_big_int_values (s) values (?)").bind(s).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_scala_big_int_values").execute.apply()
+          } catch {
+            case e: Exception => e.printStackTrace
+          }
+        }
+    }
+  }
+
+  it should "work with Java BigInteger values" in {
+    DB autoCommit {
+      implicit session =>
+        try {
+          try {
+            SQL("create table dbsession_work_with_java_big_integer_values (id bigint generated always as identity, s bigint)").execute.apply()
+          } catch {
+            case e: Exception =>
+              try {
+                SQL("create table dbsession_work_with_java_big_integer_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+              } catch {
+                case e: Exception =>
+                  SQL("create table dbsession_work_with_java_big_integer_values (id serial not null, s bigint, primary key(id))").execute.apply()
+              }
+          }
+          val s: BigInt = BigInt(123)
+          SQL("insert into dbsession_work_with_java_big_integer_values (s) values (?)").bind(s).update.apply()
+        } finally {
+          try {
+            SQL("drop table dbsession_work_with_java_big_integer_values").execute.apply()
+          } catch {
+            case e: Exception => e.printStackTrace
+          }
+        }
+    }
+  }
+
   it should "work with optional wrapper class values" in {
     DB autoCommit {
       implicit session =>

@@ -33,6 +33,8 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
 
   implicit val bigDecimal: TypeBinder[java.math.BigDecimal] = TypeBinder(_ getBigDecimal _)(_ getBigDecimal _)
   implicit val scalaBigDecimal: TypeBinder[BigDecimal] = option(bigDecimal).map(_.map(BigDecimal.apply).orNull[BigDecimal])
+  implicit val bigInteger: TypeBinder[java.math.BigInteger] = TypeBinder(_.getBigDecimal(_).toBigInteger)(_.getBigDecimal(_).toBigInteger)
+  implicit val scalaBigInt: TypeBinder[BigInt] = option(bigInteger).map(_.map(BigInt.apply).orNull[BigInt])
 
   implicit val binaryStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getBinaryStream _)(_ getBinaryStream _)
   implicit val blob: TypeBinder[java.sql.Blob] = TypeBinder(_ getBlob _)(_ getBlob _)

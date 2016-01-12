@@ -61,6 +61,8 @@ case class StringSQLRunner(sql: String) extends LogSupport {
         case null => 0
         case bigDecimal: java.math.BigDecimal => bigDecimal.intValue
         case bigDecimal: scala.math.BigDecimal => bigDecimal.toInt
+        case bigInteger: java.math.BigInteger => bigInteger.intValue
+        case bigInt: scala.math.BigInt => bigInt.toInt
         case int: java.lang.Integer => java.lang.Integer.parseInt(int.toString)
         case short: java.lang.Short => java.lang.Integer.parseInt(short.toString)
         case x => x
@@ -70,6 +72,8 @@ case class StringSQLRunner(sql: String) extends LogSupport {
         case null => 0L
         case bigDecimal: java.math.BigDecimal => bigDecimal.longValue
         case bigDecimal: scala.math.BigDecimal => bigDecimal.toLong
+        case bigInteger: java.math.BigInteger => bigInteger.longValue
+        case bigInt: scala.math.BigInt => bigInt.toLong
         case int: java.lang.Integer => java.lang.Long.parseLong(int.toString)
         case short: java.lang.Short => java.lang.Long.parseLong(short.toString)
         case x => x
