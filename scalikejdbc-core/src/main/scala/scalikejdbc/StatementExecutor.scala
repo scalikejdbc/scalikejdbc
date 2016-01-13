@@ -68,6 +68,7 @@ case class StatementExecutor(
         case binder: ParameterBinder[_] => binder.apply(underlying, i)
         case p: java.sql.Array => underlying.setArray(i, p)
         case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
+        case p: BigInt => underlying.setBigDecimal(i, new java.math.BigDecimal(p.bigInteger))
         case p: Boolean => underlying.setBoolean(i, p)
         case p: Byte => underlying.setByte(i, p)
         case p: java.sql.Date => underlying.setDate(i, p)

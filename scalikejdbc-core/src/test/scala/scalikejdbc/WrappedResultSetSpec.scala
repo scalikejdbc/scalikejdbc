@@ -25,7 +25,7 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     import java.sql.{ Array => sqlArray, Blob, Clob, NClob, Ref, SQLXML, Time, Timestamp }
     import java.io.InputStream
     import java.io.Reader
-    import java.math.BigDecimal
+    import java.math.{ BigDecimal, BigInteger }
     import java.util.Date
     import java.net.URL
 
@@ -68,6 +68,29 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       val res2: BigDecimal = rs.bigDecimal(0)
       val res3: BigDecimal = rs.bigDecimalOpt("foo").orNull[BigDecimal]
       val res4: BigDecimal = rs.bigDecimalOpt(0).orNull[BigDecimal]
+      res1 should be(null)
+      res2 should be(null)
+      res3 should be(null)
+      res4 should be(null)
+    }
+
+    {
+      val res1: BigInteger = Option(rs.bigDecimal("foo")) match {
+        case Some(bd) => bd.toBigInteger
+        case None => null
+      }
+      val res2: BigInteger = Option(rs.bigDecimal(0)) match {
+        case Some(bd) => bd.toBigInteger
+        case None => null
+      }
+      val res3: BigInteger = rs.bigDecimalOpt("foo") match {
+        case Some(bd) => bd.toBigInteger
+        case None => null
+      }
+      val res4: BigInteger = rs.bigDecimalOpt(0) match {
+        case Some(bd) => bd.toBigInteger
+        case None => null
+      }
       res1 should be(null)
       res2 should be(null)
       res3 should be(null)

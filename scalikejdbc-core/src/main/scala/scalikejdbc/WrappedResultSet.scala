@@ -59,6 +59,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def bigDecimalOpt(columnLabel: String): Option[java.math.BigDecimal] = get[Option[java.math.BigDecimal]](columnLabel)
 
+  def bigInt(columnIndex: Int): java.math.BigInteger = get[java.math.BigInteger](columnIndex)
+
+  def bigInt(columnLabel: String): java.math.BigInteger = get[java.math.BigInteger](columnLabel)
+
+  def bigIntOpt(columnIndex: Int): Option[java.math.BigInteger] = get[Option[java.math.BigInteger]](columnIndex)
+
+  def bigIntOpt(columnLabel: String): Option[java.math.BigInteger] = get[Option[java.math.BigInteger]](columnLabel)
+
   def binaryStream(columnIndex: Int): java.io.InputStream = get[java.io.InputStream](columnIndex)
 
   def binaryStream(columnLabel: String): java.io.InputStream = get[java.io.InputStream](columnLabel)

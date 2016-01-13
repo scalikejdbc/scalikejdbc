@@ -29,6 +29,20 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, 2) should be(None)
   }
 
+  it should "have TypeBinder for scala.BigInt" in {
+    val rs: ResultSet = mock[ResultSet]
+    when(rs.getBigDecimal("integer")).thenReturn(new java.math.BigDecimal("1234567"))
+    when(rs.getBigDecimal(1)).thenReturn(new java.math.BigDecimal("2345678"))
+
+    implicitly[TypeBinder[BigInt]].apply(rs, "integer") should be(BigInt("1234567"))
+    implicitly[TypeBinder[BigInt]].apply(rs, 1) should be(BigInt("2345678"))
+
+    implicitly[TypeBinder[Option[BigInt]]].apply(rs, "integer") should be(Some(BigInt("1234567")))
+    implicitly[TypeBinder[Option[BigInt]]].apply(rs, 1) should be(Some(BigInt("2345678")))
+    implicitly[TypeBinder[Option[BigInt]]].apply(rs, "none") should be(None)
+    implicitly[TypeBinder[Option[BigInt]]].apply(rs, 2) should be(None)
+  }
+
   it should "have TypeBinder for java.util.Date/Calendar" in {
     val rs: ResultSet = mock[ResultSet]
     when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(DateTime.now.getMillis))
@@ -48,6 +62,30 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     val rs: ResultSet = mock[ResultSet]
     when(rs.getObject("zero")).thenReturn(java.math.BigDecimal.ZERO, Array[Object](): _*)
     when(rs.getObject("nonzero")).thenReturn(java.math.BigDecimal.ONE, Array[Object](): _*)
+
+    val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
+    wrapped.boolean("zero") should be(false)
+    wrapped.boolean("nonzero") should be(true)
+    wrapped.booleanOpt("zero") should be(Some(false))
+    wrapped.booleanOpt("nonzero") should be(Some(true))
+    wrapped.int("zero") should be(0)
+    wrapped.int("nonzero") should be(1)
+    wrapped.intOpt("zero") should be(Some(0))
+    wrapped.intOpt("nonzero") should be(Some(1))
+    wrapped.long("zero") should be(0)
+    wrapped.long("nonzero") should be(1L)
+    wrapped.longOpt("zero") should be(Some(0L))
+    wrapped.longOpt("nonzero") should be(Some(1L))
+    wrapped.short("zero") should be(0)
+    wrapped.short("nonzero") should be(1)
+    wrapped.shortOpt("zero") should be(Some(0))
+    wrapped.shortOpt("nonzero") should be(Some(1))
+  }
+
+  it should "handle result values of type java.math.BigInt" in {
+    val rs: ResultSet = mock[ResultSet]
+    when(rs.getObject("zero")).thenReturn(java.math.BigInteger.ZERO, Array[Object](): _*)
+    when(rs.getObject("nonzero")).thenReturn(java.math.BigInteger.ONE, Array[Object](): _*)
 
     val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
     wrapped.boolean("zero") should be(false)
