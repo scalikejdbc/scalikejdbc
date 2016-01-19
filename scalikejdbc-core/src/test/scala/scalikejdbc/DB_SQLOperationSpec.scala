@@ -447,6 +447,9 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
 
         val count2 = db withinTx {
           implicit s =>
+            // https://github.com/scalikejdbc/scalikejdbc/issues/481
+            SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(Nil: _*).apply()
+
             val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
               i =>
                 Seq[(Symbol, Any)](
@@ -488,6 +491,9 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
           case e: Exception =>
           // Exception should be catched here. It's not a bug.
         }
+        // https://github.com/scalikejdbc/scalikejdbc/issues/481
+        SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(Nil: _*).apply()
+
         db.rollback()
       }
     }
