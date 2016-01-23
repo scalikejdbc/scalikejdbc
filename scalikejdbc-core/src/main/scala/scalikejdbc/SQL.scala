@@ -78,11 +78,14 @@ private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSuppo
     }
 
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    (sqlWithPlaceHolders, names.map {
-      name =>
-        parameters.find(_._1 == name).orElse {
-          throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
-        }.map(_._2).orNull[Any]
+    (sqlWithPlaceHolders, names.map { name =>
+      parameters match {
+        case Nil => Nil
+        case _ =>
+          parameters.find(_._1 == name).orElse {
+            throw new IllegalArgumentException(ErrorMessage.BINDING_PARAMETER_IS_MISSING + " (" + name + ")")
+          }.map(_._2).orNull[Any]
+      }
     })
   }
 }
