@@ -37,6 +37,8 @@ object ScalikeJDBCProjects extends Build {
     publishTo <<= version { (v: String) => _publishTo(v) },
     publishMavenStyle := true,
     resolvers ++= _resolvers,
+    // https://github.com/sbt/sbt/issues/2217
+    fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := {
