@@ -50,7 +50,6 @@
 package object scalikejdbc
     extends SQLInterpolation
     with ScalaBigDecimalConverterImplicits
-    with ScalaBigIntegerConverterImplicits
     with UnixTimeInMillisConverterImplicits {
 
   // -----
