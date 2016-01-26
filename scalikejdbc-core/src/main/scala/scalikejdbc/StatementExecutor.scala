@@ -36,9 +36,13 @@ case class StatementExecutor(
   isBatch: Boolean = false)
     extends LogSupport with UnixTimeInMillisConverterImplicits {
 
+  import java.util.TimeZone
   import StatementExecutor._
+  import GlobalSettings.serverTimeZone
 
   private[this] lazy val batchParamsList = new MutableList[Seq[Any]]
+  private[this] lazy val timeZoneConverter =
+    TimeZoneConverter.from(TimeZone.getDefault).to(serverTimeZone.getOrElse(TimeZone.getDefault))
 
   initialize()
 
@@ -62,6 +66,8 @@ case class StatementExecutor(
       case other => other
     }.zipWithIndex
 
+    val timeZoneEnabled = serverTimeZone.isDefined
+
     for ((param, idx) <- paramsWithIndices; i = idx + 1) {
       param match {
         case null => underlying.setObject(i, null)
@@ -71,7 +77,7 @@ case class StatementExecutor(
         case p: BigInt => underlying.setBigDecimal(i, new java.math.BigDecimal(p.bigInteger))
         case p: Boolean => underlying.setBoolean(i, p)
         case p: Byte => underlying.setByte(i, p)
-        case p: java.sql.Date => underlying.setDate(i, p)
+        case p: java.sql.Date => underlying.setDate(i, if (timeZoneEnabled) timeZoneConverter.convert(p) else p)
         case p: Double => underlying.setDouble(i, p)
         case p: Float => underlying.setFloat(i, p)
         case p: Int => underlying.setInt(i, p)
@@ -79,14 +85,20 @@ case class StatementExecutor(
         case p: Short => underlying.setShort(i, p)
         case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
         case p: String => underlying.setString(i, p)
-        case p: java.sql.Time => underlying.setTime(i, p)
-        case p: java.sql.Timestamp => underlying.setTimestamp(i, p)
+        case p: java.sql.Time => underlying.setTime(i, if (timeZoneEnabled) timeZoneConverter.convert(p) else p)
+        case p: java.sql.Timestamp => underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(p) else p)
         case p: java.net.URL => underlying.setURL(i, p)
-        case p: java.util.Date => underlying.setTimestamp(i, p.toSqlTimestamp)
-        case p: org.joda.time.DateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-        case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-        case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
-        case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
+        case p: java.util.Date => underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(p.toSqlTimestamp) else p.toSqlTimestamp)
+        case p: org.joda.time.DateTime =>
+          val timestamp = p.toDate.toSqlTimestamp
+          underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(timestamp) else timestamp)
+        case p: org.joda.time.LocalDateTime =>
+          val timestamp = p.toDate.toSqlTimestamp
+          underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(timestamp) else timestamp)
+        case p: org.joda.time.LocalDate =>
+          val date = p.toDate.toSqlDate
+          underlying.setDate(i, if (timeZoneEnabled) timeZoneConverter.convert(date) else date)
+        case p: org.joda.time.LocalTime => underlying.setTime(i, if (timeZoneEnabled) timeZoneConverter.convert(p.toSqlTime) else p.toSqlTime)
         case p if param.getClass.getCanonicalName.startsWith("java.time.") => {
           // Accessing JSR-310 APIs via Java reflection
           // because scalikejdbc-core should work on not only Java 8 but 6 & 7.
@@ -99,16 +111,21 @@ case class StatementExecutor(
               val dateClazz: Class[_] = Class.forName("java.util.Date") // java.util.Date
               val fromMethod: Method = dateClazz.getMethod("from", Class.forName("java.time.Instant"))
               val dateValue = fromMethod.invoke(null, instant).asInstanceOf[java.util.Date]
-              underlying.setTimestamp(i, dateValue.toSqlTimestamp)
+              val timestamp = dateValue.toSqlTimestamp
+              underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(timestamp) else timestamp)
             case "java.time.Instant" =>
               val millis = clazz.getMethod("toEpochMilli").invoke(p).asInstanceOf[java.lang.Long]
-              underlying.setTimestamp(i, new java.util.Date(millis).toSqlTimestamp)
+              val timestamp = new java.util.Date(millis).toSqlTimestamp
+              underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(timestamp) else timestamp)
             case "java.time.LocalDateTime" =>
-              underlying.setTimestamp(i, org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp)
+              val timestamp = org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp
+              underlying.setTimestamp(i, if (timeZoneEnabled) timeZoneConverter.convert(timestamp) else timestamp)
             case "java.time.LocalDate" =>
-              underlying.setDate(i, org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate)
+              val date = org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate
+              underlying.setDate(i, if (timeZoneEnabled) timeZoneConverter.convert(date) else date)
             case "java.time.LocalTime" =>
-              underlying.setTime(i, org.joda.time.LocalTime.parse(p.toString).toSqlTime)
+              val time = org.joda.time.LocalTime.parse(p.toString).toSqlTime
+              underlying.setTime(i, if (timeZoneEnabled) timeZoneConverter.convert(time) else time)
           }
         }
         case p: java.io.InputStream => underlying.setBinaryStream(i, p)

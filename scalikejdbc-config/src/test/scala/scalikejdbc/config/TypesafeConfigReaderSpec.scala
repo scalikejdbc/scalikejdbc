@@ -22,6 +22,10 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     override lazy val config: Config = ConfigFactory.load("application-bad-logenabled.conf")
   }
 
+  val configReaderServerTimeZoneSpecified = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-server-time-zone-specified.conf")
+  }
+
   describe("TypesafeConfigReader") {
 
     describe("#readJDBCSettings") {
@@ -189,6 +193,11 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
       it("should load global settings") {
         TypesafeConfigReader.loadGlobalSettings()
+      }
+
+      it("should load serverTimeZone") {
+        configReaderServerTimeZoneSpecified.loadGlobalSettings()
+        GlobalSettings.serverTimeZone.get.getID should equal("AST")
       }
 
       describe("When the format of config file is bad") {

@@ -59,4 +59,9 @@ object GlobalSettings {
     (statement: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
   }
 
+  /**
+   * Specifies server timeZone used in binding/extracting time related values.
+   */
+  var serverTimeZone: Option[java.util.TimeZone] = None
+
 }
