@@ -11,7 +11,7 @@ class StatementExecutorSpec extends FlatSpec with Matchers {
     val underlying: PreparedStatement = null
     val template: String = ""
     val params: Seq[Any] = Nil
-    val instance = new StatementExecutor(underlying, template, params)
+    val instance = new StatementExecutor(underlying, template, DBConnectionAttributes(), params)
     instance should not be null
   }
 

@@ -80,7 +80,8 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "connectionTimeoutMillis" -> "2000",
           "poolConnectionTimeoutMillis" -> "1000",
           "poolValidationQuery" -> "select 1 as foo",
-          "poolWarmUpTimeMillis" -> "10"
+          "poolWarmUpTimeMillis" -> "10",
+          "timeZone" -> "AST"
         )
         TypesafeConfigReader.readAsMap('foo) should be(expected)
       }
@@ -124,7 +125,8 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "url" -> "jdbc:h2:mem:dev-foo",
           "user" -> "dev-foo",
           "password" -> "secret2",
-          "poolWarmUpTimeMillis" -> "10"
+          "poolWarmUpTimeMillis" -> "10",
+          "timeZone" -> "AST"
         )
         val configReader = new TypesafeConfigReaderWithEnv("dev")
         configReader.readAsMap('foo) should be(expected)
@@ -166,7 +168,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
       }
 
       it("should read configuration for foo db and return as ConnectionPoolSettings") {
-        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver", 10L)
+        val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver", 10L, "AST")
         TypesafeConfigReader.readConnectionPoolSettings('foo) should be(expected)
       }
 
