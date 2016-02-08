@@ -11,16 +11,18 @@ import com.typesafe.tools.mima.plugin.MimaKeys.{previousArtifacts, reportBinaryI
  */
 object MimaSettings {
 
-  // The `previousVersions` must be *ALL* the previous versions to be binary compatible (e.g. Set("2.3.0", "2.3.1") for "2.3.2-SNAPSHOT").
+  // The `previousVersions` must be *ALL* the previous versions to be binary compatible (e.g. Set("2.4.0", "2.4.1") for "2.4.2-SNAPSHOT").
   //
   // The following bad scenario is the reason we must obey the rule:
   //
-  //  - your build is toward 2.3.2 release and the `previousVersions` is "2.3.0" only
-  //  - you've added new methods since 2.3.1
-  //  - you're going to remove some of the methods in 2.3.2
+  //  - your build is toward 2.4.2 release and the `previousVersions` is "2.4.0" only
+  //  - you've added new methods since 2.4.1
+  //  - you're going to remove some of the methods in 2.4.2
   //  - in this case, the incompatibility won't be detected
   //
-  val previousVersions = (0 to 5).map(patch => s"2.3.$patch").toSet
+  // TODO: Enable this after 2.4.0 release
+  // val previousVersions = Set(0).map(patch => s"2.4.$patch")
+  val previousVersions: Set[String] = Set.empty
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     previousArtifacts := {
