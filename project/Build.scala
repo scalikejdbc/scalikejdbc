@@ -10,16 +10,16 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.13"
+  lazy val _slf4jApiVersion = "1.7.14"
   // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
   lazy val _logbackVersion = "1.1.3"
-  lazy val _h2Version = "1.4.190"
+  lazy val _h2Version = "1.4.191"
   lazy val _mysqlVersion = "5.1.38"
   lazy val _postgresqlVersion = "9.4.1207.jre7"
-  lazy val _hibernateVersion = "5.0.6.Final"
+  lazy val _hibernateVersion = "5.0.7.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -43,7 +43,7 @@ object ScalikeJDBCProjects extends Build {
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 11 => "2.2.5"
+        case Some((2, v)) if v <= 11 => "2.2.6"
         case _ => "2.2.5-M2"
       }
     },
@@ -123,7 +123,7 @@ object ScalikeJDBCProjects extends Build {
           // scope: compile
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.1"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.2"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
