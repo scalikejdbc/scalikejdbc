@@ -1,0 +1,14 @@
+ScalikeJDBC 2.3.5 is out.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #480 Add BigInt values as bind params by @nicbaz
+ - [core] #483 Fix #481 batchByName fails on empty parameter lists by @seratch
+ - [core] #484 Revert BigInt implicit conversion introduced by #480 by @seratch
+ - [core] Bump joda-time, slf4j-api minor version
+
+Enjoy writing mostly type-safe SQL and get things done!
