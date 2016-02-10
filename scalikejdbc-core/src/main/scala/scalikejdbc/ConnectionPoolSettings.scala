@@ -10,5 +10,6 @@ case class ConnectionPoolSettings(
   validationQuery: String = null,
   connectionPoolFactoryName: String = null,
   driverName: String = null,
-  warmUpTime: Long = 100L)
+  warmUpTime: Long = 100L,
+  timeZone: String = null)
 

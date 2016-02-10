@@ -1034,4 +1034,62 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "convert timeZone" in {
+    import java.util.TimeZone
+    import org.joda.time.DateTimeZone
+
+    val time = new DateTime(2016, 1, 9, 2, 43, 42)
+
+    val castToString: String = if (driverClassName.contains("mysql")) {
+      "date_format(t, '%Y-%m-%d %H:%i:%S')"
+    } else {
+      "to_char(t, 'YYYY-MM-DD HH24:MI:SS')"
+    }
+
+    try {
+      DB autoCommit { implicit session =>
+        try SQL("drop table zone_test").execute.apply()
+        catch { case e: Exception => }
+
+        SQL("create table zone_test (id int primary key, t timestamp)").execute.apply()
+      }
+
+      /**
+       * execute with Asia/Tokyo timezone
+       */
+      DB autoCommit { session =>
+        implicit val jstSession = DBSession(
+          conn = session.conn,
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
+
+        SQL("insert into zone_test values (?, ?)").bind(1, time).execute.apply()(jstSession)
+        val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single.apply().get
+        jstString should equal(time.withZone(DateTimeZone.forID("Asia/Tokyo")).toString("yyyy-MM-dd hh:mm:ss"))
+
+        val expectedTime1 = SQL("select t from zone_test where id = 1").map(_.jodaDateTime("t")).single.apply().get
+        expectedTime1.isEqual(time) should equal(true)
+      }
+
+      /**
+       * execute with UTC timezone
+       */
+      DB autoCommit { session =>
+        implicit val utcSession = DBSession(
+          conn = session.conn,
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
+
+        SQL("insert into zone_test values (?, ?)").bind(2, time).execute.apply()
+        val utcString = SQL(s"select $castToString as s from zone_test where id = 2").map(_.string("s")).single.apply().get
+        utcString should equal(time.withZone(DateTimeZone.forID("UTC")).toString("yyyy-MM-dd HH:mm:ss"))
+
+        val expectedTime2 = SQL("select t from zone_test where id = 2").map(_.jodaDateTime("t")).single.apply().get
+        expectedTime2.isEqual(time) should equal(true)
+      }
+    } finally {
+      DB autoCommit { implicit session =>
+        try SQL("drop table zone_test").execute.apply()
+        catch { case e: Exception => }
+      }
+    }
+  }
 }

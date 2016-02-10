@@ -92,6 +92,7 @@ trait DBSession extends LogSupport with LoanPattern {
       StatementExecutor(
         underlying = statement,
         template = template,
+        connectionAttributes = connectionAttributes,
         tags = tags,
         singleParams = params)
 
@@ -140,6 +141,7 @@ trait DBSession extends LogSupport with LoanPattern {
     StatementExecutor(
       underlying = statement,
       template = template,
+      connectionAttributes = connectionAttributes,
       tags = tags,
       isBatch = true)
   }
@@ -236,7 +238,8 @@ trait DBSession extends LogSupport with LoanPattern {
   def single[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
-        val resultSet = new ResultSetTraversable(executor.executeQuery())
+        val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
+        val resultSet = new ResultSetTraversable(proxy)
         val rows = (resultSet map (rs => extract(rs))).toList
         rows match {
           case Nil => None
@@ -284,7 +287,9 @@ trait DBSession extends LogSupport with LoanPattern {
    */
   def collection[A, C[_]](template: String, params: Any*)(extract: WrappedResultSet => A)(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
     using(createStatementExecutor(conn, template, params)) {
-      executor => new ResultSetTraversable(executor.executeQuery()).map(extract)(breakOut)
+      executor =>
+        val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
+        new ResultSetTraversable(proxy).map(extract)(breakOut)
     }
   }
 
@@ -299,7 +304,8 @@ trait DBSession extends LogSupport with LoanPattern {
   def foreach(template: String, params: Any*)(f: WrappedResultSet => Unit): Unit = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
-        new ResultSetTraversable(executor.executeQuery()) foreach (rs => f(rs))
+        val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
+        new ResultSetTraversable(proxy) foreach (rs => f(rs))
     }
   }
 
@@ -315,7 +321,8 @@ trait DBSession extends LogSupport with LoanPattern {
   def foldLeft[A](template: String, params: Any*)(z: A)(op: (A, WrappedResultSet) => A): A = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
-        new ResultSetTraversable(executor.executeQuery()).foldLeft(z)(op)
+        val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
+        new ResultSetTraversable(proxy).foldLeft(z)(op)
     }
   }
 

@@ -291,7 +291,10 @@ abstract class ConnectionPool(
   def close(): Unit = throw new UnsupportedOperationException
 
   def connectionAttributes: DBConnectionAttributes = {
-    DBConnectionAttributes(driverName = Option(settings.driverName))
+    val timeZoneSettings = Option(settings.timeZone).fold(TimeZoneSettings()) { timeZone =>
+      TimeZoneSettings(true, java.util.TimeZone.getTimeZone(timeZone))
+    }
+    DBConnectionAttributes(driverName = Option(settings.driverName), timeZoneSettings = timeZoneSettings)
   }
 
 }
