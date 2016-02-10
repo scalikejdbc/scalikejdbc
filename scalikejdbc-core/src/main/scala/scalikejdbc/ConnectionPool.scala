@@ -1,7 +1,9 @@
 package scalikejdbc
 
+import java.util.concurrent.Executors
 import javax.sql.DataSource
 import java.sql.Connection
+import scala.concurrent.{ ExecutionContextExecutor, ExecutionContext }
 
 /**
  * Connection Pool
@@ -11,6 +13,13 @@ import java.sql.Connection
  * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 object ConnectionPool extends LogSupport {
+
+  /**
+   * The default execution context used by async workers for connection pools management.
+   */
+  private lazy val DEFAULT_EXECUTION_CONTEXT: ExecutionContextExecutor = {
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3))
+  }
 
   type MutableMap[A, B] = scala.collection.mutable.HashMap[A, B]
   type CPSettings = ConnectionPoolSettings
@@ -23,6 +32,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Returns true when the specified Connection pool is already initialized.
+   *
    * @param name pool name
    * @return is initialized
    */
@@ -67,8 +77,9 @@ object ConnectionPool extends LogSupport {
    * @param password JDBC password
    * @param settings Settings
    */
-  def add(name: Any, url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY) {
+  def add(name: Any, url: String, user: String, password: String, settings: CPSettings = ConnectionPoolSettings())(
+    implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY,
+    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT) {
 
     import scalikejdbc.JDBCUrl._
 
@@ -105,20 +116,6 @@ object ConnectionPool extends LogSupport {
     log.debug(s"Registered connection pool : ${get(name)} using factory : $factoryName")
   }
 
-  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool) = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    scala.concurrent.Future {
-      log.debug("The old pool destruction started. connection pool : " + get(name).toString())
-      var millis = 0L
-      while (millis < 60000L && oldPool.numActive > 0) {
-        Thread.sleep(100L)
-        millis += 100L
-      }
-      oldPool.close()
-      log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
-    }
-  }
-
   /**
    * Registers new named Connection pool.
    *
@@ -126,6 +123,8 @@ object ConnectionPool extends LogSupport {
    * @param dataSource DataSource based ConnectionPool
    */
   def add(name: Any, dataSource: DataSourceConnectionPool) = {
+    // NOTE: cannot pass ExecutionContext from outside due to overload issue
+    // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
     // register new pool or replace existing pool
     pools.synchronized {
@@ -144,6 +143,8 @@ object ConnectionPool extends LogSupport {
    * @param dataSource DataSource based ConnectionPool
    */
   def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool) = {
+    // NOTE: cannot pass ExecutionContext from outside due to overload issue
+    // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
     // register new pool or replace existing pool
     pools.synchronized {
@@ -153,6 +154,20 @@ object ConnectionPool extends LogSupport {
     }
     // asynchronously close the old pool if exists
     oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
+  }
+
+  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool)(
+    implicit ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT) = {
+    scala.concurrent.Future {
+      log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+      var millis = 0L
+      while (millis < 60000L && oldPool.numActive > 0) {
+        Thread.sleep(100L)
+        millis += 100L
+      }
+      oldPool.close()
+      log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+    }
   }
 
   /**
@@ -171,6 +186,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Registers the default Connection pool.
+   *
    * @param dataSource DataSource
    */
   def singleton(dataSource: DataSourceConnectionPool): Unit = {
@@ -180,6 +196,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Registers the default Connection pool.
+   *
    * @param dataSource DataSource
    */
   def singleton(dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
@@ -189,6 +206,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Returns javax.sql.DataSource.
+   *
    * @param name pool name
    * @return datasource
    */
@@ -199,6 +217,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Borrows a java.sql.Connection from the specified connection pool.
+   *
    * @param name pool name
    * @return connection
    */
@@ -211,6 +230,7 @@ object ConnectionPool extends LogSupport {
 
   /**
    * Close a pool by name
+   *
    * @param name pool name
    */
   def close(name: Any = DEFAULT_NAME): Unit = {
@@ -245,42 +265,49 @@ abstract class ConnectionPool(
 
   /**
    * Borrows java.sql.Connection from pool.
+   *
    * @return connection
    */
   def borrow(): Connection
 
   /**
    * Returns javax.sql.DataSource object.
+   *
    * @return datasource
    */
   def dataSource: DataSource
 
   /**
    * Returns num of active connections.
+   *
    * @return num
    */
   def numActive: Int = throw new UnsupportedOperationException
 
   /**
    * Returns num of idle connections.
+   *
    * @return num
    */
   def numIdle: Int = throw new UnsupportedOperationException
 
   /**
    * Returns max limit of active connections.
+   *
    * @return num
    */
   def maxActive: Int = throw new UnsupportedOperationException
 
   /**
    * Returns max limit of idle connections.
+   *
    * @return num
    */
   def maxIdle: Int = throw new UnsupportedOperationException
 
   /**
    * Returns self as a String value.
+   *
    * @return printable String value
    */
   override def toString() = "ConnectionPool(url:" + url + ", user:" + user + ")"
