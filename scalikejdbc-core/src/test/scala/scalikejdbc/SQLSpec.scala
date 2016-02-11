@@ -335,4 +335,44 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
     }
   }
 
+  // --------------------
+  // Batch
+
+  it should "be able to return generated keys when running batch API" in {
+    DB autoCommit { implicit session =>
+      ultimately(TestUtils.deleteTable("sqlspec_genkey")) {
+        try {
+          try {
+            SQL("create table sqlspec_genkey (id integer generated always as identity(start with 0), name varchar(10))").execute.apply()
+          } catch {
+            case e: Exception =>
+              try {
+                SQL("create table sqlspec_genkey (id integer auto_increment, name varchar(10), primary key(id))").execute.apply()
+              } catch {
+                case e: Exception =>
+                  SQL("create table sqlspec_genkey (id serial not null, name varchar(10), primary key(id))").execute.apply()
+              }
+          }
+
+          val paramss = Seq(Seq("xxx"), Seq("yyy"), Seq("zzz"))
+
+          val ids1: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
+          ids1.size should equal(3)
+          ids1.last should be <= 3L
+
+          val ids2: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
+          ids2.size should equal(3)
+          ids2.last should be <= 6L
+
+          // for Oracle DB
+          // just check compilation
+          SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*)
+          //  val ids3: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*).apply()
+          //  ids3.size should equal(3)
+          //  ids3.last should be <= 9L
+        }
+      }
+    }
+  }
+
 }

@@ -323,6 +323,8 @@ case class StatementExecutor(
    */
   private[this] val statementExecute = new NakedExecutor with LoggingSQLAndTiming with LoggingSQLIfFailed
 
+  def generatedKeysResultSet: java.sql.ResultSet = underlying.getGeneratedKeys
+
   def addBatch(): Unit = underlying.addBatch()
 
   def execute(): Boolean = statementExecute(() => underlying.execute())

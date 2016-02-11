@@ -336,15 +336,16 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     DB autoCommit {
       implicit session =>
         try {
+          // NOTE: id column should be the first one for PostgreSQL
           try {
-            SQL("create table dbsessionspec_genkey (name varchar(30), id integer generated always as identity(start with 0))").execute.apply()
+            SQL("create table dbsessionspec_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsessionspec_genkey (name varchar(30), id integer auto_increment, primary key(id))").execute.apply()
+                SQL("create table dbsessionspec_genkey (id integer auto_increment, primary key(id), name varchar(30))").execute.apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsessionspec_genkey (name varchar(30), id serial not null, primary key(id))").execute.apply()
+                  SQL("create table dbsessionspec_genkey (id serial not null, primary key(id), name varchar(30))").execute.apply()
               }
           }
           var id = -1L
@@ -359,6 +360,19 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           id should be <= 1L
           session.updateWithFilters(true, before, after, "insert into dbsessionspec_genkey (name) values (?)", "xxx")
           id should be <= 2L
+
+          val ids: Seq[Long] = session.batchAndReturnGeneratedKey(
+            "insert into dbsessionspec_genkey (name) values (?)", Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*
+          )
+          ids.size should equal(3)
+          ids.last should be <= 5L
+          // for Oracle DB
+          //  {
+          //    val ids: Seq[Long] = session.batchAndReturnSpecifiedGeneratedKey(
+          //      "insert into dbsessionspec_genkey (name) values (?)", "id", Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*)
+          //    ids.size should equal(3)
+          //    ids.last should be <= 8L
+          //  }
         } finally {
           SQL("drop table dbsessionspec_genkey").execute.apply()
         }
