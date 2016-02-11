@@ -44,13 +44,13 @@ object ScalikeJDBCProjects extends Build {
     scalatestVersion := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v <= 11 => "2.2.6"
-        case _ => "2.2.5-M2"
+        case _ => "2.2.5-M3"
       }
     },
     specs2Version := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v <= 11 => "2.4.17"
-        case _ => "3.6.3"
+        case _ => "3.7"
       }
     },
     //scalaVersion := "2.11.7",
