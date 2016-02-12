@@ -611,6 +611,7 @@ case class ActiveSession(
  */
 case object NoSession extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
+  @deprecated("this unused method will be removed", "2.2.7")
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 

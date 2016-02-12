@@ -7,6 +7,7 @@ import java.sql.Connection
  */
 case object AutoSession extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
+  @deprecated("this unused method will be removed", "2.2.7")
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
@@ -24,6 +25,7 @@ case object AutoSession extends DBSession {
  */
 case class NamedAutoSession(name: Any) extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
+  @deprecated("this unused method will be removed", "2.2.7")
   val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
