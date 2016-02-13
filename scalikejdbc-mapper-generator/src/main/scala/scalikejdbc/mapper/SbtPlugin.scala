@@ -27,7 +27,8 @@ object SbtPlugin extends Plugin {
     dateTimeClass: DateTimeClass,
     tableNameToClassName: String => String,
     columnNameToFieldName: String => String,
-    returnCollectionType: ReturnCollectionType)
+    returnCollectionType: ReturnCollectionType
+  )
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>

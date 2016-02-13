@@ -900,7 +900,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             SQL("insert into image_data (name, data) values ({name}, {data});")
               .bindByName(
                 'name -> "logo",
-                'data -> stream)
+                'data -> stream
+              )
               .update.apply()
           } catch {
             case e: Exception =>
@@ -949,7 +950,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             SQL("insert into image_data2 (name, data) values ({name}, {data});")
               .bindByName(
                 'name -> "logo",
-                'data -> bos.toByteArray)
+                'data -> bos.toByteArray
+              )
               .update.apply()
           }
         }
@@ -1060,7 +1062,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       DB autoCommit { session =>
         implicit val jstSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo")))
+        )
 
         SQL("insert into zone_test values (?, ?)").bind(1, time).execute.apply()(jstSession)
         val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single.apply().get
@@ -1076,7 +1079,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       DB autoCommit { session =>
         implicit val utcSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC")))
+        )
 
         SQL("insert into zone_test values (?, ?)").bind(2, time).execute.apply()
         val utcString = SQL(s"select $castToString as s from zone_test where id = 2").map(_.string("s")).single.apply().get

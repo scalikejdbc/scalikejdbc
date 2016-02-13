@@ -139,7 +139,8 @@ private[scalikejdbc] trait Extractor[A] {
  */
 abstract class SQL[A, E <: WithExtractor](
   val statement: String,
-  val parameters: Seq[Any])(f: WrappedResultSet => A)
+  val parameters: Seq[Any]
+)(f: WrappedResultSet => A)
     extends Extractor[A] {
 
   override def extractor: (WrappedResultSet) => A = f
@@ -497,8 +498,10 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
  * @param after after filter
  */
 class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
-    before: (PreparedStatement) => Unit)(
-        after: (PreparedStatement) => Unit) {
+    before: (PreparedStatement) => Unit
+)(
+    after: (PreparedStatement) => Unit
+) {
 
   def apply()(implicit session: DBSession): Boolean = {
     val f: DBSession => Boolean = _.tags(tags: _*).executeWithFilters(before, after, statement, parameters: _*)
@@ -523,8 +526,10 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
  * @param after after filter
  */
 class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
-    before: (PreparedStatement) => Unit)(
-        after: (PreparedStatement) => Unit) {
+    before: (PreparedStatement) => Unit
+)(
+    after: (PreparedStatement) => Unit
+) {
 
   def apply()(implicit session: DBSession): Int = session match {
     case AutoSession =>
@@ -569,9 +574,11 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
   val statement: String
   val parameters: Seq[Any]
   def apply()(
-    implicit session: DBSession,
+    implicit
+    session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
-    hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
+    hasExtractor: ThisSQL =:= SQLWithExtractor
+  ): C[A] = {
     val f: DBSession => C[A] = s => result[A](extractor, s.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout))
     // format: OFF
     session match {
@@ -605,8 +612,10 @@ trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversa
  * @tparam A return type
  */
 class SQLToTraversableImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any])(
-    override val extractor: WrappedResultSet => A)
+  override val statement: String, override val parameters: Seq[Any]
+)(
+  override val extractor: WrappedResultSet => A
+)
     extends SQL[A, E](statement, parameters)(extractor)
     with SQLToTraversable[A, E] {
 
@@ -648,8 +657,10 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
 }
 
 class SQLToCollectionImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any])(
-    override val extractor: WrappedResultSet => A)
+  override val statement: String, override val parameters: Seq[Any]
+)(
+  override val extractor: WrappedResultSet => A
+)
     extends SQL[A, E](statement, parameters)(extractor)
     with SQLToCollection[A, E] {
 
@@ -688,8 +699,10 @@ trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
  * @tparam A return type
  */
 class SQLToListImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any])(
-    override val extractor: WrappedResultSet => A)
+  override val statement: String, override val parameters: Seq[Any]
+)(
+  override val extractor: WrappedResultSet => A
+)
     extends SQL[A, E](statement, parameters)(extractor)
     with SQLToList[A, E] {
 
@@ -734,8 +747,10 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
  * @tparam A return type
  */
 class SQLToOptionImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any])(
-    override val extractor: WrappedResultSet => A)(protected val isSingle: Boolean = true)
+  override val statement: String, override val parameters: Seq[Any]
+)(
+  override val extractor: WrappedResultSet => A
+)(protected val isSingle: Boolean = true)
     extends SQL[A, E](statement, parameters)(extractor)
     with SQLToOption[A, E] {
 

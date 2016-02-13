@@ -17,11 +17,13 @@ class Commons2ConnectionPool(
   override val url: String,
   override val user: String,
   password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
+)
     extends ConnectionPool(url, user, password, settings) {
 
   private[this] val _poolFactory = new PoolableConnectionFactory(
-    new DriverManagerConnectionFactory(url, user, password), null)
+    new DriverManagerConnectionFactory(url, user, password), null
+  )
   _poolFactory.setValidationQuery(settings.validationQuery)
 
   private[this] val _pool: GenericObjectPool[PoolableConnection] = new GenericObjectPool(_poolFactory)

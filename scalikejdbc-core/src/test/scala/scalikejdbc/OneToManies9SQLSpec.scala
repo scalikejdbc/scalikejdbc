@@ -85,7 +85,8 @@ class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
             entity6: Seq[Entity6] = Nil,
             entity7: Seq[Entity7] = Nil,
             entity8: Seq[Entity8] = Nil,
-            entity9: Seq[Entity9] = Nil)
+            entity9: Seq[Entity9] = Nil
+          )
 
           class Owner(val id: Int) extends EntityEquality {
             override val entityIdentity = id
@@ -129,7 +130,8 @@ class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))),
                 rs => rs.intOpt("e7_id").map(id => Entity7(id, rs.int("g_id"))),
                 rs => rs.intOpt("e8_id").map(id => Entity8(id, rs.int("g_id"))),
-                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id"))))
+                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ns, ms, ss, e6, e7, e8, e9) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss,
@@ -190,7 +192,8 @@ class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))),
                 rs => rs.intOpt("e7_id").map(id => Entity7(id, rs.int("g_id"))),
                 rs => rs.intOpt("e8_id").map(id => Entity8(id, rs.int("g_id"))),
-                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id"))))
+                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ns, ms, ss, e6, e7, e8, e9) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss,
@@ -252,7 +255,8 @@ class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))),
                 rs => rs.intOpt("e7_id").map(id => Entity7(id, rs.int("g_id"))),
                 rs => rs.intOpt("e8_id").map(id => Entity8(id, rs.int("g_id"))),
-                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id"))))
+                rs => rs.intOpt("e9_id").map(id => Entity9(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ns, ms, ss, e6, e7, e8, e9) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss,

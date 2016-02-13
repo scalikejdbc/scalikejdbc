@@ -265,7 +265,8 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
             "Typesafe",
             """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
              From multicore to cloud computing, it's purpose built for scale.""",
-            new DateTime).update.apply()
+            new DateTime
+          ).update.apply()
 
         // Anorm like template
         SQL("""
@@ -278,7 +279,8 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 2,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime).update.apply()
+          'createdAt -> new DateTime
+        ).update.apply()
 
         // executable template
         SQL("""
@@ -291,7 +293,8 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 3,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime).update.apply()
+          'createdAt -> new DateTime
+        ).update.apply()
 
       }
     } finally { TestUtils.deleteTable("emp") }

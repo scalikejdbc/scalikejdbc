@@ -39,7 +39,8 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
 
 class OneToManies2SQL[A, B1, B2, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
+  override val parameters: Seq[Any]
+)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
@@ -71,7 +72,8 @@ class OneToManies2SQL[A, B1, B2, E <: WithExtractor, Z](
 
 class OneToManies2SQLToList[A, B1, B2, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
+  override val parameters: Seq[Any]
+)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToList[Z, E]
     with OneToManies2Extractor[A, B1, B2, E, Z] {
@@ -90,7 +92,8 @@ class OneToManies2SQLToList[A, B1, B2, E <: WithExtractor, Z](
 
 final class OneToManies2SQLToCollection[A, B1, B2, E <: WithExtractor, Z] private[scalikejdbc] (
   override val statement: String,
-  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
+  override val parameters: Seq[Any]
+)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToCollection[Z, E]
     with OneToManies2Extractor[A, B1, B2, E, Z] {
@@ -109,7 +112,8 @@ final class OneToManies2SQLToCollection[A, B1, B2, E <: WithExtractor, Z] privat
 
 class OneToManies2SQLToTraversable[A, B1, B2, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(val one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
+  override val parameters: Seq[Any]
+)(val one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToTraversable[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
@@ -129,7 +133,8 @@ class OneToManies2SQLToTraversable[A, B1, B2, E <: WithExtractor, Z](
 
 class OneToManies2SQLToOption[A, B1, B2, E <: WithExtractor, Z](
   override val statement: String,
-  override val parameters: Seq[Any])(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)(protected val isSingle: Boolean = true)
+  override val parameters: Seq[Any]
+)(one: WrappedResultSet => A)(to1: WrappedResultSet => Option[B1], to2: WrappedResultSet => Option[B2])(extractor: (A, Seq[B1], Seq[B2]) => Z)(protected val isSingle: Boolean = true)
     extends SQL[Z, E](statement, parameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToOption[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]

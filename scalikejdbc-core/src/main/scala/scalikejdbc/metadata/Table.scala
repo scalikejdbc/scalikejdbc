@@ -10,12 +10,14 @@ package scalikejdbc.metadata
  * @param foreignKeys foreign keys
  * @param indices indices
  */
-case class Table(name: String,
+case class Table(
+    name: String,
     schema: String = null,
     description: String = null,
     columns: List[Column] = List(),
     foreignKeys: List[ForeignKey] = List(),
-    indices: List[Index] = List()) {
+    indices: List[Index] = List()
+) {
 
   /**
    * Returns name with schema(if exists)

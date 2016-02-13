@@ -34,7 +34,8 @@ case class StatementExecutor(
   connectionAttributes: DBConnectionAttributes,
   singleParams: Seq[Any] = Nil,
   tags: Seq[String] = Nil,
-  isBatch: Boolean = false)
+  isBatch: Boolean = false
+)
     extends LogSupport with UnixTimeInMillisConverterImplicits {
 
   import StatementExecutor._
