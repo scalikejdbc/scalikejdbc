@@ -12,7 +12,8 @@ import java.util.Calendar
  */
 private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
     underlying: ResultSet,
-    connAttributes: DBConnectionAttributes) extends ResultSet {
+    connAttributes: DBConnectionAttributes
+) extends ResultSet {
 
   /**
    * Converts Timestamp value to an appropriate timezone.

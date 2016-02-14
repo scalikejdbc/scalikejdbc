@@ -308,7 +308,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .one(rs => Group(rs.int("g_id")))
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .list.apply()
 
@@ -333,7 +334,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .one(rs => Group(rs.int("g_id")))
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .collection[Vector]()
 
@@ -358,7 +360,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .one(rs => Group(rs.int("g_id")))
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .single.apply().get
 
@@ -431,7 +434,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, members = ms, sponsors = ss)
               }.list.apply()
@@ -461,7 +465,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, members = ms, sponsors = ss)
               }.collection[Vector]()
@@ -493,7 +498,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, ms, ss) =>
                 Group(id = g.id, ownerId = os.head.id, owner = os.head, members = ms, sponsors = ss)
               }.single.apply().get
@@ -580,7 +586,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("e_id").map(id => Event(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, members = ms, sponsors = ss)
               }.list.apply()
@@ -617,7 +624,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("e_id").map(id => Event(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, members = ms, sponsors = ss)
               }.collection[Vector]()
@@ -654,7 +662,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
                 rs => rs.intOpt("o_id").map(id => Owner(id)),
                 rs => rs.intOpt("e_id").map(id => Event(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+                rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+              )
               .map { (g, os, es, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, members = ms, sponsors = ss)
               }.single.apply().get
@@ -770,7 +779,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
             rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
             rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
             rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+          )
           .map { (g, os, es, ns, ms, ss) =>
             Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
           }.list.apply()
@@ -814,7 +824,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
             rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
             rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
             rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+          )
           .map { (g, os, es, ns, ms, ss) =>
             Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
           }.collection[Vector]()
@@ -858,7 +869,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
             rs => rs.intOpt("e_id").map(id => new Event(id, rs.int("g_id"))),
             rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
             rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
-            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
+            rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id")))
+          )
           .map { (g, os, es, ns, ms, ss) =>
             Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
           }.single.apply().get

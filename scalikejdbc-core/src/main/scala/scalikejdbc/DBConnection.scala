@@ -468,7 +468,8 @@ trait DBConnection extends LogSupport with LoanPattern {
                       Index(
                         name = indexName,
                         columnNames = List(rs.string("COLUMN_NAME")),
-                        isUnique = !rs.boolean("NON_UNIQUE"))
+                        isUnique = !rs.boolean("NON_UNIQUE")
+                      )
                     }
                     map.updated(indexName, index)
                 }.map { case (k, v) => v }.toList.distinct

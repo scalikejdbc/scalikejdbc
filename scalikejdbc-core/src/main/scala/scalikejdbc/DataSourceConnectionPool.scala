@@ -18,7 +18,8 @@ class DataSourceConnectionPool(override val dataSource: DataSource, settings: Da
  * Note: Commons-DBCP doesn't support this API.
  */
 class AuthenticatedDataSourceConnectionPool(
-  override val dataSource: DataSource, override val user: String, password: String, settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings())
+  override val dataSource: DataSource, override val user: String, password: String, settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings()
+)
     extends ConnectionPool("<external-data-source>", user, password, ConnectionPoolSettings(driverName = settings.driverName)) {
 
   override def borrow(): Connection = dataSource.getConnection(user, password)

@@ -371,8 +371,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
             }) + eol
         }.getOrElse("")
         else
-          ""
-        ) +
+          "") +
         createColumns.map { c => 3.indent + c.nameInScala + " = " + c.nameInScala }.mkString(comma + eol) + ")" + eol +
         1.indent + "}" + eol
     }
@@ -848,7 +847,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    val batchInserted = %className%.batchInsert(entities)
           |    batchInserted.size should be >(0)
           |  }
-          |}""".stripMargin + eol))
+          |}""".stripMargin + eol
+      ))
     case GeneratorTestTemplate.specs2unit =>
       Some(replaceVariablesForTestPart(
         s"""package %package%
@@ -913,7 +913,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |  }
           |
-          |}""".stripMargin + eol))
+          |}""".stripMargin + eol
+      ))
     case GeneratorTestTemplate.specs2acceptance =>
       Some(replaceVariablesForTestPart(
         s"""package %package%
@@ -990,7 +991,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |  }
           |
-          |}""".stripMargin + eol))
+          |}""".stripMargin + eol
+      ))
     case GeneratorTestTemplate(name) => None
   }
 
@@ -1002,10 +1004,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       .replace("%primaryKeys%", pkColumns.map {
         c => c.defaultValueInScala
       }.mkString(", "))
-      .replace("%syntaxObject%",
+      .replace(
+        "%syntaxObject%",
         if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else ""
       )
-      .replace("%whereExample%",
+      .replace(
+        "%whereExample%",
         if (isQueryDsl)
           pkColumns.headOption.map { c =>
           "sqls.eq(" + syntaxName + "." + c.nameInScala + ", " + c.defaultValueInScala + ")"

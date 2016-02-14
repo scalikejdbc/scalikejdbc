@@ -1,6 +1,7 @@
 package scalikejdbc.mapper
 
-case class GeneratorConfig(srcDir: String = "src/main/scala",
+case class GeneratorConfig(
+  srcDir: String = "src/main/scala",
   testDir: String = "src/test/scala",
   packageName: String = "models",
   template: GeneratorTemplate = GeneratorTemplate("queryDsl"),
@@ -13,7 +14,8 @@ case class GeneratorConfig(srcDir: String = "src/main/scala",
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
   columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord,
-  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List)
+  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List
+)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {

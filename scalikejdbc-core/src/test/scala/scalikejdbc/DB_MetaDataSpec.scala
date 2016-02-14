@@ -48,13 +48,16 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
 
         execute(
           "comment on table meta_members is 'website members';",
-          "alter table meta_members comment 'website members';")
+          "alter table meta_members comment 'website members';"
+        )
         execute(
           "comment on column meta_members.name is 'Full name';",
-          "alter table meta_members change name name varchar(30) not null comment 'Full name';")
+          "alter table meta_members change name name varchar(30) not null comment 'Full name';"
+        )
         execute(
           "comment on column meta_members.description is 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';",
-          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';")
+          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';"
+        )
 
         execute("alter table meta_members add foreign key (group_id) references meta_groups(id);")
         execute("create unique index meta_members_name_and_group on meta_members(name, group_id);")
@@ -444,7 +447,8 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
               id integer primary key,
               title varchar(30)  not null
             );
-            """)
+            """
+          )
         }
 
         // find table names

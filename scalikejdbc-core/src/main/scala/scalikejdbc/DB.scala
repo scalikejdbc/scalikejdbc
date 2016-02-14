@@ -59,7 +59,8 @@ import scala.concurrent.{ ExecutionContext, Future }
  */
 case class DB(
   conn: Connection,
-  override val connectionAttributes: DBConnectionAttributes = DBConnectionAttributes())
+  override val connectionAttributes: DBConnectionAttributes = DBConnectionAttributes()
+)
     extends DBConnection
 
 /**
@@ -252,7 +253,9 @@ object DB extends LoanPattern {
    * @return result value
    */
   def localTx[A](execution: DBSession => A)(
-    implicit context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
+    implicit
+    context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]
+  ): A = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes).autoClose(true).localTx(execution)
   }
@@ -281,7 +284,9 @@ object DB extends LoanPattern {
    * @return result value
    */
   def localTxWithConnection[A](execution: Connection => A)(
-    implicit context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
+    implicit
+    context: CPContext = NoCPContext, boundary: TxBoundary[A] = defaultTxBoundary[A]
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
       DB(conn, cp.connectionAttributes).autoClose(false).localTxWithConnection(execution)

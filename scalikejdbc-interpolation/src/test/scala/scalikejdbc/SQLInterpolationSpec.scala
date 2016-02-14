@@ -744,9 +744,11 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
           val u = UserName.syntax("u")
           val user = sql"select ${u.result.*} from ${UserName.as(u)} where ${u.id} = 2".map {
             rs =>
-              UserName(id = rs.int(u.resultName.id),
+              UserName(
+                id = rs.int(u.resultName.id),
                 first = rs.string(u.resultName.first),
-                full = rs.string(u.resultName.full))
+                full = rs.string(u.resultName.full)
+              )
           }.single.apply()
 
           user.isDefined should be(true)

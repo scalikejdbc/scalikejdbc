@@ -3,11 +3,13 @@ package models
 import scalikejdbc._
 import org.joda.time.{ LocalDate, DateTime }
 
-case class Member(id: Long,
+case class Member(
+    id: Long,
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime) {
+    createdAt: DateTime
+) {
 
   def save()(implicit session: DBSession = AutoSession): Member = Member.save(this)(session)
 
@@ -36,7 +38,8 @@ object Member extends UnixTimeInMillisConverterImplicits {
       name = rs.get(name),
       description = rs.get(description),
       birthday = rs.get(birthday),
-      createdAt = rs.get(createdAt))
+      createdAt = rs.get(createdAt)
+    )
   }
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
@@ -64,7 +67,8 @@ object Member extends UnixTimeInMillisConverterImplicits {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = AutoSession): Member = {
+    createdAt: DateTime
+  )(implicit session: DBSession = AutoSession): Member = {
     SQL("""
         INSERT INTO MEMBER (
           ID,
@@ -127,11 +131,13 @@ object Member extends UnixTimeInMillisConverterImplicits {
 
 }
 
-case class NamedMember(id: Long,
+case class NamedMember(
+    id: Long,
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime) {
+    createdAt: DateTime
+) {
 
   def save(): NamedMember = NamedMember.save(this)
 
@@ -159,7 +165,8 @@ object NamedMember {
       name = rs.get(name),
       description = rs.get(description),
       birthday = rs.get(birthday),
-      createdAt = rs.get(createdAt))
+      createdAt = rs.get(createdAt)
+    )
   }
 
   def find(id: Long)(implicit session: DBSession = NamedAutoSession('named)): Option[NamedMember] = {
@@ -187,7 +194,8 @@ object NamedMember {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = NamedAutoSession('named)): NamedMember = {
+    createdAt: DateTime
+  )(implicit session: DBSession = NamedAutoSession('named)): NamedMember = {
     SQL("""
         INSERT INTO NAMED_MEMBER (
           ID,

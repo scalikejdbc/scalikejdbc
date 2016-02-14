@@ -11,5 +11,6 @@ case class LoggingSQLAndTimeSettings(
   logLevel: Symbol = 'debug,
   warningEnabled: Boolean = false,
   warningThresholdMillis: Long = 3000L,
-  warningLogLevel: Symbol = 'warn)
+  warningLogLevel: Symbol = 'warn
+)
 
