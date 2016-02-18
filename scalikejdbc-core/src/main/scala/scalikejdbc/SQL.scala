@@ -254,6 +254,25 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
+  def batchAndReturnGeneratedKey(parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
+    new SQLBatchWithGeneratedKey(statement, parameters, tags)(None)
+  }
+
+  /**
+   * Binds parameters for batch
+   * @param generatedKeyName generated key name
+   * @param parameters parameters
+   * @return SQL for batch
+   */
+  def batchAndReturnGeneratedKey(generatedKeyName: String, parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
+    new SQLBatchWithGeneratedKey(statement, parameters, tags)(Some(generatedKeyName))
+  }
+
+  /**
+   * Binds parameters for batch
+   * @param parameters parameters
+   * @return SQL for batch
+   */
   def batchByName(parameters: Seq[(Symbol, Any)]*): SQLBatch = {
     val _sql = validateAndConvertToNormalStatement(statement, parameters.headOption.getOrElse(Seq.empty))._1
     val _parameters: Seq[Seq[Any]] = parameters.map { p =>
@@ -477,6 +496,28 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     val f: DBSession => C[Int] = _.tags(tags: _*).batch(statement, parameters: _*)
+    // format: OFF
+    session match {
+      case AutoSession                    => DB.autoCommit(f)
+      case NamedAutoSession(name)         => NamedDB(name).autoCommit(f)
+      case ReadOnlyAutoSession            => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name) => NamedDB(name).readOnly(f)
+      case _                              => f(session)
+    }
+    // format: ON
+  }
+
+}
+
+class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(key: Option[String]) {
+
+  def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    val f: DBSession => C[Long] = (session) => {
+      key match {
+        case Some(k) => session.tags(tags: _*).batchAndReturnSpecifiedGeneratedKey(statement, k, parameters: _*)
+        case _ => session.tags(tags: _*).batchAndReturnGeneratedKey(statement, parameters: _*)
+      }
+    }
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
