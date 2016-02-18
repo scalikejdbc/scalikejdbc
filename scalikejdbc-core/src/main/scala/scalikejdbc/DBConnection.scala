@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection }
-import scalikejdbc.metadata.{ Index, ForeignKey, Column, Table }
+import scalikejdbc.metadata._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
@@ -404,7 +404,9 @@ trait DBConnection extends LogSupport with LoanPattern {
   }
 
   /**
-   * Returns table information if exists
+   * Returns table information if exists.
+   *
+   * https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-
    *
    * @param meta database meta data
    * @param schema schema name
@@ -461,19 +463,39 @@ trait DBConnection extends LogSupport with LoanPattern {
               new RSTraversable(meta.getIndexInfo(null, schema, table, false, true))
                 .foldLeft(Map[String, Index]()) {
                   case (map, rs) =>
-                    val indexName = rs.string("INDEX_NAME")
-                    val index = map.get(indexName).map { index =>
-                      index.copy(columnNames = rs.string("COLUMN_NAME") :: index.columnNames)
-                    }.getOrElse {
-                      Index(
-                        name = indexName,
-                        columnNames = List(rs.string("COLUMN_NAME")),
-                        isUnique = !rs.boolean("NON_UNIQUE")
-                      )
+                    val indexName: String = rs.string("INDEX_NAME")
+                    val index: Index = map.get(indexName) match {
+                      case Some(idx) =>
+                        rs.stringOpt("COLUMN_NAME") match {
+                          case Some(columnName) => idx.copy(columnNames = idx.columnNames :+ columnName)
+                          case _ => idx
+                        }
+                      case _ =>
+                        Index(
+                          name = indexName,
+                          columnNames = rs.stringOpt("COLUMN_NAME").toList,
+                          isUnique = !rs.boolean("NON_UNIQUE"),
+                          qualifier = rs.stringOpt("INDEX_QUALIFIER"),
+                          indexType = {
+                            rs.shortOpt("TYPE") match {
+                              case Some(t) => IndexType.from(t)
+                              case _ => IndexType.tableIndexOther
+                            }
+                          },
+                          ordinalPosition = rs.shortOpt("ORDINAL_POSITION"),
+                          ascOrDesc = rs.stringOpt("ASC_OR_DESC"),
+                          cardinality = rs.longOpt("CARDINALITY"),
+                          pages = rs.longOpt("PAGES"),
+                          filterCondition = rs.stringOpt("FILTER_CONDITION")
+                        )
                     }
                     map.updated(indexName, index)
                 }.map { case (k, v) => v }.toList.distinct
-            } catch { case e: ResultSetExtractorException => Nil }
+            } catch {
+              case e: ResultSetExtractorException =>
+                log.error("Failed to fetch index information", e)
+                Nil
+            }
           }
         )
     }
