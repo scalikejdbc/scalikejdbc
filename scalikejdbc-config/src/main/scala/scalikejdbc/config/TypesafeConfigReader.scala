@@ -59,8 +59,10 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 
   def readJDBCSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): JDBCSettings = {
     val configMap = self.readAsMap(dbName)
+    // https://github.com/scalikejdbc/scalikejdbc/issues/494#issuecomment-184015480
+    // never forcing scalikejdbc-config users to load JDBC drivers in global
+    val driver = configMap.getOrElse("driver", "")
     (for {
-      driver <- configMap.get("driver")
       url <- configMap.get("url")
     } yield {
       val user = configMap.get("user").orElse(configMap.get("username")).orNull[String]

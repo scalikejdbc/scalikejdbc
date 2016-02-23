@@ -22,6 +22,10 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     override lazy val config: Config = ConfigFactory.load("application-bad-logenabled.conf")
   }
 
+  val noDriverConfigReader = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-no-driver.conf")
+  }
+
   describe("TypesafeConfigReader") {
 
     describe("#readJDBCSettings") {
@@ -55,6 +59,18 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           intercept[ConfigurationException] {
             emptyConfigReader.readJDBCSettings('foo) should be(None)
           }
+        }
+      }
+
+      describe("When configuration file doesn't have driver configuration") {
+        it("should return default JDBCSettings") {
+          val expected = JDBCSettings("jdbc:h2:mem:test123", "sa", "secret", "")
+          noDriverConfigReader.readJDBCSettings() should be(expected)
+        }
+
+        it("should return foo JDBCSettings") {
+          val expected = JDBCSettings("jdbc:h2:mem:test234", "user", "pass", "")
+          noDriverConfigReader.readJDBCSettings('foo) should be(expected)
         }
       }
 
@@ -156,7 +172,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     }
 
     it("should get db names") {
-      val expected = List("default", "foo", "bar", "baz", "topLevelDefaults").sorted
+      val expected = List("bar", "baz", "default", "foo", "nodriver1", "nodriver2", "topLevelDefaults").sorted
       TypesafeConfigReader.dbNames.sorted should be(expected)
     }
 

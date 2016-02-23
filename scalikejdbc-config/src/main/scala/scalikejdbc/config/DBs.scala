@@ -10,7 +10,9 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
   def setup(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Unit = {
     val JDBCSettings(url, user, password, driver) = readJDBCSettings(dbName)
     val cpSettings = readConnectionPoolSettings(dbName)
-    Class.forName(driver)
+    if (driver != null && driver.trim.nonEmpty) {
+      Class.forName(driver)
+    }
     ConnectionPool.add(dbName, url, user, password, cpSettings)
   }
 
