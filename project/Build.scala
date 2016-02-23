@@ -10,16 +10,16 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.14"
+  lazy val _slf4jApiVersion = "1.7.16"
   // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
-  lazy val _logbackVersion = "1.1.3"
+  lazy val _logbackVersion = "1.1.5"
   lazy val _h2Version = "1.4.191"
   lazy val _mysqlVersion = "5.1.38"
   lazy val _postgresqlVersion = "9.4.1207.jre7"
-  lazy val _hibernateVersion = "5.0.7.Final"
+  lazy val _hibernateVersion = "5.1.0.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -49,7 +49,7 @@ object ScalikeJDBCProjects extends Build {
     },
     specs2Version := {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 11 => "2.4.17"
+        case Some((2, v)) if v <= 11 => "2.5"
         case _ => "3.7"
       }
     },

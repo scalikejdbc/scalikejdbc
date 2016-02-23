@@ -1,25 +1,21 @@
 scalikejdbcSettings
 
 scalaVersion := "2.11.7"
-
 lazy val scalikejdbcVersion = scalikejdbc.ScalikejdbcBuildInfo.version
-
 resolvers ++= Seq(
   "Sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases",
   "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
-
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"        % scalikejdbcVersion,
   "org.scalikejdbc"    %% "scalikejdbc-jsr310" % scalikejdbcVersion,
   "com.github.seratch" %  "java-time-backport" % "1.0.0",
   "org.scalikejdbc"    %% "scalikejdbc-test"   % scalikejdbcVersion,
   "org.slf4j"          %  "slf4j-simple"       % "1.7.+",
-  "org.hibernate"      %  "hibernate-core"     % "4.3.11.Final",
+  "org.hibernate"      %  "hibernate-core"     % "5.1.0.Final",
   "org.hsqldb"         %  "hsqldb"             % "2.3.+",
-  "org.specs2"         %% "specs2-core"        % "2.4.4"             % "test"
+  "org.specs2"         %% "specs2-core"        % "2.5"               % "test"
 )
-
 initialCommands := """import scalikejdbc._, jsr310._
 import java.time._
 // classes
@@ -80,4 +76,3 @@ GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = true, log
 implicit val session = AutoSession
 val (u, g, gm, c) = (User.syntax("u"), Group.syntax("g"), GroupMember.syntax("gm"), Company.syntax("c"))
 """
-
