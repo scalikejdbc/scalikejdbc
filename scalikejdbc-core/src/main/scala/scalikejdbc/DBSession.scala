@@ -45,6 +45,11 @@ trait DBSession extends LogSupport with LoanPattern {
 
   private[scalikejdbc] val connectionAttributes: DBConnectionAttributes
 
+  /**
+   * Returns current transaction if exists.
+   */
+  def tx: Option[Tx] = None
+
   @volatile
   private[this] var _fetchSize: Option[Int] = None
 
@@ -701,7 +706,7 @@ object DBSession {
 case class ActiveSession(
     private[scalikejdbc] val conn: Connection,
     private[scalikejdbc] val connectionAttributes: DBConnectionAttributes,
-    tx: Option[Tx] = None,
+    override val tx: Option[Tx] = None,
     isReadOnly: Boolean = false
 ) extends DBSession {
 
@@ -720,7 +725,7 @@ case class ActiveSession(
  */
 case object NoSession extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
+  override val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
 
   override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
