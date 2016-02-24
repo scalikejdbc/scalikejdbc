@@ -7,7 +7,7 @@ import java.sql.Connection
  */
 case object ReadOnlyAutoSession extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
+  override val tx: Option[Tx] = None
   val isReadOnly: Boolean = true
 
   override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
@@ -24,7 +24,7 @@ case object ReadOnlyAutoSession extends DBSession {
  */
 case class ReadOnlyNamedAutoSession(name: Any) extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
-  val tx: Option[Tx] = None
+  override val tx: Option[Tx] = None
   val isReadOnly: Boolean = true
 
   override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation

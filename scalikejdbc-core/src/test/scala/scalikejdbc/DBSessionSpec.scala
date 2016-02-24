@@ -27,6 +27,12 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     }
   }
 
+  it should "have #tx" in {
+    DB.localTx { session =>
+      session.tx.isDefined should be(true)
+    }
+  }
+
   it should "be able to close java.sql.Connection with filters" in {
     val tableName = tableNamePrefix + "_closeConnection"
     ultimately(TestUtils.deleteTable(tableName)) {
