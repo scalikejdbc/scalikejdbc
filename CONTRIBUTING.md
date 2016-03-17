@@ -1,79 +1,79 @@
-## ScalikeJDBC Contributers' Guide
+## ScalikeJDBC Contributors' Guide
 
 ### Issues
 
-- Questions should be posted to [ScalikeJDBC Users Group](https://groups.google.com/forum/#!forum/scalikejdbc-users-group)
-- Please describe about your issue in detail (verison, situation, examples)
-- We may close your issue when we have no plan to take action right now. We appreciate your understanding.
+- Questions should be posted to the [ScalikeJDBC Users Group](https://groups.google.com/forum/#!forum/scalikejdbc-users-group)
+- Please describe your issue in detail (version, situation, examples)
+- We may close your issue if we have no plan to take action on it. We appreciate your understanding.
 
 ### Pull Requests
 
-- Pull requests basically should be sent toward "master" branch
-- Source and binary compatibility always must be kept
+- Pull requests should be sent to the "master" branch
+- Source and binary compatibility must always be kept
 - scalariform must be applied to all Scala source code
-- Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
-- ScalikeJDBC build checks binary compatibility by using [MiMa](https://github.com/typesafehub/migration-manager/wiki/Sbt-plugin). After 2.x.0 release, binary compatibility must be kept while 2.x series release.
+- Prefer creating separate Scala source files for each class/object/trait (except, of course, for sealed traits)
+- The ScalikeJDBC build checks for binary compatibility using the [Migration Manager for Scala (MiMa)](https://github.com/typesafehub/migration-manager/wiki/Sbt-plugin). After a 2.x.0 release, binary compatibility must be maintained for subsequent 2.x series releases.
 
 #### Branches
 
 ##### master (the default branch)
 
-- the latest stable version
+- Latest stable version
 - Changes that bring binary/source incompatibility are not allowed
-- This branch must be able to build against Scala 2.10 and 2.11
+- Must build against Scala 2.10 and 2.11
 
 ##### 2.2.x
 
-- the version 2.2 series maintainance branch
-- Only security fixes and critical bug fixes in master branch will be backported
-- This branch must be able to build against Scala 2.10 and 2.11
+- Version 2.2 series maintenance branch
+- Only security fixes and critical bug fixes to the master branch will be backported
+- Must build against Scala 2.10 and 2.11
 
 ##### 2.1.x
 
-- the version 2.1 series maintainance branch
-- Only security fixes and critical bug fixes in master branch will be backported
-- This branch must be able to build against Scala 2.10 and 2.11
+- Version 2.1 series maintenance branch
+- Only security fixes and critical bug fixes to the master branch will be backported
+- Must build against Scala 2.10 and 2.11
 
 ##### 2.0.x
 
-- the version 2.0 series maintainance branch
-- Only security fixes and critical bug fixes in master branch will be backported
-- This branch must be able to build against Scala 2.10 and 2.11
+- Version 2.0 series maintenance branch
+- Only security fixes and critical bug fixes to the master branch will be backported
+- Must build against Scala 2.10 and 2.11
 
 ##### 1.8.x
 
-- This branch must be able to build against Scala 2.10 
-- This branch must be compatible with ScalaTest 1.9
-- Backport from master branch which doesn't work on Scala 2.9 can be merged
+- Must build against Scala 2.10 
+- Must be compatible with ScalaTest 1.9
+- Backports from the master branch which don't work on Scala 2.9 can be merged
 - Source code compatibility should be kept with 1.7.x
 
 ##### 1.7.x
 
-- This branch must be able to build against Scala 2.9.1, 2.9.2, 2.9.3 and 2.10
-- This branch must be compatible with ScalaTest 1.9
-- Backport from master branch which doesn't work on Scala 2.9 can NOT be merged
+- Must build against Scala 2.9.1, 2.9.2, 2.9.3 and 2.10
+- Must be compatible with ScalaTest 1.9
+- Backports from the master branch which don't work on Scala 2.9 can NOT be merged
 
 #### Testing your pull request
 
-All the pull requests should pass the Travis CI jobs before merging them.
+All pull requests should pass the Travis CI jobs before they can be merged:
 
 https://travis-ci.org/scalikejdbc/scalikejdbc
 
-Testing with default settings is required when push changes:
+Testing with default settings is required when pushing changes:
 
 ```sh
 sbt library/test
 sbt interpolation/test
 ```
 
-If your change needs testing with MySQL/PostgreSQL
+If your change needs testing with MySQL/PostgreSQL:
 
 ```sh
 ./scripts/run_tests.sh mysql
 ./scripts/run_tests.sh postgresql
 ```
 
-See the required JDBC settings here.
+See the required JDBC settings here:
 
 scalikejdbc-core/src/test/resources/*.properties
 
