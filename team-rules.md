@@ -1,24 +1,26 @@
-## ScalikeJDBC Contributers' Guide
+## ScalikeJDBC Contributors' Guide
 
 ### Versioning Policy
 
 "{major}.{minor}.{fix}"
 
-- major: kept for supported Scala version compatibility, version 1 must support Scala 2.9 & 2.10, version 2 will support only Scala 2.10 & Scala 2.11 and ???
-- minor: kept for functionality and APIs compatibility, same version must provide same functionality and APIs
-- fix: to release some improvements, bug fixes and new features
+- major: Change only when the supported Scala major version changes:
+  - Version 1 supports Scala 2.9 & 2.10
+  - Version 2 supports Scala 2.10, Scala 2.11, and ???
+- minor: Change to indicate functionality and API compatibility changes, the same minor version must provide the same functionality and APIs
+- fix: For releasing smaller improvements, bug fixes and new features
 
-### Coding Rule for project members
+### Coding Rules for Project Members
 
-- Basically push "feature/xxx" branch first
-- Create "feature/xxx" branch and create a pull request when you need code review
-- Compatibility always must be kept as far as possible
+- Push "feature/xxx" branch first
+- Create a "feature/xxx" branch and create a pull request when you need code review
+- Compatibility always must be kept as far back as possible
 - scalariform must be applied to all Scala source code
-- Prefer creating scala source code for each class/object/trait (of course, except for sealed trait)
+- Prefer creating separate Scala source files for each class/object/trait (except, of course, for sealed traits)
 
 ### Testing
 
-- Testing with default settings is required when push changes
+- Testing with default settings is required when pushing changes:
 
 ```sh
 sbt library/test
@@ -27,7 +29,7 @@ sbt interpolation/test
 ./scripts/run_tests.sh h2
 ```
 
-- Testing with H2/HSQLDB/MySQL/PostgreSQL (only latest version) is required before release
+- Testing with H2/HSQLDB/MySQL/PostgreSQL (latest versions) is required before release:
 
 ```sh
 ./scripts/run_all_tests.sh
@@ -43,7 +45,7 @@ scalikejdbc-library/src/test/resources/*.properties
 
 - Sonatype release account
 
-How to add new Sonatype account to release maintainers:
+How to add a new Sonatype account for release maintainers:
 
 https://issues.sonatype.org/browse/OSSRH-14350
 
