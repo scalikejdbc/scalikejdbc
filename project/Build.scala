@@ -53,7 +53,7 @@ object ScalikeJDBCProjects extends Build {
         case _ => "3.7"
       }
     },
-    //scalaVersion := "2.11.7",
+    //scalaVersion := "2.11.8",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
