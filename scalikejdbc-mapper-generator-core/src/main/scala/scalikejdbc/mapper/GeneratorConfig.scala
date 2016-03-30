@@ -14,7 +14,8 @@ case class GeneratorConfig(
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
   columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord,
-  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List
+  returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,
+  view: Boolean = false
 )
 
 object GeneratorConfig {
