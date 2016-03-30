@@ -27,7 +27,8 @@ object SbtPlugin extends Plugin {
     dateTimeClass: DateTimeClass,
     tableNameToClassName: String => String,
     columnNameToFieldName: String => String,
-    returnCollectionType: ReturnCollectionType
+    returnCollectionType: ReturnCollectionType,
+    view: Boolean
   )
 
   private[this] def getString(props: Properties, key: String): Option[String] =
@@ -56,13 +57,15 @@ object SbtPlugin extends Plugin {
   private[this] final val DEFAULT_AUTO_SESSION = GENERATOR + "defaultAutoSession"
   private[this] final val DATETIME_CLASS = GENERATOR + "dateTimeClass"
   private[this] final val RETURN_COLLECTION_TYPE = GENERATOR + "returnCollectionType"
+  private[this] final val VIEW = GENERATOR + "view"
 
   private[this] val jdbcKeys = Set(
     JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA
   )
   private[this] val generatorKeys = Set(
     PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
-    ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE
+    ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE,
+    VIEW
   )
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
@@ -103,7 +106,8 @@ object SbtPlugin extends Plugin {
       defaultConfig.columnNameToFieldName,
       returnCollectionType = getString(props, RETURN_COLLECTION_TYPE).map { name =>
         ReturnCollectionType.map.getOrElse(name.toLowerCase(en), sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
-      }.getOrElse(defaultConfig.returnCollectionType)
+      }.getOrElse(defaultConfig.returnCollectionType),
+      view = getString(props, VIEW).map(_.toBoolean).getOrElse(defaultConfig.view)
     )
   }
 
@@ -179,7 +183,13 @@ object SbtPlugin extends Plugin {
     val className = None
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
-    model.allTables(jdbc.schema).map { table =>
+    val tableAndViews = if (generatorSettings.view) {
+      model.allTables(jdbc.schema) ++ model.allViews(jdbc.schema)
+    } else {
+      model.allTables(jdbc.schema)
+    }
+
+    tableAndViews.map { table =>
       new CodeGenerator(table, className)(config)
     }
   }

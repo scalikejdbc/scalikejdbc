@@ -14,6 +14,22 @@ $ exists src/test/scala/app/models/ProgrammersSpec.scala
 $ exists src/main/scala/app/models/Programmer.scala
 $ exists src/test/scala/app/models/ProgrammerSpec.scala
 
+> scalikejdbcGenAll
+-$ exists src/main/scala/app/models/ProgrammersView.scala
+-$ exists src/test/scala/app/models/ProgrammersViewSpec.scala
+
+> scalikejdbcGenForce programmers_view
+$ exists src/main/scala/app/models/ProgrammersView.scala
+$ exists src/test/scala/app/models/ProgrammersViewSpec.scala
+
+$ delete src/main/scala/app/models/ProgrammersView.scala
+$ delete src/test/scala/app/models/ProgrammersViewSpec.scala
+
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(view = true)}
+> scalikejdbcGenAll
+$ exists src/main/scala/app/models/ProgrammersView.scala
+$ exists src/test/scala/app/models/ProgrammersViewSpec.scala
+
 $ sleep 2000
 > scalikejdbcGenForce programmers
 $ newer src/main/scala/app/models/Programmers.scala src/main/scala/app/models/Programmer.scala
