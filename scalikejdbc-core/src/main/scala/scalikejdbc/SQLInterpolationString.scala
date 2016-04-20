@@ -13,7 +13,7 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   def sql[A](params: Any*): SQL[A, NoExtractor] = {
     val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.parameters: _*)
+    SQL[A](syntax.value).bind(syntax.rawParameters: _*)
   }
 
   def sqls(params: Any*): SQLSyntax = {
@@ -40,10 +40,12 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
     case _: String => sb += '?'
     case t: Traversable[_] => t.map {
       case SQLSyntax(s, _) => s
+      case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => s
       case _ => "?"
     }.addString(sb, ", ") // e.g. in clause
     case LastParameter => sb
     case SQLSyntax(s, _) => sb ++= s
+    case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => sb ++= s
     case _ => sb += '?'
   }
 
@@ -51,9 +53,11 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
     case (b, s: String) => b += s
     case (b, t: Traversable[_]) => t.foldLeft(b) {
       case (b, SQLSyntax(_, params)) => b ++= params
+      case (b, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => b ++= params
       case (b, e) => b += e
     }
     case (b, SQLSyntax(_, params)) => b ++= params
+    case (b, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => b ++= params
     case (b, n) => b += n
   }.result()
 

@@ -252,7 +252,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def as(provider: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A]): TableAsAliasSQLSyntax = {
-      if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table.value, table.parameters, Some(provider)) }
+      if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table.value, table.rawParameters, Some(provider)) }
       else { TableAsAliasSQLSyntax(tableNameWithSchema + " " + provider.tableAliasName, Nil, Some(provider)) }
     }
   }
@@ -262,17 +262,17 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   case class TableAsAliasSQLSyntax private[scalikejdbc] (
     override val value: String,
-    override val parameters: Seq[Any] = Vector(),
+    override val rawParameters: Seq[Any] = Vector(),
     resultAllProvider: Option[ResultAllProvider] = None
-  ) extends SQLSyntax(value, parameters)
+  ) extends SQLSyntax(value, rawParameters)
 
   /**
    * Table definition part SQLSyntax
    */
   case class TableDefSQLSyntax private[scalikejdbc] (
-    override val value: String, override val parameters: Seq[Any] = Vector()
+    override val value: String, override val rawParameters: Seq[Any] = Vector()
   )
-      extends SQLSyntax(value, parameters)
+      extends SQLSyntax(value, rawParameters)
 
   /**
    * SQLSyntax Provider
@@ -556,7 +556,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         val name = toAliasName(c.value, support)
-        SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.parameters)
+        SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.rawParameters)
       }.getOrElse(throw notFoundInColumns(aliasName, name))
     })
   }

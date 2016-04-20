@@ -5,7 +5,7 @@ import scala.language.higherKinds
 import scala.collection.generic.CanBuildFrom
 
 /**
- * SQL abstraction's companion object.
+ * SQL abstraction's companion object
  *
  * {{{
  *   ConnectionPool.singleton("jdbc:...","user","password")
@@ -133,15 +133,20 @@ private[scalikejdbc] trait Extractor[A] {
  * SQL abstraction.
  *
  * @param statement SQL template
- * @param parameters parameters
+ * @param rawParameters parameters
  * @param f  extractor function
  * @tparam A return type
  */
 abstract class SQL[A, E <: WithExtractor](
   val statement: String,
-  val parameters: Seq[Any]
+  private[scalikejdbc] val rawParameters: Seq[Any]
 )(f: WrappedResultSet => A)
     extends Extractor[A] {
+
+  final lazy val parameters: Seq[Any] = rawParameters.map {
+    case ParameterBinder(v) => v
+    case x => x
+  }
 
   override def extractor: (WrappedResultSet) => A = f
 
@@ -160,6 +165,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Set fetchSize for this query.
+   *
    * @param fetchSize fetch size
    * @return this
    */
@@ -175,6 +181,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Appends tags to this SQL object.
+   *
    * @param tags tags
    * @return this
    */
@@ -185,18 +192,21 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Returns tags for this SQL object.
+   *
    * @return tags
    */
   def tags: Seq[String] = this._tags.toSeq
 
   /**
    * Returns fetchSize for this query.
+   *
    * @return fetch size
    */
   def fetchSize: Option[Int] = this._fetchSize
 
   /**
    * Set queryTimeout for this query.
+   *
    * @param seconds query timeout seconds
    * @return this
    */
@@ -212,6 +222,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Returns queryTimeout for this query.
+   *
    * @return query timeout seconds
    */
   def queryTimeout: Option[Int] = this._queryTimeout
@@ -219,10 +230,11 @@ abstract class SQL[A, E <: WithExtractor](
   /**
    * Returns One-to-X API builder.
    */
-  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement, parameters)(f)
+  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement, rawParameters)(f)
 
   /**
    * Binds parameters to SQL template in order.
+   *
    * @param parameters parameters
    * @return SQL instance
    */
@@ -232,6 +244,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Binds named parameters to SQL template.
+   *
    * @param parametersByName named parameters
    * @return SQL instance
    */
@@ -242,6 +255,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Binds parameters for batch
+   *
    * @param parameters parameters
    * @return SQL for batch
    */
@@ -251,6 +265,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Binds parameters for batch
+   *
    * @param parameters parameters
    * @return SQL for batch
    */
@@ -260,6 +275,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Binds parameters for batch
+   *
    * @param generatedKeyName generated key name
    * @param parameters parameters
    * @return SQL for batch
@@ -270,6 +286,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Binds parameters for batch
+   *
    * @param parameters parameters
    * @return SQL for batch
    */
@@ -283,11 +300,12 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Apply the operation to all elements of result set
+   *
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
     val f: DBSession => Unit =
-      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foreach(statement, parameters: _*)(op)
+      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foreach(statement, rawParameters: _*)(op)
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
@@ -301,12 +319,13 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * folding into one value
+   *
    * @param z initial value
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
     val f: DBSession => A =
-      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foldLeft(statement, parameters: _*)(z)(op)
+      _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).foldLeft(statement, rawParameters: _*)(z)(op)
     // format: OFF
     session match {
       case AutoSession                    => DB.autoCommit(f)
@@ -320,6 +339,7 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Maps values from each [[scalikejdbc.WrappedResultSet]] object.
+   *
    * @param f extractor function
    * @tparam A return type
    * @return SQL instance
@@ -330,111 +350,126 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Maps values as a Map value from each [[scalikejdbc.WrappedResultSet]] object.
+   *
    * @return SQL instance
    */
   def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap)
 
   /**
    * Same as #single.
+   *
    * @return SQL instance
    */
   def toOption(): SQLToOption[A, E] = {
-    new SQLToOptionImpl[A, E](statement, parameters)(extractor)(isSingle = true)
+    new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = true)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
    * Set execution type as single.
+   *
    * @return SQL instance
    */
   def single(): SQLToOption[A, E] = toOption()
 
   /**
    * Same as #first.
+   *
    * @return SQL instance
    */
   def headOption(): SQLToOption[A, E] = {
-    new SQLToOptionImpl[A, E](statement, parameters)(extractor)(isSingle = false)
+    new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = false)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
    * Set execution type as first.
+   *
    * @return SQL instance
    */
   def first(): SQLToOption[A, E] = headOption()
 
   /**
    * Same as #list
+   *
    * @return SQL instance
    */
   def toList(): SQLToList[A, E] = {
-    new SQLToListImpl[A, E](statement, parameters)(extractor)
+    new SQLToListImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
    * Set execution type as list.
+   *
    * @return SQL instance
    */
   def list(): SQLToList[A, E] = toList()
 
   /**
    * Same as #collection
+   *
    * @return SQL instance
    */
   def toCollection: SQLToCollection[A, E] = {
-    new SQLToCollectionImpl[A, E](statement, parameters)(extractor)
+    new SQLToCollectionImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
    * Set execution type as collection.
+   *
    * @return SQL instance
    */
   def collection: SQLToCollection[A, E] = toCollection
 
   /**
    * Same as #traversable.
+   *
    * @return SQL instance
    */
   def toTraversable(): SQLToTraversable[A, E] = {
-    new SQLToTraversableImpl[A, E](statement, parameters)(extractor)
+    new SQLToTraversableImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
   }
 
   /**
    * Set execution type as traversable.
+   *
    * @return SQL instance
    */
   def traversable(): SQLToTraversable[A, E] = toTraversable()
 
   /**
    * Set execution type as execute
+   *
    * @return SQL instance
    */
   def execute(): SQLExecution = {
-    new SQLExecution(statement, parameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLExecution(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
    * Set execution type as execute with filters
+   *
    * @param before before filter
    * @param after after filter
    * @return SQL instance
    */
   def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = {
-    new SQLExecution(statement, parameters, tags)(before)(after)
+    new SQLExecution(statement, rawParameters, tags)(before)(after)
   }
 
   /**
    * Set execution type as executeUpdate
+   *
    * @return SQL instance
    */
   def executeUpdate(): SQLUpdate = update()
 
   /**
    * Set execution type as executeUpdate with filters
+   *
    * @param before before filter
    * @param after after filter
    * @return SQL instance
@@ -445,24 +480,27 @@ abstract class SQL[A, E <: WithExtractor](
 
   /**
    * Set execution type as executeUpdate
+   *
    * @return SQL instance
    */
   def update(): SQLUpdate = {
-    new SQLUpdate(statement, parameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
+    new SQLUpdate(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
   /**
    * Set execution type as executeUpdate with filters
+   *
    * @param before before filter
    * @param after after filter
    * @return SQL instance
    */
   def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLUpdate = {
-    new SQLUpdate(statement, parameters, tags)(before)(after)
+    new SQLUpdate(statement, rawParameters, tags)(before)(after)
   }
 
   /**
    * Set execution type as updateAndReturnGeneratedKey
+   *
    * @return SQL instance
    */
   def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
@@ -470,25 +508,26 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, parameters, this.tags)(name)
+    new SQLUpdateWithGeneratedKey(statement, rawParameters, this.tags)(name)
   }
 
   def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, parameters, this.tags)(index)
+    new SQLUpdateWithGeneratedKey(statement, rawParameters, this.tags)(index)
   }
 
   def stripMargin(marginChar: Char): SQL[A, E] =
-    withStatementAndParameters(statement.stripMargin(marginChar), parameters)
+    withStatementAndParameters(statement.stripMargin(marginChar), rawParameters)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
 
   def stripMargin: SQL[A, E] =
-    withStatementAndParameters(statement.stripMargin, parameters)
+    withStatementAndParameters(statement.stripMargin, rawParameters)
       .fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout)
 
 }
 
 /**
  * SQL which execute java.sql.Statement#executeBatch().
+ *
  * @param statement SQL template
  * @param parameters parameters
  */
@@ -533,6 +572,7 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
 
 /**
  * SQL which execute java.sql.Statement#execute().
+ *
  * @param statement SQL template
  * @param parameters parameters
  * @param before before filter
@@ -561,6 +601,7 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
 
 /**
  * SQL which execute java.sql.Statement#executeUpdate().
+ *
  * @param statement SQL template
  * @param parameters parameters
  * @param before before filter
@@ -589,6 +630,7 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
 
 /**
  * SQL which execute java.sql.Statement#executeUpdate() and get generated key value.
+ *
  * @param statement SQL template
  * @param parameters parameters
  */
@@ -611,9 +653,10 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any],
 
 trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
+
   def result[AA](f: WrappedResultSet => AA, session: DBSession): C[AA]
   val statement: String
-  val parameters: Seq[Any]
+  private[scalikejdbc] val rawParameters: Seq[Any]
   def apply()(
     implicit
     session: DBSession,
@@ -635,29 +678,31 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
 
 /**
  * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Traversable value.
+ *
  * @tparam A return type
  */
 trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversable] {
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): Traversable[AA] = {
-    session.traversable[AA](statement, parameters: _*)(f)
+    session.traversable[AA](statement, rawParameters: _*)(f)
   }
 
 }
 
 /**
  * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Traversable value.
+ *
  * @param statement SQL template
- * @param parameters parameters
+ * @param rawParameters parameters
  * @param extractor  extractor function
  * @tparam A return type
  */
 class SQLToTraversableImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any]
+  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
-    extends SQL[A, E](statement, parameters)(extractor)
+    extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToTraversable[A, E] {
 
   override protected def withParameters(params: Seq[Any]): SQLToResult[A, E, Traversable] = {
@@ -669,22 +714,23 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
   }
 
   override protected def withExtractor[B](f: WrappedResultSet => B): SQLToResult[B, HasExtractor, Traversable] = {
-    new SQLToTraversableImpl[B, HasExtractor](statement, parameters)(f)
+    new SQLToTraversableImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
 }
 
 /**
  * SQL to Collection
+ *
  * @tparam A return type
  * @tparam E extractor settings
  */
 trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
   val statement: String
-  val parameters: Seq[Any]
+  private[scalikejdbc] val rawParameters: Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
-    val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).collection[A, C](statement, parameters: _*)(extractor)
+    val f: DBSession => C[A] = _.fetchSize(fetchSize).tags(tags: _*).queryTimeout(queryTimeout).collection[A, C](statement, rawParameters: _*)(extractor)
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
@@ -698,11 +744,11 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
 }
 
 class SQLToCollectionImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any]
+  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
-    extends SQL[A, E](statement, parameters)(extractor)
+    extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToCollection[A, E] {
 
   override protected def withParameters(params: Seq[Any]): SQLToCollection[A, E] = {
@@ -714,37 +760,39 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
   }
 
   override protected def withExtractor[B](f: WrappedResultSet => B): SQLToCollection[B, HasExtractor] = {
-    new SQLToCollectionImpl[B, HasExtractor](statement, parameters)(f)
+    new SQLToCollectionImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
 }
 
 /**
  * SQL to List
+ *
  * @tparam A return type
  * @tparam E extractor settings
  */
 trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): List[AA] = {
-    session.list[AA](statement, parameters: _*)(f)
+    session.list[AA](statement, rawParameters: _*)(f)
   }
 
 }
 
 /**
  * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.immutable.List value.
+ *
  * @param statement SQL template
- * @param parameters parameters
+ * @param rawParameters parameters
  * @param extractor  extractor function
  * @tparam A return type
  */
 class SQLToListImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any]
+  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
-    extends SQL[A, E](statement, parameters)(extractor)
+    extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToList[A, E] {
 
   override protected def withParameters(params: Seq[Any]): SQLToList[A, E] = {
@@ -756,13 +804,14 @@ class SQLToListImpl[A, E <: WithExtractor](
   }
 
   override protected def withExtractor[B](f: WrappedResultSet => B): SQLToList[B, HasExtractor] = {
-    new SQLToListImpl[B, HasExtractor](statement, parameters)(f)
+    new SQLToListImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
 }
 
 /**
  * SQL to Option
+ *
  * @tparam A return type
  * @tparam E extractor settings
  */
@@ -772,9 +821,9 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): Option[AA] = {
     if (isSingle) {
-      session.single[AA](statement, parameters: _*)(f)
+      session.single[AA](statement, rawParameters: _*)(f)
     } else {
-      session.first[AA](statement, parameters: _*)(f)
+      session.first[AA](statement, rawParameters: _*)(f)
     }
   }
 
@@ -782,17 +831,18 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
 
 /**
  * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.Option value.
+ *
  * @param statement SQL template
- * @param parameters parameters
+ * @param rawParameters parameters
  * @param extractor  extractor function
  * @tparam A return type
  */
 class SQLToOptionImpl[A, E <: WithExtractor](
-  override val statement: String, override val parameters: Seq[Any]
+  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )(protected val isSingle: Boolean = true)
-    extends SQL[A, E](statement, parameters)(extractor)
+    extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToOption[A, E] {
 
   override protected def withParameters(params: Seq[Any]): SQLToOption[A, E] = {
@@ -804,7 +854,7 @@ class SQLToOptionImpl[A, E <: WithExtractor](
   }
 
   override protected def withExtractor[B](f: WrappedResultSet => B): SQLToOption[B, HasExtractor] = {
-    new SQLToOptionImpl[B, HasExtractor](statement, parameters)(f)(isSingle)
+    new SQLToOptionImpl[B, HasExtractor](statement, rawParameters)(f)(isSingle)
   }
 
 }
