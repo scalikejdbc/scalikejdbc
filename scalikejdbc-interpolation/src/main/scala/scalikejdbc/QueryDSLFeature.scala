@@ -483,6 +483,14 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val (cs, vs) = columnsAndValues.unzip
       columns(cs: _*).values(vs: _*)
     }
+    def namedValues(columnsAndValues: Map[SQLSyntax, Any]): InsertSQLBuilder = {
+      val (cs, vs) = columnsAndValues.toSeq.unzip
+      columns(cs: _*).values(vs: _*)
+    }
+    def namedValues(columnsAndValues: List[(SQLSyntax, Any)]): InsertSQLBuilder = {
+      val (cs, vs) = columnsAndValues.unzip
+      columns(cs: _*).values(vs: _*)
+    }
 
     def select(columns: SQLSyntax*)(query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]): InsertSQLBuilder = {
       val builder: SelectSQLBuilder[Nothing] = QueryDSL.select[Nothing](columns: _*)
@@ -513,6 +521,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
     def set(tuples: (SQLSyntax, ParameterBinder)*): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+    def set(tuples: List[(SQLSyntax, Any)]): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+    def set(tuples: Map[SQLSyntax, Any]): UpdateSQLBuilder = set(sqls.csv(tuples.toSeq.map(each => sqls"${each._1} = ${each._2}"): _*))
 
     override def append(part: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }
