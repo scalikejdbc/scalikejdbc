@@ -488,7 +488,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     /**
      * This is a work around of a Scala compiler bug (SI-7420).
      *
-     * https://github.com/scalikejdbc/scalikejdbc/pull/507
+     * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
      */
     def namedValues(columnsAndValues: Map[SQLSyntax, ParameterBinder]): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.toSeq.unzip
@@ -529,7 +529,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     /**
      * This is a work around of a Scala compiler bug (SI-7420).
      *
-     * https://github.com/scalikejdbc/scalikejdbc/pull/507
+     * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
      */
     def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(sqls.csv(tuples.toSeq.map(each => sqls"${each._1} = ${each._2}"): _*))
 
