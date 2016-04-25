@@ -5,18 +5,19 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.3.6-SNAPSHOT"
+  lazy val _version = "2.4.0.RC1"
 
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.16"
+  lazy val _slf4jApiVersion = "1.7.21"
   // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
-  lazy val _logbackVersion = "1.1.5"
+  lazy val _logbackVersion = "1.1.7"
   lazy val _h2Version = "1.4.191"
+  // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.38"
   lazy val _postgresqlVersion = "9.4.1207.jre7"
   lazy val _hibernateVersion = "5.1.0.Final"
