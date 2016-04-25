@@ -1,0 +1,26 @@
+ScalikeJDBC 2.4.0.RC1 is out.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [all] #511 Scala 2.11.8 by @xuwei-k
+ - [all] #513 Scala 2.12.0-M4 by @xuwei-k
+ - [core] #490 Fix #486 Blocking within the global ExecutionContext must be avoided by @seratch (reported by @backuitist)
+ - [core] #488 Add time zone conversion capability which fixes #424 by @ocadaruma
+ - [core] #496 Apply sbt-scalariform 1.6.0 by @seratch
+ - [core] #492 Fix #487 Batch insert generated keys by @seratch
+ - [core] #491 Fix #441 Provide more data in Metadata classes by @seratch
+ - [core] #501 Add DBSession#tx method to fetch current transaction if exists by @seratch
+ - [core] #423 Add an Hook that converts user defined types to JDBC primitive types by @gakuzzzz
+ - [core] #507 Allow QueryDSLFeature to accept named values as a map (work around for SI-7420) by @thobson
+ - [core] #512 Some fixes for #507 by @seratch
+ - [config] #499 Fix #494 Allow driver absence when using scalikejdbc-config by @seratch
+ - [mapper-generator] #510 generate case classes from view by @xuwei-k
+ - [project] #504 Update CONTRIBUTING.md by @btakashi
+ - [project] #505 Update readme.md by @btakashi
+ - [project] #506 Update team-rules.md by @btakashi
+
+Enjoy writing mostly type-safe SQL and get things done!
