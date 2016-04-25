@@ -41,16 +41,11 @@ object ScalikeJDBCProjects extends Build {
     fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalatestVersion := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 11 => "2.2.6"
-        case _ => "2.2.5-M3"
-      }
-    },
+    scalatestVersion := "2.2.6",
     specs2Version := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v <= 11 => "2.5"
-        case _ => "3.7"
+        case _ => "3.7.3"
       }
     },
     //scalaVersion := "2.11.8",
@@ -251,7 +246,9 @@ object ScalikeJDBCProjects extends Build {
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
           "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
           "org.scalatest"  %% "scalatest"       % scalatestVersion.value % "provided",
-          "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided"
+          "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" excludeAll(
+            ExclusionRule(organization = "org.spire-math")
+          )
         ) ++ jdbcDriverDependenciesInTestScope
       }
     )
@@ -309,7 +306,11 @@ object ScalikeJDBCProjects extends Build {
     Seq("org.scalatest" %% "scalatest" % v % "test")
 
   def specs2DependenciesInTestScope(v: String) =
-    Seq("org.specs2" %% "specs2-core" % v % "test")
+    Seq(
+      ("org.specs2" %% "specs2-core" % v % "test").excludeAll(
+        ExclusionRule(organization = "org.spire-math")
+      )
+    )
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
