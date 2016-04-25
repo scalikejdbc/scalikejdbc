@@ -674,5 +674,19 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     }
   }
 
+  "insert.namedValues" should "accepts not only var args" in {
+    val ac = Account.column
+    val s = insert.into(Account).namedValues(Map(ac.name -> "Bob Marley")).toSQL
+    s.statement should equal("insert into qi_accounts (name) values (?)")
+    s.parameters should equal(Seq("Bob Marley"))
+  }
+
+  "update.set" should "accepts not only var args" in {
+    val ac = Account.column
+    val s = update(Account).set(Map(ac.name -> "Bob Marley")).toSQL
+    s.statement should equal("update qi_accounts set name = ?")
+    s.parameters should equal(Seq("Bob Marley"))
+  }
+
 }
 

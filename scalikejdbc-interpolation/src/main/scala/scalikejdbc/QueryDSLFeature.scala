@@ -479,8 +479,19 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val vs = sqls.csv(values.map(v => sqls"${v}"): _*)
       this.copy(sql = sqls"${sql} values (${vs})")
     }
+
     def namedValues(columnsAndValues: (SQLSyntax, ParameterBinder)*): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.unzip
+      columns(cs: _*).values(vs: _*)
+    }
+
+    /**
+     * This is a work around of a Scala compiler bug (SI-7420).
+     *
+     * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
+     */
+    def namedValues(columnsAndValues: Map[SQLSyntax, ParameterBinder]): InsertSQLBuilder = {
+      val (cs, vs) = columnsAndValues.toSeq.unzip
       columns(cs: _*).values(vs: _*)
     }
 
@@ -512,7 +523,15 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       with WhereSQLBuilder[UpdateOperation] {
 
     def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
+
     def set(tuples: (SQLSyntax, ParameterBinder)*): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*))
+
+    /**
+     * This is a work around of a Scala compiler bug (SI-7420).
+     *
+     * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
+     */
+    def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(sqls.csv(tuples.toSeq.map(each => sqls"${each._1} = ${each._2}"): _*))
 
     override def append(part: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }
