@@ -38,11 +38,14 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
 
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
     case _: String => sb += '?'
-    case t: Traversable[_] => t.map {
-      case SQLSyntax(s, _) => s
-      case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => s
-      case _ => "?"
-    }.addString(sb, ", ") // e.g. in clause
+    case t: Traversable[_] => {
+      // e.g. in clause
+      t.map {
+        case SQLSyntax(s, _) => s
+        case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => s
+        case _ => "?"
+      }.addString(sb, ", ")
+    }
     case LastParameter => sb
     case SQLSyntax(s, _) => sb ++= s
     case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => sb ++= s
@@ -50,15 +53,17 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
   }
 
   private def buildParams(params: Seq[Any]): Seq[Any] = params.foldLeft(Seq.newBuilder[Any]) {
-    case (b, s: String) => b += s
-    case (b, t: Traversable[_]) => t.foldLeft(b) {
-      case (b, SQLSyntax(_, params)) => b ++= params
-      case (b, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => b ++= params
-      case (b, e) => b += e
+    case (builder, str: String) => builder += str
+    case (builder, traversable: Traversable[_]) => traversable.foldLeft(builder) {
+      case (builder, SQLSyntax(_, params)) => builder ++= params
+      case (builder, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => builder ++= params
+      case (builder, AsIsParameterBinder(value)) => builder += value
+      case (builder, value) => builder += value
     }
-    case (b, SQLSyntax(_, params)) => b ++= params
-    case (b, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => b ++= params
-    case (b, n) => b += n
+    case (builder, SQLSyntax(_, params)) => builder ++= params
+    case (builder, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => builder ++= params
+    case (builder, AsIsParameterBinder(value)) => builder += value
+    case (builder, value) => builder += value
   }.result()
 
 }

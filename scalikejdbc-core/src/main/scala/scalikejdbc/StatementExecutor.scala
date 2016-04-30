@@ -60,6 +60,10 @@ case class StatementExecutor(
    */
   def bindParams(params: Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
+      case AsIsParameterBinder(value) => ParameterBinderWithValue.extract(value) match {
+        case option: Option[_] => option.orNull[Any]
+        case other => other
+      }
       case option: Option[_] => option.orNull[Any]
       case other => other
     }.zipWithIndex

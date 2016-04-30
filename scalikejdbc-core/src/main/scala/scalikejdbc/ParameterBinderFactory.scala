@@ -7,11 +7,6 @@ import scalikejdbc.interpolation.SQLSyntax
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
-private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax) extends ParameterBinderWithValue[SQLSyntax] {
-  val value = syntax
-  def apply(stmt: PreparedStatement, idx: Int): Unit = ()
-}
-
 trait ParameterBinderFactory[A] { self =>
 
   def apply(value: A): ParameterBinderWithValue[A]
@@ -59,6 +54,18 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] = new ParameterBinderFactory[None.type] { def apply(value: None.type) = ParameterBinder.NullParameterBinder }
   implicit val sqlSyntaxParameterBinderFactory: ParameterBinderFactory[SQLSyntax] = new ParameterBinderFactory[SQLSyntax] { def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value) }
   implicit val optionalSqlSyntaxParameterBinderFactory: ParameterBinderFactory[Option[SQLSyntax]] = sqlSyntaxParameterBinderFactory.xmap(Option.apply, _ getOrElse SQLSyntax.empty)
+
+  /**
+   * Resolves already existing ParameterBinder.
+   */
+  implicit val parameterBinderParameterBinderFactory: ParameterBinderFactory[ParameterBinder] = ParameterBinderFactory { _.apply }
+
+  /**
+   * Unsafe ParameterBinderFactory which accepts any type value as-is.
+   */
+  val asIs: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
+    def apply(value: Any) = new AsIsParameterBinder(ParameterBinderWithValue.extract(value))
+  }
 
 }
 
