@@ -54,16 +54,20 @@ case class StatementExecutor(
     }
   }
 
+  private[this] def extractOption(value: Any) = {
+    ParameterBinderWithValue.extract(value) match {
+      case option: Option[_] => option.orNull[Any]
+      case other => other
+    }
+  }
+
   /**
    * Binds parameters to the underlying java.sql.PreparedStatement object.
-   * @param params parameters
    */
   def bindParams(params: Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
-      case AsIsParameterBinder(value) => ParameterBinderWithValue.extract(value) match {
-        case option: Option[_] => option.orNull[Any]
-        case other => other
-      }
+      case AsIsParameterBinder(value) => extractOption(value)
+      case binder: ParameterBinder if binder.asIs => extractOption(binder)
       case option: Option[_] => option.orNull[Any]
       case other => other
     }.zipWithIndex

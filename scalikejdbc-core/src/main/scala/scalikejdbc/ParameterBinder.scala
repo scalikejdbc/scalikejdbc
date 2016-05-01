@@ -20,6 +20,11 @@ import scalikejdbc.interpolation.SQLSyntax
 trait ParameterBinder { self =>
 
   /**
+   * Returns true if this binder has value
+   */
+  def asIs: Boolean = false
+
+  /**
    * Applies parameter to PreparedStatement.
    */
   def apply(stmt: PreparedStatement, idx: Int): Unit
@@ -28,9 +33,15 @@ trait ParameterBinder { self =>
 
 /**
  * ParameterBinder which holds a value to bind.
+ *
  * @tparam A value's type
  */
 trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
+
+  override lazy val asIs: Boolean = value match {
+    case binder: ParameterBinder => binder.asIs
+    case _ => false
+  }
 
   def value: A
 
@@ -40,7 +51,7 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
     def apply(stmt: PreparedStatement, idx: Int): Unit = self(stmt, idx)
   }
 
-  override def toString: String = s"ParameterBinderWithValue(value=$value)"
+  override def toString: String = s"ParameterBinderWithValue(value=$value, asIs=$asIs)"
 
 }
 
@@ -73,9 +84,13 @@ case class SQLSyntaxParameterBinder(syntax: SQLSyntax)
 class AsIsParameterBinder(private val underlying: Any)
     extends ParameterBinderWithValue[Any] {
 
+  override lazy val asIs: Boolean = true
+
   override val value: Any = ParameterBinderWithValue.extract(underlying)
 
-  def apply(stmt: PreparedStatement, idx: Int): Unit = ()
+  def apply(stmt: PreparedStatement, idx: Int): Unit = {
+    throw new IllegalStateException("Ths method should not be called")
+  }
 
   override def toString: String = s"AsIsParameterBinder(value=$value)"
 

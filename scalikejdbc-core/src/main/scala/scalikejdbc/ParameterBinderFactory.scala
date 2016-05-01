@@ -2,11 +2,37 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.PreparedStatement
+
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
+
+import scala.annotation.implicitNotFound
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
+@implicitNotFound(
+  "\n" +
+    "--------------------------------------------------------\n" +
+    " Implicit ParameterBinderFactory value fot the parameter is missing.\n" +
+    " Consider wrapping the value with PrameterBinder(WithValue) or AsIsParameterBinder.\n" +
+    "\n" +
+    "  (example1)\n" +
+    "    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {\n" +
+    "       value => (stmt, idx) => stmt.setInt(idx, value)\n" +
+    "     }\n" +
+    "\n" +
+    "  (example2)\n" +
+    "    column -> AsIsParameterBinder(value)\n" +
+    "\n" +
+    "  (example3)\n" +
+    "    case class Price(value: Int)\n" +
+    "    object Price {\n" +
+    "      implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)\n" +
+    "      implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)\n" +
+    "    }\n" +
+    "\n" +
+    "--------------------------------------------------------\n"
+)
 trait ParameterBinderFactory[A] { self =>
 
   def apply(value: A): ParameterBinderWithValue[A]
@@ -58,7 +84,15 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   /**
    * Resolves already existing ParameterBinder.
    */
-  implicit val parameterBinderParameterBinderFactory: ParameterBinderFactory[ParameterBinder] = ParameterBinderFactory { _.apply }
+  implicit val parameterBinderParameterBinderFactory: ParameterBinderFactory[ParameterBinder] = new ParameterBinderFactory[ParameterBinder] {
+    def apply(binder: ParameterBinder): ParameterBinderWithValue[ParameterBinder] = {
+      new ParameterBinderWithValue[ParameterBinder] {
+        override lazy val asIs = binder.asIs
+        override def value: ParameterBinder = binder
+        override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
+      }
+    }
+  }
 
   /**
    * Unsafe ParameterBinderFactory which accepts any type value as-is.
