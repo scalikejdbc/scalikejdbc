@@ -54,8 +54,11 @@ case class StatementExecutor(
     }
   }
 
-  private[this] def extractOption(value: Any) = {
-    ParameterBinderWithValue.extract(value) match {
+  /**
+   * Extracts the raw value from maybe nested BypassParameterBinder.
+   */
+  private[this] def extractBypassParameterBinderRawValue(value: Any) = {
+    BypassParameterBinder.extractValue(value) match {
       case option: Option[_] => option.orNull[Any]
       case other => other
     }
@@ -66,8 +69,8 @@ case class StatementExecutor(
    */
   def bindParams(params: Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
-      case AsIsParameterBinder(value) => extractOption(value)
-      case binder: ParameterBinder if binder.asIs => extractOption(binder)
+      case BypassParameterBinder(value) => extractBypassParameterBinderRawValue(value)
+      case binder: ParameterBinder if binder.bypass => extractBypassParameterBinderRawValue(binder)
       case option: Option[_] => option.orNull[Any]
       case other => other
     }.zipWithIndex

@@ -57,12 +57,12 @@ class SQLInterpolationString(val s: StringContext) extends AnyVal {
     case (builder, traversable: Traversable[_]) => traversable.foldLeft(builder) {
       case (builder, SQLSyntax(_, params)) => builder ++= params
       case (builder, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => builder ++= params
-      case (builder, AsIsParameterBinder(value)) => builder += value
+      case (builder, BypassParameterBinder(value)) => builder += value
       case (builder, value) => builder += value
     }
     case (builder, SQLSyntax(_, params)) => builder ++= params
     case (builder, SQLSyntaxParameterBinder(SQLSyntax(_, params))) => builder ++= params
-    case (builder, AsIsParameterBinder(value)) => builder += value
+    case (builder, BypassParameterBinder(value)) => builder += value
     case (builder, value) => builder += value
   }.result()
 

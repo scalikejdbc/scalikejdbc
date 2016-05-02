@@ -14,7 +14,7 @@ import scala.reflect.macros.blackbox.Context
   "\n" +
     "--------------------------------------------------------\n" +
     " Implicit ParameterBinderFactory value fot the parameter is missing.\n" +
-    " Consider wrapping the value with PrameterBinder(WithValue) or AsIsParameterBinder.\n" +
+    " Consider wrapping the value with PrameterBindeor ParameterBinderWithValue.\n" +
     "\n" +
     "  (example1)\n" +
     "    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {\n" +
@@ -22,9 +22,6 @@ import scala.reflect.macros.blackbox.Context
     "     }\n" +
     "\n" +
     "  (example2)\n" +
-    "    column -> AsIsParameterBinder(value)\n" +
-    "\n" +
-    "  (example3)\n" +
     "    case class Price(value: Int)\n" +
     "    object Price {\n" +
     "      implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)\n" +
@@ -86,10 +83,15 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
    */
   implicit val parameterBinderParameterBinderFactory: ParameterBinderFactory[ParameterBinder] = new ParameterBinderFactory[ParameterBinder] {
     def apply(binder: ParameterBinder): ParameterBinderWithValue[ParameterBinder] = {
-      new ParameterBinderWithValue[ParameterBinder] {
-        override lazy val asIs = binder.asIs
-        override def value: ParameterBinder = binder
-        override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
+      binder match {
+        case withValue: ParameterBinderWithValue[_] if withValue.value.isInstanceOf[ParameterBinder] =>
+          withValue.asInstanceOf[ParameterBinderWithValue[ParameterBinder]]
+        case _ =>
+          new ParameterBinderWithValue[ParameterBinder] {
+            override lazy val bypass = binder.bypass
+            override def value: ParameterBinder = binder
+            override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
+          }
       }
     }
   }
@@ -97,8 +99,8 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   /**
    * Unsafe ParameterBinderFactory which accepts any type value as-is.
    */
-  val asIs: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
-    def apply(value: Any) = new AsIsParameterBinder(ParameterBinderWithValue.extract(value))
+  val enableBypass: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
+    def apply(value: Any) = new BypassParameterBinder(BypassParameterBinder.extractValue(value))
   }
 
 }

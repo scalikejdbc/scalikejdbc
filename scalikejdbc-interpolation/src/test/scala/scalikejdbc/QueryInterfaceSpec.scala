@@ -699,8 +699,8 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
     try {
       val ac = Account.column
-      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> AsIsParameterBinder(None))
-      val query = insert.into(Account).namedValues(params.map { case (k, v) => k -> AsIsParameterBinder(v) }: _*).toSQL
+      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> BypassParameterBinder(None))
+      val query = insert.into(Account).namedValues(params.map { case (k, v) => k -> BypassParameterBinder(v) }: _*).toSQL
       query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
       query.parameters should equal(Seq(123, null))
 
@@ -722,11 +722,11 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
     try {
       val ac = Account.column
-      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> AsIsParameterBinder(None))
+      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> BypassParameterBinder(None))
       val query = insert.into(Account).namedValues(params.map {
         case (k, v) => (k, new ParameterBinderWithValue[Any] {
           // if this value is not configured correctly, ParameterBinder doesn't work
-          override lazy val asIs = true
+          override lazy val bypass = true
           override def value = v
           override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
         })
