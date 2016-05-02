@@ -64,64 +64,71 @@ case class StatementExecutor(
       case other => other
     }.zipWithIndex
 
-    for ((param, idx) <- paramsWithIndices; i = idx + 1) {
-      param match {
-        case null => underlying.setObject(i, null)
-        case binder: ParameterBinder => binder(underlying, i)
-        case p: java.sql.Array => underlying.setArray(i, p)
-        case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
-        case p: BigInt => underlying.setBigDecimal(i, new java.math.BigDecimal(p.bigInteger))
-        case p: Boolean => underlying.setBoolean(i, p)
-        case p: Byte => underlying.setByte(i, p)
-        case p: java.sql.Date => underlying.setDate(i, p)
-        case p: Double => underlying.setDouble(i, p)
-        case p: Float => underlying.setFloat(i, p)
-        case p: Int => underlying.setInt(i, p)
-        case p: Long => underlying.setLong(i, p)
-        case p: Short => underlying.setShort(i, p)
-        case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
-        case p: String => underlying.setString(i, p)
-        case p: java.sql.Time => underlying.setTime(i, p)
-        case p: java.sql.Timestamp => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p))
-        case p: java.net.URL => underlying.setURL(i, p)
-        case p: java.util.Date => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toSqlTimestamp))
-        case p: org.joda.time.DateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
-        case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
-        case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
-        case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
-        case p if param.getClass.getCanonicalName.startsWith("java.time.") => {
-          // Accessing JSR-310 APIs via Java reflection
-          // because scalikejdbc-core should work on not only Java 8 but 6 & 7.
-          import java.lang.reflect.Method
-          val className: String = param.getClass.getCanonicalName
-          val clazz: Class[_] = Class.forName(className)
-          className match {
-            case "java.time.ZonedDateTime" | "java.time.OffsetDateTime" =>
-              val instant = clazz.getMethod("toInstant").invoke(p) // java.time.Instant
-              val dateClazz: Class[_] = Class.forName("java.util.Date") // java.util.Date
-              val fromMethod: Method = dateClazz.getMethod("from", Class.forName("java.time.Instant"))
-              val dateValue = fromMethod.invoke(null, instant).asInstanceOf[java.util.Date]
-              underlying.setTimestamp(i, convertTimeZoneIfNeeded(dateValue.toSqlTimestamp))
-            case "java.time.Instant" =>
-              val millis = clazz.getMethod("toEpochMilli").invoke(p).asInstanceOf[java.lang.Long]
-              underlying.setTimestamp(i, convertTimeZoneIfNeeded(new java.util.Date(millis).toSqlTimestamp))
-            case "java.time.LocalDateTime" =>
-              underlying.setTimestamp(i, convertTimeZoneIfNeeded(org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp))
-            case "java.time.LocalDate" =>
-              underlying.setDate(i, org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate)
-            case "java.time.LocalTime" =>
-              underlying.setTime(i, org.joda.time.LocalTime.parse(p.toString).toSqlTime)
-          }
-        }
-        case p: java.io.InputStream => underlying.setBinaryStream(i, p)
-        case p => {
-          log.debug("The parameter(" + p + ") is bound as an Object.")
-          underlying.setObject(i, p)
-        }
-      }
+    for ((param, idx) <- paramsWithIndices) {
+      bind(param, idx + 1)
     }
     if (isBatch) {
       batchParamsList += params
+    }
+  }
+
+  private[this] def bind(param: Any, i: Int): Unit = {
+    param match {
+      case null => underlying.setObject(i, null)
+      case AsIsParameterBinder(None) => bind(null, i)
+      case AsIsParameterBinder(Some(value)) => bind(value, i)
+      case AsIsParameterBinder(value) => bind(value, i)
+      case binder: ParameterBinder => binder(underlying, i)
+      case p: java.sql.Array => underlying.setArray(i, p)
+      case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
+      case p: BigInt => underlying.setBigDecimal(i, new java.math.BigDecimal(p.bigInteger))
+      case p: Boolean => underlying.setBoolean(i, p)
+      case p: Byte => underlying.setByte(i, p)
+      case p: java.sql.Date => underlying.setDate(i, p)
+      case p: Double => underlying.setDouble(i, p)
+      case p: Float => underlying.setFloat(i, p)
+      case p: Int => underlying.setInt(i, p)
+      case p: Long => underlying.setLong(i, p)
+      case p: Short => underlying.setShort(i, p)
+      case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
+      case p: String => underlying.setString(i, p)
+      case p: java.sql.Time => underlying.setTime(i, p)
+      case p: java.sql.Timestamp => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p))
+      case p: java.net.URL => underlying.setURL(i, p)
+      case p: java.util.Date => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toSqlTimestamp))
+      case p: org.joda.time.DateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
+      case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
+      case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
+      case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
+      case p if param.getClass.getCanonicalName.startsWith("java.time.") => {
+        // Accessing JSR-310 APIs via Java reflection
+        // because scalikejdbc-core should work on not only Java 8 but 6 & 7.
+        import java.lang.reflect.Method
+        val className: String = param.getClass.getCanonicalName
+        val clazz: Class[_] = Class.forName(className)
+        className match {
+          case "java.time.ZonedDateTime" | "java.time.OffsetDateTime" =>
+            val instant = clazz.getMethod("toInstant").invoke(p) // java.time.Instant
+            val dateClazz: Class[_] = Class.forName("java.util.Date") // java.util.Date
+            val fromMethod: Method = dateClazz.getMethod("from", Class.forName("java.time.Instant"))
+            val dateValue = fromMethod.invoke(null, instant).asInstanceOf[java.util.Date]
+            underlying.setTimestamp(i, convertTimeZoneIfNeeded(dateValue.toSqlTimestamp))
+          case "java.time.Instant" =>
+            val millis = clazz.getMethod("toEpochMilli").invoke(p).asInstanceOf[java.lang.Long]
+            underlying.setTimestamp(i, convertTimeZoneIfNeeded(new java.util.Date(millis).toSqlTimestamp))
+          case "java.time.LocalDateTime" =>
+            underlying.setTimestamp(i, convertTimeZoneIfNeeded(org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp))
+          case "java.time.LocalDate" =>
+            underlying.setDate(i, org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate)
+          case "java.time.LocalTime" =>
+            underlying.setTime(i, org.joda.time.LocalTime.parse(p.toString).toSqlTime)
+        }
+      }
+      case p: java.io.InputStream => underlying.setBinaryStream(i, p)
+      case p => {
+        log.debug("The parameter(" + p + ") is bound as an Object.")
+        underlying.setObject(i, p)
+      }
     }
   }
 

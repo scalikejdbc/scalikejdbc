@@ -36,6 +36,17 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
   override def toString: String = s"ParameterBinder(value=$value)"
 
 }
+class AsIsParameterBinder private (val value: Any) extends ParameterBinder {
+  override def apply(stmt: PreparedStatement, idx: Int): Unit = throw new UnsupportedOperationException // TODO: error message
+  override def toString: String = value.toString
+}
+object AsIsParameterBinder {
+  def apply(value: Any): ParameterBinder = value match {
+    case x: ParameterBinder => x
+    case _ => new AsIsParameterBinder(value)
+  }
+  def unapply(binder: AsIsParameterBinder): Option[Any] = Some(binder.value)
+}
 
 /**
  * ParameterBinder factory.
@@ -55,6 +66,7 @@ object ParameterBinder {
 
   def unapply(a: Any): Option[Any] = {
     PartialFunction.condOpt(a) {
+      case AsIsParameterBinder(v) => v
       case x: ParameterBinderWithValue[_] => x.value
     }
   }
