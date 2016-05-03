@@ -72,6 +72,7 @@ case class StatementExecutor(
     }
   }
 
+  @annotation.tailrec
   private[this] def bind(param: Any, i: Int): Unit = {
     param match {
       case null => underlying.setObject(i, null)

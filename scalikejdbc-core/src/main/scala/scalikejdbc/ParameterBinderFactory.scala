@@ -67,10 +67,14 @@ trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsPa
   implicit def optionalParameterBinderFactory[A](implicit ev: ParameterBinderFactory[A]): ParameterBinderFactory[Option[A]] = new ParameterBinderFactory[Option[A]] {
     def apply(value: Option[A]): ParameterBinderWithValue[Option[A]] = {
       if (value == null) ParameterBinder.NullParameterBinder
+      else if (ev == asisParameterBinderFactory) AsIsParameterBinder(value).asInstanceOf[ParameterBinderWithValue[Option[A]]]
       else value.fold[ParameterBinderWithValue[Option[A]]](ParameterBinder.NullParameterBinder)(v => ev(v).map(Option.apply))
     }
   }
 
+  val asisParameterBinderFactory: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
+    def apply(value: Any): ParameterBinderWithValue[Any] = AsIsParameterBinder(value)
+  }
 }
 
 trait LowPriorityImplicitsParameterBinderFactory0 {
