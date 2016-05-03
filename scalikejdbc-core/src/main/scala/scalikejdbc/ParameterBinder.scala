@@ -36,9 +36,10 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
   override def toString: String = s"ParameterBinder(value=$value)"
 
 }
-class AsIsParameterBinder private (val value: Any) extends ParameterBinder {
+class AsIsParameterBinder private (val value: Any) extends ParameterBinderWithValue[Any] {
   override def apply(stmt: PreparedStatement, idx: Int): Unit = throw new UnsupportedOperationException // TODO: error message
-  override def toString: String = value.toString
+  override def toString: String = s"AsIsParameterBinder(value=$value)"
+  override private[scalikejdbc] def map[B](f: Any => B): ParameterBinderWithValue[B] = throw new UnsupportedOperationException // TODO: error message
 }
 object AsIsParameterBinder {
   def apply(value: Any): ParameterBinder = value match {
@@ -46,6 +47,7 @@ object AsIsParameterBinder {
     case _ => new AsIsParameterBinder(value)
   }
   def unapply(binder: AsIsParameterBinder): Option[Any] = Some(binder.value)
+
 }
 
 /**
