@@ -2,16 +2,39 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.PreparedStatement
+
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
+
+import scala.annotation.implicitNotFound
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
-private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax) extends ParameterBinderWithValue[SQLSyntax] {
-  val value = syntax
-  def apply(stmt: PreparedStatement, idx: Int): Unit = ()
-}
-
+@implicitNotFound(
+  "\n" +
+    "--------------------------------------------------------\n" +
+    " Implicit ParameterBinderFactory[A] for the parameter type A is missing.\n" +
+    " You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.\n" +
+    "\n" +
+    "  (example1)\n" +
+    "    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {\n" +
+    "       value => (stmt, idx) => stmt.setInt(idx, value)\n" +
+    "     }\n" +
+    "\n" +
+    "  (example2)\n" +
+    "    case class Price(value: Int)\n" +
+    "    object Price {\n" +
+    "      implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)\n" +
+    "      implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)\n" +
+    "    }\n" +
+    "\n" +
+    "  (example3)\n" +
+    "    val value: Any = 123\n" +
+    "    val key: SQLSyntax = sqls\"column_name\"\n" +
+    "    key -> AsIsParameterBinder(value)\n" +
+    "\n" +
+    "--------------------------------------------------------\n"
+)
 trait ParameterBinderFactory[A] { self =>
 
   def apply(value: A): ParameterBinderWithValue[A]
@@ -72,6 +95,11 @@ trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsPa
     }
   }
 
+  /**
+   * Unsafe ParameterBinderFactory which accepts any type value as-is.
+   *
+   * This implicit is not enabled by default. If you need this, have implicit val definition in your own code.
+   */
   val asisParameterBinderFactory: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
     def apply(value: Any): ParameterBinderWithValue[Any] = AsIsParameterBinder(value)
   }
