@@ -36,27 +36,51 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     with AllOutputDecisionsUnsupported[Z, E] {
 
   def map(extractor: (A, Seq[B]) => Z): OneToManySQL[A, B, HasExtractor, Z] = {
-    new OneToManySQL[A, B, HasExtractor, Z](statement, rawParameters)(one)(toMany)(extractor)
+    val q = new OneToManySQL[A, B, HasExtractor, Z](statement, rawParameters)(one)(toMany)(extractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def toTraversable(): OneToManySQLToTraversable[A, B, E, Z] = {
-    new OneToManySQLToTraversable[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    val q = new OneToManySQLToTraversable[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def toList(): OneToManySQLToList[A, B, E, Z] = {
-    new OneToManySQLToList[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    val q = new OneToManySQLToList[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def toOption(): OneToManySQLToOption[A, B, E, Z] = {
-    new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)(true)
+    val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)(true)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def headOption(): OneToManySQLToOption[A, B, E, Z] = {
-    new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)(false)
+    val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)(false)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def toCollection: OneToManySQLToCollection[A, B, E, Z] = {
-    new OneToManySQLToCollection[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    val q = new OneToManySQLToCollection[A, B, E, Z](statement, rawParameters)(one)(toMany)(extractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
   }
 
   override def single(): OneToManySQLToOption[A, B, E, Z] = toOption()
