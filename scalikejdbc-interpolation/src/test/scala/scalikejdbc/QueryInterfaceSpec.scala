@@ -688,5 +688,28 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     s.parameters should equal(Seq("Bob Marley"))
   }
 
+  "insert.namedValues" should "accept None under nested AsIsParameterBinder" in {
+    DB autoCommit { implicit s =>
+      try sql"drop table ${Account.table}".execute.apply()
+      catch { case e: Exception => }
+      sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+    }
+
+    try {
+      val ac = Account.column
+      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> AsIsParameterBinder(None))
+      val query = insert.into(Account).namedValues(params.map { case (k, v) => k -> AsIsParameterBinder(v) }: _*).toSQL
+      query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
+      query.parameters should equal(Seq(123, None))
+
+      DB autoCommit { implicit s => query.update.apply() }
+    } finally {
+      DB autoCommit { implicit s =>
+        try sql"drop table ${Account.table}".execute.apply()
+        catch { case e: Exception => }
+      }
+    }
+  }
+
 }
 
