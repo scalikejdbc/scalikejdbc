@@ -55,11 +55,22 @@ case class StatementExecutor(
   }
 
   /**
+   * Extracts the raw value from maybe nested BypassParameterBinder.
+   */
+  private[this] def extractBypassParameterBinderRawValue(value: Any) = {
+    BypassParameterBinder.extractValue(value) match {
+      case option: Option[_] => option.orNull[Any]
+      case other => other
+    }
+  }
+
+  /**
    * Binds parameters to the underlying java.sql.PreparedStatement object.
-   * @param params parameters
    */
   def bindParams(params: Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
+      case BypassParameterBinder(value) => extractBypassParameterBinderRawValue(value)
+      case binder: ParameterBinder if binder.bypass => extractBypassParameterBinderRawValue(binder)
       case option: Option[_] => option.orNull[Any]
       case other => other
     }.zipWithIndex

@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import java.sql.PreparedStatement
+
 import org.scalatest._
 import org.joda.time._
 
@@ -674,18 +676,71 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     }
   }
 
-  "insert.namedValues" should "accepts not only var args" in {
+  "insert.namedValues" should "accept not only var args" in {
     val ac = Account.column
     val s = insert.into(Account).namedValues(Map(ac.name -> "Bob Marley")).toSQL
     s.statement should equal("insert into qi_accounts (name) values (?)")
     s.parameters should equal(Seq("Bob Marley"))
   }
 
-  "update.set" should "accepts not only var args" in {
+  "update.set" should "accept not only var args" in {
     val ac = Account.column
     val s = update(Account).set(Map(ac.name -> "Bob Marley")).toSQL
     s.statement should equal("update qi_accounts set name = ?")
     s.parameters should equal(Seq("Bob Marley"))
+  }
+
+  "insert.namedValues" should "accept None under nested AsIsParameterBinder" in {
+    DB autoCommit { implicit s =>
+      try sql"drop table ${Account.table}".execute.apply()
+      catch { case e: Exception => }
+      sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+    }
+
+    try {
+      val ac = Account.column
+      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> BypassParameterBinder(None))
+      val query = insert.into(Account).namedValues(params.map { case (k, v) => k -> BypassParameterBinder(v) }: _*).toSQL
+      query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
+      query.parameters should equal(Seq(123, null))
+
+      DB autoCommit { implicit s => query.update.apply() }
+    } finally {
+      DB autoCommit { implicit s =>
+        try sql"drop table ${Account.table}".execute.apply()
+        catch { case e: Exception => }
+      }
+    }
+  }
+
+  "insert.namedValues" should "accept None under ParameterBinderWithValue and AsIsParameterBinder" in {
+    DB autoCommit { implicit s =>
+      try sql"drop table ${Account.table}".execute.apply()
+      catch { case e: Exception => }
+      sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+    }
+
+    try {
+      val ac = Account.column
+      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> BypassParameterBinder(None))
+      val query = insert.into(Account).namedValues(params.map {
+        case (k, v) => (k, new ParameterBinderWithValue[Any] {
+          // if this value is not configured correctly, ParameterBinder doesn't work
+          override lazy val bypass = true
+          override def value = v
+          override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
+        })
+      }: _*).toSQL
+      query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
+      query.parameters should equal(Seq(123, null))
+
+      DB autoCommit { implicit s => query.update.apply() }
+    } finally {
+      DB autoCommit { implicit s =>
+        try sql"drop table ${Account.table}".execute.apply()
+        catch { case e: Exception => }
+      }
+    }
   }
 
 }

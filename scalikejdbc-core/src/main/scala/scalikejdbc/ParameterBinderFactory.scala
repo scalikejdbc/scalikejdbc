@@ -2,16 +2,34 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.PreparedStatement
+
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
+
+import scala.annotation.implicitNotFound
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
-private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax) extends ParameterBinderWithValue[SQLSyntax] {
-  val value = syntax
-  def apply(stmt: PreparedStatement, idx: Int): Unit = ()
-}
-
+@implicitNotFound(
+  "\n" +
+    "--------------------------------------------------------\n" +
+    " Implicit ParameterBinderFactory value fot the parameter is missing.\n" +
+    " Consider wrapping the value with PrameterBindeor ParameterBinderWithValue.\n" +
+    "\n" +
+    "  (example1)\n" +
+    "    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {\n" +
+    "       value => (stmt, idx) => stmt.setInt(idx, value)\n" +
+    "     }\n" +
+    "\n" +
+    "  (example2)\n" +
+    "    case class Price(value: Int)\n" +
+    "    object Price {\n" +
+    "      implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)\n" +
+    "      implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)\n" +
+    "    }\n" +
+    "\n" +
+    "--------------------------------------------------------\n"
+)
 trait ParameterBinderFactory[A] { self =>
 
   def apply(value: A): ParameterBinderWithValue[A]
@@ -59,6 +77,31 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] = new ParameterBinderFactory[None.type] { def apply(value: None.type) = ParameterBinder.NullParameterBinder }
   implicit val sqlSyntaxParameterBinderFactory: ParameterBinderFactory[SQLSyntax] = new ParameterBinderFactory[SQLSyntax] { def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value) }
   implicit val optionalSqlSyntaxParameterBinderFactory: ParameterBinderFactory[Option[SQLSyntax]] = sqlSyntaxParameterBinderFactory.xmap(Option.apply, _ getOrElse SQLSyntax.empty)
+
+  /**
+   * Resolves already existing ParameterBinder.
+   */
+  implicit val parameterBinderParameterBinderFactory: ParameterBinderFactory[ParameterBinder] = new ParameterBinderFactory[ParameterBinder] {
+    def apply(binder: ParameterBinder): ParameterBinderWithValue[ParameterBinder] = {
+      binder match {
+        case withValue: ParameterBinderWithValue[_] if withValue.value.isInstanceOf[ParameterBinder] =>
+          withValue.asInstanceOf[ParameterBinderWithValue[ParameterBinder]]
+        case _ =>
+          new ParameterBinderWithValue[ParameterBinder] {
+            override lazy val bypass = binder.bypass
+            override def value: ParameterBinder = binder
+            override def apply(stmt: PreparedStatement, idx: Int): Unit = {}
+          }
+      }
+    }
+  }
+
+  /**
+   * Unsafe ParameterBinderFactory which accepts any type value as-is.
+   */
+  val enableBypass: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
+    def apply(value: Any) = new BypassParameterBinder(BypassParameterBinder.extractValue(value))
+  }
 
 }
 
