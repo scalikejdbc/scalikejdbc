@@ -4,6 +4,35 @@ http://scalikejdbc.org/
 
 ![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
 
+### Topic
+
+#### ParameterBinderFactory by @gakuzzzz
+
+@gakuzzzz finally created type-safe API to embed parameters into prepared statements. Previously, user defined type values are passed to PreparedStatement as-is and ScalikeJDBC calls #setObject anyway.
+
+The behavior sometimes triggers mistakes to save unexpected data into database or causes runtime errors.
+
+@gakuzzzz introduced type-safe APIs to QueryDSL to solve this issue by pull request #423.
+
+```
+scala> case class Name(value: String)
+defined class Name
+
+scala> val name = Name("Alice")
+name: Name = Name(Alice)
+
+scala> select.from(User as u).where.eq(u.name, name)
+<console>:30: error: Could not find an implicit value of the ParameterBinderFactory[Name].
+       select.from(User as u).where.eq(u.name, name)
+                                      ^
+
+scala> implicit val nameParameterBinderFactory: ParameterBinderFactory[Name] = ParameterBinderFactory { name => (stmt, idx) => stmt.setString(idx, name.value) }
+nameParameterBinderFactory: scalikejdbc.ParameterBinderFactory[Name] = scalikejdbc.ParameterBinderFactory$$anon$2@5192c37
+
+scala> select.from(User as u).where.eq(u.name, name)
+res4: scalikejdbc.ConditionSQLBuilder[Nothing] = scalikejdbc.QueryDSLFeature$ConditionSQLBuilder$$anon$1@5b9c766f
+```
+
 ### Changes
 
  - [all] #511 Scala 2.11.8 by @xuwei-k
@@ -17,6 +46,8 @@ http://scalikejdbc.org/
  - [core] #423 Add an Hook that converts user defined types to JDBC primitive types by @gakuzzzz
  - [core] #507 Allow QueryDSLFeature to accept named values as a map (work around for SI-7420) by @thobson
  - [core] #512 Some fixes for #507 by @seratch
+ - [core] #517 Lost queryTimeout attribute when using one-to-x APIs #516 by @serach
+ - [core] #423, #515 Intoroduce ParameterBinderFactory for type conversion hook by @gakuzzzz
  - [config] #499 Fix #494 Allow driver absence when using scalikejdbc-config by @seratch
  - [mapper-generator] #510 generate case classes from view by @xuwei-k
  - [project] #504 Update CONTRIBUTING.md by @btakashi
