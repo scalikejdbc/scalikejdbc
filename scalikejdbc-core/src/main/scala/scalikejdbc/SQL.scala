@@ -230,7 +230,13 @@ abstract class SQL[A, E <: WithExtractor](
   /**
    * Returns One-to-X API builder.
    */
-  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement, rawParameters)(f)
+  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = {
+    val q: OneToXSQL[A, E, Z] = new OneToXSQL[A, E, Z](statement, rawParameters)(f)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags: _*)
+    q
+  }
 
   /**
    * Binds parameters to SQL template in order.
