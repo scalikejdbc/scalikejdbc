@@ -4,4 +4,4 @@ resolvers ++= Seq(
 )
 // Don't forget adding your JDBC driver
 libraryDependencies += "org.hsqldb" % "hsqldb" % "2.+"
-addSbtPlugin("org.scalikejdbc" %% "scalikejdbc-mapper-generator" % "2.4.0.RC2")
+addSbtPlugin("org.scalikejdbc" %% "scalikejdbc-mapper-generator" % "2.4.0")
