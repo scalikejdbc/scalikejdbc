@@ -3,7 +3,6 @@ package scalikejdbc
 import java.io.InputStream
 import java.sql.PreparedStatement
 
-import scalikejdbc.UnixTimeInMillisConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
 
 import scala.annotation.implicitNotFound
@@ -11,29 +10,27 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
 @implicitNotFound(
-  "\n" +
-    "--------------------------------------------------------\n" +
-    " Implicit ParameterBinderFactory[A] for the parameter type A is missing.\n" +
-    " You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.\n" +
-    "\n" +
-    "  (example1)\n" +
-    "    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {\n" +
-    "       value => (stmt, idx) => stmt.setInt(idx, value)\n" +
-    "     }\n" +
-    "\n" +
-    "  (example2)\n" +
-    "    case class Price(value: Int)\n" +
-    "    object Price {\n" +
-    "      implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)\n" +
-    "      implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)\n" +
-    "    }\n" +
-    "\n" +
-    "  (example3)\n" +
-    "    val value: Any = 123\n" +
-    "    val key: SQLSyntax = sqls\"column_name\"\n" +
-    "    key -> AsIsParameterBinder(value)\n" +
-    "\n" +
-    "--------------------------------------------------------\n"
+  """
+--------------------------------------------------------
+ Implicit ParameterBinderFactory[A] for the parameter type A is missing.
+ You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.
+
+  (example1)
+    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {
+       value => (stmt, idx) => stmt.setInt(idx, value)
+     }
+
+  (example2)
+    case class Price(value: Int)
+    object Price {
+      implicit val converter: TypeConverter[Price] = TypeConverter.int.xmap(Price.apply, _.value)
+    }
+
+  (example3)
+    val value: Any = 123
+    val key: SQLSyntax = sqls"column_name"
+    key -> AsIsParameterBinder(value)
+--------------------------------------------------------"""
 )
 trait ParameterBinderFactory[A] { self =>
 
@@ -57,27 +54,27 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
     }
   }
 
-  implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory { v => (ps, idx) => ps.setInt(idx, v) }
-  implicit val stringParameterBinderFactory: ParameterBinderFactory[String] = ParameterBinderFactory { v => (ps, idx) => ps.setString(idx, v) }
-  implicit val sqlArrayParameterBinderFactory: ParameterBinderFactory[java.sql.Array] = ParameterBinderFactory { v => (ps, idx) => ps.setArray(idx, v) }
-  implicit val bigDecimalParameterBinderFactory: ParameterBinderFactory[BigDecimal] = ParameterBinderFactory { v => (ps, idx) => ps.setBigDecimal(idx, v.bigDecimal) }
-  implicit val booleanParameterBinderFactory: ParameterBinderFactory[Boolean] = ParameterBinderFactory { v => (ps, idx) => ps.setBoolean(idx, v) }
-  implicit val byteParameterBinderFactory: ParameterBinderFactory[Byte] = ParameterBinderFactory { v => (ps, idx) => ps.setByte(idx, v) }
-  implicit val sqlDateParameterBinderFactory: ParameterBinderFactory[java.sql.Date] = ParameterBinderFactory { v => (ps, idx) => ps.setDate(idx, v) }
-  implicit val doubleParameterBinderFactory: ParameterBinderFactory[Double] = ParameterBinderFactory { v => (ps, idx) => ps.setDouble(idx, v) }
-  implicit val floatParameterBinderFactory: ParameterBinderFactory[Float] = ParameterBinderFactory { v => (ps, idx) => ps.setFloat(idx, v) }
-  implicit val longParameterBinderFactory: ParameterBinderFactory[Long] = ParameterBinderFactory { v => (ps, idx) => ps.setLong(idx, v) }
-  implicit val shortParameterBinderFactory: ParameterBinderFactory[Short] = ParameterBinderFactory { v => (ps, idx) => ps.setShort(idx, v) }
-  implicit val sqlXmlParameterBinderFactory: ParameterBinderFactory[java.sql.SQLXML] = ParameterBinderFactory { v => (ps, idx) => ps.setSQLXML(idx, v) }
-  implicit val sqlTimeParameterBinderFactory: ParameterBinderFactory[java.sql.Time] = ParameterBinderFactory { v => (ps, idx) => ps.setTime(idx, v) }
-  implicit val sqlTimestampParameterBinderFactory: ParameterBinderFactory[java.sql.Timestamp] = ParameterBinderFactory { v => (ps, idx) => ps.setTimestamp(idx, v) }
-  implicit val urlParameterBinderFactory: ParameterBinderFactory[java.net.URL] = ParameterBinderFactory { v => (ps, idx) => ps.setURL(idx, v) }
-  implicit val utilDateParameterBinderFactory: ParameterBinderFactory[java.util.Date] = sqlTimestampParameterBinderFactory.xmap(identity, _.toSqlTimestamp)
-  implicit val jodaDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.DateTime] = utilDateParameterBinderFactory.xmap(_.toJodaDateTime, _.toDate)
-  implicit val jodaLocalDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDateTime] = utilDateParameterBinderFactory.xmap(_.toJodaLocalDateTime, _.toDate)
-  implicit val jodaLocalDateParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDate] = sqlDateParameterBinderFactory.xmap(_.toJodaLocalDate, _.toDate.toSqlDate)
-  implicit val jodaLocalTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalTime] = sqlTimeParameterBinderFactory.xmap(_.toJodaLocalTime, _.toSqlTime)
-  implicit val inputStreamParameterBinderFactory: ParameterBinderFactory[InputStream] = ParameterBinderFactory { v => (ps, idx) => ps.setBinaryStream(idx, v) }
+  implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = Binders.int
+  implicit val stringParameterBinderFactory: ParameterBinderFactory[String] = Binders.string
+  implicit val sqlArrayParameterBinderFactory: ParameterBinderFactory[java.sql.Array] = Binders.sqlArray
+  implicit val bigDecimalParameterBinderFactory: ParameterBinderFactory[BigDecimal] = Binders.bigDecimal
+  implicit val booleanParameterBinderFactory: ParameterBinderFactory[Boolean] = Binders.boolean
+  implicit val byteParameterBinderFactory: ParameterBinderFactory[Byte] = Binders.byte
+  implicit val sqlDateParameterBinderFactory: ParameterBinderFactory[java.sql.Date] = Binders.sqlDate
+  implicit val doubleParameterBinderFactory: ParameterBinderFactory[Double] = Binders.double
+  implicit val floatParameterBinderFactory: ParameterBinderFactory[Float] = Binders.float
+  implicit val longParameterBinderFactory: ParameterBinderFactory[Long] = Binders.long
+  implicit val shortParameterBinderFactory: ParameterBinderFactory[Short] = Binders.short
+  implicit val sqlXmlParameterBinderFactory: ParameterBinderFactory[java.sql.SQLXML] = Binders.sqlXml
+  implicit val sqlTimeParameterBinderFactory: ParameterBinderFactory[java.sql.Time] = Binders.sqlTime
+  implicit val sqlTimestampParameterBinderFactory: ParameterBinderFactory[java.sql.Timestamp] = Binders.sqlTimestamp
+  implicit val urlParameterBinderFactory: ParameterBinderFactory[java.net.URL] = Binders.url
+  implicit val utilDateParameterBinderFactory: ParameterBinderFactory[java.util.Date] = Binders.utilDate
+  implicit val jodaDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.DateTime] = Binders.jodaDateTime
+  implicit val jodaLocalDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDateTime] = Binders.jodaLocalDateTime
+  implicit val jodaLocalDateParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDate] = Binders.jodaLocalDate
+  implicit val jodaLocalTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalTime] = Binders.jodaLocalTime
+  implicit val inputStreamParameterBinderFactory: ParameterBinderFactory[InputStream] = Binders.binaryStream
   implicit val nullParameterBinderFactory: ParameterBinderFactory[Null] = new ParameterBinderFactory[Null] { def apply(value: Null) = ParameterBinder.NullParameterBinder }
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] = new ParameterBinderFactory[None.type] { def apply(value: None.type) = ParameterBinder.NullParameterBinder }
   implicit val sqlSyntaxParameterBinderFactory: ParameterBinderFactory[SQLSyntax] = new ParameterBinderFactory[SQLSyntax] { def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value) }
@@ -124,7 +121,27 @@ private[scalikejdbc] object ParameterBinderFactoryMacro {
       case "java.time.LocalTime" =>
         q"scalikejdbc.ParameterBinderFactory[$A] { v => (ps, idx) => ps.setTime(idx, java.sql.Time.valueOf(v)) }"
       case _ =>
-        c.abort(c.enclosingPosition, s"Could not find an implicit value of the ParameterBinderFactory[$A].")
+        c.abort(c.enclosingPosition, s"""
+          |--------------------------------------------------------
+          | Implicit ParameterBinderFactory[$A] is missing.
+          | You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.
+          |
+          |  (example1)
+          |    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {
+          |       value => (stmt, idx) => stmt.setInt(idx, value)
+          |     }
+          |
+          |  (example2)
+          |    case class Price(value: Int)
+          |    object Price {
+          |      implicit val converter: TypeConverter[Price] = TypeConverter.int.xmap(Price.apply, _.value)
+          |    }
+          |
+          |  (example3)
+          |    val value: Any = 123
+          |    val key: SQLSyntax = sqls"column_name"
+          |    key -> AsIsParameterBinder(value)
+          |--------------------------------------------------------""".stripMargin)
     }
     c.Expr[ParameterBinderFactory[A]](expr)
   }
