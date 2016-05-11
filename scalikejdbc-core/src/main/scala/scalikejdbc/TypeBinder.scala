@@ -22,6 +22,9 @@ trait TypeBinder[+A] {
  * Type binder for java.sql.ResultSet.
  */
 object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisConverterImplicits {
+  // TODO: Remove UnixTimeInMillisConverterImplicits in 2.5.
+  // TypeBinder object actually doesn't need UnixTimeInMillisConverterImplicits.
+  // Since removing it breaks bin-compatibility, we cannot do that in 2.4 series.
 
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
@@ -29,77 +32,49 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
   }
 
   private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
-  implicit val array: TypeBinder[java.sql.Array] = TypeBinder(_ getArray _)(_ getArray _)
+  implicit val array: TypeBinder[java.sql.Array] = Binders.sqlArray
 
-  implicit val bigDecimal: TypeBinder[java.math.BigDecimal] = TypeBinder(_ getBigDecimal _)(_ getBigDecimal _)
-  implicit val scalaBigDecimal: TypeBinder[BigDecimal] = option(bigDecimal).map(_.map(BigDecimal.apply).orNull[BigDecimal])
-  implicit val bigInteger: TypeBinder[java.math.BigInteger] = TypeBinder(_.getBigDecimal(_).toBigInteger)(_.getBigDecimal(_).toBigInteger)
-  implicit val scalaBigInt: TypeBinder[BigInt] = option(bigInteger).map(_.map(BigInt.apply).orNull[BigInt])
+  implicit val bigDecimal: TypeBinder[java.math.BigDecimal] = Binders.javaBigDecimal
+  implicit val scalaBigDecimal: TypeBinder[BigDecimal] = Binders.bigDecimal
+  implicit val bigInteger: TypeBinder[java.math.BigInteger] = Binders.javaBigInteger
+  implicit val scalaBigInt: TypeBinder[BigInt] = Binders.bigInt
 
-  implicit val binaryStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getBinaryStream _)(_ getBinaryStream _)
-  implicit val blob: TypeBinder[java.sql.Blob] = TypeBinder(_ getBlob _)(_ getBlob _)
-  implicit val nullableBoolean: TypeBinder[java.lang.Boolean] = any.map {
-    case b if b == null => b.asInstanceOf[java.lang.Boolean]
-    case b: java.lang.Boolean => b
-    case b: Boolean => b.asInstanceOf[java.lang.Boolean]
-    case s: String => {
-      try s.toInt != 0
-      catch { case e: NumberFormatException => !s.isEmpty }
-    }.asInstanceOf[java.lang.Boolean]
-    case n: Number => (n.intValue() != 0).asInstanceOf[java.lang.Boolean]
-    case v => (v != 0).asInstanceOf[java.lang.Boolean]
-  }
-  implicit val boolean: TypeBinder[Boolean] = nullableBoolean.map(throwExceptionIfNull(_.asInstanceOf[Boolean]))
-  implicit val optionBoolean: TypeBinder[Option[Boolean]] = nullableBoolean.map(v => Option(v).map(_.asInstanceOf[Boolean]))
-  implicit val nullableByte: TypeBinder[java.lang.Byte] = any.map(v => if (v == null) null else java.lang.Byte.valueOf(v.toString))
-  implicit val byte: TypeBinder[Byte] = nullableByte.map(throwExceptionIfNull(_.asInstanceOf[Byte]))
-  implicit val optionByte: TypeBinder[Option[Byte]] = nullableByte.map(v => Option(v).map(_.asInstanceOf[Byte]))
-  implicit val bytes: TypeBinder[Array[Byte]] = TypeBinder(_ getBytes _)(_ getBytes _)
-  implicit val characterStream: TypeBinder[java.io.Reader] = TypeBinder(_ getCharacterStream _)(_ getCharacterStream _)
-  implicit val clob: TypeBinder[java.sql.Clob] = TypeBinder(_ getClob _)(_ getClob _)
-  implicit val date: TypeBinder[java.sql.Date] = TypeBinder(_ getDate _)(_ getDate _)
-  implicit val nullableDouble: TypeBinder[java.lang.Double] = any.map(v => if (v == null) null else java.lang.Double.valueOf(v.toString))
-  implicit val double: TypeBinder[Double] = nullableDouble.map(throwExceptionIfNull(_.asInstanceOf[Double]))
-  implicit val optionDouble: TypeBinder[Option[Double]] = nullableDouble.map(v => Option(v).map(_.asInstanceOf[Double]))
-  implicit val nullableFloat: TypeBinder[java.lang.Float] = any.map(v => if (v == null) null else java.lang.Float.valueOf(v.toString))
-  implicit val float: TypeBinder[Float] = nullableFloat.map(throwExceptionIfNull(_.asInstanceOf[Float]))
-  implicit val optionFloat: TypeBinder[Option[Float]] = nullableFloat.map(v => Option(v).map(_.asInstanceOf[Float]))
-  implicit val nullableInt: TypeBinder[java.lang.Integer] = any.map {
-    case v if v == null => v.asInstanceOf[java.lang.Integer]
-    case v: Float => v.toInt.asInstanceOf[java.lang.Integer]
-    case v: Double => v.toInt.asInstanceOf[java.lang.Integer]
-    case n: Number => n.intValue()
-    case v => java.lang.Integer.valueOf(v.toString)
-  }
-  implicit val int: TypeBinder[Int] = nullableInt.map(throwExceptionIfNull(_.asInstanceOf[Int]))
-  implicit val optionInt: TypeBinder[Option[Int]] = nullableInt.map(v => Option(v).map(_.asInstanceOf[Int]))
-  implicit val nullableLong: TypeBinder[java.lang.Long] = any.map {
-    case v if v == null => v.asInstanceOf[java.lang.Long]
-    case v: Float => v.toLong.asInstanceOf[java.lang.Long]
-    case v: Double => v.toLong.asInstanceOf[java.lang.Long]
-    case n: Number => n.longValue()
-    case v => java.lang.Long.valueOf(v.toString)
-  }
-  implicit val long: TypeBinder[Long] = nullableLong.map(throwExceptionIfNull(_.asInstanceOf[Long]))
-  implicit val optionLong: TypeBinder[Option[Long]] = nullableLong.map(v => Option(v).map(_.asInstanceOf[Long]))
-  implicit val nClob: TypeBinder[java.sql.NClob] = TypeBinder(_ getNClob _)(_ getNClob _)
-  implicit val ref: TypeBinder[java.sql.Ref] = TypeBinder(_ getRef _)(_ getRef _)
-  implicit val rowId: TypeBinder[java.sql.RowId] = TypeBinder(_ getRowId _)(_ getRowId _)
-  implicit val nullableShort: TypeBinder[java.lang.Short] = any.map {
-    case v if v == null => v.asInstanceOf[java.lang.Short]
-    case v: Float => v.toShort.asInstanceOf[java.lang.Short]
-    case v: Double => v.toShort.asInstanceOf[java.lang.Short]
-    case n: Number => n.shortValue()
-    case v => java.lang.Short.valueOf(v.toString)
-  }
-  implicit val short: TypeBinder[Short] = nullableShort.map(throwExceptionIfNull(_.asInstanceOf[Short]))
-  implicit val optionShort: TypeBinder[Option[Short]] = nullableShort.map(v => Option(v).map(_.asInstanceOf[Short]))
-  implicit val sqlXml: TypeBinder[java.sql.SQLXML] = TypeBinder(_ getSQLXML _)(_ getSQLXML _)
+  implicit val binaryStream: TypeBinder[java.io.InputStream] = Binders.binaryStream
+  implicit val blob: TypeBinder[java.sql.Blob] = Binders.blob
+  implicit val nullableBoolean: TypeBinder[java.lang.Boolean] = Binders.javaBoolean
+  implicit val boolean: TypeBinder[Boolean] = Binders.boolean
+  implicit val optionBoolean: TypeBinder[Option[Boolean]] = Binders.optionBoolean
+  implicit val nullableByte: TypeBinder[java.lang.Byte] = Binders.javaByte
+  implicit val byte: TypeBinder[Byte] = Binders.byte
+  implicit val optionByte: TypeBinder[Option[Byte]] = Binders.optionByte
+  implicit val bytes: TypeBinder[Array[Byte]] = Binders.bytes
+  implicit val characterStream: TypeBinder[java.io.Reader] = Binders.characterStream
+  implicit val clob: TypeBinder[java.sql.Clob] = Binders.clob
+  implicit val date: TypeBinder[java.sql.Date] = Binders.sqlDate
+  implicit val nullableDouble: TypeBinder[java.lang.Double] = Binders.javaDouble
+  implicit val double: TypeBinder[Double] = Binders.double
+  implicit val optionDouble: TypeBinder[Option[Double]] = Binders.optionDouble
+  implicit val nullableFloat: TypeBinder[java.lang.Float] = Binders.javaFloat
+  implicit val float: TypeBinder[Float] = Binders.float
+  implicit val optionFloat: TypeBinder[Option[Float]] = Binders.optionFloat
+  implicit val nullableInt: TypeBinder[java.lang.Integer] = Binders.javaInteger
+  implicit val int: TypeBinder[Int] = Binders.int
+  implicit val optionInt: TypeBinder[Option[Int]] = Binders.optionInt
+  implicit val nullableLong: TypeBinder[java.lang.Long] = Binders.javaLong
+  implicit val long: TypeBinder[Long] = Binders.long
+  implicit val optionLong: TypeBinder[Option[Long]] = Binders.optionLong
+  implicit val nClob: TypeBinder[java.sql.NClob] = Binders.nClob
+  implicit val ref: TypeBinder[java.sql.Ref] = Binders.ref
+  implicit val rowId: TypeBinder[java.sql.RowId] = Binders.rowId
+  implicit val nullableShort: TypeBinder[java.lang.Short] = Binders.javaShort
+  implicit val short: TypeBinder[Short] = Binders.short
+  implicit val optionShort: TypeBinder[Option[Short]] = Binders.optionShort
+  implicit val sqlXml: TypeBinder[java.sql.SQLXML] = Binders.sqlXml
 
-  implicit val string: TypeBinder[String] = TypeBinder(_ getString _)(_ getString _)
+  implicit val string: TypeBinder[String] = Binders.string
 
-  implicit val time: TypeBinder[java.sql.Time] = TypeBinder(_ getTime _)(_ getTime _)
-  implicit val timestamp: TypeBinder[java.sql.Timestamp] = TypeBinder(_ getTimestamp _)(_ getTimestamp _)
+  implicit val time: TypeBinder[java.sql.Time] = Binders.sqlTime
+  implicit val timestamp: TypeBinder[java.sql.Timestamp] = Binders.sqlTimestamp
 
   /*
    * [error] /scalikejdbc/scalikejdbc-library/src/test/scala/scalikejdbc/TypeBinderSpec.scala:40: ambiguous
@@ -112,26 +87,17 @@ object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisCo
    * [error] one error found
    */
   //implicit val javaUtilDate: TypeBinder[java.util.Date] = option[java.sql.Timestamp].map(_.map(_.toJavaUtilDate).orNull[java.util.Date])
-  implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] = {
-    option[java.sql.Timestamp].map(_.map { t =>
-      val c = java.util.Calendar.getInstance
-      c.setTime(t.toJavaUtilDate)
-      c
-    }.orNull[java.util.Calendar])
-  }
-  implicit val jodaDateTime: TypeBinder[JodaDateTime] = option[java.sql.Timestamp].map(_.map(_.toJodaDateTime).orNull[JodaDateTime])
-  implicit val jodaLocalDate: TypeBinder[JodaLocalDate] = option[java.sql.Date].map(_.map(_.toJodaLocalDate).orNull[JodaLocalDate])
-  implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = option[java.sql.Time].map(_.map(_.toJodaLocalTime).orNull[JodaLocalTime])
-  implicit val jpdaLocalDateTime: TypeBinder[JodaLocalDateTime] = option[java.sql.Timestamp].map(_.map(_.toJodaLocalDateTime).orNull)
+  implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] = Binders.javaUtilCalendar
+  implicit val jodaDateTime: TypeBinder[JodaDateTime] = Binders.jodaDateTime
+  implicit val jodaLocalDate: TypeBinder[JodaLocalDate] = Binders.jodaLocalDate
+  implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = Binders.jodaLocalTime
+  implicit val jpdaLocalDateTime: TypeBinder[JodaLocalDateTime] = Binders.jodaLocalDateTime
 
-  implicit val url: TypeBinder[java.net.URL] = TypeBinder(_ getURL _)(_ getURL _)
+  implicit val url: TypeBinder[java.net.URL] = Binders.url
 
-  private[scalikejdbc] val asciiStream: TypeBinder[java.io.InputStream] = TypeBinder(_ getAsciiStream _)(_ getAsciiStream _)
-  private[scalikejdbc] val nCharacterStream: TypeBinder[java.io.Reader] = TypeBinder(_ getNCharacterStream _)(_ getNCharacterStream _)
-  private[scalikejdbc] val nString: TypeBinder[String] = TypeBinder(_ getNString _)(_ getNString _)
-
-  private def throwExceptionIfNull[A <: AnyVal](f: Any => A)(a: Any): A =
-    if (a == null) throw new UnexpectedNullValueException else f(a)
+  private[scalikejdbc] val asciiStream: TypeBinder[java.io.InputStream] = Binders.asciiStream
+  private[scalikejdbc] val nCharacterStream: TypeBinder[java.io.Reader] = Binders.nCharacterStream
+  private[scalikejdbc] val nString: TypeBinder[String] = Binders.nString
 
 }
 
