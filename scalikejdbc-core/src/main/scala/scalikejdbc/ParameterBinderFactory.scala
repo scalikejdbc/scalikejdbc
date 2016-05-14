@@ -23,7 +23,7 @@ import scala.reflect.macros.blackbox.Context
   (example2)
     case class Price(value: Int)
     object Price {
-      implicit val converter: TypeConverter[Price] = TypeConverter.int.xmap(Price.apply, _.value)
+      implicit val converter: Binders[Price] = Binders.int.xmap(Price.apply, _.value)
     }
 
   (example3)
@@ -134,7 +134,7 @@ private[scalikejdbc] object ParameterBinderFactoryMacro {
           |  (example2)
           |    case class Price(value: Int)
           |    object Price {
-          |      implicit val converter: TypeConverter[Price] = TypeConverter.int.xmap(Price.apply, _.value)
+          |      implicit val converter: Binders[Price] = Binders.int.xmap(Price.apply, _.value)
           |    }
           |
           |  (example3)
