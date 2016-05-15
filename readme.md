@@ -37,7 +37,6 @@ https://github.com/scalikejdbc/scalikejdbc-play-support
 After adding the above dependencies to your `build.sbt`, run `sbt console` and execute the following code:
 
 ```scala
-// import scalikejdbc._, SQLInterpolation._
 import scalikejdbc._
 
 // initialize JDBC driver & connection pool

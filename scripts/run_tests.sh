@@ -10,7 +10,7 @@ cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/sr
 mkdir -p logs
 
 sbt \
-  ++2.10.5 \
+  ++2.10.6 \
   clean \
   core/test \
   interpolation/test \

@@ -20,6 +20,12 @@
 
 - Latest stable version
 - Changes that bring binary/source incompatibility are not allowed
+- Must build against Scala 2.10, 2.11 and 2.12.0-M4
+
+##### 2.3.x
+
+- Version 2.3 series maintenance branch
+- Only security fixes and critical bug fixes to the master branch will be backported
 - Must build against Scala 2.10 and 2.11
 
 ##### 2.2.x
