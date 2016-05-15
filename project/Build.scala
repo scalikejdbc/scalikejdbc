@@ -18,7 +18,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _logbackVersion = "1.1.7"
   lazy val _h2Version = "1.4.191"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-  lazy val _mysqlVersion = "5.1.38"
+  lazy val _mysqlVersion = "5.1.39"
   lazy val _postgresqlVersion = "9.4.1207.jre7"
   lazy val _hibernateVersion = "5.1.0.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
@@ -120,7 +120,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.2"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.3"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
