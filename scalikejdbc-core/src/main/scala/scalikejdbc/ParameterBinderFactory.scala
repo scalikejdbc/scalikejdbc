@@ -54,21 +54,21 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
     }
   }
 
+  implicit val longParameterBinderFactory: ParameterBinderFactory[Long] = Binders.long
   implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = Binders.int
-  implicit val stringParameterBinderFactory: ParameterBinderFactory[String] = Binders.string
-  implicit val sqlArrayParameterBinderFactory: ParameterBinderFactory[java.sql.Array] = Binders.sqlArray
-  implicit val bigDecimalParameterBinderFactory: ParameterBinderFactory[BigDecimal] = Binders.bigDecimal
-  implicit val booleanParameterBinderFactory: ParameterBinderFactory[Boolean] = Binders.boolean
+  implicit val shortParameterBinderFactory: ParameterBinderFactory[Short] = Binders.short
   implicit val byteParameterBinderFactory: ParameterBinderFactory[Byte] = Binders.byte
-  implicit val sqlDateParameterBinderFactory: ParameterBinderFactory[java.sql.Date] = Binders.sqlDate
   implicit val doubleParameterBinderFactory: ParameterBinderFactory[Double] = Binders.double
   implicit val floatParameterBinderFactory: ParameterBinderFactory[Float] = Binders.float
-  implicit val longParameterBinderFactory: ParameterBinderFactory[Long] = Binders.long
-  implicit val shortParameterBinderFactory: ParameterBinderFactory[Short] = Binders.short
+  implicit val booleanParameterBinderFactory: ParameterBinderFactory[Boolean] = Binders.boolean
+  implicit val stringParameterBinderFactory: ParameterBinderFactory[String] = Binders.string
+  implicit val bigDecimalParameterBinderFactory: ParameterBinderFactory[BigDecimal] = Binders.bigDecimal
+  implicit val urlParameterBinderFactory: ParameterBinderFactory[java.net.URL] = Binders.url
+  implicit val sqlArrayParameterBinderFactory: ParameterBinderFactory[java.sql.Array] = Binders.sqlArray
   implicit val sqlXmlParameterBinderFactory: ParameterBinderFactory[java.sql.SQLXML] = Binders.sqlXml
+  implicit val sqlDateParameterBinderFactory: ParameterBinderFactory[java.sql.Date] = Binders.sqlDate
   implicit val sqlTimeParameterBinderFactory: ParameterBinderFactory[java.sql.Time] = Binders.sqlTime
   implicit val sqlTimestampParameterBinderFactory: ParameterBinderFactory[java.sql.Timestamp] = Binders.sqlTimestamp
-  implicit val urlParameterBinderFactory: ParameterBinderFactory[java.net.URL] = Binders.url
   implicit val utilDateParameterBinderFactory: ParameterBinderFactory[java.util.Date] = Binders.utilDate
   implicit val jodaDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.DateTime] = Binders.jodaDateTime
   implicit val jodaLocalDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDateTime] = Binders.jodaLocalDateTime
