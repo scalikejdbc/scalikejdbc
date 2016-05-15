@@ -55,14 +55,24 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   }
 
   implicit val longParameterBinderFactory: ParameterBinderFactory[Long] = Binders.long
+  implicit val javaLongParameterBinderFactory: ParameterBinderFactory[java.lang.Long] = Binders.javaLong
   implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = Binders.int
+  implicit val javaIntegerParameterBinderFactory: ParameterBinderFactory[java.lang.Integer] = Binders.javaInteger
   implicit val shortParameterBinderFactory: ParameterBinderFactory[Short] = Binders.short
+  implicit val javaShortParameterBinderFactory: ParameterBinderFactory[java.lang.Short] = Binders.javaShort
   implicit val byteParameterBinderFactory: ParameterBinderFactory[Byte] = Binders.byte
+  implicit val javaByteParameterBinderFactory: ParameterBinderFactory[java.lang.Byte] = Binders.javaByte
   implicit val doubleParameterBinderFactory: ParameterBinderFactory[Double] = Binders.double
+  implicit val javaDoubleParameterBinderFactory: ParameterBinderFactory[java.lang.Double] = Binders.javaDouble
   implicit val floatParameterBinderFactory: ParameterBinderFactory[Float] = Binders.float
+  implicit val javaFloatParameterBinderFactory: ParameterBinderFactory[java.lang.Float] = Binders.javaFloat
   implicit val booleanParameterBinderFactory: ParameterBinderFactory[Boolean] = Binders.boolean
+  implicit val javaBooleanParameterBinderFactory: ParameterBinderFactory[java.lang.Boolean] = Binders.javaBoolean
   implicit val stringParameterBinderFactory: ParameterBinderFactory[String] = Binders.string
+  implicit val bigIntParameterBinderFactory: ParameterBinderFactory[BigInt] = Binders.bigInt
+  implicit val javaBigIntegerParameterBinderFactory: ParameterBinderFactory[java.math.BigInteger] = Binders.javaBigInteger
   implicit val bigDecimalParameterBinderFactory: ParameterBinderFactory[BigDecimal] = Binders.bigDecimal
+  implicit val javaBigDecimalParameterBinderFactory: ParameterBinderFactory[java.math.BigDecimal] = Binders.javaBigDecimal
   implicit val urlParameterBinderFactory: ParameterBinderFactory[java.net.URL] = Binders.url
   implicit val sqlArrayParameterBinderFactory: ParameterBinderFactory[java.sql.Array] = Binders.sqlArray
   implicit val sqlXmlParameterBinderFactory: ParameterBinderFactory[java.sql.SQLXML] = Binders.sqlXml
@@ -75,6 +85,14 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val jodaLocalDateParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDate] = Binders.jodaLocalDate
   implicit val jodaLocalTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalTime] = Binders.jodaLocalTime
   implicit val inputStreamParameterBinderFactory: ParameterBinderFactory[InputStream] = Binders.binaryStream
+  implicit val blobParameterBinderFactory: ParameterBinderFactory[java.sql.Blob] = Binders.blob
+  implicit val clobParameterBinderFactory: ParameterBinderFactory[java.sql.Clob] = Binders.clob
+  implicit val nClobParameterBinderFactory: ParameterBinderFactory[java.sql.NClob] = Binders.nClob
+  implicit val refParameterBinderFactory: ParameterBinderFactory[java.sql.Ref] = Binders.ref
+  implicit val rowIdParameterBinderFactory: ParameterBinderFactory[java.sql.RowId] = Binders.rowId
+  implicit val bytesParameterBinderFactory: ParameterBinderFactory[Array[Byte]] = Binders.bytes
+  implicit val readerParameterBinderFactory: ParameterBinderFactory[java.io.Reader] = Binders.characterStream
+  implicit val calendarParameterBinderFactory: ParameterBinderFactory[java.util.Calendar] = Binders.javaUtilCalendar
   implicit val nullParameterBinderFactory: ParameterBinderFactory[Null] = new ParameterBinderFactory[Null] { def apply(value: Null) = ParameterBinder.NullParameterBinder }
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] = new ParameterBinderFactory[None.type] { def apply(value: None.type) = ParameterBinder.NullParameterBinder }
   implicit val sqlSyntaxParameterBinderFactory: ParameterBinderFactory[SQLSyntax] = new ParameterBinderFactory[SQLSyntax] { def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value) }

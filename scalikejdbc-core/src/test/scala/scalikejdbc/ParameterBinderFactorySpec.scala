@@ -18,10 +18,26 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     verify(stmt).setLong(1, 42L)
   }
 
+  it should "have instance for java.lang.Long" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Long]].apply(42L)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Long]].apply(null)(stmt, 2)
+    verify(stmt).setLong(1, 42L)
+    verify(stmt).setObject(2, null)
+  }
+
   it should "have instance for Int" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[Int]].apply(42)(stmt, 1)
     verify(stmt).setInt(1, 42)
+  }
+
+  it should "have instance for java.lang.Integer" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Integer]].apply(42)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Integer]].apply(null)(stmt, 2)
+    verify(stmt).setInt(1, 42)
+    verify(stmt).setObject(2, null)
   }
 
   it should "have instance for Short" in {
@@ -30,10 +46,26 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     verify(stmt).setShort(1, 42)
   }
 
+  it should "have instance for java.lang.Short" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Short]].apply(42.toShort)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Short]].apply(null)(stmt, 2)
+    verify(stmt).setShort(1, 42)
+    verify(stmt).setObject(2, null)
+  }
+
   it should "have instance for Byte" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[Byte]].apply(42)(stmt, 1)
     verify(stmt).setByte(1, 42)
+  }
+
+  it should "have instance for java.lang.Byte" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Byte]].apply(42.toByte)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Byte]].apply(null)(stmt, 2)
+    verify(stmt).setByte(1, 42)
+    verify(stmt).setObject(2, null)
   }
 
   it should "have instance for Double" in {
@@ -42,16 +74,40 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     verify(stmt).setDouble(1, 42d)
   }
 
+  it should "have instance for java.lang.Double" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Double]].apply(42d)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Double]].apply(null)(stmt, 2)
+    verify(stmt).setDouble(1, 42d)
+    verify(stmt).setObject(2, null)
+  }
+
   it should "have instance for Float" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[Float]].apply(42f)(stmt, 1)
     verify(stmt).setFloat(1, 42f)
   }
 
+  it should "have instance for java.lang.Float" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Float]].apply(42f)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Float]].apply(null)(stmt, 2)
+    verify(stmt).setFloat(1, 42f)
+    verify(stmt).setObject(2, null)
+  }
+
   it should "have instance for Boolean" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[Boolean]].apply(true)(stmt, 1)
     verify(stmt).setBoolean(1, true)
+  }
+
+  it should "have instance for java.lang.Boolean" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[java.lang.Boolean]].apply(true)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Boolean]].apply(null)(stmt, 2)
+    verify(stmt).setBoolean(1, true)
+    verify(stmt).setObject(2, null)
   }
 
   it should "have instance for String" in {
@@ -62,11 +118,37 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     verify(stmt).setObject(2, null)
   }
 
+  it should "have instance for BigInt" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[BigInt]].apply(42)(stmt, 1)
+    implicitly[ParameterBinderFactory[BigInt]].apply(null)(stmt, 2)
+    verify(stmt).setBigDecimal(1, new java.math.BigDecimal(42))
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.math.BigInteger" in {
+    val stmt = mock[PreparedStatement]
+    val value = java.math.BigInteger.valueOf(42)
+    implicitly[ParameterBinderFactory[java.math.BigInteger]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.math.BigInteger]].apply(null)(stmt, 2)
+    verify(stmt).setBigDecimal(1, new java.math.BigDecimal(value))
+    verify(stmt).setObject(2, null)
+  }
+
   it should "have instance for BigDecimal" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[BigDecimal]].apply(42d)(stmt, 1)
     implicitly[ParameterBinderFactory[BigDecimal]].apply(null)(stmt, 2)
     verify(stmt).setBigDecimal(1, BigDecimal(42d).bigDecimal)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.math.BigDecimal" in {
+    val stmt = mock[PreparedStatement]
+    val value = new java.math.BigDecimal(42d)
+    implicitly[ParameterBinderFactory[java.math.BigDecimal]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.math.BigDecimal]].apply(null)(stmt, 2)
+    verify(stmt).setBigDecimal(1, value)
     verify(stmt).setObject(2, null)
   }
 
@@ -175,6 +257,77 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     implicitly[ParameterBinderFactory[InputStream]].apply(value)(stmt, 1)
     implicitly[ParameterBinderFactory[InputStream]].apply(null)(stmt, 2)
     verify(stmt).setBinaryStream(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.sql.Blob" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.sql.Blob]
+    implicitly[ParameterBinderFactory[java.sql.Blob]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.sql.Blob]].apply(null)(stmt, 2)
+    verify(stmt).setBlob(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.sql.Clob" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.sql.Clob]
+    implicitly[ParameterBinderFactory[java.sql.Clob]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.sql.Clob]].apply(null)(stmt, 2)
+    verify(stmt).setClob(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.sql.NClob" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.sql.NClob]
+    implicitly[ParameterBinderFactory[java.sql.NClob]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.sql.NClob]].apply(null)(stmt, 2)
+    verify(stmt).setNClob(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.sql.Ref" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.sql.Ref]
+    implicitly[ParameterBinderFactory[java.sql.Ref]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.sql.Ref]].apply(null)(stmt, 2)
+    verify(stmt).setRef(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.sql.RowId" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.sql.RowId]
+    implicitly[ParameterBinderFactory[java.sql.RowId]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.sql.RowId]].apply(null)(stmt, 2)
+    verify(stmt).setRowId(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for Array[Byte]" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[Array[Byte]]].apply(Array[Byte](42, 123))(stmt, 1)
+    implicitly[ParameterBinderFactory[Array[Byte]]].apply(null)(stmt, 2)
+    verify(stmt).setBytes(1, Array[Byte](42, 123))
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.io.Reader" in {
+    val stmt = mock[PreparedStatement]
+    val value = mock[java.io.Reader]
+    implicitly[ParameterBinderFactory[java.io.Reader]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.io.Reader]].apply(null)(stmt, 2)
+    verify(stmt).setCharacterStream(1, value)
+    verify(stmt).setObject(2, null)
+  }
+
+  it should "have instance for java.util.Calendar" in {
+    val stmt = mock[PreparedStatement]
+    val value = java.util.Calendar.getInstance()
+    implicitly[ParameterBinderFactory[java.util.Calendar]].apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.util.Calendar]].apply(null)(stmt, 2)
+    verify(stmt).setTimestamp(1, value.getTime.toSqlTimestamp)
     verify(stmt).setObject(2, null)
   }
 
