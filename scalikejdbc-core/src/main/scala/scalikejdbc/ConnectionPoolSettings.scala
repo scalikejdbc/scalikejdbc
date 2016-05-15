@@ -13,4 +13,3 @@ case class ConnectionPoolSettings(
   warmUpTime: Long = 100L,
   timeZone: String = null
 )
-

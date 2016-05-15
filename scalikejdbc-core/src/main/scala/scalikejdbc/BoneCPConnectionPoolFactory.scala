@@ -8,7 +8,10 @@ package scalikejdbc
 object BoneCPConnectionPoolFactory extends ConnectionPoolFactory {
 
   override def apply(
-    url: String, user: String, password: String, settings: ConnectionPoolSettings = ConnectionPoolSettings()
+    url: String,
+    user: String,
+    password: String,
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()
   ) = {
     new BoneCPConnectionPool(url, user, password, settings)
   }

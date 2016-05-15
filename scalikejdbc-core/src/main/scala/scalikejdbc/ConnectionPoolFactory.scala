@@ -5,7 +5,11 @@ package scalikejdbc
  */
 trait ConnectionPoolFactory {
 
-  def apply(url: String, user: String, password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()): ConnectionPool
+  def apply(
+    url: String,
+    user: String,
+    password: String,
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()
+  ): ConnectionPool
 
 }

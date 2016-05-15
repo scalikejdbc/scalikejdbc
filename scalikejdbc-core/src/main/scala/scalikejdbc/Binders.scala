@@ -4,6 +4,9 @@ import java.io.InputStream
 import java.sql.{ PreparedStatement, ResultSet }
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 
+/**
+ * Provides both of TypeBinder and ParameterBinderFactory for the specified type A.
+ */
 trait Binders[A] extends TypeBinder[A] with ParameterBinderFactory[A] { self =>
 
   override def xmap[B](f: A => B, g: B => A): Binders[B] = new Binders[B] {
@@ -17,7 +20,44 @@ trait Binders[A] extends TypeBinder[A] with ParameterBinderFactory[A] { self =>
   }
 
 }
+
+/**
+ * Provides factories of Binders and built-in Binders.
+ */
 object Binders {
+
+  // --------------------------------------------------------------------------------------------
+  // Factory methods
+  // --------------------------------------------------------------------------------------------
+
+  def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A)(f: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
+    def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
+    def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
+    def apply(value: A): ParameterBinderWithValue[A] = {
+      if (value == null) ParameterBinder.NullParameterBinder
+      else ParameterBinder(value, f(value))
+    }
+  }
+
+  def of[A](f: Any => A)(g: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
+    def apply(rs: ResultSet, columnIndex: Int): A = f(rs.getObject(columnIndex))
+    def apply(rs: ResultSet, columnLabel: String): A = f(rs.getObject(columnLabel))
+    def apply(value: A): ParameterBinderWithValue[A] = {
+      if (value == null) ParameterBinder.NullParameterBinder
+      else ParameterBinder(value, g(value))
+    }
+  }
+
+  private[scalikejdbc] def option[A](t: Binders[A]): Binders[Option[A]] = option(t, t)
+
+  def option[A](implicit b: TypeBinder[A], p: ParameterBinderFactory[A]): Binders[Option[A]] = new Binders[Option[A]] {
+    def apply(rs: ResultSet, columnIndex: Int): Option[A] = TypeBinder.option(b).apply(rs, columnIndex)
+    def apply(rs: ResultSet, columnLabel: String): Option[A] = TypeBinder.option(b).apply(rs, columnLabel)
+    def apply(value: Option[A]): ParameterBinderWithValue[Option[A]] = ParameterBinderFactory.optionalParameterBinderFactory(p).apply(value)
+  }
+
+  // ----------------------------------------------------
+  // private
 
   private[this] def throwExceptionIfNull[A <: AnyVal, B](f: B => A)(a: B): A = {
     if (a == null) throw new UnexpectedNullValueException else f(a)
@@ -32,22 +72,9 @@ object Binders {
 
   private[this] def nullThrough[A, B](f: A => B)(a: A): B = if (a == null) null.asInstanceOf[B] else f(a)
 
-  def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A)(f: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
-    def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
-    def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
-    def apply(value: A): ParameterBinderWithValue[A] = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else ParameterBinder(value, f(value))
-    }
-  }
-  def of[A](f: Any => A)(g: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
-    def apply(rs: ResultSet, columnIndex: Int): A = f(rs.getObject(columnIndex))
-    def apply(rs: ResultSet, columnLabel: String): A = f(rs.getObject(columnLabel))
-    def apply(value: A): ParameterBinderWithValue[A] = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else ParameterBinder(value, g(value))
-    }
-  }
+  // --------------------------------------------------------------------------------------------
+  // Built-in Binders
+  // --------------------------------------------------------------------------------------------
 
   val javaInteger: Binders[java.lang.Integer] = Binders.of[java.lang.Integer] {
     case null => null
@@ -56,6 +83,7 @@ object Binders {
     case n: Number => n.intValue
     case v => java.lang.Integer.valueOf(v.toString)
   }(v => (ps, idx) => ps.setInt(idx, v.intValue))
+
   val int: Binders[Int] = javaInteger.xmap(throwExceptionIfNull(_.intValue), Integer.valueOf)
   val optionInt: Binders[Option[Int]] = javaInteger.xmap(wrapCastOption, unwrapCastOption)
 
@@ -70,6 +98,7 @@ object Binders {
     case n: Number => (n.intValue() != 0).asInstanceOf[java.lang.Boolean]
     case v => (v != 0).asInstanceOf[java.lang.Boolean]
   }(v => (ps, idx) => ps.setBoolean(idx, v))
+
   val boolean: Binders[Boolean] = javaBoolean.xmap(throwExceptionIfNull(_.booleanValue), java.lang.Boolean.valueOf)
   val optionBoolean: Binders[Option[Boolean]] = javaBoolean.xmap(wrapCastOption, unwrapCastOption)
 
@@ -80,6 +109,7 @@ object Binders {
     case n: Number => n.shortValue
     case v => java.lang.Short.valueOf(v.toString)
   }(v => (ps, idx) => ps.setShort(idx, v))
+
   val short: Binders[Short] = javaShort.xmap(throwExceptionIfNull(_.shortValue), java.lang.Short.valueOf)
   val optionShort: Binders[Option[Short]] = javaShort.xmap(wrapCastOption, unwrapCastOption)
 
@@ -90,6 +120,7 @@ object Binders {
     case n: Number => n.longValue
     case v => java.lang.Long.valueOf(v.toString)
   }(v => (ps, idx) => ps.setLong(idx, v))
+
   val long: Binders[Long] = javaLong.xmap(throwExceptionIfNull(_.longValue), java.lang.Long.valueOf)
   val optionLong: Binders[Option[Long]] = javaLong.xmap(wrapCastOption, unwrapCastOption)
 
@@ -97,6 +128,7 @@ object Binders {
     case null => null
     case v => java.lang.Float.valueOf(v.toString)
   }(v => (ps, idx) => ps.setFloat(idx, v))
+
   val float: Binders[Float] = javaFloat.xmap(throwExceptionIfNull(_.floatValue), java.lang.Float.valueOf)
   val optionFloat: Binders[Option[Float]] = javaFloat.xmap(wrapCastOption, unwrapCastOption)
 
@@ -104,6 +136,7 @@ object Binders {
     case null => null
     case v => java.lang.Double.valueOf(v.toString)
   }(v => (ps, idx) => ps.setDouble(idx, v))
+
   val double: Binders[Double] = javaDouble.xmap(throwExceptionIfNull(_.doubleValue), java.lang.Double.valueOf)
   val optionDouble: Binders[Option[Double]] = javaDouble.xmap(wrapCastOption, unwrapCastOption)
 
@@ -111,6 +144,7 @@ object Binders {
     case null => null
     case v => java.lang.Byte.valueOf(v.toString)
   }(v => (ps, idx) => ps.setByte(idx, v))
+
   val byte: Binders[Byte] = javaByte.xmap(throwExceptionIfNull(_.byteValue), java.lang.Byte.valueOf)
   val optionByte: Binders[Option[Byte]] = javaByte.xmap(wrapCastOption, unwrapCastOption)
 
@@ -147,13 +181,5 @@ object Binders {
   val asciiStream: Binders[java.io.InputStream] = Binders(_ getAsciiStream _)(_ getAsciiStream _)(v => (ps, idx) => ps.setAsciiStream(idx, v))
   val nCharacterStream: Binders[java.io.Reader] = Binders(_ getNCharacterStream _)(_ getNCharacterStream _)(v => (ps, idx) => ps.setNCharacterStream(idx, v))
   val nString: Binders[String] = Binders(_ getNString _)(_ getNString _)(v => (ps, idx) => ps.setNString(idx, v))
-
-  private[scalikejdbc] def option[A](t: Binders[A]): Binders[Option[A]] = option(t, t)
-
-  def option[A](implicit b: TypeBinder[A], p: ParameterBinderFactory[A]): Binders[Option[A]] = new Binders[Option[A]] {
-    def apply(rs: ResultSet, columnIndex: Int): Option[A] = TypeBinder.option(b).apply(rs, columnIndex)
-    def apply(rs: ResultSet, columnLabel: String): Option[A] = TypeBinder.option(b).apply(rs, columnLabel)
-    def apply(value: Option[A]): ParameterBinderWithValue[Option[A]] = ParameterBinderFactory.optionalParameterBinderFactory(p).apply(value)
-  }
 
 }
