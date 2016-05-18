@@ -356,7 +356,7 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(Some(SQLSyntax.empty))(stmt, 1)
     implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(None)(stmt, 2)
-    // implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(null)(stmt, 3)
+    implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(null)(stmt, 3)
     verifyNoMoreInteractions(stmt)
   }
 

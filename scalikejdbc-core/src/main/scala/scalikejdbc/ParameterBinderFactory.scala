@@ -96,7 +96,18 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val nullParameterBinderFactory: ParameterBinderFactory[Null] = new ParameterBinderFactory[Null] { def apply(value: Null) = ParameterBinder.NullParameterBinder }
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] = new ParameterBinderFactory[None.type] { def apply(value: None.type) = ParameterBinder.NullParameterBinder }
   implicit val sqlSyntaxParameterBinderFactory: ParameterBinderFactory[SQLSyntax] = new ParameterBinderFactory[SQLSyntax] { def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value) }
-  implicit val optionalSqlSyntaxParameterBinderFactory: ParameterBinderFactory[Option[SQLSyntax]] = sqlSyntaxParameterBinderFactory.xmap(Option.apply, _ getOrElse SQLSyntax.empty)
+
+  implicit val optionalSqlSyntaxParameterBinderFactory: ParameterBinderFactory[Option[SQLSyntax]] =
+    new ParameterBinderFactory[Option[SQLSyntax]] {
+      def apply(value: Option[SQLSyntax]): ParameterBinderWithValue[Option[SQLSyntax]] = {
+        val binder = value match {
+          case null => SQLSyntaxParameterBinder(null)
+          case None => SQLSyntaxParameterBinder(SQLSyntax.empty)
+          case Some(syntax) => SQLSyntaxParameterBinder(syntax)
+        }
+        binder.map(Option.apply)
+      }
+    }
 
 }
 
