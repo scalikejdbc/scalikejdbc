@@ -1,0 +1,33 @@
+ScalikeJDBC 2.4.1 is out for Scala 2.10.x, 2.11.x and 2.12.0-M4. The mapper-generator sbt plugin for sbt 0.13.x is available as well.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Topic
+
+#### #519 Binders to define both of ParameterBinderFactory and TypeBinder by @gakuzzzz
+
+@gakuzzzz introduced a handy way to  define both of ParameterBinderFactory and TypeBinder by pull request #519.
+
+You can simplify the following code.
+
+    case class Price(value: Int)
+    object Price {
+      implicit val binder: TypeBinder[Price] = TypeBinder.int.map(Price.apply)
+      implicit val unbinder: parameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.xmap(Price.apply, _.value)
+    }
+
+like this:
+
+    object Price {
+      implicit val converter: Binders[Price] = Binders.int.xmap(Price.apply, _.value)
+    }
+
+### Changes
+
+ - [core] #519 Introduce more handy way to define TypeBinder and ParameterBinderFactory by @gakuzzzz
+ - [core] #522 Add missing ParameterBinderFactory instances by @kxbmap 
+ - [core] #523 Fix ParameterBinderFactory[Option[SQLSyntax]] also for null pattern by @kxbmap 
+
+Enjoy writing mostly type-safe SQL and get things done!
