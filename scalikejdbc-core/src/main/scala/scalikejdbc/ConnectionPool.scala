@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import javax.sql.DataSource
 import java.sql.Connection
 import scala.concurrent.{ ExecutionContextExecutor, ExecutionContext }
