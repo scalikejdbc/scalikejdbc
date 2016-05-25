@@ -21,6 +21,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   case class Product(id: Int, name: Option[String], price: Price)
   case class Account(id: Int, name: Option[String])
   case class SchemaExample(id: Int)
+  case class TimeHolder(id: Int, time: DateTime)
 
   object Order extends SQLSyntaxSupport[Order] {
     override val tableName = "qi_orders"
@@ -52,6 +53,11 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
   object SchemaExample extends SQLSyntaxSupport[SchemaExample] {
     override val schemaName = Some("public")
     override val tableName = "qi_schema_example"
+  }
+  object TimeHolder extends SQLSyntaxSupport[TimeHolder] {
+    override val tableName = "qi_time_holder"
+    def apply(a: SyntaxProvider[TimeHolder])(rs: WrappedResultSet): TimeHolder = apply(a.resultName)(rs)
+    def apply(p: ResultName[TimeHolder])(rs: WrappedResultSet): TimeHolder = new TimeHolder(rs.int(p.id), rs.jodaDateTime(p.time))
   }
 
   it should "suport schemaName" in {
@@ -706,6 +712,63 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     } finally {
       DB autoCommit { implicit s =>
         try sql"drop table ${Account.table}".execute.apply()
+        catch { case e: Exception => }
+      }
+    }
+  }
+
+  it should "convert timeZone" in {
+    import java.util.TimeZone
+
+    val t = TimeHolder.syntax("t")
+
+    val time = new DateTime(2016, 1, 9, 2, 43, 42)
+
+    val castToString: String = if (isMySQL) {
+      "date_format(time, '%Y-%m-%d %H:%i:%S')"
+    } else {
+      "to_char(time, 'YYYY-MM-DD HH24:MI:SS')"
+    }
+
+    DB autoCommit { implicit session =>
+      try sql"drop table ${TimeHolder.table}".execute.apply()
+      catch { case e: Exception => }
+      sql"create table ${TimeHolder.table} (id int, time timestamp)".execute.apply()
+    }
+
+    try {
+      // execute with Asia/Tokyo timezone
+      DB autoCommit { session =>
+        implicit val jstSession = DBSession(
+          conn = session.conn,
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo")))
+        )
+
+        applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 1, TimeHolder.column.time -> time))
+        val jstString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 1").map(_.string("s")).single.apply().get
+        jstString should equal(time.withZone(DateTimeZone.forID("Asia/Tokyo")).toString("yyyy-MM-dd hh:mm:ss"))
+
+        val expectedTime1 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 1)).map(TimeHolder(t)(_)).single.apply().get.time
+        expectedTime1.isEqual(time) should equal(true)
+      }
+
+      // execute with UTC timezone
+      DB autoCommit { session =>
+        implicit val utcSession = DBSession(
+          conn = session.conn,
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC")))
+        )
+
+        applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 2, TimeHolder.column.time -> time))
+        val utcString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 2").map(_.string("s")).single.apply().get
+        utcString should equal(time.withZone(DateTimeZone.forID("UTC")).toString("yyyy-MM-dd HH:mm:ss"))
+
+        val expectedTime2 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 2)).map(TimeHolder(t)(_)).single.apply().get.time
+        expectedTime2.isEqual(time) should equal(true)
+      }
+    } finally {
+      DB autoCommit { implicit session =>
+        try sql"drop table ${TimeHolder.table}".execute.apply()
         catch { case e: Exception => }
       }
     }
