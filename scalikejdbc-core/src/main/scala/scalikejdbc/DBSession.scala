@@ -101,7 +101,7 @@ trait DBSession extends LogSupport with LoanPattern {
       this.fetchSize.foreach { size => statement.setFetchSize(size) }
       this.queryTimeout.foreach { seconds => statement.setQueryTimeout(seconds) }
       StatementExecutor(
-        underlying = statement,
+        underlying = new DBConnectionAttributesWiredPreparedStatement(statement, connectionAttributes),
         template = template,
         connectionAttributes = connectionAttributes,
         tags = tags,
@@ -168,7 +168,7 @@ trait DBSession extends LogSupport with LoanPattern {
     this.fetchSize.foreach { size => statement.setFetchSize(size) }
     this.queryTimeout.foreach { seconds => statement.setQueryTimeout(seconds) }
     StatementExecutor(
-      underlying = statement,
+      underlying = new DBConnectionAttributesWiredPreparedStatement(statement, connectionAttributes),
       template = template,
       connectionAttributes = connectionAttributes,
       tags = tags,

@@ -93,11 +93,11 @@ case class StatementExecutor(
       case p: java.sql.SQLXML => underlying.setSQLXML(i, p)
       case p: String => underlying.setString(i, p)
       case p: java.sql.Time => underlying.setTime(i, p)
-      case p: java.sql.Timestamp => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p))
+      case p: java.sql.Timestamp => underlying.setTimestamp(i, p)
       case p: java.net.URL => underlying.setURL(i, p)
-      case p: java.util.Date => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toSqlTimestamp))
-      case p: org.joda.time.DateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
-      case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, convertTimeZoneIfNeeded(p.toDate.toSqlTimestamp))
+      case p: java.util.Date => underlying.setTimestamp(i, p.toSqlTimestamp)
+      case p: org.joda.time.DateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
+      case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
       case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
       case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
       case p if param.getClass.getCanonicalName.startsWith("java.time.") => {
@@ -112,12 +112,12 @@ case class StatementExecutor(
             val dateClazz: Class[_] = Class.forName("java.util.Date") // java.util.Date
             val fromMethod: Method = dateClazz.getMethod("from", Class.forName("java.time.Instant"))
             val dateValue = fromMethod.invoke(null, instant).asInstanceOf[java.util.Date]
-            underlying.setTimestamp(i, convertTimeZoneIfNeeded(dateValue.toSqlTimestamp))
+            underlying.setTimestamp(i, dateValue.toSqlTimestamp)
           case "java.time.Instant" =>
             val millis = clazz.getMethod("toEpochMilli").invoke(p).asInstanceOf[java.lang.Long]
-            underlying.setTimestamp(i, convertTimeZoneIfNeeded(new java.util.Date(millis).toSqlTimestamp))
+            underlying.setTimestamp(i, new java.util.Date(millis).toSqlTimestamp)
           case "java.time.LocalDateTime" =>
-            underlying.setTimestamp(i, convertTimeZoneIfNeeded(org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp))
+            underlying.setTimestamp(i, org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp)
           case "java.time.LocalDate" =>
             underlying.setDate(i, org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate)
           case "java.time.LocalTime" =>
@@ -218,18 +218,6 @@ case class StatementExecutor(
     }
 
   }
-
-  /**
-   * Converts Timestamp value to an appropriate timezone.
-   */
-  private[this] def convertTimeZoneIfNeeded(timestamp: java.sql.Timestamp): java.sql.Timestamp =
-    if (connectionAttributes.timeZoneSettings.conversionEnabled) {
-      val clientTimeZone = java.util.TimeZone.getDefault
-      val serverTimeZone = connectionAttributes.timeZoneSettings.serverTimeZone
-      TimeZoneConverter.from(clientTimeZone).to(serverTimeZone).convert(timestamp)
-    } else {
-      timestamp
-    }
 
   /**
    * Returns stack trace information as String value
