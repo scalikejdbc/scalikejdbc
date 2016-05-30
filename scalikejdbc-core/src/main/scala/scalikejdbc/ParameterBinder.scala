@@ -75,7 +75,7 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
 
   def value: A
 
-  // keep this API private because [[scalikejdbc.ParameterBinder#map]] breaks the Functor-law
+  // keep this API private because [[scalikejdbc.ParameterBinderWithValue#map]] breaks the Functor-law
   private[scalikejdbc] def map[B](f: A => B): ParameterBinderWithValue[B] = new ParameterBinderWithValue[B] {
     lazy val value: B = f(self.value)
     def apply(stmt: PreparedStatement, idx: Int): Unit = self(stmt, idx)
