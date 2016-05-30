@@ -1,6 +1,8 @@
 package scalikejdbc
 
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 import javax.sql.DataSource
 import java.sql.Connection
 import scala.concurrent.{ ExecutionContextExecutor, ExecutionContext }
@@ -18,7 +20,14 @@ object ConnectionPool extends LogSupport {
    * The default execution context used by async workers for connection pools management.
    */
   private lazy val DEFAULT_EXECUTION_CONTEXT: ExecutionContextExecutor = {
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3))
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3, new ThreadFactory {
+      private val i = new AtomicInteger(0)
+      override def newThread(r: Runnable): Thread = {
+        val thread = new Thread(s"scalikejdbc-connection-pool-default-ec-${i.incrementAndGet()}")
+        thread.setDaemon(true)
+        thread
+      }
+    }))
   }
 
   type MutableMap[A, B] = scala.collection.mutable.HashMap[A, B]
