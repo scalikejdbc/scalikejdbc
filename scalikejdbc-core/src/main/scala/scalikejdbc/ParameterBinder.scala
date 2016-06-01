@@ -36,28 +36,28 @@ object ParameterBinder {
   /**
    * Factory method for ParameterBinder.
    */
-  def apply[A](value: A, binder: (PreparedStatement, Int) => Unit): ParameterBinderWithValue[A] = {
+  def apply(value: Any, binder: (PreparedStatement, Int) => Unit): ParameterBinderWithValue = {
     val _value = value
-    new ParameterBinderWithValue[A] {
-      val value: A = _value
+    new ParameterBinderWithValue {
+      val value: Any = _value
       override def apply(stmt: PreparedStatement, idx: Int): Unit = binder(stmt, idx)
     }
   }
 
   def unapply(a: Any): Option[Any] = {
     PartialFunction.condOpt(a) {
-      case x: ParameterBinderWithValue[_] => nestedExtract(x.value)
+      case x: ParameterBinderWithValue => nestedExtract(x.value)
     }
   }
 
   @annotation.tailrec
   private def nestedExtract(p: Any): Any = p match {
-    case x: ParameterBinderWithValue[_] => nestedExtract(x.value)
+    case x: ParameterBinderWithValue => nestedExtract(x.value)
     case _ => p
   }
 
-  def NullParameterBinder[A]: ParameterBinderWithValue[A] = new ParameterBinderWithValue[A] {
-    val value = null.asInstanceOf[A]
+  object NullParameterBinder extends ParameterBinderWithValue {
+    val value = null
     def apply(stmt: PreparedStatement, idx: Int): Unit = stmt.setObject(idx, null)
     override def toString: String = s"ParameterBinder(value=NULL)"
   }
@@ -69,20 +69,17 @@ object ParameterBinder {
 /**
  * ParameterBinder which holds a value to bind.
  *
- * @tparam A value's type
  */
-trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
+trait ParameterBinderWithValue extends ParameterBinder { self =>
 
-  def value: A
-
-  // keep this API private because [[scalikejdbc.ParameterBinderWithValue#map]] breaks the Functor-law
-  private[scalikejdbc] def map[B](f: A => B): ParameterBinderWithValue[B] = new ParameterBinderWithValue[B] {
-    lazy val value: B = f(self.value)
-    def apply(stmt: PreparedStatement, idx: Int): Unit = self(stmt, idx)
-  }
+  def value: Any
 
   override def toString: String = s"ParameterBinder(value=$value)"
 
+}
+
+private[scalikejdbc] case class ContramappedParameterBinder(value: Any, underlying: ParameterBinder) extends ParameterBinderWithValue {
+  def apply(stmt: PreparedStatement, idx: Int): Unit = underlying(stmt, idx)
 }
 
 // ------------------------------------------------------------------------------
@@ -91,7 +88,7 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
  * ParameterBinder which holds SQLSyntax.
  */
 private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax)
-    extends ParameterBinderWithValue[SQLSyntax] {
+    extends ParameterBinderWithValue {
 
   val value = syntax
 
@@ -103,14 +100,13 @@ private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax)
 /**
  * Type unsafe ParameterBinder which holds any value and binds it as-is to PreparedStatement.
  */
-case class AsIsParameterBinder(value: Any) extends ParameterBinderWithValue[Any] {
+case class AsIsParameterBinder(value: Any) extends ParameterBinderWithValue {
 
   private[this] def unsupportedError(): Nothing = {
     throw new UnsupportedOperationException("Apply method doesn't work because this is an AsIsParameterBinder")
   }
 
   override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError
-  override private[scalikejdbc] def map[B](f: Any => B): ParameterBinderWithValue[B] = unsupportedError
 
   override def toString: String = s"AsIsParameterBinder(value=$value)"
 

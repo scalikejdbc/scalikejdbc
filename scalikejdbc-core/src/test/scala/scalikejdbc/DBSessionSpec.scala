@@ -1041,7 +1041,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           }
           val bytes = scala.Array[Byte](1, 2, 3, 4, 5, 6, 7)
           val in = new ByteArrayInputStream(bytes)
-          val v = ParameterBinder[InputStream](
+          val v = ParameterBinder(
             value = in,
             binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length)
           )

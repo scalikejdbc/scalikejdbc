@@ -9,14 +9,11 @@ import scalikejdbc.UnixTimeInMillisConverterImplicits._
  */
 trait Binders[A] extends TypeBinder[A] with ParameterBinderFactory[A] { self =>
 
-  override def xmap[B](f: A => B, g: B => A): Binders[B] = new Binders[B] {
+  def xmap[B](f: A => B, g: B => A): Binders[B] = new Binders[B] {
     def apply(rs: ResultSet, columnIndex: Int): B = f(self(rs, columnIndex))
     def apply(rs: ResultSet, columnLabel: String): B = f(self(rs, columnLabel))
 
-    def apply(value: B): ParameterBinderWithValue[B] = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else self(g(value)).map(f)
-    }
+    def apply(value: B): ParameterBinderWithValue = self.contramap(g)(value)
   }
 
 }
@@ -33,7 +30,7 @@ object Binders {
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A)(f: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
     def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
-    def apply(value: A): ParameterBinderWithValue[A] = {
+    def apply(value: A): ParameterBinderWithValue = {
       if (value == null) ParameterBinder.NullParameterBinder
       else ParameterBinder(value, f(value))
     }
@@ -42,7 +39,7 @@ object Binders {
   def of[A](f: Any => A)(g: A => (PreparedStatement, Int) => Unit): Binders[A] = new Binders[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = f(rs.getObject(columnIndex))
     def apply(rs: ResultSet, columnLabel: String): A = f(rs.getObject(columnLabel))
-    def apply(value: A): ParameterBinderWithValue[A] = {
+    def apply(value: A): ParameterBinderWithValue = {
       if (value == null) ParameterBinder.NullParameterBinder
       else ParameterBinder(value, g(value))
     }
@@ -53,7 +50,7 @@ object Binders {
   def option[A](implicit b: TypeBinder[A], p: ParameterBinderFactory[A]): Binders[Option[A]] = new Binders[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] = TypeBinder.option(b).apply(rs, columnIndex)
     def apply(rs: ResultSet, columnLabel: String): Option[A] = TypeBinder.option(b).apply(rs, columnLabel)
-    def apply(value: Option[A]): ParameterBinderWithValue[Option[A]] = ParameterBinderFactory.optionalParameterBinderFactory(p).apply(value)
+    def apply(value: Option[A]): ParameterBinderWithValue = ParameterBinderFactory.optionalParameterBinderFactory(p).apply(value)
   }
 
   // ----------------------------------------------------
