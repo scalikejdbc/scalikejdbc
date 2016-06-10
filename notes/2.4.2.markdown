@@ -1,0 +1,13 @@
+ScalikeJDBC 2.4.2 is out for Scala 2.10.x, 2.11.x and 2.12.0-M4. The mapper-generator sbt plugin for sbt 0.13.x is available as well.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #528 Use named daemon thread in connection pool object by @Tolsi
+ - [core] #532 fix ParameterBinderWithValue comment by @xuwei-k
+ - [core] #531 Convert timezone too when using ParameterBinderFactory which fixes #529 by @ocadaruma
+
+Enjoy writing mostly type-safe SQL and get things done!
