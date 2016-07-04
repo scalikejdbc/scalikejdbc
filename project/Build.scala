@@ -42,11 +42,16 @@ object ScalikeJDBCProjects extends Build {
     fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalatestVersion := "2.2.6",
+    scalatestVersion := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, v)) if v <= 11 => "2.2.6"
+        case _ => "3.0.0"
+      }
+    },
     specs2Version := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v <= 11 => "2.5"
-        case _ => "3.7.3"
+        case _ => "3.8.4"
       }
     },
     //scalaVersion := "2.11.8",
@@ -242,6 +247,13 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-test"),
     settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-test",
+      unmanagedSourceDirectories in Compile += {
+        val dirName = CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, v)) if v <= 11 => "211-210"
+          case _ => "212"
+        }
+        (scalaSource in Compile).value.getParentFile / s"scala-$dirName"
+      },
       libraryDependencies ++= {
         Seq(
           "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
