@@ -37,7 +37,7 @@ class Commons2ConnectionPool(
 
   // To fix MS SQLServer jtds driver issue
   // https://github.com/scalikejdbc/scalikejdbc/issues/461
-  if (Option(settings.validationQuery).exists(_.trim.isEmpty == false)) {
+  if (Option(settings.validationQuery).exists(_.trim.nonEmpty)) {
     _pool.setTestOnBorrow(true)
   }
 

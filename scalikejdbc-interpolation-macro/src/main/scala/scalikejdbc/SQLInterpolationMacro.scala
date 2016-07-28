@@ -26,7 +26,7 @@ object SQLInterpolationMacro {
     }.getOrElse(Nil)
 
     nameOpt.map { _name =>
-      if (!expectedNames.isEmpty && !expectedNames.contains(_name)) {
+      if (expectedNames.nonEmpty && !expectedNames.contains(_name)) {
         c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
       }
     }

@@ -93,7 +93,7 @@ object Binders {
     case b: Boolean => b.asInstanceOf[java.lang.Boolean]
     case s: String => {
       try s.toInt != 0
-      catch { case e: NumberFormatException => !s.isEmpty }
+      catch { case e: NumberFormatException => s.nonEmpty }
     }.asInstanceOf[java.lang.Boolean]
     case n: Number => (n.intValue() != 0).asInstanceOf[java.lang.Boolean]
     case v => (v != 0).asInstanceOf[java.lang.Boolean]
