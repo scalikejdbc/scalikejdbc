@@ -69,7 +69,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     lazy val nameInScala: String = {
       val camelCase: String = toCamelCase(underlying.name)
-      camelCase.head.toLower + camelCase.tail
+      "`" + camelCase.head.toLower + camelCase.tail + "`"
     }
 
     lazy val rawTypeInScala: String = underlying.dataType match {
