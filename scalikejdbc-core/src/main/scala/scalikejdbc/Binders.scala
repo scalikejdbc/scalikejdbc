@@ -6,7 +6,8 @@ import scalikejdbc.UnixTimeInMillisConverterImplicits._
 /**
  * Provides both of TypeBinder and ParameterBinderFactory for the specified type A.
  */
-trait Binders[A] extends TypeBinder[A] with ParameterBinderFactory[A] { self =>
+trait Binders[A] extends TypeBinder[A] with ParameterBinderFactory[A] {
+  self =>
 
   override def xmap[B](f: A => B, g: B => A): Binders[B] = new Binders[B] {
     def apply(rs: ResultSet, columnIndex: Int): B = f(self(rs, columnIndex))
@@ -41,9 +42,9 @@ object Binders {
         if (sqlType == JDBCType.OTHER)
           ps.setObject(index, converter(value))
         else
-          ps.setObject(index, converter(value), sqlType) )
+          ps.setObject(index, converter(value), sqlType))
 
-  def ofExt[T](sqlTypeParam: SQLType, fromSqlTypeParam : Any => T, toSqlTypeParam : T => Any)
+  def ofExt[T](sqlTypeParam: SQLType, fromSqlTypeParam: Any => T, toSqlTypeParam: T => Any)
               (getByIndex: (ResultSet, Int, Any => T) => T,
                getByLabel: (ResultSet, String, Any => T) => T,
                setStatement: T => (PreparedStatement, Int, T => Any) => Unit): Binders[T] = new Binders[T] {
@@ -53,8 +54,13 @@ object Binders {
     override def apply(rs: ResultSet, columnLabel: String): T = getByLabel(rs, columnLabel, fromSqlType)
     // from ParameterBinderFactory
     override def apply(value: T): ParameterBinderWithValue[T] = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else ParameterBinder(value, (statement, i) => setStatement(value)(statement, i, toSqlTypeParam) )
+      if (value == null)
+        ParameterBinder.NullParameterBinder
+      else
+        ParameterBinder(value, (statement, i) => {
+          val statement1: (PreparedStatement, Int, (T) => Any) => Unit = setStatement(value)
+          statement1(statement, i, toSqlTypeParam)
+        })
     }
 
     override val sqlType: SQLType = sqlTypeParam
@@ -74,10 +80,12 @@ object Binders {
   // --------------------------------------------------------------------------------------------
   // Built-in Binders
   // --------------------------------------------------------------------------------------------
-  def optionBinder[T : Binders](implicit binder: Binders[T]) : Binders[Option[T]] = {
+  def optionBinder[T: Binders](implicit binder: Binders[T]): Binders[Option[T]] = {
 
     @inline
-    def wrap(a: => T): Option[T] = try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
+    def wrap(a: => T): Option[T] = try Option(a) catch {
+      case _: NullPointerException | _: UnexpectedNullValueException => None
+    }
 
     ofExt[Option[T]](
       binder.sqlType,
@@ -85,67 +93,137 @@ object Binders {
       value => value.fold(null.asInstanceOf[Any])(v => binder.toSqlType(v)))(
       (rs, index, _) => wrap(binder.apply(rs, index)),
       (rs, label, _) => wrap(binder.apply(rs, label)),
-      valueOpt => (ps, index, _) => valueOpt.fold(ps.setObject(index, null))(value => binder.apply(value).apply(ps, index)) )
+      valueOpt => (ps, index, _) => valueOpt.fold(ps.setObject(index, null))(value => binder.apply(value).apply(ps, index)))
   }
 
   // FIXME: Simplify this horror
-  def optionReaderBinder[T](implicit binder : TypeBinder[T]) : TypeBinder[Option[T]] =
-    new TypeBinder[Option[T]] {
-      @inline
-      def wrap(a: => T): Option[T] = try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
-
-      override def apply(rs: ResultSet, columnIndex: Int): Option[T] = wrap(binder.apply(rs, columnIndex))
-      override def apply(rs: ResultSet, columnLabel: String): Option[T] = wrap(binder.apply(rs, columnLabel))
-      override def fromSqlType(value: Any): Option[T] = if (value == null) None else Some(binder.fromSqlType(value))
-      override val sqlType: SQLType = binder.sqlType
+  def optionReaderBinder[T](implicit binder: TypeBinder[T]): TypeBinder[Option[T]] =
+  new TypeBinder[Option[T]] {
+    @inline
+    def wrap(a: => T): Option[T] = try Option(a) catch {
+      case _: NullPointerException | _: UnexpectedNullValueException => None
     }
+
+    override def apply(rs: ResultSet, columnIndex: Int): Option[T] = wrap(binder.apply(rs, columnIndex))
+    override def apply(rs: ResultSet, columnLabel: String): Option[T] = wrap(binder.apply(rs, columnLabel))
+    override def fromSqlType(value: Any): Option[T] = if (value == null) None else Some(binder.fromSqlType(value))
+    override val sqlType: SQLType = binder.sqlType
+  }
 
   // FIXME: Simplify this horror
-  def optionWriterBinder[T](implicit binder : ParameterBinderFactory[T]) : ParameterBinderFactory[Option[T]] =
-    new ParameterBinderFactory[Option[T]] {
-      override def toSqlType(value: Option[T]): Any = value.fold(null.asInstanceOf[Any])(v => binder.toSqlType(v))
-      override def apply(valueOpt: Option[T]): ParameterBinderWithValue[Option[T]] = new ParameterBinderWithValue[Option[T]] {
-        override def value: Option[T] = valueOpt
-        override def apply(stmt: PreparedStatement, idx: Int): Unit = valueOpt.fold(stmt.setObject(idx, null))(v => binder.apply(v).apply(stmt, idx))
-      }
-      override val sqlType: SQLType = binder.sqlType
+  def optionWriterBinder[T](implicit binder: ParameterBinderFactory[T]): ParameterBinderFactory[Option[T]] =
+  new ParameterBinderFactory[Option[T]] {
+    override def toSqlType(value: Option[T]): Any = value.fold(null.asInstanceOf[Any])(v => binder.toSqlType(v))
+    override def apply(valueOpt: Option[T]): ParameterBinderWithValue[Option[T]] = new ParameterBinderWithValue[Option[T]] {
+      override def value: Option[T] = valueOpt
+      override def apply(stmt: PreparedStatement, idx: Int): Unit =
+        // FIXME: Generally I think we should prohibit people from using `null` and not to handle it
+        if (valueOpt == null)
+          stmt.setObject(idx, null)
+        else
+          valueOpt.fold {
+              stmt.setObject(idx, null)
+            } { v =>
+              val apply1: ParameterBinderWithValue[T] = binder.apply(v)
+              apply1.apply(stmt, idx)
+            }
     }
 
-  @inline
-  private def asIsBinderWithType[T](sqlType: SQLType) = Binders.of[T](sqlType, _.asInstanceOf[T], identity)
+    override val sqlType: SQLType = binder.sqlType
+  }
 
   @inline
-  private def asIsBinderWithTypeAndAccessors[T](sqlType: SQLType) : ((ResultSet, Int, (Any) => T) => T, (ResultSet, String, (Any) => T) => T, (T) => (PreparedStatement, Int, (T) => Any) => Unit) => Binders[T] = {
+  private def asIsBinderWithTypeAndAccessors[T](sqlType: SQLType): ((ResultSet, Int, (Any) => T) => T, (ResultSet, String, (Any) => T) => T, (T) => (PreparedStatement, Int, (T) => Any) => Unit) => Binders[T] = {
     Binders.ofExt[T](sqlType, _.asInstanceOf[T], identity)
   }
 
-  val byte = asIsBinderWithType[Byte](JDBCType.TINYINT) // depending on DB vendor 1 or 2 bytes
-  val short = asIsBinderWithType[Short](JDBCType.SMALLINT) // 2 bytes
-  val int = asIsBinderWithType[Int](JDBCType.INTEGER) // 4 bytes
-  val long = asIsBinderWithType[Long](JDBCType.BIGINT) // 8 bytes
-  val float = asIsBinderWithType[Float](JDBCType.REAL) // 4 bytes
-  val double = asIsBinderWithType[Double](JDBCType.DOUBLE) // 8 bytes
-  val char = asIsBinderWithType[Char](JDBCType.CHAR) // 1 byte
-  val boolean = asIsBinderWithType[Boolean](JDBCType.BOOLEAN) // 1 byte
-  val string = asIsBinderWithType[String](JDBCType.VARCHAR) // Postgresql 9.x prefers to use TEXT
-  val bigDecimal = asIsBinderWithType[BigDecimal](JDBCType.NUMERIC)
+  val byte = asIsBinderWithTypeAndAccessors[Byte](JDBCType.TINYINT)(
+    (rs, index, _) => rs.getByte(index),
+    (rs, label, _) => rs.getByte(label),
+    value => (ps, index, _) => ps.setByte(index, value))
+  val short = asIsBinderWithTypeAndAccessors[Short](JDBCType.SMALLINT)(
+    (rs, index, _) => rs.getShort(index),
+    (rs, label, _) => rs.getShort(label),
+    value => (ps, index, _) => ps.setShort(index, value))
+  val int = asIsBinderWithTypeAndAccessors[Int](JDBCType.INTEGER)(
+    (rs, index, _) => rs.getInt(index),
+    (rs, label, _) => rs.getInt(label),
+    value => (ps, index, _) => ps.setInt(index, value))
+  val long = asIsBinderWithTypeAndAccessors[Long](JDBCType.BIGINT)(
+    (rs, index, _) => rs.getLong(index),
+    (rs, label, _) => rs.getLong(label),
+    value => (ps, index, _) => ps.setLong(index, value))
+  val float = asIsBinderWithTypeAndAccessors[Float](JDBCType.REAL)(
+    (rs, index, _) => rs.getFloat(index),
+    (rs, label, _) => rs.getFloat(label),
+    value => (ps, index, _) => ps.setFloat(index, value))
+  val double = asIsBinderWithTypeAndAccessors[Double](JDBCType.DOUBLE)(
+    (rs, index, _) => rs.getDouble(index),
+    (rs, label, _) => rs.getDouble(label),
+    value => (ps, index, _) => ps.setDouble(index, value))
+  val char = asIsBinderWithTypeAndAccessors[Char](JDBCType.CHAR)(
+    (rs, index, _) => rs.getString(index).head,
+    (rs, label, _) => rs.getString(label).head,
+    value => (ps, index, _) => ps.setString(index, String.valueOf(value)))
+  val boolean = asIsBinderWithTypeAndAccessors[Boolean](JDBCType.BOOLEAN)(
+    (rs, index, _) => rs.getBoolean(index),
+    (rs, label, _) => rs.getBoolean(label),
+    value => (ps, index, _) => ps.setBoolean(index, value))
+  val string = asIsBinderWithTypeAndAccessors[String](JDBCType.VARCHAR)(
+    (rs, index, _) => rs.getString(index),
+    (rs, label, _) => rs.getString(label),
+    value => (ps, index, _) => ps.setString(index, value))
+  val bigDecimal = asIsBinderWithTypeAndAccessors[BigDecimal](JDBCType.NUMERIC)(
+    (rs, index, _) => rs.getBigDecimal(index),
+    (rs, label, _) => rs.getBigDecimal(label),
+    value => (ps, index, _) => ps.setBigDecimal(index, value.bigDecimal))
   val bigInt = bigDecimal.xmap[BigInt](_.toBigInt(), BigDecimal.apply)
-  val bytes = asIsBinderWithTypeAndAccessors[Array[Byte]](JDBCType.BINARY) (
+  val bytes = asIsBinderWithTypeAndAccessors[Array[Byte]](JDBCType.BINARY)(
     (rs, index, _) => rs.getBytes(index),
     (rs, label, _) => rs.getBytes(label),
-    value => (ps, index, _) => ps.setBytes(index, value) )
+    value => (ps, index, _) => ps.setBytes(index, value))
 
   // FIXME: Candidates for removal because it's unlikely people will use java.sql types since they've already chosen Scalikejdbc to avoid JDBC :)
-  val sqlArray = asIsBinderWithType[java.sql.Array](JDBCType.ARRAY)
-  val sqlDate = asIsBinderWithType[java.sql.Date](JDBCType.DATE)
-  val sqlXml = asIsBinderWithType[java.sql.SQLXML](JDBCType.SQLXML)
-  val sqlTime = asIsBinderWithType[java.sql.Time](JDBCType.TIME)
-  val sqlTimestamp = asIsBinderWithType[java.sql.Timestamp](JDBCType.TIMESTAMP)
-  val blob = asIsBinderWithType[java.sql.Blob](JDBCType.BLOB)
-  val clob = asIsBinderWithType[java.sql.Clob](JDBCType.CLOB)
-  val nClob = asIsBinderWithType[java.sql.NClob](JDBCType.NCLOB)
-  val ref = asIsBinderWithType[java.sql.Ref](JDBCType.REF)
-  val rowId = asIsBinderWithType[java.sql.RowId](JDBCType.ROWID)
+  val sqlArray = asIsBinderWithTypeAndAccessors[java.sql.Array](JDBCType.ARRAY)(
+    (rs, index, _) => rs.getArray(index),
+    (rs, label, _) => rs.getArray(label),
+    value => (ps, index, _) => ps.setArray(index, value))
+  val sqlDate = asIsBinderWithTypeAndAccessors[java.sql.Date](JDBCType.DATE)(
+    (rs, index, _) => rs.getDate(index),
+    (rs, label, _) => rs.getDate(label),
+    value => (ps, index, _) => ps.setDate(index, value))
+  val sqlXml = asIsBinderWithTypeAndAccessors[java.sql.SQLXML](JDBCType.SQLXML)(
+    (rs, index, _) => rs.getSQLXML(index),
+    (rs, label, _) => rs.getSQLXML(label),
+    value => (ps, index, _) => ps.setSQLXML(index, value))
+  val sqlTime = asIsBinderWithTypeAndAccessors[java.sql.Time](JDBCType.TIME)(
+    (rs, index, _) => rs.getTime(index),
+    (rs, label, _) => rs.getTime(label),
+    value => (ps, index, _) => ps.setTime(index, value))
+  val sqlTimestamp = asIsBinderWithTypeAndAccessors[java.sql.Timestamp](JDBCType.TIMESTAMP)(
+    (rs, index, _) => rs.getTimestamp(index),
+    (rs, label, _) => rs.getTimestamp(label),
+    value => (ps, index, _) => ps.setTimestamp(index, value))
+  val blob = asIsBinderWithTypeAndAccessors[java.sql.Blob](JDBCType.BLOB)(
+    (rs, index, _) => rs.getBlob(index),
+    (rs, label, _) => rs.getBlob(label),
+    value => (ps, index, _) => ps.setBlob(index, value))
+  val clob = asIsBinderWithTypeAndAccessors[java.sql.Clob](JDBCType.CLOB)(
+    (rs, index, _) => rs.getClob(index),
+    (rs, label, _) => rs.getClob(label),
+    value => (ps, index, _) => ps.setClob(index, value))
+  val nClob = asIsBinderWithTypeAndAccessors[java.sql.NClob](JDBCType.NCLOB)(
+    (rs, index, _) => rs.getNClob(index),
+    (rs, label, _) => rs.getNClob(label),
+    value => (ps, index, _) => ps.setNClob(index, value))
+  val ref = asIsBinderWithTypeAndAccessors[java.sql.Ref](JDBCType.REF)(
+    (rs, index, _) => rs.getRef(index),
+    (rs, label, _) => rs.getRef(label),
+    value => (ps, index, _) => ps.setRef(index, value))
+  val rowId = asIsBinderWithTypeAndAccessors[java.sql.RowId](JDBCType.ROWID)(
+    (rs, index, _) => rs.getRowId(index),
+    (rs, label, _) => rs.getRowId(label),
+    value => (ps, index, _) => ps.setRowId(index, value))
 
   /*
   // FIXME: Not sure if we need java.io classes here. Maybe we should Scala counterparts instead.
