@@ -25,7 +25,6 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     import java.sql.{ Array => sqlArray, Blob, Clob, NClob, Ref, SQLXML, Time, Timestamp }
     import java.io.InputStream
     import java.io.Reader
-    import java.math.{ BigDecimal, BigInteger }
     import java.util.Date
     import java.net.URL
 
@@ -52,16 +51,16 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       res4 should be(null)
     }
 
-    {
-      val res1: InputStream = rs.asciiStream("foo")
-      val res2: InputStream = rs.asciiStream(0)
-      val res3: InputStream = rs.asciiStreamOpt("foo").orNull[InputStream]
-      val res4: InputStream = rs.asciiStreamOpt(0).orNull[InputStream]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
+//    {
+//      val res1: InputStream = rs.asciiStream("foo")
+//      val res2: InputStream = rs.asciiStream(0)
+//      val res3: InputStream = rs.asciiStreamOpt("foo").orNull[InputStream]
+//      val res4: InputStream = rs.asciiStreamOpt(0).orNull[InputStream]
+//      res1 should be(null)
+//      res2 should be(null)
+//      res3 should be(null)
+//      res4 should be(null)
+//    }
 
     {
       val res1: BigDecimal = rs.bigDecimal("foo")
@@ -74,39 +73,16 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       res4 should be(null)
     }
 
-    {
-      val res1: BigInteger = Option(rs.bigDecimal("foo")) match {
-        case Some(bd) => bd.toBigInteger
-        case None => null
-      }
-      val res2: BigInteger = Option(rs.bigDecimal(0)) match {
-        case Some(bd) => bd.toBigInteger
-        case None => null
-      }
-      val res3: BigInteger = rs.bigDecimalOpt("foo") match {
-        case Some(bd) => bd.toBigInteger
-        case None => null
-      }
-      val res4: BigInteger = rs.bigDecimalOpt(0) match {
-        case Some(bd) => bd.toBigInteger
-        case None => null
-      }
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
-
-    {
-      val res1: InputStream = rs.binaryStream("foo")
-      val res2: InputStream = rs.binaryStream(0)
-      val res3: InputStream = rs.binaryStreamOpt("foo").orNull[InputStream]
-      val res4: InputStream = rs.binaryStreamOpt(0).orNull[InputStream]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
+//    {
+//      val res1: InputStream = rs.binaryStream("foo")
+//      val res2: InputStream = rs.binaryStream(0)
+//      val res3: InputStream = rs.binaryStreamOpt("foo").orNull[InputStream]
+//      val res4: InputStream = rs.binaryStreamOpt(0).orNull[InputStream]
+//      res1 should be(null)
+//      res2 should be(null)
+//      res3 should be(null)
+//      res4 should be(null)
+//    }
 
     {
       val res1: Blob = rs.blob("foo")
@@ -120,12 +96,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Boolean = rs.nullableBoolean("foo")
-      val res2: java.lang.Boolean = rs.nullableBoolean(0)
       val res3: Option[scala.Boolean] = rs.booleanOpt("foo")
       val res4: Option[scala.Boolean] = rs.booleanOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
       intercept[ResultSetExtractorException] { rs.boolean("foo") }
@@ -138,12 +110,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Byte = rs.nullableByte("foo")
-      val res2: java.lang.Byte = rs.nullableByte(0)
       val res3: Option[scala.Byte] = rs.byteOpt("foo")
       val res4: Option[scala.Byte] = rs.byteOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
       intercept[ResultSetExtractorException] { rs.byte("foo") }
@@ -161,16 +129,16 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       res4 should be(null)
     }
 
-    {
-      val res1: Reader = rs.characterStream("foo")
-      val res2: Reader = rs.characterStream(0)
-      val res3: Reader = rs.characterStreamOpt("foo").orNull[Reader]
-      val res4: Reader = rs.characterStreamOpt(0).orNull[Reader]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
+//    {
+//      val res1: Reader = rs.characterStream("foo")
+//      val res2: Reader = rs.characterStream(0)
+//      val res3: Reader = rs.characterStreamOpt("foo").orNull[Reader]
+//      val res4: Reader = rs.characterStreamOpt(0).orNull[Reader]
+//      res1 should be(null)
+//      res2 should be(null)
+//      res3 should be(null)
+//      res4 should be(null)
+//    }
 
     {
       val res1: Clob = rs.clob("foo")
@@ -203,12 +171,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Double = rs.nullableDouble("foo")
-      val res2: java.lang.Double = rs.nullableDouble(0)
       val res3: Option[scala.Double] = rs.doubleOpt("foo")
       val res4: Option[scala.Double] = rs.doubleOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
 
@@ -217,12 +181,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Float = rs.nullableFloat("foo")
-      val res2: java.lang.Float = rs.nullableFloat(0)
       val res3: Option[scala.Float] = rs.floatOpt("foo")
       val res4: Option[scala.Float] = rs.floatOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
 
@@ -231,12 +191,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Integer = rs.nullableInt("foo")
-      val res2: java.lang.Integer = rs.nullableInt(0)
       val res3: Option[scala.Int] = rs.intOpt("foo")
       val res4: Option[scala.Int] = rs.intOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
 
@@ -245,12 +201,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Long = rs.nullableLong("foo")
-      val res2: java.lang.Long = rs.nullableLong(0)
       val res3: Option[scala.Long] = rs.longOpt("foo")
       val res4: Option[scala.Long] = rs.longOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
 
@@ -258,33 +210,22 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       intercept[ResultSetExtractorException] { rs.long(0) }
     }
 
-    {
-      val res1: Reader = rs.nCharacterStream("foo")
-      val res2: Reader = rs.nCharacterStream(0)
-      val res3: Reader = rs.nCharacterStreamOpt("foo").orNull[Reader]
-      val res4: Reader = rs.nCharacterStreamOpt(0).orNull[Reader]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
+//    {
+//      val res1: Reader = rs.nCharacterStream("foo")
+//      val res2: Reader = rs.nCharacterStream(0)
+//      val res3: Reader = rs.nCharacterStreamOpt("foo").orNull[Reader]
+//      val res4: Reader = rs.nCharacterStreamOpt(0).orNull[Reader]
+//      res1 should be(null)
+//      res2 should be(null)
+//      res3 should be(null)
+//      res4 should be(null)
+//    }
 
     {
       val res1: NClob = rs.nClob("foo")
       val res2: NClob = rs.nClob(0)
       val res3: NClob = rs.nClobOpt("foo").orNull[NClob]
       val res4: NClob = rs.nClobOpt(0).orNull[NClob]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
-    }
-
-    {
-      val res1: String = rs.nString("foo")
-      val res2: String = rs.nString(0)
-      val res3: String = rs.nStringOpt("foo").orNull[String]
-      val res4: String = rs.nStringOpt(0).orNull[String]
       res1 should be(null)
       res2 should be(null)
       res3 should be(null)
@@ -322,12 +263,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     {
-      val res1: java.lang.Short = rs.nullableShort("foo")
-      val res2: java.lang.Short = rs.nullableShort(0)
       val res3: Option[scala.Short] = rs.shortOpt("foo")
       val res4: Option[scala.Short] = rs.shortOpt(0)
-      res1 should be(null)
-      res2 should be(null)
       res3.isDefined should be(false)
       res4.isDefined should be(false)
 
@@ -393,17 +330,6 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       res6 should be(null)
       res7 should be(null)
       res8 should be(null)
-    }
-
-    {
-      val res1: URL = rs.url("foo")
-      val res2: URL = rs.url(0)
-      val res3: URL = rs.urlOpt("foo").orNull[URL]
-      val res4: URL = rs.urlOpt(0).orNull[URL]
-      res1 should be(null)
-      res2 should be(null)
-      res3 should be(null)
-      res4 should be(null)
     }
 
   }

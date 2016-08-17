@@ -838,20 +838,6 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
               )
           }.single.apply())
 
-          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
-            rs =>
-              Result(
-                vBoolean = Option(rs.nullableBoolean("v_boolean").asInstanceOf[Boolean]),
-                vByte = Option(rs.nullableByte("v_byte").asInstanceOf[Byte]),
-                vDouble = Option(rs.nullableDouble("v_double").asInstanceOf[Double]),
-                vFloat = Option(rs.nullableFloat("v_float").asInstanceOf[Float]),
-                vInt = Option(rs.nullableInt("v_int").asInstanceOf[Int]),
-                vLong = Option(rs.nullableLong("v_long").asInstanceOf[Long]),
-                vShort = Option(rs.nullableShort("v_short").asInstanceOf[Short]),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
-          }.single.apply())
-
           // should use nullable*** methods
           intercept[ResultSetExtractorException](SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
@@ -863,20 +849,6 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = opt[Int](rs.int("v_int")),
                 vLong = opt[Long](rs.long("v_long")),
                 vShort = opt[Short](rs.short("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
-          }.single.apply())
-
-          assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
-            rs =>
-              Result(
-                vBoolean = opt[Boolean](rs.nullableBoolean("v_boolean")),
-                vByte = opt[Byte](rs.nullableByte("v_byte")),
-                vDouble = opt[Double](rs.nullableDouble("v_double")),
-                vFloat = opt[Float](rs.nullableFloat("v_float")),
-                vInt = opt[Int](rs.nullableInt("v_int")),
-                vLong = opt[Long](rs.nullableLong("v_long")),
-                vShort = opt[Short](rs.nullableShort("v_short")),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
               )
           }.single.apply())
@@ -902,95 +874,6 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             case e: Exception => e.printStackTrace
           }
         }
-    }
-  }
-
-  it should "execute insert with InputStream values" in {
-    DB autoCommit { implicit s =>
-      try {
-        try {
-          SQL("create table image_data (name varchar(255), data blob);").execute.apply()
-        } catch {
-          case e: Exception =>
-            // PostgreSQL doesn't have blob
-            SQL("create table image_data (name varchar(255), data bytea);").execute.apply()
-        }
-        using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
-          try {
-            SQL("insert into image_data (name, data) values ({name}, {data});")
-              .bindByName(
-                'name -> "logo",
-                'data -> stream
-              )
-              .update.apply()
-          } catch {
-            case e: Exception =>
-              // PostgreSQL does not support #setBinaryStream
-              if (url.startsWith("jdbc:postgresql")) println(e.getMessage)
-              else fail("Failed to insert data because " + e.getMessage, e)
-          }
-        }
-        SQL("select * from image_data;").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
-          using(new java.io.ByteArrayOutputStream) { bos =>
-            var next: Int = bs.read()
-            while (next > -1) {
-              bos.write(next)
-              next = bs.read()
-            }
-            bos.flush()
-            bos.toByteArray().size should equal(7007)
-          }
-        }
-      } finally {
-        try {
-          SQL("drop table image_data;").execute.apply()
-        } catch { case e: Exception => }
-      }
-    }
-  }
-
-  it should "execute insert with byte array values" in {
-    DB autoCommit { implicit s =>
-      try {
-        try {
-          SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
-        } catch {
-          case e: Exception =>
-            // PostgreSQL doesn't have blob
-            SQL("create table image_data2 (name varchar(255), data bytea);").execute.apply()
-        }
-        using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
-          using(new java.io.ByteArrayOutputStream) { bos =>
-            var next: Int = stream.read()
-            while (next > -1) {
-              bos.write(next)
-              next = stream.read()
-            }
-            bos.flush()
-            SQL("insert into image_data2 (name, data) values ({name}, {data});")
-              .bindByName(
-                'name -> "logo",
-                'data -> bos.toByteArray
-              )
-              .update.apply()
-          }
-        }
-        SQL("select * from image_data2").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
-          using(new java.io.ByteArrayOutputStream) { bos =>
-            var next: Int = bs.read()
-            while (next > -1) {
-              bos.write(next)
-              next = bs.read()
-            }
-            bos.flush()
-            bos.toByteArray().size should equal(7007)
-          }
-        }
-      } finally {
-        try {
-          SQL("drop table image_data2").execute.apply()
-        } catch { case e: Exception => }
-      }
     }
   }
 

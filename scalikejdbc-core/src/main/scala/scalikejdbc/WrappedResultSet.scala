@@ -31,63 +31,85 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     }
   }
 
+  // FIXME: Candidates for removal
   def array(columnIndex: Int): java.sql.Array = get[java.sql.Array](columnIndex)
-
   def array(columnLabel: String): java.sql.Array = get[java.sql.Array](columnLabel)
-
   def arrayOpt(columnIndex: Int): Option[java.sql.Array] = get[Option[java.sql.Array]](columnIndex)
-
   def arrayOpt(columnLabel: String): Option[java.sql.Array] = get[Option[java.sql.Array]](columnLabel)
-
-  def asciiStream(columnIndex: Int): java.io.InputStream = get[java.io.InputStream](columnIndex)(TypeBinder.asciiStream)
-
-  def asciiStream(columnLabel: String): java.io.InputStream = get[java.io.InputStream](columnLabel)(TypeBinder.asciiStream)
-
-  def asciiStreamOpt(columnIndex: Int): Option[java.io.InputStream] = {
-    implicit val binder = TypeBinder.asciiStream
-    get[Option[java.io.InputStream]](columnIndex)
-  }
-
-  def asciiStreamOpt(columnLabel: String): Option[java.io.InputStream] = {
-    implicit val binder = TypeBinder.asciiStream
-    get[Option[java.io.InputStream]](columnLabel)
-  }
-
-  def bigDecimal(columnIndex: Int): java.math.BigDecimal = get[java.math.BigDecimal](columnIndex)
-
-  def bigDecimal(columnLabel: String): java.math.BigDecimal = get[java.math.BigDecimal](columnLabel)
-
-  def bigDecimalOpt(columnIndex: Int): Option[java.math.BigDecimal] = get[Option[java.math.BigDecimal]](columnIndex)
-
-  def bigDecimalOpt(columnLabel: String): Option[java.math.BigDecimal] = get[Option[java.math.BigDecimal]](columnLabel)
-
-  def bigInt(columnIndex: Int): java.math.BigInteger = get[java.math.BigInteger](columnIndex)
-
-  def bigInt(columnLabel: String): java.math.BigInteger = get[java.math.BigInteger](columnLabel)
-
-  def bigIntOpt(columnIndex: Int): Option[java.math.BigInteger] = get[Option[java.math.BigInteger]](columnIndex)
-
-  def bigIntOpt(columnLabel: String): Option[java.math.BigInteger] = get[Option[java.math.BigInteger]](columnLabel)
-
-  def binaryStream(columnIndex: Int): java.io.InputStream = get[java.io.InputStream](columnIndex)
-
-  def binaryStream(columnLabel: String): java.io.InputStream = get[java.io.InputStream](columnLabel)
-
-  def binaryStreamOpt(columnIndex: Int): Option[java.io.InputStream] = get[Option[java.io.InputStream]](columnIndex)
-
-  def binaryStreamOpt(columnLabel: String): Option[java.io.InputStream] = get[Option[java.io.InputStream]](columnLabel)
-
   def blob(columnIndex: Int): java.sql.Blob = get[java.sql.Blob](columnIndex)
-
   def blob(columnLabel: String): java.sql.Blob = get[java.sql.Blob](columnLabel)
-
   def blobOpt(columnIndex: Int): Option[java.sql.Blob] = get[Option[java.sql.Blob]](columnIndex)
-
   def blobOpt(columnLabel: String): Option[java.sql.Blob] = get[Option[java.sql.Blob]](columnLabel)
+  def clob(columnIndex: Int): java.sql.Clob = get[java.sql.Clob](columnIndex)
+  def clob(columnLabel: String): java.sql.Clob = get[java.sql.Clob](columnLabel)
+  def clobOpt(columnIndex: Int): Option[java.sql.Clob] = get[Option[java.sql.Clob]](columnIndex)
+  def clobOpt(columnLabel: String): Option[java.sql.Clob] = get[Option[java.sql.Clob]](columnLabel)
+  def date(columnIndex: Int): java.sql.Date = get[java.sql.Date](columnIndex)
+  def date(columnLabel: String): java.sql.Date = get[java.sql.Date](columnLabel)
+  def date(columnIndex: Int, cal: Calendar): java.sql.Date = {
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
+    get[java.sql.Date](columnIndex)
+  }
+  def date(columnLabel: String, cal: Calendar): java.sql.Date = {
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
+    get[java.sql.Date](columnLabel)
+  }
+  def dateOpt(columnIndex: Int): Option[java.sql.Date] = get[Option[java.sql.Date]](columnIndex)
+  def dateOpt(columnLabel: String): Option[java.sql.Date] = get[Option[java.sql.Date]](columnLabel)
+  def dateOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Date] = {
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
+    get[Option[java.sql.Date]](columnIndex)
+  }
+  def dateOpt(columnLabel: String, cal: Calendar): Option[java.sql.Date] = {
+    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
+    get[Option[java.sql.Date]](columnLabel)
+  }
+  def nClob(columnIndex: Int): java.sql.NClob = get[java.sql.NClob](columnIndex)
+  def nClob(columnLabel: String): java.sql.NClob = get[java.sql.NClob](columnLabel)
+  def nClobOpt(columnIndex: Int): Option[java.sql.NClob] = get[Option[java.sql.NClob]](columnIndex)
+  def nClobOpt(columnLabel: String): Option[java.sql.NClob] = get[Option[java.sql.NClob]](columnLabel)
+//  def nullableBoolean(columnIndex: Int): java.lang.Boolean = get[java.lang.Boolean](columnIndex)
+//  def nullableBoolean(columnLabel: String): java.lang.Boolean = get[java.lang.Boolean](columnLabel)
+//  def nullableByte(columnIndex: Int): java.lang.Byte = get[java.lang.Byte](columnIndex)
+//  def nullableByte(columnLabel: String): java.lang.Byte = get[java.lang.Byte](columnLabel)
+//  def nullableDouble(columnIndex: Int): java.lang.Double = get[java.lang.Double](columnIndex)
+//  def nullableDouble(columnLabel: String): java.lang.Double = get[java.lang.Double](columnLabel)
+//  def nullableFloat(columnIndex: Int): java.lang.Float = get[java.lang.Float](columnIndex)
+//  def nullableFloat(columnLabel: String): java.lang.Float = get[java.lang.Float](columnLabel)
+//  def nullableInt(columnIndex: Int): java.lang.Integer = get[java.lang.Integer](columnIndex)
+//  def nullableInt(columnLabel: String): java.lang.Integer = get[java.lang.Integer](columnLabel)
+//  def nullableLong(columnIndex: Int): java.lang.Long = get[java.lang.Long](columnIndex)
+//  def nullableLong(columnLabel: String): java.lang.Long = get[java.lang.Long](columnLabel)
+//  def nullableShort(columnIndex: Int): java.lang.Short = get[java.lang.Short](columnIndex)
+//  def nullableShort(columnLabel: String): java.lang.Short = get[java.lang.Short](columnLabel)
+//  def binaryStream(columnIndex: Int): java.io.InputStream = get[java.io.InputStream](columnIndex)
+//  def binaryStream(columnLabel: String): java.io.InputStream = get[java.io.InputStream](columnLabel)
+//  def binaryStreamOpt(columnIndex: Int): Option[java.io.InputStream] = get[Option[java.io.InputStream]](columnIndex)
+//  def binaryStreamOpt(columnLabel: String): Option[java.io.InputStream] = get[Option[java.io.InputStream]](columnLabel)
+//  def characterStream(columnIndex: Int): java.io.Reader = get[java.io.Reader](columnIndex)
+//  def characterStream(columnLabel: String): java.io.Reader = get[java.io.Reader](columnLabel)
+//  def characterStreamOpt(columnIndex: Int): Option[java.io.Reader] = get[Option[java.io.Reader]](columnIndex)
+//  def characterStreamOpt(columnLabel: String): Option[java.io.Reader] = get[Option[java.io.Reader]](columnLabel)
+//  def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
+//  def url(columnLabel: String): java.net.URL = get[java.net.URL](columnLabel)
+//  def urlOpt(columnIndex: Int): Option[java.net.URL] = get[Option[java.net.URL]](columnIndex)
+//  def urlOpt(columnLabel: String): Option[java.net.URL] = get[Option[java.net.URL]](columnLabel)
 
-  def nullableBoolean(columnIndex: Int): java.lang.Boolean = get[java.lang.Boolean](columnIndex)
+  def bigDecimal(columnIndex: Int): BigDecimal = get[BigDecimal](columnIndex)
 
-  def nullableBoolean(columnLabel: String): java.lang.Boolean = get[java.lang.Boolean](columnLabel)
+  def bigDecimal(columnLabel: String): BigDecimal = get[BigDecimal](columnLabel)
+
+  def bigDecimalOpt(columnIndex: Int): Option[BigDecimal] = get[Option[BigDecimal]](columnIndex)
+
+  def bigDecimalOpt(columnLabel: String): Option[BigDecimal] = get[Option[BigDecimal]](columnLabel)
+
+  def bigInt(columnIndex: Int): BigInt = get[BigInt](columnIndex)
+
+  def bigInt(columnLabel: String): BigInt = get[BigInt](columnLabel)
+
+  def bigIntOpt(columnIndex: Int): Option[BigInt] = get[Option[BigInt]](columnIndex)
+
+  def bigIntOpt(columnLabel: String): Option[BigInt] = get[Option[BigInt]](columnLabel)
 
   def boolean(columnIndex: Int): Boolean = get[Boolean](columnIndex)
 
@@ -96,10 +118,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def booleanOpt(columnIndex: Int): Option[Boolean] = get[Option[Boolean]](columnIndex)
 
   def booleanOpt(columnLabel: String): Option[Boolean] = get[Option[Boolean]](columnLabel)
-
-  def nullableByte(columnIndex: Int): java.lang.Byte = get[java.lang.Byte](columnIndex)
-
-  def nullableByte(columnLabel: String): java.lang.Byte = get[java.lang.Byte](columnLabel)
 
   def byte(columnIndex: Int): Byte = get[Byte](columnIndex)
 
@@ -117,22 +135,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
 
   def bytesOpt(columnLabel: String): Option[Array[Byte]] = get[Option[Array[Byte]]](columnLabel)
 
-  def characterStream(columnIndex: Int): java.io.Reader = get[java.io.Reader](columnIndex)
-
-  def characterStream(columnLabel: String): java.io.Reader = get[java.io.Reader](columnLabel)
-
-  def characterStreamOpt(columnIndex: Int): Option[java.io.Reader] = get[Option[java.io.Reader]](columnIndex)
-
-  def characterStreamOpt(columnLabel: String): Option[java.io.Reader] = get[Option[java.io.Reader]](columnLabel)
-
-  def clob(columnIndex: Int): java.sql.Clob = get[java.sql.Clob](columnIndex)
-
-  def clob(columnLabel: String): java.sql.Clob = get[java.sql.Clob](columnLabel)
-
-  def clobOpt(columnIndex: Int): Option[java.sql.Clob] = get[Option[java.sql.Clob]](columnIndex)
-
-  def clobOpt(columnLabel: String): Option[java.sql.Clob] = get[Option[java.sql.Clob]](columnLabel)
-
   def concurrency: Int = {
     ensureCursor()
     underlying.getConcurrency
@@ -142,38 +144,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     ensureCursor()
     underlying.getCursorName
   }
-
-  def date(columnIndex: Int): java.sql.Date = get[java.sql.Date](columnIndex)
-
-  def date(columnLabel: String): java.sql.Date = get[java.sql.Date](columnLabel)
-
-  def date(columnIndex: Int, cal: Calendar): java.sql.Date = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
-    get[java.sql.Date](columnIndex)
-  }
-
-  def date(columnLabel: String, cal: Calendar): java.sql.Date = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
-    get[java.sql.Date](columnLabel)
-  }
-
-  def dateOpt(columnIndex: Int): Option[java.sql.Date] = get[Option[java.sql.Date]](columnIndex)
-
-  def dateOpt(columnLabel: String): Option[java.sql.Date] = get[Option[java.sql.Date]](columnLabel)
-
-  def dateOpt(columnIndex: Int, cal: Calendar): Option[java.sql.Date] = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
-    get[Option[java.sql.Date]](columnIndex)
-  }
-
-  def dateOpt(columnLabel: String, cal: Calendar): Option[java.sql.Date] = {
-    implicit val binder: TypeBinder[java.sql.Date] = TypeBinder((rs, i) => rs.getDate(i, cal))((rs, l) => rs.getDate(l, cal))
-    get[Option[java.sql.Date]](columnLabel)
-  }
-
-  def nullableDouble(columnIndex: Int): java.lang.Double = get[java.lang.Double](columnIndex)
-
-  def nullableDouble(columnLabel: String): java.lang.Double = get[java.lang.Double](columnLabel)
 
   def double(columnIndex: Int): Double = get[Double](columnIndex)
 
@@ -193,10 +163,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getFetchSize
   }
 
-  def nullableFloat(columnIndex: Int): java.lang.Float = get[java.lang.Float](columnIndex)
-
-  def nullableFloat(columnLabel: String): java.lang.Float = get[java.lang.Float](columnLabel)
-
   def float(columnIndex: Int): Float = get[Float](columnIndex)
 
   def float(columnLabel: String): Float = get[Float](columnLabel)
@@ -210,10 +176,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     underlying.getHoldability
   }
 
-  def nullableInt(columnIndex: Int): java.lang.Integer = get[java.lang.Integer](columnIndex)
-
-  def nullableInt(columnLabel: String): java.lang.Integer = get[java.lang.Integer](columnLabel)
-
   def int(columnIndex: Int): Int = get[Int](columnIndex)
 
   def int(columnLabel: String): Int = get[Int](columnLabel)
@@ -221,10 +183,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def intOpt(columnIndex: Int): Option[Int] = get[Option[Int]](columnIndex)
 
   def intOpt(columnLabel: String): Option[Int] = get[Option[Int]](columnLabel)
-
-  def nullableLong(columnIndex: Int): java.lang.Long = get[java.lang.Long](columnIndex)
-
-  def nullableLong(columnLabel: String): java.lang.Long = get[java.lang.Long](columnLabel)
 
   def long(columnIndex: Int): Long = get[Long](columnIndex)
 
@@ -237,42 +195,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def metaData: java.sql.ResultSetMetaData = {
     ensureCursor()
     underlying.getMetaData
-  }
-
-  def nCharacterStream(columnIndex: Int): java.io.Reader = get[java.io.Reader](columnIndex)(TypeBinder.nCharacterStream)
-
-  def nCharacterStream(columnLabel: String): java.io.Reader = get[java.io.Reader](columnLabel)(TypeBinder.nCharacterStream)
-
-  def nCharacterStreamOpt(columnIndex: Int): Option[java.io.Reader] = {
-    implicit val binder = TypeBinder.nCharacterStream
-    get[Option[java.io.Reader]](columnIndex)
-  }
-
-  def nCharacterStreamOpt(columnLabel: String): Option[java.io.Reader] = {
-    implicit val binder = TypeBinder.nCharacterStream
-    get[Option[java.io.Reader]](columnLabel)
-  }
-
-  def nClob(columnIndex: Int): java.sql.NClob = get[java.sql.NClob](columnIndex)
-
-  def nClob(columnLabel: String): java.sql.NClob = get[java.sql.NClob](columnLabel)
-
-  def nClobOpt(columnIndex: Int): Option[java.sql.NClob] = get[Option[java.sql.NClob]](columnIndex)
-
-  def nClobOpt(columnLabel: String): Option[java.sql.NClob] = get[Option[java.sql.NClob]](columnLabel)
-
-  def nString(columnIndex: Int): String = get[String](columnIndex)(TypeBinder.nString)
-
-  def nString(columnLabel: String): String = get[String](columnLabel)(TypeBinder.nString)
-
-  def nStringOpt(columnIndex: Int): Option[String] = {
-    implicit val binder = TypeBinder.nString
-    get[Option[String]](columnIndex)
-  }
-
-  def nStringOpt(columnLabel: String): Option[String] = {
-    implicit val binder = TypeBinder.nString
-    get[Option[String]](columnLabel)
   }
 
   def any(columnIndex: Int): Any = get[Any](columnIndex)(TypeBinder.any)
@@ -325,10 +247,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def rowId(columnIndex: Int): java.sql.RowId = get[java.sql.RowId](columnIndex)
 
   def rowId(columnLabel: String): java.sql.RowId = get[java.sql.RowId](columnLabel)
-
-  def nullableShort(columnIndex: Int): java.lang.Short = get[java.lang.Short](columnIndex)
-
-  def nullableShort(columnLabel: String): java.lang.Short = get[java.lang.Short](columnLabel)
 
   def short(columnIndex: Int): Short = get[Short](columnIndex)
 
@@ -439,14 +357,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def jodaLocalDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
   def jodaLocalDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
 
-  def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
-
-  def url(columnLabel: String): java.net.URL = get[java.net.URL](columnLabel)
-
-  def urlOpt(columnIndex: Int): Option[java.net.URL] = get[Option[java.net.URL]](columnIndex)
-
-  def urlOpt(columnLabel: String): Option[java.net.URL] = get[Option[java.net.URL]](columnLabel)
-
   def warnings: java.sql.SQLWarning = {
     ensureCursor()
     underlying.getWarnings
@@ -464,9 +374,19 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     wrapIfError(implicitly[TypeBinder[A]].apply(underlying, columnIndex))
   }
 
-  def get[A: TypeBinder](columnLabel: String): A = {
+  def getOpt[A : TypeBinder](columnIndex: Int)(implicit binder : TypeBinder[Option[A]]): Option[A] = {
     ensureCursor()
-    wrapIfError(implicitly[TypeBinder[A]].apply(underlying, columnLabel))
+    wrapIfError(binder.apply(underlying, columnIndex))
+  }
+
+  def get[A](columnLabel: String)(implicit binder : TypeBinder[A]): A = {
+    ensureCursor()
+    wrapIfError(binder.apply(underlying, columnLabel))
+  }
+
+  def getOpt[A](columnLabel: String)(implicit binder : TypeBinder[Option[A]]): Option[A] = {
+    ensureCursor()
+    wrapIfError(binder.apply(underlying, columnLabel))
   }
 
 }

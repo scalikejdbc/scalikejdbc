@@ -71,6 +71,7 @@ object ParameterBinder {
  *
  * @tparam A value's type
  */
+///*
 trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
 
   def value: A
@@ -84,6 +85,7 @@ trait ParameterBinderWithValue[A] extends ParameterBinder { self =>
   override def toString: String = s"ParameterBinder(value=$value)"
 
 }
+//*/
 
 // ------------------------------------------------------------------------------
 
@@ -109,8 +111,8 @@ case class AsIsParameterBinder(value: Any) extends ParameterBinderWithValue[Any]
     throw new UnsupportedOperationException("Apply method doesn't work because this is an AsIsParameterBinder")
   }
 
-  override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError
-  override private[scalikejdbc] def map[B](f: Any => B): ParameterBinderWithValue[B] = unsupportedError
+  override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError()
+  override private[scalikejdbc] def map[B](f: Any => B): ParameterBinderWithValue[B] = unsupportedError()
 
   override def toString: String = s"AsIsParameterBinder(value=$value)"
 
