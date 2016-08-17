@@ -174,8 +174,20 @@ object Binders {
     (rs, label, _) => rs.getString(label),
     value => (ps, index, _) => ps.setString(index, value))
   val bigDecimal = asIsBinderWithTypeAndAccessors[BigDecimal](JDBCType.NUMERIC)(
-    (rs, index, _) => rs.getBigDecimal(index),
-    (rs, label, _) => rs.getBigDecimal(label),
+    (rs, index, _) => {
+      val res = rs.getBigDecimal(index)
+      if (res != null)
+        math.BigDecimal.javaBigDecimal2bigDecimal(res)
+      else
+        null
+    },
+    (rs, label, _) => {
+      val res = rs.getBigDecimal(label)
+      if (res != null)
+        math.BigDecimal.javaBigDecimal2bigDecimal(res)
+      else
+        null
+    },
     value => (ps, index, _) => ps.setBigDecimal(index, value.bigDecimal))
   val bigInt = bigDecimal.xmap[BigInt](_.toBigInt(), BigDecimal.apply)
   val bytes = asIsBinderWithTypeAndAccessors[Array[Byte]](JDBCType.BINARY)(
