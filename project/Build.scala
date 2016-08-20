@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.4.3-SNAPSHOT"
+  lazy val _version = "2.5.0-SNAPSHOT"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -20,7 +20,8 @@ object ScalikeJDBCProjects extends Build {
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.39"
   lazy val _postgresqlVersion = "9.4.1208.jre7"
-  lazy val _hibernateVersion = "5.1.0.Final"
+  // Hibernate 5.2 dropped JDK 7 support
+  lazy val _hibernateVersion = "5.1.1.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -42,11 +43,11 @@ object ScalikeJDBCProjects extends Build {
     fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalatestVersion := "2.2.6",
+    scalatestVersion := "3.0.0",
     specs2Version := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v <= 11 => "2.5"
-        case _ => "3.7.3"
+        case _ => "3.8.4"
       }
     },
     //scalaVersion := "2.11.8",
@@ -126,7 +127,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "2.4.6"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "2.4.7"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
