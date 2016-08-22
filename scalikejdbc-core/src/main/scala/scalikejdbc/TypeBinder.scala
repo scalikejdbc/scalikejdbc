@@ -1,25 +1,22 @@
 package scalikejdbc
 
-import java.sql.{JDBCType, ResultSet, SQLType}
-
-import org.joda.time.{DateTime => JodaDateTime}
-import org.joda.time.{LocalDate => JodaLocalDate}
-import org.joda.time.{LocalTime => JodaLocalTime}
-import org.joda.time.{LocalDateTime => JodaLocalDateTime}
+import java.sql.{ ResultSet, SQLType }
+import org.joda.time.{ DateTime => JodaDateTime, LocalDate => JodaLocalDate, LocalDateTime => JodaLocalDateTime, LocalTime => JodaLocalTime }
 
 /**
  * Type binder for java.sql.ResultSet.
  */
 trait TypeBinder[+A] { self =>
-  def sqlType : SQLType
-  def fromSqlType(value : Any) : A
+  val handleDefaultForNull: Boolean = false
+  def sqlType: SQLType
+  def fromSqlType(value: Any): A
 
-  def apply(rs: ResultSet, columnIndex: Int): A
-  def apply(rs: ResultSet, columnLabel: String): A
+  def read(rs: ResultSet, columnIndex: Int): A
+  def read(rs: ResultSet, columnLabel: String): A
 
   def map[B](f: A => B): TypeBinder[B] = new TypeBinder[B] {
-    def apply(rs: ResultSet, columnIndex: Int): B = f(TypeBinder.this.apply(rs, columnIndex))
-    def apply(rs: ResultSet, columnLabel: String): B = f(TypeBinder.this.apply(rs, columnLabel))
+    override def read(rs: ResultSet, columnIndex: Int): B = f(TypeBinder.this.read(rs, columnIndex))
+    override def read(rs: ResultSet, columnLabel: String): B = f(TypeBinder.this.read(rs, columnLabel))
 
     override val sqlType: SQLType = self.sqlType
     override def fromSqlType(value: Any) = f(self.fromSqlType(value))
@@ -29,21 +26,18 @@ trait TypeBinder[+A] { self =>
 /**
  * Type binder for java.sql.ResultSet.
  */
-object TypeBinder extends UnixTimeInMillisConverterImplicits {
-  // TODO: Remove UnixTimeInMillisConverterImplicits in 2.5.
-  // TypeBinder object actually doesn't need UnixTimeInMillisConverterImplicits.
-  // Since removing it breaks bin-compatibility, we cannot do that in 2.4 series.
+object TypeBinder {
 
-  def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
-    def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
-    def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
+  def apply[T](sqlTypeParam: SQLType, fromSqlTypeParam: Any => T, handleDefaultForNullParam: Boolean = false)(
+    getByIndex: (ResultSet, Int, Any => T) => T,
+    getByLabel: (ResultSet, String, Any => T) => T
+  ): TypeBinder[T] = new TypeBinder[T] {
+    override def read(rs: ResultSet, columnIndex: Int): T = getByIndex(rs, columnIndex, fromSqlTypeParam)
+    override def read(rs: ResultSet, columnLabel: String): T = getByLabel(rs, columnLabel, fromSqlTypeParam)
 
-    // FIXME: Do something here
-    override val sqlType: SQLType = JDBCType.OTHER
-    override def fromSqlType(value: Any): A = ???
+    override val sqlType: SQLType = sqlTypeParam
+    override def fromSqlType(value: Any): T = fromSqlTypeParam(value)
   }
-
-  private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
 
   // FIXME: Candidates for removal
   implicit val array: TypeBinder[java.sql.Array] = Binders.sqlArray
@@ -86,5 +80,5 @@ object TypeBinder extends UnixTimeInMillisConverterImplicits {
   implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = Binders.jodaLocalTime
   implicit val jpdaLocalDateTime: TypeBinder[JodaLocalDateTime] = Binders.jodaLocalDateTime
 
-  implicit def option[A : TypeBinder]: TypeBinder[Option[A]] = Binders.optionReaderBinder[A]
+  implicit def option[A: TypeBinder]: TypeBinder[Option[A]] = Binders.optionReaderBinder[A]
 }

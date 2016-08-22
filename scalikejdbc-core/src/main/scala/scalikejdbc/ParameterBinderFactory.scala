@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import java.sql.{JDBCType, PreparedStatement, SQLType}
+import java.sql.{ JDBCType, PreparedStatement, SQLType }
 
 import scalikejdbc.interpolation.SQLSyntax
 
@@ -11,8 +11,8 @@ import scala.reflect.macros.blackbox.Context
 @implicitNotFound("Implicit ParameterBinderFactory[T] for the parameter type T is missing. You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.")
 trait ParameterBinderFactory[T] { self =>
 
-  def sqlType : SQLType
-  def toSqlType(value : T) : Any
+  def sqlType: SQLType
+  def toSqlType(value: T): Any
 
   def apply(value: T): ParameterBinderWithValue[T]
 
@@ -91,7 +91,7 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
       override def toSqlType(value: Option[SQLSyntax]): Any = value.fold(null.asInstanceOf[Any])(identity)
     }
 
-  implicit def optionalParameterBinderFactory[A : ParameterBinderFactory]: ParameterBinderFactory[Option[A]] = Binders.optionWriterBinder[A]
+  implicit def optionalParameterBinderFactory[A: ParameterBinderFactory]: ParameterBinderFactory[Option[A]] = Binders.optionWriterBinder[A]
 }
 
 trait LowPriorityImplicitsParameterBinderFactory0 {

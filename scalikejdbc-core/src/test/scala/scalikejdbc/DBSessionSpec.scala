@@ -78,9 +78,9 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           benOpt.get._2 should equal("Ben")
 
           session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
-          val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
+          val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.stringOpt("name")))
           noName.get._1 should equal(4)
-          noName.get._2 should equal(null)
+          noName.get._2 should equal(None)
       }
     }
   }
@@ -863,7 +863,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = rs.intOpt("v_int"),
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
+                vTimestamp = rs.timestampOpt("v_timestamp").map(_.toJodaDateTime)
               )
           }.single.apply())
 
