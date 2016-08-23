@@ -1,6 +1,6 @@
 package foo
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest._
 import scalikejdbc._
 
 class AutoNamedValuesSpec extends FlatSpec with Matchers with DBSettings {
