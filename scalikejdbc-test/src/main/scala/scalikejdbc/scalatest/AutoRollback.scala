@@ -1,6 +1,5 @@
 package scalikejdbc.scalatest
 
-import org.scalatest.fixture.Suite
 import scalikejdbc._
 
 /**
@@ -28,7 +27,7 @@ import scalikejdbc._
  * }
  * }}}
  */
-trait AutoRollback extends LoanPattern { self: Suite =>
+trait AutoRollback extends LoanPattern { self: ScalatestTestSuite =>
 
   type FixtureParam = DBSession
 
