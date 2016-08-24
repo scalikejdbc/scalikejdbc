@@ -13,7 +13,7 @@ object autoNamedValues {
       q"$column.$fieldName -> $entity.$fieldName"
     }
 
-    c.Expr[Map[SQLSyntax, ParameterBinder]](q"Map(..$toMapParams)")
+    c.Expr[Map[SQLSyntax, ParameterBinder]](q"_root_.scala.collection.immutable.Map(..$toMapParams)")
   }
 
   def debug_impl[E: c.WeakTypeTag](c: Context)(entity: c.Expr[E], column: c.Expr[ColumnName[E]], excludes: c.Expr[String]*): c.Expr[Map[SQLSyntax, ParameterBinder]] = {
