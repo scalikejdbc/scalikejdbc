@@ -7,7 +7,7 @@ object autoNamedValues {
   def apply_impl[E: c.WeakTypeTag](c: Context)(entity: c.Expr[E], column: c.Expr[ColumnName[E]], excludes: c.Expr[String]*): c.Expr[Map[SQLSyntax, ParameterBinder]] = {
     import c.universe._
 
-    val toMapParams: List[c.universe.Tree] = EntityUtil.constructorParams[E](c)("autoInsert", excludes: _*).map { field =>
+    val toMapParams: List[c.universe.Tree] = EntityUtil.constructorParams[E](c)("autoNamedValues", excludes: _*).map { field =>
       val fieldName = field.name.toTermName
 
       q"$column.$fieldName -> $entity.$fieldName"
