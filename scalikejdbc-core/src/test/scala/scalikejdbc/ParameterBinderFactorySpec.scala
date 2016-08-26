@@ -4,7 +4,7 @@ import java.io.InputStream
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
 import org.scalatest.FlatSpec
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
 

@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import org.scalatest._
-import mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.util.Calendar
