@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import java.sql.{ DatabaseMetaData, Connection }
+import java.sql.{ DatabaseMetaData, Connection, ResultSet }
 import scalikejdbc.metadata._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
@@ -374,6 +374,21 @@ trait DBConnection extends LogSupport with LoanPattern {
   }
 
   /**
+   * Returns columns resultset in schema.tableNames
+   *
+   * @param meta database meta data
+   * @param schema schema name
+   * @param table table name
+   * @return resultset related to columns
+   */
+  def getAllColumns(meta: DatabaseMetaData, schema: String, table: String): ResultSet = {
+    meta.getDatabaseProductName match {
+      case "MySQL" => meta.getColumns(schema, null, table, "%")
+      case _ => meta.getColumns(null, schema, table, "%")
+    }
+  }
+
+  /**
    * Returns all the column names on the matched table name
    */
   def getColumnNames(tableName: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
@@ -381,7 +396,7 @@ trait DBConnection extends LogSupport with LoanPattern {
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableName, tableTypes).map {
         case (schema, tableName) =>
-          new RSTraversable(meta.getColumns(null, schema, tableName, "%")).map(_.string("COLUMN_NAME")).toList.distinct
+          new RSTraversable(getAllColumns(meta, schema, tableName)).map(_.string("COLUMN_NAME")).toList.distinct
       }
     }.getOrElse(Nil)
   }
@@ -427,7 +442,7 @@ trait DBConnection extends LogSupport with LoanPattern {
           name = table,
           schema = schema,
           description = remarks,
-          columns = new RSTraversable(meta.getColumns(null, schema, table, "%")).map { rs =>
+          columns = new RSTraversable(getAllColumns(meta, schema, table)).map { rs =>
             Column(
               name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
               typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },

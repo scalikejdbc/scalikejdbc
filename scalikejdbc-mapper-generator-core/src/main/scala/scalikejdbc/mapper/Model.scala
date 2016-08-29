@@ -24,10 +24,16 @@ case class Model(url: String, username: String, password: String) {
   } catch { case e: Exception => false }
 
   private[this] def listAllTables(schema: String, types: List[String]): Seq[String] = {
-    val catalog = null
-    val _schema = if (schema == null || schema.size == 0) null else schema
     DB readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
+      val (catalog, _schema) = {
+        (schema, meta.getDatabaseProductName) match {
+          case (null, _) => (null, null)
+          case (s, _) if s.size == 0 => (null, null)
+          case (s, "MySQL") => (s, null)
+          case (s, _) => (null, s)
+        }
+      }
       new RSTraversable(meta.getTables(catalog, _schema, "%", types.toArray))
         .map { rs => rs.string("TABLE_NAME") }
         .toList
