@@ -56,6 +56,10 @@ object ScalikeJDBCProjects extends Build {
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
       "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
     ),
+    mappings in (Compile, packageSrc) ++= (managedSources in Compile).value.map{ f =>
+      // to merge generated sources into sources.jar as well
+      (f, f.relativeTo((sourceManaged in Compile).value).get.getPath)
+    },
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
