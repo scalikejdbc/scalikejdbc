@@ -85,6 +85,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case JavaSqlTypes.TINYINT => TypeName.Byte
       case JavaSqlTypes.VARBINARY => TypeName.ByteArray
       case JavaSqlTypes.VARCHAR => TypeName.String
+      case JavaSqlTypes.NVARCHAR => TypeName.String
+      case JavaSqlTypes.NCHAR => TypeName.String
+      case JavaSqlTypes.LONGNVARCHAR => TypeName.String
       case _ => TypeName.Any
     }
 
@@ -124,6 +127,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case JavaSqlTypes.TINYINT => "1"
       case JavaSqlTypes.VARBINARY => "null"
       case JavaSqlTypes.VARCHAR => "'abc'"
+      case JavaSqlTypes.NVARCHAR => "'abc'"
+      case JavaSqlTypes.NCHAR => "'abc'"
+      case JavaSqlTypes.LONGNVARCHAR => "'abc'"
       case _ => "null"
     }
 
