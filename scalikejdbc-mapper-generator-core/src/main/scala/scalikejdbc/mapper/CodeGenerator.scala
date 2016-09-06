@@ -209,7 +209,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |
         |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
         |
-        |  def destroy()(implicit session: DBSession$defaultAutoSession): Unit = ${className}.destroy(this)(session)
+        |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
         |
         |}""".stripMargin + eol
 
@@ -236,7 +236,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         |
         |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
         |
-        |  def destroy()(implicit session: DBSession$defaultAutoSession): Unit = ${className}.destroy(this)(session)
+        |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
         |
         |}""".stripMargin + eol
     }
@@ -451,7 +451,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
-     * def destroy(entity: Member)(implicit session: DBSession = autoSession): Unit = {
+     * def destroy(entity: Member)(implicit session: DBSession = autoSession): Int = {
      *   SQL("""delete from member where id = /*'id*/123""")
      *     .bindByName('id -> entity.id)
      *     .update.apply()
@@ -471,11 +471,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Unit = {
+          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
           |    sql\"\"\"delete from $${${className}.table} where ${wherePart}\"\"\".update.apply()
           |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Unit = {
+          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
           |    withSQL { delete.from(${className}).where${wherePart} }.update.apply()
           |  }"""
       }).stripMargin + eol
@@ -844,7 +844,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |  }
           |  it should "destroy a record" in { implicit session =>
           |    val entity = %className%.findAll().head
-          |    %className%.destroy(entity)
+          |    val deleted = %className%.destroy(entity)
+          |    deleted should be(1)
           |    val shouldBeNone = %className%.find(%primaryKeys%)
           |    shouldBeNone.isDefined should be(false)
           |  }
@@ -908,7 +909,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |    "destroy a record" in new AutoRollback {
           |      val entity = %className%.findAll().head
-          |      %className%.destroy(entity)
+          |      val deleted = %className%.destroy(entity) == 1
+          |      deleted should beTrue
           |      val shouldBeNone = %className%.find(%primaryKeys%)
           |      shouldBeNone.isDefined should beFalse
           |    }
@@ -986,7 +988,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |    def destroy = this {
           |      val entity = %className%.findAll().head
-          |      %className%.destroy(entity)
+          |      val deleted = %className%.destroy(entity) == 1
+          |      deleted should beTrue
           |      val shouldBeNone = %className%.find(%primaryKeys%)
           |      shouldBeNone.isDefined should beFalse
           |    }
