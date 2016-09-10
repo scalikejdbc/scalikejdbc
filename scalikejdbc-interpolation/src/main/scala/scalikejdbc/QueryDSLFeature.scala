@@ -538,6 +538,11 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      */
     def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(sqls.csv(tuples.toSeq.map(each => sqls"${each._1} = ${each._2}"): _*))
 
+    /**
+     *  `returning` for PostgreSQL
+     */
+    def returning(columns: SQLSyntax*): UpdateSQLBuilder = append(sqls"returning ${sqls.csv(columns: _*)}")
+
     override def append(part: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }
 
