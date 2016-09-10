@@ -513,6 +513,11 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      */
     def returningId: InsertSQLBuilder = append(sqls"returning id")
 
+    /**
+     *  `returning` for PostgreSQL
+     */
+    def returning(columns: SQLSyntax*): InsertSQLBuilder = append(sqls"returning ${sqls.csv(columns: _*)}")
+
     override def append(part: SQLSyntax): InsertSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }
 

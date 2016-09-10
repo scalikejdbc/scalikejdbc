@@ -656,6 +656,10 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         val returningIdQuery = insert.into(Account).namedValues(ac.name -> "Alice").returningId
         returningIdQuery.toSQL.statement should equal("insert into qi_accounts (name) values (?) returning id")
 
+        // returning columns* for PostgreSQL
+        val returningColumnsQuery = insert.into(Account).namedValues(ac.name -> "Alice").returning(ac.name, ac.id)
+        returningColumnsQuery.toSQL.statement should equal("insert into qi_accounts (name) values (?) returning name, id")
+
       }
 
       // for update query
