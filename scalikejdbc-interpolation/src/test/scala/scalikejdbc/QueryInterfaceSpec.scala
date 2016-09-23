@@ -729,7 +729,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
     val t = TimeHolder.syntax("t")
 
-    val time = new DateTime(2016, 1, 9, 2, 43, 42)
+    val time = new DateTime(2016, 1, 9, 2, 43, 42, DateTimeZone.forID("Asia/Tokyo"))
 
     val castToString: String = if (isMySQL) {
       "date_format(time, '%Y-%m-%d %H:%i:%S')"
@@ -753,7 +753,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 1, TimeHolder.column.time -> time))
         val jstString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 1").map(_.string("s")).single.apply().get
-        jstString should equal(time.withZone(DateTimeZone.forID("Asia/Tokyo")).toString("yyyy-MM-dd hh:mm:ss"))
+        jstString should equal(time.toString("yyyy-MM-dd HH:mm:ss"))
 
         val expectedTime1 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 1)).map(TimeHolder(t)(_)).single.apply().get.time
         expectedTime1.isEqual(time) should equal(true)

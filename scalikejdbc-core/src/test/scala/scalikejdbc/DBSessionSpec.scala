@@ -1060,7 +1060,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     import java.util.TimeZone
     import org.joda.time.DateTimeZone
 
-    val time = new DateTime(2016, 1, 9, 2, 43, 42)
+    val time = new DateTime(2016, 1, 9, 2, 43, 42, DateTimeZone.forID("Asia/Tokyo"))
 
     val castToString: String = if (driverClassName.contains("mysql")) {
       "date_format(t, '%Y-%m-%d %H:%i:%S')"
@@ -1087,7 +1087,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
 
         SQL("insert into zone_test values (?, ?)").bind(1, time).execute.apply()(jstSession)
         val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single.apply().get
-        jstString should equal(time.withZone(DateTimeZone.forID("Asia/Tokyo")).toString("yyyy-MM-dd hh:mm:ss"))
+        jstString should equal(time.toString("yyyy-MM-dd HH:mm:ss"))
 
         val expectedTime1 = SQL("select t from zone_test where id = 1").map(_.jodaDateTime("t")).single.apply().get
         expectedTime1.isEqual(time) should equal(true)
