@@ -666,8 +666,15 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         else
           allColumns
 
+      val canBuildFrom = {
+        if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
+          s", $C: CanBuildFrom[Nothing, Int, $C[Int]]"
+        else
+          ""
+      }
+
       // def batchInsert=(
-      1.indent + s"def batchInsert(entities: Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + "): " + "Seq[Int] = {" + eol +
+      1.indent + s"def batchInsert${typeParam}(entities: Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + canBuildFrom + s"): $returnType[Int] = {" + eol +
         2.indent + "val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
         batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
@@ -676,7 +683,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         batchInsertColumns.map(c => 4.indent + c.name.replace("`", "")).mkString(comma + eol) + eol +
         3.indent + ")" + " values (" + eol +
         batchInsertColumns.map(c => 4.indent + "{" + c.nameInScala.replace("`", "") + "}").mkString(comma + eol) + eol +
-        3.indent + ")\"\"\").batchByName(params: _*).apply()" + eol +
+        3.indent + ")\"\"\").batchByName(params: _*).apply[" + returnType + "]()" + eol +
         2.indent + "}" + eol
     }
 
