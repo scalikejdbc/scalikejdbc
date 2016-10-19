@@ -44,12 +44,7 @@ object ScalikeJDBCProjects extends Build {
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := "3.0.0",
-    specs2Version := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 11 => "2.5"
-        case _ => "3.8.4"
-      }
-    },
+    specs2Version := "3.8.5",
     //scalaVersion := "2.11.8",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
