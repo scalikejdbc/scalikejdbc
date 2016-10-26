@@ -34,12 +34,12 @@ import scala.reflect.macros.blackbox.Context
 )
 trait ParameterBinderFactory[A] { self =>
 
-  def apply(value: A): ParameterBinderWithValue[A]
+  def apply(value: A): ParameterBinderWithValue
 
-  def xmap[B](f: A => B, g: B => A): ParameterBinderFactory[B] = new ParameterBinderFactory[B] {
-    def apply(value: B): ParameterBinderWithValue[B] = {
+  def contramap[B](g: B => A): ParameterBinderFactory[B] = new ParameterBinderFactory[B] {
+    def apply(value: B): ParameterBinderWithValue = {
       if (value == null) ParameterBinder.NullParameterBinder
-      else self(g(value)).map(f)
+      else ContramappedParameterBinder(value, self(g(value)))
     }
   }
 
@@ -48,7 +48,7 @@ trait ParameterBinderFactory[A] { self =>
 object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory1 {
 
   def apply[A](f: A => (PreparedStatement, Int) => Unit): ParameterBinderFactory[A] = new ParameterBinderFactory[A] {
-    def apply(value: A): ParameterBinderWithValue[A] = {
+    def apply(value: A): ParameterBinderWithValue = {
       if (value == null) ParameterBinder.NullParameterBinder
       else ParameterBinder(value, f(value))
     }
@@ -99,13 +99,13 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
 
   implicit val optionalSqlSyntaxParameterBinderFactory: ParameterBinderFactory[Option[SQLSyntax]] =
     new ParameterBinderFactory[Option[SQLSyntax]] {
-      def apply(value: Option[SQLSyntax]): ParameterBinderWithValue[Option[SQLSyntax]] = {
-        val binder = value match {
+      def apply(value: Option[SQLSyntax]): ParameterBinderWithValue = {
+        val result = value match {
           case null => SQLSyntaxParameterBinder(null)
           case None => SQLSyntaxParameterBinder(SQLSyntax.empty)
           case Some(syntax) => SQLSyntaxParameterBinder(syntax)
         }
-        binder.map(Option.apply)
+        ContramappedParameterBinder(value, result)
       }
     }
 
@@ -114,10 +114,12 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
 trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsParameterBinderFactory0 {
 
   implicit def optionalParameterBinderFactory[A](implicit ev: ParameterBinderFactory[A]): ParameterBinderFactory[Option[A]] = new ParameterBinderFactory[Option[A]] {
-    def apply(value: Option[A]): ParameterBinderWithValue[Option[A]] = {
+    def apply(value: Option[A]): ParameterBinderWithValue = {
       if (value == null) ParameterBinder.NullParameterBinder
-      else if (ev == asisParameterBinderFactory) AsIsParameterBinder(value).asInstanceOf[ParameterBinderWithValue[Option[A]]]
-      else value.fold[ParameterBinderWithValue[Option[A]]](ParameterBinder.NullParameterBinder)(v => ev(v).map(Option.apply))
+      else if (ev == asisParameterBinderFactory) AsIsParameterBinder(value)
+      else value.fold[ParameterBinderWithValue](ParameterBinder.NullParameterBinder) { v =>
+        ContramappedParameterBinder(v, ev(v))
+      }
     }
   }
 
@@ -127,7 +129,7 @@ trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsPa
    * This implicit is not enabled by default. If you need this, have implicit val definition in your own code.
    */
   val asisParameterBinderFactory: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
-    def apply(value: Any): ParameterBinderWithValue[Any] = AsIsParameterBinder(value)
+    def apply(value: Any): ParameterBinderWithValue = AsIsParameterBinder(value)
   }
 }
 

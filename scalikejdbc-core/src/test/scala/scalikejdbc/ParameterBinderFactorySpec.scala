@@ -371,4 +371,25 @@ class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
     verify(stmt).setObject(3, null)
   }
 
+  it should "have instance for EnumLike" in {
+    val stmt = mock[PreparedStatement]
+    implicitly[ParameterBinderFactory[EnumLike]].apply(EnumLike.Foo)(stmt, 1)
+    implicitly[ParameterBinderFactory[EnumLike]].apply(EnumLike.Bar)(stmt, 2)
+    verify(stmt).setString(1, "Foo")
+    verify(stmt).setString(2, "Bar")
+
+    assert(SQLSyntax.eq(SQLSyntax.empty, EnumLike.Foo).parameters === Seq(EnumLike.Foo))
+  }
+}
+
+sealed trait EnumLike
+object EnumLike {
+
+  case object Foo extends EnumLike
+  case object Bar extends EnumLike
+
+  implicit def FooEnumParameterBinderFactory[A <: EnumLike]: ParameterBinderFactory[A] = {
+    ParameterBinderFactory.stringParameterBinderFactory.contramap(_.toString)
+  }
+
 }
