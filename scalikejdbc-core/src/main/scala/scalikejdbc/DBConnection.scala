@@ -135,7 +135,9 @@ trait DBConnection extends LogSupport with LoanPattern {
     ignoring(classOf[Throwable]) {
       conn.close()
     }
-    log.debug("A Connection is closed.")
+    if (GlobalSettings.loggingConnections) {
+      log.debug("A Connection is closed.")
+    }
   }
 
   /**
