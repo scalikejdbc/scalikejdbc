@@ -206,7 +206,7 @@ case class StatementExecutor(
         }
       } catch {
         case e: Exception =>
-          log.debug("Catched an exception when formatting SQL because of " + e.getMessage)
+          log.debug("Caught an exception when formatting SQL because of " + e.getMessage)
           sql
       }
     }
