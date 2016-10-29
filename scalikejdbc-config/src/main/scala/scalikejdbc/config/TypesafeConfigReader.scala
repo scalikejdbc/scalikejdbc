@@ -90,8 +90,8 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       initialSize = configMap.get("poolInitialSize").map(_.toInt).getOrElse(default.initialSize),
       maxSize = configMap.get("poolMaxSize").map(_.toInt).getOrElse(default.maxSize),
       connectionTimeoutMillis = readTimeoutMillis().getOrElse(default.connectionTimeoutMillis),
-      validationQuery = configMap.get("poolValidationQuery").getOrElse(default.validationQuery),
-      connectionPoolFactoryName = configMap.get("poolFactoryName").getOrElse(default.connectionPoolFactoryName),
+      validationQuery = configMap.getOrElse("poolValidationQuery", default.validationQuery),
+      connectionPoolFactoryName = configMap.getOrElse("poolFactoryName", default.connectionPoolFactoryName),
       driverName = configMap.get("driver").orNull[String],
       warmUpTime = configMap.get("poolWarmUpTimeMillis").map(_.toLong).getOrElse(default.warmUpTime),
       timeZone = configMap.get("timeZone").orNull[String]
