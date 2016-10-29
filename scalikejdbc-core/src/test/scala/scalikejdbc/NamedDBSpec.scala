@@ -15,10 +15,6 @@ class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settin
 
   behavior of "NamedDB"
 
-  before {
-    initializeConnectionPools()
-  }
-
   it should "be available" in {
     using(ConnectionPool.borrow('named)) { conn =>
       using(new DB(conn)) { db =>
