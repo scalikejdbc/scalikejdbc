@@ -489,7 +489,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
           count2.size should equal(1000)
         } catch {
           case e: Exception =>
-          // Exception should be catched here. It's not a bug.
+          // Exception should be caught here. It's not a bug.
         }
         // https://github.com/scalikejdbc/scalikejdbc/issues/481
         SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(Nil: _*).apply()
