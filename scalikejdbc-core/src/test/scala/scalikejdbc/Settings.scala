@@ -1,8 +1,9 @@
 package scalikejdbc
 
 import java.util.Properties
+import org.scalatest._
 
-trait Settings {
+trait Settings extends BeforeAndAfter { self: Suite =>
 
   val props = new Properties
   props.load(classOf[Settings].getClassLoader.getResourceAsStream("jdbc.properties"))
@@ -22,6 +23,8 @@ trait Settings {
     }
   }
 
-  initializeConnectionPools()
+  before {
+    initializeConnectionPools()
+  }
 
 }
