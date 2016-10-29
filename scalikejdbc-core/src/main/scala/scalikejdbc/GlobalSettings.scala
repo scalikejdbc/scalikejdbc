@@ -21,6 +21,11 @@ object GlobalSettings {
   var loggingSQLErrors: Boolean = true
 
   /**
+   * Enables logging for connection handling.
+   */
+  var loggingConnections: Boolean = true
+
+  /**
    * Settings for query timing logs.
    */
   var loggingSQLAndTime: LoggingSQLAndTimeSettings = LoggingSQLAndTimeSettings()

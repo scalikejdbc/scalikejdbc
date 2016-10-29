@@ -123,8 +123,9 @@ object ConnectionPool extends LogSupport {
       // asynchronously close the old pool if exists
       oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     }
-
-    log.debug(s"Registered connection pool : ${get(name)} using factory : $factoryName")
+    if (GlobalSettings.loggingConnections) {
+      log.debug(s"Registered connection pool : ${get(name)} using factory : $factoryName")
+    }
   }
 
   /**
@@ -172,14 +173,18 @@ object ConnectionPool extends LogSupport {
     ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
   ) = {
     scala.concurrent.Future {
-      log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+      if (GlobalSettings.loggingConnections) {
+        log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+      }
       var millis = 0L
       while (millis < 60000L && oldPool.numActive > 0) {
         Thread.sleep(100L)
         millis += 100L
       }
       oldPool.close()
-      log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+      if (GlobalSettings.loggingConnections) {
+        log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+      }
     }
   }
 
