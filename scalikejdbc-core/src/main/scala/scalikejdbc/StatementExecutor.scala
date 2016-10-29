@@ -156,8 +156,13 @@ case class StatementExecutor(
         }
         (normalize(param) match {
           case null => "null"
-          case result: String if result.size > 100 => "'" + result.take(100) + "... (" + result.size + ")" + "'"
-          case result: String => "'" + result + "'"
+          case result: String =>
+            GlobalSettings.loggingSQLAndTime.maxColumnSize.collect {
+              case maxSize if result.size > maxSize =>
+                "'" + result.take(maxSize) + "... (" + result.size + ")" + "'"
+            }.getOrElse {
+              "'" + result + "'"
+            }
           case result => result.toString
         }).replaceAll("\r", "\\\\r")
           .replaceAll("\n", "\\\\n")
@@ -207,10 +212,11 @@ case class StatementExecutor(
     }
 
     if (isBatch) {
-      if (batchParamsList.size > 20) {
-        batchParamsList.take(20).map(params => singleSqlString(params)).mkString(";" + eol + "   ") + ";" + eol +
-          "   ... (total: " + batchParamsList.size + " times)"
-      } else {
+      GlobalSettings.loggingSQLAndTime.maxBatchParamSize.collect {
+        case maxSize if batchParamsList.size > maxSize =>
+          batchParamsList.take(maxSize).map(params => singleSqlString(params)).mkString(";" + eol + "   ") + ";" + eol +
+            "   ... (total: " + batchParamsList.size + " times)"
+      }.getOrElse {
         batchParamsList.map(params => singleSqlString(params)).mkString(";" + eol + "   ")
       }
     } else {
