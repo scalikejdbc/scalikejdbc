@@ -52,3 +52,15 @@ class NamedAutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
   }
 
 }
+
+class AutoRollbackWithNoArgTestFixtureSpec extends FlatSpecWithCommonTraits with AutoRollback with BufferMixin {
+
+  override def db = NamedDB('db2).toDB
+
+  behavior of "AutoRollback with NoArgTestFixture"
+
+  it should "call withFixture(NoArgTest)" in { implicit session =>
+    // "test" is appended in BufferMixin
+    assert(buffer.contains("test"))
+  }
+}

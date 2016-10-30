@@ -1,5 +1,6 @@
 package scalikejdbc.scalatest
 
+import org.scalatest.Outcome
 import org.scalatest.fixture.TestSuite
 import scalikejdbc._
 
@@ -48,14 +49,14 @@ trait AutoRollback extends LoanPattern { self: TestSuite =>
    * Provides transactional block
    * @param test one arg test
    */
-  override def withFixture(test: OneArgTest) = {
+  override def withFixture(test: OneArgTest): Outcome = {
     using(db()) { db =>
       try {
         db.begin()
         db.withinTx { implicit session =>
           fixture(session)
         }
-        test(db.withinTxSession())
+        withFixture(test.toNoArgTest(db.withinTxSession()))
       } finally {
         db.rollbackIfActive()
       }
