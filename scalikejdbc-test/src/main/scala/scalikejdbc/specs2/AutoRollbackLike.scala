@@ -8,11 +8,15 @@ import org.specs2.specification.After
  */
 trait AutoRollbackLike extends After with LoanPattern {
 
+  protected[this] def settingsProvider: SettingsProvider =
+    SettingsProvider.default
+
   /**
    * Creates a [[scalikejdbc.DB]] instance.
    * @return DB instance
    */
-  def db(): DB = DB(ConnectionPool.borrow())
+  def db(): DB =
+    DB(conn = ConnectionPool.borrow(), settingsProvider = settingsProvider)
 
   /**
    * Prepares database for the test.

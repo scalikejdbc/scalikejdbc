@@ -100,7 +100,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
 
     // creating a session instance without a block (be careful to close resources)
     val db = DB(ConnectionPool.borrow())
-    val session = db.autoCommitSession
+    val session = db.autoCommitSession()
     session.update("update " + tableName + " set name = ? where id = ?", "name2", 2)
     session.close()
   }
@@ -119,7 +119,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
       val emps: List[Emp] = DB readOnly { session =>
         session.list("select * from " + tableName) { rs => Emp(rs.int("id"), rs.string("name")) }
       }
-      val session = DB.readOnlySession
+      val session = DB.readOnlySession()
       val emps2: List[Emp2] = session.list("select * from " + tableName) { rs => Emp2(rs.int("id"), Option(rs.string("name"))) }
       session.close()
 
@@ -191,7 +191,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         }
 
         {
-          implicit val session = DB(conn).readOnlySession
+          implicit val session = DB(conn).readOnlySession()
           val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
           e2s.size should equal(2)

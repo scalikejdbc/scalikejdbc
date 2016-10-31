@@ -34,7 +34,8 @@ case class StatementExecutor(
     connectionAttributes: DBConnectionAttributes,
     singleParams: Seq[Any] = Nil,
     tags: Seq[String] = Nil,
-    isBatch: Boolean = false
+    isBatch: Boolean = false,
+    settingsProvider: SettingsProvider = SettingsProvider.default
 ) extends LogSupport with UnixTimeInMillisConverterImplicits {
 
   import StatementExecutor._
@@ -136,6 +137,7 @@ case class StatementExecutor(
    * SQL String value
    */
   private[this] lazy val sqlString: String = {
+    val loggingSQLAndTime = settingsProvider.loggingSQLAndTime(GlobalSettings.loggingSQLAndTime)
 
     def singleSqlString(params: Seq[Any]): String = {
 
@@ -157,7 +159,7 @@ case class StatementExecutor(
         (normalize(param) match {
           case null => "null"
           case result: String =>
-            GlobalSettings.loggingSQLAndTime.maxColumnSize.collect {
+            loggingSQLAndTime.maxColumnSize.collect {
               case maxSize if result.size > maxSize =>
                 "'" + result.take(maxSize) + "... (" + result.size + ")" + "'"
             }.getOrElse {
@@ -198,11 +200,11 @@ case class StatementExecutor(
         }.mkString
 
       try {
-        if (GlobalSettings.sqlFormatter.formatter.isDefined) {
-          val formatter = GlobalSettings.sqlFormatter.formatter.get
-          formatter.format(sql)
-        } else {
-          sql
+        settingsProvider.sqlFormatter(GlobalSettings.sqlFormatter).formatter match {
+          case Some(formatter) =>
+            formatter.format(sql)
+          case None =>
+            sql
         }
       } catch {
         case e: Exception =>
@@ -212,7 +214,7 @@ case class StatementExecutor(
     }
 
     if (isBatch) {
-      GlobalSettings.loggingSQLAndTime.maxBatchParamSize.collect {
+      loggingSQLAndTime.maxBatchParamSize.collect {
         case maxSize if batchParamsList.size > maxSize =>
           batchParamsList.take(maxSize).map(params => singleSqlString(params)).mkString(";" + eol + "   ") + ";" + eol +
             "   ... (total: " + batchParamsList.size + " times)"
@@ -230,9 +232,10 @@ case class StatementExecutor(
    * @return stack trace
    */
   private[this] def stackTraceInformation: String = {
+    val loggingSQLAndTime = settingsProvider.loggingSQLAndTime(GlobalSettings.loggingSQLAndTime)
 
     val stackTrace = Thread.currentThread.getStackTrace
-    val lines = (if (GlobalSettings.loggingSQLAndTime.printUnprocessedStackTrace) {
+    val lines = (if (loggingSQLAndTime.printUnprocessedStackTrace) {
       stackTrace.tail
     } else {
       stackTrace.dropWhile { trace =>
@@ -240,7 +243,7 @@ case class StatementExecutor(
         className != getClass.toString &&
           (className.startsWith("java.lang.") || className.startsWith("scalikejdbc."))
       }
-    }).take(GlobalSettings.loggingSQLAndTime.stackTraceDepth).map { trace => "    " + trace.toString }
+    }).take(loggingSQLAndTime.stackTraceDepth).map { trace => "    " + trace.toString }
 
     "  [Stack Trace]" + eol +
       "    ..." + eol +
@@ -254,7 +257,7 @@ case class StatementExecutor(
   private[this] trait LoggingSQLAndTiming extends Executor with LogSupport {
 
     abstract override def apply[A](execute: () => A): A = {
-      import GlobalSettings.loggingSQLAndTime
+      val loggingSQLAndTime = settingsProvider.loggingSQLAndTime(GlobalSettings.loggingSQLAndTime)
 
       def messageInSingleLine(spentMillis: Long): String = "[SQL Execution] " + sqlString + "; (" + spentMillis + " ms)"
       def messageInMultiLines(spentMillis: Long): String = {
@@ -289,7 +292,7 @@ case class StatementExecutor(
         }
       }
       // call event handler
-      GlobalSettings.queryCompletionListener.apply(template, singleParams, spentMillis)
+      settingsProvider.queryCompletionListener(GlobalSettings.queryCompletionListener).apply(template, singleParams, spentMillis)
       GlobalSettings.taggedQueryCompletionListener(template, singleParams, spentMillis, tags)
 
       // result from super.apply()

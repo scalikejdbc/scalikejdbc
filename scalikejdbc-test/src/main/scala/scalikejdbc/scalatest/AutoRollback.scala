@@ -33,11 +33,15 @@ trait AutoRollback extends LoanPattern { self: TestSuite =>
 
   type FixtureParam = DBSession
 
+  protected[this] def settingsProvider: SettingsProvider =
+    SettingsProvider.default
+
   /**
    * Creates a [[scalikejdbc.DB]] instance.
    * @return DB instance
    */
-  def db(): DB = DB(ConnectionPool.borrow())
+  def db(): DB =
+    DB(conn = ConnectionPool.borrow(), settingsProvider = settingsProvider)
 
   /**
    * Prepares database for the test.
