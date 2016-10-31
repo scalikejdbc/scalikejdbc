@@ -14,7 +14,10 @@ import java.sql.Connection
  * }
  * }}}
  */
-case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
+case class NamedDB(
+    name: Any,
+    settingsProvider: SettingsProvider = SettingsProvider.default
+)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
 
   private[this] def connectionPool(): ConnectionPool = Option(context match {
     case NoConnectionPoolContext => ConnectionPool(name)
@@ -30,7 +33,7 @@ case class NamedDB(name: Any)(implicit context: ConnectionPoolContext = NoConnec
 
   private lazy val db: DB = {
     val cp = connectionPool()
-    DB(cp.borrow(), connectionAttributes)
+    DB(cp.borrow(), connectionAttributes, settingsProvider)
   }
 
   def toDB(): DB = db

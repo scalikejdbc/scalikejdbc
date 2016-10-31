@@ -95,6 +95,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait SQLSyntaxSupport[A] {
 
+    protected[this] def settings: SettingsProvider =
+      SettingsProvider.default
+
     /**
      * Connection Pool Name. If you use NamedDB, you must override this method.
      */
@@ -152,7 +155,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
         SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableNameWithSchema), {
-          NamedDB(connectionPoolName).getColumnNames(tableNameWithSchema).map(_.toLowerCase(en)) match {
+          NamedDB(connectionPoolName, settings).getColumnNames(tableNameWithSchema).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
               "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName."
             )

@@ -40,15 +40,19 @@ object GlobalSettings {
    */
   var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
 
+  type QueryCompletionListener = (String, Seq[Any], Long) => Unit
+
   /**
    * Event handler to be called every query completion.
    */
-  var queryCompletionListener: (String, Seq[Any], Long) => Unit = (statement: String, params: Seq[Any], millis: Long) => ()
+  var queryCompletionListener: QueryCompletionListener = (statement: String, params: Seq[Any], millis: Long) => ()
+
+  type QueryFailureListener = (String, Seq[Any], Throwable) => Unit
 
   /**
    * Event handler to be called every query failure.
    */
-  var queryFailureListener: (String, Seq[Any], Throwable) => Unit = (statement: String, params: Seq[Any], e: Throwable) => ()
+  var queryFailureListener: QueryFailureListener = (statement: String, params: Seq[Any], e: Throwable) => ()
 
   /**
    * Event handler to be called every query completion when specifying tags.
@@ -57,10 +61,12 @@ object GlobalSettings {
     (statement: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
   }
 
+  type TaggedQueryFailureListener = (String, Seq[Any], Throwable, Seq[String]) => Unit
+
   /**
    * Event handler to be called every query failure when specifying tags.
    */
-  var taggedQueryFailureListener: (String, Seq[Any], Throwable, Seq[String]) => Unit = {
+  var taggedQueryFailureListener: TaggedQueryFailureListener = {
     (statement: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
   }
 
