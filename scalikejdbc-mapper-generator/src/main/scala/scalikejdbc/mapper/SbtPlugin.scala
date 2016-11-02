@@ -135,16 +135,6 @@ object SbtPlugin extends Plugin {
     }
   }
 
-  @deprecated("will be removed", "2.1.3")
-  def loadSettings(): (JDBCSettings, GeneratorSettings) = {
-    loadPropertiesFromFile() match {
-      case Right(props) =>
-        (loadJDBCSettings(props), loadGeneratorSettings(props))
-      case Left(e) =>
-        throw e
-    }
-  }
-
   def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
     GeneratorConfig(
       srcDir = srcDir.getAbsolutePath,
