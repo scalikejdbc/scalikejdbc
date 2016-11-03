@@ -20,7 +20,7 @@
 
 - Latest stable version
 - Changes that bring binary/source incompatibility are not allowed
-- Must build against Scala 2.10, 2.11 and 2.12.0-M4
+- Must build against Scala 2.10, 2.11 and 2.12
 
 ##### 2.3.x
 
