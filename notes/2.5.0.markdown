@@ -1,0 +1,32 @@
+ScalikeJDBC 2.5.0 is out for Scala 2.10, 2.11 and 2.12. The mapper-generator sbt plugin for sbt 0.13 is available as well.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #548 Use xxx.nonEmpty instead of checking `xxx.isEmpty == false` by @monkey-mas
+ - [test] #551 Bump ScalaTest version to 3.0, Scala 2.12.0-M5 CI support by @seratch
+ - [core] #553 Introduce autoNamedValues macros for automatic create named values by @greenhost87
+ - [core] #555 fix deprecation warnings in tests by @xuwei-k
+ - [core] #556 add generated sources to sources.jar by @xuwei-k
+ - [core] #554 fix a bug for detecting mysql column names by @uneme
+ - [core] #563 Return Boolean instead of Unit for generated destroy by @Uxio0
+ - [mapper-generator] #558 Support for (some) SQL Server datatypes in code generator by @vpopescu
+ - [core] #564 dd insert and update returning for arbitrary columns in PostgreSQL by @kbrowder
+ - [core] #566 Specify timeZone to avoid environment-dependent failure which fixes #565 by @ocadaruma
+ - [core] #572 use returnCollectionType setting in batchInsert method by @xuwei-k
+ - [core] #536 Introduce ParameterBinderFactory contramap for contravariant types by @gakuzzzz
+ - [core] #575 add LoggingSQLAndTimeSettings.maxColumnSize, maxBatchParamSize by @zaneli
+ - [core] #576 add settings for avoid connection handling logging by @rika-t
+ - [core] #577 Fix the stability of core library tests by @seratch
+ - [core] #580 Fix typos in log messages by @xuwei-k
+ - [core] #581 use Map#getOrElse by @xuwei-k
+ - [core] #583 AutoRollback calls withFixutre(NoArgTest) in withFixture(OneArgTest) by @shinnya
+ - [core] #582 add SettingsProvider by @xuwei-k
+ - [core] #584 add newline at end of file by @xuwei-k
+ - [core] #585 Scala 2.12.0 final by @xuwei-k
+ - [mapper-generator] #586 delete deprecated method by @xuwei-k
+
+Enjoy writing mostly type-safe SQL and get things done!

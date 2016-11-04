@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.5.0-SNAPSHOT"
+  lazy val _version = "2.5.0"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -16,12 +16,12 @@ object ScalikeJDBCProjects extends Build {
 
   // internal only
   lazy val _logbackVersion = "1.1.7"
-  lazy val _h2Version = "1.4.192"
+  lazy val _h2Version = "1.4.193"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-  lazy val _mysqlVersion = "5.1.39"
+  lazy val _mysqlVersion = "5.1.40"
   lazy val _postgresqlVersion = "9.4.1208.jre7"
   // Hibernate 5.2 dropped JDK 7 support
-  lazy val _hibernateVersion = "5.1.1.Final"
+  lazy val _hibernateVersion = "5.1.2.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -120,7 +120,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.4"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.5"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
@@ -315,7 +315,7 @@ object ScalikeJDBCProjects extends Build {
 
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
-    "org.apache.derby"  % "derby"                % "10.12.1.1"        % "test",
+    "org.apache.derby"  % "derby"                % "10.13.1.1"        % "test",
     "org.xerial"        % "sqlite-jdbc"          % "3.8.11.2"         % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.4"            % "test",
     "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
