@@ -5,23 +5,21 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "2.5.0"
+  lazy val _version = "3.0.0-SNAPSHOT"
 
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.21"
-  // 1.3 dropped JDK 7 support
-  lazy val _typesafeConfigVersion = "1.2.1"
+  lazy val _typesafeConfigVersion = "1.3.1"
 
   // internal only
   lazy val _logbackVersion = "1.1.7"
   lazy val _h2Version = "1.4.193"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.40"
-  lazy val _postgresqlVersion = "9.4.1208.jre7"
-  // Hibernate 5.2 dropped JDK 7 support
-  lazy val _hibernateVersion = "5.1.2.Final"
+  lazy val _postgresqlVersion = "9.4.1212"
+  lazy val _hibernateVersion = "5.2.4.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -46,6 +44,8 @@ object ScalikeJDBCProjects extends Build {
     scalatestVersion := "3.0.0",
     specs2Version := "3.8.6",
     //scalaVersion := "2.11.8",
+    javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
+    javacOptions in doc := Seq("-source", "1.8"),
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
