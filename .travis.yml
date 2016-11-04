@@ -3,6 +3,7 @@ language: scala
 scala:
   - 2.10.6
   - 2.11.8
+  - 2.12.0
 
 jdk:
   - oraclejdk8
@@ -41,9 +42,6 @@ env:
 
 matrix:
   include:
-    - scala: 2.12.0
-      jdk: oraclejdk8
-      env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
       jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
@@ -53,9 +51,9 @@ matrix:
     - scala: scripted-test
       jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.11.8
-      jdk: oraclejdk7
+    - scala: 2.12.0
+      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.11.8
-      jdk: oraclejdk7
+    - scala: 2.12.0
+      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="hsqldb"
