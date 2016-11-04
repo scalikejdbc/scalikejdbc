@@ -22,7 +22,7 @@ Just add ScalikeJDBC, a JDBC driver, and an slf4j implementation to your sbt bui
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"        % "2.4.+",
+  "org.scalikejdbc" %% "scalikejdbc"        % "2.5.+",
   "com.h2database"  %  "h2"                 % "1.4.+",
   "ch.qos.logback"  %  "logback-classic"    % "1.1.+"
 )
