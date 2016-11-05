@@ -1,6 +1,6 @@
 scalikejdbcSettings
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
 lazy val scalikejdbcVersion = scalikejdbc.ScalikejdbcBuildInfo.version
 resolvers ++= Seq(
   "Sonatype releases"  at "https://oss.sonatype.org/content/repositories/releases",
@@ -12,9 +12,9 @@ libraryDependencies ++= Seq(
   "com.github.seratch" %  "java-time-backport" % "1.0.0",
   "org.scalikejdbc"    %% "scalikejdbc-test"   % scalikejdbcVersion,
   "org.slf4j"          %  "slf4j-simple"       % "1.7.+",
-  "org.hibernate"      %  "hibernate-core"     % "5.1.0.Final",
+  "org.hibernate"      %  "hibernate-core"     % "5.2.4.Final",
   "org.hsqldb"         %  "hsqldb"             % "2.3.+",
-  "org.specs2"         %% "specs2-core"        % "2.5"               % "test"
+  "org.specs2"         %% "specs2-core"        % "3.8.6"             % "test"
 )
 initialCommands := """import scalikejdbc._, jsr310._
 import java.time._
