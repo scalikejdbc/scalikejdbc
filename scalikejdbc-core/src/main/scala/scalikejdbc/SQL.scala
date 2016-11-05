@@ -558,6 +558,10 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
     // format: ON
   }
 
+  def copy(statement: String = statement, parameters: Seq[Seq[Any]] = parameters, tags: Seq[String] = tags): SQLBatch = {
+    new SQLBatch(statement, parameters, tags)
+  }
+
 }
 
 class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(key: Option[String]) {
@@ -578,6 +582,10 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
       case _                                 => f(session)
     }
     // format: ON
+  }
+
+  def copy(statement: String = statement, parameters: Seq[Seq[Any]] = parameters, tags: Seq[String] = tags, key: Option[String] = key): SQLBatchWithGeneratedKey = {
+    new SQLBatchWithGeneratedKey(statement, parameters, tags)(key)
   }
 
 }
@@ -609,6 +617,10 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
     // format: ON
   }
 
+  def copy(statement: String = statement, parameters: Seq[Any] = parameters, tags: Seq[String] = tags, before: (PreparedStatement) => Unit = before, after: (PreparedStatement) => Unit = after): SQLExecution = {
+    new SQLExecution(statement, parameters, tags)(before)(after)
+  }
+
 }
 
 /**
@@ -638,6 +650,10 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
       session.tags(tags: _*).updateWithFilters(before, after, statement, parameters: _*)
   }
 
+  def copy(statement: String = statement, parameters: Seq[Any] = parameters, tags: Seq[String] = tags, before: (PreparedStatement) => Unit = before, after: (PreparedStatement) => Unit = after): SQLUpdate = {
+    new SQLUpdate(statement, parameters, tags)(before)(after)
+  }
+
 }
 
 /**
@@ -659,6 +675,10 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any],
       case _                                 => f(session)
     }
     // format: ON
+  }
+
+  def copy(statement: String = statement, parameters: Seq[Any] = parameters, tags: Seq[String] = tags, key: Any = key): SQLUpdateWithGeneratedKey = {
+    new SQLUpdateWithGeneratedKey(statement, parameters, tags)(key)
   }
 
 }
@@ -717,6 +737,10 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
     extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToTraversable[A, E] {
 
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, extractor: WrappedResultSet => A = extractor): SQLToResult[A, E, Traversable] = {
+    new SQLToTraversableImpl[A, E](statement, rawParameters)(extractor)
+  }
+
   override protected def withParameters(params: Seq[Any]): SQLToResult[A, E, Traversable] = {
     new SQLToTraversableImpl[A, E](statement, params)(extractor)
   }
@@ -763,6 +787,10 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
     extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToCollection[A, E] {
 
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, extractor: WrappedResultSet => A = extractor): SQLToCollection[A, E] = {
+    new SQLToCollectionImpl[A, E](statement, rawParameters)(extractor)
+  }
+
   override protected def withParameters(params: Seq[Any]): SQLToCollection[A, E] = {
     new SQLToCollectionImpl[A, E](statement, params)(extractor)
   }
@@ -806,6 +834,10 @@ class SQLToListImpl[A, E <: WithExtractor](
 )
     extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToList[A, E] {
+
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, extractor: WrappedResultSet => A = extractor): SQLToResult[A, E, List] = {
+    new SQLToListImpl[A, E](statement, rawParameters)(extractor)
+  }
 
   override protected def withParameters(params: Seq[Any]): SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, params)(extractor)
@@ -856,6 +888,10 @@ class SQLToOptionImpl[A, E <: WithExtractor](
 )(protected val isSingle: Boolean = true)
     extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToOption[A, E] {
+
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, extractor: WrappedResultSet => A = extractor, isSingle: Boolean = isSingle): SQLToOption[A, E] = {
+    new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle)
+  }
 
   override protected def withParameters(params: Seq[Any]): SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, params)(extractor)(isSingle)

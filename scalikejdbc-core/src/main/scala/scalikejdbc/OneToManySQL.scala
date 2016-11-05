@@ -35,6 +35,10 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toMany: WrappedResultSet => Option[B] = toMany, extractor: (A, Seq[B]) => Z = extractor): OneToManySQL[A, B, E, Z] = {
+    new OneToManySQL(statement, rawParameters)(one)(toMany)(extractor)
+  }
+
   def map(extractor: (A, Seq[B]) => Z): OneToManySQL[A, B, HasExtractor, Z] = {
     val q = new OneToManySQL[A, B, HasExtractor, Z](statement, rawParameters)(one)(toMany)(extractor)
     q.queryTimeout(queryTimeout)
@@ -104,6 +108,9 @@ class OneToManySQLToList[A, B, E <: WithExtractor, Z](
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[Z] = {
     executeQuery[List](session, (session: DBSession) => toTraversable(session, statement, rawParameters, extractor).toList)
   }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toMany: WrappedResultSet => Option[B] = toMany, extractor: (A, Seq[B]) => Z = extractor): OneToManySQLToList[A, B, E, Z] = {
+    new OneToManySQLToList(statement, rawParameters)(one)(toMany)(extractor)
+  }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
   private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toMany
@@ -122,6 +129,9 @@ class OneToManySQLToTraversable[A, B, E <: WithExtractor, Z](
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[Z] = {
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, statement, rawParameters, extractor))
+  }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toMany: WrappedResultSet => Option[B] = toMany, extractor: (A, Seq[B]) => Z = extractor): OneToManySQLToTraversable[A, B, E, Z] = {
+    new OneToManySQLToTraversable(statement, rawParameters)(one)(toMany)(extractor)
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
@@ -142,6 +152,9 @@ class OneToManySQLToCollection[A, B, E <: WithExtractor, Z](
   override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, Z, C[Z]]): C[Z] = {
     executeQuery(session, (session: DBSession) => toTraversable(session, statement, rawParameters, extractor).to[C])
   }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toMany: WrappedResultSet => Option[B] = toMany, extractor: (A, Seq[B]) => Z = extractor): OneToManySQLToCollection[A, B, E, Z] = {
+    new OneToManySQLToCollection(statement, rawParameters)(one)(toMany)(extractor)
+  }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
   private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toMany
@@ -159,6 +172,9 @@ class OneToManySQLToOption[A, B, E <: WithExtractor, Z](
   import GeneralizedTypeConstraintsForWithExtractor._
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[Z] = {
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, statement, rawParameters, extractor)))
+  }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toMany: WrappedResultSet => Option[B] = toMany, extractor: (A, Seq[B]) => Z = extractor, isSingle: Boolean = isSingle): OneToManySQLToOption[A, B, E, Z] = {
+    new OneToManySQLToOption(statement, rawParameters)(one)(toMany)(extractor)(isSingle)
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
