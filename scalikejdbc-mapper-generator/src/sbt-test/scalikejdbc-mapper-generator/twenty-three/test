@@ -17,6 +17,10 @@
 > compile
 > test:compile
 
+> set scalaVersion :="2.12.0"
+> compile
+> test:compile
+
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
