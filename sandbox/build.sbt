@@ -8,7 +8,6 @@ resolvers ++= Seq(
 )
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"        % scalikejdbcVersion,
-  "org.scalikejdbc"    %% "scalikejdbc-jsr310" % scalikejdbcVersion,
   "com.github.seratch" %  "java-time-backport" % "1.0.0",
   "org.scalikejdbc"    %% "scalikejdbc-test"   % scalikejdbcVersion,
   "org.slf4j"          %  "slf4j-simple"       % "1.7.+",
@@ -16,7 +15,7 @@ libraryDependencies ++= Seq(
   "org.hsqldb"         %  "hsqldb"             % "2.3.+",
   "org.specs2"         %% "specs2-core"        % "3.8.6"             % "test"
 )
-initialCommands := """import scalikejdbc._, jsr310._
+initialCommands := """import scalikejdbc._
 import java.time._
 // classes
 case class User(id: Long, name: Option[String], companyId: Option[Long] = None, company: Option[Company] = None)

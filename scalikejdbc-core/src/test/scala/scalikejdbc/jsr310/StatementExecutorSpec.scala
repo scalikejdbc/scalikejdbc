@@ -1,7 +1,8 @@
 package scalikejdbc
+package jsr310
 
+import scalikejdbc.interpolation.Implicits._
 import org.scalatest._
-import scalikejdbc.jsr310._
 import java.time._
 
 class StatementExecutorSpec extends FunSpec with Matchers {

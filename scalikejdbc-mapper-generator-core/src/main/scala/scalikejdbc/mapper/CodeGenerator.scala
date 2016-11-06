@@ -737,8 +737,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         if (config.dateTimeClass == DateTimeClass.JodaDateTime) {
           "import org.joda.time.{" + classes.distinct.mkString(", ") + "}" + eol
         } else {
-          "import java.time.{" + classes.distinct.mkString(", ") + "}" + eol +
-            "import scalikejdbc.jsr310._" + eol
+          "import java.time.{" + classes.distinct.mkString(", ") + "}" + eol
         }
       case _ => ""
     }

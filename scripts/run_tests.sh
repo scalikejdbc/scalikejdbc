@@ -15,7 +15,6 @@ sbt \
   core/test \
   interpolation/test \
   syntax-support-macro/test \
-  jsr310/test \
   config/test \
   test/test > logs/test_stdout.log
 

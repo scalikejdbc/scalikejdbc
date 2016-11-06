@@ -148,18 +148,6 @@ object ScalikeJDBCProjects extends Build {
     )
   )
 
-  lazy val scalikejdbcJSR310 = Project(
-    id = "jsr310",
-    base = file("scalikejdbc-jsr310"),
-    settings = baseSettings ++ /*mimaSettings ++*/ Seq(
-      name := "scalikejdbc-jsr310",
-      libraryDependencies ++= Seq(
-        "com.github.seratch" %  "java-time-backport" % "1.0.0"    % "provided,test",
-        "com.h2database"     %  "h2"                 % _h2Version % "test"
-      ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value)
-    )
-  ) dependsOn(scalikejdbcLibrary)
-
   // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(
     id = "interpolation-macro",
