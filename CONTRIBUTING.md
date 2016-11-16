@@ -16,7 +16,7 @@
 
 #### Branches
 
-##### master (wll be 3.0.x, the default branch)
+##### master (will be 3.0.x, the default branch)
 
 - Latest stable version
 - Changes that bring binary/source incompatibility are not allowed
