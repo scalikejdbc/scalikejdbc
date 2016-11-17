@@ -21,7 +21,7 @@ case class GeneratorConfig(
 object GeneratorConfig {
   private def toProperCase(s: String): String = {
     import java.util.Locale.ENGLISH
-    if (s == null || s.trim.size == 0) ""
+    if (s == null || s.trim.isEmpty) ""
     else s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1).toLowerCase(ENGLISH)
   }
 
