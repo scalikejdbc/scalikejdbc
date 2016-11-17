@@ -16,7 +16,7 @@ trait Implicits {
    * Enables sql"", sqls"" interpolation.
    *
    * {{{
-   *   sql"select * from memebrs"
+   *   sql"select * from members"
    *   val whereClause = sqls"where id = ${id}"
    *   sql"select * from members ${whereClause}"
    * }}}
