@@ -363,10 +363,10 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   private[this] def toSchemaAndTable(name: String): (String, String) = {
     val schema = {
-      if (name.split("\\.").size > 1) name.split("\\.").head
+      if (name.split("\\.").length > 1) name.split("\\.").head
       else null
     }
-    val table = if (name.split("\\.").size > 1) name.split("\\.")(1) else name
+    val table = if (name.split("\\.").length > 1) name.split("\\.")(1) else name
     (schema, table)
   }
 

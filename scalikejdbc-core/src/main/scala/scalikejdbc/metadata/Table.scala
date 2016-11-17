@@ -42,7 +42,7 @@ case class Table(
     }
     def length(str: String): Int = {
       if (str == null) 0
-      else withoutCRLF(str).map(c => if (c.toString.getBytes.size > 1) 2 else 1).sum
+      else withoutCRLF(str).map(c => if (c.toString.getBytes.length > 1) 2 else 1).sum
     }
     def take(str: String, maxLength: Int): String = {
       if (str == null) null

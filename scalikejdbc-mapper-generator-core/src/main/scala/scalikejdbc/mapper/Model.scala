@@ -29,7 +29,7 @@ case class Model(url: String, username: String, password: String) {
       val (catalog, _schema) = {
         (schema, meta.getDatabaseProductName) match {
           case (null, _) => (null, null)
-          case (s, _) if s.size == 0 => (null, null)
+          case (s, _) if s.isEmpty => (null, null)
           case (s, "MySQL") => (s, null)
           case (s, _) => (null, s)
         }
@@ -48,7 +48,7 @@ case class Model(url: String, username: String, password: String) {
 
   def table(schema: String = null, tableName: String): Option[Table] = {
     val catalog = null
-    val _schema = if (schema == null || schema.size == 0) null else schema
+    val _schema = if (schema == null || schema.isEmpty) null else schema
     DB readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       new RSTraversable(meta.getColumns(catalog, _schema, tableName, "%"))

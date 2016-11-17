@@ -410,7 +410,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     private[this] def toAlphabetOnly(name: String): String = {
       val _name = name.filter(c => c.isLetter && c <= 'z' || c == '_')
-      if (_name.size == 0) "x" else _name
+      if (_name.isEmpty) "x" else _name
     }
 
   }
