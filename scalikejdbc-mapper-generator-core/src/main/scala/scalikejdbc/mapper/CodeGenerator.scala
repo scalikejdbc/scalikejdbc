@@ -793,7 +793,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   }
 
   def writeSpec(code: Option[String]): Unit = {
-    code.map { code =>
+    code.foreach { code =>
       mkdirRecursively(outputSpecFile.getParentFile)
       using(new FileOutputStream(outputSpecFile)) {
         fos =>
