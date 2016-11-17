@@ -1,52 +1,39 @@
 package scalikejdbc
 
 import org.scalatest._
+import scalikejdbc.jsr310._
+import java.time._
 
 class StatementExecutorSpec extends FunSpec with Matchers {
 
-  // java.lang.SecurityException: Prohibited package name: java.time on Java 7
-  if (sys.props("java.version").startsWith("1.8")) {
+  Class.forName("org.h2.Driver")
+  ConnectionPool.add('jsr310, "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
 
-    import scalikejdbc.jsr310._
-    import java.time._
+  describe("StatementExecutor") {
+    it("should work with JSR-310 APIs") {
+      implicit val session = NamedAutoSession('jsr310)
 
-    Class.forName("org.h2.Driver")
-    ConnectionPool.add('jsr310, "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
+      sql"create table accounts (id bigserial not null, birthday date not null, alert_time time not null, local_created_at timestamp not null, created_at timestamp not null, updated_at timestamp not null )"
+        .execute.apply()
 
-    describe("StatementExecutor") {
-      it("should work with JSR-310 APIs") {
-        implicit val session = NamedAutoSession('jsr310)
+      val birthday = LocalDate.now
+      val alertTime = LocalTime.now
+      val localCreatedAt = LocalDateTime.now
+      val createdAt = ZonedDateTime.now
+      val updatedAt = Instant.now
+      val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt})"
+      query.execute.apply()
 
-        sql"create table accounts (id bigserial not null, birthday date not null, alert_time time not null, local_created_at timestamp not null, created_at timestamp not null, updated_at timestamp not null )"
-          .execute.apply()
+      val account = sql"select birthday, alert_time, local_created_at, created_at, updated_at from accounts limit 1".map { rs =>
+        (rs.get[LocalDate]("birthday"), rs.get[LocalTime]("alert_time"), rs.get[LocalDateTime]("local_created_at"), rs.get[ZonedDateTime]("created_at"), rs.get[Instant]("updated_at"))
+      }.headOption.apply()
 
-        val birthday = LocalDate.now
-        val alertTime = LocalTime.now
-        val localCreatedAt = LocalDateTime.now
-        val createdAt = ZonedDateTime.now
-        val updatedAt = Instant.now
-        val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt})"
-        query.execute.apply()
-
-        val account = sql"select birthday, alert_time, local_created_at, created_at, updated_at from accounts limit 1".map { rs =>
-          (rs.get[LocalDate]("birthday"), rs.get[LocalTime]("alert_time"), rs.get[LocalDateTime]("local_created_at"), rs.get[ZonedDateTime]("created_at"), rs.get[Instant]("updated_at"))
-        }.headOption.apply()
-
-        account.isDefined should equal(true)
-        account.get._1 should equal(birthday)
-        account.get._2 should equal(alertTime)
-        account.get._3 should equal(localCreatedAt)
-        account.get._4 should equal(createdAt)
-        account.get._5 should equal(updatedAt)
-      }
-    }
-
-  } else {
-    describe("StatementExecutor") {
-      it("should work with Java 7") {
-        scalikejdbc.StatementExecutor
-        // NOOP
-      }
+      account.isDefined should equal(true)
+      account.get._1 should equal(birthday)
+      account.get._2 should equal(alertTime)
+      account.get._3 should equal(localCreatedAt)
+      account.get._4 should equal(createdAt)
+      account.get._5 should equal(updatedAt)
     }
   }
 
