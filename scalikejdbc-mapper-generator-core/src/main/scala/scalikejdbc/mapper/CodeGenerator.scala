@@ -157,7 +157,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
    * Create directory to put the source code file if it does not exist yet.
    */
   def mkdirRecursively(file: File): Unit = {
-    if (!file.getParentFile.exists) mkdirRecursively(file.getParentFile)
+    val parent = file.getAbsoluteFile.getParentFile
+    if (!parent.exists) mkdirRecursively(parent)
     if (!file.exists) file.mkdir()
   }
 
