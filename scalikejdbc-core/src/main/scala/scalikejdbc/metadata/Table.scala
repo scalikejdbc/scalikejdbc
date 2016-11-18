@@ -120,10 +120,10 @@ case class Table(
       }.mkString +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
       {
-        if (indices.size > 0) "Indexes:\n" + indices.map { index => "  \"" + index.name + "\"" + (if (index.isUnique) " UNIQUE," else "") + " (" + index.columnNames.mkString(", ") + ")" + "\n" }.mkString
+        if (indices.nonEmpty) "Indexes:\n" + indices.map { index => "  \"" + index.name + "\"" + (if (index.isUnique) " UNIQUE," else "") + " (" + index.columnNames.mkString(", ") + ")" + "\n" }.mkString
         else ""
       } + {
-        if (foreignKeys.size > 0) "Foreign Keys:\n" + foreignKeys.map { fk => "  " + fk.name + " -> " + fk.foreignTableName + "(" + fk.foreignColumnName + ")" + "\n" }.mkString
+        if (foreignKeys.nonEmpty) "Foreign Keys:\n" + foreignKeys.map { fk => "  " + fk.name + " -> " + fk.foreignTableName + "(" + fk.foreignColumnName + ")" + "\n" }.mkString
         else ""
       }
   }

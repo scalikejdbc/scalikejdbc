@@ -755,7 +755,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           case _ => None
         }
     } match {
-      case classes if classes.size > 0 => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
+      case classes if classes.nonEmpty => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
       case _ => ""
     }
     val canBuildFromImport =
