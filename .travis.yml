@@ -19,7 +19,6 @@ cache:
     - $HOME/.sbt/boot
 
 before_script:
-  - rm project/sbt-idea.sbt
   - rm project/sbt-pgp.sbt
   - rm project/sbt-updates.sbt
   - psql -c "CREATE ROLE sa WITH SUPERUSER LOGIN PASSWORD 'sa';" -U postgres
