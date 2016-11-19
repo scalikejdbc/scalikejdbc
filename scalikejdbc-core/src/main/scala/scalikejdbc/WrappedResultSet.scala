@@ -1,8 +1,14 @@
 package scalikejdbc
 
+import java.time._
 import java.sql.ResultSet
 import java.util.Calendar
-import org.joda.time._
+import org.joda.time.{
+  LocalDateTime => JodaLocalDateTime,
+  LocalTime => JodaLocalTime,
+  LocalDate => JodaLocalDate,
+  _
+}
 import collection.JavaConverters._
 
 /**
@@ -404,14 +410,14 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def jodaDateTime(columnIndex: Int): DateTime = get[DateTime](columnIndex)
   def jodaDateTime(columnLabel: String): DateTime = get[DateTime](columnLabel)
 
-  def jodaLocalDate(columnIndex: Int): LocalDate = get[LocalDate](columnIndex)
-  def jodaLocalDate(columnLabel: String): LocalDate = get[LocalDate](columnLabel)
+  def jodaLocalDate(columnIndex: Int): JodaLocalDate = get[JodaLocalDate](columnIndex)
+  def jodaLocalDate(columnLabel: String): JodaLocalDate = get[JodaLocalDate](columnLabel)
 
-  def jodaLocalTime(columnIndex: Int): LocalTime = get[LocalTime](columnIndex)
-  def jodaLocalTime(columnLabel: String): LocalTime = get[LocalTime](columnLabel)
+  def jodaLocalTime(columnIndex: Int): JodaLocalTime = get[JodaLocalTime](columnIndex)
+  def jodaLocalTime(columnLabel: String): JodaLocalTime = get[JodaLocalTime](columnLabel)
 
-  def jodaLocalDateTime(columnIndex: Int): LocalDateTime = get[LocalDateTime](columnIndex)
-  def jodaLocalDateTime(columnLabel: String): LocalDateTime = get[LocalDateTime](columnLabel)
+  def jodaLocalDateTime(columnIndex: Int): JodaLocalDateTime = get[JodaLocalDateTime](columnIndex)
+  def jodaLocalDateTime(columnLabel: String): JodaLocalDateTime = get[JodaLocalDateTime](columnLabel)
 
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnIndex)
 
@@ -430,11 +436,11 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def jodaDateTimeOpt(columnIndex: Int): Option[DateTime] = get[Option[DateTime]](columnIndex)
   def jodaDateTimeOpt(columnLabel: String): Option[DateTime] = get[Option[DateTime]](columnLabel)
 
-  def jodaLocalDateOpt(columnIndex: Int): Option[LocalDate] = get[Option[LocalDate]](columnIndex)
-  def jodaLocalDateOpt(columnLabel: String): Option[LocalDate] = get[Option[LocalDate]](columnLabel)
+  def jodaLocalDateOpt(columnIndex: Int): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnIndex)
+  def jodaLocalDateOpt(columnLabel: String): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnLabel)
 
-  def jodaLocalTimeOpt(columnIndex: Int): Option[LocalTime] = get[Option[LocalTime]](columnIndex)
-  def jodaLocalTimeOpt(columnLabel: String): Option[LocalTime] = get[Option[LocalTime]](columnLabel)
+  def jodaLocalTimeOpt(columnIndex: Int): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnIndex)
+  def jodaLocalTimeOpt(columnLabel: String): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnLabel)
 
   def jodaLocalDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
   def jodaLocalDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
@@ -446,6 +452,42 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def urlOpt(columnIndex: Int): Option[java.net.URL] = get[Option[java.net.URL]](columnIndex)
 
   def urlOpt(columnLabel: String): Option[java.net.URL] = get[Option[java.net.URL]](columnLabel)
+
+  def dateTime(columnIndex: Int): ZonedDateTime = zonedDateTime(columnIndex)
+  def dateTime(columnLabel: String): ZonedDateTime = zonedDateTime(columnLabel)
+
+  def zonedDateTime(columnIndex: Int): ZonedDateTime = get[ZonedDateTime](columnIndex)
+  def zonedDateTime(columnLabel: String): ZonedDateTime = get[ZonedDateTime](columnLabel)
+
+  def offsetDateTime(columnIndex: Int): OffsetDateTime = get[OffsetDateTime](columnIndex)
+  def offsetDateTime(columnLabel: String): OffsetDateTime = get[OffsetDateTime](columnLabel)
+
+  def localDate(columnIndex: Int): LocalDate = get[LocalDate](columnIndex)
+  def localDate(columnLabel: String): LocalDate = get[LocalDate](columnLabel)
+
+  def localTime(columnIndex: Int): LocalTime = get[LocalTime](columnIndex)
+  def localTime(columnLabel: String): LocalTime = get[LocalTime](columnLabel)
+
+  def localDateTime(columnIndex: Int): LocalDateTime = get[LocalDateTime](columnIndex)
+  def localDateTime(columnLabel: String): LocalDateTime = get[LocalDateTime](columnLabel)
+
+  def dateTimeOpt(columnIndex: Int): Option[ZonedDateTime] = zonedDateTimeOpt(columnIndex)
+  def dateTimeOpt(columnLabel: String): Option[ZonedDateTime] = zonedDateTimeOpt(columnLabel)
+
+  def zonedDateTimeOpt(columnIndex: Int): Option[ZonedDateTime] = get[Option[ZonedDateTime]](columnIndex)
+  def zonedDateTimeOpt(columnLabel: String): Option[ZonedDateTime] = get[Option[ZonedDateTime]](columnLabel)
+
+  def offsetDateTimeOpt(columnIndex: Int): Option[OffsetDateTime] = get[Option[OffsetDateTime]](columnIndex)
+  def offsetDateTimeOpt(columnLabel: String): Option[OffsetDateTime] = get[Option[OffsetDateTime]](columnLabel)
+
+  def localDateOpt(columnIndex: Int): Option[LocalDate] = get[Option[LocalDate]](columnIndex)
+  def localDateOpt(columnLabel: String): Option[LocalDate] = get[Option[LocalDate]](columnLabel)
+
+  def localTimeOpt(columnIndex: Int): Option[LocalTime] = get[Option[LocalTime]](columnIndex)
+  def localTimeOpt(columnLabel: String): Option[LocalTime] = get[Option[LocalTime]](columnLabel)
+
+  def localDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
+  def localDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
 
   def warnings: java.sql.SQLWarning = {
     ensureCursor()

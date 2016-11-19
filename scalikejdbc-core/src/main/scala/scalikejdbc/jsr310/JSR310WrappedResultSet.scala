@@ -6,6 +6,7 @@ import java.time._
 /**
  * Rich WrappedResultSet for JSR 310 support.
  */
+@deprecated("use WrappedResultSet", "3.0.0")
 class JSR310WrappedResultSet(underlying: WrappedResultSet) extends Implicits {
 
   def dateTime(columnIndex: Int): ZonedDateTime = zonedDateTime(columnIndex)
