@@ -267,6 +267,15 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           ids should equal(Seq(11, 12, 13, 14, 15, 21, 22, 23, 24, 25))
         }
 
+        // sub-query
+        val sp = SubQuery.syntax("sp").include(p)
+        val productId: Option[Int] = withSQL {
+          select(sqls"${sp(p).id} id")
+            .from(select.from(Product as p).where.eq(p.price, Price(80)).as(sp))
+        }.map(rs => rs.int("id")).single.apply()
+
+        productId should equal(Option(2))
+
         // sub-query, group by, having
         import sqls.{ sum, gt }
         val x = SubQuery.syntax("x").include(o, p)
