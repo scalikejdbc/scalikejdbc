@@ -381,7 +381,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
         val (n, found) = columns.zip(shortenedNames).foldLeft((1, false)) {
           case ((n, found), (column, shortened)) =>
             if (found) {
-              (n, found) // alread found
+              (n, found) // already found
             } else if (column == name) {
               (n, true) // original name is expected
             } else if (shortened == shortenedName) {
