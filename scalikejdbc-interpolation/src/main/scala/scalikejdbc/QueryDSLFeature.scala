@@ -310,7 +310,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      */
     def as(sq: SubQuerySQLSyntaxProvider): TableAsAliasSQLSyntax = {
       val syntax = sqls"(${this.toSQLSyntax}) ${SubQuery.as(sq)}"
-      TableAsAliasSQLSyntax(syntax.value, syntax.parameters)
+      TableAsAliasSQLSyntax(syntax.value, syntax.rawParameters)
     }
   }
 
