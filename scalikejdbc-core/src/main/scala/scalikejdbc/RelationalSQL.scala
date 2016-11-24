@@ -53,6 +53,10 @@ class OneToXSQL[A, E <: WithExtractor, Z](
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-one/one-to-many operation needs toOne(RS => Option[B]).map((A,B) => A) or toMany(RS => Option[B]).map((A,Seq(B) => A)."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one): OneToXSQL[A, E, Z] = {
+    new OneToXSQL(statement, rawParameters)(one)
+  }
+
   def toOne[B](to: WrappedResultSet => B): OneToOneSQL[A, B, E, Z] = {
     new OneToOneSQL(statement, rawParameters)(one)(to.andThen((b: B) => Option(b)))((a, b) => a.asInstanceOf[Z])
   }

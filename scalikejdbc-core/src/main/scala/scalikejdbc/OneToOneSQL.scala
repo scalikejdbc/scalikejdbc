@@ -36,6 +36,10 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-one extractor(one(RS => A).toOne(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toOne: WrappedResultSet => Option[B] = toOne, extractor: (A, B) => Z = extractor): OneToOneSQL[A, B, E, Z] = {
+    new OneToOneSQL(statement, rawParameters)(one)(toOne)(extractor)
+  }
+
   def map(extractor: (A, B) => Z): OneToOneSQL[A, B, HasExtractor, Z] = {
     new OneToOneSQL(statement, rawParameters)(one)(toOne)(extractor)
   }
@@ -76,6 +80,9 @@ class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](
     hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[Z] = {
     executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, statement, rawParameters, transform))
   }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toOne: WrappedResultSet => Option[B] = toOne, map: (A, B) => Z = map): OneToOneSQLToTraversable[A, B, E, Z] = {
+    new OneToOneSQLToTraversable(statement, rawParameters)(one)(toOne)(map)
+  }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
   private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toOne
@@ -94,6 +101,9 @@ class OneToOneSQLToList[A, B, E <: WithExtractor, Z](
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): List[Z] = {
     executeQuery[List](session, (session: DBSession) => toTraversable(session, statement, rawParameters, extractor).toList)
+  }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toOne: WrappedResultSet => Option[B] = toOne, extractor: (A, B) => Z = extractor): OneToOneSQLToList[A, B, E, Z] = {
+    new OneToOneSQLToList(statement, rawParameters)(one)(toOne)(extractor)
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
@@ -114,6 +124,9 @@ class OneToOneSQLToCollection[A, B, E <: WithExtractor, Z](
     hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, Z, C[Z]]): C[Z] = {
     executeQuery(session, (session: DBSession) => toTraversable(session, statement, rawParameters, extractor).to[C])
   }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toOne: WrappedResultSet => Option[B] = toOne, extractor: (A, B) => Z = extractor): OneToOneSQLToCollection[A, B, E, Z] = {
+    new OneToOneSQLToCollection(statement, rawParameters)(one)(toOne)(extractor)
+  }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
   private[scalikejdbc] def extractTo: WrappedResultSet => Option[B] = toOne
@@ -131,6 +144,9 @@ class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](
   import GeneralizedTypeConstraintsForWithExtractor._
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[Z] = {
     executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, statement, rawParameters, extractor)))
+  }
+  def copy(statement: String = statement, rawParameters: Seq[Any] = rawParameters, one: WrappedResultSet => A = one, toOne: WrappedResultSet => Option[B] = toOne, extractor: (A, B) => Z = extractor, isSingle: Boolean = isSingle): OneToOneSQLToOption[A, B, E, Z] = {
+    new OneToOneSQLToOption(statement, rawParameters)(one)(toOne)(extractor)(isSingle)
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
