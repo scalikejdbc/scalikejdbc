@@ -5,7 +5,7 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "3.0.0-SNAPSHOT"
+  lazy val _version = "3.0.0-M1"
 
   lazy val _organization = "org.scalikejdbc"
 
@@ -41,7 +41,7 @@ object ScalikeJDBCProjects extends Build {
     fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalatestVersion := "3.0.0",
+    scalatestVersion := "3.0.1",
     specs2Version := "3.8.6",
     //scalaVersion := "2.11.8",
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
@@ -120,13 +120,13 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.5"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.6"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "2.4.7"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "2.5.1"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
