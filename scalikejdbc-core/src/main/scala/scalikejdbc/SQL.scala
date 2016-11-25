@@ -560,7 +560,13 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
 
 }
 
-class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(key: Option[String]) {
+object SQLBatch {
+  def unapply(sqlObject: SQLBatch): Option[(String, Seq[Seq[Any]], Seq[String])] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags))
+  }
+}
+
+class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(val key: Option[String]) {
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     val f: DBSession => C[Long] = (session) => {
@@ -582,6 +588,12 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
 
 }
 
+object SQLBatchWithGeneratedKey {
+  def unapply(sqlObject: SQLBatchWithGeneratedKey): Option[(String, Seq[Seq[Any]], Seq[String], Option[String])] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
+  }
+}
+
 /**
  * SQL which execute java.sql.Statement#execute().
  *
@@ -591,9 +603,9 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
  * @param after after filter
  */
 class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
-    before: (PreparedStatement) => Unit
+    val before: (PreparedStatement) => Unit
 )(
-    after: (PreparedStatement) => Unit
+    val after: (PreparedStatement) => Unit
 ) {
 
   def apply()(implicit session: DBSession): Boolean = {
@@ -611,6 +623,12 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
 
 }
 
+object SQLExecution {
+  def unapply(sqlObject: SQLExecution): Option[(String, Seq[Any], Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.before, sqlObject.after))
+  }
+}
+
 /**
  * SQL which execute java.sql.Statement#executeUpdate().
  *
@@ -620,9 +638,9 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
  * @param after after filter
  */
 class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
-    before: (PreparedStatement) => Unit
+    val before: (PreparedStatement) => Unit
 )(
-    after: (PreparedStatement) => Unit
+    val after: (PreparedStatement) => Unit
 ) {
 
   def apply()(implicit session: DBSession): Int = session match {
@@ -640,13 +658,19 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
 
 }
 
+object SQLUpdate {
+  def unapply(sqlObject: SQLUpdate): Option[(String, Seq[Any], Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.before, sqlObject.after))
+  }
+}
+
 /**
  * SQL which execute java.sql.Statement#executeUpdate() and get generated key value.
  *
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(key: Any) {
+class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(val key: Any) {
 
   def apply()(implicit session: DBSession): Long = {
     val f: DBSession => Long = _.tags(tags: _*).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
@@ -661,6 +685,12 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any],
     // format: ON
   }
 
+}
+
+object SQLUpdateWithGeneratedKey {
+  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Option[(String, Seq[Any], Seq[String], Any)] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
+  }
 }
 
 trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[A] {
@@ -710,7 +740,7 @@ trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversa
  * @tparam A return type
  */
 class SQLToTraversableImpl[A, E <: WithExtractor](
-  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
+  override val statement: String, override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
@@ -729,6 +759,12 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
     new SQLToTraversableImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
+}
+
+object SQLToTraversableImpl {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToTraversableImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+    Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
+  }
 }
 
 /**
@@ -756,7 +792,7 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
 }
 
 class SQLToCollectionImpl[A, E <: WithExtractor](
-  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
+  override val statement: String, override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
@@ -775,6 +811,12 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
     new SQLToCollectionImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
+}
+
+object SQLToCollectionImpl {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToCollectionImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+    Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
+  }
 }
 
 /**
@@ -800,7 +842,7 @@ trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
  * @tparam A return type
  */
 class SQLToListImpl[A, E <: WithExtractor](
-  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
+  override val statement: String, override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
 )
@@ -819,6 +861,12 @@ class SQLToListImpl[A, E <: WithExtractor](
     new SQLToListImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
+}
+
+object SQLToListImpl {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToListImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+    Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
+  }
 }
 
 /**
@@ -850,10 +898,10 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
  * @tparam A return type
  */
 class SQLToOptionImpl[A, E <: WithExtractor](
-  override val statement: String, private[scalikejdbc] override val rawParameters: Seq[Any]
+  override val statement: String, override val rawParameters: Seq[Any]
 )(
   override val extractor: WrappedResultSet => A
-)(protected val isSingle: Boolean = true)
+)(val isSingle: Boolean = true)
     extends SQL[A, E](statement, rawParameters)(extractor)
     with SQLToOption[A, E] {
 
@@ -869,4 +917,10 @@ class SQLToOptionImpl[A, E <: WithExtractor](
     new SQLToOptionImpl[B, HasExtractor](statement, rawParameters)(f)(isSingle)
   }
 
+}
+
+object SQLToOptionImpl {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToOptionImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A, Boolean)] = {
+    Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor, sqlObject.isSingle))
+  }
 }

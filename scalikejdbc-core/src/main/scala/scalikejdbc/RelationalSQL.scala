@@ -49,7 +49,7 @@ trait AllOutputDecisionsUnsupported[Z, E <: scalikejdbc.WithExtractor] extends S
  */
 class OneToXSQL[A, E <: WithExtractor, Z](
   override val statement: String, override val rawParameters: Seq[Any]
-)(one: WrappedResultSet => A)
+)(val one: WrappedResultSet => A)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-one/one-to-many operation needs toOne(RS => Option[B]).map((A,B) => A) or toMany(RS => Option[B]).map((A,Seq(B) => A)."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
@@ -198,6 +198,9 @@ class OneToXSQL[A, E <: WithExtractor, Z](
 }
 
 object OneToXSQL {
+  def unapply[A, E <: WithExtractor, Z](sqlObject: OneToXSQL[A, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+    Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one))
+  }
   def handleException(e: Exception) = e match {
     case invalidColumn: InvalidColumnNameException =>
       throw new ResultSetExtractorException(
