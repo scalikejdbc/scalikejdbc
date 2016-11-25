@@ -47,6 +47,16 @@ object ScalikeJDBCProjects extends Build {
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
     javacOptions in doc := Seq("-source", "1.8"),
     scalacOptions ++= _scalacOptions,
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 11)) =>
+          "-target:jvm-1.8" :: Nil
+        case Some((2, 10)) =>
+          "-target:jvm-1.7" :: Nil
+        case _ =>
+          Nil
+      }
+    },
     scalacOptions in (Compile, doc) ++= Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
       "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
