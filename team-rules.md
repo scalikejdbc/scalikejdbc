@@ -6,7 +6,8 @@
 
 - major: Change only when the supported Scala major version changes:
   - Version 1 supports Scala 2.9 & 2.10
-  - Version 2 supports Scala 2.10, Scala 2.11, and ???
+  - Version 2 supports Scala 2.10, Scala 2.11 and Scala 2.12
+  - Version 3 supports Scala 2.10, Scala 2.11 and Scala 2.12
 - minor: Change to indicate functionality and API compatibility changes, the same minor version must provide the same functionality and APIs
 - fix: For releasing smaller improvements, bug fixes and new features
 
