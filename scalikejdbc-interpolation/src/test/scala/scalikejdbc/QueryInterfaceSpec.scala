@@ -206,8 +206,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
             .where(sqls.toAndConditionOpt(
               accountName.map(sqls.eq(a.name, _))
             ))
-        }.map {
-          rs => Order(o, p)(rs)
+        }.map { rs => Order(o, p)(rs)
         }.list.apply()
 
         findByOptionalAccountName(Some("Alice")).size should be(4)
@@ -790,5 +789,9 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     }
   }
 
+  it should "have result.name" in {
+    select(Product.syntax("p").result.name)
+    select(Product.column.name)
+  }
 }
 
