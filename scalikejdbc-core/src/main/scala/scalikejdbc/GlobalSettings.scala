@@ -54,10 +54,12 @@ object GlobalSettings {
    */
   var queryFailureListener: QueryFailureListener = (statement: String, params: Seq[Any], e: Throwable) => ()
 
+  type TaggedQueryCompletionListener = (String, Seq[Any], Long, Seq[String]) => Unit
+
   /**
    * Event handler to be called every query completion when specifying tags.
    */
-  var taggedQueryCompletionListener: (String, Seq[Any], Long, Seq[String]) => Unit = {
+  var taggedQueryCompletionListener: TaggedQueryCompletionListener = {
     (statement: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
   }
 
