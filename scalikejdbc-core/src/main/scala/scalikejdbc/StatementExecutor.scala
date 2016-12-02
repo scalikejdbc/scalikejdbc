@@ -281,7 +281,7 @@ case class StatementExecutor(
       }
       // call event handler
       settingsProvider.queryCompletionListener(GlobalSettings.queryCompletionListener).apply(template, singleParams, spentMillis)
-      GlobalSettings.taggedQueryCompletionListener(template, singleParams, spentMillis, tags)
+      settingsProvider.taggedQueryCompletionListener(GlobalSettings.taggedQueryCompletionListener).apply(template, singleParams, spentMillis, tags)
 
       // result from super.apply()
       result
@@ -294,8 +294,8 @@ case class StatementExecutor(
       super.apply(execute)
     } catch {
       case e: Exception =>
-        if (GlobalSettings.loggingSQLErrors) {
-          if (GlobalSettings.loggingSQLAndTime.singleLineMode) {
+        if (settingsProvider.loggingSQLErrors(GlobalSettings.loggingSQLErrors)) {
+          if (settingsProvider.loggingSQLAndTime(GlobalSettings.loggingSQLAndTime).singleLineMode) {
             log.error("[SQL Execution Failed] " + sqlString + " (Reason: " + e.getMessage + ")")
           } else {
             log.error("SQL execution failed (Reason: " + e.getMessage + "):" + eol + eol + "   " + sqlString + eol)
@@ -304,8 +304,8 @@ case class StatementExecutor(
           log.debug("Logging SQL errors is disabled.")
         }
         // call event handler
-        GlobalSettings.queryFailureListener.apply(template, singleParams, e)
-        GlobalSettings.taggedQueryFailureListener.apply(template, singleParams, e, tags)
+        settingsProvider.queryFailureListener(GlobalSettings.queryFailureListener).apply(template, singleParams, e)
+        settingsProvider.taggedQueryFailureListener(GlobalSettings.taggedQueryFailureListener).apply(template, singleParams, e, tags)
 
         throw e
     }
