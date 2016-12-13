@@ -90,7 +90,7 @@ object ConnectionPool extends LogSupport {
     implicit
     factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY,
     ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
-  ) {
+  ): Unit = {
 
     import scalikejdbc.JDBCUrl._
 

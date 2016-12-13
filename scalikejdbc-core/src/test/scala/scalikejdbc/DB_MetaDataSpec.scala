@@ -515,7 +515,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
     }
   }
 
-  private def execute(sqls: String*)(implicit session: DBSession) {
+  private def execute(sqls: String*)(implicit session: DBSession): Unit = {
     for (sql <- sqls) {
       try {
         SQL(sql).execute.apply()
