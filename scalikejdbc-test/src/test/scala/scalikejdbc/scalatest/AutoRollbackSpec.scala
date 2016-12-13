@@ -11,7 +11,7 @@ trait FlatSpecWithCommonTraits extends FlatSpec with Matchers with DBSettings wi
 
 class AutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 
-  override def fixture(implicit session: DBSession) {
+  override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into ScalaTest_members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
     SQL("insert into ScalaTest_members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
   }
@@ -34,7 +34,7 @@ class NamedAutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 
   override def db = NamedDB('db2).toDB
 
-  override def fixture(implicit session: DBSession) {
+  override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into scalatest_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
     SQL("insert into scalatest_members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
   }

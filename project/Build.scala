@@ -320,7 +320,7 @@ object ScalikeJDBCProjects extends Build {
     "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
-  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
+  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
   val _pomExtra = <url>http://scalikejdbc.org/</url>
       <licenses>
         <license>
