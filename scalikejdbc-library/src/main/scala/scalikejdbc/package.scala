@@ -55,7 +55,7 @@ package object scalikejdbc
   // -----
   // Loan Pattern everywhere
 
-  type Closable = { def close() }
+  type Closable = { def close(): Unit }
 
   def using[R <: Closable, A](resource: R)(f: R => A): A = LoanPattern.using(resource)(f)
 

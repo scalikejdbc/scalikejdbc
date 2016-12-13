@@ -47,7 +47,7 @@ case class StatementExecutor(
   /**
    * Initializes this instance.
    */
-  private def initialize() {
+  private def initialize(): Unit = {
     bindParams(singleParams)
     if (isBatch) {
       batchParamsList.clear()

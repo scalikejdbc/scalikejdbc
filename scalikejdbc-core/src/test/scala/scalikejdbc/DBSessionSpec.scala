@@ -456,7 +456,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     execute("java.sql/java.util mixed", date.toSqlDate, date.toSqlTime, date)
     execute("java.util.Date all", date, date, date)
 
-    def execute(label: String, date: Any, time: Any, timestamp: Any) {
+    def execute(label: String, date: Any, time: Any, timestamp: Any): Unit = {
       log.warn("datetime check: " + label)
       DB autoCommit {
         implicit session =>
