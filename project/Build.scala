@@ -288,9 +288,13 @@ object ScalikeJDBCProjects extends Build {
           "org.reactivestreams" %  "reactive-streams-tck" % _reactiveStreamsVersion % "test"
         ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       },
-      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
-        if (v.startsWith("2.12")) dir / "scala2.12"
-        else dir / "scala2.10"
+      unmanagedSourceDirectories in Compile += {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, 12)) =>
+            (sourceDirectory in Compile).value / "scala2.12"
+          case _ =>
+            (sourceDirectory in Compile).value / "scala2.10"
+        }
       }
     )
   ) dependsOn(scalikejdbcLibrary)
