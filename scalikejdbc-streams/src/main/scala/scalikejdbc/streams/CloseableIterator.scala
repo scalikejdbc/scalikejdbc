@@ -2,7 +2,7 @@ package scalikejdbc.streams
 
 import java.io.Closeable
 
-trait CloseableIterator[A] extends Iterator[A] with Closeable {
+trait CloseableIterator[+A] extends Iterator[A] with Closeable {
   self =>
 
   override def close(): Unit
