@@ -18,22 +18,22 @@ trait AsyncExecutor extends Closeable {
 object AsyncExecutor extends LogSupport {
 
   def apply(ec: ExecutionContext): AsyncExecutor = {
-    new AsyncExecutor {
+    new AsyncExecutor with ExecutionContextPreparable {
       override val executionContext: ExecutionContext = ec
 
-      override def execute(runnable: Runnable): Unit = executionContext.prepare().execute(runnable)
+      override def execute(runnable: Runnable): Unit = prepareExecution.execute(runnable)
 
       override def close(): Unit = ()
     }
   }
 
   def apply(executorService: ExecutorService, autoClose: Boolean = false): AsyncExecutor = {
-    new AsyncExecutor {
+    new AsyncExecutor with ExecutionContextPreparable {
       private[this] val executor = executorService
 
       override lazy val executionContext: ExecutionContext = ExecutionContext.fromExecutorService(executor)
 
-      override def execute(runnable: Runnable): Unit = executionContext.prepare().execute(runnable)
+      override def execute(runnable: Runnable): Unit = prepareExecution.execute(runnable)
 
       override def close(): Unit = if (autoClose) {
         executor.shutdownNow()
