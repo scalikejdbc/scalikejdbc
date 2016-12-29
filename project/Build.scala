@@ -34,7 +34,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val baseSettings = Seq(
     organization := _organization,
     version := _version,
-    publishTo <<= version { (v: String) => _publishTo(v) },
+    publishTo := _publishTo(version.value),
     publishMavenStyle := true,
     resolvers ++= _resolvers,
     // https://github.com/sbt/sbt/issues/2217
@@ -106,7 +106,7 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-core"),
     settings = baseSettings ++ mimaSettings ++ buildInfoSettings ++ Seq(
       name := "scalikejdbc-core",
-      sourceGenerators in Compile <+= buildInfo,
+      sourceGenerators in Compile += buildInfo.taskValue,
       buildInfoPackage := "scalikejdbc",
       buildInfoObject := "ScalikejdbcBuildInfo",
       buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
@@ -151,9 +151,13 @@ object ScalikeJDBCProjects extends Build {
             Nil
         }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       },
-      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
-        if (v.startsWith("2.10")) dir / "scala2.10"
-        else dir / "scala2.11"
+      unmanagedSourceDirectories in Compile += {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, 10)) =>
+            (sourceDirectory in Compile).value / "scala2.10"
+          case _ =>
+            (sourceDirectory in Compile).value / "scala2.11"
+        }
       }
     )
   )
