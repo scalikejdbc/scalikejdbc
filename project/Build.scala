@@ -290,7 +290,7 @@ object ScalikeJDBCProjects extends Build {
       },
       unmanagedSourceDirectories in Compile += {
         CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, 12)) =>
+          case Some((2, v)) if v >= 12 =>
             (sourceDirectory in Compile).value / "scala2.12"
           case _ =>
             (sourceDirectory in Compile).value / "scala2.10"
