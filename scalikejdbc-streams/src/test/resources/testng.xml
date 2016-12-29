@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="ReactiveStreamsTCK" verbose="2" >
+    <test name="DatabasePublisher">
+        <classes>
+            <class name="scalikejdbc.streams.DatabasePublisherTckTest" />
+        </classes>
+    </test>
+</suite>

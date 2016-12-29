@@ -12,6 +12,7 @@ object ScalikeJDBCProjects extends Build {
   // published dependency version
   lazy val _slf4jApiVersion = "1.7.21"
   lazy val _typesafeConfigVersion = "1.3.1"
+  lazy val _reactiveStreamsVersion = "1.0.0"
 
   // internal only
   lazy val _logbackVersion = "1.1.7"
@@ -269,6 +270,23 @@ object ScalikeJDBCProjects extends Build {
     )
   ) dependsOn(scalikejdbcCore)
 
+  // scalikejdbc-streams
+  lazy val scalikejdbcStreams = Project(
+    id = "streams",
+    base = file("scalikejdbc-streams"),
+    settings = baseSettings ++ mimaSettings ++ Seq(
+      name := "scalikejdbc-streams",
+      libraryDependencies ++= {
+        Seq(
+          "org.reactivestreams" %  "reactive-streams"     % _reactiveStreamsVersion % "compile",
+          "org.slf4j"           %  "slf4j-api"            % _slf4jApiVersion        % "compile",
+          "ch.qos.logback"      %  "logback-classic"      % _logbackVersion         % "test",
+          "org.reactivestreams" %  "reactive-streams-tck" % _reactiveStreamsVersion % "test"
+        ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
+      }
+    )
+  ) dependsOn(scalikejdbcLibrary)
+
   // scalikejdbc-support
   lazy val scalikejdbcSyntaxSupportMacro = Project(
     id = "syntax-support-macro",
@@ -363,6 +381,11 @@ object ScalikeJDBCProjects extends Build {
           <id>tkawachi</id>
           <name>Takashi Kawachi</name>
           <url>https://github.com/tkawachi</url>
+        </developer>
+        <developer>
+          <id>yoskhdia</id>
+          <name>Yoshitaka Okuda</name>
+          <url>https://github.com/yoskhdia</url>
         </developer>
       </developers>
 
