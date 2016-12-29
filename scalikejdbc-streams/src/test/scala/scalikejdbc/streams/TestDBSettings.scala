@@ -2,30 +2,48 @@ package scalikejdbc.streams
 
 import scalikejdbc._
 
-trait TestDBSettings {
-  val settings: SettingsProvider = SettingsProvider.default.copy(loggingSQLAndTime = s => s.copy(singleLineMode = true))
+import scala.util.control.Exception.ignoring
 
-  lazy val dbName = Symbol(this.getClass.getSimpleName)
+trait TestDBSettings {
 
   protected def openDB(): Unit = {
-    val url = s"jdbc:h2:mem:streams_test_${dbName.name};LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0"
-    val user = "user"
-    val password = "password"
-    val poolSettings = ConnectionPoolSettings(driverName = "org.h2.Driver")
-    Class.forName(poolSettings.driverName)
-    ConnectionPool.add(dbName, url, user, password, poolSettings)
+    if (!ConnectionPool.isInitialized()) {
+      // loading jdbc.properties
+      val props = new java.util.Properties
+      props.load(classOf[TestDBSettings].getClassLoader.getResourceAsStream("jdbc.properties"))
+      // loading JDBC driver
+      val driverClassName = props.getProperty("driverClassName")
+      Class.forName(driverClassName)
+      // preparing the connection pool settings
+      val poolSettings = ConnectionPoolSettings(initialSize = 1, maxSize = 100, driverName = driverClassName)
+      // JDBC settings
+      val url = props.getProperty("url")
+      val user = props.getProperty("user")
+      val password = props.getProperty("password")
+      ConnectionPool.singleton(url, user, password, poolSettings)
+    }
   }
 
-  protected def closeDB(): Unit = {
-    ConnectionPool.close(dbName)
+  protected def initializeFixtures(tableName: String, numberOfRecords: Int): Unit = {
+    implicit val settings = SettingsProvider.default.copy(loggingSQLAndTime = s => s.copy(enabled = false))
+    DB.localTx { implicit session =>
+      session.execute(s"create table $tableName (id integer primary key, name varchar(30))")
+
+      var i = 0
+      val delta = 2000
+      do {
+        val s = i * delta
+        val e = if ((s + delta) > numberOfRecords) numberOfRecords else s + delta
+        val batchParams: Seq[Seq[Any]] = ((s + 1) to e).map(i => Seq(i))
+        SQL(s"insert into $tableName (id) values (?)").batch(batchParams: _*).apply()
+        i += 1
+      } while ((numberOfRecords - 1) / delta >= i)
+    }
   }
 
-  protected def db: NamedDB = {
-    NamedDB(dbName, settings)
-  }
-
-  protected def loadFixtures(f: DBSession => Unit): Unit = {
-    val settings = SettingsProvider.default.copy(loggingSQLAndTime = s => s.copy(enabled = false))
-    NamedDB(dbName, settings).localTx(f)
+  protected def dropTable(tableName: String): Unit = {
+    ignoring(classOf[Throwable]) {
+      DB autoCommit { _.execute(s"drop table $tableName") }
+    }
   }
 }

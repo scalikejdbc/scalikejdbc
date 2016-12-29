@@ -6,28 +6,21 @@ import scalikejdbc._
 import scala.concurrent.{ ExecutionContext, Promise }
 
 class DatabasePublisherSpec extends AsyncFlatSpec with BeforeAndAfterAll with Matchers with LogSupport with TestDBSettings {
+  private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
+
   implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   override protected def beforeAll(): Unit = {
     openDB()
-
-    loadFixtures { implicit session =>
-      sql"drop table if exists users".execute().apply()
-      sql"create table users(id INT)".execute().apply()
-
-      for (i <- 1 to 10) {
-        sql"insert into users(id) values ($i)".execute().apply()
-      }
-    }
+    initializeFixtures(tableName, 2)
   }
 
   override protected def afterAll(): Unit = {
-    closeDB()
+    dropTable(tableName)
   }
 
   "DatabasePublisher" should "be subscribed" in {
     val promise = Promise[Boolean]()
-
     val subscriber = new SyncSubscriber[Int] {
       override protected def whenNext(element: Int): Boolean = {
         log.info(s"onNext element=$element")
@@ -45,8 +38,8 @@ class DatabasePublisherSpec extends AsyncFlatSpec with BeforeAndAfterAll with Ma
       }
     }
 
-    val publisher = db stream {
-      sql"select id from users".map(r => r.int("id")).cursor
+    val publisher = DB stream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).cursor
     }
 
     publisher.subscribe(subscriber)

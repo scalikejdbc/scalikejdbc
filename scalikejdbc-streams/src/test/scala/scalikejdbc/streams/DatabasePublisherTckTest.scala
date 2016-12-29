@@ -10,40 +10,31 @@ import scalikejdbc.streams.DatabasePublisherTckTest.User
 import scala.concurrent.ExecutionContext
 
 class DatabasePublisherTckTest extends PublisherVerification[User](DatabasePublisherTckTest.environment) with TestDBSettings {
+  private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
+
   implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   @BeforeClass
-  def setUpDb(): Unit = {
+  def setupTable(): Unit = {
     openDB()
-
-    loadFixtures { implicit session =>
-      sql"drop table if exists users".execute().apply()
-      sql"create table users(id INT)".execute().apply()
-
-      for (i <- 0 to 9) {
-        val delta = 2000
-        val s = i * delta
-        val batchParams: Seq[Seq[Any]] = ((s + 1) to (s + delta)).map(i => Seq(i))
-        sql"insert into users(id) values (?)".batch(batchParams: _*).apply()
-      }
-    }
+    initializeFixtures(tableName, 20000)
   }
 
   @AfterClass
-  def teardownDb(): Unit = {
-    closeDB()
+  def teardownTable(): Unit = {
+    dropTable(tableName)
   }
 
   override def createPublisher(elements: Long): Publisher[User] = {
     if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
-    db stream {
-      sql"select id from users limit ${elements}".map(r => User(r.int("id"))).cursor
+    DB stream {
+      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).cursor
     }
   }
 
   override def createFailedPublisher(): Publisher[User] = {
-    db stream {
-      sql"select id from users".map[User](_ => throw new RuntimeException("this is failed publisher.")).cursor
+    DB stream {
+      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).cursor
     }
   }
 }
