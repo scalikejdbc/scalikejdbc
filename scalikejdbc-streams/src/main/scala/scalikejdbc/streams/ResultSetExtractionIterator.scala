@@ -4,7 +4,15 @@ import java.sql.ResultSet
 
 import scalikejdbc.{ ResultSetCursor, WrappedResultSet }
 
-abstract class ExtractedResultIterator[+A](rs: ResultSet, autoClose: Boolean)(extract: WrappedResultSet => A) extends BufferedIterator[A] with CloseableIterator[A] {
+abstract class ResultSetExtractionIterator[+A](
+  rs: ResultSet,
+  autoClose: Boolean
+)(extract: WrappedResultSet => A)
+    extends BufferedIterator[A]
+    with CloseableIterator[A] {
+
+  // TODO: refactor
+
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var cached: A = null.asInstanceOf[A]
 
