@@ -9,11 +9,9 @@ import scala.concurrent.Promise
 import scala.util.control.NonFatal
 
 class StreamingContext[A, E <: WithExtractor](
-  subscriber: Subscriber[_],
-  database: StreamingDB[A, E],
-  val bufferNext: Boolean
-) extends Subscription
-    with LogSupport {
+    val publisher: DatabasePublisher[A, E],
+    val subscriber: Subscriber[_]
+) extends Subscription with LogSupport {
 
   /**
    * A volatile variable to enforce the happens-before relationship (see
@@ -34,29 +32,34 @@ class StreamingContext[A, E <: WithExtractor](
   private[this] var finished = false
 
   /**
-   * The total number of elements requested and not yet marked as delivered by the synchronous
-   * streaming action. Whenever this value drops to 0, streaming is suspended. When it is raised
-   * up from 0 in `request`, streaming is scheduled to be restarted. It is initially set to
-   * `Long.MinValue` when streaming starts. Any negative value above `Long.MinValue` indicates
-   * the actual demand at that point. It is reset to 0 when the initial streaming ends.
+   * The total number of elements requested and not yet marked as delivered by the synchronous streaming action.
+   * Whenever this value drops to 0, streaming is suspended.
+   * When it is raised up from 0 in `request`, streaming is scheduled to be restarted.
+   * It is initially set to `Long.MinValue` when streaming starts.
+   * Any negative value above `Long.MinValue` indicates the actual demand at that point.
+   * It is reset to 0 when the initial streaming ends.
    */
   private[this] val remaining = new AtomicLong(Long.MinValue)
 
   /**
-   * An error that will be signaled to the Subscriber when the stream is cancelled or
-   * terminated. This is used for signaling demand overflow in `request()` while guaranteeing
-   * that the `onError` message does not overlap with an active `onNext` call.
+   * An error that will be signaled to the Subscriber when the stream is cancelled or terminated.
+   * This is used for signaling demand overflow in `request()`
+   * while guaranteeing that the `onError` message does not overlap with an active `onNext` call.
    */
   private[streams] var deferredError: Throwable = null
 
   /**
-   * The state for a suspended streaming action. Must only be set from a synchronous action
-   * context.
+   * The state for a suspended streaming action.
+   * Must be set only from a synchronous action context.
    */
-  private[streams] var streamState: AnyRef = null
+  private[this] var currentIterator: CloseableIterator[A] = null
+
+  private[streams] def replaceCurrentIterator(newIterator: CloseableIterator[A]): Unit = {
+    currentIterator = newIterator
+  }
 
   /** The streaming action which may need to be continued with the suspended state */
-  private[streams] var streamingAction: StreamingAction[A, E] = null
+  private[streams] var emitter: StreamingEmitter[A, E] = null
 
   @volatile private[this] var cancelRequested = false
 
@@ -64,17 +67,16 @@ class StreamingContext[A, E <: WithExtractor](
   val streamingResultPromise: Promise[Null] = Promise[Null]()
 
   /**
-   * Indicate that the specified number of elements has been delivered. Returns the remaining
-   * demand. This is an atomic operation. It must only be called from the synchronous action
-   * context which performs the streaming.
+   * Indicate that the specified number of elements has been delivered. Returns the remaining demand.
+   * This is an atomic operation.
+   * It must only be called from the synchronous action context which performs the streaming.
    */
   def delivered(num: Long): Long = remaining.addAndGet(-num)
 
   /**
-   * Get the current demand that has not yet been marked as delivered and mark it as being in
-   * the current batch. When this value is negative, the initial streaming action is still
-   * running and the real demand can be computed by subtracting `Long.MinValue` from the
-   * returned value.
+   * Get the current demand that has not yet been marked as delivered and mark it as being in the current batch.
+   * When this value is negative, the initial streaming action is still running
+   * and the real demand can be computed by subtracting `Long.MinValue` from the returned value.
    */
   def demandBatch: Long = remaining.get()
 
@@ -84,8 +86,8 @@ class StreamingContext[A, E <: WithExtractor](
   def emit(v: Any): Unit = subscriber.asInstanceOf[Subscriber[Any]].onNext(v)
 
   /**
-   * Finish the stream with `onComplete` if it is not finished yet. May only be called from a
-   * synchronous action context.
+   * Finish the stream with `onComplete` if it is not finished yet.
+   * May only be called from a synchronous action context.
    */
   def tryOnComplete(): Unit = if (!finished && !cancelRequested) {
     if (log.isDebugEnabled) log.debug("Signaling onComplete()")
@@ -96,8 +98,8 @@ class StreamingContext[A, E <: WithExtractor](
   }
 
   /**
-   * Finish the stream with `onError` if it is not finished yet. May only be called from a
-   * synchronous action context.
+   * Finish the stream with `onError` if it is not finished yet.
+   * May only be called from a synchronous action context.
    */
   def tryOnError(t: Throwable): Unit = if (!finished) {
     if (log.isDebugEnabled) log.debug(s"Signaling onError($t)")
@@ -107,20 +109,29 @@ class StreamingContext[A, E <: WithExtractor](
     }
   }
 
-  /** Restart a suspended streaming action. Must only be called from the Subscriber context. */
+  /**
+   * Restart a suspended streaming action.
+   * Must only be called from the Subscriber context.
+   */
   def restartStreaming(): Unit = {
     val _ = sync
-    val s = streamState
-    if (s ne null) {
-      streamState = null
-      if (log.isDebugEnabled) log.debug("Scheduling stream continuation after transition from demand = 0")
+    val iteratorToConsume = currentIterator
+    if (iteratorToConsume != null) {
+      currentIterator = null
+      if (log.isDebugEnabled) {
+        log.debug("Scheduling stream continuation after transition from demand = 0")
+      }
 
-      database.scheduleSynchronousStreaming(
-        streamingAction,
-        this
-      )(s.asInstanceOf[CloseableIterator[A]])
+      publisher.scheduleSynchronousStreaming(
+        emitter,
+        this,
+        iteratorToConsume
+      )
+
     } else {
-      if (log.isDebugEnabled) log.debug("Saw transition from demand = 0, but no stream continuation available")
+      if (log.isDebugEnabled) {
+        log.debug("Saw transition from demand = 0, but no stream continuation available")
+      }
     }
   }
 

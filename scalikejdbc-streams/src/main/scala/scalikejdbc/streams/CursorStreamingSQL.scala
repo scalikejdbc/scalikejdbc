@@ -6,14 +6,14 @@ private[streams] class CursorStreamingSQL[A, E <: WithExtractor](
     override val underlying: SQL[A, E]
 ) extends StreamingSQL[A, E](underlying) {
 
-  override def statement = underlying.statement
-
-  override def parameters: Seq[Any] = underlying.parameters
-
   override def extractor: (WrappedResultSet) => A = underlying.extractor
 
-  override protected[streams] def setSessionAttributes(session: DBSession): DBSession = {
-    super.setSessionAttributes(session)
+  /**
+   * Builds a cursor supported session.
+   */
+  override private[streams] def updateDBSessionWithSQLAttributes(original: DBSession): DBSession = {
+
+    val session: DBSession = super.updateDBSessionWithSQLAttributes(original)
 
     // setup required settings to enable cursor operations
     session.connectionAttributes.driverName match {
@@ -38,10 +38,11 @@ private[streams] class CursorStreamingSQL[A, E <: WithExtractor](
          * - java.sql.ResultSet.TYPE_FORWARD_ONLY
          */
         session.conn.setAutoCommit(false)
-        session
 
-      case _ => session
+      case _ =>
     }
+
+    session
   }
 }
 

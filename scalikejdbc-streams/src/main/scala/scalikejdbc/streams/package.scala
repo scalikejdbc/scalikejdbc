@@ -14,8 +14,8 @@ package object streams { self =>
     executor: AsyncExecutor,
     context: DB.CPContext = DB.NoCPContext,
     settings: SettingsProvider = SettingsProvider.default
-  ): DatabasePublisher[A] = {
-    val db = StreamingDB[A, E](dbName, executor)
+  ): DatabasePublisher[A, E] = {
+    val db = StreamingDatabaseConfig[A, E](dbName, executor)
     db.stream(sql)
   }
 
@@ -33,7 +33,7 @@ package object streams { self =>
     def stream[A, E <: WithExtractor](sql: StreamingSQL[A, E])(implicit
       executor: AsyncExecutor,
       context: DB.CPContext = DB.NoCPContext,
-      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A] = {
+      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A, E] = {
 
       self.stream(sql)
     }
@@ -52,7 +52,7 @@ package object streams { self =>
 
     def stream[A, E <: WithExtractor](sql: StreamingSQL[A, E])(implicit
       executor: AsyncExecutor,
-      context: DB.CPContext = DB.NoCPContext): DatabasePublisher[A] = {
+      context: DB.CPContext = DB.NoCPContext): DatabasePublisher[A, E] = {
 
       // I think that it is better to use ConnectionPoolContext of NamedDB,
       // but since it can not be referenced in this scope,

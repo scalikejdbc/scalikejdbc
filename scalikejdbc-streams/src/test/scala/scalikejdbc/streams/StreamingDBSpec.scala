@@ -12,14 +12,14 @@ class StreamingDBSpec extends FlatSpec with Matchers {
     val publisher = DB stream {
       sql"select id from users".map(r => r.int("id")).cursor
     }
-    publisher shouldBe a[DatabasePublisher[_]]
+    publisher shouldBe a[DatabasePublisher[_, _]]
   }
 
   "NamedDB.stream" should "create DatabasePublisher" in {
     val publisher = NamedDB('default) stream {
       sql"select id from users".map(r => r.int("id")).cursor
     }
-    publisher shouldBe a[DatabasePublisher[_]]
+    publisher shouldBe a[DatabasePublisher[_, _]]
   }
 
 }

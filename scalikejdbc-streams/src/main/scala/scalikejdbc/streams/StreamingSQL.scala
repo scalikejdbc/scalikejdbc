@@ -2,19 +2,21 @@ package scalikejdbc.streams
 
 import scalikejdbc.{ DBSession, SQL, WithExtractor, WrappedResultSet }
 
-abstract class StreamingSQL[A, E <: WithExtractor](val underlying: SQL[A, E]) {
+abstract class StreamingSQL[A, E <: WithExtractor](
+    val underlying: SQL[A, E]
+) {
 
-  def statement: String
+  lazy val statement: String = underlying.statement
 
-  def parameters: Seq[Any]
+  lazy val parameters: Seq[Any] = underlying.parameters
 
   def extractor: WrappedResultSet => A
 
-  protected[streams] def setSessionAttributes(session: DBSession): DBSession = {
+  private[streams] def updateDBSessionWithSQLAttributes(session: DBSession): DBSession = {
     session
       .fetchSize(underlying.fetchSize)
       .tags(underlying.tags: _*)
       .queryTimeout(underlying.queryTimeout)
   }
-}
 
+}
