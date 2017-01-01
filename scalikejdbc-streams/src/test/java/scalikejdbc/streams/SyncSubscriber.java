@@ -1,4 +1,7 @@
 /*
+original code:
+https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/examples/src/main/java/org/reactivestreams/example/unicast/SyncSubscriber.java
+
 https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/LICENSE
 
 Licensed under Public Domain (CC0)
