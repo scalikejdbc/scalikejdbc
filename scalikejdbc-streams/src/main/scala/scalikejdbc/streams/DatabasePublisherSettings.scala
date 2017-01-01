@@ -1,24 +1,27 @@
 package scalikejdbc.streams
 
-import scalikejdbc.{ WithExtractor, _ }
+import scalikejdbc._
 
-case class DatabasePublisherSettings[A, E <: WithExtractor](
-  executor: AsyncExecutor,
-  name: Any,
-  connectionPoolContext: DB.CPContext,
-  settings: SettingsProvider,
-  bufferNext: Boolean = true
+/**
+ * Settings for DatabasePublisher.
+ */
+class DatabasePublisherSettings[A](
+  val dbName: Any,
+  val connectionPoolContext: DB.CPContext,
+  val settingsProvider: SettingsProvider,
+  val bufferNext: Boolean = true
 )
 
 object DatabasePublisherSettings {
 
-  def apply[A, E <: WithExtractor](
-    dbName: Any,
-    executor: AsyncExecutor
-  )(implicit
+  def apply[A](dbName: Any)(implicit
     context: DB.CPContext = DB.NoCPContext,
-    settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A, E] = {
-    new DatabasePublisherSettings(executor, dbName, context, settingsProvider)
+    settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A] = {
+    new DatabasePublisherSettings(
+      dbName,
+      context,
+      settingsProvider
+    )
   }
 
 }

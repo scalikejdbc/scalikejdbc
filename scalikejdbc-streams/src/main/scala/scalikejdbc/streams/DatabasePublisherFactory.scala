@@ -1,16 +1,21 @@
 package scalikejdbc.streams
 
-import scalikejdbc.WithExtractor
-import scalikejdbc.streams.sql.StreamingSQL
-
+/**
+ * Factory of DatabasePublisher.
+ */
 object DatabasePublisherFactory {
 
-  def createNewPublisher[A, E <: WithExtractor](
-    publisherSettings: DatabasePublisherSettings[A, E],
-    streamingSql: StreamingSQL[A, E]
-  ): DatabasePublisher[A, E] = {
-    val emitter = new StreamingEmitter[A, E]()
-    new DatabasePublisher[A, E](publisherSettings, streamingSql, emitter)
+  def createNewPublisher[A](
+    publisherSettings: DatabasePublisherSettings[A],
+    asyncExecutor: AsyncExecutor,
+    sql: StreamSQL[A]
+  ): DatabasePublisher[A] = {
+    new DatabasePublisher[A](
+      publisherSettings,
+      sql,
+      asyncExecutor,
+      new StreamEmitter[A]()
+    )
   }
 
 }

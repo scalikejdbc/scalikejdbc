@@ -16,8 +16,8 @@ import scalikejdbc.streams._
 // using a ThreadPoolExecutor that generates daemon threads is highly recommended
 implicit val executor = AsyncExecutor(scala.concurrent.ExecutionContext.global)
 
-val publisher = DB stream {
-  sql"select id from users".map(r => r.int("id")).cursor
+val publisher = DB readOnlyStream {
+  sql"select id from users".map(r => r.int("id")).iterator
 }
 publisher.subscribe(???)
 ```

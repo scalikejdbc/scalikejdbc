@@ -5,13 +5,19 @@ import scalikejdbc._
 
 import scala.concurrent.{ ExecutionContext, Promise }
 
-class DatabasePublisherSpec extends AsyncFlatSpec with BeforeAndAfterAll with Matchers with LogSupport with TestDBSettings {
+class DatabasePublisherSpec
+    extends AsyncFlatSpec
+    with BeforeAndAfterAll
+    with Matchers
+    with LogSupport
+    with TestDBSettings {
+
   private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
 
   implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   override protected def beforeAll(): Unit = {
-    openDB()
+    initDatabaseSettings()
     initializeFixtures(tableName, 2)
   }
 
@@ -38,12 +44,14 @@ class DatabasePublisherSpec extends AsyncFlatSpec with BeforeAndAfterAll with Ma
       }
     }
 
-    val publisher = DB stream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).cursor
+    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
     }
 
     publisher.subscribe(subscriber)
 
     promise.future.map(b => assert(b))
+
   }
+
 }

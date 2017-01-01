@@ -1,42 +1,46 @@
 package scalikejdbc
 
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
-import scalikejdbc.streams.sql.{ CursorStreamingSQL, StreamingSQL }
 
+/**
+ * Reactive Streams support.
+ *
+ * see also [[http://www.reactive-streams.org/]]
+ */
 package object streams { self =>
 
-  final val DefaultFetchSize: Int = 1000
+  val DefaultFetchSize: Int = 1000
 
-  def stream[A, E <: WithExtractor](
-    sql: StreamingSQL[A, E],
+  private def readOnlyStream[A, E <: WithExtractor](
+    sql: StreamSQL[A],
     dbName: Any = ConnectionPool.DEFAULT_NAME
   )(
     implicit
-    executor: AsyncExecutor,
-    context: DB.CPContext = DB.NoCPContext,
+    asyncExecutor: AsyncExecutor,
+    cpContext: DB.CPContext = DB.NoCPContext,
     settings: SettingsProvider = SettingsProvider.default
-  ): DatabasePublisher[A, E] = {
-    val publisherSettings = DatabasePublisherSettings[A, E](dbName, executor)
-    DatabasePublisherFactory.createNewPublisher[A, E](publisherSettings, sql)
+  ): DatabasePublisher[A] = {
+    val publisherSettings = DatabasePublisherSettings[A](dbName)
+    DatabasePublisherFactory.createNewPublisher[A](publisherSettings, asyncExecutor, sql)
   }
 
   /**
    * An implicit to enable the `DB.stream` method:
    *
    * {{{
-   * val publisher = DB.stream { implicit session =>
-   *   sql"select id from users".map(_.long("id")).cursor
+   * val publisher = DB.readOnlyStream { implicit session =>
+   *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
    */
-  implicit class StreamingDBConverter(val db: DB.type) extends AnyVal {
+  implicit class EnableDBCodeBlockToProvideDatabasePublisher(val db: DB.type) extends AnyVal {
 
-    def stream[A, E <: WithExtractor](sql: StreamingSQL[A, E])(implicit
-      executor: AsyncExecutor,
-      context: DB.CPContext = DB.NoCPContext,
-      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A, E] = {
+    def readOnlyStream[A](sql: StreamSQL[A])(implicit
+      asyncExecutor: AsyncExecutor,
+      cpContext: DB.CPContext = DB.NoCPContext,
+      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A] = {
 
-      self.stream(sql)
+      self.readOnlyStream(sql)
     }
   }
 
@@ -44,47 +48,42 @@ package object streams { self =>
    * An implicit to enable the `NamedDB('name).stream` method:
    *
    * {{{
-   * val publisher = NamedDB('name).stream { implicit session =>
-   *   sql"select id from users".map(_.long("id")).cursor
+   * val publisher = NamedDB('name).readOnlyStream { implicit session =>
+   *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
    */
-  implicit class StreamingNamedDBConverter(val db: NamedDB) extends AnyVal {
+  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(val db: NamedDB) extends AnyVal {
 
-    def stream[A, E <: WithExtractor](sql: StreamingSQL[A, E])(implicit
-      executor: AsyncExecutor,
-      context: DB.CPContext = DB.NoCPContext): DatabasePublisher[A, E] = {
+    def readOnlyStream[A, E <: WithExtractor](sql: StreamSQL[A])(implicit
+      asyncExecutor: AsyncExecutor,
+      cpContext: DB.CPContext = DB.NoCPContext): DatabasePublisher[A] = {
 
       // I think that it is better to use ConnectionPoolContext of NamedDB,
       // but since it can not be referenced in this scope,
       // so I am trying to receive it with implicit parameter.
       // (In addition, since NamedDB persists one DBConnection inside statically, it is not suitable for streaming.)
-      self.stream(sql, db.name)(executor, context, db.settingsProvider)
+      self.readOnlyStream(sql, db.name)(asyncExecutor, cpContext, db.settingsProvider)
     }
   }
 
   /**
-   * An implicit to enable the `cursor` method:
+   * An implicit to enable the `iterator` method:
    *
    * {{{
-   * val publisher = DB.stream { implicit session =>
-   *   sql"select id from users".map(_.long("id")).cursor
+   * val publisher = DB.readOnlyStream { implicit session =>
+   *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
    */
-  implicit class StreamingSQLConverter[A, E <: WithExtractor](val sql: SQL[A, E]) extends AnyVal {
+  implicit class FromSQLToStreamSQLConverter[A, E <: WithExtractor](val sql: SQL[A, E]) extends AnyVal {
 
-    def cursorWith(fetchSize: Int = DefaultFetchSize)(
+    def iterator()(
       implicit
       hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor
-    ): StreamingSQL[A, E] = {
-      CursorStreamingSQL[A, E](sql, fetchSize)
+    ): StreamSQL[A] = {
+      StreamSQL[A, E](sql, sql.fetchSize.getOrElse(DefaultFetchSize))
     }
-
-    def cursor()(
-      implicit
-      hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor
-    ): StreamingSQL[A, E] = cursorWith()
 
   }
 

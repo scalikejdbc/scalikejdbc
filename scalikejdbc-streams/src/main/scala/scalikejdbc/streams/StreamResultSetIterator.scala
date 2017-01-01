@@ -1,15 +1,17 @@
-package scalikejdbc.streams.iterator
+package scalikejdbc.streams
 
+import java.io.Closeable
 import java.sql.ResultSet
 
 import scalikejdbc.{ ResultSetCursor, WrappedResultSet }
 
-abstract class StreamingIterator[+A](
-  rs: ResultSet,
-  autoClose: Boolean
-)(extract: WrappedResultSet => A)
-    extends BufferedIterator[A]
-    with CloseableIterator[A] {
+/**
+ * An iterator which handles JDBC ResultSet in the fashion of Reactive Streams.
+ */
+class StreamResultSetIterator[+A](
+    rs: ResultSet,
+    autoClose: Boolean
+)(extract: WrappedResultSet => A) extends BufferedIterator[A] with Closeable { self =>
 
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var preFetchedNextValue: A = null.asInstanceOf[A]
@@ -56,6 +58,10 @@ abstract class StreamingIterator[+A](
       if (autoClose) close()
       finished()
     }
+  }
+
+  override def close(): Unit = {
+    self.close()
   }
 
 }
