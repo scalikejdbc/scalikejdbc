@@ -1,17 +1,18 @@
 package scalikejdbc.streams
 
 import scalikejdbc.WithExtractor
+import scalikejdbc.streams.iterator.CloseableIterator
 
 import scala.util.control.NonFatal
 
 class StreamingEmitter[A, E <: WithExtractor] {
 
   def emit(
-    context: StreamingContext[A, E],
+    subscription: DatabaseSubscription[A, E],
     limit: Long,
     iterator: CloseableIterator[A]
   ): CloseableIterator[A] = {
-    val bufferNext = context.publisher.db.bufferNext
+    val bufferNext = subscription.publisher.publisherSettings.bufferNext
     var count = 0L
 
     try {
@@ -20,7 +21,7 @@ class StreamingEmitter[A, E <: WithExtractor] {
         else count < limit && iterator.hasNext
       }) {
         count += 1
-        context.emit(iterator.next())
+        subscription.emit(iterator.next())
       }
     } catch {
       case NonFatal(ex) =>
@@ -35,7 +36,7 @@ class StreamingEmitter[A, E <: WithExtractor] {
   }
 
   def cancel(
-    context: StreamingContext[A, E],
+    context: DatabaseSubscription[A, E],
     iterator: CloseableIterator[A]
   ): Unit = {
     if (iterator != null) {

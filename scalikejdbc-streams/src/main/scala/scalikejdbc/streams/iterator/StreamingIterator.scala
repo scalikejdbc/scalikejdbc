@@ -1,4 +1,4 @@
-package scalikejdbc.streams
+package scalikejdbc.streams.iterator
 
 import java.sql.ResultSet
 
@@ -10,8 +10,6 @@ abstract class StreamingIterator[+A](
 )(extract: WrappedResultSet => A)
     extends BufferedIterator[A]
     with CloseableIterator[A] {
-
-  // TODO: refactor
 
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var preFetchedNextValue: A = null.asInstanceOf[A]

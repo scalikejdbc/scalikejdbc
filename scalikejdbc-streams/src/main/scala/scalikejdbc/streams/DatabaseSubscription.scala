@@ -3,27 +3,27 @@ package scalikejdbc.streams
 import java.util.concurrent.atomic.AtomicLong
 
 import org.reactivestreams.{ Subscriber, Subscription }
+import scalikejdbc.streams.iterator.CloseableIterator
 import scalikejdbc.{ DBSession, LogSupport, WithExtractor }
 
 import scala.concurrent.Promise
 import scala.util.control.NonFatal
 
-class StreamingContext[A, E <: WithExtractor](
+private[streams] class DatabaseSubscription[A, E <: WithExtractor](
     val publisher: DatabasePublisher[A, E],
     val subscriber: Subscriber[_]
 ) extends Subscription with LogSupport {
 
   /**
-   * A volatile variable to enforce the happens-before relationship (see
-   * [[https://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html]] and
-   * [[http://gee.cs.oswego.edu/dl/jmm/cookbook.html]]) when executing something in
-   * a synchronous action context. It is read when entering the context and written when leaving
-   * so that all writes to non-volatile variables within the context are visible to the next
-   * synchronous execution.
+   * A volatile variable to enforce the happens-before relationship
+   * (see [[https://docs.oracle.com/javase/specs/jls/se7/html/jls-17.html]] and [[http://gee.cs.oswego.edu/dl/jmm/cookbook.html]])
+   * when executing something in a synchronous action context.
+   * It is read when entering the context and written when leaving
+   * so that all writes to non-volatile variables within the context are visible
+   * to the next synchronous execution.
    */
   @volatile private[streams] var sync = 0
 
-  // TODO: use Option
   private[streams] var currentSession: DBSession = null
 
   def session: DBSession = currentSession
@@ -161,4 +161,5 @@ class StreamingContext[A, E <: WithExtractor](
     // allow the rest of the scheduled Action to run.
     if (remaining.getAndSet(Long.MaxValue) == 0L) restartStreaming()
   }
+
 }

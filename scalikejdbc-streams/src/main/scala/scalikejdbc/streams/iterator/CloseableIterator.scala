@@ -1,4 +1,4 @@
-package scalikejdbc.streams
+package scalikejdbc.streams.iterator
 
 import java.io.Closeable
 

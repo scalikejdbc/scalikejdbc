@@ -1,6 +1,8 @@
 package scalikejdbc.streams
 
 import org.reactivestreams.{ Publisher, Subscriber }
+import scalikejdbc.streams.iterator.{ CloseableIterator, StreamingIterator }
+import scalikejdbc.streams.sql.StreamingSQL
 import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, LogSupport, NamedDB, SQL, WithExtractor }
 
 import scala.util.{ Failure, Success }
@@ -12,36 +14,41 @@ import scala.util.control.NonFatal
  * http://www.reactive-streams.org/
  */
 class DatabasePublisher[A, E <: WithExtractor](
-    val db: StreamingDatabaseConfig[A, E],
+    val publisherSettings: DatabasePublisherSettings[A, E],
     val streamingSql: StreamingSQL[A, E],
     val emitter: StreamingEmitter[A, E]
 ) extends Publisher[A] with LogSupport {
 
   override def subscribe(subscriber: Subscriber[_ >: A]): Unit = {
-    if (subscriber eq null) {
+    if (subscriber == null) {
       throw new NullPointerException("given a null Subscriber in subscribe. (see Reactive Streams spec, 1.9)")
     }
-    val context = new StreamingContext[A, E](this, subscriber)
-    val subscribed = try { subscriber.onSubscribe(context); true } catch {
-      case NonFatal(ex) =>
-        log.warn("Subscriber.onSubscribe failed unexpectedly", ex)
-        false
+    val subscription: DatabaseSubscription[A, E] = new DatabaseSubscription[A, E](this, subscriber)
+    val subscribed: Boolean = {
+      try {
+        subscriber.onSubscribe(subscription)
+        true
+      } catch {
+        case NonFatal(ex) =>
+          log.warn("Subscriber#onSubscribe failed unexpectedly", ex)
+          false
+      }
     }
     if (subscribed) {
       try {
-        context.emitter = emitter
-        scheduleSynchronousStreaming(context.emitter, context, null)
-        context.streamingResultPromise.future.onComplete {
-          case Success(_) => context.tryOnComplete()
-          case Failure(t) => context.tryOnError(t)
-        }(db.executor.executionContext)
-      } catch { case NonFatal(ex) => context.tryOnError(ex) }
+        subscription.emitter = emitter
+        scheduleSynchronousStreaming(subscription.emitter, subscription, null)
+        subscription.streamingResultPromise.future.onComplete {
+          case Success(_) => subscription.tryOnComplete()
+          case Failure(t) => subscription.tryOnError(t)
+        }(publisherSettings.executor.executionContext)
+      } catch { case NonFatal(ex) => subscription.tryOnError(ex) }
     }
   }
 
   private[streams] def scheduleSynchronousStreaming(
     emitter: StreamingEmitter[A, E],
-    ctx: StreamingContext[A, E],
+    subscription: DatabaseSubscription[A, E],
     iterator: CloseableIterator[A]
   ): Unit = {
     try {
@@ -49,37 +56,37 @@ class DatabasePublisher[A, E <: WithExtractor](
       val task: Runnable = new Runnable {
         private[this] def str(l: Long) = if (l != Long.MaxValue) l else "Inf"
         private[this] val debug = log.isDebugEnabled
-        private[this] val _ctx: StreamingContext[A, E] = ctx
+        private[this] val _subscription: DatabaseSubscription[A, E] = subscription
         private[this] val _iterator = iterator
 
         def run(): Unit = try {
           // must start with remaining iterator every time invoking this Runnable
           var remainingIterator = _iterator
-          val _ = _ctx.sync
+          val _ = _subscription.sync
 
           if (remainingIterator == null) {
-            borrowNewSessionAndSetAsCurrentSession(_ctx)
+            borrowNewSessionAndSetAsCurrentSession(_subscription)
           }
 
-          var demand: Long = _ctx.demandBatch
+          var demand: Long = _subscription.demandBatch
           var realDemand: Long = if (demand < 0) demand - Long.MinValue else demand
 
           do {
             try {
               debugLogStart(remainingIterator, realDemand)
 
-              if (_ctx.cancelled) {
+              if (_subscription.cancelled) {
                 // ------------------------
                 // cancelled stream
 
-                if (_ctx.deferredError != null) {
-                  throw _ctx.deferredError
+                if (_subscription.deferredError != null) {
+                  throw _subscription.deferredError
                 }
 
                 if (remainingIterator != null) { // streaming cancelled before finishing
                   val iteratorToConsume = remainingIterator
                   remainingIterator = null
-                  emitter.cancel(_ctx, iteratorToConsume)
+                  emitter.cancel(_subscription, iteratorToConsume)
                 }
 
               } else if (realDemand > 0 || remainingIterator == null) {
@@ -88,42 +95,42 @@ class DatabasePublisher[A, E <: WithExtractor](
 
                 val iteratorToConsume = {
                   if (remainingIterator != null) remainingIterator
-                  else issueQueryAndCreateNewIterator(ctx.session)
+                  else issueQueryAndCreateNewIterator(subscription.session)
                 }
                 remainingIterator = null
-                remainingIterator = emitter.emit(_ctx, realDemand, iteratorToConsume)
+                remainingIterator = emitter.emit(_subscription, realDemand, iteratorToConsume)
               }
 
               if (remainingIterator == null) { // streaming finished and cleaned up
-                releaseCurrentSession(_ctx, true)
-                _ctx.streamingResultPromise.trySuccess(null)
+                releaseCurrentSession(_subscription, true)
+                _subscription.streamingResultPromise.trySuccess(null)
               }
 
             } catch {
               case NonFatal(ex) =>
                 if (remainingIterator != null) {
                   try {
-                    emitter.cancel(_ctx, remainingIterator)
+                    emitter.cancel(_subscription, remainingIterator)
                   } catch { case NonFatal(_) => () }
                 }
-                releaseCurrentSession(_ctx, true)
+                releaseCurrentSession(_subscription, true)
                 throw ex
 
             } finally {
-              _ctx.replaceCurrentIterator(remainingIterator)
-              _ctx.sync = 0
+              _subscription.replaceCurrentIterator(remainingIterator)
+              _subscription.sync = 0
             }
 
             debugLogSentEvent(remainingIterator, realDemand)
 
-            demand = _ctx.delivered(demand)
+            demand = _subscription.delivered(demand)
             realDemand = if (demand < 0) demand - Long.MinValue else demand
 
           } while (remainingIterator != null && realDemand > 0)
 
           debugLogEnd(remainingIterator)
 
-        } catch { case NonFatal(ex) => _ctx.streamingResultPromise.tryFailure(ex) }
+        } catch { case NonFatal(ex) => _subscription.streamingResultPromise.tryFailure(ex) }
 
         // ------------------------------
         // debug logging
@@ -137,7 +144,7 @@ class DatabasePublisher[A, E <: WithExtractor](
         private[this] def debugLogSentEvent(currentIterator: CloseableIterator[A], realDemand: Long): Unit = {
           if (debug) {
             val message = if (currentIterator == null) {
-              s"Sent up to ${str(realDemand)} elements - Stream ${if (_ctx.cancelled) "cancelled" else "completely delivered"}"
+              s"Sent up to ${str(realDemand)} elements - Stream ${if (_subscription.cancelled) "cancelled" else "completely delivered"}"
             } else {
               s"Sent ${str(realDemand)} elements, more available - Performing atomic state transition"
             }
@@ -156,7 +163,7 @@ class DatabasePublisher[A, E <: WithExtractor](
         }
       }
 
-      db.executor.execute(task)
+      publisherSettings.executor.execute(task)
 
     } catch {
       case NonFatal(ex) =>
@@ -189,13 +196,16 @@ class DatabasePublisher[A, E <: WithExtractor](
     }
   }
 
-  private[this] def borrowNewSessionAndSetAsCurrentSession(context: StreamingContext[A, E]): Unit = {
-    val session = NamedDB(db.name, db.settings)(db.connectionPoolContext).autoClose(false).readOnlySession()
+  private[this] def borrowNewSessionAndSetAsCurrentSession(context: DatabaseSubscription[A, E]): Unit = {
+    val session: DBSession = {
+      val db = NamedDB(publisherSettings.name, publisherSettings.settings)(publisherSettings.connectionPoolContext)
+      db.autoClose(false).readOnlySession()
+    }
     context.currentSession = session
   }
 
   private[this] def releaseCurrentSession(
-    context: StreamingContext[A, E],
+    context: DatabaseSubscription[A, E],
     discardErrors: Boolean
   ): Unit = {
     try {

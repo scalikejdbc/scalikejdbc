@@ -1,6 +1,7 @@
 package scalikejdbc
 
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
+import scalikejdbc.streams.sql.{ CursorStreamingSQL, StreamingSQL }
 
 package object streams { self =>
 
@@ -15,8 +16,8 @@ package object streams { self =>
     context: DB.CPContext = DB.NoCPContext,
     settings: SettingsProvider = SettingsProvider.default
   ): DatabasePublisher[A, E] = {
-    val db = StreamingDatabaseConfig[A, E](dbName, executor)
-    db.stream(sql)
+    val publisherSettings = DatabasePublisherSettings[A, E](dbName, executor)
+    DatabasePublisherFactory.createNewPublisher[A, E](publisherSettings, sql)
   }
 
   /**
