@@ -8,7 +8,7 @@ import scalikejdbc.{ ResultSetCursor, WrappedResultSet }
 /**
  * An iterator which handles JDBC ResultSet in the fashion of Reactive Streams.
  */
-class StreamResultSetIterator[+A](
+private[streams] class StreamResultSetIterator[+A](
     rs: ResultSet,
     autoClose: Boolean
 )(extract: WrappedResultSet => A) extends BufferedIterator[A] with Closeable { self =>
@@ -16,7 +16,7 @@ class StreamResultSetIterator[+A](
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var preFetchedNextValue: A = null.asInstanceOf[A]
 
-  protected[this] final def finished(): A = {
+  protected[this] final def markedAsFinishedAndReturnNullValue(): A = {
     state = 2
     null.asInstanceOf[A]
   }
@@ -56,7 +56,7 @@ class StreamResultSetIterator[+A](
       res
     } else {
       if (autoClose) close()
-      finished()
+      markedAsFinishedAndReturnNullValue()
     }
   }
 

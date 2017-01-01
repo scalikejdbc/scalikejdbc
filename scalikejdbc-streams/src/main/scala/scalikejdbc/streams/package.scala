@@ -13,14 +13,14 @@ package object streams { self =>
 
   private def readOnlyStream[A, E <: WithExtractor](
     sql: StreamSQL[A],
-    dbName: Any = ConnectionPool.DEFAULT_NAME
+    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
   )(
     implicit
     asyncExecutor: AsyncExecutor,
     cpContext: DB.CPContext = DB.NoCPContext,
     settings: SettingsProvider = SettingsProvider.default
   ): DatabasePublisher[A] = {
-    val publisherSettings = DatabasePublisherSettings[A](dbName)
+    val publisherSettings = DatabasePublisherSettings[A](connectionPoolName)
     DatabasePublisherFactory.createNewPublisher[A](publisherSettings, asyncExecutor, sql)
   }
 

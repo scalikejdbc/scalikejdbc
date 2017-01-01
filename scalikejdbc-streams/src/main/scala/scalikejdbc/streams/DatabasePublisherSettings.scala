@@ -6,7 +6,7 @@ import scalikejdbc._
  * Settings for DatabasePublisher.
  */
 class DatabasePublisherSettings[A](
-  val dbName: Any,
+  val connectionPoolName: Any,
   val connectionPoolContext: DB.CPContext,
   val settingsProvider: SettingsProvider,
   val bufferNext: Boolean = true
@@ -14,11 +14,11 @@ class DatabasePublisherSettings[A](
 
 object DatabasePublisherSettings {
 
-  def apply[A](dbName: Any)(implicit
+  def apply[A](connectionPoolName: Any)(implicit
     context: DB.CPContext = DB.NoCPContext,
     settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A] = {
     new DatabasePublisherSettings(
-      dbName,
+      connectionPoolName,
       context,
       settingsProvider
     )

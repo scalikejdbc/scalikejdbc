@@ -149,7 +149,7 @@ private[streams] class DatabaseSubscription[A](
    * Restart a suspended streaming action.
    * Must only be called from the Subscriber context.
    */
-  private[streams] def restartStreaming(): Unit = {
+  private[this] def restartStreaming(): Unit = {
     val _ = sync
     val iteratorToConsume = currentIterator
     if (iteratorToConsume != null) {
@@ -354,7 +354,7 @@ private[streams] class DatabaseSubscription[A](
     }
     val session: DBSession = {
       val settings: DatabasePublisherSettings[A] = publisher.settings
-      val db: NamedDB = NamedDB(settings.dbName, settings.settingsProvider)(settings.connectionPoolContext)
+      val db: NamedDB = NamedDB(settings.connectionPoolName, settings.settingsProvider)(settings.connectionPoolContext)
       db.autoClose(false).readOnlySession()
     }
     _occupiedDBSession = session
