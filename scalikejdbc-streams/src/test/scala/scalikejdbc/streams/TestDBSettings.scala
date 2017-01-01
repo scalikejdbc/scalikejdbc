@@ -6,7 +6,7 @@ import scala.util.control.Exception.ignoring
 
 trait TestDBSettings {
 
-  protected def openDB(): Unit = {
+  protected def initDatabaseSettings(): Unit = {
     if (!ConnectionPool.isInitialized()) {
       // loading jdbc.properties
       val props = new java.util.Properties
@@ -46,4 +46,5 @@ trait TestDBSettings {
       DB autoCommit { _.execute(s"drop table $tableName") }
     }
   }
+
 }
