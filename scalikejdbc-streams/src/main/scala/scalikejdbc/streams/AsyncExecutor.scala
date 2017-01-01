@@ -7,39 +7,73 @@ import scalikejdbc.LogSupport
 
 import scala.concurrent.ExecutionContext
 
+/**
+ * Closeable executor which runs asynchronous operations.
+ */
 trait AsyncExecutor extends Closeable {
+
   def executionContext: ExecutionContext
 
   def execute(runnable: Runnable): Unit
 
   def close(): Unit
+
 }
 
 object AsyncExecutor extends LogSupport {
 
+  /**
+   * Returns AsyncExecutor built from ExecutionContext.
+   */
   def apply(ec: ExecutionContext): AsyncExecutor = {
-    new AsyncExecutor with ExecutionContextPreparable {
-      override val executionContext: ExecutionContext = ec
-
-      override def execute(runnable: Runnable): Unit = prepareExecution.execute(runnable)
-
-      override def close(): Unit = ()
-    }
+    new AsyncExecutorBuiltWithExecutionContext(ec)
   }
 
+  /**
+   * Returns AsyncExecutor built from ExecutorService.
+   */
   def apply(executorService: ExecutorService, autoClose: Boolean = false): AsyncExecutor = {
-    new AsyncExecutor with ExecutionContextPreparable {
-      private[this] val executor = executorService
+    new AsyncExecutorBuiltWithExecutorService(executorService, autoClose)
+  }
 
-      override lazy val executionContext: ExecutionContext = ExecutionContext.fromExecutorService(executor)
+  private class AsyncExecutorBuiltWithExecutionContext(
+    override val executionContext: ExecutionContext
+  ) extends AsyncExecutor
+      with ExecutionContextPreparable {
 
-      override def execute(runnable: Runnable): Unit = prepareExecution.execute(runnable)
+    override def execute(runnable: Runnable): Unit = {
+      preparedExecutionContext().execute(runnable)
+    }
 
-      override def close(): Unit = if (autoClose) {
-        executor.shutdownNow()
-        if (executor.awaitTermination(30, TimeUnit.SECONDS))
-          log.warn("Abandoning ThreadPoolExecutor (not yet destroyed after 30 seconds)")
-      } else ()
+    override def close(): Unit = ()
+
+  }
+
+  private class AsyncExecutorBuiltWithExecutorService(
+    executorService: ExecutorService,
+    autoClose: Boolean = false
+  ) extends AsyncExecutor
+      with ExecutionContextPreparable
+      with LogSupport {
+
+    override lazy val executionContext: ExecutionContext = {
+      ExecutionContext.fromExecutorService(executorService)
+    }
+
+    override def execute(runnable: Runnable): Unit = {
+      preparedExecutionContext().execute(runnable)
+    }
+
+    override def close(): Unit = {
+      if (autoClose) {
+        executorService.shutdownNow()
+        if (executorService.awaitTermination(30, TimeUnit.SECONDS) == false) {
+          log.warn("Failed to terminate ExecutorService after waiting 30 seconds")
+        }
+      } else {
+        ()
+      }
     }
   }
+
 }

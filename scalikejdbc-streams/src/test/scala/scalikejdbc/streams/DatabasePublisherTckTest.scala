@@ -9,14 +9,17 @@ import scalikejdbc.streams.DatabasePublisherTckTest.User
 
 import scala.concurrent.ExecutionContext
 
-class DatabasePublisherTckTest extends PublisherVerification[User](DatabasePublisherTckTest.environment) with TestDBSettings {
+class DatabasePublisherTckTest
+    extends PublisherVerification[User](DatabasePublisherTckTest.environment)
+    with TestDBSettings {
+
   private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
 
   implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   @BeforeClass
   def setupTable(): Unit = {
-    openDB()
+    initDatabaseSettings()
     initializeFixtures(tableName, 20000)
   }
 
@@ -27,20 +30,23 @@ class DatabasePublisherTckTest extends PublisherVerification[User](DatabasePubli
 
   override def createPublisher(elements: Long): Publisher[User] = {
     if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
-    DB stream {
-      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).cursor
+
+    DB readOnlyStream {
+      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
     }
   }
 
   override def createFailedPublisher(): Publisher[User] = {
-    DB stream {
-      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).cursor
+    DB readOnlyStream {
+      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).iterator
     }
   }
 }
 
 object DatabasePublisherTckTest {
+
   val environment = new TestEnvironment(150L, false)
 
   case class User(id: Int)
+
 }
