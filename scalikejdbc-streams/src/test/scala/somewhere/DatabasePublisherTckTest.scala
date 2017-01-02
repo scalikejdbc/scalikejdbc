@@ -43,6 +43,23 @@ class DatabasePublisherTckTest
   }
 
   /*
+   * Additional Tests
+   */
+
+  // If there is 0 record at the first data fetch, complete the streaming and should not leave the DBConnection unnecessarily open.
+  // test for https://github.com/scalikejdbc/scalikejdbc/pull/614/commits/0c1c120272fe49cde399a7e57a42f78701d5f830
+  @Test
+  def optional_spec105_shouldSignalOnCompleteWithoutRequestWhenResultSetIsEmptyAtFirstFetch(): Unit = {
+    optionalActivePublisherTest(0, true, new PublisherTestRun[User] {
+      override def run(pub: Publisher[User]): Unit = {
+        val sub = env.newManualSubscriber(pub)
+        sub.expectCompletion()
+        sub.expectNone()
+      }
+    })
+  }
+
+  /*
    * Override Tests
    *
    * If subscribe from DatabasePublisher, it have to complete the streaming and close the DB connection.
@@ -56,7 +73,7 @@ class DatabasePublisherTckTest
   // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L195-L216
   @Test
   override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(): Unit = {
-    activePublisherTest(5, false, new PublisherTestRun[User]() {
+    activePublisherTest(5, false, new PublisherTestRun[User] {
       @throws[InterruptedException]
       def run(pub: Publisher[User]) {
         val sub = env.newManualSubscriber(pub)
