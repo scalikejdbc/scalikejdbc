@@ -458,7 +458,7 @@ private[streams] class DatabaseSubscription[A](
         throw ex
     }
 
-    if ((bufferNext && iterator.hasNext) || count == realDemand) iterator
+    if ((bufferNext && iterator.hasNext) || (!bufferNext && count == realDemand)) iterator
     else null
   }
 
