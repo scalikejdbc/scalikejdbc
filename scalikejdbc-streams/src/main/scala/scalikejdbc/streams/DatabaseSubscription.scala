@@ -328,6 +328,7 @@ private[streams] class DatabaseSubscription[A](
             val _ = currentSubscription.sync
 
             if (remainingIterator == null) {
+              // need to start new session for this
               currentSubscription.borrowNewDBSession()
             }
 

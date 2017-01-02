@@ -1,5 +1,6 @@
 package somewhere
 
+import org.reactivestreams.example.unicast.SyncSubscriber
 import org.scalatest._
 import org.slf4j.LoggerFactory
 import scalikejdbc._
@@ -29,8 +30,8 @@ class DatabasePublisherSpec
   "DatabasePublisher" should "be subscribed" in {
     val promise = Promise[Boolean]()
     val subscriber = new SyncSubscriber[Int] {
-      override protected def whenNext(element: Int): Boolean = {
-        log.info(s"whenNext element=$element")
+      override def foreach(element: Int): Boolean = {
+        log.info(s"onNext element=$element")
         true
       }
 

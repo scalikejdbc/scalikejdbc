@@ -30,10 +30,10 @@ package object streams {
   }
 
   /**
-   * An implicit to enable the `DB.stream` method:
+   * An implicit to enable the `DB.readOnlyStream` method:
    *
    * {{{
-   * val publisher = DB.readOnlyStream { implicit session =>
+   * val publisher = DB.readOnlyStream {
    *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
@@ -50,10 +50,10 @@ package object streams {
   }
 
   /**
-   * An implicit to enable the `NamedDB('name).stream` method:
+   * An implicit to enable the `NamedDB('name).readOnlyStream` method:
    *
    * {{{
-   * val publisher = NamedDB('name).readOnlyStream { implicit session =>
+   * val publisher = NamedDB('name).readOnlyStream {
    *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
@@ -72,7 +72,7 @@ package object streams {
    * An implicit to enable the `iterator` method:
    *
    * {{{
-   * val publisher = DB.readOnlyStream { implicit session =>
+   * val publisher = DB.readOnlyStream {
    *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
