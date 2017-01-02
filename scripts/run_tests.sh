@@ -16,6 +16,7 @@ sbt \
   interpolation/test \
   syntax-support-macro/test \
   config/test \
+  streams/test \
   test/test > logs/test_stdout.log
 
 cp -p scalikejdbc-core/src/test/resources/jdbc_hsqldb.properties scalikejdbc-core/src/test/resources/jdbc.properties
