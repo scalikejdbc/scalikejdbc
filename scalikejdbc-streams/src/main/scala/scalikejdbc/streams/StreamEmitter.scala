@@ -31,7 +31,7 @@ class StreamEmitter[A] {
         throw ex
     }
 
-    if ((bufferNext && iterator.hasNext) || count == limit) iterator
+    if ((bufferNext && iterator.hasNext) || (!bufferNext && count == limit)) iterator
     else null
   }
 
