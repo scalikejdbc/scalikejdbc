@@ -10,7 +10,7 @@ trait TestDBSettings {
     if (!ConnectionPool.isInitialized()) {
       // loading jdbc.properties
       val props = new java.util.Properties
-      props.load(classOf[TestDBSettings].getClassLoader.getResourceAsStream("jdbc.properties"))
+      using(new java.io.FileInputStream("scalikejdbc-core/src/test/resources/jdbc.properties")) { in => props.load(in) }
       // loading JDBC driver
       val driverClassName = props.getProperty("driverClassName")
       Class.forName(driverClassName)
