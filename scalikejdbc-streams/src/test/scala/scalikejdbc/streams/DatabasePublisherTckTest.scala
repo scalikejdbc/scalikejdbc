@@ -1,9 +1,10 @@
 package scalikejdbc.streams
 
 import org.reactivestreams.Publisher
+import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
 import org.testng.SkipException
-import org.testng.annotations.{ AfterClass, BeforeClass }
+import org.testng.annotations.{ AfterClass, BeforeClass, Test }
 import scalikejdbc._
 import scalikejdbc.streams.DatabasePublisherTckTest.User
 
@@ -12,6 +13,7 @@ import scala.concurrent.ExecutionContext
 class DatabasePublisherTckTest
     extends PublisherVerification[User](DatabasePublisherTckTest.environment)
     with TestDBSettings {
+  private val env = DatabasePublisherTckTest.environment
 
   private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
 
@@ -40,6 +42,57 @@ class DatabasePublisherTckTest
     DB readOnlyStream {
       SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).iterator
     }
+  }
+
+  /*
+   * Override Tests
+   *
+   * If subscribe from DatabasePublisher, it have to complete the streaming and close the DB connection.
+   * The original TCK,
+   * - required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements
+   * - optional_spec111_maySupportMultiSubscribe
+   * will not cancel the streaming after testing. Therefore, we override these.
+   */
+
+  // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.1
+  // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L195-L216
+  @Test
+  override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(): Unit = {
+    activePublisherTest(5, false, new PublisherTestRun[User]() {
+      @throws[InterruptedException]
+      def run(pub: Publisher[User]) {
+        val sub = env.newManualSubscriber(pub)
+        sub.expectNone(String.format("Publisher %s produced value before the first `request`: ", pub))
+        sub.request(1)
+        sub.nextElement(String.format("Publisher %s produced no element after first `request`", pub))
+        sub.expectNone(String.format("Publisher %s produced unrequested: ", pub))
+        sub.request(1)
+        sub.request(2)
+        sub.nextElements(3, env.defaultTimeoutMillis, String.format("Publisher %s produced less than 3 elements after two respective `request` calls", pub))
+        sub.expectNone(String.format("Publisher %sproduced unrequested ", pub))
+
+        // clean up for Connection release
+        sub.cancel()
+      }
+    })
+  }
+
+  // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.11
+  // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L540-L552
+  @Test
+  override def optional_spec111_maySupportMultiSubscribe(): Unit = {
+    optionalActivePublisherTest(1, false, new PublisherTestRun[User] {
+      @throws[Throwable]
+      override def run(pub: Publisher[User]): Unit = {
+        val sub1 = env.newManualSubscriber(pub)
+        val sub2 = env.newManualSubscriber(pub)
+        env.verifyNoAsyncErrors()
+
+        // clean up for Connection release
+        sub1.cancel()
+        sub2.cancel()
+      }
+    })
   }
 }
 
