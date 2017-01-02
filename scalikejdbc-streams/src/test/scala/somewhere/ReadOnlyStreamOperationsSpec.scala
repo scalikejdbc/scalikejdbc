@@ -1,13 +1,12 @@
-package scalikejdbc.streams
+package somewhere
 
 import org.scalatest._
 import scalikejdbc._
+import scalikejdbc.streams._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ReadOnlyStreamOperationsSpec extends FlatSpec with Matchers {
-
-  implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   "DB.readOnlyStream" should "create DatabasePublisher" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {

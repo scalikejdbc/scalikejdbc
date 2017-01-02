@@ -1,22 +1,25 @@
 package scalikejdbc.streams
 
-import java.io.Closeable
-import java.util.concurrent.{ ExecutorService, TimeUnit }
-
 import scalikejdbc.LogSupport
 
 import scala.concurrent.ExecutionContext
 
 /**
- * Closeable executor which runs asynchronous operations.
+ * Executes asynchronous operations.
+ *
+ * This class properly closes a closeable internal state if exists.
  */
-trait AsyncExecutor extends Closeable {
+private[streams] trait AsyncExecutor {
 
+  /**
+   * Returns current ExecutionContext.
+   */
   def executionContext: ExecutionContext
 
+  /**
+   * Runs an asynchronous operation.
+   */
   def execute(runnable: Runnable): Unit
-
-  def close(): Unit
 
 }
 
@@ -29,50 +32,12 @@ object AsyncExecutor extends LogSupport {
     new AsyncExecutorBuiltWithExecutionContext(ec)
   }
 
-  /**
-   * Returns AsyncExecutor built from ExecutorService.
-   */
-  def apply(executorService: ExecutorService, autoClose: Boolean = false): AsyncExecutor = {
-    new AsyncExecutorBuiltWithExecutorService(executorService, autoClose)
-  }
-
   private class AsyncExecutorBuiltWithExecutionContext(
-    override val executionContext: ExecutionContext
-  ) extends AsyncExecutor
-      with ExecutionContextPreparable {
+      override val executionContext: ExecutionContext
+  ) extends AsyncExecutor with ExecutionContextPreparable {
 
     override def execute(runnable: Runnable): Unit = {
       preparedExecutionContext().execute(runnable)
-    }
-
-    override def close(): Unit = ()
-
-  }
-
-  private class AsyncExecutorBuiltWithExecutorService(
-    executorService: ExecutorService,
-    autoClose: Boolean = false
-  ) extends AsyncExecutor
-      with ExecutionContextPreparable
-      with LogSupport {
-
-    override lazy val executionContext: ExecutionContext = {
-      ExecutionContext.fromExecutorService(executorService)
-    }
-
-    override def execute(runnable: Runnable): Unit = {
-      preparedExecutionContext().execute(runnable)
-    }
-
-    override def close(): Unit = {
-      if (autoClose) {
-        executorService.shutdownNow()
-        if (executorService.awaitTermination(30, TimeUnit.SECONDS) == false) {
-          log.warn("Failed to terminate ExecutorService after waiting 30 seconds")
-        }
-      } else {
-        ()
-      }
     }
   }
 

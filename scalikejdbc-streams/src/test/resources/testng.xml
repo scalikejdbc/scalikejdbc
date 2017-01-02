@@ -3,7 +3,7 @@
 <suite name="ReactiveStreamsTCK" verbose="2" >
     <test name="DatabasePublisher">
         <classes>
-            <class name="scalikejdbc.streams.DatabasePublisherTckTest" />
+            <class name="somewhere.DatabasePublisherTckTest" />
         </classes>
     </test>
 </suite>

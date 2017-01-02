@@ -5,20 +5,38 @@ import scalikejdbc._
 /**
  * Settings for DatabasePublisher.
  */
-class DatabasePublisherSettings[A](
-  val connectionPoolName: Any,
+private[streams] class DatabasePublisherSettings[A](
+  /**
+   * Connection pool name.
+   */
+  val dbName: Any,
+
+  /**
+   * Context for connection pool
+   */
   val connectionPoolContext: DB.CPContext,
+
+  /**
+   * Connection pool settings provider.
+   */
   val settingsProvider: SettingsProvider,
+
+  /**
+   * DatabasePublisher has a buffer internally if true.
+   */
   val bufferNext: Boolean = true
 )
 
 object DatabasePublisherSettings {
 
-  def apply[A](connectionPoolName: Any)(implicit
+  /**
+   * Creates and returns a DatabasePublisherSettings.
+   */
+  def apply[A](dbName: Any)(implicit
     context: DB.CPContext = DB.NoCPContext,
     settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A] = {
     new DatabasePublisherSettings(
-      connectionPoolName,
+      dbName,
       context,
       settingsProvider
     )
