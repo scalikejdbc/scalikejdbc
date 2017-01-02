@@ -1,4 +1,4 @@
-package scalikejdbc.streams
+package somewhere
 
 import org.reactivestreams.Publisher
 import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
@@ -6,9 +6,9 @@ import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
 import org.testng.SkipException
 import org.testng.annotations.{ AfterClass, BeforeClass, Test }
 import scalikejdbc._
-import scalikejdbc.streams.DatabasePublisherTckTest.User
-
-import scala.concurrent.ExecutionContext
+import scalikejdbc.streams._
+import somewhere.DatabasePublisherTckTest.User
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class DatabasePublisherTckTest
     extends PublisherVerification[User](DatabasePublisherTckTest.environment)
@@ -16,8 +16,6 @@ class DatabasePublisherTckTest
   private val env = DatabasePublisherTckTest.environment
 
   private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
-
-  implicit val executor = AsyncExecutor(ExecutionContext.global)
 
   @BeforeClass
   def setupTable(): Unit = {

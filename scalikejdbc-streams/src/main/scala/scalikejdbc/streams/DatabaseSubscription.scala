@@ -6,13 +6,21 @@ import org.reactivestreams.{ Subscriber, Subscription }
 import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, LogSupport, NamedDB }
 
 import scala.concurrent.Promise
+import scala.util.{ Failure, Success }
 import scala.util.control.NonFatal
 
 /**
  * A subscription of DatabasePublisher
  */
 private[streams] class DatabaseSubscription[A](
+    /**
+     * DatabasePublisher in the fashion of Reactive Streams.
+     */
     val publisher: DatabasePublisher[A],
+
+    /**
+     * Subscriber in the fashion of Reactive Streams.
+     */
     val subscriber: Subscriber[_ >: A]
 ) extends Subscription with LogSupport {
 
@@ -20,7 +28,10 @@ private[streams] class DatabaseSubscription[A](
   // Internal state
   // -----------------------------------------------
 
-  private lazy val sql = publisher.sql
+  /**
+   * Stream ready SQL object.
+   */
+  private lazy val sql: StreamReadySQL[A] = publisher.sql
 
   /**
    * A volatile variable to enforce the happens-before relationship when executing something in a synchronous action context.
@@ -46,30 +57,37 @@ private[streams] class DatabaseSubscription[A](
   private var currentIterator: StreamResultSetIterator[A] = null
 
   /**
+   * The Promise to complete when streaming has finished.
+   */
+  private val endOfStream: Promise[Null] = Promise[Null]()
+
+  /**
    * The total number of elements requested and not yet marked as delivered by the synchronous streaming action.
-   * Whenever this value drops to 0, streaming is suspended.
-   * When it is raised up from 0 in `request`, streaming is scheduled to be restarted.
-   * It is initially set to `Long.MinValue` when streaming starts.
-   * Any negative value above `Long.MinValue` indicates the actual demand at that point.
+   *
+   * Whenever the value drops to 0, streaming is suspended.
+   * The value is initially set to `Long.MinValue` when the streaming starts.
+   * When the value is raised up from 0 in #request(Long), the streaming is scheduled to be restarted.
+   * Any negative value of more than `Long.MinValue` indicates the actual demand at that point.
    * It is reset to 0 when the initial streaming ends.
    */
-  private[this] val _numberOfRemainingElements = new AtomicLong(Long.MinValue)
+  private[this] val _numberOfRemainingElements: AtomicLong = new AtomicLong(Long.MinValue)
 
   /**
    * Returns true if it has been cancelled by the Subscriber.
    */
   @volatile
-  private[this] var _cancelRequested = false
+  private[this] var _cancelRequested: Boolean = false
 
   /**
    * Whether the Subscriber has been signaled with `onComplete` or `onError`.
    */
-  private[this] var _isFinished = false
+  private[this] var _isFinished: Boolean = false
 
   /**
    * An error that will be signaled to the Subscriber when the stream is cancelled or terminated.
-   * This is used for signaling demand overflow in `request()`
-   * while guaranteeing that the `onError` message does not overlap with an active `onNext` call.
+   *
+   * This is used for signaling demand overflow in #request(Long)
+   * while guaranteeing that the #onError(Throwable) message does not overlap with an active #onNext(A) call.
    */
   private[this] var _deferredError: Throwable = null
 
@@ -77,28 +95,45 @@ private[streams] class DatabaseSubscription[A](
   // Reactive Streams Subscription APIs
   // -----------------------------------------------
 
-  override def request(l: Long): Unit = {
-    if (!_cancelRequested) {
-      if (l <= 0) {
-        _deferredError = new IllegalArgumentException("Requested count must not be <= 0 (see Reactive Streams spec, 3.9)")
+  /**
+   * No events will be sent by a Publisher until demand is signaled via this method.
+   */
+  override def request(n: Long): Unit = {
+    if (_cancelRequested == false) {
+      if (n <= 0) {
+        // 3. Subscription - 9
+        // see: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+        //
+        // While the Subscription is not cancelled, Subscription.request(long n)
+        // MUST signal onError with a java.lang.IllegalArgumentException if the argument is <= 0.
+        // The cause message MUST include a reference to this rule and/or quote the full rule.
+        //
+        _deferredError = new IllegalArgumentException("The n of Subscription#request(long n) must not be larger than 0 (Reactive Streams spec, 3.9)")
+
         cancel()
+
       } else {
-        // If a large number of requests are signaled, it will continue to receive the request signal (even though it might not stabilize),
-        // even if it goes beyond Long.MaxValue. Because the record in the database is finite and streaming ends when it reaches its end.
-        // Also, if there is a request of Long.MaxValue + Long.MaxValue + 2 at the time of continuity check of the (first) streaming loop,
-        // it will be reset to Long.MinValue so there means no request, but the next request It will be signaled soon, so it would not be a serious problem.
-        // ReactiveStreams Spec 3.17 has "effectively unbounded"
-        // -> As it is not feasibly reachable with current or foreseen hardware within
-        //    a reasonable amount of time (1 element per nanosecond would take 292 years) to fulfill a demand of 2^63-1,
-        //    it is allowed for a Publisher to stop tracking demand beyond this point.
-        if (!_cancelRequested && _numberOfRemainingElements.getAndAdd(l) == 0L) restartStreaming()
+        // 3. Subscription - 17
+        // see: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#3-subscription-code
+        //
+        // A Subscription MUST support an unbounded number of calls to request
+        // and MUST support a demand (sum requested - sum delivered) up to 2^63-1 (java.lang.Long.MAX_VALUE).
+        // A demand equal or greater than 2^63-1 (java.lang.Long.MAX_VALUE) MAY be considered by the Publisher as “effectively unbounded”[3].
+        //
+        if (_cancelRequested == false && _numberOfRemainingElements.getAndAdd(n) == 0L) {
+          restartStreaming()
+        }
       }
     }
   }
 
+  /**
+   * Requests the Publisher to stop sending data and clean up resources.
+   */
   override def cancel(): Unit = if (!_cancelRequested) {
     _cancelRequested = true
-    // Restart streaming because cancelling requires closing the result set and the session from within a synchronous action context.
+
+    // restart the streaming here because cancelling it requires closing the occupied database session.
     // This will also complete the result Promise and thus allow the rest of the scheduled Action to run.
     if (_numberOfRemainingElements.getAndSet(Long.MaxValue) == 0L) {
       restartStreaming()
@@ -110,188 +145,44 @@ private[streams] class DatabaseSubscription[A](
   // -----------------------------------------------
 
   /**
-   * Emits single value to the subscriber.
+   * Prepares the completion handler of the current streaming process.
    */
-  private[streams] def emit(v: A): Unit = subscriber.onNext(v)
+  private[streams] def prepareCompletionHandler(): Unit = {
+    implicit val ec = publisher.asyncExecutor.executionContext
+    endOfStream.future.onComplete {
+      case Success(_) => onComplete()
+      case Failure(t) => onError(t)
+    }
+  }
 
   /**
-   * The Promise to complete when streaming has finished.
+   * Finishes the streaming when some error happens.
    */
-  private[streams] val streamingResultPromise: Promise[Null] = Promise[Null]()
-
-  /**
-   * Finishes the stream with `onComplete` if it is not finished yet.
-   * May only be called from a synchronous action context.
-   */
-  private[streams] def tryOnComplete(): Unit = {
-    if (!_isFinished && !_cancelRequested) {
-      if (log.isDebugEnabled) log.debug("Signaling onComplete()")
+  private[streams] def onError(t: Throwable): Unit = {
+    if (!_isFinished) {
+      if (log.isDebugEnabled) {
+        log.debug(s"Subscriber#onError exception: $t")
+      }
       _isFinished = true
-      try subscriber.onComplete() catch {
-        case NonFatal(ex) => log.warn("Subscriber.onComplete failed unexpectedly", ex)
+
+      try {
+        subscriber.onError(t)
+      } catch {
+        case NonFatal(ex) => log.warn(s"Subscriber#onError unexpectedly failed because ${ex.getMessage}", ex)
       }
     }
   }
 
   /**
-   * Finish the stream with `onError` if it is not finished yet.
-   * May only be called from a synchronous action context.
+   * Starts new streaming.
    */
-  private[streams] def tryOnError(t: Throwable): Unit = if (!_isFinished) {
-    if (log.isDebugEnabled) log.debug(s"Signaling onError($t)")
-    _isFinished = true
-    try subscriber.onError(t) catch {
-      case NonFatal(ex) => log.warn("Subscriber.onError failed unexpectedly", ex)
-    }
-  }
-
-  /**
-   * Restart a suspended streaming action.
-   * Must only be called from the Subscriber context.
-   */
-  private[this] def restartStreaming(): Unit = {
-    val _ = sync
-    val iteratorToConsume = currentIterator
-    if (iteratorToConsume != null) {
-      currentIterator = null
-      if (log.isDebugEnabled) {
-        log.debug("Scheduling stream continuation after transition from demand = 0")
-      }
-
-      scheduleSynchronousStreaming(iteratorToConsume)
-
-    } else {
-      if (log.isDebugEnabled) {
-        log.debug("Saw transition from demand = 0, but no stream continuation available")
-      }
-    }
-  }
-
-  private[streams] def scheduleSynchronousStreaming(iterator: StreamResultSetIterator[A]): Unit = {
-
-    val currentSubscription = this
-
-    try {
-      val task: Runnable = new Runnable {
-        private[this] def str(l: Long) = if (l != Long.MaxValue) l else "Inf"
-        private[this] val debug = log.isDebugEnabled
-        private[this] val _iterator = iterator
-
-        def run(): Unit = try {
-          // must start with remaining iterator every time invoking this Runnable
-          var remainingIterator = _iterator
-          val _ = currentSubscription.sync
-
-          if (remainingIterator == null) {
-            currentSubscription.borrowNewDBSession()
-          }
-
-          var demand: Long = currentSubscription.demandBatch
-          var realDemand: Long = if (demand < 0) demand - Long.MinValue else demand
-
-          do {
-            try {
-              debugLogStart(remainingIterator, realDemand)
-
-              if (currentSubscription.cancelled) {
-                // ------------------------
-                // cancelled stream
-
-                if (currentSubscription.deferredError != null) {
-                  throw currentSubscription.deferredError
-                }
-
-                if (remainingIterator != null) { // streaming cancelled before finishing
-                  val iteratorToConsume = remainingIterator
-                  remainingIterator = null
-                  publisher.streamEmitter.cancel(currentSubscription, iteratorToConsume)
-                }
-
-              } else if (realDemand > 0 || remainingIterator == null) {
-                // ------------------------
-                // proceed with remaining iterator
-
-                val iteratorToConsume: StreamResultSetIterator[A] = {
-                  if (remainingIterator != null) remainingIterator
-                  else currentSubscription.issueQueryAndCreateNewIterator()
-                }
-                remainingIterator = null
-                remainingIterator = publisher.streamEmitter.emit(currentSubscription, realDemand, iteratorToConsume)
-              }
-
-              if (remainingIterator == null) { // streaming finished and cleaned up
-                currentSubscription.releaseOccupiedDBSession(true)
-                currentSubscription.streamingResultPromise.trySuccess(null)
-              }
-
-            } catch {
-              case NonFatal(ex) =>
-                if (remainingIterator != null) {
-                  try {
-                    publisher.streamEmitter.cancel(currentSubscription, remainingIterator)
-                  } catch { case NonFatal(_) => () }
-                }
-                currentSubscription.releaseOccupiedDBSession(true)
-                throw ex
-
-            } finally {
-              currentSubscription.currentIterator = remainingIterator
-              currentSubscription.sync = 0
-            }
-
-            debugLogSentEvent(remainingIterator, realDemand)
-
-            demand = currentSubscription.saveNumberOfDeliveredElementsAndReturnRemainingDemand(demand)
-            realDemand = if (demand < 0) demand - Long.MinValue else demand
-
-          } while (remainingIterator != null && realDemand > 0)
-
-          debugLogEnd(remainingIterator)
-
-        } catch { case NonFatal(ex) => currentSubscription.streamingResultPromise.tryFailure(ex) }
-
-        // ------------------------------
-        // debug logging
-
-        private[this] def debugLogStart(currentIterator: StreamResultSetIterator[A], realDemand: Long): Unit = {
-          if (debug) {
-            log.debug((if (currentIterator != null) "Starting initial" else "Restarting") + " streaming action, realDemand = " + str(realDemand))
-          }
-        }
-
-        private[this] def debugLogSentEvent(currentIterator: StreamResultSetIterator[A], realDemand: Long): Unit = {
-          if (debug) {
-            val message = if (currentIterator == null) {
-              s"Sent up to ${str(realDemand)} elements - Stream ${if (currentSubscription.cancelled) "cancelled" else "completely delivered"}"
-            } else {
-              s"Sent ${str(realDemand)} elements, more available - Performing atomic state transition"
-            }
-            log.debug(message)
-          }
-        }
-
-        private[this] def debugLogEnd(currentIterator: StreamResultSetIterator[A]): Unit = {
-          if (debug) {
-            if (currentIterator != null) {
-              log.debug("Suspending streaming action with continuation (more data available)")
-            } else {
-              log.debug("Finished streaming action")
-            }
-          }
-        }
-      }
-
-      publisher.asyncExecutor.execute(task)
-
-    } catch {
-      case NonFatal(ex) =>
-        log.warn("Error scheduling synchronous streaming", ex)
-        throw ex
-    }
+  private[streams] def startNewStreaming(): Unit = {
+    scheduleSynchronousStreaming(null)
   }
 
   // -----------------------------------------------
-  // Internal APIs visible to only threads current subscription started
+  // Internal APIs
+  // visible to only threads current subscription started
   // -----------------------------------------------
 
   /**
@@ -328,6 +219,9 @@ private[streams] class DatabaseSubscription[A](
    */
   private def cancelled: Boolean = _cancelRequested
 
+  /**
+   * Issues a query and creates a new iterator to consume.
+   */
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
     makeDBSessionCursorQueryReady()
 
@@ -337,7 +231,7 @@ private[streams] class DatabaseSubscription[A](
       occupiedDBSession.connectionAttributes
     )
 
-    new StreamResultSetIterator[A](resultSetProxy, true)(sql.extractor) {
+    new StreamResultSetIterator[A](resultSetProxy, sql.extractor) {
       private[this] var closed = false
       override def close(): Unit = {
         if (!closed) {
@@ -348,22 +242,35 @@ private[streams] class DatabaseSubscription[A](
     }
   }
 
+  /**
+   * Borrows a new database session and returns it.
+   */
   private def borrowNewDBSession(): Unit = {
     if (_occupiedDBSession != null) {
       releaseOccupiedDBSession(true)
     }
     val session: DBSession = {
       val settings: DatabasePublisherSettings[A] = publisher.settings
-      val db: NamedDB = NamedDB(settings.connectionPoolName, settings.settingsProvider)(settings.connectionPoolContext)
+      val db: NamedDB = NamedDB(settings.dbName, settings.settingsProvider)(settings.connectionPoolContext)
       db.autoClose(false).readOnlySession()
     }
     _occupiedDBSession = session
   }
 
+  /**
+   * Releases the occupied database session.
+   */
   private def releaseOccupiedDBSession(discardErrors: Boolean): Unit = {
     try {
       _occupiedDBSession.close()
-    } catch { case NonFatal(_) if discardErrors => }
+    } catch {
+      case NonFatal(e) if discardErrors =>
+        if (log.isDebugEnabled) {
+          log.debug(s"Failed to close the occupied database session because ${e.getMessage}", e)
+        } else {
+          log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
+        }
+    }
     _occupiedDBSession = null
   }
 
@@ -402,6 +309,181 @@ private[streams] class DatabaseSubscription[A](
         occupiedDBSession.conn.setAutoCommit(false)
 
       case _ =>
+    }
+  }
+
+  /**
+   * Schedules a synchronous streaming which holds the given iterator.
+   */
+  private[this] def scheduleSynchronousStreaming(iterator: StreamResultSetIterator[A]): Unit = {
+
+    val currentSubscription = this
+
+    try {
+      val task: Runnable = new Runnable() {
+        def run(): Unit = {
+          try {
+            // must start with remaining iterator every time invoking this Runnable
+            var remainingIterator = iterator
+            val _ = currentSubscription.sync
+
+            if (remainingIterator == null) {
+              // need to start new session for this
+              currentSubscription.borrowNewDBSession()
+            }
+
+            var demand: Long = currentSubscription.demandBatch
+            var realDemand: Long = if (demand < 0) demand - Long.MinValue else demand
+
+            do {
+              try {
+
+                if (currentSubscription.cancelled) {
+                  // ------------------------
+                  // cancelled the streaming
+
+                  if (currentSubscription.deferredError != null) {
+                    throw currentSubscription.deferredError
+                  }
+
+                  if (remainingIterator != null) {
+                    // the streaming was cancelled before it finished
+                    val iteratorToConsume = remainingIterator
+                    remainingIterator = null
+                    cancel(iteratorToConsume)
+                  }
+
+                } else if (realDemand > 0 || remainingIterator == null) {
+                  // ------------------------
+                  // proceed with the remaining iterator
+
+                  // create a new iterator if it absent.
+                  val iteratorToConsume: StreamResultSetIterator[A] = {
+                    if (remainingIterator != null) remainingIterator
+                    else currentSubscription.issueQueryAndCreateNewIterator()
+                  }
+                  remainingIterator = null
+                  remainingIterator = emitDemandedElementsAndReturnRemainingIterator(realDemand, iteratorToConsume)
+                }
+
+                if (remainingIterator == null) {
+                  // finishing and cleaning up the streaming
+                  currentSubscription.releaseOccupiedDBSession(true)
+                  currentSubscription.endOfStream.trySuccess(null)
+                }
+
+              } catch {
+                case NonFatal(ex) =>
+                  if (remainingIterator != null) {
+                    try {
+                      cancel(remainingIterator)
+                    } catch {
+                      case NonFatal(_) => ()
+                    }
+                  }
+                  currentSubscription.releaseOccupiedDBSession(true)
+                  throw ex
+
+              } finally {
+                currentSubscription.currentIterator = remainingIterator
+                currentSubscription.sync = 0
+              }
+
+              demand = currentSubscription.saveNumberOfDeliveredElementsAndReturnRemainingDemand(demand)
+              realDemand = if (demand < 0) demand - Long.MinValue else demand
+
+            } while (remainingIterator != null && realDemand > 0)
+
+          } catch {
+            case NonFatal(ex) =>
+              currentSubscription.endOfStream.tryFailure(ex)
+          }
+        }
+      }
+
+      publisher.asyncExecutor.execute(task)
+
+    } catch {
+      case NonFatal(e) =>
+        log.warn(s"Failed to schedule a synchronous processing because ${e.getMessage}", e)
+        throw e
+    }
+  }
+
+  /**
+   * Restarts a suspended streaming action.
+   * Must only be called from the Subscriber context.
+   */
+  private[this] def restartStreaming(): Unit = {
+    val _ = sync
+    val iteratorToConsume = currentIterator
+    if (iteratorToConsume != null) {
+      currentIterator = null
+      if (log.isDebugEnabled) {
+        log.debug("Scheduling stream continuation after transition from demand = 0")
+      }
+
+      scheduleSynchronousStreaming(iteratorToConsume)
+
+    } else {
+      if (log.isDebugEnabled) {
+        log.debug("Saw transition from demand = 0, but no stream continuation available")
+      }
+    }
+  }
+
+  /**
+   * Emits a bunch of elements.
+   */
+  private[this] def emitDemandedElementsAndReturnRemainingIterator(
+    realDemand: Long,
+    iterator: StreamResultSetIterator[A]
+  ): StreamResultSetIterator[A] = {
+    val bufferNext = publisher.settings.bufferNext
+    var count = 0L
+
+    try {
+      while ({
+        if (bufferNext) iterator.hasNext && count < realDemand
+        else count < realDemand && iterator.hasNext
+      }) {
+        count += 1
+        subscriber.onNext(iterator.next())
+      }
+    } catch {
+      case NonFatal(ex) =>
+        try {
+          iterator.close()
+        } catch { case NonFatal(_) => () }
+        throw ex
+    }
+
+    if ((bufferNext && iterator.hasNext) || (!bufferNext && count == realDemand)) iterator
+    else null
+  }
+
+  /**
+   * Cancels a given iterator.
+   */
+  private[this] def cancel(iterator: StreamResultSetIterator[A]): Unit = {
+    if (iterator != null) {
+      iterator.close()
+    }
+  }
+
+  /**
+   * Finishes the stream with `onComplete` if it is not finished yet.
+   * May only be called from a synchronous action context.
+   */
+  private[this] def onComplete(): Unit = {
+    if (!_isFinished && !_cancelRequested) {
+      _isFinished = true
+
+      try {
+        subscriber.onComplete()
+      } catch {
+        case NonFatal(ex) => log.warn(s"Subscriber#onComplete unexpectedly failed because ${ex.getMessage}", ex)
+      }
     }
   }
 

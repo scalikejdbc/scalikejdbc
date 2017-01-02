@@ -1,20 +1,22 @@
-package scalikejdbc.streams
+package somewhere
 
+import org.reactivestreams.example.unicast.SyncSubscriber
 import org.scalatest._
+import org.slf4j.LoggerFactory
 import scalikejdbc._
+import scalikejdbc.streams._
 
-import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent.Promise
 
 class DatabasePublisherSpec
     extends AsyncFlatSpec
     with BeforeAndAfterAll
     with Matchers
-    with LogSupport
     with TestDBSettings {
 
-  private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
+  private lazy val log = LoggerFactory.getLogger(classOf[DatabasePublisherSpec])
 
-  implicit val executor = AsyncExecutor(ExecutionContext.global)
+  private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
 
   override protected def beforeAll(): Unit = {
     initDatabaseSettings()
@@ -28,7 +30,7 @@ class DatabasePublisherSpec
   "DatabasePublisher" should "be subscribed" in {
     val promise = Promise[Boolean]()
     val subscriber = new SyncSubscriber[Int] {
-      override protected def whenNext(element: Int): Boolean = {
+      override def foreach(element: Int): Boolean = {
         log.info(s"onNext element=$element")
         true
       }

@@ -7,7 +7,7 @@ import scalikejdbc._
  *
  * The primary constructor is intentionally hidden, use only StreamSQL object's apply method to instantiate.
  */
-case class StreamSQL[A] private (underlying: SQL[A, HasExtractor]) {
+case class StreamReadySQL[A] private (underlying: SQL[A, HasExtractor]) {
 
   lazy val extractor: (WrappedResultSet) => A = underlying.extractor
 
@@ -22,17 +22,17 @@ case class StreamSQL[A] private (underlying: SQL[A, HasExtractor]) {
 
 }
 
-object StreamSQL {
+object StreamReadySQL {
 
   /**
    * The only way to instantiate StreamSQL.
    */
-  def apply[A, E <: WithExtractor](sql: SQL[A, E], fetchSize: Int): StreamSQL[A] = {
-    val underlying = {
+  def apply[A, E <: WithExtractor](sql: SQL[A, E], fetchSize: Int): StreamReadySQL[A] = {
+    val underlying: SQL[A, HasExtractor] = {
       (new SQL[A, HasExtractor](sql.statement, sql.rawParameters)(sql.extractor) {})
         .fetchSize(fetchSize)
     }
-    new StreamSQL(underlying)
+    new StreamReadySQL(underlying)
   }
 
 }

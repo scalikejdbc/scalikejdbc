@@ -3,18 +3,21 @@ package scalikejdbc.streams
 /**
  * Factory of DatabasePublisher.
  */
-object DatabasePublisherFactory {
+private[streams] object DatabasePublisherFactory {
 
+  /**
+   * Creates and returns new DatabasePublisher instance.
+   */
   def createNewPublisher[A](
     publisherSettings: DatabasePublisherSettings[A],
     asyncExecutor: AsyncExecutor,
-    sql: StreamSQL[A]
+    sql: StreamReadySQL[A]
   ): DatabasePublisher[A] = {
+
     new DatabasePublisher[A](
       publisherSettings,
       sql,
-      asyncExecutor,
-      new StreamEmitter[A]()
+      asyncExecutor
     )
   }
 

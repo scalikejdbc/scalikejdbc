@@ -13,13 +13,19 @@ import scalikejdbc.streams._
 // Prepare a connection pool in advance.
 // http://scalikejdbc.org/documentation/configuration.html#scalikejdbc-config
 
-// using a ThreadPoolExecutor that generates daemon threads is highly recommended
-implicit val executor = AsyncExecutor(scala.concurrent.ExecutionContext.global)
+// Prepare an ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
-val publisher = DB readOnlyStream {
+val publisher: DatabasePublisher[Int] = DB readOnlyStream {
   sql"select id from users".map(r => r.int("id")).iterator
 }
-publisher.subscribe(???)
+
+val subscriber = new SyncSubscriber[Int] {
+  override protected def whenNext(element: Int): Boolean = { true }
+  override def onError(t: Throwable): Unit = { super.onError(t) }
+  override def onComplete(): Unit = { super.onComplete() }
+}
+publisher.subscribe(subscriber)
 ```
 
 ## Supported RDBMS
