@@ -401,7 +401,6 @@ private[streams] class DatabaseSubscription[A](
                     if (remainingIterator != null) remainingIterator
                     else currentSubscription.issueQueryAndCreateNewIterator()
                   }
-                  remainingIterator = null
                   remainingIterator = emitDemandedElementsAndReturnRemainingIterator(realDemand, iteratorToConsume)
                 }
 
