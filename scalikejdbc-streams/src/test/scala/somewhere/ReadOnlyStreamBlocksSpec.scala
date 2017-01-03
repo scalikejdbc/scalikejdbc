@@ -6,7 +6,7 @@ import scalikejdbc.streams._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ReadOnlyStreamOperationsSpec extends FlatSpec with Matchers {
+class ReadOnlyStreamBlocksSpec extends FlatSpec with Matchers {
 
   "DB.readOnlyStream" should "create DatabasePublisher" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
