@@ -3,7 +3,9 @@ package scalikejdbc.streams
 import java.io.Closeable
 import java.sql.ResultSet
 
-import scalikejdbc.{ ResultSetCursor, WrappedResultSet }
+import scalikejdbc.{ LogSupport, ResultSetCursor, WrappedResultSet }
+
+import scala.util.control.NonFatal
 
 /**
  * An iterator which handles JDBC ResultSet in the fashion of Reactive Streams.
@@ -12,7 +14,7 @@ private[streams] class StreamResultSetIterator[+A](
     rs: ResultSet,
     extractor: WrappedResultSet => A,
     autoClose: Boolean = true
-) extends BufferedIterator[A] with Closeable { self =>
+) extends BufferedIterator[A] with Closeable with LogSupport {
 
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var preFetchedNextValue: A = null.asInstanceOf[A]
@@ -46,7 +48,14 @@ private[streams] class StreamResultSetIterator[+A](
   // ------------------------------------
 
   override def close(): Unit = {
-    self.close()
+    try {
+      rs.close()
+    } catch {
+      case NonFatal(e) =>
+        if (log.isDebugEnabled) {
+          log.debug(s"Failed to close ResultSet because ${e.getMessage}", e)
+        }
+    }
   }
 
   // ------------------------------------

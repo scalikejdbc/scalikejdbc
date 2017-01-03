@@ -33,19 +33,26 @@ case class DatabasePublisher[A](
       throw new NullPointerException("given Subscriber to DatabasePublisher#subscribe is null. (Reactive Streams spec, 1.9)")
     }
 
+    val subscription: DatabaseSubscription[A] = new DatabaseSubscription[A](this, subscriber)
     try {
-      val subscription: DatabaseSubscription[A] = new DatabaseSubscription[A](this, subscriber)
-      subscriber.onSubscribe(subscription)
       try {
-        subscription.startNewStreaming()
-        subscription.prepareCompletionHandler()
+        subscriber.onSubscribe(subscription)
       } catch {
         case NonFatal(e) =>
-          log.warn("Failed to make preparation after subscription", e)
+          log.warn(s"Subscriber#onSubscribe for subscriber: ${subscriber} unexpectedly failed because ${e.getMessage}", e)
           subscription.onError(e)
+          return
       }
+
+      subscription.startNewStreaming()
+      subscription.prepareCompletionHandler()
+
+      log.info(s"Initialized new subscription from subscriber: ${subscriber}")
+
     } catch {
-      case NonFatal(e) => log.warn(s"Subscriber#onSubscribe unexpectedly failed because ${e.getMessage}", e)
+      case NonFatal(e) =>
+        log.warn(s"Failed to make preparation for subscriber: ${subscriber}", e)
+        subscription.onError(e)
     }
   }
 
