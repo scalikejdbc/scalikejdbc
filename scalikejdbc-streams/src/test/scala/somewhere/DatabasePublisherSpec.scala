@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import scalikejdbc._
 import scalikejdbc.streams._
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
 import scala.language.reflectiveCalls
 
@@ -65,6 +66,35 @@ class DatabasePublisherSpec
     }
     publisher.subscribe(subscriber)
     consumedCountPromise.future.map(count => assert(count == totalRows))
+  }
+
+  it should "emit elements in order" in {
+    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+      SQL(s"select id from $tableName order by id").map(r => r.int("id")).iterator
+    }
+
+    val expectedElements = (1 to totalRows)
+    val actualElements = new ListBuffer[Int]
+    val consumedCountPromise: Promise[ListBuffer[Int]] = Promise[ListBuffer[Int]]()
+    val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
+      override def foreach(element: Int): Boolean = {
+        actualElements += element
+        log.info(s"foreach element: $element")
+        true
+      }
+      override def onError(error: Throwable): Unit = {
+        super.onError(error)
+        log.info(s"Error - ${error}, consumed: ${actualElements.size}")
+        consumedCountPromise.tryFailure(error)
+      }
+      override def onComplete(): Unit = {
+        super.onComplete()
+        log.info(s"Completed - consumed: ${actualElements.size}")
+        consumedCountPromise.trySuccess(actualElements)
+      }
+    }
+    publisher.subscribe(subscriber)
+    consumedCountPromise.future.map(actualElements => assert(actualElements == expectedElements))
   }
 
   // ------------------------------------------
