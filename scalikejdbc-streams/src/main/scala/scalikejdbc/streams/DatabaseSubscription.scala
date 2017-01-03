@@ -157,7 +157,10 @@ private[streams] class DatabaseSubscription[A](
           case t: Throwable =>
             log.warn("Caught an exception in Subscription#cancel()", t)
             cleanUpCurrentSubscriptionWithoutException()
-            throw t
+            t match {
+              case _: InterruptedException => Thread.currentThread().interrupt()
+              case _ => throw t
+            }
         }
       }
     }

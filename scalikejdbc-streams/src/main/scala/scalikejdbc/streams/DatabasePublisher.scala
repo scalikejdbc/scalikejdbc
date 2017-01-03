@@ -20,39 +20,55 @@ case class DatabasePublisher[A](
    * Requests Publisher to start streaming data.
    */
   override def subscribe(subscriber: Subscriber[_ >: A]): Unit = {
+    // 1. Publisher - 9
+    // https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#1-publisher-code
+    //
+    // Publisher.subscribe MUST call onSubscribe on the provided Subscriber prior to any other signals to that Subscriber
+    // and MUST return normally, except when the provided Subscriber is null
+    // in which case it MUST throw a java.lang.NullPointerException to the caller,
+    // for all other situations the only legal way to signal failure (or reject the Subscriber)
+    // is by calling onError (after calling onSubscribe).
+    //
     if (subscriber == null) {
-      // 1. Publisher - 9
-      // https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#1-publisher-code
-      //
-      // Publisher.subscribe MUST call onSubscribe on the provided Subscriber prior to any other signals to that Subscriber
-      // and MUST return normally, except when the provided Subscriber is null
+      // 1-9: Publisher.subscribe MUST return normally, except when the provided Subscriber is null
       // in which case it MUST throw a java.lang.NullPointerException to the caller,
       // for all other situations the only legal way to signal failure (or reject the Subscriber)
-      // is by calling onError (after calling onSubscribe).
-      //
       throw new NullPointerException("given Subscriber to DatabasePublisher#subscribe is null. (Reactive Streams spec, 1.9)")
     }
 
-    val subscription: DatabaseSubscription[A] = new DatabaseSubscription[A](this, subscriber)
     try {
+      val subscription: DatabaseSubscription[A] = new DatabaseSubscription[A](this, subscriber)
       try {
-        subscriber.onSubscribe(subscription)
+        try {
+          // 1-9: Publisher.subscribe MUST call onSubscribe on the provided Subscriber prior to any other signals to that Subscriber
+          subscriber.onSubscribe(subscription)
+        } catch {
+          case NonFatal(e) =>
+            log.warn(s"Subscriber#onSubscribe for subscriber: ${subscriber} unexpectedly failed because ${e.getMessage}", e)
+            // for all other situations the only legal way to signal failure (or reject the Subscriber)
+            // is by calling onError (after calling onSubscribe).
+            subscription.onError(e)
+            return
+        }
+
+        subscription.startNewStreaming()
+        subscription.prepareCompletionHandler()
+
+        log.info(s"Initialized new subscription from subscriber: ${subscriber}")
+
       } catch {
         case NonFatal(e) =>
-          log.warn(s"Subscriber#onSubscribe for subscriber: ${subscriber} unexpectedly failed because ${e.getMessage}", e)
+          log.warn(s"Failed to make preparation for subscriber: ${subscriber}", e)
+          // 1-9: for all other situations the only legal way to signal failure (or reject the Subscriber)
+          // is by calling onError (after calling onSubscribe).
           subscription.onError(e)
-          return
       }
-
-      subscription.startNewStreaming()
-      subscription.prepareCompletionHandler()
-
-      log.info(s"Initialized new subscription from subscriber: ${subscriber}")
-
     } catch {
       case NonFatal(e) =>
-        log.warn(s"Failed to make preparation for subscriber: ${subscriber}", e)
-        subscription.onError(e)
+        // 1-9: Publisher.subscribe MUST return normally, except when the provided Subscriber is null
+        if (log.isDebugEnabled) {
+          log.debug(s"Ignore exceptions for subscriber: ${subscriber} to obey Reactive Streams spec 1-9", e)
+        }
     }
   }
 
