@@ -141,7 +141,9 @@ private[streams] class DatabaseSubscription[A](
    */
   override def cancel(): Unit = {
     if (_cancelRequested) {
-      log.info(s"Subscription#cancel() called from subscriber: ${subscriber} again, skipped processing")
+      if (log.isDebugEnabled) {
+        log.debug(s"Subscription#cancel() called from subscriber: ${subscriber} again, skipped processing")
+      }
 
     } else {
       log.info(s"Subscription#cancel() called from subscriber: ${subscriber}")
@@ -295,7 +297,9 @@ private[streams] class DatabaseSubscription[A](
     }
 
     try {
-      _occupiedDBSession.close()
+      if (_occupiedDBSession != null) {
+        _occupiedDBSession.close()
+      }
     } catch {
       case NonFatal(e) if discardErrors =>
         if (log.isDebugEnabled) {
@@ -377,11 +381,11 @@ private[streams] class DatabaseSubscription[A](
                   log.info(s"Cancellation from subscriber: ${currentSubscription.subscriber} detected")
 
                   if (currentSubscription.deferredError != null) {
+                    log.info(s"Responding the deferred error : ${currentSubscription.deferredError} to the cancellation")
                     throw currentSubscription.deferredError
                   }
 
                   if (remainingIterator != null) {
-                    log.info(s"Responding the deferred error : ${currentSubscription.deferredError} to the cancellation")
                     // the streaming was cancelled before it finished
                     val iteratorToConsume = remainingIterator
                     remainingIterator = null

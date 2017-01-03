@@ -54,7 +54,7 @@ case class DatabasePublisher[A](
         subscription.startNewStreaming()
         subscription.prepareCompletionHandler()
 
-        log.info(s"Initialized new subscription from subscriber: ${subscriber}")
+        log.info(s"Database stream requested by subscriber: ${subscriber} is ready")
 
       } catch {
         case NonFatal(e) =>

@@ -65,7 +65,8 @@ class DatabasePublisherSpec
       }
     }
     publisher.subscribe(subscriber)
-    consumedCountPromise.future.map(count => assert(count == totalRows))
+    consumedCountPromise.future
+      .map(count => assert(count == totalRows))
   }
 
   it should "emit elements in order" in {
@@ -94,7 +95,8 @@ class DatabasePublisherSpec
       }
     }
     publisher.subscribe(subscriber)
-    consumedCountPromise.future.map(actualElements => assert(actualElements == expectedElements))
+    consumedCountPromise.future
+      .map(actualElements => assert(actualElements == expectedElements))
   }
 
   // ------------------------------------------
@@ -138,8 +140,8 @@ class DatabasePublisherSpec
     }
     publisher.subscribe(subscriber)
 
-    consumedCountPromise.future.map(count => assert(count == totalRows))
-      .andThen { case _ => subscriber.shutdownNow() }
+    consumedCountPromise.future
+      .map(count => assert(count == totalRows))
   }
 
   it should "be subscribed and cancelled by AsyncSubscriber" in {
