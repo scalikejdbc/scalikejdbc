@@ -1,0 +1,79 @@
+ScalikeJDBC 3.0.0 is out for Scala 2.12, 2.11 and 2.10 with new useful features including the [Reactive Streams](http://www.reactive-streams.org/) support module!
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Topics
+
+#### Support only Scala 2.12, 2.11 and 2.10 on JDK 8
+
+ScalikeJDBC 3.0 is available on Java SE 8 or higher. All libraries are built against Scala 2.12, 2.11 and 2.10.
+
+#### Merged JSR-310 module into core module
+
+Since scalikejdbc-core 3.0 can depend on JDK 8 APIs, we merged scalikejdbc-jsr310 module into scalikejdbc-core module.
+You don't need add scalikejdbc-jsr310 to your libraryDependencies anymore.
+
+#### Reactive Streams support
+
+Newly arrived module, scalikejdbc-streams, is an extension to support [Reactive Streams](http://www.reactive-streams.org/) to subscribe results from database queries.
+
+```
+import scalikejdbc._
+import scalikejdbc.streams._
+import java.util.concurrent._
+import org.reactivestreams.example.unicast.AsyncSubscriber
+
+// Prepare a connection pool in advance.
+Class.forName("org.h2.Driver")
+ConnectionPool.singleton("jdbc:h2:file:./db/hello", "user", "pass")
+
+// ------------
+// publisher
+val publisherExecutor = Executors.newFixedThreadPool(5)
+implicit val publisherEC = ExecutionContext.fromExecutor(publisherExecutor)
+val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+  sql"select id from users".map(r => r.int("id")).iterator
+}
+
+// ------------
+// subscriber
+val subscriberExecutor = Executors.newFixedThreadPool(5)
+val subscriber = new AsyncSubscriber[Int](subscriberExecutor) {
+  override def whenNext(element: Int): Boolean = { 
+    // do something here
+    log.info(s"element: ${element}")
+    true 
+  }
+  override def whenComplete(): Unit = {
+    if (executor.awaitTermination(1, TimeUnit.SECONDS) == false) {
+      log.warn("Timed out while waiting all tasks termination")
+    }
+    subscriberExecutor.shutdownNow()
+  }
+}
+publisher.subscribe(subscriber)
+```
+
+### Changes
+
+- [core] #608 Fix procedure syntax warnings by @xuwei-k
+- [core] #606 Add taggedQueryCompletionListener to SettingsProvider by @zaneli
+- [core] #604 Make result.name private because `name` column exists very often in real apps (fixes #570) by @seratch
+- [core] #602 use collect instead of filter & map by @xuwei-k
+- [core] #603 add -target scalacOptions by @xuwei-k
+- [core] #601 Introduce unapply methods to SQL\* by @iTakeshi
+- [core] #600 Fix parameters passed to TableAsAliasSQLSyntax to rawParameters closes by @takayahilton
+- [core] #596 Merge scalikejdbc-jsr310 module to scalikejdbc-core by @xuwei-k
+- [core] #594 Use length instead of size by @xuwei-k 
+- [core] #593 Use nonEmpty instead of size by @xuwei-k
+- [mapper-generator] #592 Avoid NullPointerException by @xuwei-k
+- [mapper-generator] #591 Fix batchInsert method indent by @xuwei-k
+- [mapper-generator] Remove deprecated methods since sbt 0.13.{12, 13} by @xuwei-k
+- [streams] #614 Introducing scalikejdbc-streams as a sub module by @yoskhdia
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+

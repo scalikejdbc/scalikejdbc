@@ -5,22 +5,22 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "3.0.0-M2"
+  lazy val _version = "3.0.0-M3"
 
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.21"
+  lazy val _slf4jApiVersion = "1.7.22"
   lazy val _typesafeConfigVersion = "1.3.1"
   lazy val _reactiveStreamsVersion = "1.0.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.7"
+  lazy val _logbackVersion = "1.1.8"
   lazy val _h2Version = "1.4.193"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.40"
   lazy val _postgresqlVersion = "9.4.1212"
-  lazy val _hibernateVersion = "5.2.5.Final"
+  lazy val _hibernateVersion = "5.2.6.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -131,7 +131,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.6"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.7"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",

@@ -10,6 +10,7 @@ sbt 'set scalaVersion := "2.12.1"' \
   "project interpolation-macro" 'set scalaVersion := "2.12.1"' publishSigned \
   "project interpolation" 'set scalaVersion := "2.12.1"' publishSigned \
   "project library" 'set scalaVersion := "2.12.1"' publishSigned \
+  "project streams" 'set scalaVersion := "2.12.1"' publishSigned \
   "project syntax-support-macro" 'set scalaVersion := "2.12.1"' publishSigned \
   "project test" 'set scalaVersion := "2.12.1"' publishSigned \
   "project mapper-generator-core" 'set scalaVersion := "2.12.1"' publishSigned
