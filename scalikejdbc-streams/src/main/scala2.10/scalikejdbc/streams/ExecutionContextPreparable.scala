@@ -2,7 +2,7 @@ package scalikejdbc.streams
 
 import scala.concurrent.ExecutionContext
 
-trait ExecutionContextPreparable {
+private[streams] trait ExecutionContextPreparable {
 
   def executionContext: ExecutionContext
 

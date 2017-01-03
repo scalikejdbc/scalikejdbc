@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext
  *
  * see also [[http://scala-lang.org/api/2.12.1/scala/concurrent/ExecutionContext.html]]
  */
-trait ExecutionContextPreparable {
+private[streams] trait ExecutionContextPreparable {
 
   def executionContext: ExecutionContext
 

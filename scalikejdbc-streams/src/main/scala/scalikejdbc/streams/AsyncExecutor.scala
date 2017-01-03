@@ -23,7 +23,7 @@ private[streams] trait AsyncExecutor {
 
 }
 
-object AsyncExecutor extends LogSupport {
+private[streams] object AsyncExecutor extends LogSupport {
 
   /**
    * Returns AsyncExecutor built from ExecutionContext.
