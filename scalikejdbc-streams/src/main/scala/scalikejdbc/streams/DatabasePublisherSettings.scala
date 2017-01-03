@@ -9,30 +9,30 @@ private[streams] class DatabasePublisherSettings[A](
   /**
    * Connection pool name.
    */
-  val dbName: Any,
+  private[streams] val dbName: Any,
 
   /**
    * Context for connection pool
    */
-  val connectionPoolContext: DB.CPContext,
+  private[streams] val connectionPoolContext: DB.CPContext,
 
   /**
    * Connection pool settings provider.
    */
-  val settingsProvider: SettingsProvider,
+  private[streams] val settingsProvider: SettingsProvider,
 
   /**
    * DatabasePublisher has a buffer internally if true.
    */
-  val bufferNext: Boolean = true
+  private[streams] val bufferNext: Boolean = true
 )
 
-object DatabasePublisherSettings {
+private[streams] object DatabasePublisherSettings {
 
   /**
    * Creates and returns a DatabasePublisherSettings.
    */
-  def apply[A](dbName: Any)(implicit
+  private[streams] def apply[A](dbName: Any)(implicit
     context: DB.CPContext = DB.NoCPContext,
     settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A] = {
     new DatabasePublisherSettings(

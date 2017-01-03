@@ -8,7 +8,7 @@ private[streams] object DatabasePublisherFactory {
   /**
    * Creates and returns new DatabasePublisher instance.
    */
-  def createNewPublisher[A](
+  private[streams] def createNewPublisher[A](
     publisherSettings: DatabasePublisherSettings[A],
     asyncExecutor: AsyncExecutor,
     sql: StreamReadySQL[A]
