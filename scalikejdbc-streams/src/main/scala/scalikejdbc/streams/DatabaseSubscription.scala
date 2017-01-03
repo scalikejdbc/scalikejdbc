@@ -16,12 +16,12 @@ private[streams] class DatabaseSubscription[A](
     /**
      * DatabasePublisher in the fashion of Reactive Streams.
      */
-    val publisher: DatabasePublisher[A],
+    private[streams] val publisher: DatabasePublisher[A],
 
     /**
      * Subscriber in the fashion of Reactive Streams.
      */
-    val subscriber: Subscriber[_ >: A]
+    private[streams] val subscriber: Subscriber[_ >: A]
 ) extends Subscription with LogSupport {
 
   // -----------------------------------------------

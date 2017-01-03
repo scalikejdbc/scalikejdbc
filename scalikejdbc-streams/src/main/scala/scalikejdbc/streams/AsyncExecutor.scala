@@ -14,12 +14,12 @@ private[streams] trait AsyncExecutor {
   /**
    * Returns current ExecutionContext.
    */
-  def executionContext: ExecutionContext
+  private[streams] def executionContext: ExecutionContext
 
   /**
    * Runs an asynchronous operation.
    */
-  def execute(runnable: Runnable): Unit
+  private[streams] def execute(runnable: Runnable): Unit
 
 }
 
@@ -28,7 +28,7 @@ private[streams] object AsyncExecutor extends LogSupport {
   /**
    * Returns AsyncExecutor built from ExecutionContext.
    */
-  def apply(ec: ExecutionContext): AsyncExecutor = {
+  private[streams] def apply(ec: ExecutionContext): AsyncExecutor = {
     new AsyncExecutorBuiltWithExecutionContext(ec)
   }
 
