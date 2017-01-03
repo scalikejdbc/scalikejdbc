@@ -14,7 +14,7 @@ private[streams] class StreamResultSetIterator[+A](
     rs: ResultSet,
     extractor: WrappedResultSet => A,
     autoClose: Boolean = true
-) extends BufferedIterator[A] with Closeable with LogSupport {
+) extends BufferedIterator[A] with Closeable with LogSupport { self =>
 
   private[this] var state = 0 // 0: no data, 1: cached, 2: finished
   private[this] var preFetchedNextValue: A = null.asInstanceOf[A]
@@ -48,6 +48,7 @@ private[streams] class StreamResultSetIterator[+A](
   // ------------------------------------
 
   override def close(): Unit = {
+    self.close()
     try {
       rs.close()
     } catch {

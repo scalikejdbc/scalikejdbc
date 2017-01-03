@@ -139,8 +139,11 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Requests the Publisher to stop sending data and clean up resources.
    */
-  override def cancel(): Unit = if (!_cancelRequested) {
-    if (cancelled == false) {
+  override def cancel(): Unit = {
+    if (_cancelRequested) {
+      log.info(s"Subscription#cancel() called from subscriber: ${subscriber} again, skipped processing")
+
+    } else {
       log.info(s"Subscription#cancel() called from subscriber: ${subscriber}")
 
       _cancelRequested = true
@@ -148,11 +151,15 @@ private[streams] class DatabaseSubscription[A](
       // restart the streaming here because cancelling it requires closing the occupied database session.
       // This will also complete the result Promise and thus allow the rest of the scheduled Action to run.
       if (_numberOfRemainingElements.getAndSet(Long.MaxValue) == 0L) {
-        reScheduleSynchronousStreaming()
+        try {
+          reScheduleSynchronousStreaming()
+        } catch {
+          case t: Throwable =>
+            log.warn("Caught an exception in Subscription#cancel()", t)
+            cleanUpCurrentSubscriptionWithoutException()
+            throw t
+        }
       }
-
-    } else {
-      log.info(s"Subscription#cancel() called from subscriber: ${subscriber} again, skipped processing")
     }
   }
 
@@ -494,6 +501,17 @@ private[streams] class DatabaseSubscription[A](
   private[this] def closeIterator(iterator: StreamResultSetIterator[A]): Unit = {
     if (iterator != null) {
       iterator.close()
+    }
+    releaseOccupiedDBSession(true)
+  }
+
+  private[this] def cleanUpCurrentSubscriptionWithoutException(): Unit = {
+    try {
+      releaseOccupiedDBSession(true)
+      endOfStream.trySuccess(())
+    } catch {
+      case NonFatal(e) =>
+        log.warn("Caught an exception while cleaning up the subscription", e)
     }
   }
 
