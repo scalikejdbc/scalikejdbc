@@ -2,10 +2,10 @@ package scalikejdbc.streams
 
 import java.io.Closeable
 import java.sql.ResultSet
-
 import scalikejdbc.{ LogSupport, ResultSetCursor, WrappedResultSet }
-
 import scala.util.control.NonFatal
+
+import scalikejdbc.streams.StreamResultSetIterator._
 
 /**
  * An iterator which handles JDBC ResultSet in the fashion of Reactive Streams.
@@ -15,11 +15,6 @@ private[streams] class StreamResultSetIterator[+A](
     extractor: WrappedResultSet => A,
     autoClose: Boolean = true
 ) extends BufferedIterator[A] with Closeable with LogSupport { self =>
-
-  private sealed trait InternalState
-  private case object NeedToPrefetchNextValue extends InternalState
-  private case object NextInvocationReady extends InternalState
-  private case object AlreadyConsumed extends InternalState
 
   private[this] var internalState: InternalState = NeedToPrefetchNextValue
   private[this] var fetchedNextValue: Option[A] = None
@@ -101,5 +96,14 @@ private[streams] class StreamResultSetIterator[+A](
       None
     }
   }
+
+}
+
+private[streams] object StreamResultSetIterator {
+
+  private sealed trait InternalState
+  private case object NeedToPrefetchNextValue extends InternalState
+  private case object NextInvocationReady extends InternalState
+  private case object AlreadyConsumed extends InternalState
 
 }
