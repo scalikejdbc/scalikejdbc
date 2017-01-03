@@ -1,7 +1,7 @@
 package somewhere
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ ExecutorService, ThreadFactory, ThreadPoolExecutor, TimeUnit }
+import java.util.concurrent._
 
 import org.reactivestreams.example.unicast.{ AsyncSubscriber, SyncSubscriber }
 import org.scalatest._
@@ -10,6 +10,7 @@ import scalikejdbc._
 import scalikejdbc.streams._
 
 import scala.concurrent.Promise
+import scala.language.reflectiveCalls
 
 class DatabasePublisherSpec
     extends AsyncFlatSpec
@@ -20,12 +21,11 @@ class DatabasePublisherSpec
   private lazy val log = LoggerFactory.getLogger(classOf[DatabasePublisherSpec])
 
   private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
-
-  private val streamSize = 20
+  private val totalRows = 100
 
   override protected def beforeAll(): Unit = {
     initDatabaseSettings()
-    initializeFixtures(tableName, streamSize)
+    initializeFixtures(tableName, totalRows)
   }
 
   override protected def afterAll(): Unit = {
@@ -34,102 +34,131 @@ class DatabasePublisherSpec
 
   behavior of "DatabasePublisher"
 
+  // ------------------------------------------
+  // SyncSubscriber
+  // ------------------------------------------
+
   it should "be subscribed by SyncSubscriber" in {
-    val promise = Promise[Int]()
-    val subscriber = new SyncSubscriber[Int] {
-      private[this] var previousElement = 0
+    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
+    }
+
+    val consumedCountPromise: Promise[Int] = Promise[Int]()
+    val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
+      private[this] val consumedCount = new AtomicInteger(0)
 
       override def foreach(element: Int): Boolean = {
-        log.debug(s"whenNext element=$element")
-        if (element < previousElement) {
-          false
-        } else {
-          previousElement = element
-          true
-        }
+        val consumed = consumedCount.incrementAndGet()
+        log.info(s"foreach element: $element, consumed: $consumed")
+        true
       }
-
       override def onError(error: Throwable): Unit = {
         super.onError(error)
-        promise.tryFailure(error)
+        log.info(s"Error - ${error}, consumed: ${consumedCount.get()}")
+        consumedCountPromise.tryFailure(error)
       }
-
       override def onComplete(): Unit = {
         super.onComplete()
-        promise.trySuccess(previousElement)
+        log.info(s"Completed - consumed: ${consumedCount.get()}")
+        consumedCountPromise.trySuccess(consumedCount.get())
       }
     }
-
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
-    }
-
     publisher.subscribe(subscriber)
-
-    promise.future.map(result => assert(result == streamSize))
+    consumedCountPromise.future.map(count => assert(count == totalRows))
   }
+
+  // ------------------------------------------
+  // AsyncSubscriber
+  // ------------------------------------------
 
   it should "be subscribed by AsyncSubscriber" in {
-    val executor = DatabasePublisherSpec.newExecutor()
-    val promise = Promise[Int]()
-    val subscriber = new AsyncSubscriber[Int](executor) {
-      private[this] var previousElement = 0
-
-      override def whenNext(element: Int): Boolean = {
-        log.debug(s"whenNext element=$element")
-        if (element < previousElement) {
-          false
-        } else {
-          previousElement = element
-          true
-        }
-      }
-
-      override def whenComplete(): Unit = {
-        super.whenComplete()
-        promise.trySuccess(previousElement)
-      }
-
-      override def whenError(error: Throwable): Unit = {
-        super.whenError(error)
-        promise.tryFailure(error)
-      }
-    }
-
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
       SQL(s"select id from $tableName").map(r => r.int("id")).iterator
     }
 
+    val consumedCountPromise: Promise[Int] = Promise[Int]()
+    val executor = Executors.newFixedThreadPool(5)
+    val subscriber = new AsyncSubscriber[Int](executor) {
+      private[this] val consumedCount = new AtomicInteger(0)
+
+      override def whenNext(element: Int): Boolean = {
+        val consumed = consumedCount.incrementAndGet()
+        log.info(s"[async] whenNext element: $element, consumed: $consumed")
+        true
+      }
+      override def whenComplete(): Unit = {
+        log.info(s"[async] Completed - consumed: ${consumedCount.get()}")
+        super.whenComplete()
+        consumedCountPromise.trySuccess(consumedCount.get())
+        shutdownNow()
+      }
+      override def whenError(error: Throwable): Unit = {
+        log.info(s"[async] Error - ${error}, consumed: ${consumedCount.get()}")
+        super.whenError(error)
+        consumedCountPromise.tryFailure(error)
+        shutdownNow()
+      }
+
+      def shutdownNow(): Unit = {
+        if (executor.awaitTermination(1, TimeUnit.SECONDS) == false) {
+          log.warn("[async] Timed out while waiting all tasks termination")
+        }
+        executor.shutdownNow()
+      }
+    }
     publisher.subscribe(subscriber)
 
-    promise.future.map(result => assert(result == streamSize))
-      .andThen {
-        case _ =>
-          executor.shutdownNow()
-          if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-            log.warn("Failed to terminate ExecutorService after waiting 30 seconds")
-          }
-      }
-  }
-}
-
-object DatabasePublisherSpec {
-
-  private def newExecutor(): ExecutorService = {
-    val queue = new java.util.concurrent.LinkedBlockingQueue[Runnable]()
-    val tf = new DaemonThreadFactory("AsyncSubscriberSpec-")
-    new ThreadPoolExecutor(1, 10, 1000L, TimeUnit.MILLISECONDS, queue, tf)
+    consumedCountPromise.future.map(count => assert(count == totalRows))
+      .andThen { case _ => subscriber.shutdownNow() }
   }
 
-  private class DaemonThreadFactory(namePrefix: String) extends ThreadFactory {
-    private[this] val group = Option(System.getSecurityManager).fold(Thread.currentThread.getThreadGroup)(_.getThreadGroup)
-    private[this] val threadNumber = new AtomicInteger(1)
-
-    def newThread(r: Runnable): Thread = {
-      val t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement, 0)
-      if (!t.isDaemon) t.setDaemon(true)
-      if (t.getPriority != Thread.NORM_PRIORITY) t.setPriority(Thread.NORM_PRIORITY)
-      t
+  it should "be subscribed and cancelled by AsyncSubscriber" in {
+    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
     }
+
+    val expectedCountOfElements = 20
+    val consumedCountPromise: Promise[Int] = Promise[Int]()
+    val executor = Executors.newFixedThreadPool(5)
+    val subscriber = new AsyncSubscriber[Int](executor) {
+      val consumedCount = new AtomicInteger(0)
+
+      override def whenNext(element: Int): Boolean = {
+        val consumed = consumedCount.incrementAndGet()
+        log.info(s"[async] whenNext element: $element, consumed: $consumed")
+        val needMore = consumed < expectedCountOfElements
+        if (needMore == false) {
+          consumedCountPromise.trySuccess(consumedCount.get())
+          shutdownNow()
+        }
+        needMore
+      }
+      // the following event handlers won't be called.
+      // check the source code of AsyncSubscriber
+      // https://github.com/reactive-streams/reactive-streams-jvm/blob/223ef95e06d1fc30259c867bdcfe9265e60832a8/examples/src/main/java/org/reactivestreams/example/unicast/AsyncSubscriber.java#L194-L204
+      override def whenComplete(): Unit = {
+        log.info(s"[async] Completed - consumed: ${consumedCount.get()}")
+        super.whenComplete()
+        shutdownNow()
+      }
+      override def whenError(error: Throwable): Unit = {
+        log.info(s"[async] Error - ${error}, consumed: ${consumedCount.get()}")
+        super.whenError(error)
+        consumedCountPromise.tryFailure(error)
+        shutdownNow()
+      }
+
+      def shutdownNow(): Unit = {
+        if (executor.awaitTermination(1, TimeUnit.SECONDS) == false) {
+          log.warn("[async] Timed out while waiting all tasks termination")
+        }
+        executor.shutdownNow()
+      }
+    }
+    publisher.subscribe(subscriber)
+
+    consumedCountPromise.future
+      .map(count => assert(count == expectedCountOfElements))
   }
+
 }
