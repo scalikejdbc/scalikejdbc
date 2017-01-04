@@ -16,14 +16,15 @@ import scalikejdbc.streams._
 // Prepare an ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-  sql"select id from users".map(r => r.int("id")).iterator
+val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
+  sql"select id from users order by id".map(r => r.get[Int]("id")).iterator
 }
 
 val subscriber = new SyncSubscriber[Int] {
-  override protected def whenNext(element: Int): Boolean = { true }
-  override def onError(t: Throwable): Unit = { super.onError(t) }
-  override def onComplete(): Unit = { super.onComplete() }
+  def foreach(element: Int): Boolean = {
+    // do something with the element here
+    true // true if you need more elements
+  }
 }
 publisher.subscribe(subscriber)
 ```
