@@ -1,6 +1,6 @@
 package scalikejdbc.streams
 
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.{ AtomicBoolean, AtomicLong }
 
 import org.reactivestreams.{ Subscriber, Subscription }
 import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, LogSupport, NamedDB }
@@ -48,13 +48,13 @@ private[streams] class DatabaseSubscription[A](
   /**
    * A database session occupied by current subscription.
    */
-  private[this] var _occupiedDBSession: DBSession = null
+  private[this] var _maybeOccupiedDBSession: Option[DBSession] = None
 
   /**
    * The state for a suspended streaming action.
    * Must be set only from a synchronous action context.
    */
-  private var currentIterator: StreamResultSetIterator[A] = null
+  private var maybeRemainingIterator: Option[StreamResultSetIterator[A]] = None
 
   /**
    * The Promise to complete when streaming has finished.
@@ -75,13 +75,12 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Returns true if it has been cancelled by the Subscriber.
    */
-  @volatile
-  private[this] var _cancelRequested: Boolean = false
+  private[this] val _isCancellationAlreadyRequested: AtomicBoolean = new AtomicBoolean(false)
 
   /**
    * Whether the Subscriber has been signaled with `onComplete` or `onError`.
    */
-  private[this] var _isFinished: Boolean = false
+  private[this] val _isCurrentSubscriptionFinished: AtomicBoolean = new AtomicBoolean(false)
 
   /**
    * An error that will be signaled to the Subscriber when the stream is cancelled or terminated.
@@ -89,7 +88,7 @@ private[streams] class DatabaseSubscription[A](
    * This is used for signaling demand overflow in #request(Long)
    * while guaranteeing that the #onError(Throwable) message does not overlap with an active #onNext(A) call.
    */
-  private[this] var _deferredError: Throwable = null
+  private[this] var _maybeDeferredError: Option[Throwable] = None
 
   // -----------------------------------------------
   // Reactive Streams Subscription APIs
@@ -99,7 +98,7 @@ private[streams] class DatabaseSubscription[A](
    * No events will be sent by a Publisher until demand is signaled via this method.
    */
   override def request(n: Long): Unit = {
-    if (_cancelRequested) {
+    if (isCancellationAlreadyRequested) {
       if (log.isDebugEnabled) {
         log.debug(s"Subscription#request($n) called from subscriber: ${subscriber} after cancellation, skipped processing")
       }
@@ -117,7 +116,7 @@ private[streams] class DatabaseSubscription[A](
         // MUST signal onError with a java.lang.IllegalArgumentException if the argument is <= 0.
         // The cause message MUST include a reference to this rule and/or quote the full rule.
         //
-        _deferredError = new IllegalArgumentException("The n of Subscription#request(long n) must not be larger than 0 (Reactive Streams spec, 3.9)")
+        _maybeDeferredError = Some(new IllegalArgumentException("The n of Subscription#request(long n) must not be larger than 0 (Reactive Streams spec, 3.9)"))
 
         cancel()
 
@@ -129,7 +128,7 @@ private[streams] class DatabaseSubscription[A](
         // and MUST support a demand (sum requested - sum delivered) up to 2^63-1 (java.lang.Long.MAX_VALUE).
         // A demand equal or greater than 2^63-1 (java.lang.Long.MAX_VALUE) MAY be considered by the Publisher as “effectively unbounded”[3].
         //
-        if (_cancelRequested == false && _numberOfRemainingElements.getAndAdd(n) == 0L) {
+        if (isCancellationAlreadyRequested == false && _numberOfRemainingElements.getAndAdd(n) == 0L) {
           reScheduleSynchronousStreaming()
         }
       }
@@ -140,15 +139,13 @@ private[streams] class DatabaseSubscription[A](
    * Requests the Publisher to stop sending data and clean up resources.
    */
   override def cancel(): Unit = {
-    if (_cancelRequested) {
+    if (_isCancellationAlreadyRequested.getAndSet(true)) {
       if (log.isDebugEnabled) {
         log.debug(s"Subscription#cancel() called from subscriber: ${subscriber} again, skipped processing")
       }
 
     } else {
       log.info(s"Subscription#cancel() called from subscriber: ${subscriber}")
-
-      _cancelRequested = true
 
       // restart the streaming here because cancelling it requires closing the occupied database session.
       // This will also complete the result Promise and thus allow the rest of the scheduled Action to run.
@@ -187,11 +184,10 @@ private[streams] class DatabaseSubscription[A](
    * Finishes the streaming when some error happens.
    */
   private[streams] def onError(t: Throwable): Unit = {
-    if (!_isFinished) {
+    if (_isCurrentSubscriptionFinished.getAndSet(true) == false) {
       if (log.isDebugEnabled) {
         log.debug(s"Subscriber#onError for subscriber: ${subscriber} called with exception: $t")
       }
-      _isFinished = true
 
       try {
         subscriber.onError(t)
@@ -206,7 +202,7 @@ private[streams] class DatabaseSubscription[A](
    * Starts new streaming.
    */
   private[streams] def startNewStreaming(): Unit = {
-    scheduleSynchronousStreaming(null)
+    scheduleSynchronousStreaming(None)
   }
 
   // -----------------------------------------------
@@ -236,24 +232,36 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Returns the deferred error of current subscription if exists.
    */
-  private def deferredError: Throwable = _deferredError
+  private def maybeDeferredError: Option[Throwable] = _maybeDeferredError
 
   /**
    * Returns the DBSession occupied by current subscription.
    */
-  private def occupiedDBSession: DBSession = _occupiedDBSession
+  private def maybeOccupiedDBSession: Option[DBSession] = _maybeOccupiedDBSession
 
   /**
    * Whether the stream has been cancelled by the Subscriber
    */
-  private def cancelled: Boolean = _cancelRequested
+  private def isCancellationAlreadyRequested: Boolean = _isCancellationAlreadyRequested.get()
+
+  /**
+   * Whether the current subscription is already finished.
+   */
+  private def isCurrentSubscriptionFinished: Boolean = _isCurrentSubscriptionFinished.get()
 
   /**
    * Issues a query and creates a new iterator to consume.
    */
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
-    makeDBSessionCursorQueryReady()
 
+    val occupiedDBSession: DBSession = {
+      val session = maybeOccupiedDBSession match {
+        case Some(session) => session
+        case _ => occupyNewDBSession()
+      }
+      makeDBSessionCursorQueryReady(session)
+      session
+    }
     val statementExecutor = occupiedDBSession.toStatementExecutor(sql.statement, sql.rawParameters)
     val resultSet = statementExecutor.executeQuery()
     val resultSetProxy = new DBConnectionAttributesWiredResultSet(resultSet, occupiedDBSession.connectionAttributes)
@@ -272,20 +280,23 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Borrows a new database session and returns it.
    */
-  private def borrowNewDBSession(): Unit = {
+  private def occupyNewDBSession(): DBSession = {
     if (log.isDebugEnabled) {
       log.debug(s"Acquiring a new database session for subscriber: ${subscriber}")
     }
 
-    if (_occupiedDBSession != null) {
-      releaseOccupiedDBSession(true)
+    _maybeOccupiedDBSession match {
+      case Some(_) => releaseOccupiedDBSession(true)
+      case _ =>
     }
+
     val session: DBSession = {
-      val settings: DatabasePublisherSettings[A] = publisher.settings
-      val db: NamedDB = NamedDB(settings.dbName, settings.settingsProvider)(settings.connectionPoolContext)
-      db.autoClose(false).readOnlySession()
+      implicit val cpContext = publisher.settings.connectionPoolContext
+      val sessionProvider: NamedDB = NamedDB(publisher.settings.dbName, publisher.settings.settingsProvider)
+      sessionProvider.autoClose(false).readOnlySession()
     }
-    _occupiedDBSession = session
+    _maybeOccupiedDBSession = Some(session)
+    session
   }
 
   /**
@@ -297,8 +308,9 @@ private[streams] class DatabaseSubscription[A](
     }
 
     try {
-      if (_occupiedDBSession != null) {
-        _occupiedDBSession.close()
+      _maybeOccupiedDBSession match {
+        case Some(session) => session.close()
+        case _ =>
       }
     } catch {
       case NonFatal(e) if discardErrors =>
@@ -307,22 +319,23 @@ private[streams] class DatabaseSubscription[A](
         } else {
           log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
         }
+    } finally {
+      _maybeOccupiedDBSession = None
     }
-    _occupiedDBSession = null
   }
 
   // -----------------------------------------------
   // Completely internal methods
   // -----------------------------------------------
 
-  private[this] def makeDBSessionCursorQueryReady(): Unit = {
-    occupiedDBSession
+  private[this] def makeDBSessionCursorQueryReady(session: DBSession): Unit = {
+    session
       .fetchSize(sql.fetchSize)
       .tags(sql.tags: _*)
       .queryTimeout(sql.queryTimeout)
 
     // setup required settings to enable cursor operations
-    occupiedDBSession.connectionAttributes.driverName match {
+    session.connectionAttributes.driverName match {
       case Some(driver) if driver == "com.mysql.jdbc.Driver" && sql.fetchSize.exists(_ > 0) =>
         /*
          * MySQL - https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-implementation-notes.html
@@ -334,7 +347,7 @@ private[streams] class DatabaseSubscription[A](
          *
          * If the fetchSize is set as 0 or less, we need to forcibly change the value with the Int min value.
          */
-        occupiedDBSession.fetchSize(Int.MinValue)
+        session.fetchSize(Int.MinValue)
 
       case Some(driver) if driver == "org.postgresql.Driver" =>
         /*
@@ -343,7 +356,7 @@ private[streams] class DatabaseSubscription[A](
          * - java.sql.Connection#autocommit false
          * - java.sql.ResultSet.TYPE_FORWARD_ONLY
          */
-        occupiedDBSession.conn.setAutoCommit(false)
+        session.conn.setAutoCommit(false)
 
       case _ =>
     }
@@ -352,7 +365,7 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Schedules a synchronous streaming which holds the given iterator.
    */
-  private[this] def scheduleSynchronousStreaming(iterator: StreamResultSetIterator[A]): Unit = {
+  private[this] def scheduleSynchronousStreaming(maybeIterator: Option[StreamResultSetIterator[A]]): Unit = {
 
     val currentSubscription = this
 
@@ -361,12 +374,12 @@ private[streams] class DatabaseSubscription[A](
         def run(): Unit = {
           try {
             // must start with remaining iterator every time invoking this Runnable
-            var remainingIterator = iterator
+            var maybeRemainingIterator: Option[StreamResultSetIterator[A]] = maybeIterator
             val _ = currentSubscription.sync
 
-            if (remainingIterator == null) {
-              // need to start new session for this
-              currentSubscription.borrowNewDBSession()
+            maybeRemainingIterator match {
+              case None => currentSubscription.occupyNewDBSession()
+              case _ =>
             }
 
             var demand: Long = currentSubscription.demandBatch
@@ -375,36 +388,40 @@ private[streams] class DatabaseSubscription[A](
             do {
               try {
 
-                if (currentSubscription.cancelled) {
+                if (currentSubscription.isCancellationAlreadyRequested) {
                   // ------------------------
                   // cancelled the streaming
                   log.info(s"Cancellation from subscriber: ${currentSubscription.subscriber} detected")
 
-                  if (currentSubscription.deferredError != null) {
-                    log.info(s"Responding the deferred error : ${currentSubscription.deferredError} to the cancellation")
-                    throw currentSubscription.deferredError
+                  currentSubscription.maybeDeferredError match {
+                    case Some(error) =>
+                      log.info(s"Responding the deferred error : ${currentSubscription.maybeDeferredError} to the cancellation")
+                      throw error
+                    case _ =>
                   }
 
-                  if (remainingIterator != null) {
-                    // the streaming was cancelled before it finished
-                    val iteratorToConsume = remainingIterator
-                    remainingIterator = null
-                    closeIterator(iteratorToConsume)
+                  maybeRemainingIterator match {
+                    case Some(iterator) =>
+                      closeIterator(iterator)
+                      maybeRemainingIterator = None
+                    case _ =>
                   }
 
-                } else if (realDemand > 0 || remainingIterator == null) {
+                } else if (realDemand > 0 || maybeRemainingIterator.isEmpty) {
                   // ------------------------
                   // proceed with the remaining iterator
 
                   // create a new iterator if it absent.
-                  val iteratorToConsume: StreamResultSetIterator[A] = {
-                    if (remainingIterator != null) remainingIterator
-                    else currentSubscription.issueQueryAndCreateNewIterator()
+                  val iterator: StreamResultSetIterator[A] = {
+                    maybeRemainingIterator match {
+                      case Some(iterator) => iterator
+                      case _ => currentSubscription.issueQueryAndCreateNewIterator()
+                    }
                   }
-                  remainingIterator = emitDemandedElementsAndReturnRemainingIterator(realDemand, iteratorToConsume)
+                  maybeRemainingIterator = emitElementsAndReturnRemainingIterator(realDemand, iterator)
                 }
 
-                if (remainingIterator == null) {
+                if (maybeRemainingIterator.isEmpty) {
                   // finishing and cleaning up the streaming
                   currentSubscription.releaseOccupiedDBSession(true)
                   currentSubscription.endOfStream.trySuccess(())
@@ -418,25 +435,24 @@ private[streams] class DatabaseSubscription[A](
                     log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
                   }
 
-                  if (remainingIterator != null) {
-                    try {
-                      closeIterator(remainingIterator)
-                    } catch {
-                      case NonFatal(_) => ()
-                    }
+                  maybeRemainingIterator match {
+                    case Some(iterator) =>
+                      try { closeIterator(iterator) }
+                      catch { case NonFatal(_) => () }
+                    case _ =>
                   }
                   currentSubscription.releaseOccupiedDBSession(true)
                   throw e
 
               } finally {
-                currentSubscription.currentIterator = remainingIterator
+                currentSubscription.maybeRemainingIterator = maybeRemainingIterator
                 currentSubscription.sync = 0
               }
 
               demand = currentSubscription.saveNumberOfDeliveredElementsAndReturnRemainingDemand(demand)
               realDemand = if (demand < 0) demand - Long.MinValue else demand
 
-            } while (remainingIterator != null && realDemand > 0)
+            } while (maybeRemainingIterator.isDefined && realDemand > 0)
 
           } catch {
             case NonFatal(ex) =>
@@ -460,20 +476,22 @@ private[streams] class DatabaseSubscription[A](
    */
   private[this] def reScheduleSynchronousStreaming(): Unit = {
     val _ = sync
-    val iteratorToConsume = currentIterator
-    if (iteratorToConsume != null) {
-      currentIterator = null
-      scheduleSynchronousStreaming(iteratorToConsume)
+    maybeRemainingIterator match {
+      case Some(remainingIterator) =>
+        maybeRemainingIterator = None
+        scheduleSynchronousStreaming(Some(remainingIterator))
+      case _ =>
     }
   }
 
   /**
    * Emits a bunch of elements.
    */
-  private[this] def emitDemandedElementsAndReturnRemainingIterator(
+  private[this] def emitElementsAndReturnRemainingIterator(
     realDemand: Long,
     iterator: StreamResultSetIterator[A]
-  ): StreamResultSetIterator[A] = {
+  ): Option[StreamResultSetIterator[A]] = {
+
     val bufferNext = publisher.settings.bufferNext
     var count = 0L
 
@@ -497,8 +515,12 @@ private[streams] class DatabaseSubscription[A](
       log.debug(s"Emitted $count element${if (count > 1) "s" else ""} to subscriber: ${subscriber}, realDemand: ${realDemand}")
     }
 
-    if ((bufferNext && iterator.hasNext) || (!bufferNext && count == realDemand)) iterator
-    else null
+    if ((bufferNext && iterator.hasNext)
+      || (bufferNext == false && count == realDemand)) {
+      Some(iterator)
+    } else {
+      None
+    }
   }
 
   /**
@@ -526,12 +548,11 @@ private[streams] class DatabaseSubscription[A](
    * May only be called from a synchronous action context.
    */
   private[this] def onComplete(): Unit = {
-    if (_isFinished == false && _cancelRequested == false) {
+    if (isCurrentSubscriptionFinished == false && isCancellationAlreadyRequested == false) {
       if (log.isDebugEnabled) {
         log.debug(s"Invoking ${subscriber}#onComplete() from Subscription#onComplete()")
       }
-
-      _isFinished = true
+      _isCurrentSubscriptionFinished.set(true)
       try {
         subscriber.onComplete()
       } catch {
