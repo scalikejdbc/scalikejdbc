@@ -6,18 +6,28 @@ http://scalikejdbc.org/
 
 ### Topics
 
-#### Support only Scala 2.12, 2.11 and 2.10 on JDK 8
+#### Support Scala 2.12/2.11/2.10 on JDK 8
 
-ScalikeJDBC 3.0 is available on Java SE 8 or higher. All libraries are built against Scala 2.12, 2.11 and 2.10.
+ScalikeJDBC 3.0 requires Java SE 8 or higher. All libraries are built against Scala 2.12, 2.11 and 2.10.
 
-#### Merged JSR-310 module into core module
+#### Merging JSR-310 module into core module
 
 Since scalikejdbc-core 3.0 can depend on JDK 8 APIs, we merged scalikejdbc-jsr310 module into scalikejdbc-core module.
-You don't need add scalikejdbc-jsr310 to your libraryDependencies anymore.
+If you're already using time APIs, You don't need add scalikejdbc-jsr310 to your libraryDependencies anymore.
+
+In the migration, there is no source code incompatibility to existing applications.
 
 #### Reactive Streams support
 
 Newly arrived module, scalikejdbc-streams, is an extension to support [Reactive Streams](http://www.reactive-streams.org/) to subscribe results from database queries.
+
+https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-streams
+
+[scalikejdbc-streams](https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-streams) is a Reactive Streams 1.0 compliant implementation.
+We never release without passing the existing unit tests to satisfy [PublisherVerification](https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.0/tck#structure-of-the-tck) in [Reactive Streams TCK](https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.0/tck).
+
+This library is originally assumed to be suitable for batch applications. You need to keep borrowing a connection while someone is subscribing a stream provided by scalikejdbc-streams.
+Be aware of the max size of connection pool and carefully monitor the state of the pool.
 
 ```
 import scalikejdbc._
@@ -48,7 +58,7 @@ val subscriber = new AsyncSubscriber[Int](subscriberExecutor) {
   }
   override def whenComplete(): Unit = {
     if (executor.awaitTermination(1, TimeUnit.SECONDS) == false) {
-      log.warn("Timed out while waiting all tasks termination")
+      log.warn("Timed out while waiting for all tasks terminated")
     }
     subscriberExecutor.shutdownNow()
   }
@@ -71,6 +81,10 @@ publisher.subscribe(subscriber)
 - [mapper-generator] #592 Avoid NullPointerException by @xuwei-k
 - [mapper-generator] #591 Fix batchInsert method indent by @xuwei-k
 - [mapper-generator] Remove deprecated methods since sbt 0.13.{12, 13} by @xuwei-k
+- [streams] #619 Improve handling on occupied database resources in various cases by @seratch
+- [streams] #618 Apply more strict access modifiers under scalikejdbc.streams package by @seratch
+- [streams] #617 Remove null patterns from DatabaseSubscription, StreamResultSetIterator by @seratch
+- [streams] #616 Fix to restrict on scope of internally classes by @yoskhdia
 - [streams] #614 Introducing scalikejdbc-streams as a sub module by @yoskhdia
 
 ---
