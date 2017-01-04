@@ -10,7 +10,10 @@ import scala.util.{ Failure, Success }
 import scala.util.control.NonFatal
 
 /**
- * A subscription of DatabasePublisher
+ * A DatabaseSubscription represents a one-to-one lifecycle of a Subscriber subscribing to a DatabasePublisher.
+ *
+ * It can only be used once by a single Subscriber.
+ * It is used to both signal desire for data and cancel demand (and allow resource cleanup).
  */
 private[streams] class DatabaseSubscription[A](
     /**
@@ -155,7 +158,7 @@ private[streams] class DatabaseSubscription[A](
         } catch {
           case t: Throwable =>
             log.warn("Caught an exception in Subscription#cancel()", t)
-            cleanUpCurrentSubscriptionWithoutException()
+            finishAsCompletionWithoutException()
             t match {
               case _: InterruptedException => Thread.currentThread().interrupt()
               case _ => throw t
@@ -328,6 +331,9 @@ private[streams] class DatabaseSubscription[A](
   // Completely internal methods
   // -----------------------------------------------
 
+  /**
+   * Forcibly changes the database session to be cursor query ready.
+   */
   private[this] def makeDBSessionCursorQueryReady(session: DBSession): Unit = {
     session
       .fetchSize(sql.fetchSize)
@@ -390,21 +396,20 @@ private[streams] class DatabaseSubscription[A](
 
                 if (currentSubscription.isCancellationAlreadyRequested) {
                   // ------------------------
-                  // cancelled the streaming
+                  // cancelling the current subscription
+
                   log.info(s"Cancellation from subscriber: ${currentSubscription.subscriber} detected")
 
-                  currentSubscription.maybeDeferredError match {
-                    case Some(error) =>
-                      log.info(s"Responding the deferred error : ${currentSubscription.maybeDeferredError} to the cancellation")
-                      throw error
-                    case _ =>
-                  }
+                  try {
+                    currentSubscription.maybeDeferredError match {
+                      case Some(error) =>
+                        log.info(s"Responding the deferred error : ${currentSubscription.maybeDeferredError} to the cancellation")
+                        throw error
+                      case _ =>
+                    }
 
-                  maybeRemainingIterator match {
-                    case Some(iterator) =>
-                      closeIterator(iterator)
-                      maybeRemainingIterator = None
-                    case _ =>
+                  } finally {
+                    cleanUpResources()
                   }
 
                 } else if (realDemand > 0 || maybeRemainingIterator.isEmpty) {
@@ -422,9 +427,8 @@ private[streams] class DatabaseSubscription[A](
                 }
 
                 if (maybeRemainingIterator.isEmpty) {
-                  // finishing and cleaning up the streaming
-                  currentSubscription.releaseOccupiedDBSession(true)
-                  currentSubscription.endOfStream.trySuccess(())
+                  log.info(s"All data for subscriber: ${currentSubscription.subscriber} has been sent")
+                  finishAsCompletionWithoutException()
                 }
 
               } catch {
@@ -434,14 +438,7 @@ private[streams] class DatabaseSubscription[A](
                   } else {
                     log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
                   }
-
-                  maybeRemainingIterator match {
-                    case Some(iterator) =>
-                      try { closeIterator(iterator) }
-                      catch { case NonFatal(_) => () }
-                    case _ =>
-                  }
-                  currentSubscription.releaseOccupiedDBSession(true)
+                  cleanUpResources()
                   throw e
 
               } finally {
@@ -504,11 +501,11 @@ private[streams] class DatabaseSubscription[A](
         subscriber.onNext(iterator.next())
       }
     } catch {
-      case NonFatal(ex) =>
+      case NonFatal(e) =>
         try {
           iterator.close()
-        } catch { case NonFatal(_) => () }
-        throw ex
+        } catch { case NonFatal(_) => }
+        throw e
     }
 
     if (log.isDebugEnabled) {
@@ -524,22 +521,46 @@ private[streams] class DatabaseSubscription[A](
   }
 
   /**
-   * Cancels a given iterator.
+   * Cleans up the occupied resources.
    */
-  private[this] def closeIterator(iterator: StreamResultSetIterator[A]): Unit = {
-    if (iterator != null) {
-      iterator.close()
-    }
-    releaseOccupiedDBSession(true)
-  }
-
-  private[this] def cleanUpCurrentSubscriptionWithoutException(): Unit = {
+  private[this] def cleanUpResources(): Unit = {
     try {
       releaseOccupiedDBSession(true)
-      endOfStream.trySuccess(())
+      log.info(s"Finished cleaning up database resources occupied for subscriber: ${subscriber}")
     } catch {
-      case NonFatal(e) =>
-        log.warn("Caught an exception while cleaning up the subscription", e)
+      case NonFatal(e) => log.warn("Caught an exception while releasing the occupied database session", e)
+    } finally {
+
+      try {
+        maybeRemainingIterator match {
+          case Some(iterator) =>
+            if (iterator != null) {
+              iterator.close()
+            }
+            maybeRemainingIterator = None
+          case _ =>
+        }
+      } catch {
+        case NonFatal(e) => log.warn("Caught an exception while closing the remaining iterator", e)
+      }
+    }
+  }
+
+  /**
+   * Finishes the current subscription as completed.
+   */
+  private[this] def finishAsCompletionWithoutException(): Unit = {
+    try {
+      cleanUpResources()
+    } catch {
+      case e: Throwable => throw e
+    } finally {
+
+      try {
+        endOfStream.trySuccess(())
+      } catch {
+        case NonFatal(e) => log.warn("Caught an exception while finishing the subscription", e)
+      }
     }
   }
 
