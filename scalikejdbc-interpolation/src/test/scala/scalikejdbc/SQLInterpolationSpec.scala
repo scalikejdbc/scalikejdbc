@@ -7,7 +7,7 @@ import org.slf4j._
 import scala.collection.concurrent.TrieMap
 import scala.util.control.NonFatal
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation with OptionValues {
 
   val logger: Logger = LoggerFactory.getLogger(classOf[SQLInterpolationSpec])
 
@@ -862,8 +862,16 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     sql.parameters should equal(Seq(123, "Alice"))
   }
 
+  it should "cache columns" in {
+    SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
+      .get(Order.connectionPoolName, Order.tableName).value.values.forall(_.nonEmpty) should be(true)
+  }
+
   it should "clear loaded columns" in {
     Order.clearLoadedColumns()
+    SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
+      .get(Order.connectionPoolName, Order.tableName).value.values.forall(_.isEmpty) should be(true)
+
     SQLSyntaxSupport.clearLoadedColumns(ConnectionPool.DEFAULT_NAME)
     SQLSyntaxSupport.clearAllLoadedColumns()
   }
