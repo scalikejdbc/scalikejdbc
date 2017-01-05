@@ -7,7 +7,7 @@ import scalikejdbc._
  *
  * The primary constructor is intentionally hidden, use only StreamSQL object's apply method to instantiate.
  */
-private[streams] case class StreamReadySQL[A] private (underlying: SQL[A, HasExtractor]) {
+case class StreamReadySQL[A] private (private[streams] val underlying: SQL[A, HasExtractor]) {
 
   private[streams] lazy val extractor: (WrappedResultSet) => A = underlying.extractor
 
