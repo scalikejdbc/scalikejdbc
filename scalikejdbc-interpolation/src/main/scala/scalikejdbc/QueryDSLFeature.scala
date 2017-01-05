@@ -28,7 +28,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *   val userIdAndName = withSQL {
      *     select(u.result.id, u.result.name).from(User).where.eq.(u.id, 123)
      *   }.map(User(u.resultName)).single.apply()
-     * }}}}
+     * }}}
      */
     object select {
       def from[A](table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = {
@@ -57,7 +57,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *   val (u, c) = (User.syntax("u"), User.column)
      *   withSQL { insert.into(User).columns(c.id, c.name, c.createdAt).values(1, "Alice", DateTime.now) }.update.apply()
      *   applyUpdate { insert.into(User).values(2, "Bob", DateTime.now) }
-     * }}}}
+     * }}}
      */
     object insert {
       def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
@@ -74,7 +74,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *   val (u, c) = (User.syntax("u"), User.column)
      *   withSQL { delete.from(User as u).where.eq(u.id, 1) }.update.apply()
      *   applyUpdate { delete.from(User).where.eq(c.id, 1) }
-     * }}}}
+     * }}}
      */
     object delete {
       def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
@@ -93,7 +93,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *   val u = User.syntax("u")
      *   withSQL { update(User as u).set(u.name -> "Chris", u.updatedAt -> DateTime.now).where.eq(u.id, 1) }.update.apply()
      *   applyUpdate { update(User as u).set(u.name -> "Dennis").where.eq(u.id, 1) }
-     * }}}}
+     * }}}
      */
     object update {
       def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
