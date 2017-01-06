@@ -70,12 +70,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def clearLoadedColumns(connectionPoolName: Any = ConnectionPool.DEFAULT_NAME): Unit = {
       val loadedColumns = SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns
       loadedColumns.keys
-        .filter { case (cp, _) => cp == connectionPoolName }
+        .withFilter { case (cp, _) => cp == connectionPoolName }
         .foreach { case (cp, table) => loadedColumns.remove((cp, table)) }
 
       val cachedColumns = SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
       cachedColumns.keys
-        .filter { case (cp, _) => cp == connectionPoolName }
+        .withFilter { case (cp, _) => cp == connectionPoolName }
         .foreach {
           case (cp, table) =>
             cachedColumns.get((cp, table)).foreach { caches =>
