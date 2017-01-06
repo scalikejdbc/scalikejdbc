@@ -172,7 +172,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.remove((connectionPoolName, tableNameWithSchema))
 
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
-        .find { case (cp, tb) => cp == connectionPoolName && tb == tableNameWithSchema }
+        .find { case ((cp, tb), _) => cp == connectionPoolName && tb == tableNameWithSchema }
         .foreach {
           case (_, caches) =>
             caches.foreach { case (_, cache: TrieMap[String, SQLSyntax]) => cache.clear() }
@@ -441,7 +441,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         SQLSyntax(c.value)
       }.getOrElse {
@@ -501,7 +501,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         SQLSyntax(s"${tableAliasName}.${c.value}")
       }.getOrElse {
@@ -536,7 +536,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         val name = toAliasName(c.value, support)
         SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
@@ -556,7 +556,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         val name = toAliasName(c.value, support)
         SQLSyntax(s"${syntax.value} as ${name}${delimiterForResultName}${aliasName}", syntax.rawParameters)
@@ -608,7 +608,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         val name = toAliasName(c.value, support)
         SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
@@ -791,7 +791,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String) = cachedColumns.getOrElse(name, {
+    def column(name: String) = cachedColumns.getOrElseUpdate(name, {
       SQLSyntax(s"${aliasName}.${underlying.column(name).value}")
     })
 
@@ -820,7 +820,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).map { nc =>
         SQLSyntax(s"${aliasName}.${nc.value} as ${nc.value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
@@ -853,7 +853,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def column(name: String): SQLSyntax = cachedColumns.getOrElse(name, {
+    def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original: SQLSyntax =>
         val name = toAliasName(original.value, underlying.support)
         SQLSyntax(s"${name}${delimiterForResultName}${underlying.tableAliasName}${delimiterForResultName}${aliasName}")
@@ -874,7 +874,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cc
     }
 
-    def namedColumn(name: String) = cachedNamedColumns.getOrElse(name, {
+    def namedColumn(name: String) = cachedNamedColumns.getOrElseUpdate(name, {
       underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).getOrElse {
         throw notFoundInColumns(aliasName, name, namedColumns.map(_.value).mkString(","))
       }
