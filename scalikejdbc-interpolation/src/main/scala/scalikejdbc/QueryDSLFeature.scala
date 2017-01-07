@@ -11,7 +11,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   trait UpdateOperation
 
   /**
-   * Prefix object for name confiliction.
+   * Prefix object to avoid name confliction.
    *
    * {{{
    *   withSQL { QueryDSL.select.from(User as u).where.eq(u.id, 123) }
