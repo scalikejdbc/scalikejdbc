@@ -22,10 +22,7 @@ trait TypeBinder[+A] {
 /**
  * Type binder for java.sql.ResultSet.
  */
-object TypeBinder extends LowPriorityTypeBinderImplicits with UnixTimeInMillisConverterImplicits {
-  // TODO: Remove UnixTimeInMillisConverterImplicits in 2.5.
-  // TypeBinder object actually doesn't need UnixTimeInMillisConverterImplicits.
-  // Since removing it breaks bin-compatibility, we cannot do that in 2.4 series.
+object TypeBinder extends LowPriorityTypeBinderImplicits {
 
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
