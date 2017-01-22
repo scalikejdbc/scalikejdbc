@@ -8,7 +8,8 @@ import java.sql.Connection
  */
 class DataSourceConnectionPool(
   override val dataSource: DataSource,
-  settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings()
+  settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings(),
+  closer: DataSourceCloser = DefaultDataSourceCloser
 )
     extends ConnectionPool(
       url = "<external-data-source>",
@@ -18,6 +19,8 @@ class DataSourceConnectionPool(
     ) {
 
   override def borrow(): Connection = dataSource.getConnection()
+
+  override def close(): Unit = closer.close()
 }
 
 /**
@@ -29,7 +32,8 @@ class AuthenticatedDataSourceConnectionPool(
   override val dataSource: DataSource,
   override val user: String,
   password: String,
-  settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings()
+  settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings(),
+  closer: DataSourceCloser = DefaultDataSourceCloser
 )
     extends ConnectionPool(
       url = "<external-data-source>",
@@ -39,4 +43,6 @@ class AuthenticatedDataSourceConnectionPool(
     ) {
 
   override def borrow(): Connection = dataSource.getConnection(user, password)
+
+  override def close(): Unit = closer.close()
 }
