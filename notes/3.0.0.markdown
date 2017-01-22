@@ -68,6 +68,10 @@ publisher.subscribe(subscriber)
 
 ### Changes
 
+- [core] #631 Closing DataSource based connection pools by @smdmts
+- [core] #629 Remove UnixTimeInMillisConverterImplicits from TypeBinder by @xuwei-k
+- [core] #625 #626 Code improvements by @xuwei-k
+- [core] #623 Fix on SQLSyntaxSupportCachedColumns by @zaneli
 - [core] #608 Fix procedure syntax warnings by @xuwei-k
 - [core] #606 Add taggedQueryCompletionListener to SettingsProvider by @zaneli
 - [core] #604 Make result.name private because `name` column exists very often in real apps (fixes #570) by @seratch
@@ -81,6 +85,7 @@ publisher.subscribe(subscriber)
 - [mapper-generator] #592 Avoid NullPointerException by @xuwei-k
 - [mapper-generator] #591 Fix batchInsert method indent by @xuwei-k
 - [mapper-generator] Remove deprecated methods since sbt 0.13.{12, 13} by @xuwei-k
+- [streams] #622 Make StreamReadySQL public  by @yoskhdia
 - [streams] #619 Improve handling on occupied database resources in various cases by @seratch
 - [streams] #618 Apply more strict access modifiers under scalikejdbc.streams package by @seratch
 - [streams] #617 Remove null patterns from DatabaseSubscription, StreamResultSetIterator by @seratch
