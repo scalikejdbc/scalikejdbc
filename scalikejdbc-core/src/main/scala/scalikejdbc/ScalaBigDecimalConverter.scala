@@ -12,3 +12,14 @@ class ScalaBigDecimalConverter(val value: java.math.BigDecimal) extends AnyVal {
   }
 
 }
+
+/**
+  * BigDecimal Option converter.
+  * @param value option big decimal value
+  */
+class ScalaBigDecimalConverterOpt(val value: Option[java.math.BigDecimal]) extends AnyVal {
+  def toScalaBigDecimalOpt(x: Option[java.math.BigDecimal]) = x match {
+    case None => None
+    case Some(x) => Option(x.toScalaBigDecimal)
+  }
+}
