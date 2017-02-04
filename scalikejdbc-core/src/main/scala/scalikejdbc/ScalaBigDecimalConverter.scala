@@ -18,8 +18,8 @@ class ScalaBigDecimalConverter(val value: java.math.BigDecimal) extends AnyVal {
  * @param value option big decimal value
  */
 class ScalaBigDecimalConverterOpt(val value: Option[java.math.BigDecimal]) extends AnyVal {
-  def toScalaBigDecimalOpt(x: Option[java.math.BigDecimal]) = x match {
+  def toScalaBigDecimalOpt: Option[scala.math.BigDecimal] = value match {
     case None => None
-    case Some(x) => Option(new BigDecimal(x))
+    case Some(x) => Option(scala.math.BigDecimal(x))
   }
 }
