@@ -4,9 +4,9 @@ import java.sql.ResultSet
 
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
-class ScalaBigDecimalConverterImplicitsSpec  extends FlatSpec with Matchers with MockitoSugar with ScalaBigDecimalConverterImplicits {
+class ScalaBigDecimalConverterImplicitsSpec extends FlatSpec with Matchers with MockitoSugar with ScalaBigDecimalConverterImplicits {
 
   behavior of "ScalaBigDecimalConverterImplicits"
 
@@ -25,7 +25,7 @@ class ScalaBigDecimalConverterImplicitsSpec  extends FlatSpec with Matchers with
     val cursor: ResultSetCursor = new ResultSetCursor(0)
     val rs = new WrappedResultSet(underlying, cursor, cursor.position)
 
-    obj(rs).value shouldEqual(Some(scala.math.BigDecimal(0)))
+    obj(rs).value shouldEqual (Some(scala.math.BigDecimal(0)))
   }
 
   it should "Return None if the column does not contain a value" in {
@@ -35,6 +35,6 @@ class ScalaBigDecimalConverterImplicitsSpec  extends FlatSpec with Matchers with
     val cursor: ResultSetCursor = new ResultSetCursor(0)
     val rs = new WrappedResultSet(underlying, cursor, cursor.position)
 
-    obj(rs).value shouldEqual(None)
+    obj(rs).value shouldEqual (None)
   }
 }
