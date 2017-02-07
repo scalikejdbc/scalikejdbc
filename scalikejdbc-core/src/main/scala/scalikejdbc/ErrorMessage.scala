@@ -31,4 +31,6 @@ private[scalikejdbc] object ErrorMessage {
 
   val INVALID_ONE_TO_ONE_RELATION = "one-to-one relation is expected but it seems to be a one-to-many relationship."
 
+  val INVALID_CONNECTION_POOL_FACTORY_NAME = "Invalid connection pool factory name."
+
 }

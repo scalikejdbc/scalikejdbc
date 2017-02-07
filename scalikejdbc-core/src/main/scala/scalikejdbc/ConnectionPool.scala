@@ -94,8 +94,11 @@ object ConnectionPool extends LogSupport {
 
     import scalikejdbc.JDBCUrl._
 
-    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).flatMap { name =>
-      ConnectionPoolFactoryRepository.get(name).map(f => (f, name))
+    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).map { name =>
+      ConnectionPoolFactoryRepository.get(name).map(f => (f, name)).getOrElse {
+        val message = ErrorMessage.INVALID_CONNECTION_POOL_FACTORY_NAME + "(name:" + name + ")"
+        throw new IllegalArgumentException(message)
+      }
     }.getOrElse((factory, "<default>"))
 
     // register new pool or replace existing pool
