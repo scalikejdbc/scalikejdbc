@@ -118,4 +118,11 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
 
   }
 
+  it should "throw exception if invalid connectionPoolFactoryName is given" in {
+    intercept[IllegalArgumentException](
+      ConnectionPool.add('xxxx, url, user, password,
+        ConnectionPoolSettings(connectionPoolFactoryName = "invalid"))
+    )
+  }
+
 }
