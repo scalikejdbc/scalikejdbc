@@ -1,10 +1,10 @@
 package scalikejdbc
 
 import scala.language.implicitConversions
-
-import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
+import java.sql.{ Date => sqlDate, Time => sqlTime, Timestamp => sqlTimestamp }
 import java.util.{ Date => utilDate }
-import org.joda.time.LocalTime
+
+import scalikejdbc.jodatime.LocalTimeConverter
 
 /**
  * Implicit conversions for date time values.
@@ -19,7 +19,7 @@ trait UnixTimeInMillisConverterImplicits {
 
   implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertLocalTimeToConverter(t: LocalTime): LocalTimeConverter = new LocalTimeConverter(t)
+  implicit def convertLocalTimeToConverter(t: org.joda.time.LocalTime): LocalTimeConverter = new LocalTimeConverter(t)
 
 }
 

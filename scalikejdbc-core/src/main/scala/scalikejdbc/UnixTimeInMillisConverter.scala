@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import java.util.Calendar
-import org.joda.time._
 
 /**
  * Unix Time Converter to several types.
@@ -10,23 +9,53 @@ import org.joda.time._
  */
 class UnixTimeInMillisConverter(val millis: Long) extends AnyVal {
 
+  // --------------------
+  // java.util.Date
+  // --------------------
+
   def toJavaUtilDate: java.util.Date = new java.util.Date(millis)
 
-  def toJodaDateTime: DateTime = new DateTime(millis)
+  // --------------------
+  // java.time
+  // --------------------
 
-  def toJodaDateTimeWithTimeZone(timezone: DateTimeZone): DateTime = new DateTime(millis, timezone)
+  private def defaultZoneId: java.time.ZoneId = java.time.ZoneId.systemDefault()
 
-  def toJodaLocalDateTime: LocalDateTime = new LocalDateTime(millis)
+  def toInstant: java.time.Instant = java.time.Instant.ofEpochMilli(millis)
 
-  def toJodaLocalDateTimeWithTimeZone(timezone: DateTimeZone): LocalDateTime = new LocalDateTime(millis, timezone)
+  def toZonedDateTime: java.time.ZonedDateTime = java.time.ZonedDateTime.ofInstant(toInstant, defaultZoneId)
 
-  def toJodaLocalDate: LocalDate = new LocalDate(millis)
+  def toOffsetDateTime: java.time.OffsetDateTime = java.time.OffsetDateTime.ofInstant(toInstant, defaultZoneId)
 
-  def toJodaLocalDateWithTimeZone(timezone: DateTimeZone): LocalDate = new LocalDate(millis, timezone)
+  def toLocalDate: java.time.LocalDate = toInstant.atZone(defaultZoneId).toLocalDate
 
-  def toJodaLocalTime: LocalTime = new LocalTime(millis)
+  def toLocalTime: java.time.LocalTime = toInstant.atZone(defaultZoneId).toLocalTime
 
-  def toJodaLocalTimeWithTimeZone(timezone: DateTimeZone): LocalTime = new LocalTime(millis, timezone)
+  def toLocalDateTime: java.time.LocalDateTime = toInstant.atZone(defaultZoneId).toLocalDateTime
+
+  // --------------------
+  // joda-time
+  // --------------------
+
+  def toJodaDateTime: org.joda.time.DateTime = new org.joda.time.DateTime(millis)
+
+  def toJodaDateTimeWithTimeZone(timezone: org.joda.time.DateTimeZone): org.joda.time.DateTime = new org.joda.time.DateTime(millis, timezone)
+
+  def toJodaLocalDateTime: org.joda.time.LocalDateTime = new org.joda.time.LocalDateTime(millis)
+
+  def toJodaLocalDateTimeWithTimeZone(timezone: org.joda.time.DateTimeZone): org.joda.time.LocalDateTime = new org.joda.time.LocalDateTime(millis, timezone)
+
+  def toJodaLocalDate: org.joda.time.LocalDate = new org.joda.time.LocalDate(millis)
+
+  def toJodaLocalDateWithTimeZone(timezone: org.joda.time.DateTimeZone): org.joda.time.LocalDate = new org.joda.time.LocalDate(millis, timezone)
+
+  def toJodaLocalTime: org.joda.time.LocalTime = new org.joda.time.LocalTime(millis)
+
+  def toJodaLocalTimeWithTimeZone(timezone: org.joda.time.DateTimeZone): org.joda.time.LocalTime = new org.joda.time.LocalTime(millis, timezone)
+
+  // --------------------
+  // java.sql
+  // --------------------
 
   def toSqlDate: java.sql.Date = {
     // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html

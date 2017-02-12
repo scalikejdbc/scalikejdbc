@@ -1,4 +1,4 @@
-package scalikejdbc
+package scalikejdbc.jodatime
 
 import org.joda.time.LocalTime
 

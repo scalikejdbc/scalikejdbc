@@ -80,10 +80,18 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val sqlTimeParameterBinderFactory: ParameterBinderFactory[java.sql.Time] = Binders.sqlTime
   implicit val sqlTimestampParameterBinderFactory: ParameterBinderFactory[java.sql.Timestamp] = Binders.sqlTimestamp
   implicit val utilDateParameterBinderFactory: ParameterBinderFactory[java.util.Date] = Binders.utilDate
+
+  implicit val javaTimeZonedDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.ZonedDateTime] = Binders.javaTimeZonedDateTime
+  implicit val javaTimeOffsetDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.OffsetDateTime] = Binders.javaTimeOffsetDateTime
+  implicit val javaTimeLocalDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.LocalDateTime] = Binders.javaTimeLocalDateTime
+  implicit val javaTimeLocalDateParameterBinderFactory: ParameterBinderFactory[java.time.LocalDate] = Binders.javaTimeLocalDate
+  implicit val javaTimeLocalTimeParameterBinderFactory: ParameterBinderFactory[java.time.LocalTime] = Binders.javaTimeLocalTime
+
   implicit val jodaDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.DateTime] = Binders.jodaDateTime
   implicit val jodaLocalDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDateTime] = Binders.jodaLocalDateTime
   implicit val jodaLocalDateParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDate] = Binders.jodaLocalDate
   implicit val jodaLocalTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalTime] = Binders.jodaLocalTime
+
   implicit val inputStreamParameterBinderFactory: ParameterBinderFactory[InputStream] = Binders.binaryStream
   implicit val blobParameterBinderFactory: ParameterBinderFactory[java.sql.Blob] = Binders.blob
   implicit val clobParameterBinderFactory: ParameterBinderFactory[java.sql.Clob] = Binders.clob
@@ -143,14 +151,6 @@ private[scalikejdbc] object ParameterBinderFactoryMacro {
     import c.universe._
     val A = weakTypeTag[A].tpe
     val expr = A.toString match {
-      case "java.time.ZonedDateTime" | "java.time.OffsetDateTime" =>
-        q"scalikejdbc.ParameterBinderFactory[$A] { v => (ps, idx) => ps.setTimestamp(idx, java.sql.Timestamp.from(v.toInstant)) }"
-      case "java.time.LocalDateTime" =>
-        q"scalikejdbc.ParameterBinderFactory[$A] { v => (ps, idx) => ps.setTimestamp(idx, java.sql.Timestamp.valueOf(v)) }"
-      case "java.time.LocalDate" =>
-        q"scalikejdbc.ParameterBinderFactory[$A] { v => (ps, idx) => ps.setDate(idx, java.sql.Date.valueOf(v)) }"
-      case "java.time.LocalTime" =>
-        q"scalikejdbc.ParameterBinderFactory[$A] { v => (ps, idx) => ps.setTime(idx, java.sql.Time.valueOf(v)) }"
       case _ =>
         c.abort(c.enclosingPosition, s"""
           |--------------------------------------------------------
