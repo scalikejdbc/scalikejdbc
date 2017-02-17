@@ -5,26 +5,30 @@ import org.scalatest.fixture.AsyncTestSuite
 import scalikejdbc._
 
 /**
- * AutoRollback for ScalaTest
+ * AsyncAutoRollback for ScalaTest
  *
  * {{{
- * import org.scalatest.fixture.FlatSpec
- * class MemberSpec extends FlatSpec with AutoRollback {
+ * import org.scalatest.fixture.AsyncFlatSpec
+ * class MemberSpec extends AsyncFlatSpec with AsyncAutoRollback {
  *   describe of "Member"
  *   it should "create a new record" in { implicit session =>
- *     Member.create(1, "Alice")
- *     Member.find(1).isDefined should be(true)
+ *    Future {
+ *      Member.create(1, "Alice")
+ *      Member.find(1).isDefined should be(true)
+ *    }
  *   }
  * }
- * class LegacyAccountSpec extends FlatSpec with AutoRollback {
+ * class LegacyAccountSpec extends AsyncFlatSpec with AsyncAutoRollback {
  *   override def db = NamedDB('db2).toDB
  *   override def fixture(implicit session: DBSession) {
  *     SQL("insert into legacy_accounts values ...").update.apply()
  *   }
  *
  *   it should "create a new record" in { implicit session =>
- *     LegacyAccount.create(2, "Bob")
- *     LegacyAccount.find(2).isDefined should be(true)
+ *     Future {
+ *       LegacyAccount.create(2, "Bob")
+ *       LegacyAccount.find(2).isDefined should be(true)
+ *     }
  *   }
  * }
  * }}}
