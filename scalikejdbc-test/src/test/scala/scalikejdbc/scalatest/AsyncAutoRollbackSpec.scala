@@ -8,7 +8,6 @@ import org.scalatest.fixture.AsyncFlatSpec
 import org.scalatest._
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait AsyncFlatSpecWithCommonTraits extends AsyncFlatSpec with Matchers with DBSettings with PreparingTables
 
