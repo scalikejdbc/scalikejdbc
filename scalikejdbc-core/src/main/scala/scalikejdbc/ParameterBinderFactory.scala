@@ -119,7 +119,7 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
 
 }
 
-trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsParameterBinderFactory0 {
+trait LowPriorityImplicitsParameterBinderFactory1 {
 
   implicit def optionalParameterBinderFactory[A](implicit ev: ParameterBinderFactory[A]): ParameterBinderFactory[Option[A]] = new ParameterBinderFactory[Option[A]] {
     def apply(value: Option[A]): ParameterBinderWithValue = {
@@ -138,43 +138,6 @@ trait LowPriorityImplicitsParameterBinderFactory1 extends LowPriorityImplicitsPa
    */
   val asisParameterBinderFactory: ParameterBinderFactory[Any] = new ParameterBinderFactory[Any] {
     def apply(value: Any): ParameterBinderWithValue = AsIsParameterBinder(value)
-  }
-}
-
-trait LowPriorityImplicitsParameterBinderFactory0 {
-  implicit def anyParameterBinderFactory[A]: ParameterBinderFactory[A] = macro ParameterBinderFactoryMacro.any[A]
-}
-
-private[scalikejdbc] object ParameterBinderFactoryMacro {
-
-  def any[A: c.WeakTypeTag](c: Context): c.Expr[ParameterBinderFactory[A]] = {
-    import c.universe._
-    val A = weakTypeTag[A].tpe
-    val expr = A.toString match {
-      case _ =>
-        c.abort(c.enclosingPosition, s"""
-          |--------------------------------------------------------
-          | Implicit ParameterBinderFactory[$A] is missing.
-          | You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.
-          |
-          |  (example1)
-          |    implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {
-          |       value => (stmt, idx) => stmt.setInt(idx, value)
-          |     }
-          |
-          |  (example2)
-          |    case class Price(value: Int)
-          |    object Price {
-          |      implicit val converter: Binders[Price] = Binders.int.xmap(Price.apply, _.value)
-          |    }
-          |
-          |  (example3)
-          |    val value: Any = 123
-          |    val key: SQLSyntax = sqls"column_name"
-          |    key -> AsIsParameterBinder(value)
-          |--------------------------------------------------------""".stripMargin)
-    }
-    c.Expr[ParameterBinderFactory[A]](expr)
   }
 
 }
