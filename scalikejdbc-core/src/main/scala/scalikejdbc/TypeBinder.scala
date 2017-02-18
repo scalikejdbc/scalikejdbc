@@ -86,26 +86,20 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
    */
   //implicit val javaUtilDate: TypeBinder[java.util.Date] = option[java.sql.Timestamp].map(_.map(_.toJavaUtilDate).orNull[java.util.Date])
   implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] = Binders.javaUtilCalendar
+
+  implicit val javaTimeInstant: TypeBinder[Instant] = Binders.javaTimeInstant
+  implicit val javaTimeZonedDateTime: TypeBinder[ZonedDateTime] = Binders.javaTimeZonedDateTime
+  implicit val javaTimeOffsetDateTime: TypeBinder[OffsetDateTime] = Binders.javaTimeOffsetDateTime
+  implicit val javaTimeLocalDate: TypeBinder[LocalDate] = Binders.javaTimeLocalDate
+  implicit val javaTimeLocalTime: TypeBinder[LocalTime] = Binders.javaTimeLocalTime
+  implicit val javaTimeLocalDateTime: TypeBinder[LocalDateTime] = Binders.javaTimeLocalDateTime
+
   implicit val jodaDateTime: TypeBinder[JodaDateTime] = Binders.jodaDateTime
   implicit val jodaLocalDate: TypeBinder[JodaLocalDate] = Binders.jodaLocalDate
   implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = Binders.jodaLocalTime
-  implicit val jpdaLocalDateTime: TypeBinder[JodaLocalDateTime] = Binders.jodaLocalDateTime
+  implicit val jodaLocalDateTime: TypeBinder[JodaLocalDateTime] = Binders.jodaLocalDateTime
 
   implicit val url: TypeBinder[java.net.URL] = Binders.url
-
-  implicit val zonedDateTime: TypeBinder[ZonedDateTime] = option[java.sql.Timestamp].map(_.map(v => ZonedDateTime.ofInstant(Instant.ofEpochMilli(v.getTime), ZoneId.systemDefault())).orNull[ZonedDateTime])
-  implicit val offsetDateTime: TypeBinder[OffsetDateTime] = option[java.sql.Timestamp].map(_.map(v => OffsetDateTime.ofInstant(Instant.ofEpochMilli(v.getTime), ZoneId.systemDefault())).orNull[OffsetDateTime])
-  implicit val instant: TypeBinder[Instant] = option[java.sql.Timestamp].map(_.map(v => Instant.ofEpochMilli(v.getTime)).orNull[Instant])
-  implicit val localDate: TypeBinder[LocalDate] = option[java.sql.Date].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalDate).orNull[LocalDate])
-  implicit val localTime: TypeBinder[LocalTime] = option[java.sql.Time].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalTime).orNull[LocalTime])
-  implicit val localDateTime: TypeBinder[LocalDateTime] = option[java.sql.Timestamp].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalDateTime).orNull[LocalDateTime])
-
-  implicit val zonedDateTimeOpt: TypeBinder[Option[ZonedDateTime]] = option[java.sql.Timestamp].map(_.map(v => ZonedDateTime.ofInstant(Instant.ofEpochMilli(v.getTime), ZoneId.systemDefault())))
-  implicit val offsetDateTimeOpt: TypeBinder[Option[OffsetDateTime]] = option[java.sql.Timestamp].map(_.map(v => OffsetDateTime.ofInstant(Instant.ofEpochMilli(v.getTime), ZoneId.systemDefault())))
-  implicit val instantOpt: TypeBinder[Option[Instant]] = option[java.sql.Timestamp].map(_.map(v => Instant.ofEpochMilli(v.getTime)))
-  implicit val localDateOpt: TypeBinder[Option[LocalDate]] = option[java.sql.Date].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalDate))
-  implicit val localTimeOpt: TypeBinder[Option[LocalTime]] = option[java.sql.Time].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalTime))
-  implicit val localDateTimeOpt: TypeBinder[Option[LocalDateTime]] = option[java.sql.Timestamp].map(_.map(v => Instant.ofEpochMilli(v.getTime).atZone(ZoneId.systemDefault()).toLocalDateTime))
 
   private[scalikejdbc] val asciiStream: TypeBinder[java.io.InputStream] = Binders.asciiStream
   private[scalikejdbc] val nCharacterStream: TypeBinder[java.io.Reader] = Binders.nCharacterStream

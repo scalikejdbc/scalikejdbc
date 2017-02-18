@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.{ PreparedStatement, ResultSet }
+
 import scalikejdbc.UnixTimeInMillisConverterImplicits._
 
 /**
@@ -157,10 +158,23 @@ object Binders {
   val sqlTimestamp: Binders[java.sql.Timestamp] = Binders(_ getTimestamp _)(_ getTimestamp _)(v => (ps, idx) => ps.setTimestamp(idx, v))
   val url: Binders[java.net.URL] = Binders(_ getURL _)(_ getURL _)(v => (ps, idx) => ps.setURL(idx, v))
   val utilDate: Binders[java.util.Date] = sqlTimestamp.xmap(identity, _.toSqlTimestamp)
+
+  val javaTimeInstant: Binders[java.time.Instant] = utilDate.xmap(nullThrough(_.toInstant), java.util.Date.from)
+  val javaTimeZonedDateTime: Binders[java.time.ZonedDateTime] = utilDate.xmap(nullThrough(_.toZonedDateTime), v => java.util.Date.from(v.toInstant))
+  val javaTimeOffsetDateTime: Binders[java.time.OffsetDateTime] = utilDate.xmap(nullThrough(_.toOffsetDateTime), v => java.util.Date.from(v.toInstant))
+  val javaTimeLocalDateTime: Binders[java.time.LocalDateTime] = utilDate.xmap(nullThrough(_.toLocalDateTime), v => java.util.Date.from(v.atZone(java.time.ZoneId.systemDefault()).toInstant))
+  val javaTimeLocalDate: Binders[java.time.LocalDate] = sqlDate.xmap(nullThrough(_.toLocalDate), java.sql.Date.valueOf)
+  val javaTimeLocalTime: Binders[java.time.LocalTime] = sqlTime.xmap(nullThrough(v => {
+    // java.sql.Time#toLocalTime drops its millisecond value
+    val millis: Long = v.getTime
+    new java.util.Date(millis).toLocalTime
+  }), java.sql.Time.valueOf)
+
   val jodaDateTime: Binders[org.joda.time.DateTime] = utilDate.xmap(nullThrough(_.toJodaDateTime), _.toDate)
   val jodaLocalDateTime: Binders[org.joda.time.LocalDateTime] = utilDate.xmap(nullThrough(_.toJodaLocalDateTime), _.toDate)
   val jodaLocalDate: Binders[org.joda.time.LocalDate] = sqlDate.xmap(nullThrough(_.toJodaLocalDate), _.toDate.toSqlDate)
   val jodaLocalTime: Binders[org.joda.time.LocalTime] = sqlTime.xmap(nullThrough(_.toJodaLocalTime), _.toSqlTime)
+
   val binaryStream: Binders[InputStream] = Binders(_ getBinaryStream _)(_ getBinaryStream _)(v => (ps, idx) => ps.setBinaryStream(idx, v))
   val blob: Binders[java.sql.Blob] = Binders(_ getBlob _)(_ getBlob _)(v => (ps, idx) => ps.setBlob(idx, v))
   val clob: Binders[java.sql.Clob] = Binders(_ getClob _)(_ getClob _)(v => (ps, idx) => ps.setClob(idx, v))
