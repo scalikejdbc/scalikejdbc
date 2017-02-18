@@ -5,17 +5,17 @@ import sbtbuildinfo.Plugin._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "3.0.0-RC1"
+  lazy val _version = "3.0.0-RC2"
 
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.22"
+  lazy val _slf4jApiVersion = "1.7.23"
   lazy val _typesafeConfigVersion = "1.3.1"
   lazy val _reactiveStreamsVersion = "1.0.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.8"
+  lazy val _logbackVersion = "1.1.10"
   lazy val _h2Version = "1.4.193"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.40"
@@ -43,7 +43,7 @@ object ScalikeJDBCProjects extends Build {
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := "3.0.1",
-    specs2Version := "3.8.6",
+    specs2Version := "3.8.8",
     //scalaVersion := "2.11.8",
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
     javacOptions in doc := Seq("-source", "1.8"),
