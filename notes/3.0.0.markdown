@@ -68,6 +68,8 @@ publisher.subscribe(subscriber)
 
 ### Changes
 
+- [core] #636 Fix #605 cleanup for merging jsr310 module by @seratch 
+- [core] #635 Throw exception with invalid connectionPoolFactoryName by @mshibuya
 - [core] #631 Closing DataSource based connection pools by @smdmts
 - [core] #629 Remove UnixTimeInMillisConverterImplicits from TypeBinder by @xuwei-k
 - [core] #625 #626 Code improvements by @xuwei-k
@@ -91,6 +93,7 @@ publisher.subscribe(subscriber)
 - [streams] #617 Remove null patterns from DatabaseSubscription, StreamResultSetIterator by @seratch
 - [streams] #616 Fix to restrict on scope of internally classes by @yoskhdia
 - [streams] #614 Introducing scalikejdbc-streams as a sub module by @yoskhdia
+- [test] #638 Add AsyncAutoRollback for ScalaTest AsyncTestSuite by @amazzeo
 
 ---
 
