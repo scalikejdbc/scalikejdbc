@@ -15,8 +15,22 @@ class ReadOnlyStreamBlocksSpec extends FlatSpec with Matchers {
     publisher shouldBe a[DatabasePublisher[_]]
   }
 
+  "DB.readOnlyStream with SessionModification" should "create DatabasePublisher" in {
+    val publisher: DatabasePublisher[Int] = DB withSessionModification SessionModification.none readOnlyStream {
+      sql"select id from users".map(r => r.int("id")).iterator
+    }
+    publisher shouldBe a[DatabasePublisher[_]]
+  }
+
   "NamedDB.readOnlyStream" should "create DatabasePublisher" in {
     val publisher: DatabasePublisher[Long] = NamedDB('default) readOnlyStream {
+      sql"select id from users".map(r => r.long("id")).iterator
+    }
+    publisher shouldBe a[DatabasePublisher[_]]
+  }
+
+  "NamedDB.readOnlyStream with SessionModification" should "create DatabasePublisher" in {
+    val publisher: DatabasePublisher[Long] = NamedDB('default) withSessionModification SessionModification.none readOnlyStream {
       sql"select id from users".map(r => r.long("id")).iterator
     }
     publisher shouldBe a[DatabasePublisher[_]]

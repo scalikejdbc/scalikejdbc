@@ -2,7 +2,7 @@ package scalikejdbc
 
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
 
-import scala.concurrent.ExecutionContext
+import scala.language.implicitConversions
 
 /**
  * Reactive Streams support.
@@ -14,22 +14,6 @@ package object streams {
   val DefaultFetchSize: Int = 1000
 
   /**
-   * Creates a new DatabasePublisher.
-   */
-  private def createDatabasePublisher[A, E <: WithExtractor](
-    sql: StreamReadySQL[A],
-    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
-  )(
-    implicit
-    executionContext: ExecutionContext,
-    cpContext: DB.CPContext = DB.NoCPContext,
-    settings: SettingsProvider = SettingsProvider.default
-  ): DatabasePublisher[A] = {
-    val publisherSettings = DatabasePublisherSettings[A](connectionPoolName)
-    DatabasePublisherFactory.createNewPublisher[A](publisherSettings, AsyncExecutor(executionContext), sql)
-  }
-
-  /**
    * An implicit to enable the `DB.readOnlyStream` method:
    *
    * {{{
@@ -38,15 +22,8 @@ package object streams {
    * }
    * }}}
    */
-  implicit class EnableDBCodeBlockToProvideDatabasePublisher(val db: DB.type) extends AnyVal {
-
-    def readOnlyStream[A](sql: StreamReadySQL[A])(implicit
-      executionContext: ExecutionContext,
-      cpContext: DB.CPContext = DB.NoCPContext,
-      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A] = {
-
-      createDatabasePublisher(sql)
-    }
+  implicit final def enableDBCodeBlockToProvideDatabasePublisher(db: DB.type)(implicit settings: SettingsProvider = SettingsProvider.default): DatabasePublisherProvider = {
+    new DatabasePublisherProvider(settings = settings)
   }
 
   /**
@@ -58,14 +35,8 @@ package object streams {
    * }
    * }}}
    */
-  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(val db: NamedDB) extends AnyVal {
-
-    def readOnlyStream[A, E <: WithExtractor](sql: StreamReadySQL[A])(implicit
-      executionContext: ExecutionContext,
-      cpContext: DB.CPContext = DB.NoCPContext): DatabasePublisher[A] = {
-
-      createDatabasePublisher(sql, db.name)(executionContext, cpContext, db.settingsProvider)
-    }
+  implicit final def enableNamedDBCodeBlockToProvideDatabasePublisher(db: NamedDB): DatabasePublisherProvider = {
+    new DatabasePublisherProvider(connectionPoolName = db.name, settings = db.settingsProvider)
   }
 
   /**
