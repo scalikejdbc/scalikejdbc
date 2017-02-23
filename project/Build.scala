@@ -1,7 +1,8 @@
 import sbt._
 import Keys._
 import MimaSettings.mimaSettings
-import sbtbuildinfo.Plugin._
+import sbtbuildinfo.BuildInfoPlugin
+import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 object ScalikeJDBCProjects extends Build {
 
@@ -105,9 +106,8 @@ object ScalikeJDBCProjects extends Build {
   lazy val scalikejdbcCore = Project(
     id = "core",
     base = file("scalikejdbc-core"),
-    settings = baseSettings ++ mimaSettings ++ buildInfoSettings ++ Seq(
+    settings = baseSettings ++ mimaSettings ++ Seq(
       name := "scalikejdbc-core",
-      sourceGenerators in Compile += buildInfo.taskValue,
       buildInfoPackage := "scalikejdbc",
       buildInfoObject := "ScalikejdbcBuildInfo",
       buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
@@ -161,7 +161,7 @@ object ScalikeJDBCProjects extends Build {
         }
       }
     )
-  )
+  ).enablePlugins(BuildInfoPlugin)
 
   // scalikejdbc-interpolation-macro
   lazy val scalikejdbcInterpolationMacro = Project(
