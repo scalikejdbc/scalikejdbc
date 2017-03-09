@@ -1,0 +1,12 @@
+ScalikeJDBC 2.5.1 is out for Scala 2.10, 2.11 and 2.12. The mapper-generator sbt plugin for sbt 0.13 is available as well.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+ - [core] #644 2.5.x: backporting #643 by @seratch
+ - [core] Bump patch version of libs by @seratch
+ 
+Enjoy writing mostly type-safe SQL and get things done!
