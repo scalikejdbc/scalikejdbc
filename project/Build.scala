@@ -10,15 +10,15 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.21"
+  lazy val _slf4jApiVersion = "1.7.24"
   // 1.3 dropped JDK 7 support
   lazy val _typesafeConfigVersion = "1.2.1"
 
   // internal only
-  lazy val _logbackVersion = "1.1.7"
+  lazy val _logbackVersion = "1.2.1"
   lazy val _h2Version = "1.4.193"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-  lazy val _mysqlVersion = "5.1.40"
+  lazy val _mysqlVersion = "5.1.41"
   lazy val _postgresqlVersion = "9.4.1208.jre7"
   // Hibernate 5.2 dropped JDK 7 support
   lazy val _hibernateVersion = "5.1.2.Final"
@@ -43,8 +43,8 @@ object ScalikeJDBCProjects extends Build {
     fullResolvers ~= { _.filterNot(_.name == "jcenter") },
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
-    scalatestVersion := "3.0.0",
-    specs2Version := "3.8.6",
+    scalatestVersion := "3.0.1",
+    specs2Version := "3.8.9",
     //scalaVersion := "2.11.8",
     scalacOptions ++= _scalacOptions,
     scalacOptions in (Compile, doc) ++= Seq(
