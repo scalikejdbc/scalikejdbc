@@ -23,7 +23,7 @@ object ConnectionPool extends LogSupport {
     ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3, new ThreadFactory {
       private val i = new AtomicInteger(0)
       override def newThread(r: Runnable): Thread = {
-        val thread = new Thread(s"scalikejdbc-connection-pool-default-ec-${i.incrementAndGet()}")
+        val thread = new Thread(r, s"scalikejdbc-connection-pool-default-ec-${i.incrementAndGet()}")
         thread.setDaemon(true)
         thread
       }
