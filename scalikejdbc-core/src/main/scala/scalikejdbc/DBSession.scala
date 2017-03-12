@@ -27,14 +27,18 @@ trait DBSession extends LogSupport with LoanPattern {
     throw new IllegalStateException("This method should not be called.")
   }
 
-  override def using[R <: Closable, A](resource: R)(f: R => A): A = {
-    try {
-      super.using(resource)(f)
-    } finally {
-      // initialize options
-      this._fetchSize = None
-      this._tags = Vector.empty
-      this._queryTimeout = None
+  /**
+   * Adapt DBSessionTuner to this session.
+   *
+   * @param tuner DB session tuner
+   * @return DB session
+   */
+  private[scalikejdbc] def withTuner(tuner: DBSessionTuner): DBSession = {
+    this match {
+      case DBSessionTuningAdapter(session, _) =>
+        DBSessionTuningAdapter(session, tuner)
+      case _ =>
+        DBSessionTuningAdapter(this, tuner)
     }
   }
 
@@ -229,7 +233,7 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return this
    */
   def tags(tags: String*): this.type = {
-    this._tags = this._tags ++ tags
+    this._tags = tags
     this
   }
 
