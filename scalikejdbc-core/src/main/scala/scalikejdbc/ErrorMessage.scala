@@ -5,6 +5,8 @@ package scalikejdbc
  */
 private[scalikejdbc] object ErrorMessage {
 
+  val THIS_IS_A_BUG = "If you see this message, it's a ScalikeJDBC's bug. Please report us with stacktrace."
+
   val CONNECTION_POOL_IS_NOT_YET_INITIALIZED = "Connection pool is not yet initialized."
 
   val CANNOT_START_A_NEW_TRANSACTION = "Cannot start a new transaction."
