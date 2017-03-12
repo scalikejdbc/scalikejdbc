@@ -1,10 +1,16 @@
 package scalikejdbc
 
-import java.sql.{ Connection, PreparedStatement }
+import java.sql.PreparedStatement
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
+/**
+ * Adapt DB session and tuner.
+ *
+ * Control the process between tuning the session and delegate execution.
+ * Keeping session scope properties is a Tuner role.
+ */
 private[scalikejdbc] final case class DBSessionTuningAdapter(
     private val session: DBSession,
     private val tuner: DBSessionTuner
@@ -14,20 +20,6 @@ private[scalikejdbc] final case class DBSessionTuningAdapter(
   override private[scalikejdbc] val conn = session.conn
   override private[scalikejdbc] val connectionAttributes = session.connectionAttributes
   override val isReadOnly: Boolean = session.isReadOnly
-
-  /**
-   * Modify session and delegate execution.
-   */
-  private def delegateWithModification[T](delegate: DBSession => T): T = {
-    val transientSession = tuner.tune(session)
-    try {
-      delegate(transientSession)
-    } finally {
-      tuner.reset(transientSession)
-    }
-  }
-
-  override lazy val connection: Connection = session.connection
   override def tx: Option[Tx] = session.tx
 
   override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
@@ -40,6 +32,18 @@ private[scalikejdbc] final case class DBSessionTuningAdapter(
   override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
   override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
   override def queryTimeout: Option[Int] = session.queryTimeout
+
+  /**
+   * Modify session and delegate execution.
+   */
+  private def delegateWithModification[T](delegate: DBSession => T): T = {
+    val transientSession = tuner.tune(session)
+    try {
+      delegate(transientSession)
+    } finally {
+      tuner.reset(transientSession)
+    }
+  }
 
   override def toStatementExecutor(template: String, params: Seq[Any], returnGeneratedKeys: Boolean): StatementExecutor =
     delegateWithModification(_.toStatementExecutor(template, params, returnGeneratedKeys))

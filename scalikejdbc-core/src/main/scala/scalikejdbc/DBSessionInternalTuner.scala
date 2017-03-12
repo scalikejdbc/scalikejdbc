@@ -3,6 +3,7 @@ package scalikejdbc
 /**
  * Internally Tuner of DBSession.
  * Almost, be used by SQL object.
+ * This is not thread-safe. Don't share across threads.
  */
 private[scalikejdbc] final case class DBSessionInternalTuner(
     private[scalikejdbc] val fetchSize: Option[Int] = None,

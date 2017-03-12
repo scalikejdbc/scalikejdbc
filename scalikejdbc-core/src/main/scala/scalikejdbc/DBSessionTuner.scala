@@ -27,7 +27,7 @@ private[scalikejdbc] trait DBSessionTuner {
   def reset(session: DBSession): session.type
 }
 
-object DBSessionTuner {
+private[scalikejdbc] object DBSessionTuner {
 
   val default: DBSessionTuner = new DBSessionTuner {
     override def tune(session: DBSession): session.type = session
