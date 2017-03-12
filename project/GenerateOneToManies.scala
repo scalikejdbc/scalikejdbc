@@ -73,7 +73,8 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
   }
 
   private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], zExtractor: (A, $seq) => Z): Traversable[Z] = {
-    session.foldLeft(statement, parameters: _*)(LinkedHashMap[A, ($seq)]())(processResultSet).map {
+    val tuner = createDBSessionTuner()
+    DBSessionTuningAdapter(session, tuner).foldLeft(statement, parameters: _*)(LinkedHashMap[A, ($seq)]())(processResultSet).map {
       case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
     }
   }
