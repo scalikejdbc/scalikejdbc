@@ -28,21 +28,6 @@ trait DBSession extends LogSupport with LoanPattern {
   }
 
   /**
-   * Adapt DBSessionTuner to this session.
-   *
-   * @param tuner DB session tuner
-   * @return DB session
-   */
-  private[scalikejdbc] def withTuner(tuner: DBSessionTuner): DBSession = {
-    this match {
-      case DBSessionTuningAdapter(session, _) =>
-        DBSessionTuningAdapter(session, tuner)
-      case _ =>
-        DBSessionTuningAdapter(this, tuner)
-    }
-  }
-
-  /**
    * Connection
    */
   lazy val connection: Connection = conn

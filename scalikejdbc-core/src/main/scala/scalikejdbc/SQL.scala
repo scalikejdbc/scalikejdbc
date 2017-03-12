@@ -238,7 +238,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return DB session tuner
    */
-  private[scalikejdbc] def createDBSessionTuner(): DBSessionTuner = {
+  protected def createDBSessionTuner(): DBSessionTuner = {
     DBSessionInternalTuner(fetchSize, tags, queryTimeout)
   }
 
@@ -327,7 +327,7 @@ abstract class SQL[A, E <: WithExtractor](
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
     val tuner = createDBSessionTuner()
     val f: DBSession => Unit =
-      _.withTuner(tuner).foreach(statement, rawParameters: _*)(op)
+      DBSessionTuningAdapter(_, tuner).foreach(statement, rawParameters: _*)(op)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -348,7 +348,7 @@ abstract class SQL[A, E <: WithExtractor](
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
     val tuner = createDBSessionTuner()
     val f: DBSession => A =
-      _.withTuner(tuner).foldLeft(statement, rawParameters: _*)(z)(op)
+      DBSessionTuningAdapter(_, tuner).foldLeft(statement, rawParameters: _*)(z)(op)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -558,7 +558,7 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     val tuner = DBSessionInternalTuner(tags = tags)
-    val f: DBSession => C[Int] = _.withTuner(tuner).batch(statement, parameters: _*)
+    val f: DBSession => C[Int] = DBSessionTuningAdapter(_, tuner).batch(statement, parameters: _*)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -584,8 +584,8 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
     val tuner = DBSessionInternalTuner(tags = tags)
     val f: DBSession => C[Long] = (session) => {
       key match {
-        case Some(k) => session.withTuner(tuner).batchAndReturnSpecifiedGeneratedKey(statement, k, parameters: _*)
-        case _ => session.withTuner(tuner).batchAndReturnGeneratedKey(statement, parameters: _*)
+        case Some(k) => DBSessionTuningAdapter(session, tuner).batchAndReturnSpecifiedGeneratedKey(statement, k, parameters: _*)
+        case _ => DBSessionTuningAdapter(session, tuner).batchAndReturnGeneratedKey(statement, parameters: _*)
       }
     }
     // format: OFF
@@ -623,7 +623,7 @@ class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Se
 
   def apply()(implicit session: DBSession): Boolean = {
     val tuner = DBSessionInternalTuner(tags = tags)
-    val f: DBSession => Boolean = _.withTuner(tuner).executeWithFilters(before, after, statement, parameters: _*)
+    val f: DBSession => Boolean = DBSessionTuningAdapter(_, tuner).executeWithFilters(before, after, statement, parameters: _*)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -661,15 +661,15 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
     val tuner = DBSessionInternalTuner(tags = tags)
     session match {
       case AutoSession =>
-        DB.autoCommit(_.withTuner(tuner).updateWithFilters(before, after, statement, parameters: _*))
+        DB.autoCommit(DBSessionTuningAdapter(_, tuner).updateWithFilters(before, after, statement, parameters: _*))
       case NamedAutoSession(name, _) =>
-        NamedDB(name, session.settings).autoCommit(_.withTuner(tuner).updateWithFilters(before, after, statement, parameters: _*))
+        NamedDB(name, session.settings).autoCommit(DBSessionTuningAdapter(_, tuner).updateWithFilters(before, after, statement, parameters: _*))
       case ReadOnlyAutoSession =>
-        DB.readOnly(_.withTuner(tuner).updateWithFilters(before, after, statement, parameters: _*))
+        DB.readOnly(DBSessionTuningAdapter(_, tuner).updateWithFilters(before, after, statement, parameters: _*))
       case ReadOnlyNamedAutoSession(name, _) =>
-        NamedDB(name, session.settings).readOnly(_.withTuner(tuner).updateWithFilters(before, after, statement, parameters: _*))
+        NamedDB(name, session.settings).readOnly(DBSessionTuningAdapter(_, tuner).updateWithFilters(before, after, statement, parameters: _*))
       case _ =>
-        session.withTuner(tuner).updateWithFilters(before, after, statement, parameters: _*)
+        DBSessionTuningAdapter(session, tuner).updateWithFilters(before, after, statement, parameters: _*)
     }
   }
 
@@ -691,7 +691,7 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any],
 
   def apply()(implicit session: DBSession): Long = {
     val tuner = DBSessionInternalTuner(tags = tags)
-    val f: DBSession => Long = _.withTuner(tuner).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
+    val f: DBSession => Long = DBSessionTuningAdapter(_, tuner).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -724,7 +724,7 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     hasExtractor: ThisSQL =:= SQLWithExtractor
   ): C[A] = {
     val tuner = createDBSessionTuner()
-    val f: DBSession => C[A] = s => result[A](extractor, s.withTuner(tuner))
+    val f: DBSession => C[A] = s => result[A](extractor, DBSessionTuningAdapter(s, tuner))
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
@@ -798,7 +798,7 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
   private[scalikejdbc] val rawParameters: Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
     val tuner = createDBSessionTuner()
-    val f: DBSession => C[A] = _.withTuner(tuner).collection[A, C](statement, rawParameters: _*)(extractor)
+    val f: DBSession => C[A] = DBSessionTuningAdapter(_, tuner).collection[A, C](statement, rawParameters: _*)(extractor)
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)

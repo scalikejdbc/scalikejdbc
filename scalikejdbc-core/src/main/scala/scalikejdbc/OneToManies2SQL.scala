@@ -31,7 +31,7 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
 
   private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], zExtractor: (A, Seq[B1], Seq[B2]) => Z): Traversable[Z] = {
     val tuner = createDBSessionTuner()
-    session.withTuner(tuner).foldLeft(statement, rawParameters: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2])]())(processResultSet).map {
+    DBSessionTuningAdapter(session, tuner).foldLeft(statement, rawParameters: _*)(LinkedHashMap[A, (Seq[B1], Seq[B2])]())(processResultSet).map {
       case (one, (t1, t2)) => zExtractor(one, t1, t2)
     }
   }
