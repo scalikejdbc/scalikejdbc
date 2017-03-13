@@ -182,6 +182,19 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           errorResult should equal(3)
         }
 
+        // Session scope tagging
+        result = -1
+        session.tags("foo")
+        GlobalSettings.taggedQueryCompletionListener.synchronized {
+          SQL("select * from tagged_query_completion_listener").tags("bar", "baz").map(_.toMap).list.apply()
+          result should equal(3)
+        }
+        result = -1
+        GlobalSettings.taggedQueryCompletionListener.synchronized {
+          SQL("select * from tagged_query_completion_listener").map(_.toMap).list.apply()
+          result should equal(1)
+        }
+
       } finally {
         GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
         GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()

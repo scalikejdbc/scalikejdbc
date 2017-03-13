@@ -703,6 +703,36 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     }
   }
 
+  it should "keep fetchSize and queryTimeout during while the session is active" in {
+    val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      DB readOnly { session =>
+        session.fetchSize(111).queryTimeout(11)
+        val result = session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        result.size should be > 0
+        session.fetchSize should equal(Some(111))
+        session.queryTimeout should equal(Some(11))
+      }
+
+      DB readOnly { implicit session =>
+        session.fetchSize(111).queryTimeout(11)
+        val result = {
+          SQL("select * from " + tableName + "")
+            .map(rs => rs.string("name"))
+            .list()
+            .fetchSize(222)
+            .queryTimeout(22)
+            .apply()
+        }
+        result.size should be > 0
+        session.fetchSize should equal(Some(111))
+        session.queryTimeout should equal(Some(11))
+      }
+    }
+  }
+
   // queryTimeout
 
   it should "execute query with queryTimeout" in {

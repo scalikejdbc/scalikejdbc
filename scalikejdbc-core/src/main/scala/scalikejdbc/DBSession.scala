@@ -27,17 +27,6 @@ trait DBSession extends LogSupport with LoanPattern {
     throw new IllegalStateException("This method should not be called.")
   }
 
-  override def using[R <: Closable, A](resource: R)(f: R => A): A = {
-    try {
-      super.using(resource)(f)
-    } finally {
-      // initialize options
-      this._fetchSize = None
-      this._tags = Vector.empty
-      this._queryTimeout = None
-    }
-  }
-
   /**
    * Connection
    */
@@ -229,7 +218,7 @@ trait DBSession extends LogSupport with LoanPattern {
    * @return this
    */
   def tags(tags: String*): this.type = {
-    this._tags = this._tags ++ tags
+    this._tags = tags
     this
   }
 
