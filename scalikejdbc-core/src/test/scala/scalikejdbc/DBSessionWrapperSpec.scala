@@ -10,7 +10,7 @@ class DBSessionWrapperSpec extends FlatSpec with Matchers {
 
   behavior of "DBSessionWrapper"
 
-  it should "" in {
+  it should "be called #overwrite -> #recover" in {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       var step = 0
