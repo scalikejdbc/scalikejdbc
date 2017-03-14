@@ -140,7 +140,7 @@ object ScalikeJDBCProjects extends Build {
           "com.zaxxer"              %  "HikariCP"        % "2.5.1"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
+          "org.mockito"             %  "mockito-core"    % "2.7.17"          % "test"
         ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, scalaMajor)) if scalaMajor >= 11 =>
             Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
