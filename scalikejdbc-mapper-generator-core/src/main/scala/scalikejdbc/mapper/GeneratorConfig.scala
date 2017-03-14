@@ -4,7 +4,7 @@ case class GeneratorConfig(
   srcDir: String = "src/main/scala",
   testDir: String = "src/test/scala",
   packageName: String = "models",
-  template: GeneratorTemplate = GeneratorTemplate("queryDsl"),
+  template: GeneratorTemplate = GeneratorTemplate.queryDsl,
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
   caseClassOnly: Boolean = false,
