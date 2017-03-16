@@ -30,7 +30,7 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     import java.net.URL
 
     val underlying: ResultSet = mock[ResultSet]
-    val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) = (new java.lang.Integer(1), new java.lang.Integer(0), new java.lang.Integer(-1))
+    val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) = (1: Integer, 0: Integer, -1: Integer)
     when(underlying.getObject("one")).thenReturn(one, Array[Object](): _*)
     // TODO this code doesn't work as expected, should I use ScalaMock?
     // when(underlying.getObject("zero")).thenReturn(zero, Array[Object](): _*)
