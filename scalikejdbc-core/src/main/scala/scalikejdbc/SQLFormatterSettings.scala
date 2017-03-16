@@ -8,7 +8,7 @@ case class SQLFormatterSettings(formatterClassName: Option[String]) extends LogS
   lazy val formatter: Option[SQLFormatter] = formatterClassName.flatMap { className =>
     try {
       val clazz = Class.forName(className)
-      Some(clazz.newInstance().asInstanceOf[SQLFormatter])
+      Some(clazz.getDeclaredConstructor().newInstance().asInstanceOf[SQLFormatter])
     } catch {
       case e: Exception =>
         log.warn("Failed to load " + className)
