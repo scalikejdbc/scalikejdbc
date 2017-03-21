@@ -3,7 +3,7 @@ package scalikejdbc.streams
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicLong }
 
 import org.reactivestreams.{ Subscriber, Subscription }
-import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, LogSupport, NamedDB }
+import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, DBSessionWrapper, LogSupport, NamedDB }
 
 import scala.concurrent.Promise
 import scala.util.{ Failure, Success }
@@ -257,15 +257,8 @@ private[streams] class DatabaseSubscription[A](
    */
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
 
-    val occupiedDBSession: DBSession = {
-      val session = maybeOccupiedDBSession match {
-        case Some(session) => session
-        case _ => occupyNewDBSession()
-      }
-      makeDBSessionCursorQueryReady(session)
-      session
-    }
-    val statementExecutor = occupiedDBSession.toStatementExecutor(sql.statement, sql.rawParameters)
+    val occupiedDBSession = maybeOccupiedDBSession.getOrElse(occupyNewDBSession())
+    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher()).toStatementExecutor(sql.statement, sql.rawParameters)
     val resultSet = statementExecutor.executeQuery()
     val resultSetProxy = new DBConnectionAttributesWiredResultSet(resultSet, occupiedDBSession.connectionAttributes)
 
@@ -330,43 +323,6 @@ private[streams] class DatabaseSubscription[A](
   // -----------------------------------------------
   // Completely internal methods
   // -----------------------------------------------
-
-  /**
-   * Forcibly changes the database session to be cursor query ready.
-   */
-  private[this] def makeDBSessionCursorQueryReady(session: DBSession): Unit = {
-    session
-      .fetchSize(sql.fetchSize)
-      .tags(sql.tags: _*)
-      .queryTimeout(sql.queryTimeout)
-
-    // setup required settings to enable cursor operations
-    session.connectionAttributes.driverName match {
-      case Some(driver) if driver == "com.mysql.jdbc.Driver" && sql.fetchSize.exists(_ > 0) =>
-        /*
-         * MySQL - https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-implementation-notes.html
-         *
-         * StreamAction.StreamingInvoker prepares the following required settings in advance:
-         *
-         * - java.sql.ResultSet.TYPE_FORWARD_ONLY
-         * - java.sql.ResultSet.CONCUR_READ_ONLY
-         *
-         * If the fetchSize is set as 0 or less, we need to forcibly change the value with the Int min value.
-         */
-        session.fetchSize(Int.MinValue)
-
-      case Some(driver) if driver == "org.postgresql.Driver" =>
-        /*
-         * PostgreSQL - https://jdbc.postgresql.org/documentation/94/query.html
-         *
-         * - java.sql.Connection#autocommit false
-         * - java.sql.ResultSet.TYPE_FORWARD_ONLY
-         */
-        session.conn.setAutoCommit(false)
-
-      case _ =>
-    }
-  }
 
   /**
    * Schedules a synchronous streaming which holds the given iterator.

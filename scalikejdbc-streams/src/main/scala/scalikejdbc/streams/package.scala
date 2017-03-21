@@ -22,8 +22,8 @@ package object streams {
   )(
     implicit
     executionContext: ExecutionContext,
-    cpContext: DB.CPContext = DB.NoCPContext,
-    settings: SettingsProvider = SettingsProvider.default
+    cpContext: DB.CPContext,
+    settings: SettingsProvider
   ): DatabasePublisher[A] = {
     val publisherSettings = DatabasePublisherSettings[A](connectionPoolName)
     DatabasePublisherFactory.createNewPublisher[A](publisherSettings, AsyncExecutor(executionContext), sql)

@@ -1,6 +1,6 @@
 package somewhere
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger }
 import java.util.concurrent._
 
 import org.reactivestreams.example.unicast.{ AsyncSubscriber, SyncSubscriber }
@@ -97,6 +97,39 @@ class DatabasePublisherSpec
     publisher.subscribe(subscriber)
     consumedCountPromise.future
       .map(actualElements => assert(actualElements == expectedElements))
+  }
+
+  it should "be subscribed and use the modified DB session" in {
+    val passedStreamReadySwitcher: AtomicBoolean = new AtomicBoolean(false)
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator.withDBSessionForceAdjuster(session => {
+        passedStreamReadySwitcher.set(true)
+      })
+    }
+
+    val consumedCountPromise: Promise[Int] = Promise[Int]()
+    val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
+      private[this] val consumedCount = new AtomicInteger(0)
+
+      override def foreach(element: Int): Boolean = {
+        val consumed = consumedCount.incrementAndGet()
+        log.info(s"foreach element: $element, consumed: $consumed")
+        true
+      }
+      override def onError(error: Throwable): Unit = {
+        super.onError(error)
+        log.info(s"Error - ${error}, consumed: ${consumedCount.get()}")
+        consumedCountPromise.tryFailure(error)
+      }
+      override def onComplete(): Unit = {
+        super.onComplete()
+        log.info(s"Completed - consumed: ${consumedCount.get()}")
+        consumedCountPromise.trySuccess(consumedCount.get())
+      }
+    }
+    publisher.subscribe(subscriber)
+    consumedCountPromise.future
+      .map(count => assert(count == totalRows && passedStreamReadySwitcher.get() == true))
   }
 
   // ------------------------------------------
