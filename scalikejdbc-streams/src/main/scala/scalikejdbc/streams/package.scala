@@ -3,7 +3,6 @@ package scalikejdbc
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
 
 import scala.concurrent.ExecutionContext
-import scala.language.implicitConversions
 
 /**
  * Reactive Streams support.
