@@ -1,12 +1,20 @@
 package scalikejdbc.mapper
 
+import java.util.UUID
 import scalikejdbc._
 import scalikejdbc.{ ResultSetTraversable => RSTraversable }
 
 case class Model(url: String, username: String, password: String) {
 
-  if (!ConnectionPool.isInitialized()) {
-    ConnectionPool.singleton(url, username, password)
+  private[this] val poolName = UUID.randomUUID
+
+  locally {
+    ConnectionPool.add(
+      name = poolName,
+      url = url,
+      user = username,
+      password = password
+    )
   }
 
   private def columnName(implicit rs: WrappedResultSet): String = rs.string("COLUMN_NAME")
@@ -24,7 +32,7 @@ case class Model(url: String, username: String, password: String) {
   } catch { case e: Exception => false }
 
   private[this] def listAllTables(schema: String, types: List[String]): Seq[String] = {
-    DB readOnlyWithConnection { conn =>
+    using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
       val (catalog, _schema) = {
         (schema, meta.getDatabaseProductName) match {
@@ -49,7 +57,7 @@ case class Model(url: String, username: String, password: String) {
   def table(schema: String = null, tableName: String): Option[Table] = {
     val catalog = null
     val _schema = if (schema == null || schema.isEmpty) null else schema
-    DB readOnlyWithConnection { conn =>
+    using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
       new RSTraversable(meta.getColumns(catalog, _schema, tableName, "%"))
         .map { implicit rs => Column(columnName, columnDataType, isNotNull, isAutoIncrement) }
@@ -71,5 +79,8 @@ case class Model(url: String, username: String, password: String) {
     }
   }
 
+  def close(): Unit = {
+    ConnectionPool.close(poolName)
+  }
 }
 
