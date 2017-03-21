@@ -58,8 +58,8 @@ private[streams] object StreamReadySQL {
   }
 
   /**
-    * Forcibly changes the database session to be cursor query ready.
-    */
+   * Forcibly changes the database session to be cursor query ready.
+   */
   val defaultFunctionToMakeDBSessionStreamReady: DBSession => Unit = (session) => {
 
     // setup required settings to enable cursor operations
