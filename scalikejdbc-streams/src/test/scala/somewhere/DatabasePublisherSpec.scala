@@ -102,7 +102,7 @@ class DatabasePublisherSpec
   it should "be subscribed and use the modified DB session" in {
     val passedStreamReadySwitcher: AtomicBoolean = new AtomicBoolean(false)
     val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator.withDBSessionAttributesModification(session => {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator.withDBSessionForceAdjuster(session => {
         passedStreamReadySwitcher.set(true)
       })
     }

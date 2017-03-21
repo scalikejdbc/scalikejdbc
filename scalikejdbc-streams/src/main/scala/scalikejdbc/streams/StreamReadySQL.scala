@@ -1,6 +1,7 @@
 package scalikejdbc.streams
 
 import scalikejdbc._
+import StreamReadySQL._
 
 /**
  * Streaming-ready SQL object.
@@ -9,7 +10,7 @@ import scalikejdbc._
  */
 case class StreamReadySQL[A] private (
     private val underlying: SQL[A, HasExtractor],
-    private val makeDBSessionStreamReady: DBSession => Unit = StreamReadySQL.defaultFunctionToMakeDBSessionStreamReady
+    private val adjuster: DBSessionForceAdjuster = defaultDBSessionForceAdjuster
 ) {
 
   private[streams] lazy val extractor: (WrappedResultSet) => A = underlying.extractor
@@ -24,19 +25,19 @@ case class StreamReadySQL[A] private (
   private[streams] lazy val queryTimeout: Option[Int] = underlying.queryTimeout
 
   /**
-   * New StreamReadySQL with modification of DBSession attributes.
+   * New StreamReadySQL with adjuster of DBSession attributes.
    *
-   * @param makeDBSessionStreamReady The Function to modify the db session before querying.
+   * @param adjuster The Function to adjust the db session before querying.
    */
-  final def withDBSessionAttributesModification(makeDBSessionStreamReady: DBSession => Unit): StreamReadySQL[A] = {
-    new StreamReadySQL(underlying, makeDBSessionStreamReady)
+  final def withDBSessionForceAdjuster(adjuster: DBSessionForceAdjuster): StreamReadySQL[A] = {
+    new StreamReadySQL(underlying, adjuster)
   }
 
   private[streams] def createDBSessionAttributesSwitcher(): DBSessionAttributesSwitcher = {
     new DBSessionAttributesSwitcher(underlying) {
       override def withSwitchedDBSession[T](session: DBSession)(op: (DBSession) => T): T = {
         super.withSwitchedDBSession(session) { session =>
-          makeDBSessionStreamReady(session)
+          adjuster(session)
           op(session)
         }
       }
@@ -45,6 +46,7 @@ case class StreamReadySQL[A] private (
 }
 
 private[streams] object StreamReadySQL {
+  type DBSessionForceAdjuster = DBSession => Unit
 
   /**
    * The only way to instantiate StreamSQL.
@@ -60,7 +62,7 @@ private[streams] object StreamReadySQL {
   /**
    * Forcibly changes the database session to be cursor query ready.
    */
-  val defaultFunctionToMakeDBSessionStreamReady: DBSession => Unit = (session) => {
+  val defaultDBSessionForceAdjuster: DBSessionForceAdjuster = (session) => {
 
     // setup required settings to enable cursor operations
     session.connectionAttributes.driverName match {
