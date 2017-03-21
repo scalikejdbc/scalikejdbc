@@ -99,16 +99,12 @@ class DatabasePublisherSpec
       .map(actualElements => assert(actualElements == expectedElements))
   }
 
-  it should "be subscribed and use the modified DB session by SessionModification" in {
-    val sessionModification = new SessionModification {
-      val passedModification: AtomicBoolean = new AtomicBoolean(false)
-      override def modify(session: DBSession): session.type = {
-        passedModification.set(true)
-        SessionModification.default.modify(session)
-      }
-    }
-    val publisher: DatabasePublisher[Int] = DB.withSessionModification(sessionModification).readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
+  it should "be subscribed and use the modified DB session" in {
+    val passedStreamReadySwitcher: AtomicBoolean = new AtomicBoolean(false)
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator.withDBSessionAttributesModification(session => {
+        passedStreamReadySwitcher.set(true)
+      })
     }
 
     val consumedCountPromise: Promise[Int] = Promise[Int]()
@@ -133,7 +129,7 @@ class DatabasePublisherSpec
     }
     publisher.subscribe(subscriber)
     consumedCountPromise.future
-      .map(count => assert(count == totalRows && sessionModification.passedModification.get() == true))
+      .map(count => assert(count == totalRows && passedStreamReadySwitcher.get() == true))
   }
 
   // ------------------------------------------

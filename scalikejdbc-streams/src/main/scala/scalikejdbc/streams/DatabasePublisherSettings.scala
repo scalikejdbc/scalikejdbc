@@ -17,11 +17,6 @@ private[streams] class DatabasePublisherSettings[A](
   private[streams] val connectionPoolContext: DB.CPContext,
 
   /**
-   * Modification to make session cursor query ready.
-   */
-  private[streams] val sessionModification: SessionModification,
-
-  /**
    * Connection pool settings provider.
    */
   private[streams] val settingsProvider: SettingsProvider,
@@ -37,13 +32,12 @@ private[streams] object DatabasePublisherSettings {
   /**
    * Creates and returns a DatabasePublisherSettings.
    */
-  private[streams] def apply[A](dbName: Any, sessionModification: SessionModification)(implicit
+  private[streams] def apply[A](dbName: Any)(implicit
     context: DB.CPContext = DB.NoCPContext,
     settingsProvider: SettingsProvider = SettingsProvider.default): DatabasePublisherSettings[A] = {
     new DatabasePublisherSettings(
       dbName,
       context,
-      sessionModification,
       settingsProvider
     )
   }

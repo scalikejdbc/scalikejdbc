@@ -3,7 +3,7 @@ package scalikejdbc.streams
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicLong }
 
 import org.reactivestreams.{ Subscriber, Subscription }
-import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, LogSupport, NamedDB }
+import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, DBSessionWrapper, LogSupport, NamedDB }
 
 import scala.concurrent.Promise
 import scala.util.{ Failure, Success }
@@ -257,14 +257,8 @@ private[streams] class DatabaseSubscription[A](
    */
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
 
-    val occupiedDBSession: DBSession = {
-      val session = maybeOccupiedDBSession match {
-        case Some(session) => session
-        case _ => occupyNewDBSession()
-      }
-      makeDBSessionCursorQueryReady(session)
-    }
-    val statementExecutor = occupiedDBSession.toStatementExecutor(sql.statement, sql.rawParameters)
+    val occupiedDBSession = maybeOccupiedDBSession.getOrElse(occupyNewDBSession())
+    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher()).toStatementExecutor(sql.statement, sql.rawParameters)
     val resultSet = statementExecutor.executeQuery()
     val resultSetProxy = new DBConnectionAttributesWiredResultSet(resultSet, occupiedDBSession.connectionAttributes)
 
@@ -329,17 +323,6 @@ private[streams] class DatabaseSubscription[A](
   // -----------------------------------------------
   // Completely internal methods
   // -----------------------------------------------
-
-  /**
-   * Forcibly changes the database session to be cursor query ready.
-   */
-  private[this] def makeDBSessionCursorQueryReady(session: DBSession): DBSession = {
-    publisher.settings
-      .sessionModification.modify(session)
-      .fetchSize(sql.fetchSize)
-      .tags(sql.tags: _*)
-      .queryTimeout(sql.queryTimeout)
-  }
 
   /**
    * Schedules a synchronous streaming which holds the given iterator.
