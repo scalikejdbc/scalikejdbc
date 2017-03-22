@@ -11,17 +11,17 @@ object ScalikeJDBCProjects extends Build {
   lazy val _organization = "org.scalikejdbc"
 
   // published dependency version
-  lazy val _slf4jApiVersion = "1.7.23"
+  lazy val _slf4jApiVersion = "1.7.25"
   lazy val _typesafeConfigVersion = "1.3.1"
   lazy val _reactiveStreamsVersion = "1.0.0"
 
   // internal only
-  lazy val _logbackVersion = "1.1.10"
-  lazy val _h2Version = "1.4.193"
+  lazy val _logbackVersion = "1.2.2"
+  lazy val _h2Version = "1.4.194"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-  lazy val _mysqlVersion = "5.1.40"
+  lazy val _mysqlVersion = "5.1.41"
   lazy val _postgresqlVersion = "9.4.1212"
-  lazy val _hibernateVersion = "5.2.6.Final"
+  lazy val _hibernateVersion = "5.2.9.Final"
   lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
   lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -44,7 +44,7 @@ object ScalikeJDBCProjects extends Build {
     transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := "3.0.1",
-    specs2Version := "3.8.8",
+    specs2Version := "3.8.9",
     //scalaVersion := "2.11.8",
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
     javacOptions in doc := Seq("-source", "1.8"),
@@ -137,7 +137,7 @@ object ScalikeJDBCProjects extends Build {
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
           "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
           // scope: test
-          "com.zaxxer"              %  "HikariCP"        % "2.5.1"           % "test",
+          "com.zaxxer"              %  "HikariCP"        % "2.6.1"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
           "org.mockito"             %  "mockito-core"    % "2.7.17"          % "test"
@@ -345,7 +345,7 @@ object ScalikeJDBCProjects extends Build {
   val jdbcDriverDependenciesInTestScope = Seq(
     "com.h2database"    % "h2"                   % _h2Version         % "test",
     "org.apache.derby"  % "derby"                % "10.13.1.1"        % "test",
-    "org.xerial"        % "sqlite-jdbc"          % "3.8.11.2"         % "test",
+    "org.xerial"        % "sqlite-jdbc"          % "3.16.1"           % "test",
     "org.hsqldb"        % "hsqldb"               % "2.3.4"            % "test",
     "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
     "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
