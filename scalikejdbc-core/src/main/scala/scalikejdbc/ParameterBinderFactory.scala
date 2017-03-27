@@ -12,7 +12,7 @@ import scala.reflect.macros.blackbox.Context
 @implicitNotFound(
   """
 --------------------------------------------------------
- Implicit ParameterBinderFactory[A] for the parameter type A is missing.
+ Implicit ParameterBinderFactory[${A}] for the parameter type ${A} is missing.
  You need to define ParameterBinderFactory for the type or use AsIsParameterBinder.
 
   (example1)
