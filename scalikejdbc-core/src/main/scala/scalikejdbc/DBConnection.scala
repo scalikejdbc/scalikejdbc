@@ -442,7 +442,7 @@ trait DBConnection extends LogSupport with LoanPattern {
   /**
    * Returns table information if exists.
    *
-   * https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-
+   * [[https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-]]
    *
    * @param meta database meta data
    * @param schema schema name
