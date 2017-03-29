@@ -62,3 +62,6 @@ sbt
 
 logs
 sandbox/db
+
+.ensime
+.ensime_cache/
