@@ -468,7 +468,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param after after filter
    * @return SQL instance
    */
-  def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit) = {
+  def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit): SQLExecution = {
     new SQLExecution(statement, rawParameters, tags)(before)(after)
   }
 

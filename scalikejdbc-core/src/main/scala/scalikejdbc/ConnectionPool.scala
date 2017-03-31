@@ -137,7 +137,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @param dataSource DataSource based ConnectionPool
    */
-  def add(name: Any, dataSource: DataSourceConnectionPool) = {
+  def add(name: Any, dataSource: DataSourceConnectionPool): Unit = {
     // NOTE: cannot pass ExecutionContext from outside due to overload issue
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
@@ -157,7 +157,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @param dataSource DataSource based ConnectionPool
    */
-  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool) = {
+  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
     // NOTE: cannot pass ExecutionContext from outside due to overload issue
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
