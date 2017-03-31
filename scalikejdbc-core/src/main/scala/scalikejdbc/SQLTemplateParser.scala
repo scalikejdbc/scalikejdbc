@@ -61,7 +61,7 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
   /**
    * Converts Executable SQL template to Anorm SQL template.
    */
-  private case class ExecutableToAnormConverter(str: String) {
+  private case class ExecutableToAnormConverter(str: String) extends AnyVal {
 
     implicit def toStringWithMethodsInternally(sql: String) = ExecutableToAnormConverter(sql)
 
