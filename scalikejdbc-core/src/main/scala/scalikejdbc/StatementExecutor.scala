@@ -36,7 +36,7 @@ case class StatementExecutor(
     tags: Seq[String] = Nil,
     isBatch: Boolean = false,
     settingsProvider: SettingsProvider = SettingsProvider.default
-) extends LogSupport with UnixTimeInMillisConverterImplicits {
+) extends LogSupport with UnixTimeInMillisConverterImplicits with AutoCloseable {
 
   import StatementExecutor._
 

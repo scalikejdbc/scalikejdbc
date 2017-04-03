@@ -19,7 +19,7 @@ import scala.language.higherKinds
  * }
  * }}}
  */
-trait DBSession extends LogSupport with LoanPattern {
+trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
 
   protected[scalikejdbc] def settings: SettingsProvider
 
