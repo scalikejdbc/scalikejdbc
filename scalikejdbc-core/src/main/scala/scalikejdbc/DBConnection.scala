@@ -19,7 +19,7 @@ trait DBConnection extends LogSupport with LoanPattern {
     settingsProvider.jtaDataSourceCompatible(GlobalSettings.jtaDataSourceCompatible)
 
   /**
-   * Connection wil be closed automatically by default.
+   * Connection will be closed automatically by default.
    */
   private[this] var autoCloseEnabled: Boolean = true
 
