@@ -16,7 +16,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val _reactiveStreamsVersion = "1.0.0"
 
   // internal only
-  lazy val _logbackVersion = "1.2.2"
+  lazy val _logbackVersion = "1.2.3"
   lazy val _h2Version = "1.4.194"
   // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
   lazy val _mysqlVersion = "5.1.41"
@@ -131,7 +131,7 @@ object ScalikeJDBCProjects extends Build {
           "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
           "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
           "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-          "joda-time"               %  "joda-time"       % "2.9.7"           % "compile",
+          "joda-time"               %  "joda-time"       % "2.9.9"           % "compile",
           "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
           // scope: provided
           "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
@@ -140,7 +140,7 @@ object ScalikeJDBCProjects extends Build {
           "com.zaxxer"              %  "HikariCP"        % "2.6.1"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.mockito"             %  "mockito-core"    % "2.7.17"          % "test"
+          "org.mockito"             %  "mockito-core"    % "2.7.21"          % "test"
         ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, scalaMajor)) if scalaMajor >= 11 =>
             Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
