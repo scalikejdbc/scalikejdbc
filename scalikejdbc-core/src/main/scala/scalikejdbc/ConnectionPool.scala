@@ -283,7 +283,7 @@ abstract class ConnectionPool(
     val user: String,
     password: String,
     val settings: ConnectionPoolSettings = ConnectionPoolSettings()
-) {
+) extends AutoCloseable {
 
   /**
    * Borrows java.sql.Connection from pool.

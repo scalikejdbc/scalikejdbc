@@ -3,7 +3,7 @@ package scalikejdbc
 /**
  * Resource manager which closes a DataSource.
  */
-trait DataSourceCloser {
+trait DataSourceCloser extends AutoCloseable {
   def close(): Unit
 }
 

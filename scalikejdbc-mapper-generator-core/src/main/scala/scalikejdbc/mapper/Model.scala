@@ -4,7 +4,7 @@ import java.util.UUID
 import scalikejdbc._
 import scalikejdbc.{ ResultSetTraversable => RSTraversable }
 
-case class Model(url: String, username: String, password: String) {
+case class Model(url: String, username: String, password: String) extends AutoCloseable {
 
   private[this] val poolName = UUID.randomUUID
 

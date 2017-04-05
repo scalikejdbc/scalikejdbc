@@ -10,7 +10,7 @@ import java.util.Locale.{ ENGLISH => en }
 /**
  * Basic Database Accessor which holds a JDBC connection.
  */
-trait DBConnection extends LogSupport with LoanPattern {
+trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
 
   type RSTraversable = ResultSetTraversable
 
