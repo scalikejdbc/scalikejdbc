@@ -688,11 +688,25 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         1.indent + "}" + eol
     }
 
+    val nameConverters: String = {
+      def quote(str: String) = "\"" + str + "\""
+      val customNameColumns = table.allColumns.collect {
+        case column if GeneratorConfig.columnNameToFieldNameBasic(column.name) != column.nameInScala =>
+          quote(column.nameInScala) -> quote(column.name)
+      }.toMap
+      if (customNameColumns.nonEmpty) {
+        1.indent + s"override val nameConverters: Map[String, String] = ${customNameColumns} " + eol + eol
+      } else {
+        ""
+      }
+    }
+
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
     "object " + className + " extends SQLSyntaxSupport[" + className + "] {" + eol +
       table.schema.filterNot(_.isEmpty).map { schema =>
         eol + 1.indent + "override val schemaName = Some(\"" + schema + "\")" + eol
       }.getOrElse("") +
+      nameConverters +
       eol +
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +
