@@ -235,8 +235,8 @@ object SQLSyntax {
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.rawParameters))
 
-  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = {
-    val sep = if (spaceBeforeDelimier) {
+  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimiter: Boolean = true): SQLSyntax = {
+    val sep = if (spaceBeforeDelimiter) {
       s" ${delimiter.value} "
     } else {
       s"${delimiter.value} "
