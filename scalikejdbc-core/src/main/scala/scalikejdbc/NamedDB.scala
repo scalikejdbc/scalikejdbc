@@ -13,6 +13,9 @@ import java.sql.Connection
  *   session.list("select * from user")
  * }
  * }}}
+ *
+ * Please note that a single NamedDB instance should be used only once, as the connection is closed
+ * after being used. To re-use an instance, use the .setAutoClose(false) method.
  */
 case class NamedDB(
     name: Any,
