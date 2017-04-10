@@ -4,13 +4,13 @@ import util.control.Exception._
 
 object TestUtils {
 
-  def initializeEmpRecords(session: DBSession, tableName: String) {
+  def initializeEmpRecords(session: DBSession, tableName: String): Unit = {
     session.update("delete from " + tableName)
     session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
     session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
   }
 
-  def initialize(tableName: String) {
+  def initialize(tableName: String): Unit = {
     DB autoCommit {
       session =>
         handling(classOf[Throwable]) by {

@@ -157,7 +157,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
    * Create directory to put the source code file if it does not exist yet.
    */
   def mkdirRecursively(file: File): Unit = {
-    if (!file.getParentFile.exists) mkdirRecursively(file.getParentFile)
+    val parent = file.getAbsoluteFile.getParentFile
+    if (!parent.exists) mkdirRecursively(parent)
     if (!file.exists) file.mkdir()
   }
 
@@ -640,10 +641,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def batchInsert(entities: Seq[Member])(implicit session: DBSession = autoSession): Seq[Int] = {
      *   val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>
-     *   Seq(
-     *     'id -> entity.id,
-     *     'name -> entity.name,
-     *     'birthday -> entity.birthday))
+     *     Seq(
+     *       'id -> entity.id,
+     *       'name -> entity.name,
+     *       'birthday -> entity.birthday))
      *   SQL("""insert into member (
      *     id,
      *     name,
@@ -679,12 +680,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         3.indent + "Seq(" + eol +
         batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
         "))" + eol +
-        4.indent + "SQL(\"\"\"insert into " + table.name + "(" + eol +
-        batchInsertColumns.map(c => 4.indent + c.name.replace("`", "")).mkString(comma + eol) + eol +
-        3.indent + ")" + " values (" + eol +
-        batchInsertColumns.map(c => 4.indent + "{" + c.nameInScala.replace("`", "") + "}").mkString(comma + eol) + eol +
-        3.indent + ")\"\"\").batchByName(params: _*).apply[" + returnType + "]()" + eol +
-        2.indent + "}" + eol
+        2.indent + "SQL(\"\"\"insert into " + table.name + "(" + eol +
+        batchInsertColumns.map(c => 3.indent + c.name.replace("`", "")).mkString(comma + eol) + eol +
+        2.indent + ")" + " values (" + eol +
+        batchInsertColumns.map(c => 3.indent + "{" + c.nameInScala.replace("`", "") + "}").mkString(comma + eol) + eol +
+        2.indent + ")\"\"\").batchByName(params: _*).apply[" + returnType + "]()" + eol +
+        1.indent + "}" + eol
     }
 
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
@@ -754,7 +755,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           case _ => None
         }
     } match {
-      case classes if classes.size > 0 => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
+      case classes if classes.nonEmpty => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
       case _ => ""
     }
     val canBuildFromImport =
@@ -792,7 +793,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   }
 
   def writeSpec(code: Option[String]): Unit = {
-    code.map { code =>
+    code.foreach { code =>
       mkdirRecursively(outputSpecFile.getParentFile)
       using(new FileOutputStream(outputSpecFile)) {
         fos =>

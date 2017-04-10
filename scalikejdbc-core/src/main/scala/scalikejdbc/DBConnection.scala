@@ -19,7 +19,7 @@ trait DBConnection extends LogSupport with LoanPattern {
     settingsProvider.jtaDataSourceCompatible(GlobalSettings.jtaDataSourceCompatible)
 
   /**
-   * Connection wil be closed automatically by default.
+   * Connection will be closed automatically by default.
    */
   private[this] var autoCloseEnabled: Boolean = true
 
@@ -363,10 +363,10 @@ trait DBConnection extends LogSupport with LoanPattern {
    */
   private[this] def toSchemaAndTable(name: String): (String, String) = {
     val schema = {
-      if (name.split("\\.").size > 1) name.split("\\.").head
+      if (name.split("\\.").length > 1) name.split("\\.").head
       else null
     }
-    val table = if (name.split("\\.").size > 1) name.split("\\.")(1) else name
+    val table = if (name.split("\\.").length > 1) name.split("\\.")(1) else name
     (schema, table)
   }
 
@@ -442,7 +442,7 @@ trait DBConnection extends LogSupport with LoanPattern {
   /**
    * Returns table information if exists.
    *
-   * https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-
+   * [[https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-]]
    *
    * @param meta database meta data
    * @param schema schema name

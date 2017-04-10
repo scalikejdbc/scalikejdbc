@@ -47,7 +47,7 @@ case class StatementExecutor(
   /**
    * Initializes this instance.
    */
-  private def initialize() {
+  private def initialize(): Unit = {
     bindParams(singleParams)
     if (isBatch) {
       batchParamsList.clear()
@@ -160,8 +160,8 @@ case class StatementExecutor(
           case null => "null"
           case result: String =>
             loggingSQLAndTime.maxColumnSize.collect {
-              case maxSize if result.size > maxSize =>
-                "'" + result.take(maxSize) + "... (" + result.size + ")" + "'"
+              case maxSize if result.length > maxSize =>
+                "'" + result.take(maxSize) + "... (" + result.length + ")" + "'"
             }.getOrElse {
               "'" + result + "'"
             }

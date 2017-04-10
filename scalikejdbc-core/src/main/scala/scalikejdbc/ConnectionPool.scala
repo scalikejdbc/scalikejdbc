@@ -90,12 +90,15 @@ object ConnectionPool extends LogSupport {
     implicit
     factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY,
     ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
-  ) {
+  ): Unit = {
 
     import scalikejdbc.JDBCUrl._
 
-    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).flatMap { name =>
-      ConnectionPoolFactoryRepository.get(name).map(f => (f, name))
+    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).map { name =>
+      ConnectionPoolFactoryRepository.get(name).map(f => (f, name)).getOrElse {
+        val message = ErrorMessage.INVALID_CONNECTION_POOL_FACTORY_NAME + "(name:" + name + ")"
+        throw new IllegalArgumentException(message)
+      }
     }.getOrElse((factory, "<default>"))
 
     // register new pool or replace existing pool
@@ -134,7 +137,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @param dataSource DataSource based ConnectionPool
    */
-  def add(name: Any, dataSource: DataSourceConnectionPool) = {
+  def add(name: Any, dataSource: DataSourceConnectionPool): Unit = {
     // NOTE: cannot pass ExecutionContext from outside due to overload issue
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
@@ -154,7 +157,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @param dataSource DataSource based ConnectionPool
    */
-  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool) = {
+  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
     // NOTE: cannot pass ExecutionContext from outside due to overload issue
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)

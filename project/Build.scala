@@ -36,7 +36,7 @@ object ScalikeJDBCProjects extends Build {
   lazy val baseSettings = Seq(
     organization := _organization,
     version := _version,
-    publishTo <<= version { (v: String) => _publishTo(v) },
+    publishTo := _publishTo(version.value),
     publishMavenStyle := true,
     resolvers ++= _resolvers,
     // https://github.com/sbt/sbt/issues/2217
@@ -96,7 +96,7 @@ object ScalikeJDBCProjects extends Build {
     base = file("scalikejdbc-core"),
     settings = baseSettings ++ mimaSettings ++ buildInfoSettings ++ Seq(
       name := "scalikejdbc-core",
-      sourceGenerators in Compile <+= buildInfo,
+      sourceGenerators in Compile += buildInfo.taskValue,
       buildInfoPackage := "scalikejdbc",
       buildInfoObject := "ScalikejdbcBuildInfo",
       buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
@@ -129,7 +129,7 @@ object ScalikeJDBCProjects extends Build {
           "com.zaxxer"              %  "HikariCP"        % "2.4.7"           % "test",
           "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
           "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-          "org.mockito"             %  "mockito-all"     % "1.10.+"          % "test"
+          "org.mockito"             %  "mockito-core"    % "2.7.17"          % "test"
         ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
           case Some((2, scalaMajor)) if scalaMajor >= 11 =>
             Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4" % "compile")
@@ -141,9 +141,13 @@ object ScalikeJDBCProjects extends Build {
             Nil
         }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
       },
-      unmanagedSourceDirectories in Compile <+= (scalaVersion, sourceDirectory in Compile){(v, dir) =>
-        if (v.startsWith("2.10")) dir / "scala2.10"
-        else dir / "scala2.11"
+      unmanagedSourceDirectories in Compile += {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, 10)) =>
+            (sourceDirectory in Compile).value / "scala2.10"
+          case _ =>
+            (sourceDirectory in Compile).value / "scala2.11"
+        }
       }
     )
   )
@@ -322,7 +326,7 @@ object ScalikeJDBCProjects extends Build {
     "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
   )
   //val _scalacOptions = Seq("-deprecation", "-unchecked", "-Ymacro-debug-lite", "-Xlog-free-terms", "Yshow-trees", "-feature")
-  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
+  val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
   val _pomExtra = <url>http://scalikejdbc.org/</url>
       <licenses>
         <license>

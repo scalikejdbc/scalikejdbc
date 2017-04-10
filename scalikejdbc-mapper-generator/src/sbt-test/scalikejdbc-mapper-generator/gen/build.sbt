@@ -29,13 +29,13 @@ TaskKey[Unit]("createTestDatabase") := {
 testOptions in Test += Tests.Setup{ loader =>
   type Initializer = {def run(url: String, username: String, password: String)}
   val setting = (scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile).value
-  val initializer = loader.loadClass("app.Initializer").newInstance().asInstanceOf[Initializer]
+  val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
   initializer.run(setting.url, setting.username, setting.password)
 }
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.11.8", "2.10.6")
+crossScalaVersions := List("2.12.1", "2.11.8", "2.10.6")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked", "-Xfatal-warnings")
 

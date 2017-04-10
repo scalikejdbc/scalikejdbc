@@ -44,7 +44,7 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   }
 
   case class autoRollbackWithFixture() extends AutoRollback {
-    override def fixture(implicit session: DBSession) {
+    override def fixture(implicit session: DBSession): Unit = {
       SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
       SQL("insert into members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
     }
@@ -87,7 +87,7 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   case class db2AutoRollbackWithFixture() extends AutoRollback {
     override def db = NamedDB('db2).toDB
 
-    override def fixture(implicit session: DBSession) {
+    override def fixture(implicit session: DBSession): Unit = {
       SQL("insert into members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
       SQL("insert into members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
     }

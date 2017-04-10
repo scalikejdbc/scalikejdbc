@@ -42,7 +42,7 @@ case class Table(
     }
     def length(str: String): Int = {
       if (str == null) 0
-      else withoutCRLF(str).map(c => if (c.toString.getBytes.size > 1) 2 else 1).sum
+      else withoutCRLF(str).map(c => if (c.toString.getBytes.length > 1) 2 else 1).sum
     }
     def take(str: String, maxLength: Int): String = {
       if (str == null) null
@@ -120,10 +120,10 @@ case class Table(
       }.mkString +
       "+-" + "-" * maxColumnNameLength + "-+-" + "-" * maxTypeNameLength + "-+------+-----+-" + "-" * maxDefaultValueLength + "-+-----------------+-" + "-" * maxDescriptionLength + "-+\n" +
       {
-        if (indices.size > 0) "Indexes:\n" + indices.map { index => "  \"" + index.name + "\"" + (if (index.isUnique) " UNIQUE," else "") + " (" + index.columnNames.mkString(", ") + ")" + "\n" }.mkString
+        if (indices.nonEmpty) "Indexes:\n" + indices.map { index => "  \"" + index.name + "\"" + (if (index.isUnique) " UNIQUE," else "") + " (" + index.columnNames.mkString(", ") + ")" + "\n" }.mkString
         else ""
       } + {
-        if (foreignKeys.size > 0) "Foreign Keys:\n" + foreignKeys.map { fk => "  " + fk.name + " -> " + fk.foreignTableName + "(" + fk.foreignColumnName + ")" + "\n" }.mkString
+        if (foreignKeys.nonEmpty) "Foreign Keys:\n" + foreignKeys.map { fk => "  " + fk.name + " -> " + fk.foreignTableName + "(" + fk.foreignColumnName + ")" + "\n" }.mkString
         else ""
       }
   }

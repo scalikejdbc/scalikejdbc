@@ -1,6 +1,8 @@
 package scalikejdbc
 package interpolation
 
+import java.util.Locale.ENGLISH
+
 /**
  * Value as a part of SQL syntax.
  *
@@ -233,8 +235,8 @@ object SQLSyntax {
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.rawParameters))
 
-  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimier: Boolean = true): SQLSyntax = {
-    val sep = if (spaceBeforeDelimier) {
+  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, @deprecatedName('spaceBeforeDelimier) spaceBeforeDelimiter: Boolean = true): SQLSyntax = {
+    val sep = if (spaceBeforeDelimiter) {
       s" ${delimiter.value} "
     } else {
       s"${delimiter.value} "
@@ -252,7 +254,7 @@ object SQLSyntax {
   def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",", false)
 
   private[this] def hasAndOr(s: SQLSyntax): Boolean = {
-    val statement = s.value.toLowerCase
+    val statement = s.value.toLowerCase(ENGLISH)
     statement.matches(".+\\s+and\\s+.+") ||
       statement.matches(".+\\s+or\\s+.+")
   }
