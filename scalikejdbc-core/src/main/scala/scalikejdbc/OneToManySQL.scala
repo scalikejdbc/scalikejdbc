@@ -14,9 +14,9 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
 
   private[scalikejdbc] def processResultSet(oneToMany: (LinkedHashMap[A, Seq[B]]), rs: WrappedResultSet): LinkedHashMap[A, Seq[B]] = {
     val o = extractOne(rs)
-    oneToMany.keys.find(_ == o).map { _ =>
+    if (oneToMany.contains(o)) {
       extractTo(rs).map(many => oneToMany += (o -> (oneToMany.apply(o) :+ many))).getOrElse(oneToMany)
-    }.getOrElse {
+    } else {
       oneToMany += (o -> extractTo(rs).map(many => Vector(many)).getOrElse(Nil))
     }
   }

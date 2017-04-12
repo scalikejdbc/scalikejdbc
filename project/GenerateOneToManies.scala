@@ -52,7 +52,7 @@ s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
     rs: WrappedResultSet): LinkedHashMap[A, ($seq)] = {
     val o = extractOne(rs)
     val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n).map(extractTo + _ + "(rs)").mkString(", ")})
-    result.keys.find(_ == o).map { _ =>
+    if (result.contains(o)) {
       ${(1 to n).map("to" + _).mkString("(", " orElse ", ")")}.map { _ =>
         val (${(1 to n).map("ts" + _).mkString(", ")}) = result.apply(o)
         result += (o -> (
@@ -61,7 +61,7 @@ s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(t
           }.mkString(",\n")}
         ))
       }.getOrElse(result)
-    }.getOrElse {
+    } else {
       result += (
         o -> (
 ${(1 to n).map{i =>
