@@ -14,9 +14,9 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
 
   private[scalikejdbc] def processResultSet(oneToOne: (LinkedHashMap[A, Option[B]]), rs: WrappedResultSet): LinkedHashMap[A, Option[B]] = {
     val o = extractOne(rs)
-    oneToOne.keys.find(_ == o).map {
-      case Some(found) => throw new IllegalRelationshipException(ErrorMessage.INVALID_ONE_TO_ONE_RELATION)
-    }.getOrElse {
+    if (oneToOne.contains(o)) {
+      throw new IllegalRelationshipException(ErrorMessage.INVALID_ONE_TO_ONE_RELATION)
+    } else {
       oneToOne += (o -> extractTo(rs))
     }
   }
