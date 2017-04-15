@@ -150,7 +150,8 @@ object SbtPlugin extends Plugin {
       dateTimeClass = generatorSettings.dateTimeClass,
       tableNameToClassName = generatorSettings.tableNameToClassName,
       columnNameToFieldName = generatorSettings.columnNameToFieldName,
-      returnCollectionType = generatorSettings.returnCollectionType
+      returnCollectionType = generatorSettings.returnCollectionType,
+      view = generatorSettings.view
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {
