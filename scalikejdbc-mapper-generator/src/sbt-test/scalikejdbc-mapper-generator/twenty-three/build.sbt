@@ -26,7 +26,7 @@ TaskKey[Unit]("createTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked", "-Xfatal-warnings")
+scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"     %% "scalikejdbc"              % scalikejdbcVersion,
