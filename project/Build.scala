@@ -45,7 +45,7 @@ object ScalikeJDBCProjects extends Build {
     incOptions := incOptions.value.withNameHashing(true),
     scalatestVersion := "3.0.3",
     specs2Version := "3.8.9",
-    //scalaVersion := "2.11.8",
+    //scalaVersion := "2.11.11",
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
     javacOptions in doc := Seq("-source", "1.8"),
     scalacOptions ++= _scalacOptions,
