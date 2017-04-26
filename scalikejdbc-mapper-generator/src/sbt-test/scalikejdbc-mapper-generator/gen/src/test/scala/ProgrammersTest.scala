@@ -11,7 +11,21 @@ class ProgrammersTest extends fixture.FlatSpec with Matchers with AutoRollback {
 
   behavior of "Programmer"
 
+  private[this] def driverClassName(): String = {
+    val props = new java.util.Properties()
+    val inputStream = new java.io.FileInputStream("test.properties")
+    try {
+      props.load(inputStream)
+    } finally {
+      inputStream.close()
+    }
+    props.get("jdbc.driver").toString
+  }
+
   it should "be available" in { implicit session =>
+    if (driverClassName() == "org.h2.Driver") {
+      pending
+    }
     Programmers.findAll().toSet should equal(Set.empty[Programmers])
     Programmers.countAll() should equal(0)
 

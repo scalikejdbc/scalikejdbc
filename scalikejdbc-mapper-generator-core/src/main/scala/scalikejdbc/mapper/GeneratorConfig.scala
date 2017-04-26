@@ -13,7 +13,7 @@ case class GeneratorConfig(
   defaultAutoSession: Boolean = true,
   dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
-  columnNameToFieldName: String => String = GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord,
+  columnNameToFieldName: String => String = GeneratorConfig.columnNameToFieldNameBasic andThen GeneratorConfig.addSuffixIfConflict("Column"),
   returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,
   view: Boolean = false
 )
@@ -47,8 +47,23 @@ object GeneratorConfig {
       else name
   }
 
+  val conflictMethods: Set[String] = Set(
+    "toString", "hashCode", "wait", "getClass", "notify", "notifyAll",
+    "productArity", "productIterator", "productPrefix"
+  )
+
+  def addSuffixIfConflict(suffix: String): String => String = {
+    name =>
+      if (conflictMethods(name)) name + suffix
+      else name
+  }
+
   val lowerCamelCase: String => String =
     GeneratorConfig.toCamelCase.andThen {
       camelCase => camelCase.head.toLower + camelCase.tail
     }
+
+  val columnNameToFieldNameBasic: String => String = {
+    GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord
+  }
 }
