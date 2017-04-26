@@ -20,8 +20,8 @@ private[scalikejdbc] object EntityUtil {
         c.error(c.enclosingPosition, s"You must use String literal values for field names to exclude from #$macroName's targets. $m could not resolve at compile time.")
         None
       }
-    }.toSet
-    val paramsStrs: Set[String] = allParams.map(_.name.decodedName.toString).toSet
+    }(collection.breakOut)
+    val paramsStrs: Set[String] = allParams.map(_.name.decodedName.toString)(collection.breakOut)
     excludeStrs.foreach { ex =>
       if (!paramsStrs(ex)) c.error(c.enclosingPosition, s"$ex does not found in ${weakTypeTag[A].tpe}")
     }
