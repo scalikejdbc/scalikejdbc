@@ -11,7 +11,6 @@ import scalikejdbc.streams._
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
-import scala.language.reflectiveCalls
 
 class DatabasePublisherSpec
     extends AsyncFlatSpec

@@ -1,8 +1,6 @@
 package scalikejdbc
 
 import org.scalatest._
-import java.sql.{ Timestamp => sqlTimestamp, Time => sqlTime, Date => sqlDate }
-import java.util.{ Calendar, Date => utilDate }
 import org.joda.time._
 
 class UnixTimeInMillisConverterSpec extends FlatSpec with Matchers with UnixTimeInMillisConverterImplicits {

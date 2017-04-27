@@ -6,8 +6,6 @@ import java.sql.PreparedStatement
 import scalikejdbc.interpolation.SQLSyntax
 
 import scala.annotation.implicitNotFound
-import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
 
 @implicitNotFound(
   """

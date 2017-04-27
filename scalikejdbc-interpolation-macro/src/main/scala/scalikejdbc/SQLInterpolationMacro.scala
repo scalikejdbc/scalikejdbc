@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import scala.language.experimental.macros
 import scala.reflect.macros._
 
 import scalikejdbc.interpolation.SQLSyntax

@@ -1,9 +1,5 @@
 package scalikejdbc
 
-import java.util.Date
-
-import java.util.TimeZone
-import org.joda.time._
 import org.scalatest._
 import java.sql.SQLException
 import org.slf4j.LoggerFactory

@@ -4,10 +4,9 @@ import util.control.Exception._
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import org.joda.time.DateTime
-import java.util.Calendar
 import java.sql._
 import scala.concurrent.ExecutionContext
-import java.io.{ InputStream, ByteArrayInputStream }
+import java.io.ByteArrayInputStream
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
     with LoanPattern with UnixTimeInMillisConverterImplicits {

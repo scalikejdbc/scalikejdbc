@@ -4,7 +4,6 @@ import java.util.Locale.{ ENGLISH => en }
 import scalikejdbc.interpolation.SQLSyntax
 
 import scala.collection.concurrent.TrieMap
-import scala.language.reflectiveCalls
 import scala.language.experimental.macros
 import scala.language.dynamics
 
