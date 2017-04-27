@@ -75,7 +75,7 @@ class DatabasePublisherTckTest
   override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(): Unit = {
     activePublisherTest(5, false, new PublisherTestRun[User] {
       @throws[InterruptedException]
-      def run(pub: Publisher[User]) {
+      def run(pub: Publisher[User]) = {
         val sub = env.newManualSubscriber(pub)
         sub.expectNone(String.format("Publisher %s produced value before the first `request`: ", pub))
         sub.request(1)
