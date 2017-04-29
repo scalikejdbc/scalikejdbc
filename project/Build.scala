@@ -6,7 +6,7 @@ import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 object ScalikeJDBCProjects extends Build {
 
-  lazy val _version = "3.0.0-SNAPSHOT"
+  lazy val _version = "3.0.0-RC4"
 
   lazy val _organization = "org.scalikejdbc"
 

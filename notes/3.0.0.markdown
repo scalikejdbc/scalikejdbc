@@ -68,7 +68,15 @@ publisher.subscribe(subscriber)
 
 ### Changes
 
-- [core] #655 update dependencies by @xuwei-k
+- [core] #682 Use collection.breakOut by @zaneli
+- [core] #677 Use LinkedHashMap.contains instead of LinkedHashMap.keys.find by @ushjp
+- [core] #676 Add a note to NamedDB scaladocs that it should be used only once by @adamw
+- [core] #673 Avoid conflict java.lang.Object and scala.Product methods by @xuwei-k
+- [core] #668 Make closeable objects to extend java.lang.AutoCloseable by @xuwei-k
+- [core] #664 Add explicit type annotations by @xuwei-k
+- [core] #660 s/toLowerCase/toLowerCase(ENGLISH) by @xuwei-k
+- [core] #659 Improve implicitNotFound message by @xuwei-k
+- [core] #655 Update dependencies by @xuwei-k
 - [core] #652 Java9: s/newInstance()/getDeclaredConstructor().newInstance() by @xuwei-k
 - [core] #651 Java9: Avoid java.lang.Integer constructor by @xuwei-k
 - [core] #643 Fix a potential issue of thread factory in ConnectionPoolFix by @zaneli
@@ -88,6 +96,7 @@ publisher.subscribe(subscriber)
 - [core] #596 Merge scalikejdbc-jsr310 module to scalikejdbc-core by @xuwei-k
 - [core] #594 Use length instead of size by @xuwei-k 
 - [core] #593 Use nonEmpty instead of size by @xuwei-k
+- [mapper-generator] #678 Fix bug that "view" argument is unused by @xuwei-k
 - [mapper-generator] #654 Avoid ConnectionPool.singleton per a code generator by @xuwei-k
 - [mapper-generator] #592 Avoid NullPointerException by @xuwei-k
 - [mapper-generator] #591 Fix batchInsert method indent by @xuwei-k
