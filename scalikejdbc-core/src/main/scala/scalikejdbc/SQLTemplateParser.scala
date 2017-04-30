@@ -63,11 +63,12 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
    */
   private case class ExecutableToAnormConverter(str: String) extends AnyVal {
 
-    implicit def toStringWithMethodsInternally(sql: String) = ExecutableToAnormConverter(sql)
+    implicit def toStringWithMethodsInternally(sql: String): ExecutableToAnormConverter = ExecutableToAnormConverter(sql)
 
     def standardizeLineBreaks(): String = str.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
 
-    def trimSpaces() = {
+    def trimSpaces(): String = {
+      @annotation.tailrec
       def trimSpaces(s: String, i: Int = 0): String = i match {
         case i if i > 10 => s
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
@@ -75,13 +76,13 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
       trimSpaces(str).replaceAll("\\s+;", ";").trim()
     }
 
-    def removeLineComments() = str.split("\n").map(_.replaceFirst("--.+$", "")).mkString(" ")
+    def removeLineComments(): String = str.split("\n").map(_.replaceFirst("--.+$", "")).mkString(" ")
 
-    def removeMultipleLineComments() = str.replaceAll("/\\*\\s*.+?\\s*\\*/", "")
+    def removeMultipleLineComments(): String = str.replaceAll("/\\*\\s*.+?\\s*\\*/", "")
 
-    def simplifyParameters() = str.replaceAll("/\\*\\s*'(\\w+)\\s*\\*/[^\\s,\\)]+", "{$1}")
+    def simplifyParameters(): String = str.replaceAll("/\\*\\s*'(\\w+)\\s*\\*/[^\\s,\\)]+", "{$1}")
 
-    def trimParameterDummyValues() = {
+    def trimParameterDummyValues(): String = {
       // because literals might have whitespace
       val paramComment = "(/\\*\\s*'.+?\\s*\\*/\\s*)"
       str.replaceAll(paramComment + "'[^']+'", "$1''")
