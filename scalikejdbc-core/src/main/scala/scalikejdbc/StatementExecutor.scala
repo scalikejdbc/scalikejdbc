@@ -130,6 +130,7 @@ case class StatementExecutor(
     def singleSqlString(params: Seq[Any]): String = {
 
       def toPrintable(param: Any): String = {
+        @annotation.tailrec
         def normalize(param: Any): Any = {
           param match {
             case ParameterBinder(v) => normalize(v)
@@ -159,6 +160,7 @@ case class StatementExecutor(
       }
 
       var i = 0
+      @annotation.tailrec
       def trimSpaces(s: String, i: Int = 0): String = i match {
         case i if i > 10 => s
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)

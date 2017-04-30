@@ -68,6 +68,7 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
     def standardizeLineBreaks(): String = str.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
 
     def trimSpaces() = {
+      @annotation.tailrec
       def trimSpaces(s: String, i: Int = 0): String = i match {
         case i if i > 10 => s
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
