@@ -204,7 +204,6 @@ object ScalikeJDBCProjects extends Build {
       libraryDependencies ++= {
         Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
           scalaTestDependenciesInTestScope(scalatestVersion.value) ++
-          specs2DependenciesInTestScope(specs2Version.value) ++
           jdbcDriverDependenciesInTestScope
       }
     )
