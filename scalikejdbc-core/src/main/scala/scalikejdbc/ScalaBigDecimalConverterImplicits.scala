@@ -11,4 +11,7 @@ trait ScalaBigDecimalConverterImplicits {
     new ScalaBigDecimalConverter(bd)
   }
 
+  implicit def convertBigDecimalOpt(bd: Option[java.math.BigDecimal]): ScalaBigDecimalConverterOpt = {
+    new ScalaBigDecimalConverterOpt(bd)
+  }
 }
