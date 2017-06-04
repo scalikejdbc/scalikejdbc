@@ -1,10 +1,10 @@
-scalikejdbcSettings
+val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
-scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile := {
+scalikejdbcJDBCSettings in Compile := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))
   def loadProp(key: String): String = Option(props.get(key)).map(_.toString).getOrElse(throw new IllegalStateException("missing key " + key))
-  scalikejdbc.mapper.SbtPlugin.JDBCSettings(
+  JDBCSettings(
     driver = loadProp("jdbc.driver"),
     url = loadProp("jdbc.url"),
     username = "sa",
@@ -15,7 +15,7 @@ scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile := {
 
 TaskKey[Unit]("createTestDatabase") := {
   import scalikejdbc._
-  val setting = (mapper.SbtKeys.scalikejdbcJDBCSettings in Compile).value
+  val setting = (scalikejdbcJDBCSettings in Compile).value
   Class.forName(setting.driver)
   ConnectionPool.singleton(setting.url, setting.username, setting.password)
   DB.autoCommit { implicit s =>
@@ -28,7 +28,7 @@ TaskKey[Unit]("createTestDatabase") := {
 
 testOptions in Test += Tests.Setup{ loader =>
   type Initializer = {def run(url: String, username: String, password: String)}
-  val setting = (scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile).value
+  val setting = (scalikejdbcJDBCSettings in Compile).value
   val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
   initializer.run(setting.url, setting.username, setting.password)
 }

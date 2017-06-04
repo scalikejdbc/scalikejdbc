@@ -9,27 +9,60 @@ import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
 import java.util.Properties
 
-object SbtPlugin extends Plugin {
+@deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin", "")
+object SbtPlugin {
+  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.JDBCSettings", "")
+  val JDBCSettings = ScalikejdbcPlugin.autoImport.JDBCSettings
+  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.JDBCSettings", "")
+  type JDBCSettings = ScalikejdbcPlugin.autoImport.JDBCSettings
 
-  import SbtKeys._
+  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.GeneratorSettings", "")
+  val GeneratorSettings = ScalikejdbcPlugin.autoImport.GeneratorSettings
+  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.GeneratorSettings", "")
+  type GeneratorSettings = ScalikejdbcPlugin.autoImport.GeneratorSettings
 
-  case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
+  @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
+  val scalikejdbcSettings: Seq[Def.Setting[_]] = ScalikejdbcPlugin.projectSettings
+}
 
-  case class GeneratorSettings(
-    packageName: String,
-    template: String,
-    testTemplate: String,
-    lineBreak: String,
-    caseClassOnly: Boolean,
-    encoding: String,
-    autoConstruct: Boolean,
-    defaultAutoSession: Boolean,
-    dateTimeClass: DateTimeClass,
-    tableNameToClassName: String => String,
-    columnNameToFieldName: String => String,
-    returnCollectionType: ReturnCollectionType,
-    view: Boolean
-  )
+object ScalikejdbcPlugin extends AutoPlugin {
+
+  object autoImport {
+    val scalikejdbcGen = InputKey[Unit]("scalikejdbc-gen", "Generates a model for a specified table")
+    val scalikejdbcGenForce = InputKey[Unit]("scalikejdbc-gen-force", "Generates and overwrites a model for a specified table")
+    val scalikejdbcGenAll = InputKey[Unit]("scalikejdbc-gen-all", "Generates models for all tables")
+    val scalikejdbcGenAllForce = InputKey[Unit]("scalikejdbc-gen-all-force", "Generates and overwrites models for all tables")
+    val scalikejdbcGenEcho = InputKey[Unit]("scalikejdbc-gen-echo", "Prints a model for a specified table")
+
+    val scalikejdbcJDBCSettings = TaskKey[JDBCSettings]("scalikejdbcJDBCSettings")
+    val scalikejdbcGeneratorSettings = TaskKey[GeneratorSettings]("scalikejdbcGeneratorSettings")
+
+    val scalikejdbcCodeGeneratorSingle = TaskKey[(String, Option[String], JDBCSettings, GeneratorSettings) => Option[Generator]]("scalikejdbcCodeGeneratorSingle")
+    val scalikejdbcCodeGeneratorAll = TaskKey[(JDBCSettings, GeneratorSettings) => Seq[Generator]]("scalikejdbcCodeGeneratorAll")
+
+    case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
+
+    case class GeneratorSettings(
+      packageName: String,
+      template: String,
+      testTemplate: String,
+      lineBreak: String,
+      caseClassOnly: Boolean,
+      encoding: String,
+      autoConstruct: Boolean,
+      defaultAutoSession: Boolean,
+      dateTimeClass: DateTimeClass,
+      tableNameToClassName: String => String,
+      columnNameToFieldName: String => String,
+      returnCollectionType: ReturnCollectionType,
+      view: Boolean
+    )
+
+    @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
+    lazy val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
+  }
+
+  import autoImport._
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -193,7 +226,7 @@ object SbtPlugin extends Plugin {
     Space ~> token(StringBasic, "tableName") ~ (Space ~> token(StringBasic, "(class-name)")).?
   ).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
-  val scalikejdbcSettings = inConfig(Compile)(Seq(
+  override val projectSettings: Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
     scalikejdbcCodeGeneratorSingle := { (table, clazz, jdbc, generatorSettings) =>
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
@@ -242,9 +275,11 @@ object SbtPlugin extends Plugin {
     scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)
   ))
 
+  @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
+  val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
+
   def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {
     ignoring(classOf[Throwable]) apply resource.close()
   } apply f(resource)
 
 }
-
