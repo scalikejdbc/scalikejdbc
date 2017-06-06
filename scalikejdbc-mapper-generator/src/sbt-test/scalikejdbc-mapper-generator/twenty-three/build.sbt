@@ -1,6 +1,6 @@
-scalikejdbcSettings
+val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
-scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile := {
+scalikejdbcJDBCSettings in Compile := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))
   def loadProp(key: String): String = Option(props.get(key)).map(_.toString).getOrElse(throw new IllegalStateException("missing key " + key))
@@ -15,7 +15,7 @@ scalikejdbc.mapper.SbtKeys.scalikejdbcJDBCSettings in Compile := {
 
 TaskKey[Unit]("createTestDatabase") := {
   import scalikejdbc._
-  val setting = (mapper.SbtKeys.scalikejdbcJDBCSettings in Compile).value
+  val setting = (scalikejdbcJDBCSettings in Compile).value
   Class.forName(setting.driver)
   ConnectionPool.singleton(setting.url, setting.username, setting.password)
   DB.autoCommit { implicit s =>

@@ -1,6 +1,6 @@
 import scalikejdbc.mapper._
 
-scalikejdbcSettings
+val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version")
 )
 
-(SbtKeys.scalikejdbcJDBCSettings in Compile) := JDBCSettings(
+(scalikejdbcJDBCSettings in Compile) := JDBCSettings(
   "dummy driver name",
   "dummy url",
   "dummy username",
@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "dummy schema"
 )
 
-(SbtKeys.scalikejdbcCodeGeneratorAll in Compile) := { (_, generatorSettings) =>
+(scalikejdbcCodeGeneratorAll in Compile) := { (_, generatorSettings) =>
   val idColumn = Column("id", java.sql.Types.INTEGER, true, true)
   val columns = List(
     idColumn,
