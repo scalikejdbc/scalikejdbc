@@ -4,7 +4,7 @@ import sbt._
 import sbt.Keys._
 import sbt.complete.EditDistance
 import scala.language.reflectiveCalls
-import util.control.Exception._
+import scala.util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
 import java.util.Properties
@@ -103,7 +103,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
   private[this] def printWarningIfTypo(props: Properties): Unit = {
-    import scala.collection.convert.decorateAsScala._
+    import scala.collection.JavaConverters._
     props.keySet().asScala.map(_.toString).filterNot(allKeys).foreach { typoKey =>
       val correctKeys = allKeys.toList.sortBy(key => EditDistance.levenshtein(typoKey, key)).take(3).mkString(" or ")
       println(s"""Not a valid key "$typoKey". did you mean ${correctKeys}?""")
@@ -227,15 +227,19 @@ object ScalikejdbcPlugin extends AutoPlugin {
   ).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
   override val projectSettings: Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
-    scalikejdbcCodeGeneratorSingle := { (table, clazz, jdbc, generatorSettings) =>
+    scalikejdbcCodeGeneratorSingle := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
-      generator(tableName = table, className = clazz, srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+      (table, clazz, jdbc, generatorSettings) => {
+        generator(tableName = table, className = clazz, srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+      }
     },
-    scalikejdbcCodeGeneratorAll := { (jdbc, generatorSettings) =>
+    scalikejdbcCodeGeneratorAll := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
-      allGenerators(srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+      (jdbc, generatorSettings) => {
+        allGenerators(srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
+      }
     },
     scalikejdbcGen := {
       val args = genTaskParser(scalikejdbcGen.key.label).parsed
