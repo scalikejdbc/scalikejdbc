@@ -15,7 +15,8 @@ case class GeneratorConfig(
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
   columnNameToFieldName: String => String = GeneratorConfig.columnNameToFieldNameBasic andThen GeneratorConfig.addSuffixIfConflict("Column"),
   returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,
-  view: Boolean = false
+  view: Boolean = false,
+  tableNamesToSkip: Seq[String] = List()
 )
 
 object GeneratorConfig {
