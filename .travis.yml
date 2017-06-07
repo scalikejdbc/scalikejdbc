@@ -48,22 +48,16 @@ matrix:
       # TODO https://github.com/sbt/sbt/issues/3245 enable scripted test
       - sbt ++${TRAVIS_SCALA_VERSION} "project mapper-generator" "^^ 1.0.0-M6" compile
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.2
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.2
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M1
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
       script:
       # https://github.com/scalikejdbc/scalikejdbc/issues/683
