@@ -41,6 +41,11 @@ env:
 
 matrix:
   include:
+    - scala: 2.12.2
+      script:
+      - echo "sbt.version=0.13.16-M1" > project/build.properties
+      # TODO https://github.com/sbt/sbt/issues/3245 enable scripted test
+      - sbt ++${TRAVIS_SCALA_VERSION} "project mapper-generator" "^^ 1.0.0-M6" compile
     - scala: scripted-test
       jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
