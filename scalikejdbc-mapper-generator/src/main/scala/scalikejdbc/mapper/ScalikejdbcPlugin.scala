@@ -278,7 +278,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
   val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
 
-  def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {
+  def using[R <: { def close(): Unit }, A](resource: R)(f: R => A): A = ultimately {
     ignoring(classOf[Throwable]) apply resource.close()
   } apply f(resource)
 
