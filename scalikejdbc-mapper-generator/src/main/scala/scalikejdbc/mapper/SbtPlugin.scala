@@ -242,7 +242,7 @@ object SbtPlugin extends Plugin {
     scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)
   ))
 
-  def using[R <: { def close() }, A](resource: R)(f: R => A): A = ultimately {
+  def using[R <: { def close(): Unit }, A](resource: R)(f: R => A): A = ultimately {
     ignoring(classOf[Throwable]) apply resource.close()
   } apply f(resource)
 
