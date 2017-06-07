@@ -42,22 +42,16 @@ env:
 matrix:
   include:
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.2
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.2
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M1
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
       script:
       # https://github.com/scalikejdbc/scalikejdbc/issues/683
