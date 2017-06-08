@@ -1,7 +1,7 @@
 package scalikejdbc.mapper
 
 object LineBreak {
-  def value(name: String) = name match {
+  def value(name: String): String = name match {
     case "CR" => "\r"
     case "LF" => "\n"
     case "CRLF" => "\r\n"
@@ -10,5 +10,5 @@ object LineBreak {
 }
 
 case class LineBreak(name: String) {
-  def value = LineBreak.value(name)
+  def value: String = LineBreak.value(name)
 }
