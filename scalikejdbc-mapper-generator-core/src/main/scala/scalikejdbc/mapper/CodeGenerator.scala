@@ -167,14 +167,22 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   private[this] def outputModelFile =
     new File(config.srcDir + "/" + packageName.replace(".", "/") + "/" + className + ".scala")
 
+  private[this] def shouldBeSkipped: Boolean =
+    config.tableNamesToSkip.contains(table.name.toLowerCase)
+
   /**
    * Write the source code if outputFile does not exists.
    */
-  def writeModelIfNotExist(): Unit = {
+  def writeModelIfNonexistentAndUnskippable(): Boolean = {
     if (outputModelFile.exists) {
       println("\"" + packageName + "." + className + "\"" + " already exists.")
+      false
+    } else if (shouldBeSkipped) {
+      println("\"" + packageName + "." + className + "\"" + " is skipped by settings.")
+      false
     } else {
       writeModel()
+      true
     }
   }
 

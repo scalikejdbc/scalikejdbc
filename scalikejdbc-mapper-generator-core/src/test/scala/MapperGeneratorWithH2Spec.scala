@@ -197,9 +197,43 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     Thread.sleep(500)
   }
 
+  it should "skip the table if skip settings contain the name of table" in {
+    DB autoCommit { implicit session =>
+      // Here is an example of flyway metadata table.
+      SQL("""
+        create table schema_version (
+          version_rank int not null,
+          installed_rank int not null,
+          version varchar(50) not null,
+          description varchar(200) not null,
+          type varchar(20) not null,
+          script varchar(1000) not null,
+          checksum int,
+          installed_by varchar(100) not null,
+          installed_on timestamp default current_timestamp not null,
+          execution_time int not null,
+          success bit not null
+        )
+      """).execute.apply()
+    }
+
+    Model(url, username, password).table(null, "SCHEMA_VERSION").map {
+      table =>
+        val generator = new CodeGenerator(table)(GeneratorConfig(
+          srcDir = srcDir,
+          packageName = "com.example",
+          tableNamesToSkip = List("schema_version")
+        ))
+        generator.writeModelIfNonexistentAndUnskippable() should be(false)
+    } getOrElse {
+      fail("The table is not found.")
+    }
+    Thread.sleep(500)
+  }
+
   it should "work fine for all tables defined above" in {
     val allTables = Model(url, username, password).allTables(null)
-    allTables should have size 4
+    allTables should have size 5
     allTables.map {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
@@ -210,5 +244,4 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
     }
     Thread.sleep(500)
   }
-
 }
