@@ -255,7 +255,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     val tableName = tableNamePrefix + "_batchInLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = false
       )
       val batchTime: Long = DB localTx {

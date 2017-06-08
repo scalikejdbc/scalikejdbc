@@ -11,7 +11,7 @@ class ConnectionPoolSettingsSpec extends FlatSpec with Matchers {
     val maxSize: Int = 0
     val connectionTimeoutMillis: Long = 2000L
     val validationQuery: String = ""
-    val instance = new ConnectionPoolSettings(initialSize, maxSize, connectionTimeoutMillis, validationQuery)
+    val instance = ConnectionPoolSettings(initialSize, maxSize, connectionTimeoutMillis, validationQuery)
     instance should not be null
   }
 

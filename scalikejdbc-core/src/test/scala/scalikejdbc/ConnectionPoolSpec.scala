@@ -21,7 +21,7 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
   Class.forName(driverClassName)
 
   it should "be available" in {
-    val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
+    val poolSettings = ConnectionPoolSettings(initialSize = 50, maxSize = 50)
     ConnectionPool.singleton(url, user, password, poolSettings)
 
     using(ConnectionPool.borrow()) { conn =>

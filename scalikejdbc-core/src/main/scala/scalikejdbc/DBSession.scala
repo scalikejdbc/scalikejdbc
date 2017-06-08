@@ -271,7 +271,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
         rows match {
           case Nil => None
           case one :: Nil => Option(one)
-          case _ => throw new TooManyRowsException(1, rows.size)
+          case _ => throw TooManyRowsException(1, rows.size)
         }
     }
   }

@@ -8,7 +8,7 @@ class IllegalRelationshipExceptionSpec extends FlatSpec with Matchers {
 
   it should "be available" in {
     val message = "foo"
-    val exception = new IllegalRelationshipException(message)
+    val exception = IllegalRelationshipException(message)
     exception should not be null
   }
 

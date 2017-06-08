@@ -16,9 +16,9 @@ class EntityEqualitySpec extends FlatSpec with Matchers {
   }
 
   it should "be available with case classes" in {
-    val h1 = new Hoge(1, "Alice")
-    val h2 = new Hoge(1, "Alice")
-    val h3 = new Hoge(1, "Bob")
+    val h1 = Hoge(1, "Alice")
+    val h2 = Hoge(1, "Alice")
+    val h3 = Hoge(1, "Bob")
 
     (h1 == h2) should be(true)
     (h1 == h3) should be(false)

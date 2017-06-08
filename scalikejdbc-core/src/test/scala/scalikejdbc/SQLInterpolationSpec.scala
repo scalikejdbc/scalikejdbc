@@ -18,7 +18,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
   val password = props.getProperty("password")
 
   Class.forName(driverClassName)
-  val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
+  val poolSettings = ConnectionPoolSettings(initialSize = 50, maxSize = 50)
   ConnectionPool.singleton(url, user, password, poolSettings)
 
   case class Group(id: Int, websiteUrl: Option[String], members: Seq[User] = Nil)

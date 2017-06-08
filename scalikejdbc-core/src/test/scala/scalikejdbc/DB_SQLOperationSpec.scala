@@ -542,7 +542,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
   }
 
   it should "solve issue #30" in {
-    GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+    GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
       enabled = true,
       logLevel = 'info
     )
@@ -570,7 +570,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
           SQL("drop table issue30;").execute.apply()
         }
       } catch { case e: Exception => }
-      GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+      GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
     }
   }
 

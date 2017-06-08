@@ -13,7 +13,7 @@ class TableSpec extends FlatSpec with Matchers {
     val columns: List[Column] = Nil
     val foreignKeys: List[ForeignKey] = Nil
     val indices: List[Index] = Nil
-    val instance = new Table(name, schema, description, columns, foreignKeys, indices)
+    val instance = Table(name, schema, description, columns, foreignKeys, indices)
     instance should not be null
   }
 

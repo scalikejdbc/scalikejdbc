@@ -10,7 +10,7 @@ class NamedAutoSessionSpec extends FlatSpec with Matchers {
 
   it should "be available" in {
     val name: Any = null
-    val instance = new NamedAutoSession(name)
+    val instance = NamedAutoSession(name)
     instance should not be null
   }
 

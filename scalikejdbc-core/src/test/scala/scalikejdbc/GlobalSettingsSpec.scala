@@ -16,10 +16,10 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("create table settings_example (id int primary key, name varchar(13) not null)")
           .execute.apply()
         1 to 20000 foreach { i =>
-          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
           SQL("insert into settings_example values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
         }
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
           warningLogLevel = 'INFO,
@@ -27,7 +27,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         )
         SQL("select  * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
         try {
           SQL("drop table settings_example").execute.apply()
         } catch { case e: Exception => }
@@ -42,7 +42,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           SQL("drop table issue22").execute.apply()
         } catch { case e: Exception => }
         SQL("create table issue22 (id int primary key, created_at timestamp)").execute.apply()
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
           warningLogLevel = 'INFO,
@@ -53,7 +53,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("insert into issue22 values (?,?)").bind(11, Option(DateTime.now)).update.apply()
         SQL("insert into issue22 values (?,?)").bind(12, Option(new java.util.Date)).update.apply()
       } finally {
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
         try {
           SQL("drop table issue22").execute.apply()
         } catch { case e: Exception => }
@@ -62,7 +62,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
   }
 
   it should "support singleLineMode logging" in {
-    GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+    GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
       enabled = true,
       singleLineMode = true,
       logLevel = 'ERROR
@@ -76,7 +76,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("create table issue118 (id int primary key, created_at timestamp)").execute.apply()
         SQL("insert into issue118 values (?,?)").bind(1, DateTime.now).update.apply()
       } finally {
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
         try {
           SQL("drop table issue118").execute.apply()
         } catch { case e: Exception => }
@@ -214,10 +214,10 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("create table logging_stacktrace (id int primary key, name varchar(13) not null)").execute.apply()
 
         1 to 20000 foreach { i =>
-          GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
           SQL("insert into logging_stacktrace values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
         }
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = true,
           logLevel = 'WARN,
           printUnprocessedStackTrace = true,
@@ -226,7 +226,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("select  * from logging_stacktrace").map(rs => rs.int("id")).list.apply()
 
       } finally {
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings()
         try SQL("drop table logging_stacktrace").execute.apply()
         catch { case e: Exception => }
       }

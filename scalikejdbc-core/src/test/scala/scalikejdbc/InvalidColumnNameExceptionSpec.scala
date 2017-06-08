@@ -8,7 +8,7 @@ class InvalidColumnNameExceptionSpec extends FlatSpec with Matchers {
 
   it should "be available" in {
     val message = "foo"
-    val exception = new InvalidColumnNameException(message)
+    val exception = InvalidColumnNameException(message)
     exception should not be null
   }
 

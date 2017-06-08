@@ -9,7 +9,7 @@ import scala.language.higherKinds
 private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def toSingle(rows: Traversable[Z]): Option[Z] = {
-    if (rows.size > 1) throw new TooManyRowsException(1, rows.size)
+    if (rows.size > 1) throw TooManyRowsException(1, rows.size)
     else rows.headOption
   }
 
@@ -203,7 +203,7 @@ object OneToXSQL {
   }
   def handleException(e: Exception) = e match {
     case invalidColumn: InvalidColumnNameException =>
-      throw new ResultSetExtractorException(
+      throw ResultSetExtractorException(
         "Failed to extract ResultSet because the specified column name (" + invalidColumn.name + ") is invalid." +
           " If you're using SQLInterpolation, you may mistake u.id for u.resultName.id."
       )
