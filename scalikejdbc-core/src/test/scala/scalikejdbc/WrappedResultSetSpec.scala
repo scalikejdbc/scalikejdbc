@@ -13,7 +13,7 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
   it should "be available" in {
     val underlying: ResultSet = null
     val cursor: ResultSetCursor = new ResultSetCursor(0)
-    val instance = new WrappedResultSet(underlying, cursor, cursor.position)
+    val instance = WrappedResultSet(underlying, cursor, cursor.position)
     instance should not be null
   }
 
@@ -39,7 +39,7 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
     when(underlying.getObject("str")).thenReturn("abc", Array[Object](): _*)
 
     val cursor: ResultSetCursor = new ResultSetCursor(0)
-    val rs = new WrappedResultSet(underlying, cursor, cursor.position)
+    val rs = WrappedResultSet(underlying, cursor, cursor.position)
 
     {
       val res1: sqlArray = rs.array("foo")

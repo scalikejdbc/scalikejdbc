@@ -10,7 +10,7 @@ class ForeignKeySpec extends FlatSpec with Matchers {
     val name: String = ""
     val foreignColumnName: String = ""
     val foreignTableName: String = ""
-    val instance = new ForeignKey(name, foreignColumnName, foreignTableName)
+    val instance = ForeignKey(name, foreignColumnName, foreignTableName)
     instance should not be null
   }
 

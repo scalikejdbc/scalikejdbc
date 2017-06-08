@@ -19,7 +19,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
   val driverClassName = props.getProperty("driverClassName")
   Class.forName(driverClassName)
   // preparing the connection pool settings
-  val poolSettings = new ConnectionPoolSettings(initialSize = 100, maxSize = 100)
+  val poolSettings = ConnectionPoolSettings(initialSize = 100, maxSize = 100)
   // JDBC settings
   val url = props.getProperty("url")
   val user = props.getProperty("user")
@@ -317,7 +317,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           SQL("insert into  logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
         }
 
-        GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
+        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
           warningLogLevel = 'INFO,

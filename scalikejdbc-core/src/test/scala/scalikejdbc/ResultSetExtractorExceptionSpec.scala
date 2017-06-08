@@ -9,7 +9,7 @@ class ResultSetExtractorExceptionSpec extends FlatSpec with Matchers {
   it should "be available" in {
     val message = "foo"
     val e = Some(new RuntimeException)
-    val exception = new ResultSetExtractorException(message, e)
+    val exception = ResultSetExtractorException(message, e)
     exception should not be null
   }
 

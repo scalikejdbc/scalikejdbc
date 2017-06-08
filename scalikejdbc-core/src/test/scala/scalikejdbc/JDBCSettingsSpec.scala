@@ -11,7 +11,7 @@ class JDBCSettingsSpec extends FlatSpec with Matchers {
     val user: String = ""
     val password: String = ""
     val driverName: String = ""
-    val instance = new JDBCSettings(url, user, password, driverName)
+    val instance = JDBCSettings(url, user, password, driverName)
     instance should not be null
   }
 

@@ -16,7 +16,7 @@ class ColumnSpec extends FlatSpec with Matchers {
     val isAutoIncrement: Boolean = false
     val description: String = ""
     val defaultValue: String = ""
-    val instance = new Column(name, typeCode, typeName, size, isRequired, isPrimaryKey, isAutoIncrement, description, defaultValue)
+    val instance = Column(name, typeCode, typeName, size, isRequired, isPrimaryKey, isAutoIncrement, description, defaultValue)
     instance should not be null
   }
 

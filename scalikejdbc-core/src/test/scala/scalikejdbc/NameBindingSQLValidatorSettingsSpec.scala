@@ -9,7 +9,7 @@ class NameBindingSQLValidatorSettingsSpec extends FlatSpec with Matchers {
 
   it should "be available" in {
     val ignoredParams: IgnoredParamsValidation = null
-    val instance = new NameBindingSQLValidatorSettings(ignoredParams)
+    val instance = NameBindingSQLValidatorSettings(ignoredParams)
     instance should not be null
   }
 
