@@ -183,6 +183,19 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         cookieOrders(1).product.isEmpty should be(false)
         cookieOrders(1).account.isEmpty should be(false)
 
+        // cross join query
+        val ordersAndProducts = withSQL {
+          select
+            .from(Order as o)
+            .crossJoin(Product as p)
+        }.map(Order(o, p)).list.apply()
+
+        val productNum = withSQL(select.from(Product as p)).map(Product(p)).list.apply().size
+        val orderNum = withSQL(select.from(Order as o)).map(Order(o)).list.apply().size
+        ordersAndProducts.size should equal(productNum * orderNum)
+        ordersAndProducts.head.id should equal(11)
+        ordersAndProducts.head.productId should equal(1)
+
         // dynamic query
 
         def findCookieOrder(accountRequired: Boolean) = withSQL {

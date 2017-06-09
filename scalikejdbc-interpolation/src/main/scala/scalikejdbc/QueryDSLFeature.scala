@@ -405,6 +405,16 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def rightJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
       table.map(rightJoin) getOrElse copy(ignoreOnClause = true)
 
+    def crossJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
+      sql = sqls"${sql} cross join ${table}",
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders),
+      ignoreOnClause = false
+    )
+
+    // if table is none, this join part will be skipped
+    def crossJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
+      table.map(crossJoin) getOrElse copy(ignoreOnClause = true)
+
     def on(onClause: SQLSyntax): SelectSQLBuilder[A] = {
       if (ignoreOnClause) this.copy(ignoreOnClause = false)
       else this.copy(sql = sqls"${sql} on ${onClause}", ignoreOnClause = false)
