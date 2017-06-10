@@ -4,7 +4,7 @@ scalikejdbcJDBCSettings in Compile := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))
   def loadProp(key: String): String = Option(props.get(key)).map(_.toString).getOrElse(throw new IllegalStateException("missing key " + key))
-  scalikejdbc.mapper.SbtPlugin.JDBCSettings(
+  JDBCSettings(
     driver = loadProp("jdbc.driver"),
     url = loadProp("jdbc.url"),
     username = "sa",
