@@ -7,10 +7,10 @@ trait Settings extends BeforeAndAfter { self: Suite =>
 
   val props = new Properties
   props.load(classOf[Settings].getClassLoader.getResourceAsStream("jdbc.properties"))
-  val driverClassName = props.getProperty("driverClassName")
-  val url = props.getProperty("url")
-  val user = props.getProperty("user")
-  val password = props.getProperty("password")
+  val driverClassName: String = props.getProperty("driverClassName")
+  val url: String = props.getProperty("url")
+  val user: String = props.getProperty("user")
+  val password: String = props.getProperty("password")
 
   def initializeConnectionPools() = {
     if (!ConnectionPool.isInitialized()) {

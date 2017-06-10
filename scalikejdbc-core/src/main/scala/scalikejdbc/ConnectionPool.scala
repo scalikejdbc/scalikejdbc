@@ -45,7 +45,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @return is initialized
    */
-  def isInitialized(name: Any = DEFAULT_NAME) = pools.synchronized {
+  def isInitialized(name: Any = DEFAULT_NAME): Boolean = pools.synchronized {
     pools.get(name).isDefined
   }
 
@@ -332,7 +332,7 @@ abstract class ConnectionPool(
    *
    * @return printable String value
    */
-  override def toString() = "ConnectionPool(url:" + url + ", user:" + user + ")"
+  override def toString(): String = "ConnectionPool(url:" + url + ", user:" + user + ")"
 
   /**
    * Close this connection pool.
