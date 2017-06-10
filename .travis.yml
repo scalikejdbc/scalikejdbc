@@ -26,6 +26,7 @@ before_script:
   - psql -c "CREATE DATABASE scalikejdbc;" -U postgres
   - mysql -e 'GRANT ALL ON *.* TO sa@"localhost"IDENTIFIED BY "sa";FLUSH PRIVILEGES;' -uroot
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
+  - mysql -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -usa -psa
 
 script:
   - bash -x ./travis_before.sh
