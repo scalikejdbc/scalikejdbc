@@ -4,6 +4,7 @@ package jsr310
 import scalikejdbc.interpolation.Implicits._
 import org.scalatest._
 import java.time._
+import java.time.temporal.ChronoUnit
 
 class StatementExecutorSpec extends FunSpec with Matchers {
 
@@ -18,10 +19,10 @@ class StatementExecutorSpec extends FunSpec with Matchers {
         .execute.apply()
 
       val birthday = LocalDate.now
-      val alertTime = LocalTime.now
-      val localCreatedAt = LocalDateTime.now
-      val createdAt = ZonedDateTime.now
-      val updatedAt = Instant.now
+      val alertTime = LocalTime.now.truncatedTo(ChronoUnit.MILLIS)
+      val localCreatedAt = LocalDateTime.now.truncatedTo(ChronoUnit.MILLIS)
+      val createdAt = ZonedDateTime.now.truncatedTo(ChronoUnit.MILLIS)
+      val updatedAt = Instant.now.truncatedTo(ChronoUnit.MILLIS)
       val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt})"
       query.execute.apply()
 
