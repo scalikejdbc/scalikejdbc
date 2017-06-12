@@ -1,0 +1,14 @@
+ScalikeJDBC 3.0.1 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #698 3.0.x backport: Performance tuning: SQL#batchByName() by @tkawachi
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+
