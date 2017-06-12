@@ -58,6 +58,11 @@ private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSuppo
 
   def apply(sql: String, settings: SettingsProvider, parameters: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = SQLTemplateParser.extractAllParameters(sql)
+    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    apply(sql, sqlWithPlaceHolders, names, settings, parameters)
+  }
+
+  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
 
     // check all the parameters passed by #bindByName are actually used
     import scalikejdbc.globalsettings._
@@ -77,7 +82,6 @@ private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSuppo
         }
     }
 
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     (sqlWithPlaceHolders, names.map { name =>
       parameters match {
         case Nil => Nil
@@ -310,9 +314,11 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL for batch
    */
   def batchByName(parameters: Seq[(Symbol, Any)]*): SQLBatch = {
-    val _sql = validateAndConvertToNormalStatement(statement, _settings, parameters.headOption.getOrElse(Seq.empty))._1
+    val names = SQLTemplateParser.extractAllParameters(statement)
+    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(statement)
+    val _sql = validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, parameters.headOption.getOrElse(Seq.empty))._1
     val _parameters: Seq[Seq[Any]] = parameters.map { p =>
-      validateAndConvertToNormalStatement(statement, _settings, p)._2
+      validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, p)._2
     }
     new SQLBatch(_sql, _parameters, tags)
   }
