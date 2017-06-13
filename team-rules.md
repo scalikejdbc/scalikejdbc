@@ -70,7 +70,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 The release manager is @seratch. Currently, all the following operations should be done by @seratch.
 
 - Create release note under notes.
-- Fix _version in project/Build.scala
+- Fix _version in build.sbt
 - Run all the `./scripts/release_*.sh` and close/publish on the sonatype console
 - Post to [ScalikeJDBC Users Group](https://groups.google.com/forum/#!forum/scalikejdbc-users-group)
 - Twitter account: @scalikejdbc
