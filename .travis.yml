@@ -60,10 +60,6 @@ matrix:
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M1
       env: SCALIKEJDBC_DATABASE="mysql"
-      script:
-      # https://github.com/scalikejdbc/scalikejdbc/issues/683
-      - bash -x ./travis_before.sh
-      - sbt ++${TRAVIS_SCALA_VERSION} config/test core/test interpolation/test interpolation-macro/test library/test syntax-support-macro/test mapper-generator-core/test test/test
     - dist: trusty
       group: edge
       sudo: required
