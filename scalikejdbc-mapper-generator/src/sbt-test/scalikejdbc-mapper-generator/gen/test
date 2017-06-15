@@ -85,6 +85,11 @@ $ delete src/test/scala/ProgrammersTest.scala
 > scalikejdbcGenForce programmers
 > + test:compile
 
+> set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.LocalDateTime)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + test:compile
+
 > set (scalikejdbc.mapper.SbtKeys.scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.OffsetDateTime)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
