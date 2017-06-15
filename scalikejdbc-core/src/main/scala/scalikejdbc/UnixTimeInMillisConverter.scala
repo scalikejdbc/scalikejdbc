@@ -23,13 +23,23 @@ class UnixTimeInMillisConverter(val millis: Long) extends AnyVal {
 
   def toInstant: java.time.Instant = java.time.Instant.ofEpochMilli(millis)
 
+  def toZonedDateTimeWithZoneId(zoneId: java.time.ZoneId): java.time.ZonedDateTime = java.time.ZonedDateTime.ofInstant(toInstant, zoneId)
+
   def toZonedDateTime: java.time.ZonedDateTime = java.time.ZonedDateTime.ofInstant(toInstant, defaultZoneId)
+
+  def toOffsetDateTimeWithZoneId(zoneId: java.time.ZoneId): java.time.OffsetDateTime = java.time.OffsetDateTime.ofInstant(toInstant, zoneId)
 
   def toOffsetDateTime: java.time.OffsetDateTime = java.time.OffsetDateTime.ofInstant(toInstant, defaultZoneId)
 
+  def toLocalDateWithZoneId(zoneId: java.time.ZoneId): java.time.LocalDate = toInstant.atZone(zoneId).toLocalDate
+
   def toLocalDate: java.time.LocalDate = toInstant.atZone(defaultZoneId).toLocalDate
 
+  def toLocalTimeWithZoneId(zoneId: java.time.ZoneId): java.time.LocalTime = toInstant.atZone(zoneId).toLocalTime
+
   def toLocalTime: java.time.LocalTime = toInstant.atZone(defaultZoneId).toLocalTime
+
+  def toLocalDateTimeWithZoneId(zoneId: java.time.ZoneId): java.time.LocalDateTime = toInstant.atZone(zoneId).toLocalDateTime
 
   def toLocalDateTime: java.time.LocalDateTime = toInstant.atZone(defaultZoneId).toLocalDateTime
 
