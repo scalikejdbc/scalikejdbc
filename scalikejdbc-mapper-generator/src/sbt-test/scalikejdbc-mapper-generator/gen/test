@@ -90,6 +90,11 @@ $ delete src/test/scala/ProgrammersTest.scala
 > scalikejdbcGenForce programmers
 > + test:compile
 
+> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.LocalDateTime)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + test:compile
+
 > set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Vector)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
