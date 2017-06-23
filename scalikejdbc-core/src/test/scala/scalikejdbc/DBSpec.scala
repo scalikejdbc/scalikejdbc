@@ -1,13 +1,17 @@
 package scalikejdbc
 
+import java.sql.Connection
+
 import org.scalatest._
 import java.sql.SQLException
+
 import org.slf4j.LoggerFactory
 
 import scala.util.control.Exception._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import org.scalatest.concurrent.ScalaFutures
+
 import ExecutionContext.Implicits.global
 
 class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
@@ -558,6 +562,28 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
           .bindByName('id -> 3)
           .map(rs => rs.string("name")).list.apply()
         res2.size should equal(1)
+      }
+    }
+  }
+
+  // --------------------
+  // isolation level
+
+  it should "allow setting the isolation level" in {
+    val tableName = tableNamePrefix + "_test_isolation_level"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      // What is the expected isolation level from the database
+      val expectedTransactionIsolation = if (driverClassName == "org.h2.Driver") {
+        Connection.TRANSACTION_SERIALIZABLE // H2 over-delivers
+      } else {
+        Connection.TRANSACTION_REPEATABLE_READ
+      }
+      // Execute
+      using(DB(ConnectionPool.borrow()).isolationLevel(IsolationLevel.RepeatableRead)) { db =>
+        db localTx { session =>
+          assert(session.connection.getTransactionIsolation === expectedTransactionIsolation)
+        }
       }
     }
   }
