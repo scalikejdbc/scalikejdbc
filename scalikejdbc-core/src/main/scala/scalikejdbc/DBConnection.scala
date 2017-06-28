@@ -6,6 +6,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
+import java.sql.Connection._
 
 /**
  * Basic Database Accessor which holds a JDBC connection.
@@ -24,6 +25,11 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   private[this] var autoCloseEnabled: Boolean = true
 
   /**
+   * Isolation level for transactions.
+   */
+  private[this] var isolationLevel: IsolationLevel = IsolationLevel.Default
+
+  /**
    * Provides default TxBoundary type class instance.
    */
   private[this] def defaultTxBoundary[A]: TxBoundary[A] = TxBoundary.Exception.exceptionTxBoundary[A]
@@ -34,6 +40,14 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    */
   def autoClose(autoClose: Boolean): DBConnection = {
     this.autoCloseEnabled = autoClose
+    this
+  }
+
+  /**
+   * Set isolation level.
+   */
+  def isolationLevel(isolationLevel: IsolationLevel): DBConnection = {
+    this.isolationLevel = isolationLevel
     this
   }
 
@@ -93,19 +107,19 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     if (!jtaDataSourceCompatible) conn.setReadOnly(readOnly)
   }
 
-  private[this] def newTx(conn: Connection): Tx = {
+  private[this] def newTx(conn: Connection, isolationLevel: IsolationLevel): Tx = {
     setReadOnly(conn, false)
     if (!jtaDataSourceCompatible && (isTxNotActive || isTxAlreadyStarted)) {
       throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
     }
-    new Tx(conn)
+    new Tx(conn, isolationLevel)
   }
 
   /**
    * Starts a new transaction and returns it.
    * @return tx
    */
-  def newTx: Tx = newTx(conn)
+  def newTx: Tx = newTx(conn, isolationLevel)
 
   /**
    * Returns the current transaction.
@@ -116,7 +130,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     if (!jtaDataSourceCompatible && (isTxNotActive || isTxNotYetStarted)) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
-    new Tx(conn)
+    new Tx(conn, isolationLevel)
   }
 
   /**
@@ -280,7 +294,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   }
 
   private[this] def begin(tx: Tx): Unit = {
+    // Start the transaction
     tx.begin()
+    // Check if transaction is actually active
     if (!jtaDataSourceCompatible && !tx.isActive) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }

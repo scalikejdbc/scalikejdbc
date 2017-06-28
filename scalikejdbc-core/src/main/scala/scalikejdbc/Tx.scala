@@ -1,6 +1,8 @@
 package scalikejdbc
 
-import java.sql.{ SQLException, Connection }
+import java.sql.Connection._
+import java.sql.{ Connection, SQLException }
+
 import scala.util.control.Exception._
 import scala.util.control.NonFatal
 
@@ -8,12 +10,29 @@ import scala.util.control.NonFatal
  * DB Transaction abstraction.
  * @param conn connection
  */
-class Tx(val conn: Connection) {
+class Tx(val conn: Connection, isolationLevel: IsolationLevel = IsolationLevel.Default) {
+
+  private[this] def setTransactionIsolation(): Unit = {
+    // Set isolation level for the transaction
+    isolationLevel match {
+      case IsolationLevel.Serializable =>
+        conn.setTransactionIsolation(TRANSACTION_SERIALIZABLE)
+      case IsolationLevel.RepeatableRead =>
+        conn.setTransactionIsolation(TRANSACTION_REPEATABLE_READ)
+      case IsolationLevel.ReadCommitted =>
+        conn.setTransactionIsolation(TRANSACTION_READ_COMMITTED)
+      case IsolationLevel.ReadUncommitted =>
+        conn.setTransactionIsolation(TRANSACTION_READ_UNCOMMITTED)
+      case IsolationLevel.Default =>
+      // Do nothing
+    }
+  }
 
   /**
    * Begins this transaction.
    */
   def begin(): Unit = {
+    setTransactionIsolation()
     conn.setAutoCommit(false)
     if (!GlobalSettings.jtaDataSourceCompatible) {
       conn.setReadOnly(false)
