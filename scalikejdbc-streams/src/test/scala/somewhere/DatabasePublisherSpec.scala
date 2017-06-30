@@ -47,7 +47,7 @@ class DatabasePublisherSpec
     val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
       private[this] val consumedCount = new AtomicInteger(0)
 
-      override def foreach(element: Int): Boolean = {
+      override def whenNext(element: Int): Boolean = {
         val consumed = consumedCount.incrementAndGet()
         log.info(s"foreach element: $element, consumed: $consumed")
         true
@@ -77,7 +77,7 @@ class DatabasePublisherSpec
     val actualElements = new ListBuffer[Int]
     val consumedCountPromise: Promise[ListBuffer[Int]] = Promise[ListBuffer[Int]]()
     val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
-      override def foreach(element: Int): Boolean = {
+      override def whenNext(element: Int): Boolean = {
         actualElements += element
         log.info(s"foreach element: $element")
         true
@@ -110,7 +110,7 @@ class DatabasePublisherSpec
     val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
       private[this] val consumedCount = new AtomicInteger(0)
 
-      override def foreach(element: Int): Boolean = {
+      override def whenNext(element: Int): Boolean = {
         val consumed = consumedCount.incrementAndGet()
         log.info(s"foreach element: $element, consumed: $consumed")
         true
