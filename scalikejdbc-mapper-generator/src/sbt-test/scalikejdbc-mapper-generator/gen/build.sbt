@@ -26,11 +26,13 @@ TaskKey[Unit]("createTestDatabase") := {
   }
 }
 
-testOptions in Test += Tests.Setup{ loader =>
-  type Initializer = {def run(url: String, username: String, password: String)}
+testOptions in Test += {
   val setting = (scalikejdbcJDBCSettings in Compile).value
-  val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
-  initializer.run(setting.url, setting.username, setting.password)
+  Tests.Setup{ loader =>
+    type Initializer = {def run(url: String, username: String, password: String)}
+    val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
+    initializer.run(setting.url, setting.username, setting.password)
+  }
 }
 
 val scalikejdbcVersion = System.getProperty("plugin.version")

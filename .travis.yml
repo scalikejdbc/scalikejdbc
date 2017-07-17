@@ -27,11 +27,13 @@ before_script:
   - mysql -e 'GRANT ALL ON *.* TO sa@"localhost"IDENTIFIED BY "sa";FLUSH PRIVILEGES;' -uroot
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
   - mysql -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -usa -psa
+  - bash -x ./travis_before.sh
 
 script:
-  - bash -x ./travis_before.sh
   - git add . --all
   - travis_retry ./travis.sh
+
+before_cache:
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
   - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
@@ -43,11 +45,13 @@ env:
 
 matrix:
   include:
-    - scala: 2.12.2
+    - scala: "scripted-test"
+      env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
       script:
       - echo "sbt.version=0.13.16-M1" > project/build.properties
-      # TODO https://github.com/sbt/sbt/issues/3245 enable scripted test
-      - sbt ++${TRAVIS_SCALA_VERSION} "project mapper-generator" "^^ 1.0.0-M6" compile
+      - sbt '++ 2.12.2' root211/publishLocal '++ 2.11.11' root211/publishLocal '++ 2.10.6' publishLocal
+      - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
+      - sbt '++ 2.12.2' "project mapper-generator" "^^ 1.0.0-RC2" scripted
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
