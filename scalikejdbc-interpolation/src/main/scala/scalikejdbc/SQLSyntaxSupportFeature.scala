@@ -145,7 +145,10 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def table: TableDefSQLSyntax = {
       SQLSyntaxSupportFeature.verifyTableName(tableNameWithSchema)
-      TableDefSQLSyntax(tableNameWithSchema)
+      val t =
+        if (backquote) schemaName.map { schema => s"`${schema}`.`${tableName}`" }.getOrElse(s"`$tableName`")
+        else tableNameWithSchema
+      TableDefSQLSyntax(t)
     }
 
     /**
@@ -197,6 +200,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * True if you need to convert filed names to snake_case column names in SQL.
      */
     def useSnakeCaseColumnName: Boolean = true
+
+    def backquote: Boolean = false
 
     /**
      * Delimiter for alias names in SQL.
@@ -254,8 +259,15 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def as(provider: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A]): TableAsAliasSQLSyntax = {
-      if (tableName == provider.tableAliasName) { TableAsAliasSQLSyntax(table.value, table.rawParameters, Some(provider)) }
-      else { TableAsAliasSQLSyntax(tableNameWithSchema + " " + provider.tableAliasName, Nil, Some(provider)) }
+      if (tableName == provider.tableAliasName) {
+        val t = if (backquote) s"`${table.value}`" else table.value
+        TableAsAliasSQLSyntax(t, table.rawParameters, Some(provider))
+      } else {
+        val t =
+          if (backquote) s"`$tableNameWithSchema` `${provider.tableAliasName}`"
+          else s"$tableNameWithSchema ${provider.tableAliasName}"
+        TableAsAliasSQLSyntax(t, Nil, Some(provider))
+      }
     }
   }
 
@@ -425,12 +437,16 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val nameConverters = support.nameConverters
     val forceUpperCase = support.forceUpperCase
     val useSnakeCaseColumnName = support.useSnakeCaseColumnName
+    val backquote = support.backquote
 
     lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
     lazy val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
-    lazy val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
+    lazy val * : SQLSyntax = SQLSyntax(columns.map { c =>
+      if (backquote) s"`${c.value}`"
+      else c.value
+    }.mkString(", "))
 
     val asterisk: SQLSyntax = sqls"*"
 
@@ -444,7 +460,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-        SQLSyntax(c.value)
+        if (backquote) SQLSyntax(s"`${c.value}`")
+        else c
       }.getOrElse {
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
           s" (name: ${name}, registered names: ${columns.map(_.value).mkString(",")})")
@@ -485,6 +502,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       with ResultAllProvider
       with AsteriskProvider {
 
+    private val backquote = support.backquote
+
     val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase(en) else tableAliasName
       ResultSQLSyntaxProvider[S, A](support, table)
@@ -494,7 +513,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     val resultName: BasicResultNameSQLSyntaxProvider[S, A] = result.nameProvider
 
-    lazy val * : SQLSyntax = SQLSyntax(columns.map(c => s"${tableAliasName}.${c.value}").mkString(", "))
+    lazy val * : SQLSyntax = SQLSyntax(
+      columns
+        .map { c =>
+          if (backquote) s"`${tableAliasName}`.`${c.value}`"
+          else s"${tableAliasName}.${c.value}"
+        }
+        .mkString(", ")
+    )
 
     val asterisk: SQLSyntax = SQLSyntax(tableAliasName + ".*")
 
@@ -508,7 +534,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
-        SQLSyntax(s"${tableAliasName}.${c.value}")
+        if (backquote) SQLSyntax(s"`${tableAliasName}`.`${c.value}`")
+        else SQLSyntax(s"`${tableAliasName}`.`${c.value}`")
       }.getOrElse {
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME +
           s" (name: ${tableAliasName}.${name}, registered names: ${columns.map(_.value).mkString(",")})")
@@ -528,9 +555,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     private[scalikejdbc] val nameProvider: BasicResultNameSQLSyntaxProvider[S, A] = BasicResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
 
+    private val backquote = support.backquote
+
     lazy val * : SQLSyntax = SQLSyntax(columns.map { c =>
       val name = toAliasName(c.value, support)
-      s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}"
+      if (backquote) s"`${tableAliasName}`.`${c.value}` as `${name}${delimiterForResultName}${tableAliasName}`"
+      else s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
     def apply(syntax: SQLSyntax): PartialResultSQLSyntaxProvider[S, A] = PartialResultSQLSyntaxProvider(support, tableAliasName, syntax)
@@ -546,7 +576,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       columns.find(_.value.equalsIgnoreCase(name)).map { c =>
         val name = toAliasName(c.value, support)
-        SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
+        if (backquote) SQLSyntax(s"`${tableAliasName}`.`${c.value}` as `${name}${delimiterForResultName}${tableAliasName}`")
+        else SQLSyntax(s"${tableAliasName}.${c.value} as ${name}${delimiterForResultName}${tableAliasName}")
       }.getOrElse(throw notFoundInColumns(tableAliasName, name))
     })
   }

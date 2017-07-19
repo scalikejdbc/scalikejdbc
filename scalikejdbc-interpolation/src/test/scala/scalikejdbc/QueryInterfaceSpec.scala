@@ -806,5 +806,37 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     select(Product.syntax("p").result.name)
     select(Product.column.name)
   }
-}
 
+  it should "quote column names if backquote option is true" in {
+    object Account extends SQLSyntaxSupport[Account] {
+      override val tableName = "qi_accounts"
+      override val backquote = true
+      def apply(a: SyntaxProvider[Account])(rs: WrappedResultSet): Account = apply(a.resultName)(rs)
+      def apply(a: ResultName[Account])(rs: WrappedResultSet): Account = new Account(rs.int(a.id), rs.stringOpt(a.name))
+      def opt(a: SyntaxProvider[Account])(rs: WrappedResultSet): Option[Account] = rs.intOpt(a.resultName.id).map(_ => apply(a)(rs))
+    }
+
+    val ac = Account.column
+    val a = Account.syntax("a")
+
+    val s = insert.into(Account).namedValues(Map(ac.name -> "Bob Marley")).toSQL
+    s.statement should equal("insert into `qi_accounts` (`name`) values (?)")
+    s.parameters should equal(Seq("Bob Marley"))
+
+    val s2 = update(Account).set(Map(ac.name -> "Bob Marley")).toSQL
+    s2.statement should equal("update `qi_accounts` set `name` = ?")
+    s2.parameters should equal(Seq("Bob Marley"))
+
+    val s3 = select.from(Account as a).where.eq(ac.name, "Bob Marley").toSQL
+    s3.statement should equal("select `a`.`id` as `i_on_a`, `a`.`name` as `n_on_a` from `qi_accounts` `a`  where  `name` = ?")
+    s3.parameters should equal(Seq("Bob Marley"))
+
+    val s4 = select(a.id).from(Account as a).where.eq(ac.name, "Bob Marley").toSQL
+    s4.statement should equal("select `a`.`id` from `qi_accounts` `a`  where  `name` = ?")
+    s4.parameters should equal(Seq("Bob Marley"))
+
+    val s5 = delete.from(Account).where.eq(ac.id, 1).toSQL
+    s5.statement should equal("delete from `qi_accounts`  where  `id` = ?")
+
+  }
+}
