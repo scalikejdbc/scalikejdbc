@@ -199,6 +199,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
 
   def -> [A](value: A)(implicit ev: ParameterBinderFactory[A]): (SQLSyntax, ParameterBinder) = (this, ev(value))
   def -> (value: ParameterBinder): (SQLSyntax, ParameterBinder) = (this, value)
+  @inline def → [A](value: A)(implicit ev: ParameterBinderFactory[A]): (SQLSyntax, ParameterBinder) = ->(value)
+  @inline def → (value: ParameterBinder): (SQLSyntax, ParameterBinder) = ->(value)
 }
 
 /**
