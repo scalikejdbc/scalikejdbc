@@ -484,4 +484,13 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
          /""".stripMargin('/').statement.replaceAll("""\\r\\n""", """\n""") should equal("a =\n?\n")
   }
 
+  it should "create a name->parameterBinder pair" in {
+    val p: (SQLSyntax, ParameterBinder) = SQLSyntax("name") -> "paramValue"
+    p._2.asInstanceOf[ParameterBinderWithValue].value should equal("paramValue")
+  }
+
+  it should "create a name→parameterBinder pair" in {
+    val p: (SQLSyntax, ParameterBinder) = SQLSyntax("name") → "paramValue"
+    p._2.asInstanceOf[ParameterBinderWithValue].value should equal("paramValue")
+  }
 }
