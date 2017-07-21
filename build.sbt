@@ -11,11 +11,11 @@ lazy val _reactiveStreamsVersion = "1.0.0"
 
 // internal only
 lazy val _logbackVersion = "1.2.3"
-lazy val _h2Version = "1.4.194"
+lazy val _h2Version = "1.4.196"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-lazy val _mysqlVersion = "5.1.41"
+lazy val _mysqlVersion = "5.1.42"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.2.9.Final"
+lazy val _hibernateVersion = "5.2.10.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 
@@ -38,7 +38,7 @@ lazy val baseSettings = Seq(
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   incOptions := incOptions.value.withNameHashing(true),
   scalatestVersion := "3.0.3",
-  specs2Version := "3.9.0",
+  specs2Version := "3.9.4",
   //scalaVersion := "2.11.11",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
@@ -134,12 +134,12 @@ lazy val scalikejdbcCore = Project(
         "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
         "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
         "joda-time"               %  "joda-time"       % "2.9.9"           % "compile",
-        "org.joda"                %  "joda-convert"    % "1.8.1"           % "compile",
+        "org.joda"                %  "joda-convert"    % "1.8.2"           % "compile",
         // scope: provided
         "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
         "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
         // scope: test
-        "com.zaxxer"              %  "HikariCP"        % "2.6.1"           % "test",
+        "com.zaxxer"              %  "HikariCP"        % "2.6.3"           % "test",
         "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
         "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
         "org.mockito"             %  "mockito-core"    % "2.7.21"          % "test"
@@ -361,8 +361,8 @@ def specs2DependenciesInTestScope(v: String) =
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.13.1.1"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.16.1"           % "test",
-  "org.hsqldb"        % "hsqldb"               % "2.3.4"            % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.19.3"           % "test",
+  "org.hsqldb"        % "hsqldb"               % "2.4.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
