@@ -19,7 +19,7 @@
 ##### master (will be 3.1.x, the default branch)
 
 - Latest stable version
-- Breaking source compaitibility is not acceptable
+- Breaking source compatibility is not acceptable
 - Changes that bring binary incompatibility with reasonable reasons are **allowed**
 - Must build against Scala 2.10, 2.11 and 2.12
 - Requires Java 8 or higher
