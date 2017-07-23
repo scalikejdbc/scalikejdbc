@@ -15,9 +15,9 @@ case class StreamReadySQL[A] private (
 
   private[streams] lazy val extractor: (WrappedResultSet) => A = underlying.extractor
 
-  private[streams] lazy val statement: String = underlying.statement
-  private[streams] lazy val rawParameters: Seq[Any] = underlying.rawParameters
-  private[streams] lazy val parameters: Seq[Any] = underlying.parameters
+  private[streams] def statement: String = underlying.statement
+  private[streams] def rawParameters: Seq[Any] = underlying.rawParameters
+  private[streams] def parameters: Seq[Any] = underlying.parameters
 
   private[streams] lazy val fetchSize: Option[Int] = underlying.fetchSize
   private[streams] lazy val tags: Seq[String] = underlying.tags
