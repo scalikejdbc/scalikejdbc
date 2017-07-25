@@ -681,7 +681,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     lazy val * : SQLSyntax = SQLSyntax(resultNames.map { resultName =>
       resultName.namedColumns.map { c =>
         s"${aliasName}.${c.value}"
-      }
+      }.mkString(", ")
     }.mkString(", "))
 
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
