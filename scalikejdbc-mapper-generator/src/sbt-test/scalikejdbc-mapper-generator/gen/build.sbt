@@ -35,7 +35,7 @@ testOptions in Test += Tests.Setup{ loader =>
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.12.2", "2.11.11", "2.10.6")
+crossScalaVersions := List("2.12.3", "2.11.11", "2.10.6")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
 
