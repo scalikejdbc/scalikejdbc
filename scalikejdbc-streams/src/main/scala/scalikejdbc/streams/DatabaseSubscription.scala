@@ -34,7 +34,7 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Stream ready SQL object.
    */
-  private lazy val sql: StreamReadySQL[A] = publisher.sql
+  private def sql: StreamReadySQL[A] = publisher.sql
 
   /**
    * A volatile variable to enforce the happens-before relationship when executing something in a synchronous action context.
