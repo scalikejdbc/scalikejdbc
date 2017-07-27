@@ -656,7 +656,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       def include(syntaxProviders: QuerySQLSyntaxProvider[_, _]*): SubQuerySQLSyntaxProvider = {
         SubQuery.syntax(
           name,
-          delimiterForResultName.getOrElse(syntaxProviders.head.resultName.delimiterForResultName),
+          delimiterForResultName.orElse(syntaxProviders.headOption.map(_.resultName.delimiterForResultName)).getOrElse("_on_"),
           syntaxProviders.map(_.resultName): _*
         )
       }
