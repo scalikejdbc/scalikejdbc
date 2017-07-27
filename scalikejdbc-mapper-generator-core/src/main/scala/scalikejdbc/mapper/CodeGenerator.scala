@@ -219,8 +219,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
       }.mkString("," + eol)
 
+      val baseTypes = {
+        val types = config.tableNameToBaseTypes(table.name)
+        if (types.isEmpty) ""
+        else types.mkString("extends ", " with ", " ")
+      }
+
       s"""case class ${className}(
-        |${constructorArgs}) {
+        |${constructorArgs}) ${baseTypes}{
         |
         |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
         |
@@ -710,7 +716,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     }
 
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
-    "object " + className + " extends SQLSyntaxSupport[" + className + "] {" + eol +
+    val baseTypes = {
+      val types = config.tableNameToCompanionBaseTypes(table.name)
+      if (types.isEmpty) ""
+      else types.mkString("with ", " with ", " ")
+    }
+
+    "object " + className + " extends SQLSyntaxSupport[" + className + s"] ${baseTypes}{" + eol +
       table.schema.filterNot(_.isEmpty).map { schema =>
         eol + 1.indent + "override val schemaName = Some(\"" + schema + "\")" + eol
       }.getOrElse("") +
