@@ -45,13 +45,13 @@ env:
 
 matrix:
   include:
-    - scala: "scripted-test"
-      env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
-      script:
-      - echo "sbt.version=0.13.16-M1" > project/build.properties
-      - sbt '++ 2.12.2' root211/publishLocal '++ 2.11.11' root211/publishLocal '++ 2.10.6' publishLocal
-      - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
-      - sbt '++ 2.12.2' "project mapper-generator" "^^ 1.0.0-RC2" scripted
+    #- scala: "scripted-test"
+    #  env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
+    #  script:
+    #  - echo "sbt.version=0.13.16-M1" > project/build.properties
+    #  - sbt '++ 2.12.2' root211/publishLocal '++ 2.11.11' root211/publishLocal '++ 2.10.6' publishLocal
+    #  - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
+    #  - sbt '++ 2.12.2' "project mapper-generator" "^^ 1.0.0-RC2" scripted
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
