@@ -3,7 +3,7 @@ language: scala
 scala:
   - 2.10.6
   - 2.11.11
-  - 2.12.2
+  - 2.12.3
 
 jdk:
   - oraclejdk8
@@ -16,6 +16,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.ivy2/cache
+    - $HOME/.sbt/launchers
     - $HOME/.sbt/boot
 
 before_script:
@@ -25,6 +26,7 @@ before_script:
   - psql -c "CREATE DATABASE scalikejdbc;" -U postgres
   - mysql -e 'GRANT ALL ON *.* TO sa@"localhost"IDENTIFIED BY "sa";FLUSH PRIVILEGES;' -uroot
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
+  - mysql -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -usa -psa
 
 script:
   - bash -x ./travis_before.sh
@@ -42,22 +44,16 @@ env:
 matrix:
   include:
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.2
-      jdk: oraclejdk8
+    - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.2
-      jdk: oraclejdk8
+    - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M1
-      jdk: oraclejdk8
       env: SCALIKEJDBC_DATABASE="mysql"
       script:
       # https://github.com/scalikejdbc/scalikejdbc/issues/683

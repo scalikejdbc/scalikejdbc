@@ -31,9 +31,8 @@ case class MultipleConnectionPoolContext(contexts: (Any, ConnectionPool)*) exten
 
   override def set(name: Any, pool: ConnectionPool): Unit = pools.update(name, pool)
 
-  override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool = pools.get(name).getOrElse {
-    throw new IllegalStateException("No connection context for " + name + ".")
-  }
+  override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool =
+    pools.getOrElse(name, throw new IllegalStateException("No connection context for " + name + "."))
 
 }
 

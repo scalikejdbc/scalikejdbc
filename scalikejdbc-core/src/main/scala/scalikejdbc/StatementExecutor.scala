@@ -9,7 +9,7 @@ object StatementExecutor {
 
   type MutableList[A] = collection.mutable.MutableList[A]
 
-  val eol = System.getProperty("line.separator")
+  val eol: String = System.getProperty("line.separator")
 
   private trait Executor {
     def apply[A](execute: () => A): A
@@ -348,6 +348,6 @@ case class StatementExecutor(
 
   def executeUpdate(x1: String, x2: Int): Int = statementExecute(() => underlying.executeUpdate(x1, x2))
 
-  def close() = underlying.close()
+  def close(): Unit = underlying.close()
 
 }

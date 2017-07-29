@@ -16,11 +16,11 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   import SQLSyntax._
 
   override def equals(that: Any): Boolean = {
-    if (that.isInstanceOf[SQLSyntax]) {
-      val thatSqls = that.asInstanceOf[SQLSyntax]
-      value == thatSqls.value && rawParameters == thatSqls.rawParameters
-    } else {
-      false
+    that match {
+      case thatSqls: SQLSyntax =>
+        value == thatSqls.value && rawParameters == thatSqls.rawParameters
+      case _ =>
+        false
     }
   }
 
