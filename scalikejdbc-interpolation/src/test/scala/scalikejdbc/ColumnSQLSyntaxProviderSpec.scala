@@ -37,6 +37,60 @@ trait SyntaxProviderSpec extends FunSpec
   with SyntaxProviderTestSupport
   with DBSettings
 
+class ColumnSQLSyntaxProviderSpec extends SyntaxProviderSpec {
+
+  it("should get column sql syntax") {
+    val p = ColumnSQLSyntaxProvider[Account.type, Account](Account)
+    p.* should be(SQLSyntax("id, name"))
+    p.name should be(SQLSyntax("name"))
+  }
+
+}
+
+class QuerySQLSyntaxProviderSpec extends SyntaxProviderSpec {
+
+  it("should get query sql syntax") {
+    val p: QuerySQLSyntaxProvider[SQLSyntaxSupport[Account], Account] = Account.syntax("a")
+    p.columns should be(Seq(SQLSyntax("id"), SQLSyntax("name")))
+    p.* should be(SQLSyntax("a.id, a.name"))
+    p.column("name") should be(SQLSyntax("a.name"))
+    p.resultAll should be(SQLSyntax("a.id as i_on_a, a.name as n_on_a"))
+    p.resultName.* should be(SQLSyntax("i_on_a, n_on_a"))
+  }
+
+}
+
+class ResultSQLSyntaxProviderSpec extends SyntaxProviderSpec {
+
+  it("should get result sql syntax") {
+    val p: ResultSQLSyntaxProvider[SQLSyntaxSupport[Account], Account] = Account.syntax("a").result
+    p.columns should be(Seq(SQLSyntax("id"), SQLSyntax("name")))
+    p.* should be(SQLSyntax("a.id as i_on_a, a.name as n_on_a"))
+    p.column("name") should be(SQLSyntax("a.name as n_on_a"))
+  }
+
+}
+
+class PartialResultSQLSyntaxProviderSpec extends SyntaxProviderSpec {
+
+  it("should get partial result sql syntax") {
+    val p: PartialResultSQLSyntaxProvider[SQLSyntaxSupport[Account], Account] = Account.syntax("a").result.apply(sqls"a.name")
+    p.name should be(SQLSyntax("a.name as n_on_a"))
+  }
+
+}
+
+class BasicResultNameSQLSyntaxProviderSpec extends SyntaxProviderSpec {
+
+  it("should get basic result name sql syntax") {
+    val p: BasicResultNameSQLSyntaxProvider[SQLSyntaxSupport[Account], Account] = Account.syntax("a").resultName
+    p.columns should be(Seq(SQLSyntax("id"), SQLSyntax("name")))
+    p.* should be(SQLSyntax("i_on_a, n_on_a"))
+    p.column("name") should be(SQLSyntax("n_on_a"))
+  }
+
+}
+
 class SubQuerySQLSyntaxProviderSpec extends SyntaxProviderSpec {
 
   it("should get sub query sql syntax") {
