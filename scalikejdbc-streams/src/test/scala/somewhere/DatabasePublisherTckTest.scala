@@ -113,7 +113,8 @@ class DatabasePublisherTckTest
 
 object DatabasePublisherTckTest {
 
-  val environment = new TestEnvironment(150L, false)
+  val timeoutMillis = 150L
+  val environment = new TestEnvironment(timeoutMillis, timeoutMillis, false)
 
   case class User(id: Int)
 
