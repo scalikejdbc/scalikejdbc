@@ -60,7 +60,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      * }}}
      */
     object insert {
-      def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = new InsertSQLBuilder(sqls"insert into ${support.table}")
+      def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder = InsertSQLBuilder(sqls"insert into ${support.table}")
     }
 
     object insertInto {
@@ -77,8 +77,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      * }}}
      */
     object delete {
-      def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${table}")
-      def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = new DeleteSQLBuilder(sqls"delete from ${support.table}")
+      def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder = DeleteSQLBuilder(sqls"delete from ${table}")
+      def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder = DeleteSQLBuilder(sqls"delete from ${support.table}")
     }
 
     object deleteFrom {
@@ -96,8 +96,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      * }}}
      */
     object update {
-      def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${table}")
-      def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = new UpdateSQLBuilder(sqls"update ${support.table}")
+      def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder = UpdateSQLBuilder(sqls"update ${table}")
+      def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder = UpdateSQLBuilder(sqls"update ${support.table}")
     }
 
   }

@@ -1,0 +1,24 @@
+ScalikeJDBC 3.0.2 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [all] Bump Scala version from 2.12.2 to 2.12.3
+- [all] Bump sbt version from 0.13.11 to 0.13.16
+- [core] #647 scalikejdbc.jsr310.StatementExecutorSpec fail in Java9 by @xuwei-k
+- [core] #648 add Java 9 test in travis-ci by @jyane
+- [core] #699 Modified ExectableToAnormConverter#trimSpaces() by @tkawachi
+- [core] #705 add to{DateTimeClass}WithZoneId methods in UnixTimeInMillisConverter by @xuwei-k
+- [core] #709 Replaced type check with pattern matching @by tototoshi
+- [core] Add explicit return types to public methods by @jyane
+- [core] Fix #729 Some column caches in SQLSyntaxSupports are always empty by @tototoshi, @sesartch
+- [core] Fix #724 SubQuerySQLSyntaxProviderBuilder#include throws NoSuchElementException against empty argument by @tototoshi, @seratch
+- [mapper-generator] #704 support java.time.LocalDateTime in mapper-generator by @xuwei-k
+
+---
+
+Enjoy writing mostly type-safe SQL and get things done!
+

@@ -56,7 +56,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
       columnNameToFieldName: String => String,
       returnCollectionType: ReturnCollectionType,
       view: Boolean,
-      tableNamesToSkip: Seq[String]
+      tableNamesToSkip: Seq[String],
+      baseTypes: Seq[String],
+      companionBaseTypes: Seq[String]
     )
 
     @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
@@ -72,6 +74,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
         str.substring(1, str.length - 1)
       } else str
     }
+
+  private[this] def commaSeparated(props: Properties, key: String): Seq[String] =
+    getString(props, key).map(_.split(',').map(_.trim).filter(_.nonEmpty).toList).getOrElse(Nil)
 
   private[this] final val JDBC = "jdbc."
   private[this] final val JDBC_DRIVER = JDBC + "driver"
@@ -93,6 +98,8 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] final val RETURN_COLLECTION_TYPE = GENERATOR + "returnCollectionType"
   private[this] final val VIEW = GENERATOR + "view"
   private[this] final val TABLE_NAMES_TO_SKIP = GENERATOR + "tableNamesToSkip"
+  private[this] final val BASE_TYPES = GENERATOR + "baseTypes"
+  private[this] final val COMPANION_BASE_TYPES = GENERATOR + "companionBaseTypes"
 
   private[this] val jdbcKeys = Set(
     JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA
@@ -100,7 +107,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] val generatorKeys = Set(
     PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
     ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE,
-    VIEW, TABLE_NAMES_TO_SKIP
+    VIEW, TABLE_NAMES_TO_SKIP, BASE_TYPES, COMPANION_BASE_TYPES
   )
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
@@ -143,7 +150,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
         ReturnCollectionType.map.getOrElse(name.toLowerCase(en), sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
       }.getOrElse(defaultConfig.returnCollectionType),
       view = getString(props, VIEW).map(_.toBoolean).getOrElse(defaultConfig.view),
-      tableNamesToSkip = getString(props, TABLE_NAMES_TO_SKIP).map(_.split(",").toList).getOrElse(defaultConfig.tableNamesToSkip)
+      tableNamesToSkip = getString(props, TABLE_NAMES_TO_SKIP).map(_.split(",").toList).getOrElse(defaultConfig.tableNamesToSkip),
+      baseTypes = commaSeparated(props, BASE_TYPES),
+      companionBaseTypes = commaSeparated(props, COMPANION_BASE_TYPES)
     )
   }
 
@@ -188,7 +197,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
       columnNameToFieldName = generatorSettings.columnNameToFieldName,
       returnCollectionType = generatorSettings.returnCollectionType,
       view = generatorSettings.view,
-      tableNamesToSkip = generatorSettings.tableNamesToSkip
+      tableNamesToSkip = generatorSettings.tableNamesToSkip,
+      tableNameToBaseTypes = _ => generatorSettings.baseTypes,
+      tableNameToCompanionBaseTypes = _ => generatorSettings.companionBaseTypes
     )
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {

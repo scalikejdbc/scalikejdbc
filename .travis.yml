@@ -3,7 +3,7 @@ language: scala
 scala:
   - 2.10.6
   - 2.11.11
-  - 2.12.2
+  - 2.12.3
 
 jdk:
   - oraclejdk8
@@ -27,11 +27,13 @@ before_script:
   - mysql -e 'GRANT ALL ON *.* TO sa@"localhost"IDENTIFIED BY "sa";FLUSH PRIVILEGES;' -uroot
   - mysql -e "CREATE DATABASE scalikejdbc;" -usa -psa
   - mysql -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -usa -psa
+  - bash -x ./travis_before.sh
 
 script:
-  - bash -x ./travis_before.sh
   - git add . --all
   - travis_retry ./travis.sh
+
+before_cache:
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
   - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
@@ -43,44 +45,21 @@ env:
 
 matrix:
   include:
-    - scala: 2.12.2
+    - scala: "scripted-test"
+      env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
       script:
-      - echo "sbt.version=0.13.16-M1" > project/build.properties
-      # TODO https://github.com/sbt/sbt/issues/3245 enable scripted test
-      - sbt ++${TRAVIS_SCALA_VERSION} "project mapper-generator" "^^ 1.0.0-M6" compile
+      # - sbt '++ 2.12.3' root211/publishLocal '++ 2.11.11' root211/publishLocal '++ 2.10.6' publishLocal
+      # - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
+      - sbt '++ 2.12.3' "project mapper-generator" "^^ 1.0.0-RC3" compile # scripted
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.2
+    - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.2
+    - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M1
       env: SCALIKEJDBC_DATABASE="mysql"
-    - dist: trusty
-      group: edge
-      sudo: required
-      scala: 2.12.2
-      jdk: oraclejdk9
-      env: SCALIKEJDBC_DATABASE="mysql"
-      addons:
-        apt:
-          packages:
-          - oracle-java9-installer
-      script:
-      # https://github.com/sbt/sbt/pull/2951
-      - git clone https://github.com/retronym/java9-rt-export
-      - cd java9-rt-export/
-      - git checkout 1019a2873d057dd7214f4135e84283695728395d
-      - jdk_switcher use oraclejdk8
-      - sbt package
-      - jdk_switcher use oraclejdk9
-      - mkdir -p $HOME/.sbt/0.13/java9-rt-ext; java -jar target/java9-rt-export-*.jar $HOME/.sbt/0.13/java9-rt-ext/rt.jar
-      - jar tf $HOME/.sbt/0.13/java9-rt-ext/rt.jar | grep java/lang/Object
-      - cd ..
-      - wget https://raw.githubusercontent.com/paulp/sbt-extras/9ade5fa54914ca8aded44105bf4b9a60966f3ccd/sbt && chmod +x ./sbt
-      - bash -x ./travis_before.sh
-      - ./sbt -Dscala.ext.dirs=$HOME/.sbt/0.13/java9-rt-ext ++$TRAVIS_SCALA_VERSION "project root211" test:compile testSequential

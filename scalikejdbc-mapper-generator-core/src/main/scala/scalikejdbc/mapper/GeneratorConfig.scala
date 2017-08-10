@@ -16,7 +16,9 @@ case class GeneratorConfig(
   columnNameToFieldName: String => String = GeneratorConfig.columnNameToFieldNameBasic andThen GeneratorConfig.addSuffixIfConflict("Column"),
   returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,
   view: Boolean = false,
-  tableNamesToSkip: Seq[String] = List()
+  tableNamesToSkip: Seq[String] = List(),
+  tableNameToBaseTypes: String => Seq[String] = _ => Nil,
+  tableNameToCompanionBaseTypes: String => Seq[String] = _ => Nil
 )
 
 object GeneratorConfig {
@@ -50,7 +52,7 @@ object GeneratorConfig {
 
   val conflictMethods: Set[String] = Set(
     "toString", "hashCode", "wait", "getClass", "notify", "notifyAll",
-    "productArity", "productIterator", "productPrefix"
+    "productArity", "productIterator", "productPrefix", "copy"
   )
 
   def addSuffixIfConflict(suffix: String): String => String = {
