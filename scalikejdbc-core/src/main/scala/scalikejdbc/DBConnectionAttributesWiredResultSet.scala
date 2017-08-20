@@ -135,6 +135,10 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
   def updateObject(columnIndex: Int, x: scala.Any): Unit = underlying.updateObject(columnIndex, x)
   def updateObject(columnLabel: String, x: scala.Any, scaleOrLength: Int): Unit = underlying.updateObject(columnLabel, x, scaleOrLength)
   def updateObject(columnLabel: String, x: scala.Any): Unit = underlying.updateObject(columnLabel, x)
+  override def updateObject(columnIndex: Int, x: scala.Any, targetSqlType: SQLType, scaleOrLength: Int): Unit = underlying.updateObject(columnIndex, x, targetSqlType, scaleOrLength)
+  override def updateObject(columnIndex: Int, x: scala.Any, targetSqlType: SQLType): Unit = underlying.updateObject(columnIndex, x, targetSqlType)
+  override def updateObject(columnLabel: String, x: scala.Any, targetSqlType: SQLType, scaleOrLength: Int): Unit = underlying.updateObject(columnLabel, x, targetSqlType, scaleOrLength)
+  override def updateObject(columnLabel: String, x: scala.Any, targetSqlType: SQLType): Unit = underlying.updateObject(columnLabel, x, targetSqlType)
   def getFetchSize: Int = underlying.getFetchSize
   def getTime(columnIndex: Int): Time = underlying.getTime(columnIndex)
   def getTime(columnLabel: String): Time = underlying.getTime(columnLabel)
