@@ -1,5 +1,7 @@
 package scalikejdbc.specs2.mutable
 
+import java.sql.SQLException
+
 import org.specs2.mutable.Specification
 import scalikejdbc._
 import org.joda.time.DateTime
@@ -34,6 +36,16 @@ object AutoRollbackSpec extends Specification with DBSettings with PreparingTabl
 
     MutableMember.create(3, "Chris")
     MutableMember.count() must_== (3)
+  }
+
+  "AutoRollback should roll back if fixture() failed" in {
+    // step 2 failed with lock timeout if step 1 is not rolled back
+    "step 1" in {
+      new AutoRollbackWithWrongFixture {} must throwA[SQLException]
+    }
+    "step 2" in new AutoRollbackWithFixture {
+      MutableMember.count() must_== (2)
+    }
   }
 
   "mutable_members table must be empty after a test" in new AutoRollback {
@@ -78,6 +90,16 @@ trait AutoRollbackWithFixture extends AutoRollback {
   override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into mutable_members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
     SQL("insert into mutable_members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+  }
+}
+
+trait AutoRollbackWithWrongFixture extends AutoRollback {
+  override def fixture(implicit session: DBSession): Unit = {
+    SQL("insert into mutable_members values (?, ?, ?)")
+      .bind(1, "Alice", DateTime.now).update().apply()
+    // Primary key conflict
+    SQL("insert into mutable_members values (?, ?, ?)")
+      .bind(1, "Alice", DateTime.now).update().apply()
   }
 }
 

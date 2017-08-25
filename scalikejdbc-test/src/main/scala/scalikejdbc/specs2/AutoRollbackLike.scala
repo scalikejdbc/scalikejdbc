@@ -3,6 +3,8 @@ package scalikejdbc.specs2
 import scalikejdbc._
 import org.specs2.specification.After
 
+import scala.util.control.NonFatal
+
 /**
  * AutoRollback support for specs2
  */
@@ -29,8 +31,15 @@ trait AutoRollbackLike extends After with LoanPattern {
   // ------------------------------
   val _db = db()
   _db.begin()
-  _db.withinTx { implicit session =>
-    fixture(session)
+
+  try {
+    _db.withinTx { implicit session =>
+      fixture(session)
+    }
+  } catch {
+    case NonFatal(e) =>
+      using(_db)(_.rollbackIfActive())
+      throw e
   }
 
   // ------------------------------
