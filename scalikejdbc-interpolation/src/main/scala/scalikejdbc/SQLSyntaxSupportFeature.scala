@@ -194,7 +194,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def useShortenedResultName: Boolean = true
 
     /**
-     * True if you need to convert filed names to snake_case column names in SQL.
+     * True if you need to convert field names to snake_case column names in SQL.
      */
     def useSnakeCaseColumnName: Boolean = true
 
@@ -298,7 +298,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val delimiterForResultName: String
 
     /**
-     * True if you need to convert filed names to snake_case column names in SQL.
+     * True if you need to convert field names to snake_case column names in SQL.
      */
     val useSnakeCaseColumnName: Boolean
 
