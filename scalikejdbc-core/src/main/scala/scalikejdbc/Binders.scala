@@ -83,7 +83,7 @@ object Binders {
   }(v => (ps, idx) => ps.setInt(idx, v.intValue))
 
   val int: Binders[Int] = javaInteger.xmap(throwExceptionIfNull(_.intValue), Integer.valueOf)
-  val optionInt: Binders[Option[Int]] = javaInteger.xmap(wrapCastOption, unwrapCastOption)
+  val optionInt: Binders[Option[Int]] = javaInteger.xmap(wrapCastOption[Int, Integer], unwrapCastOption[Int, Integer])
 
   val javaBoolean: Binders[java.lang.Boolean] = Binders.of[java.lang.Boolean] {
     case null => null
@@ -98,7 +98,7 @@ object Binders {
   }(v => (ps, idx) => ps.setBoolean(idx, v))
 
   val boolean: Binders[Boolean] = javaBoolean.xmap(throwExceptionIfNull(_.booleanValue), java.lang.Boolean.valueOf)
-  val optionBoolean: Binders[Option[Boolean]] = javaBoolean.xmap(wrapCastOption, unwrapCastOption)
+  val optionBoolean: Binders[Option[Boolean]] = javaBoolean.xmap(wrapCastOption[Boolean, java.lang.Boolean], unwrapCastOption[Boolean, java.lang.Boolean])
 
   val javaShort: Binders[java.lang.Short] = Binders.of[java.lang.Short] {
     case null => null
@@ -109,7 +109,7 @@ object Binders {
   }(v => (ps, idx) => ps.setShort(idx, v))
 
   val short: Binders[Short] = javaShort.xmap(throwExceptionIfNull(_.shortValue), java.lang.Short.valueOf)
-  val optionShort: Binders[Option[Short]] = javaShort.xmap(wrapCastOption, unwrapCastOption)
+  val optionShort: Binders[Option[Short]] = javaShort.xmap(wrapCastOption[Short, java.lang.Short], unwrapCastOption[Short, java.lang.Short])
 
   val javaLong: Binders[java.lang.Long] = Binders.of[java.lang.Long] {
     case null => null
@@ -120,7 +120,7 @@ object Binders {
   }(v => (ps, idx) => ps.setLong(idx, v))
 
   val long: Binders[Long] = javaLong.xmap(throwExceptionIfNull(_.longValue), java.lang.Long.valueOf)
-  val optionLong: Binders[Option[Long]] = javaLong.xmap(wrapCastOption, unwrapCastOption)
+  val optionLong: Binders[Option[Long]] = javaLong.xmap(wrapCastOption[Long, java.lang.Long], unwrapCastOption[Long, java.lang.Long])
 
   val javaFloat: Binders[java.lang.Float] = Binders.of[java.lang.Float] {
     case null => null
@@ -128,7 +128,7 @@ object Binders {
   }(v => (ps, idx) => ps.setFloat(idx, v))
 
   val float: Binders[Float] = javaFloat.xmap(throwExceptionIfNull(_.floatValue), java.lang.Float.valueOf)
-  val optionFloat: Binders[Option[Float]] = javaFloat.xmap(wrapCastOption, unwrapCastOption)
+  val optionFloat: Binders[Option[Float]] = javaFloat.xmap(wrapCastOption[Float, java.lang.Float], unwrapCastOption[Float, java.lang.Float])
 
   val javaDouble: Binders[java.lang.Double] = Binders.of[java.lang.Double] {
     case null => null
@@ -136,7 +136,7 @@ object Binders {
   }(v => (ps, idx) => ps.setDouble(idx, v))
 
   val double: Binders[Double] = javaDouble.xmap(throwExceptionIfNull(_.doubleValue), java.lang.Double.valueOf)
-  val optionDouble: Binders[Option[Double]] = javaDouble.xmap(wrapCastOption, unwrapCastOption)
+  val optionDouble: Binders[Option[Double]] = javaDouble.xmap(wrapCastOption[Double, java.lang.Double], unwrapCastOption[Double, java.lang.Double])
 
   val javaByte: Binders[java.lang.Byte] = Binders.of[java.lang.Byte] {
     case null => null
@@ -144,7 +144,7 @@ object Binders {
   }(v => (ps, idx) => ps.setByte(idx, v))
 
   val byte: Binders[Byte] = javaByte.xmap(throwExceptionIfNull(_.byteValue), java.lang.Byte.valueOf)
-  val optionByte: Binders[Option[Byte]] = javaByte.xmap(wrapCastOption, unwrapCastOption)
+  val optionByte: Binders[Option[Byte]] = javaByte.xmap(wrapCastOption[Byte, java.lang.Byte], unwrapCastOption[Byte, java.lang.Byte])
 
   val string: Binders[String] = Binders(_ getString _)(_ getString _)(v => (ps, idx) => ps.setString(idx, v))
   val sqlArray: Binders[java.sql.Array] = Binders(_ getArray _)(_ getArray _)(v => (ps, idx) => ps.setArray(idx, v))
