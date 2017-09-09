@@ -526,6 +526,24 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   /**
+   * Set execution type as `executeLargeUpdate`
+   *
+   * @return SQL instance
+   */
+  def largeUpdate(): SQLLargeUpdate =
+    new SQLLargeUpdate(statement, rawParameters, tags)(_ => {})(_ => {})
+
+  /**
+   * Set execution type as `executeLargeUpdate` with filters
+   *
+   * @param before before filter
+   * @param after after filter
+   * @return SQL instance
+   */
+  def largeUpdateWithFilters(before: PreparedStatement => Unit, after: PreparedStatement => Unit): SQLLargeUpdate =
+    new SQLLargeUpdate(statement, rawParameters, tags)(before)(after)
+
+  /**
    * Set execution type as updateAndReturnGeneratedKey
    *
    * @return SQL instance
@@ -682,6 +700,37 @@ class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[S
 object SQLUpdate {
   def unapply(sqlObject: SQLUpdate): Option[(String, Seq[Any], Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.before, sqlObject.after))
+  }
+}
+
+/**
+ * SQL which execute java.sql.Statement#executeLargeUpdate().
+ *
+ * @param statement SQL template
+ * @param parameters parameters
+ * @param before before filter
+ * @param after after filter
+ */
+class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: Seq[Any], tags: Seq[String] = Nil)(
+    before: PreparedStatement => Unit
+)(
+    after: PreparedStatement => Unit
+) {
+
+  def apply()(implicit session: DBSession): Long = {
+    val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
+    session match {
+      case AutoSession =>
+        DB.autoCommit(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters: _*))
+      case NamedAutoSession(name, _) =>
+        NamedDB(name, session.settings).autoCommit(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters: _*))
+      case ReadOnlyAutoSession =>
+        DB.readOnly(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters: _*))
+      case ReadOnlyNamedAutoSession(name, _) =>
+        NamedDB(name, session.settings).readOnly(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters: _*))
+      case _ =>
+        DBSessionWrapper(session, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters: _*)
+    }
   }
 }
 
