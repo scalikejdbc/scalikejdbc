@@ -287,6 +287,15 @@ abstract class SQL[A, E <: WithExtractor](
   }
 
   /**
+   * Binds parameters for largeBatch
+   *
+   * @param parameters parameters
+   * @return SQL for batch
+   */
+  def largeBatch(parameters: Seq[Any]*): SQLLargeBatch =
+    new SQLLargeBatch(statement, parameters, tags)
+
+  /**
    * Binds parameters for batch
    *
    * @param parameters parameters
@@ -597,6 +606,31 @@ class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: S
 object SQLBatch {
   def unapply(sqlObject: SQLBatch): Option[(String, Seq[Seq[Any]], Seq[String])] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags))
+  }
+}
+
+/**
+ * SQL which execute java.sql.Statement#executeLargeBatch().
+ *
+ * @param statement SQL template
+ * @param parameters parameters
+ */
+class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: Seq[Seq[Any]], tags: Seq[String]) {
+  def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
+    val f: DBSession => C[Long] = DBSessionWrapper(_, attributesSwitcher).largeBatch(statement, parameters: _*)
+    session match {
+      case AutoSession =>
+        DB.autoCommit(f)
+      case NamedAutoSession(name, _) =>
+        NamedDB(name, session.settings).autoCommit(f)
+      case ReadOnlyAutoSession =>
+        DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name, _) =>
+        NamedDB(name, session.settings).readOnly(f)
+      case _ =>
+        f(session)
+    }
   }
 }
 
