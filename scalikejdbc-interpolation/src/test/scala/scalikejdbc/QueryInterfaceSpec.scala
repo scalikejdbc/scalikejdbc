@@ -60,7 +60,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
     def apply(p: ResultName[TimeHolder])(rs: WrappedResultSet): TimeHolder = new TimeHolder(rs.int(p.id), rs.jodaDateTime(p.time))
   }
 
-  it should "suport schemaName" in {
+  it should "support schemaName" in {
     if (!isMySQL) {
       try {
         DB autoCommit { implicit s =>
