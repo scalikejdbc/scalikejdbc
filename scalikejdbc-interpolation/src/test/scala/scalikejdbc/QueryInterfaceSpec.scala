@@ -13,7 +13,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
   case class Price(value: Int)
   object Price {
-    implicit val bider: TypeBinder[Price] = TypeBinder.int.map(Price.apply)
+    implicit val binder: TypeBinder[Price] = TypeBinder.int.map(Price.apply)
     implicit val unbinder: ParameterBinderFactory[Price] = ParameterBinderFactory.intParameterBinderFactory.contramap(_.value)
   }
   case class Order(id: Int, productId: Int, accountId: Option[Int], createdAt: DateTime, product: Option[Product] = None, account: Option[Account] = None)
