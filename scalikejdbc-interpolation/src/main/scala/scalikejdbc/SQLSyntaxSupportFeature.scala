@@ -687,11 +687,16 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val asterisk: SQLSyntax = SQLSyntax(aliasName + ".*")
 
     def apply(name: SQLSyntax): SQLSyntax = {
-      resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name.value))).map { rn =>
-        SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
-      }.getOrElse {
-        val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
-        throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})")
+      val foundResultName: Option[SQLSyntax] = {
+        resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name.value))).map { rn =>
+          SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
+        }
+      }
+      foundResultName match {
+        case Some(resultName) => resultName
+        case _ =>
+          val registeredNames = resultNames.map { rn => rn.namedColumns.map(_.value).mkString(",") }.mkString(",")
+          throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})")
       }
     }
 
@@ -721,7 +726,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name))).map { rn =>
         SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
       }.getOrElse {
-        val registeredNames = resultNames.map { rn => rn.columns.map(_.value).mkString(",") }.mkString(",")
+        val registeredNames = resultNames.map { rn => rn.namedColumns.map(_.value).mkString(",") }.mkString(",")
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
       }
     })
