@@ -1,0 +1,29 @@
+ScalikeJDBC 3.1.0 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #705 add to{DateTimeClass}WithZoneId methods in UnixTimeInMillisConverter by @xuwei-k
+- [core] #709 Replaced type check with pattern matching @by tototoshi
+- [core] #696 cross join support in query DSL (fixes #525) by @jyane
+- [core] #697 Add explicit return types to public methods by @jyane
+- [core] #695 Performance tuning: SQL#batchByName() by @tkawachi
+- [core] #699 Refactor ExectableToAnormConverter#trimSpaces() by @tkawachi
+- [core] #748, #749, #755, #759 Add Java 8 APIs by @xuwei-k
+- [core] #731 Fix #727 Error message from SubQuerySQLSyntaxProvider#apply(name: SQLSyntax) is confusing by @seratch
+- [core] #752 Fix a typo in SQLSyntaxSupportFeature code by @Uxio0
+- [core] Fix #729 Some column caches in SQLSyntaxSupports are always empty by @tototoshi, @sesartch
+- [core] Fix #724 SubQuerySQLSyntaxProviderBuilder#include throws NoSuchElementException against empty argument by @tototoshi, @seratch
+- [mapper-generator] #689 Migrate sbt plugin to AutoPlugin by @xuwei-k
+- [mapper-generator] #691, #741, #753, #762 Bump sbt 0.13.16 to 1.0 by @xuwei-k
+- [mapper-generator] #693 Add generator.tableNamesToSkip to sbt-plugin settings by @jyane
+- [test] #647 scalikejdbc.jsr310.StatementExecutorSpec fail in Java9 by @xuwei-k
+- [test] #751 Rollback if fixture() throws an exception by @tkawachi
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
