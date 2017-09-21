@@ -7,7 +7,7 @@ http://scalikejdbc.org/
 ### Changes
 
 - [core] #705 add to{DateTimeClass}WithZoneId methods in UnixTimeInMillisConverter by @xuwei-k
-- [core] #709 Replaced type check with pattern matching @by tototoshi
+- [core] #709 Replaced type check with pattern matching by @tototoshi
 - [core] #696 cross join support in query DSL (fixes #525) by @jyane
 - [core] #697 Add explicit return types to public methods by @jyane
 - [core] #695 Performance tuning: SQL#batchByName() by @tkawachi
