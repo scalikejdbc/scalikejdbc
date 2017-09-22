@@ -38,6 +38,11 @@ sbt 'set scalaVersion := "2.12.3"' \
   "project test" 'set scalaVersion := "2.10.6"' publishSigned \
   clean \
   "project mapper-generator" \
-  'set scalaVersion := "2.10.6"' \
-  'set scalaBinaryVersion := "2.10"' \
+  "++2.10.6" \
+  "^^ 0.13.16" \
+  publishSigned \
+  clean \
+  "project mapper-generator" \
+  "++2.12.3" \
+  "^^ 1.0.2" \
   publishSigned
