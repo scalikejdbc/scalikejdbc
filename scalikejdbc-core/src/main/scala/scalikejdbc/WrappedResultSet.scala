@@ -442,8 +442,8 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def jodaLocalTimeOpt(columnIndex: Int): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnIndex)
   def jodaLocalTimeOpt(columnLabel: String): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnLabel)
 
-  def jodaLocalDateTimeOpt(columnIndex: Int): Option[LocalDateTime] = get[Option[LocalDateTime]](columnIndex)
-  def jodaLocalDateTimeOpt(columnLabel: String): Option[LocalDateTime] = get[Option[LocalDateTime]](columnLabel)
+  def jodaLocalDateTimeOpt(columnIndex: Int): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnIndex)
+  def jodaLocalDateTimeOpt(columnLabel: String): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnLabel)
 
   def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
 
