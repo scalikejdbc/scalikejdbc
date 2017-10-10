@@ -98,7 +98,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " on u.group_id = g.id where u.id = 7")
               .one(rs => User(rs.intOpt("u_id").getOrElse(0), rs.intOpt("u_group_id").getOrElse(0), None))
               .toOptionalOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Some(g)))
+              .map((u: User, g: Option[Group]) => u.copy(group = g))
               .list.apply()
 
             users.size should equal(1)
@@ -113,7 +113,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " on u.group_id = g.id where u.id = 7")
               .one(rs => User(rs.intOpt("u_id").getOrElse(0), rs.intOpt("u_group_id").getOrElse(0), None))
               .toOptionalOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
-              .map((u: User, g: Group) => u.copy(group = Some(g)))
+              .map((u: User, g: Option[Group]) => u.copy(group = g))
               .collection[Vector]()
 
             users.size should equal(1)
