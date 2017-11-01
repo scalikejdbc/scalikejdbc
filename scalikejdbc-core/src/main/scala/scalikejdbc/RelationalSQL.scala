@@ -57,8 +57,8 @@ class OneToXSQL[A, E <: WithExtractor, Z](
     new OneToOneSQL(statement, rawParameters)(one)(to.andThen((b: B) => Option(b)))((a, b) => a.asInstanceOf[Z])
   }
 
-  def toOptionalOne[B](to: WrappedResultSet => Option[B]): OneToOneSQL[A, B, E, Z] = {
-    new OneToOneSQL(statement, rawParameters)(one)(to)((a, b) => a.asInstanceOf[Z])
+  def toOptionalOne[B](to: WrappedResultSet => Option[B]): OneToOneSQL[A, Option[B], E, Z] = {
+    new OneToOneSQL(statement, rawParameters)(one)(to.andThen((maybeB: Option[B]) => Option(maybeB)))((a, maybeB) => a.asInstanceOf[Z])
   }
 
   def toMany[B](to: WrappedResultSet => Option[B]): OneToManySQL[A, B, E, Z] = {

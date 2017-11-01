@@ -593,7 +593,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
           """
               .one(Customer(sq(c).resultName))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
-              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .map { (c, cg) => c.copy(group = cg) }
               .list
               .apply()
 
@@ -612,7 +612,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
                 .orderBy(sq(c).id)
             }.one(Customer(sq(c).resultName))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
-              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .map { (c, cg) => c.copy(group = cg) }
               .list
               .apply()
 
@@ -636,7 +636,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
           """
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
-              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .map { (c, cg) => c.copy(group = cg) }
               .traversable
               .apply()
 
@@ -660,7 +660,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
           """
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
-              .map { (c, cg) => c.copy(group = Some(cg)) }
+              .map { (c, cg) => c.copy(group = cg) }
               .single
               .apply()
 
