@@ -37,8 +37,17 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   incOptions := incOptions.value.withNameHashing(true),
-  scalatestVersion := "3.0.3",
-  specs2Version := "3.9.4",
+  scalatestVersion := "3.0.4",
+  specs2Version := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 10)) =>
+        // specs2 4 does not support Scala 2.10
+        // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
+        "3.9.5"
+      case _ =>
+        "4.0.1"
+    }
+  },
   //scalaVersion := "2.11.11",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),

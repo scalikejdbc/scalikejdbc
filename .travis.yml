@@ -61,5 +61,5 @@ matrix:
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="hsqldb"
-    - scala: 2.13.0-M1
+    - scala: 2.13.0-M2
       env: SCALIKEJDBC_DATABASE="mysql"
