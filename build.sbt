@@ -48,7 +48,7 @@ lazy val baseSettings = Seq(
         "4.0.1"
     }
   },
-  //scalaVersion := "2.11.11",
+  //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   scalacOptions ++= _scalacOptions,
