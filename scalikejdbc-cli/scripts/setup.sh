@@ -136,7 +136,7 @@ run_sbt "console"
 ' > ${DBCONSOLE_COMMAND}
 
 
-echo 'scalaVersion := "2.11.11"
+echo 'scalaVersion := "2.11.12"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "2.3.2",

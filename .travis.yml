@@ -2,7 +2,7 @@ language: scala
 
 scala:
   - 2.10.6
-  - 2.11.11
+  - 2.11.12
   - 2.12.3
 
 jdk:
@@ -48,7 +48,7 @@ matrix:
     - scala: "scripted-test"
       env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
       script:
-      # - sbt '++ 2.12.3' root211/publishLocal '++ 2.11.11' root211/publishLocal '++ 2.10.6' publishLocal
+      # - sbt '++ 2.12.3' root211/publishLocal '++ 2.11.12' root211/publishLocal '++ 2.10.6' publishLocal
       # - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
       - sbt '++ 2.12.3' "project mapper-generator" "^^ 1.0.2" compile # scripted
     - scala: scripted-test
