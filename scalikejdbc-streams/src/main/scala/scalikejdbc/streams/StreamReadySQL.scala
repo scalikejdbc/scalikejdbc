@@ -9,9 +9,8 @@ import StreamReadySQL._
  * The primary constructor is intentionally hidden, use only StreamSQL object's apply method to instantiate.
  */
 case class StreamReadySQL[A] private (
-    private val underlying: SQL[A, HasExtractor],
-    private val adjuster: DBSessionForceAdjuster = defaultDBSessionForceAdjuster
-) {
+  private val underlying: SQL[A, HasExtractor],
+  private val adjuster: DBSessionForceAdjuster = defaultDBSessionForceAdjuster) {
 
   private[streams] lazy val extractor: (WrappedResultSet) => A = underlying.extractor
 

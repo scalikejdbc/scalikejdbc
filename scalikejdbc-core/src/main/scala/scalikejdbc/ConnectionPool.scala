@@ -89,8 +89,7 @@ object ConnectionPool extends LogSupport {
   def add(name: Any, url: String, user: String, password: String, settings: CPSettings = ConnectionPoolSettings())(
     implicit
     factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY,
-    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
-  ): Unit = {
+    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT): Unit = {
 
     import scalikejdbc.JDBCUrl._
 
@@ -173,8 +172,7 @@ object ConnectionPool extends LogSupport {
 
   private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool)(
     implicit
-    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
-  ) = {
+    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT) = {
     scala.concurrent.Future {
       if (GlobalSettings.loggingConnections) {
         log.debug("The old pool destruction started. connection pool : " + get(name).toString())
@@ -279,11 +277,10 @@ object ConnectionPool extends LogSupport {
  * Connection Pool
  */
 abstract class ConnectionPool(
-    val url: String,
-    val user: String,
-    password: String,
-    val settings: ConnectionPoolSettings = ConnectionPoolSettings()
-) extends AutoCloseable {
+  val url: String,
+  val user: String,
+  password: String,
+  val settings: ConnectionPoolSettings = ConnectionPoolSettings()) extends AutoCloseable {
 
   /**
    * Borrows java.sql.Connection from pool.

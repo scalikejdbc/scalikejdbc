@@ -13,8 +13,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
       name = poolName,
       url = url,
       user = username,
-      password = password
-    )
+      password = password)
   }
 
   private def columnName(implicit rs: WrappedResultSet): String = rs.string("COLUMN_NAME")
@@ -73,8 +72,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
                 new RSTraversable(meta.getPrimaryKeys(catalog, _schema, tableName))
                   .flatMap { implicit rs => allColumns.find(column => column.name == columnName) }
                   .toList.distinct
-              }
-            ))
+              }))
         }
     }
   }

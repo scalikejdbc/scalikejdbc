@@ -9,14 +9,12 @@ import java.sql.Connection
 class DataSourceConnectionPool(
   override val dataSource: DataSource,
   settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings(),
-  closer: DataSourceCloser = DefaultDataSourceCloser
-)
-    extends ConnectionPool(
-      url = "<external-data-source>",
-      user = "<external-data-source>",
-      password = "<external-data-source>",
-      settings = ConnectionPoolSettings(driverName = settings.driverName)
-    ) {
+  closer: DataSourceCloser = DefaultDataSourceCloser)
+  extends ConnectionPool(
+    url = "<external-data-source>",
+    user = "<external-data-source>",
+    password = "<external-data-source>",
+    settings = ConnectionPoolSettings(driverName = settings.driverName)) {
 
   override def borrow(): Connection = dataSource.getConnection()
 
@@ -33,14 +31,12 @@ class AuthenticatedDataSourceConnectionPool(
   override val user: String,
   password: String,
   settings: DataSourceConnectionPoolSettings = DataSourceConnectionPoolSettings(),
-  closer: DataSourceCloser = DefaultDataSourceCloser
-)
-    extends ConnectionPool(
-      url = "<external-data-source>",
-      user = user,
-      password = password,
-      settings = ConnectionPoolSettings(driverName = settings.driverName)
-    ) {
+  closer: DataSourceCloser = DefaultDataSourceCloser)
+  extends ConnectionPool(
+    url = "<external-data-source>",
+    user = user,
+    password = password,
+    settings = ConnectionPoolSettings(driverName = settings.driverName)) {
 
   override def borrow(): Connection = dataSource.getConnection(user, password)
 

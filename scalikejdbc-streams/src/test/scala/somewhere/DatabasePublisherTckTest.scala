@@ -11,8 +11,8 @@ import somewhere.DatabasePublisherTckTest.User
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DatabasePublisherTckTest
-    extends PublisherVerification[User](DatabasePublisherTckTest.environment)
-    with TestDBSettings {
+  extends PublisherVerification[User](DatabasePublisherTckTest.environment)
+  with TestDBSettings {
   private val env = DatabasePublisherTckTest.environment
 
   private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()

@@ -46,8 +46,7 @@ class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
     val tableName = tableNamePrefix + "_withNamedCPContext"
     implicit val context = MultipleConnectionPoolContext(
       ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
-      'ConnectionPoolContextSpec -> ConnectionPool.get()
-    )
+      'ConnectionPoolContextSpec -> ConnectionPool.get())
     try {
       createTable(tableName)(ConnectionPool.DEFAULT_NAME)
       createTable(tableName)('ConnectionPoolContextSpec)
@@ -113,8 +112,7 @@ object ConnectionPoolContextSpecUtils {
 trait NamedCPContextAsDefault {
   implicit lazy val context = MultipleConnectionPoolContext(
     ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
-    'ConnectionPoolContextSpec -> ConnectionPool.get()
-  )
+    'ConnectionPoolContextSpec -> ConnectionPool.get())
 }
 
 class ConnectionPoolContextMixinSpec extends FlatSpec with Matchers with Settings with NamedCPContextAsDefault {
@@ -165,8 +163,7 @@ trait DefaultSettings {
 trait InMemoryDB {
   Class.forName("org.h2.Driver")
   implicit val context: ConnectionPoolContext = new MultipleConnectionPoolContext(
-    'CPContextWithAutoSessionSpec -> CommonsConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", "")
-  )
+    'CPContextWithAutoSessionSpec -> CommonsConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", ""))
   NamedDB('CPContextWithAutoSessionSpec) localTx { implicit session =>
     SQL("create table users (id bigint primary key, name varchar(256), created_at timestamp not null);")
       .execute.apply()

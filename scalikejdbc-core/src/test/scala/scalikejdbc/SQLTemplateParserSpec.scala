@@ -78,8 +78,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     params(1) should equal('userName)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "select * from user where id = ? and user_name = ?"
-    )
+      "select * from user where id = ? and user_name = ?")
   }
 
   it should "parse a str contains >" in {
@@ -97,8 +96,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "SELECT customer_state, COUNT(customer_id) As total FROM customers WHERE group = ? " +
-        "GROUP BY customer_state HAVING COUNT(customer_id) > 5;"
-    )
+        "GROUP BY customer_state HAVING COUNT(customer_id) > 5;")
   }
 
   it should "parse an insert SQL" in {
@@ -112,8 +110,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     params(1) should equal('customerName)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES(?, ?)"
-    )
+      "INSERT INTO customers(customer_id, customer_name) VALUES(?, ?)")
   }
 
   it should "parse an insert SQL without parameters" in {
@@ -125,8 +122,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     params.size should equal(0)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES('12345', 'GIS Experts')"
-    )
+      "INSERT INTO customers(customer_id, customer_name) VALUES('12345', 'GIS Experts')")
   }
 
   it should "parse an insert SQL without parameters using double quart" in {
@@ -138,8 +134,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     params.size should equal(0)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES(\"12345\", \"GIS Experts\")"
-    )
+      "INSERT INTO customers(customer_id, customer_name) VALUES(\"12345\", \"GIS Experts\")")
   }
 
   it should "parse an update SQL" in {
@@ -161,8 +156,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     params(1) should equal('orderDate)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "UPDATE customers SET rating = ? FROM orders WHERE orderdate > ? and orders.customer_id = customers.customer_id"
-    )
+      "UPDATE customers SET rating = ? FROM orders WHERE orderdate > ? and orders.customer_id = customers.customer_id")
   }
 
   it should "parse ddl" in {

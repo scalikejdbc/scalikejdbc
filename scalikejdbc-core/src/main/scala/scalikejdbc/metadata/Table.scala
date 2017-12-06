@@ -11,13 +11,12 @@ package scalikejdbc.metadata
  * @param indices indices
  */
 case class Table(
-    name: String,
-    schema: String = null,
-    description: String = null,
-    columns: List[Column] = List(),
-    foreignKeys: List[ForeignKey] = List(),
-    indices: List[Index] = List()
-) {
+  name: String,
+  schema: String = null,
+  description: String = null,
+  columns: List[Column] = List(),
+  foreignKeys: List[ForeignKey] = List(),
+  indices: List[Index] = List()) {
 
   /**
    * Returns name with schema(if exists)
@@ -71,8 +70,7 @@ case class Table(
           else if (c.size >= 1000) 6
           else if (c.size >= 100) 5
           else if (c.size >= 10) 4
-          else 0
-        )
+          else 0)
       }.sortWith { case (a, b) => a > b }.head
       if (maxLength < 4) 4 else maxLength
     }

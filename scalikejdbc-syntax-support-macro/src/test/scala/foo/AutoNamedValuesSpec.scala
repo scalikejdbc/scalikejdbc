@@ -54,8 +54,7 @@ class AutoNamedValuesSpec extends FlatSpec with Matchers with DBSettings {
           insert.into(Organization).namedValues(autoNamedValues(org1, oc)),
           insert.into(Organization).namedValues(autoNamedValues(org2, oc)),
           insert.into(Person).columns(pc.id, pc.name, pc.organizationId, pc.groupId).values(1L, "person1", Some(1L), 1L),
-          insert.into(Person).columns(pc.id, pc.name, pc.organizationId, pc.groupId).values(2L, "person2", None, 1L)
-        ).foreach(sql => applyUpdate(sql))
+          insert.into(Person).columns(pc.id, pc.name, pc.organizationId, pc.groupId).values(2L, "person2", None, 1L)).foreach(sql => applyUpdate(sql))
 
         val (i, o, p) = (IssueTable.syntax("i"), Organization.syntax("o"), Person.syntax("p"))
 

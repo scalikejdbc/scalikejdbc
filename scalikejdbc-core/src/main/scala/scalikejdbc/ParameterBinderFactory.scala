@@ -28,8 +28,7 @@ import scala.annotation.implicitNotFound
     val value: Any = 123
     val key: SQLSyntax = sqls"column_name"
     key -> AsIsParameterBinder(value)
---------------------------------------------------------"""
-)
+--------------------------------------------------------""")
 trait ParameterBinderFactory[A] { self =>
 
   def apply(value: A): ParameterBinderWithValue

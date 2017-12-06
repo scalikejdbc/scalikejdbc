@@ -88,7 +88,7 @@ private[scalikejdbc] case class ContramappedParameterBinder(value: Any, underlyi
  * ParameterBinder which holds SQLSyntax.
  */
 private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax)
-    extends ParameterBinderWithValue {
+  extends ParameterBinderWithValue {
 
   val value: SQLSyntax = syntax
 

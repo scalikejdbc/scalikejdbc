@@ -48,16 +48,13 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
 
         execute(
           "comment on table meta_members is 'website members';",
-          "alter table meta_members comment 'website members';"
-        )
+          "alter table meta_members comment 'website members';")
         execute(
           "comment on column meta_members.name is 'Full name';",
-          "alter table meta_members change name name varchar(30) not null comment 'Full name';"
-        )
+          "alter table meta_members change name name varchar(30) not null comment 'Full name';")
         execute(
           "comment on column meta_members.description is 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';",
-          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';"
-        )
+          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';")
 
         execute("alter table meta_members add foreign key (group_id) references meta_groups(id);")
         execute("create unique index meta_members_name_and_group on meta_members(name, group_id);")
@@ -74,8 +71,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           NamedDB('default).getTableNames("*"),
           NamedDB('default).getTableNames("%"),
           NamedDB('default).getTableNames("meta_%"),
-          NamedDB('default).getTableNames("META_%")
-        ).zipWithIndex
+          NamedDB('default).getTableNames("META_%")).zipWithIndex
       ) withClue(s"No. ${i}") {
         lower(act) should contain allOf ("meta_groups", "meta_members")
       }
@@ -83,8 +79,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
       for (
         act <- Seq(
           DB.getTableNames("%.%"),
-          NamedDB('default).getTableNames("%.%")
-        )
+          NamedDB('default).getTableNames("%.%"))
       ) {
         // mysql is not support schema
         if (driverClassName == "com.mysql.jdbc.Driver") {
@@ -99,8 +94,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           DB.getTableNames("%ta_me%"),
           DB.getTableNames("%TA_ME%"),
           NamedDB('default).getTableNames("%ta_me%"),
-          NamedDB('default).getTableNames("%TA_ME%")
-        ).zipWithIndex
+          NamedDB('default).getTableNames("%TA_ME%")).zipWithIndex
       ) withClue(s"No. ${i}") {
         lower(act) should (contain("meta_members") and not contain ("meta_groups"))
       }
@@ -121,8 +115,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
           DB.getTable("META_MEMBERS"),
           DB.getTable("meta_members"),
           NamedDB('default).getTable("META_MEMBERS"),
-          NamedDB('default).getTable("meta_members")
-        )
+          NamedDB('default).getTable("meta_members"))
       ) {
         if (driverClassName == "com.mysql.jdbc.Driver") {
           lower(act.value.schema) should equal(null)
@@ -241,8 +234,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             NamedDB('default).getTableNames("*"),
             NamedDB('default).getTableNames("%"),
             NamedDB('default).getTableNames("meta_%"),
-            NamedDB('default).getTableNames("META_%")
-          ).zipWithIndex
+            NamedDB('default).getTableNames("META_%")).zipWithIndex
         ) withClue(s"No. ${i}") {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
@@ -258,8 +250,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.getTableNames("%.%"),
-            NamedDB('default).getTableNames("%.%")
-          )
+            NamedDB('default).getTableNames("%.%"))
         ) {
           // public.meta_members, other.meta_members, other.meta_groups
           lower(act).count(_ == "public.meta_members") should be(1)
@@ -272,8 +263,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             DB.getTableNames("%mem%"),
             DB.getTableNames("%MEM%"),
             NamedDB('default).getTableNames("%mem%"),
-            NamedDB('default).getTableNames("%MEM%")
-          )
+            NamedDB('default).getTableNames("%MEM%"))
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
@@ -295,8 +285,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             NamedDB('default).getTableNames("public.*"),
             NamedDB('default).getTableNames("public.%"),
             NamedDB('default).getTableNames("public.meta_%"),
-            NamedDB('default).getTableNames("PUBLIC.META_%")
-          ).zipWithIndex
+            NamedDB('default).getTableNames("PUBLIC.META_%")).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act) should (contain("public.meta_members") and not contain ("other.meta_groups"))
         }
@@ -310,8 +299,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             NamedDB('default).getTableNames("other.*"),
             NamedDB('default).getTableNames("other.%"),
             NamedDB('default).getTableNames("other.meta_%"),
-            NamedDB('default).getTableNames("OTHER.META_%")
-          ).zipWithIndex
+            NamedDB('default).getTableNames("OTHER.META_%")).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act) should (contain allOf ("other.meta_members", "other.meta_groups"))
         }
@@ -323,8 +311,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.showTables("%"),
-            NamedDB('default).showTables("%")
-          )
+            NamedDB('default).showTables("%"))
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
@@ -338,8 +325,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.showTables("public.%"),
-            NamedDB('default).showTables("public.%")
-          )
+            NamedDB('default).showTables("public.%"))
         ) {
           lower(act) should (include("public.meta_members") and not include ("other.meta_members") and not include ("other.meta_groups"))
         }
@@ -347,8 +333,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.showTables("other.%"),
-            NamedDB('default).showTables("other.%")
-          )
+            NamedDB('default).showTables("other.%"))
         ) {
           lower(act) should (not include ("public.meta_members") and include("other.meta_members") and include("other.meta_groups"))
         }
@@ -359,8 +344,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             DB.getTable("public.meta_members"),
             DB.getTable("PUBLIC.META_MEMBERS"),
             NamedDB('default).getTable("public.meta_members"),
-            NamedDB('default).getTable("PUBLIC.META_MEMBERS")
-          ).zipWithIndex
+            NamedDB('default).getTable("PUBLIC.META_MEMBERS")).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("meta_members")
@@ -372,8 +356,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
             DB.getTable("other.meta_members"),
             DB.getTable("OTHER.META_MEMBERS"),
             NamedDB('default).getTable("other.meta_members"),
-            NamedDB('default).getTable("OTHER.META_MEMBERS")
-          ).zipWithIndex
+            NamedDB('default).getTable("OTHER.META_MEMBERS")).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("other")
           lower(act.value.name) should equal("meta_members")
@@ -387,8 +370,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.describe("public.meta_members"),
-            NamedDB('default).describe("public.meta_members")
-          )
+            NamedDB('default).describe("public.meta_members"))
         ) {
           lower(act) should (include("public.meta_members") and not include ("other.meta_members"))
         }
@@ -396,8 +378,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.describe("other.meta_members"),
-            NamedDB('default).describe("other.meta_members")
-          )
+            NamedDB('default).describe("other.meta_members"))
         ) {
           lower(act) should (not include ("public.meta_members") and include("other.meta_members"))
         }
@@ -406,8 +387,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           (schemas, exp) <- Seq(
             (Seq("public", "Public", "PUBLIC"), List("id", "title", "special_day", "updated_at")),
-            (Seq("other", "Other", "OTHER"), List("id", "name", "group_id", "description", "birthday", "created_at"))
-          );
+            (Seq("other", "Other", "OTHER"), List("id", "name", "group_id", "description", "birthday", "created_at")));
           schema <- schemas;
           table <- Seq("meta_members", "Meta_Members", "META_MEMBERS")
         ) withClue(s"table [${schema}.${table}]") {
@@ -447,16 +427,14 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
               id integer primary key,
               title varchar(30)  not null
             );
-            """
-          )
+            """)
         }
 
         // find table names
         for (
           act <- Seq(
             DB.getTableNames("%"),
-            NamedDB('default).getTableNames("%")
-          )
+            NamedDB('default).getTableNames("%"))
         ) {
           lower(act) should contain("users")
         }
@@ -464,8 +442,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.getTableNames("public.%"),
-            NamedDB('default).getTableNames("public.%")
-          )
+            NamedDB('default).getTableNames("public.%"))
         ) {
           lower(act) should contain("public.users")
         }
@@ -474,8 +451,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.getTable("users"),
-            NamedDB('default).getTable("users")
-          )
+            NamedDB('default).getTable("users"))
         ) {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")
@@ -488,8 +464,7 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
         for (
           act <- Seq(
             DB.getTable("public.users"),
-            NamedDB('default).getTable("public.users")
-          )
+            NamedDB('default).getTable("public.users"))
         ) {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")

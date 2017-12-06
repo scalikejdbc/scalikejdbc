@@ -11,9 +11,8 @@ import java.util.Calendar
  * ResultSet proxy which holds current DBConnectionAttributes.
  */
 private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
-    underlying: ResultSet,
-    connAttributes: DBConnectionAttributes
-) extends ResultSet {
+  underlying: ResultSet,
+  connAttributes: DBConnectionAttributes) extends ResultSet {
 
   /**
    * Converts Timestamp value to an appropriate timezone.

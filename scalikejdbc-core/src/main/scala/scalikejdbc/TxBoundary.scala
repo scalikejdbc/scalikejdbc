@@ -60,8 +60,7 @@ object TxBoundary {
           case Failure(resultError) =>
             resultError.addSuppressed(finishError)
             resultError
-        })
-    )
+        }))
 
   /**
    * Applies an operation to finish current transaction to the Future value which holds the result.

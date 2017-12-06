@@ -41,8 +41,7 @@ class MemberOnMemorySpec extends FlatSpec with Matchers {
           name = "Alice",
           description = Option("Alice's Adventures in Wonderland"),
           birthday = Option(new LocalDate(1980, 1, 2)),
-          createdAt = new DateTime
-        )
+          createdAt = new DateTime)
         Member.find(alice.id).get.id should equal(alice.id)
         intercept[IllegalStateException] {
           Member.findBy("name like /*:nameMatch*/'Bob%'", 'nameMatch -> "Alice%").size should be > 0
@@ -60,8 +59,7 @@ class MemberOnMemorySpec extends FlatSpec with Matchers {
                 name = "Rollback",
                 description = Option("rollback test"),
                 birthday = Option(new LocalDate(1980, 1, 2)),
-                createdAt = new DateTime
-              )
+                createdAt = new DateTime)
               Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
               throw new RuntimeException
           }

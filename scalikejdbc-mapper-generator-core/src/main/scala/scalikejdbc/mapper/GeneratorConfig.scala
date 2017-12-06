@@ -18,8 +18,7 @@ case class GeneratorConfig(
   view: Boolean = false,
   tableNamesToSkip: Seq[String] = List(),
   tableNameToBaseTypes: String => Seq[String] = _ => Nil,
-  tableNameToCompanionBaseTypes: String => Seq[String] = _ => Nil
-)
+  tableNameToCompanionBaseTypes: String => Seq[String] = _ => Nil)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {
@@ -41,8 +40,7 @@ object GeneratorConfig {
     "object", "override", "package", "private", "protected",
     "return", "sealed", "super", "then", "this", "throw",
     "trait", "try", "true", "type", "val",
-    "var", "while", "with", "yield"
-  )
+    "var", "while", "with", "yield")
 
   val quoteReservedWord: String => String = {
     name =>
@@ -52,8 +50,7 @@ object GeneratorConfig {
 
   val conflictMethods: Set[String] = Set(
     "toString", "hashCode", "wait", "getClass", "notify", "notifyAll",
-    "productArity", "productIterator", "productPrefix", "copy"
-  )
+    "productArity", "productIterator", "productPrefix", "copy")
 
   def addSuffixIfConflict(suffix: String): String => String = {
     name =>

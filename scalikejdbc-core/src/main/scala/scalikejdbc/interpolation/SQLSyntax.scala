@@ -197,8 +197,8 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
 
   def stripMargin(marginChar: Char): SQLSyntax = new SQLSyntax(value.stripMargin(marginChar), rawParameters)
 
-  def -> [A](value: A)(implicit ev: ParameterBinderFactory[A]): (SQLSyntax, ParameterBinder) = (this, ev(value))
-  def -> (value: ParameterBinder): (SQLSyntax, ParameterBinder) = (this, value)
+  def ->[A](value: A)(implicit ev: ParameterBinderFactory[A]): (SQLSyntax, ParameterBinder) = (this, ev(value))
+  def ->(value: ParameterBinder): (SQLSyntax, ParameterBinder) = (this, value)
 }
 
 /**

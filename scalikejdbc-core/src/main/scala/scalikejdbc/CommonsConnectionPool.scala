@@ -12,9 +12,8 @@ class CommonsConnectionPool(
   override val url: String,
   override val user: String,
   password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
-)
-    extends ConnectionPool(url, user, password, settings) {
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
+  extends ConnectionPool(url, user, password, settings) {
 
   import org.apache.commons.pool.impl.GenericObjectPool
   import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
@@ -35,8 +34,7 @@ class CommonsConnectionPool(
     null,
     settings.validationQuery,
     false,
-    true
-  )
+    true)
 
   private[this] val _dataSource: DataSource = new PoolingDataSource(_pool)
 

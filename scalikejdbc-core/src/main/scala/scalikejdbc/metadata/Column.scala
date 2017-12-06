@@ -22,5 +22,4 @@ case class Column(
   isPrimaryKey: Boolean = false,
   isAutoIncrement: Boolean = false,
   description: String = null,
-  defaultValue: String = null
-)
+  defaultValue: String = null)

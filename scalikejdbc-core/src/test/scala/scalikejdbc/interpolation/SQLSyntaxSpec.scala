@@ -399,8 +399,7 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
   it should "have #roundBracket" in {
     val (id, name, age) = (123, "Alice", 12)
     val s = SQLSyntax.eq(sqls"id", id).and.roundBracket(
-      SQLSyntax.eq(sqls"name", name).or.eq(sqls"age", age)
-    )
+      SQLSyntax.eq(sqls"name", name).or.eq(sqls"age", age))
     s.value should equal(" id = ? and ( name = ? or age = ?)")
     s.parameters should equal(Seq(123, "Alice", 12))
 

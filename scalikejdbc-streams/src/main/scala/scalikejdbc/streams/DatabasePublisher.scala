@@ -11,10 +11,9 @@ import scala.util.control.NonFatal
  * see also: [[http://www.reactive-streams.org/]]
  */
 class DatabasePublisher[A] private[streams] (
-    private[streams] val settings: DatabasePublisherSettings[A],
-    private[streams] val sql: StreamReadySQL[A],
-    private[streams] val asyncExecutor: AsyncExecutor
-) extends Publisher[A] with LogSupport {
+  private[streams] val settings: DatabasePublisherSettings[A],
+  private[streams] val sql: StreamReadySQL[A],
+  private[streams] val asyncExecutor: AsyncExecutor) extends Publisher[A] with LogSupport {
 
   /**
    * Requests Publisher to start streaming data.

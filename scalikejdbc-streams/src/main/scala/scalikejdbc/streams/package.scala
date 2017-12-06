@@ -18,13 +18,11 @@ package object streams {
    */
   private def createDatabasePublisher[A, E <: WithExtractor](
     sql: StreamReadySQL[A],
-    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
-  )(
+    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME)(
     implicit
     executionContext: ExecutionContext,
     cpContext: DB.CPContext,
-    settings: SettingsProvider
-  ): DatabasePublisher[A] = {
+    settings: SettingsProvider): DatabasePublisher[A] = {
     val publisherSettings = DatabasePublisherSettings[A](connectionPoolName)
     DatabasePublisherFactory.createNewPublisher[A](publisherSettings, AsyncExecutor(executionContext), sql)
   }
@@ -81,8 +79,7 @@ package object streams {
 
     def iterator()(
       implicit
-      hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor
-    ): StreamReadySQL[A] = {
+      hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor): StreamReadySQL[A] = {
       StreamReadySQL[A, E](sql, sql.fetchSize.getOrElse(DefaultFetchSize))
     }
 

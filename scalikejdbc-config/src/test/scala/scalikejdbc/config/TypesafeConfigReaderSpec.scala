@@ -97,8 +97,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "poolConnectionTimeoutMillis" -> "1000",
           "poolValidationQuery" -> "select 1 as foo",
           "poolWarmUpTimeMillis" -> "10",
-          "timeZone" -> "AST"
-        )
+          "timeZone" -> "AST")
         TypesafeConfigReader.readAsMap('foo) should be(expected)
       }
 
@@ -115,8 +114,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:dev",
           "user" -> "dev",
-          "password" -> "secret"
-        )
+          "password" -> "secret")
         val configReader = new TypesafeConfigReaderWithEnv("dev")
         configReader.readAsMap() should be(expected)
       }
@@ -125,8 +123,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "driver" -> "org.h2.Driver3",
           "url" -> "jdbc:h2:mem:prod",
           "user" -> "prod",
-          "password" -> "secret3"
-        )
+          "password" -> "secret3")
         val configReader = new TypesafeConfigReaderWithEnv("prod")
         configReader.readAsMap() should be(expected)
       }
@@ -142,8 +139,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "user" -> "dev-foo",
           "password" -> "secret2",
           "poolWarmUpTimeMillis" -> "10",
-          "timeZone" -> "AST"
-        )
+          "timeZone" -> "AST")
         val configReader = new TypesafeConfigReaderWithEnv("dev")
         configReader.readAsMap('foo) should be(expected)
       }
@@ -153,8 +149,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:topLevelDefaults",
           "user" -> "xxx",
-          "password" -> "yyy"
-        )
+          "password" -> "yyy")
         TypesafeConfigReader.readAsMap('topLevelDefaults) should be(expected)
       }
 
@@ -163,8 +158,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "driver" -> "org.h2.Driver",
           "url" -> "jdbc:h2:mem:topLevelDefaults",
           "user" -> "app",
-          "password" -> "password"
-        )
+          "password" -> "password")
         val configReader = new TypesafeConfigReaderWithEnv("prod")
         configReader.readAsMap('topLevelDefaults) should be(expected)
       }

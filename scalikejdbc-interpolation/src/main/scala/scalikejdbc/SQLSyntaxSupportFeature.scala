@@ -156,8 +156,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
         SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableNameWithSchema), {
           NamedDB(connectionPoolName, settings).getColumnNames(tableNameWithSchema).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
-              "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName."
-            )
+              "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")
             case cs => cs
           }
         })
@@ -265,16 +264,14 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class TableAsAliasSQLSyntax private[scalikejdbc] (
     override val value: String,
     override val rawParameters: Seq[Any] = Vector(),
-    resultAllProvider: Option[ResultAllProvider] = None
-  ) extends SQLSyntax(value, rawParameters)
+    resultAllProvider: Option[ResultAllProvider] = None) extends SQLSyntax(value, rawParameters)
 
   /**
    * Table definition part SQLSyntax
    */
   case class TableDefSQLSyntax private[scalikejdbc] (
     override val value: String,
-    override val rawParameters: Seq[Any] = Vector()
-  ) extends SQLSyntax(value, rawParameters)
+    override val rawParameters: Seq[Any] = Vector()) extends SQLSyntax(value, rawParameters)
 
   /**
    * SQLSyntax Provider
@@ -353,8 +350,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
           acronymRegExp.findFirstMatchIn(convertersApplied).map { m =>
             convertersApplied.replaceFirst(endsWithAcronymRegExpStr, "_" + m.matched.toLowerCase(en))
           }.getOrElse(convertersApplied), // might end with an acronym
-          { m => "_" + m.matched.init.toLowerCase(en) + "_" + m.matched.last.toString.toLowerCase(en) }
-        )
+          { m => "_" + m.matched.init.toLowerCase(en) + "_" + m.matched.last.toString.toLowerCase(en) })
         val result = singleUpperCaseRegExp.replaceAllIn(acronymsFiltered, { m => "_" + m.matched.toLowerCase(en) })
           .replaceFirst("^_", "")
           .replaceFirst("_$", "")
@@ -418,9 +414,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    * SQLSyntax provider for column names.
    */
   case class ColumnSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
-    support: S
-  ) extends SQLSyntaxProvider[A]
-      with AsteriskProvider {
+    support: S) extends SQLSyntaxProvider[A]
+    with AsteriskProvider {
 
     val nameConverters: Map[String, String] = support.nameConverters
     val forceUpperCase: Boolean = support.forceUpperCase
@@ -437,8 +432,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -457,9 +451,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    * SQLSyntax Provider basic implementation.
    */
   private[scalikejdbc] abstract class SQLSyntaxProviderCommonImpl[S <: SQLSyntaxSupport[A], A](
-      support: S,
-      tableAliasName: String
-  ) extends SQLSyntaxProvider[A] {
+    support: S,
+    tableAliasName: String) extends SQLSyntaxProvider[A] {
 
     val nameConverters: Map[String, String] = support.nameConverters
     val forceUpperCase: Boolean = support.forceUpperCase
@@ -480,10 +473,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   case class QuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
     support: S,
-    tableAliasName: String
-  ) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
-      with ResultAllProvider
-      with AsteriskProvider {
+    tableAliasName: String) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
+    with ResultAllProvider
+    with AsteriskProvider {
 
     val result: ResultSQLSyntaxProvider[S, A] = {
       val table = if (support.forceUpperCase) tableAliasName.toUpperCase(en) else tableAliasName
@@ -501,8 +493,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -521,9 +512,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    * SQLSyntax provider for result parts.
    */
   case class ResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
-      support: S,
-      tableAliasName: String
-  ) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
+    support: S,
+    tableAliasName: String) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName) {
     import SQLSyntaxProvider._
 
     private[scalikejdbc] val nameProvider: BasicResultNameSQLSyntaxProvider[S, A] = BasicResultNameSQLSyntaxProvider[S, A](support, tableAliasName)
@@ -538,8 +528,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -552,17 +541,15 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   }
 
   case class PartialResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
-      support: S,
-      aliasName: String,
-      syntax: SQLSyntax
-  ) extends SQLSyntaxProviderCommonImpl[S, A](support, aliasName) {
+    support: S,
+    aliasName: String,
+    syntax: SQLSyntax) extends SQLSyntaxProviderCommonImpl[S, A](support, aliasName) {
     import SQLSyntaxProvider._
 
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -589,9 +576,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   case class BasicResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
     support: S,
-    tableAliasName: String
-  ) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
-      with ResultNameSQLSyntaxProvider[S, A] {
+    tableAliasName: String) extends SQLSyntaxProviderCommonImpl[S, A](support, tableAliasName)
+    with ResultNameSQLSyntaxProvider[S, A] {
 
     import SQLSyntaxProvider._
 
@@ -617,8 +603,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (support.connectionPoolName, support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -657,8 +642,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
         SubQuery.syntax(
           name,
           delimiterForResultName.orElse(syntaxProviders.headOption.map(_.resultName.delimiterForResultName)).getOrElse("_on_"),
-          syntaxProviders.map(_.resultName): _*
-        )
+          syntaxProviders.map(_.resultName): _*)
       }
     }
 
@@ -669,9 +653,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQuerySQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]
-  ) extends ResultAllProvider
-      with AsteriskProvider {
+    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) extends ResultAllProvider
+    with AsteriskProvider {
 
     val result: SubQueryResultSQLSyntaxProvider = SubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
     val resultName: SubQueryResultNameSQLSyntaxProvider = result.nameProvider
@@ -707,10 +690,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   }
 
   case class SubQueryResultSQLSyntaxProvider(
-      aliasName: String,
-      delimiterForResultName: String,
-      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]
-  ) {
+    aliasName: String,
+    delimiterForResultName: String,
+    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     private[scalikejdbc] val nameProvider: SubQueryResultNameSQLSyntaxProvider = SubQueryResultNameSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
 
@@ -734,10 +716,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   }
 
   case class SubQueryResultNameSQLSyntaxProvider(
-      aliasName: String,
-      delimiterForResultName: String,
-      resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]
-  ) {
+    aliasName: String,
+    delimiterForResultName: String,
+    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     lazy val * : SQLSyntax = SQLSyntax(resultNames.map { rn =>
       rn.namedColumns.map { c =>
@@ -778,9 +759,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class PartialSubQuerySQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
     aliasName: String,
     override val delimiterForResultName: String,
-    underlying: BasicResultNameSQLSyntaxProvider[S, A]
-  ) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
-      with AsteriskProvider {
+    underlying: BasicResultNameSQLSyntaxProvider[S, A]) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
+    with AsteriskProvider {
 
     val result: PartialSubQueryResultSQLSyntaxProvider[S, A] = {
       PartialSubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, underlying)
@@ -803,8 +783,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -815,10 +794,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   }
 
   case class PartialSubQueryResultSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
-      aliasName: String,
-      override val delimiterForResultName: String,
-      underlying: BasicResultNameSQLSyntaxProvider[S, A]
-  ) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
+    aliasName: String,
+    override val delimiterForResultName: String,
+    underlying: BasicResultNameSQLSyntaxProvider[S, A]) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName) {
 
     private[scalikejdbc] val nameProvider: PartialSubQueryResultNameSQLSyntaxProvider[S, A] = {
       PartialSubQueryResultNameSQLSyntaxProvider(aliasName, delimiterForResultName, underlying)
@@ -831,8 +809,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
-      ).put(this, cc)
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty).put(this, cc)
       cc
     }
 
@@ -849,9 +826,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class PartialSubQueryResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A](
     aliasName: String,
     override val delimiterForResultName: String,
-    underlying: BasicResultNameSQLSyntaxProvider[S, A]
-  ) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
-      with ResultNameSQLSyntaxProvider[S, A] {
+    underlying: BasicResultNameSQLSyntaxProvider[S, A]) extends SQLSyntaxProviderCommonImpl[S, A](underlying.support, aliasName)
+    with ResultNameSQLSyntaxProvider[S, A] {
     import SQLSyntaxProvider._
 
     lazy val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
@@ -864,8 +840,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
-      ).put(this.toString + "_cachedColumns", cc)
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty).put(this.toString + "_cachedColumns", cc)
       cc
     }
 
@@ -885,8 +860,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private[this] lazy val cachedNamedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
       SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns.getOrElseUpdate(
-        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty
-      ).put(this.toString + "_cachedNamedColumns", cc)
+        (underlying.support.connectionPoolName, underlying.support.tableNameWithSchema), TrieMap.empty).put(this.toString + "_cachedNamedColumns", cc)
       cc
     }
 

@@ -32,8 +32,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.interpolation,
-          packageName = "com.example.interpolation"
-        ))
+          packageName = "com.example.interpolation"))
         generator.modelAll()
         generator.writeModel()
       }
@@ -42,8 +41,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
-          packageName = "com.example.querydsl"
-        ))
+          packageName = "com.example.querydsl"))
         generator.modelAll()
         generator.writeModel()
       }
@@ -76,16 +74,14 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2unit"),
-          packageName = "com.example"
-        ))
+          packageName = "com.example"))
         generator1.specAll()
         generator1.writeModel()
         val generator2 = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
-          packageName = "com.example.placeholder"
-        ))
+          packageName = "com.example.placeholder"))
         generator2.specAll()
         generator2.writeModel()
 
@@ -93,8 +89,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.anorm"
-        ))
+          packageName = "com.example.anorm"))
         generator3.specAll()
         generator3.writeModel()
 
@@ -102,8 +97,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.schema"
-        ))
+          packageName = "com.example.schema"))
         generator4.specAll()
         generator4.writeModel()
 
@@ -111,8 +105,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.schema2"
-        ))
+          packageName = "com.example.schema2"))
         generator5.specAll()
         generator5.writeModel()
 
@@ -163,8 +156,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           //caseClassOnly = true,
-          packageName = "com.example"
-        ))
+          packageName = "com.example"))
         generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
@@ -188,8 +180,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
-          packageName = "com.example"
-        ))
+          packageName = "com.example"))
         generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
@@ -222,8 +213,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
           packageName = "com.example",
-          tableNamesToSkip = List("schema_version")
-        ))
+          tableNamesToSkip = List("schema_version")))
         generator.writeModelIfNonexistentAndUnskippable() should be(false)
     } getOrElse {
       fail("The table is not found.")
@@ -238,8 +228,7 @@ class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
-          packageName = "com.example.alltables"
-        ))
+          packageName = "com.example.alltables"))
         generator.writeModel()
     }
     Thread.sleep(500)
