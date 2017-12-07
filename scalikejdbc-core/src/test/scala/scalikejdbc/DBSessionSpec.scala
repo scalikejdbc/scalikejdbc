@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext
 import java.io.ByteArrayInputStream
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
-    with LoanPattern with UnixTimeInMillisConverterImplicits {
+  with LoanPattern with UnixTimeInMillisConverterImplicits {
 
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
@@ -256,8 +256,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
-        enabled = false
-      )
+        enabled = false)
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
@@ -367,8 +366,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           id should be <= 2L
 
           val ids: Seq[Long] = session.batchAndReturnGeneratedKey(
-            "insert into dbsessionspec_genkey (name) values (?)", Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*
-          )
+            "insert into dbsessionspec_genkey (name) values (?)", Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*)
           ids.size should equal(3)
           ids.last should be <= 5L
           // for Oracle DB
@@ -508,8 +506,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                  """).bind(
               date,
               time,
-              timestamp
-            ).update.apply()
+              timestamp).update.apply()
 
             SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
               rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
@@ -789,8 +786,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short, v_timestamp) values 
           (?,?,?,?,?,?,?,?)
                         """).bind(
-            None, None, None, None, None, None, None, None
-          ).updateAndReturnGeneratedKey.apply()
+            None, None, None, None, None, None, None, None).updateAndReturnGeneratedKey.apply()
 
           case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
             vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short],
@@ -833,8 +829,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = rs.intOpt("v_int"),
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
-                vTimestamp = rs.jodaDateTimeOpt("v_timestamp")
-              )
+                vTimestamp = rs.jodaDateTimeOpt("v_timestamp"))
           }.single.apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
@@ -847,8 +842,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = Option(rs.nullableInt("v_int").asInstanceOf[Int]),
                 vLong = Option(rs.nullableLong("v_long").asInstanceOf[Long]),
                 vShort = Option(rs.nullableShort("v_short").asInstanceOf[Short]),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
           }.single.apply())
 
           // should use nullable*** methods
@@ -862,8 +856,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = opt[Int](rs.int("v_int")),
                 vLong = opt[Long](rs.long("v_long")),
                 vShort = opt[Short](rs.short("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
           }.single.apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
@@ -876,8 +869,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = opt[Int](rs.nullableInt("v_int")),
                 vLong = opt[Long](rs.nullableLong("v_long")),
                 vShort = opt[Short](rs.nullableShort("v_short")),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
           }.single.apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
@@ -890,8 +882,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
                 vInt = rs.intOpt("v_int"),
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
-                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime)
-              )
+                vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
           }.single.apply())
 
         } finally {
@@ -919,8 +910,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             SQL("insert into image_data (name, data) values ({name}, {data});")
               .bindByName(
                 'name -> "logo",
-                'data -> stream
-              )
+                'data -> stream)
               .update.apply()
           } catch {
             case e: Exception =>
@@ -969,8 +959,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             SQL("insert into image_data2 (name, data) values ({name}, {data});")
               .bindByName(
                 'name -> "logo",
-                'data -> bos.toByteArray
-              )
+                'data -> bos.toByteArray)
               .update.apply()
           }
         }
@@ -1042,8 +1031,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           val in = new ByteArrayInputStream(bytes)
           val v = ParameterBinder(
             value = in,
-            binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length)
-          )
+            binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length))
           SQL("insert into dbsession_work_with_parameter_binder (data) values (?)").bind(v).update.apply()
         } finally {
           try {
@@ -1081,8 +1069,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       DB autoCommit { session =>
         implicit val jstSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo")))
-        )
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
 
         SQL("insert into zone_test values (?, ?)").bind(1, time).execute.apply()(jstSession)
         val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single.apply().get
@@ -1098,8 +1085,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       DB autoCommit { session =>
         implicit val utcSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC")))
-        )
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
 
         SQL("insert into zone_test values (?, ?)").bind(2, time).execute.apply()
         val utcString = SQL(s"select $castToString as s from zone_test where id = 2").map(_.string("s")).single.apply().get

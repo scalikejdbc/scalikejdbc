@@ -5,5 +5,4 @@ package scalikejdbc
  */
 case class ResultSetExtractorException(
   message: String,
-  e: Option[Exception] = None
-) extends IllegalArgumentException(message, e.orNull[Exception])
+  e: Option[Exception] = None) extends IllegalArgumentException(message, e.orNull[Exception])

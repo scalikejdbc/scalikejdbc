@@ -24,8 +24,7 @@ private[streams] class DatabasePublisherSettings[A](
   /**
    * DatabasePublisher has a buffer internally if true.
    */
-  private[streams] val bufferNext: Boolean = true
-)
+  private[streams] val bufferNext: Boolean = true)
 
 private[streams] object DatabasePublisherSettings {
 
@@ -38,8 +37,7 @@ private[streams] object DatabasePublisherSettings {
     new DatabasePublisherSettings(
       dbName,
       context,
-      settingsProvider
-    )
+      settingsProvider)
   }
 
 }

@@ -19,8 +19,7 @@ object JDBCUrl {
     JDBCUrl(
       host = host,
       port = port,
-      database = database
-    )
+      database = database)
   } catch {
     case e: Exception =>
       throw new IllegalArgumentException("Failed to parse JDBC URL (" + url + ")")

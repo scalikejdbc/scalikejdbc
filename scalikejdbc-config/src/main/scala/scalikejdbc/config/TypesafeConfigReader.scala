@@ -22,8 +22,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 
   private val attributeNames = Seq(
     "url", "driver", "user", "username", "password",
-    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName", "poolWarmUpTimeMillis", "timeZone"
-  )
+    "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName", "poolWarmUpTimeMillis", "timeZone")
 
   def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val configMap: MutableMap[String, String] = MutableMap.empty
@@ -94,8 +93,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
       connectionPoolFactoryName = configMap.getOrElse("poolFactoryName", default.connectionPoolFactoryName),
       driverName = configMap.get("driver").orNull[String],
       warmUpTime = configMap.get("poolWarmUpTimeMillis").map(_.toLong).getOrElse(default.warmUpTime),
-      timeZone = configMap.get("timeZone").orNull[String]
-    )
+      timeZone = configMap.get("timeZone").orNull[String])
   }
 
   def loadGlobalSettings(): Unit = {
@@ -114,8 +112,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
           logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
           warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
           warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
-          warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel)
-        )
+          warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel))
       } else {
         GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
       }

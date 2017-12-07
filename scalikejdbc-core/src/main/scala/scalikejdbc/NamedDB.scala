@@ -18,9 +18,8 @@ import java.sql.Connection
  * after being used. To re-use an instance, use the .setAutoClose(false) method.
  */
 case class NamedDB(
-    name: Any,
-    settingsProvider: SettingsProvider = SettingsProvider.default
-)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
+  name: Any,
+  settingsProvider: SettingsProvider = SettingsProvider.default)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
 
   private[this] def connectionPool(): ConnectionPool = Option(context match {
     case NoConnectionPoolContext => ConnectionPool(name)

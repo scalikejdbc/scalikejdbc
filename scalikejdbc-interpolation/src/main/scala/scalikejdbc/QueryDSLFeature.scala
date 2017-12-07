@@ -35,8 +35,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
         new SelectSQLBuilder[A](
           sql = sqls"from ${table}",
           lazyColumns = true,
-          resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil)
-        )
+          resultAllProviders = table.resultAllProvider.map(p => List(p)).getOrElse(Nil))
       }
       def all[A]: SelectSQLBuilder[A] = new SelectSQLBuilder[A](sql = SQLSyntax.empty, lazyColumns = true)
       def all[A](providers: ResultAllProvider*): SelectSQLBuilder[A] = {
@@ -139,7 +138,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   }
 
   // -----
-  // Query Interface SQLBuilder 
+  // Query Interface SQLBuilder
 
   /**
    * SQLBuilder
@@ -168,7 +167,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   }
 
   trait GroupBySQLBuilder[A] extends SQLBuilder[A]
-      with PagingSQLBuilder[A] {
+    with PagingSQLBuilder[A] {
     def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
     def having(condition: SQLSyntax): GroupBySQLBuilder[A] = GroupBySQLBuilder[A](sqls"${sql} ${sqls.having(condition)}")
 
@@ -181,11 +180,11 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   }
 
   trait PagingSQLBuilder[A] extends SQLBuilder[A]
-      with UnionQuerySQLBuilder[A]
-      with ExceptQuerySQLBuilder[A]
-      with IntersectQuerySQLBuilder[A]
-      with ForUpdateQuerySQLBuilder[A]
-      with SubQuerySQLBuilder[A] {
+    with UnionQuerySQLBuilder[A]
+    with ExceptQuerySQLBuilder[A]
+    with IntersectQuerySQLBuilder[A]
+    with ForUpdateQuerySQLBuilder[A]
+    with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
     def desc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} desc")
@@ -201,8 +200,8 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
   }
 
   trait ConditionSQLBuilder[A] extends SQLBuilder[A]
-      with PagingSQLBuilder[A]
-      with GroupBySQLBuilder[A] {
+    with PagingSQLBuilder[A]
+    with GroupBySQLBuilder[A] {
 
     def and: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sql.and)
 
@@ -356,7 +355,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
    * SQLBuilder for select queries.
    */
   case class SelectSQLBuilder[A](override val sql: SQLSyntax, lazyColumns: Boolean = false, resultAllProviders: List[ResultAllProvider] = Nil, ignoreOnClause: Boolean = false)
-      extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
+    extends SQLBuilder[A] with SubQuerySQLBuilder[A] {
 
     private def appendResultAllProvider(table: TableAsAliasSQLSyntax, providers: List[ResultAllProvider]) = {
       table.resultAllProvider.map(provider => provider :: resultAllProviders).getOrElse(resultAllProviders)
@@ -365,8 +364,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     // e.g. select.from(User as u)
     def from(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} from ${table}",
-      resultAllProviders = appendResultAllProvider(table, resultAllProviders)
-    )
+      resultAllProviders = appendResultAllProvider(table, resultAllProviders))
 
     // ---
     // join query
@@ -379,8 +377,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def innerJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} inner join ${table}",
       resultAllProviders = appendResultAllProvider(table, resultAllProviders),
-      ignoreOnClause = false
-    )
+      ignoreOnClause = false)
 
     // if table is none, this join part will be skipped
     def innerJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] = table.map(innerJoin) getOrElse copy(ignoreOnClause = true)
@@ -388,8 +385,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def leftJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} left join ${table}",
       resultAllProviders = appendResultAllProvider(table, resultAllProviders),
-      ignoreOnClause = false
-    )
+      ignoreOnClause = false)
 
     // if table is none, this join part will be skipped
     def leftJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
@@ -398,8 +394,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def rightJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} right join ${table}",
       resultAllProviders = appendResultAllProvider(table, resultAllProviders),
-      ignoreOnClause = false
-    )
+      ignoreOnClause = false)
 
     // if table is none, this join part will be skipped
     def rightJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
@@ -408,8 +403,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def crossJoin(table: TableAsAliasSQLSyntax): SelectSQLBuilder[A] = this.copy(
       sql = sqls"${sql} cross join ${table}",
       resultAllProviders = appendResultAllProvider(table, resultAllProviders),
-      ignoreOnClause = false
-    )
+      ignoreOnClause = false)
 
     // if table is none, this join part will be skipped
     def crossJoin(table: Option[TableAsAliasSQLSyntax]): SelectSQLBuilder[A] =
@@ -457,7 +451,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersectAll(anotherQuery.toSQLSyntax)
 
     // ---
-    // where 
+    // where
 
     def where: ConditionSQLBuilder[A] = ConditionSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.where}")
 
@@ -535,7 +529,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
    * SQLBuilder for update queries.
    */
   case class UpdateSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation]
-      with WhereSQLBuilder[UpdateOperation] {
+    with WhereSQLBuilder[UpdateOperation] {
 
     def set(sqlPart: SQLSyntax): UpdateSQLBuilder = this.copy(sql = sqls"${sql} set ${sqlPart}")
 
@@ -560,7 +554,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
    * SQLBuilder for delete queries.
    */
   case class DeleteSQLBuilder(override val sql: SQLSyntax) extends SQLBuilder[UpdateOperation]
-      with WhereSQLBuilder[UpdateOperation] {
+    with WhereSQLBuilder[UpdateOperation] {
 
     override def append(part: SQLSyntax): DeleteSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }

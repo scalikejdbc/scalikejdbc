@@ -239,7 +239,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
         firstEmp.isDefined should be(true)
 
-        // expects single result or nothing, when mutiple results are returned, Exception will be thrown. 
+        // expects single result or nothing, when mutiple results are returned, Exception will be thrown.
         val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
         single.isDefined should be(true)
 
@@ -265,8 +265,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
             "Typesafe",
             """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
              From multicore to cloud computing, it's purpose built for scale.""",
-            new DateTime
-          ).update.apply()
+            new DateTime).update.apply()
 
         // Anorm like template
         SQL("""
@@ -279,8 +278,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 2,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime
-        ).update.apply()
+          'createdAt -> new DateTime).update.apply()
 
         // executable template
         SQL("""
@@ -293,8 +291,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 3,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime
-        ).update.apply()
+          'createdAt -> new DateTime).update.apply()
 
       }
     } finally { TestUtils.deleteTable("emp") }
@@ -321,8 +318,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           enabled = true,
           warningEnabled = true,
           warningLogLevel = 'INFO,
-          warningThresholdMillis = 10L
-        )
+          warningThresholdMillis = 10L)
         // this query will spend more than 10 millis
         SQL("select  *  from logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
 

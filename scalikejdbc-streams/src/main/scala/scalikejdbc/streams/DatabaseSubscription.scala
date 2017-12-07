@@ -16,16 +16,15 @@ import scala.util.control.NonFatal
  * It is used to both signal desire for data and cancel demand (and allow resource cleanup).
  */
 private[streams] class DatabaseSubscription[A](
-    /**
-     * DatabasePublisher in the fashion of Reactive Streams.
-     */
-    private[streams] val publisher: DatabasePublisher[A],
+  /**
+   * DatabasePublisher in the fashion of Reactive Streams.
+   */
+  private[streams] val publisher: DatabasePublisher[A],
 
-    /**
-     * Subscriber in the fashion of Reactive Streams.
-     */
-    private[streams] val subscriber: Subscriber[_ >: A]
-) extends Subscription with LogSupport {
+  /**
+   * Subscriber in the fashion of Reactive Streams.
+   */
+  private[streams] val subscriber: Subscriber[_ >: A]) extends Subscription with LogSupport {
 
   // -----------------------------------------------
   // Internal state
@@ -442,8 +441,7 @@ private[streams] class DatabaseSubscription[A](
    */
   private[this] def emitElementsAndReturnRemainingIterator(
     realDemand: Long,
-    iterator: StreamResultSetIterator[A]
-  ): Option[StreamResultSetIterator[A]] = {
+    iterator: StreamResultSetIterator[A]): Option[StreamResultSetIterator[A]] = {
 
     val bufferNext = publisher.settings.bufferNext
     var count = 0L

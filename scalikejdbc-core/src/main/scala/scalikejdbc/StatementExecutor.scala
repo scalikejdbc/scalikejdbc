@@ -29,14 +29,13 @@ object StatementExecutor {
  * @param isBatch is batch flag
  */
 case class StatementExecutor(
-    underlying: PreparedStatement,
-    template: String,
-    connectionAttributes: DBConnectionAttributes,
-    singleParams: Seq[Any] = Nil,
-    tags: Seq[String] = Nil,
-    isBatch: Boolean = false,
-    settingsProvider: SettingsProvider = SettingsProvider.default
-) extends LogSupport with UnixTimeInMillisConverterImplicits with AutoCloseable {
+  underlying: PreparedStatement,
+  template: String,
+  connectionAttributes: DBConnectionAttributes,
+  singleParams: Seq[Any] = Nil,
+  tags: Seq[String] = Nil,
+  isBatch: Boolean = false,
+  settingsProvider: SettingsProvider = SettingsProvider.default) extends LogSupport with UnixTimeInMillisConverterImplicits with AutoCloseable {
 
   import StatementExecutor._
 

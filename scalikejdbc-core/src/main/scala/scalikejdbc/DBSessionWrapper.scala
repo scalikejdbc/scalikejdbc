@@ -9,9 +9,8 @@ import scala.language.higherKinds
  * A DBSession wrapper which is DBSessionAttributeSwitcher-wired.
  */
 private[scalikejdbc] final class DBSessionWrapper(
-    session: DBSession,
-    attributesSwitcher: DBSessionAttributesSwitcher
-) extends DBSession {
+  session: DBSession,
+  attributesSwitcher: DBSessionAttributesSwitcher) extends DBSession {
 
   override protected[scalikejdbc] val settings = session.settings
   override private[scalikejdbc] val conn = session.conn

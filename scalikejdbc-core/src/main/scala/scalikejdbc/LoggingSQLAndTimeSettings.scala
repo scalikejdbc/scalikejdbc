@@ -13,5 +13,4 @@ case class LoggingSQLAndTimeSettings(
   warningThresholdMillis: Long = 3000L,
   warningLogLevel: Symbol = 'warn,
   maxColumnSize: Option[Int] = Some(100),
-  maxBatchParamSize: Option[Int] = Some(20)
-)
+  maxBatchParamSize: Option[Int] = Some(20))

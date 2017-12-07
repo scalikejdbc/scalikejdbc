@@ -63,8 +63,7 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
             SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
               .bindByName(
                 'name -> "foo",
-                'id -> 1
-              ).executeUpdate().apply()
+                'id -> 1).executeUpdate().apply()
         }
         count should equal(1)
       }

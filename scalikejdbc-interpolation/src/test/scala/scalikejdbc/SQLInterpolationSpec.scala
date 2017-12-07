@@ -384,16 +384,14 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   object Issue extends SQLSyntaxSupport[Issue] {
     def apply(rs: WrappedResultSet, i: ResultName[Issue]): Issue = Issue(
       id = rs.int(i.id),
-      body = rs.string(i.body)
-    )
+      body = rs.string(i.body))
   }
 
   case class Tag(id: Int, name: String)
   object Tag extends SQLSyntaxSupport[Tag] {
     def apply(rs: WrappedResultSet, t: ResultName[Tag]): Tag = Tag(
       id = rs.int(t.id),
-      name = rs.string(t.name)
-    )
+      name = rs.string(t.name))
   }
 
   object IssueTag extends SQLSyntaxSupport[Nothing]
@@ -750,8 +748,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
               UserName(
                 id = rs.int(u.resultName.id),
                 first = rs.string(u.resultName.first),
-                full = rs.string(u.resultName.full)
-              )
+                full = rs.string(u.resultName.full))
           }.single.apply()
 
           user.isDefined should be(true)
@@ -769,8 +766,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   object XNames extends SQLSyntaxSupport[XNames] {
     override val columns = Seq("x1", "x2")
     def apply(xn: ResultName[XNames])(rs: WrappedResultSet) = new XNames(
-      x1 = rs.string(xn.x1), x2 = rs.string(xn.x2)
-    )
+      x1 = rs.string(xn.x1), x2 = rs.string(xn.x2))
   }
 
   it should "be available with names such as x1, x2" in {
@@ -802,8 +798,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   object Names extends SQLSyntaxSupport[Names] {
     override val columns = Seq("full_name", "first_name", "last_name")
     def apply(n: ResultName[Names])(rs: WrappedResultSet) = new Names(
-      fullName = rs.string(n.fullName), firstName = rs.string(n.firstName), lastName = rs.string(n.lastName)
-    )
+      fullName = rs.string(n.fullName), firstName = rs.string(n.firstName), lastName = rs.string(n.lastName))
   }
 
   it should "be available with duplicated shorten names" in {

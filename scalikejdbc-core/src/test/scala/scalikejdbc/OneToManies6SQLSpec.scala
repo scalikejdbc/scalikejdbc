@@ -69,8 +69,7 @@ class OneToManies6SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
             news: Seq[News] = Nil,
             members: Seq[Member] = Nil,
             sponsors: Seq[Sponsor] = Nil,
-            entity6: Seq[Entity6] = Nil
-          )
+            entity6: Seq[Entity6] = Nil)
 
           class Owner(val id: Int) extends EntityEquality {
             override val entityIdentity = id
@@ -105,8 +104,7 @@ class OneToManies6SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))),
-                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id")))
-              )
+                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))))
               .map { (g, os, es, ns, ms, ss, e6) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss, entity6 = e6)
@@ -157,8 +155,7 @@ class OneToManies6SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))),
-                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id")))
-              )
+                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))))
               .map { (g, os, es, ns, ms, ss, e6) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss, entity6 = e6)
@@ -210,8 +207,7 @@ class OneToManies6SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
                 rs => rs.intOpt("n_id").map(id => new News(id, rs.int("g_id"))),
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))),
-                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id")))
-              )
+                rs => rs.intOpt("e6_id").map(id => Entity6(id, rs.int("g_id"))))
               .map { (g, os, es, ns, ms, ss, e6) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss, entity6 = e6)

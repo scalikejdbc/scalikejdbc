@@ -141,8 +141,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by { e =>
       throw new IllegalStateException(
-        ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead."
-      )
+        ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead.")
     } apply currentTx
   }
 
@@ -201,8 +200,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       conn = conn,
       isReadOnly = true,
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings
-    )
+      settings = this.settingsProvider merge settings)
   }
 
   /**
@@ -269,8 +267,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       conn = conn,
       tx = Some(tx),
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings
-    )
+      settings = this.settingsProvider merge settings)
   }
 
   /**
@@ -337,8 +334,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
           conn = conn,
           tx = Option(tx),
           connectionAttributes = connectionAttributes,
-          settings = this.settingsProvider
-        )
+          settings = this.settingsProvider)
         val result: A = execution(session)
         boundary.finishTx(result, tx)
       }
@@ -496,8 +492,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
                 rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
               } catch { case e: ResultSetExtractorException => false },
               description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
-              defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null }
-            )
+              defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null })
           }.toList.distinct,
           foreignKeys = {
             try {
@@ -505,8 +500,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
                 ForeignKey(
                   name = rs.string("FKCOLUMN_NAME"),
                   foreignColumnName = rs.string("PKCOLUMN_NAME"),
-                  foreignTableName = rs.string("PKTABLE_NAME")
-                )
+                  foreignTableName = rs.string("PKTABLE_NAME"))
               }.toList.distinct
             } catch { case e: ResultSetExtractorException => Nil }
           },
@@ -538,8 +532,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
                           ascOrDesc = rs.stringOpt("ASC_OR_DESC"),
                           cardinality = rs.longOpt("CARDINALITY"),
                           pages = rs.longOpt("PAGES"),
-                          filterCondition = rs.stringOpt("FILTER_CONDITION")
-                        )
+                          filterCondition = rs.stringOpt("FILTER_CONDITION"))
                     }
                     map.updated(indexName, index)
                 }.map { case (k, v) => v }.toList.distinct
@@ -548,8 +541,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
                 log.error("Failed to fetch index information", e)
                 Nil
             }
-          }
-        )
+          })
     }
   }
 

@@ -58,8 +58,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       view: Boolean,
       tableNamesToSkip: Seq[String],
       baseTypes: Seq[String],
-      companionBaseTypes: Seq[String]
-    )
+      companionBaseTypes: Seq[String])
 
     @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
     lazy val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
@@ -102,13 +101,11 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] final val COMPANION_BASE_TYPES = GENERATOR + "companionBaseTypes"
 
   private[this] val jdbcKeys = Set(
-    JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA
-  )
+    JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA)
   private[this] val generatorKeys = Set(
     PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
     ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE,
-    VIEW, TABLE_NAMES_TO_SKIP, BASE_TYPES, COMPANION_BASE_TYPES
-  )
+    VIEW, TABLE_NAMES_TO_SKIP, BASE_TYPES, COMPANION_BASE_TYPES)
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
   private[this] def printWarningIfTypo(props: Properties): Unit = {
@@ -126,8 +123,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       url = getString(props, JDBC_URL).getOrElse(throw new IllegalStateException(s"Add $JDBC_URL to project/scalikejdbc-mapper-generator.properties")),
       username = getString(props, JDBC_USER_NAME).getOrElse(""),
       password = getString(props, JDBC_PASSWORD).getOrElse(""),
-      schema = getString(props, JDBC_SCHEMA).orNull[String]
-    )
+      schema = getString(props, JDBC_SCHEMA).orNull[String])
   }
 
   private[this] def loadGeneratorSettings(props: Properties): GeneratorSettings = {
@@ -152,8 +148,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       view = getString(props, VIEW).map(_.toBoolean).getOrElse(defaultConfig.view),
       tableNamesToSkip = getString(props, TABLE_NAMES_TO_SKIP).map(_.split(",").toList).getOrElse(defaultConfig.tableNamesToSkip),
       baseTypes = commaSeparated(props, BASE_TYPES),
-      companionBaseTypes = commaSeparated(props, COMPANION_BASE_TYPES)
-    )
+      companionBaseTypes = commaSeparated(props, COMPANION_BASE_TYPES))
   }
 
   private[this] def loadPropertiesFromFile(): Either[FileNotFoundException, Properties] = {
@@ -199,8 +194,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       view = generatorSettings.view,
       tableNamesToSkip = generatorSettings.tableNamesToSkip,
       tableNameToBaseTypes = _ => generatorSettings.baseTypes,
-      tableNameToCompanionBaseTypes = _ => generatorSettings.companionBaseTypes
-    )
+      tableNameToCompanionBaseTypes = _ => generatorSettings.companionBaseTypes)
 
   private def generator(tableName: String, className: Option[String], srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Option[CodeGenerator] = {
     val config = generatorConfig(srcDir, testDir, generatorSettings)
@@ -238,8 +232,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   import complete.DefaultParsers._
 
   private def genTaskParser(keyName: String): complete.Parser[GenTaskParameter] = (
-    Space ~> token(StringBasic, "tableName") ~ (Space ~> token(StringBasic, "(class-name)")).?
-  ).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
+    Space ~> token(StringBasic, "tableName") ~ (Space ~> token(StringBasic, "(class-name)")).?).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
   override val projectSettings: Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
     scalikejdbcCodeGeneratorSingle := {
@@ -291,8 +284,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       gen.foreach(g => g.specAll().foreach(spec => println(spec)))
     },
     scalikejdbcJDBCSettings := loadPropertiesFromFile().fold(throw _, loadJDBCSettings),
-    scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)
-  ))
+    scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)))
 
   @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
   val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings

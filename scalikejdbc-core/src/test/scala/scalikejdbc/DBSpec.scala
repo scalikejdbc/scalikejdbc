@@ -551,8 +551,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
       GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = true,
-        logLevel = 'info
-      )
+        logLevel = 'info)
       DB readOnly { implicit s =>
         val res1 = SQL("select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?")
           .bind(3)

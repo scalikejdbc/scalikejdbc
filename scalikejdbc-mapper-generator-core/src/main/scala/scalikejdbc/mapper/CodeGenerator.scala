@@ -8,7 +8,7 @@ import java.util.Locale.{ ENGLISH => en }
  * Active Record like template generator
  */
 class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig())
-    extends Generator with LoanPattern {
+  extends Generator with LoanPattern {
 
   import java.sql.{ Types => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
@@ -763,8 +763,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   private val timeImport: String = {
     val timeClasses = Set(
       TypeName.LocalDate,
-      TypeName.LocalTime
-    ) ++ DateTimeClass.all.map(_.simpleName)
+      TypeName.LocalTime) ++ DateTimeClass.all.map(_.simpleName)
 
     table.allColumns.map(_.rawTypeInScala).filter(timeClasses) match {
       case classes if classes.nonEmpty =>
@@ -902,8 +901,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    val batchInserted = %className%.batchInsert(entities)
           |    batchInserted.size should be >(0)
           |  }
-          |}""".stripMargin + eol
-      ))
+          |}""".stripMargin + eol))
     case GeneratorTestTemplate.specs2unit =>
       Some(replaceVariablesForTestPart(
         s"""package %package%
@@ -969,8 +967,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |  }
           |
-          |}""".stripMargin + eol
-      ))
+          |}""".stripMargin + eol))
     case GeneratorTestTemplate.specs2acceptance =>
       Some(replaceVariablesForTestPart(
         s"""package %package%
@@ -1048,8 +1045,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |    }
           |  }
           |
-          |}""".stripMargin + eol
-      ))
+          |}""".stripMargin + eol))
     case GeneratorTestTemplate(name) => None
   }
 
@@ -1063,8 +1059,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }.mkString(", "))
       .replace(
         "%syntaxObject%",
-        if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else ""
-      )
+        if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else "")
       .replace(
         "%whereExample%",
         if (isQueryDsl)
@@ -1074,8 +1069,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         else
           pkColumns.headOption.map { c =>
             "sqls\"" + c.name + " = ${" + c.defaultValueInScala + "}\""
-          }.getOrElse("")
-      )
+          }.getOrElse(""))
       .replace("%createFields%", table.allColumns.filter {
         c =>
           c.isNotNull && table.autoIncrementColumns.forall(_.name != c.name)

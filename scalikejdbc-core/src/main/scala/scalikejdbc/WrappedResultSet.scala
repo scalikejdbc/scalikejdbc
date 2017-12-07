@@ -19,8 +19,7 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
   def ensureCursor(): Unit = {
     if (cursor.position != index) {
       throw new IllegalStateException(
-        ErrorMessage.INVALID_CURSOR_POSITION + " (actual:" + cursor.position + ",expected:" + index + ")"
-      )
+        ErrorMessage.INVALID_CURSOR_POSITION + " (actual:" + cursor.position + ",expected:" + index + ")")
     }
   }
 
@@ -32,8 +31,7 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
       op
     } catch {
       case e: Exception => throw new ResultSetExtractorException(
-        "Failed to retrieve value because " + e.getMessage + ". If you're using SQLInterpolation, you may mistake u.id for u.resultName.id.", Some(e)
-      )
+        "Failed to retrieve value because " + e.getMessage + ". If you're using SQLInterpolation, you may mistake u.id for u.resultName.id.", Some(e))
     }
   }
 

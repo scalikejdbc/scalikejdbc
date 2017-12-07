@@ -28,8 +28,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         implicit session =>
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
             enabled = true,
-            logLevel = 'info
-          )
+            logLevel = 'info)
           val result = SQL("select * from " + tableName + " where name = 'name1' and id = /*'id*/123;")
             .bindByName('id -> 1)
             .map(rs => Some(rs.string("name"))).toList.apply()
@@ -454,8 +453,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
               i =>
                 Seq[(Symbol, Any)](
                   'id -> i,
-                  'name -> ("name" + i.toString)
-                )
+                  'name -> ("name" + i.toString))
             }
             SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params: _*).apply()
         }
@@ -544,8 +542,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
   it should "solve issue #30" in {
     GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
       enabled = true,
-      logLevel = 'info
-    )
+      logLevel = 'info)
     try {
       DB autoCommit { implicit session =>
         try {
@@ -558,11 +555,9 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
           data2 varchar(255) not null
         );""").execute.apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
-          (101 to 121) map { i => Seq(i, "a", "b") }: _*
-        ).apply()
+          (101 to 121) map { i => Seq(i, "a", "b") }: _*).apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
-          (201 to 205) map { i => Seq(i, "a", "b") }: _*
-        ).apply()
+          (201 to 205) map { i => Seq(i, "a", "b") }: _*).apply()
       }
     } finally {
       try {

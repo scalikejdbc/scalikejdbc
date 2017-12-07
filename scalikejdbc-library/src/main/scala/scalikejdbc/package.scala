@@ -48,9 +48,9 @@
  * }}}
  */
 package object scalikejdbc
-    extends SQLInterpolation
-    with ScalaBigDecimalConverterImplicits
-    with UnixTimeInMillisConverterImplicits {
+  extends SQLInterpolation
+  with ScalaBigDecimalConverterImplicits
+  with UnixTimeInMillisConverterImplicits {
 
   // -----
   // Loan Pattern everywhere

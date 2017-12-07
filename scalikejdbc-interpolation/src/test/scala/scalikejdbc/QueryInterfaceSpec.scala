@@ -70,8 +70,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           withSQL { insert.into(SchemaExample).values(1) }.update.apply()
           val se = SchemaExample.syntax("se")
           select(sqls.count).from(SchemaExample as se).toSQL.statement should equal(
-            "select count(1) from public.qi_schema_example se"
-          )
+            "select count(1) from public.qi_schema_example se")
 
           val count = withSQL { select(sqls.count).from(SchemaExample as se) }.map(_.long(1)).single.apply().get
           count should equal(1L)
@@ -133,8 +132,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           insert.into(Order).values(23, 2, Some(2), DateTime.now),
           insert.into(Order).values(24, 2, Some(1), DateTime.now),
           insert.into(Order).values(25, 2, Some(3), DateTime.now),
-          insert.into(Order).values(26, 2, None, DateTime.now)
-        ).foreach(sql => applyUpdate(sql))
+          insert.into(Order).values(26, 2, None, DateTime.now)).foreach(sql => applyUpdate(sql))
 
         {
           val p = Product.syntax("p")
@@ -144,7 +142,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           assert(products === List(Product(1, Some("Cookie"), Price(120)), Product(2, Some("Tea"), Price(80))))
         }
 
-        // batch insert 
+        // batch insert
         val batchInsertQuery = withSQL {
           insert into Product columns (pc.id, pc.name, pc.price) values (sqls.?, sqls.?, sqls.?)
         }
@@ -217,8 +215,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
             .innerJoin(Product as p).on(o.productId, p.id)
             .innerJoin(accountName.map(_ => Account as a)).on(o.accountId, a.id)
             .where(sqls.toAndConditionOpt(
-              accountName.map(sqls.eq(a.name, _))
-            ))
+              accountName.map(sqls.eq(a.name, _))))
         }.map { rs => Order(o, p)(rs)
         }.list.apply()
 
@@ -231,8 +228,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
             select(o.result.id).from(Order as o)
               .where(sqls.toAndConditionOpt(
                 productId.map(id => sqls.eq(o.productId, id)),
-                accountId.map(id => sqls.eq(o.accountId, id))
-              ))
+                accountId.map(id => sqls.eq(o.accountId, id))))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
@@ -243,8 +239,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
             select(o.result.id).from(Order as o)
               .where(sqls.toAndConditionOpt(
                 productId.map(id => sqls.eq(o.productId, id)),
-                accountId.map(id => sqls.eq(o.accountId, id))
-              ))
+                accountId.map(id => sqls.eq(o.accountId, id))))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(12))
@@ -258,8 +253,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .isNotNull(o.accountId)
               .and(sqls.toOrConditionOpt(
                 id1.map(id => sqls.eq(o.productId, id)),
-                id2.map(id => sqls.eq(o.productId, id))
-              ))
+                id2.map(id => sqls.eq(o.productId, id))))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
@@ -272,8 +266,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .isNotNull(o.accountId)
               .and(sqls.toOrConditionOpt(
                 id1.map(id => sqls.eq(o.productId, id)),
-                id2.map(id => sqls.eq(o.productId, id))
-              ))
+                id2.map(id => sqls.eq(o.productId, id))))
               .orderBy(o.id)
           }.map(_.int(1)).list.apply()
           ids should equal(Seq(11, 12, 13, 14, 15, 21, 22, 23, 24, 25))
@@ -319,8 +312,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           select(o.result.id)
             .from(Order as o)
             .where.roundBracket(
-              sqls.eq(o.productId, 1).and.isNotNull(o.accountId)
-            ).or.isNull(o.accountId)
+              sqls.eq(o.productId, 1).and.isNotNull(o.accountId)).or.isNull(o.accountId)
             .orderBy(o.id)
         }.map(_.int(o.resultName.id)).list.apply()
 
@@ -334,8 +326,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .where
               .withRoundBracket(sql => sqls.toAndConditionOpt(
                 productId.map(i => sqls.eq(o.productId, i)),
-                Some(sqls.isNotNull(o.accountId))
-              ).map(s => sql.append(s)).getOrElse(sql))
+                Some(sqls.isNotNull(o.accountId))).map(s => sql.append(s)).getOrElse(sql))
               .or.isNull(o.accountId)
               .orderBy(o.id).append(sqls"desc")
           }.map(_.int(o.resultName.id)).list.apply()
@@ -350,8 +341,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .from(Order as o)
               .where(sqls.toOrConditionOpt(
                 productId.map(i => sqls.eq(o.productId, i)),
-                Some(sqls.isNull(o.accountId))
-              )).orderBy(o.id)
+                Some(sqls.isNull(o.accountId)))).orderBy(o.id)
           }.map(_.int(o.resultName.id)).list.apply()
 
           withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
@@ -525,7 +515,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         productCount should equal(2)
 
         // enabled wildcard count but it doesn't work with all the RDBMS
-        // HSQLDB: sytax error, H2: always treated as *, MySQL: syntax error 
+        // HSQLDB: sytax error, H2: always treated as *, MySQL: syntax error
         val wildCardCountSyntax = select(o.productId, count(p), count(a))
 
         val wildcardCounts = withSQL {
@@ -592,7 +582,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         }
 
         // intersect
-        // MySQL doesn't support intersect 
+        // MySQL doesn't support intersect
         if (!isMySQL) {
           val intersectResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
@@ -601,7 +591,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
           intersectResults should equal(List(1, 2))
         }
 
-        // intersect all  
+        // intersect all
         // H2 and MySQL don't support intersect all
         if (!isH2 && !isMySQL) {
           val intersectAllResults = withSQL {
@@ -648,7 +638,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
         newName should equal(Some("Bob Marley"))
 
         // TODO compilation error since 2.10.1
-        // applyUpdate { delete.from(Order).where.isNull(Order.column.accountId) } 
+        // applyUpdate { delete.from(Order).where.isNull(Order.column.accountId) }
         withSQL { delete.from(Order).where.isNull(Order.column.accountId) }.update.apply()
 
         val noAccountIdOrderCount = withSQL {
@@ -769,8 +759,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
       DB autoCommit { session =>
         implicit val jstSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo")))
-        )
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
 
         applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 1, TimeHolder.column.time -> time))
         val jstString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 1").map(_.string("s")).single.apply().get
@@ -784,8 +773,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
       DB autoCommit { session =>
         implicit val utcSession = DBSession(
           conn = session.conn,
-          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC")))
-        )
+          connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
 
         applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 2, TimeHolder.column.time -> time))
         val utcString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 2").map(_.string("s")).single.apply().get

@@ -10,9 +10,8 @@ import java.util.Calendar
  * PreparedStatement proxy which holds current DBConnectionAttributes.
  */
 private[scalikejdbc] class DBConnectionAttributesWiredPreparedStatement(
-    underlying: PreparedStatement,
-    connAttributes: DBConnectionAttributes
-) extends PreparedStatement {
+  underlying: PreparedStatement,
+  connAttributes: DBConnectionAttributes) extends PreparedStatement {
 
   /**
    * Converts Timestamp value to an appropriate timezone.

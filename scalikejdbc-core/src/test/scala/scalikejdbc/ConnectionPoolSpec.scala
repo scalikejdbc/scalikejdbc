@@ -98,9 +98,8 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
       url: String,
       user: String,
       password: String,
-      settings: ConnectionPoolSettings = ConnectionPoolSettings()
-    )
-        extends ConnectionPool(url, user, password, settings) {
+      settings: ConnectionPoolSettings = ConnectionPoolSettings())
+      extends ConnectionPool(url, user, password, settings) {
       def borrow(): Connection = null
       def dataSource: DataSource = null
     }
@@ -121,8 +120,7 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
   it should "throw exception if invalid connectionPoolFactoryName is given" in {
     intercept[IllegalArgumentException](
       ConnectionPool.add('xxxx, url, user, password,
-        ConnectionPoolSettings(connectionPoolFactoryName = "invalid"))
-    )
+        ConnectionPoolSettings(connectionPoolFactoryName = "invalid")))
   }
 
 }

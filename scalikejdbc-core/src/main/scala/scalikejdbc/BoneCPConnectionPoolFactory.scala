@@ -11,8 +11,7 @@ object BoneCPConnectionPoolFactory extends ConnectionPoolFactory {
     url: String,
     user: String,
     password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()
-  ) = {
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()) = {
     new BoneCPConnectionPool(url, user, password, settings)
   }
 

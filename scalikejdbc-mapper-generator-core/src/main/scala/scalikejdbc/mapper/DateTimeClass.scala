@@ -7,8 +7,7 @@ object DateTimeClass {
   case object LocalDateTime extends DateTimeClass("java.time.LocalDateTime")
 
   private[scalikejdbc] val all = Set(
-    JodaDateTime, ZonedDateTime, OffsetDateTime, LocalDateTime
-  )
+    JodaDateTime, ZonedDateTime, OffsetDateTime, LocalDateTime)
 
   private[scalikejdbc] val map: Map[String, DateTimeClass] =
     all.map(clazz => clazz.name -> clazz).toMap

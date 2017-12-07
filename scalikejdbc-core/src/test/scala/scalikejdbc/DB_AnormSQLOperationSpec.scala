@@ -64,8 +64,7 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
             SQL("update " + tableName + " set name = {name} where id = {id}")
               .bindByName(
                 'name -> "foo",
-                'id -> 1
-              ).executeUpdate().apply()
+                'id -> 1).executeUpdate().apply()
         }
         count should equal(1)
       }

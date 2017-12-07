@@ -5,5 +5,4 @@ package scalikejdbc
  */
 case class DBConnectionAttributes(
   driverName: Option[String] = None,
-  timeZoneSettings: TimeZoneSettings = TimeZoneSettings()
-)
+  timeZoneSettings: TimeZoneSettings = TimeZoneSettings())

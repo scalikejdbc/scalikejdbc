@@ -13,10 +13,10 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
 
 class DatabasePublisherSpec
-    extends AsyncFlatSpec
-    with BeforeAndAfterAll
-    with Matchers
-    with TestDBSettings {
+  extends AsyncFlatSpec
+  with BeforeAndAfterAll
+  with Matchers
+  with TestDBSettings {
 
   private lazy val log = LoggerFactory.getLogger(classOf[DatabasePublisherSpec])
 
