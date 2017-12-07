@@ -706,7 +706,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
       resultNames.find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name))).map { rn =>
-        SQLSyntax(s"${aliasName}.${rn.column(name)} as ${rn.column(name)}${delimiterForResultName}${aliasName}")
+        SQLSyntax(s"${aliasName}.${rn.namedColumn(name).value} as ${rn.namedColumn(name).value}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         val registeredNames = resultNames.map { rn => rn.namedColumns.map(_.value).mkString(",") }.mkString(",")
         throw new InvalidColumnNameException(ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name}, registered names: ${registeredNames})")
@@ -831,8 +831,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     import SQLSyntaxProvider._
 
     lazy val * : SQLSyntax = SQLSyntax(underlying.namedColumns.map { c =>
-      val name = toAliasName(c.value, underlying.support)
-      s"${name}${delimiterForResultName}${aliasName}"
+      s"${c.value}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
     override lazy val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
