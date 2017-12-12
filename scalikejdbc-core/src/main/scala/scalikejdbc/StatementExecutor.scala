@@ -18,6 +18,7 @@ object StatementExecutor {
     override def apply[A](execute: () => A): A = execute()
   }
 
+  private val LocalDateEpoch = java.time.LocalDate.ofEpochDay(0)
 }
 
 /**
@@ -101,17 +102,18 @@ case class StatementExecutor(
       case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
       case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
       case p: java.time.ZonedDateTime =>
-        underlying.setTimestamp(i, java.util.Date.from(p.toInstant).toSqlTimestamp)
+        underlying.setTimestamp(i, java.sql.Timestamp.from(p.toInstant))
       case p: java.time.OffsetDateTime =>
-        underlying.setTimestamp(i, java.util.Date.from(p.toInstant).toSqlTimestamp)
+        underlying.setTimestamp(i, java.sql.Timestamp.from(p.toInstant))
       case p: java.time.Instant =>
-        underlying.setTimestamp(i, new java.util.Date(p.toEpochMilli).toSqlTimestamp)
+        underlying.setTimestamp(i, java.sql.Timestamp.from(p))
       case p: java.time.LocalDateTime =>
-        underlying.setTimestamp(i, org.joda.time.LocalDateTime.parse(p.toString).toDate.toSqlTimestamp)
+        underlying.setTimestamp(i, java.sql.Timestamp.valueOf(p))
       case p: java.time.LocalDate =>
-        underlying.setDate(i, org.joda.time.LocalDate.parse(p.toString).toDate.toSqlDate)
+        underlying.setDate(i, java.sql.Date.valueOf(p))
       case p: java.time.LocalTime =>
-        underlying.setTime(i, org.joda.time.LocalTime.parse(p.toString).toSqlTime)
+        val t = new java.sql.Time(p.atDate(StatementExecutor.LocalDateEpoch).toInstant(java.time.OffsetDateTime.now().getOffset()).toEpochMilli())
+        underlying.setTime(i, t)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
       case p => {
         log.debug("The parameter(" + p + ") is bound as an Object.")
