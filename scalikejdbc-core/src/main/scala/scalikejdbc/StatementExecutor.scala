@@ -112,8 +112,10 @@ case class StatementExecutor(
       case p: java.time.LocalDate =>
         underlying.setDate(i, java.sql.Date.valueOf(p))
       case p: java.time.LocalTime =>
-        val t = new java.sql.Time(p.atDate(StatementExecutor.LocalDateEpoch).toInstant(java.time.OffsetDateTime.now().getOffset()).toEpochMilli())
-        underlying.setTime(i, t)
+        val offset = java.time.OffsetDateTime.now.getOffset
+        val millis = p.atDate(StatementExecutor.LocalDateEpoch).toInstant(offset).toEpochMilli
+        val time = new java.sql.Time(millis)
+        underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
       case p => {
         log.debug("The parameter(" + p + ") is bound as an Object.")
