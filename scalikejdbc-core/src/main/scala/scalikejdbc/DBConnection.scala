@@ -6,7 +6,6 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
-import java.sql.Connection._
 
 /**
  * Basic Database Accessor which holds a JDBC connection.
