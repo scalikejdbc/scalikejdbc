@@ -84,11 +84,6 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val javaTimeLocalDateParameterBinderFactory: ParameterBinderFactory[java.time.LocalDate] = Binders.javaTimeLocalDate
   implicit val javaTimeLocalTimeParameterBinderFactory: ParameterBinderFactory[java.time.LocalTime] = Binders.javaTimeLocalTime
 
-  implicit val jodaDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.DateTime] = Binders.jodaDateTime
-  implicit val jodaLocalDateTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDateTime] = Binders.jodaLocalDateTime
-  implicit val jodaLocalDateParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalDate] = Binders.jodaLocalDate
-  implicit val jodaLocalTimeParameterBinderFactory: ParameterBinderFactory[org.joda.time.LocalTime] = Binders.jodaLocalTime
-
   implicit val inputStreamParameterBinderFactory: ParameterBinderFactory[InputStream] = Binders.binaryStream
   implicit val blobParameterBinderFactory: ParameterBinderFactory[java.sql.Blob] = Binders.blob
   implicit val clobParameterBinderFactory: ParameterBinderFactory[java.sql.Clob] = Binders.clob

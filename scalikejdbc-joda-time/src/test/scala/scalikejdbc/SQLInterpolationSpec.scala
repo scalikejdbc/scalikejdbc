@@ -2,11 +2,9 @@ package scalikejdbc
 
 import org.scalatest._
 import org.joda.time._
+import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 
 class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with UnixTimeInMillisConverterImplicits {
-
-  import scalikejdbc.interpolation._
-  import scalikejdbc.interpolation.Implicits._
 
   behavior of "SQLInterpolation"
 
@@ -115,7 +113,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
   }
 
   it should "support some syntax" in {
-    import SQLSyntax._
+    import scalikejdbc.interpolation.SQLSyntax._
     try {
       DB autoCommit { implicit s =>
         sql"create table sqlsyntax_spec (id int not null, name varchar(256))".execute.apply()

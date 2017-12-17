@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.joda.time._
+import java.time._
 import org.slf4j._
 
 import scala.collection.concurrent.TrieMap
@@ -541,7 +541,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     override val tableName = "orders"
     override val columns = Seq("id", "customer_id", "product_id", "ordered_at")
   }
-  case class Order(customerId: Int, productId: Int, orderedAt: DateTime)
+  case class Order(customerId: Int, productId: Int, orderedAt: LocalDateTime)
 
   it should "be available for sub-queries with SQLSyntaxSupport" in {
     try {

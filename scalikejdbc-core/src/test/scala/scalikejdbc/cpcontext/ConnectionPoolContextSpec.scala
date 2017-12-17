@@ -2,7 +2,7 @@ package scalikejdbc.cpcontext
 
 import org.scalatest._
 import scalikejdbc._
-import org.joda.time._
+import java.time._
 
 class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
 
@@ -169,7 +169,7 @@ trait InMemoryDB {
       .execute.apply()
     (1 to 1000) foreach { i =>
       SQL("insert into users values (?,?,?)")
-        .bind(i, "user%05d".format(i), DateTime.now).update.apply()
+        .bind(i, "user%05d".format(i), LocalDateTime.now).update.apply()
     }
   }
 }

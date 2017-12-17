@@ -6,6 +6,7 @@ rm -rf */target
 sbt 'set scalaVersion := "2.11.12"' \
   clean \
   "project core" 'set scalaVersion := "2.11.12"' publishSigned \
+  "project joda-time" 'set scalaVersion := "2.11.12"' publishSigned \
   "project config" 'set scalaVersion := "2.11.12"' publishSigned \
   "project interpolation-macro" 'set scalaVersion := "2.11.12"' publishSigned \
   "project interpolation" 'set scalaVersion := "2.11.12"' publishSigned \

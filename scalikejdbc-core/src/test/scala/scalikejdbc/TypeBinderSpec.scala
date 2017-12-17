@@ -4,7 +4,7 @@ import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
 import java.sql.ResultSet
-import org.joda.time._
+import java.time._
 
 class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixTimeInMillisConverterImplicits {
 
@@ -45,11 +45,11 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
 
   it should "have TypeBinder for java.util.Date/Calendar" in {
     val rs: ResultSet = mock[ResultSet]
-    when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(DateTime.now.getMillis))
-    when(rs.getDate("date")).thenReturn(new java.sql.Date(DateTime.now.getMillis))
+    when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(System.currentTimeMillis))
+    when(rs.getDate("date")).thenReturn(new java.sql.Date(System.currentTimeMillis))
 
     implicitly[TypeBinder[java.sql.Timestamp]].apply(rs, "time") should not be (null)
-    implicitly[TypeBinder[DateTime]].apply(rs, "time") should not be (null)
+    implicitly[TypeBinder[LocalDateTime]].apply(rs, "time") should not be (null)
     implicitly[TypeBinder[LocalDate]].apply(rs, "date") should not be (null)
 
     //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
@@ -158,7 +158,7 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[Option[java.sql.Time]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.sql.Time]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.sql.Timestamp]]].apply(rs, 1) should be(None)
-    implicitly[TypeBinder[Option[DateTime]]].apply(rs, 1) should be(None)
+    implicitly[TypeBinder[Option[LocalDateTime]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.net.URL]]].apply(rs, 1) should be(None)
   }
 

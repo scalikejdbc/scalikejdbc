@@ -13,6 +13,7 @@ sbt \
   ++2.10.6 \
   clean \
   core/test \
+  joda-time/test \
   interpolation/test \
   syntax-support-macro/test \
   config/test \

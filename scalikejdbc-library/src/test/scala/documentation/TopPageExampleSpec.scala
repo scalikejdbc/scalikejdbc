@@ -1,6 +1,7 @@
 package documentation
 
 import org.scalatest.{ Matchers, FlatSpec }
+import java.time.LocalDateTime
 
 class TopPageExampleSpec extends FlatSpec with Matchers {
 
@@ -10,8 +11,7 @@ class TopPageExampleSpec extends FlatSpec with Matchers {
   import scalikejdbc._
 
   // defines entity object and extractor
-  import org.joda.time._
-  case class Member(id: Long, name: Option[String], createdAt: DateTime)
+  case class Member(id: Long, name: Option[String], createdAt: LocalDateTime)
   object Member extends SQLSyntaxSupport[Member] {
     override val tableName = "members"
     def apply(rs: WrappedResultSet) = new Member(rs.get("id"), rs.get("name"), rs.get("created_at"))

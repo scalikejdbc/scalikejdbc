@@ -768,7 +768,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     table.allColumns.map(_.rawTypeInScala).filter(timeClasses) match {
       case classes if classes.nonEmpty =>
         if (config.dateTimeClass == DateTimeClass.JodaDateTime) {
-          "import org.joda.time.{" + classes.distinct.mkString(", ") + "}" + eol
+          "import org.joda.time.{" + classes.distinct.mkString(", ") + "}" + eol +
+            "import scalikejdbc.jodatime.JodaParameterBinderFactory._" + eol +
+            "import scalikejdbc.jodatime.JodaTypeBinder._" + eol
         } else {
           "import java.time.{" + classes.distinct.mkString(", ") + "}" + eol
         }

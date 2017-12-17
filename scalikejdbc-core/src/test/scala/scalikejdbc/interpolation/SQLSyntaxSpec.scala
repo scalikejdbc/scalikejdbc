@@ -2,7 +2,7 @@ package scalikejdbc
 package interpolation
 
 import org.scalatest._
-import org.joda.time.DateTime
+import java.time.LocalDateTime
 
 class SQLSyntaxSpec extends FlatSpec with Matchers {
 
@@ -164,14 +164,14 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq())
   }
   it should "have #in for 5 columns" in {
-    val time = DateTime.now
+    val time = LocalDateTime.now
     val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
     s.value should equal(" (id, name, age, foo, created_at) in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
   }
   it should "have #in for 5 columns with empty" in {
-    val time = DateTime.now
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, DateTime)]())
+    val time = LocalDateTime.now
+    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, LocalDateTime)]())
     s.value should equal(" FALSE")
     s.parameters should equal(Seq())
   }
@@ -218,14 +218,14 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq())
   }
   it should "have #notIn for 5 columns" in {
-    val time = DateTime.now
+    val time = LocalDateTime.now
     val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
     s.value should equal(" (id, name, age, foo, created_at) not in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
   }
   it should "have #notIn for 5 columns with empty" in {
-    val time = DateTime.now
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, DateTime)]())
+    val time = LocalDateTime.now
+    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, LocalDateTime)]())
     s.value should equal(" TRUE")
     s.parameters should equal(Seq())
   }
