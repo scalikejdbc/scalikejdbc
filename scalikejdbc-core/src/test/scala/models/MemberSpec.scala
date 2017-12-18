@@ -1,8 +1,7 @@
 package models
 
 import scalikejdbc._
-import org.joda.time._
-
+import java.time._
 import org.scalatest._
 
 class MemberSpec extends FlatSpec with Matchers with Settings {
@@ -37,8 +36,8 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
       id = 1,
       name = "Alice",
       description = Option("Alice's Adventures in Wonderland"),
-      birthday = Option(new LocalDate(1980, 1, 2)),
-      createdAt = new DateTime)
+      birthday = Option(LocalDate.of(1980, 1, 2)),
+      createdAt = LocalDateTime.now)
     Member.find(alice.id).get.id should equal(alice.id)
     intercept[IllegalStateException] {
       Member.findBy("name like /*:nameMatch*/'Bob%'", 'nameMatch -> "Alice%").size should be > 0
@@ -54,8 +53,8 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
           id = 999,
           name = "Rollback",
           description = Option("rollback test"),
-          birthday = Option(new LocalDate(1980, 1, 2)),
-          createdAt = new DateTime)
+          birthday = Option(LocalDate.of(1980, 1, 2)),
+          createdAt = LocalDateTime.now)
         Member.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
@@ -98,8 +97,8 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
       id = 1,
       name = "Alice",
       description = Option("Alice's Adventures in Wonderland"),
-      birthday = Option(new LocalDate(1980, 1, 2)),
-      createdAt = new DateTime)
+      birthday = Option(LocalDate.of(1980, 1, 2)),
+      createdAt = LocalDateTime.now)
     NamedMember.find(alice.id).get.id should equal(alice.id)
     intercept[IllegalStateException] {
       NamedMember.findBy("name like /*:nameMatch*/'Bob%'", 'nameMatch -> "Alice%").size should be > 0
@@ -115,8 +114,8 @@ class MemberSpec extends FlatSpec with Matchers with Settings {
           id = 999,
           name = "Rollback",
           description = Option("rollback test"),
-          birthday = Option(new LocalDate(1980, 1, 2)),
-          createdAt = new DateTime)
+          birthday = Option(LocalDate.of(1980, 1, 2)),
+          createdAt = LocalDateTime.now)
         NamedMember.findBy("name = /*'name*/''", 'name -> "Rollback").size should equal(1)
         throw new RuntimeException
       }

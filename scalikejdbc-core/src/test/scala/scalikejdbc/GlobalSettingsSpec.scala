@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.joda.time.DateTime
+import java.time._
 
 class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSupport {
 
@@ -46,9 +46,9 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           warningEnabled = true,
           warningLogLevel = 'INFO,
           warningThresholdMillis = 0L)
-        SQL("insert into issue22 values (?,?)").bind(1, DateTime.now).update.apply()
+        SQL("insert into issue22 values (?,?)").bind(1, LocalDateTime.now).update.apply()
         SQL("insert into issue22 values (?,?)").bind(2, new java.util.Date).update.apply()
-        SQL("insert into issue22 values (?,?)").bind(11, Option(DateTime.now)).update.apply()
+        SQL("insert into issue22 values (?,?)").bind(11, Option(LocalDateTime.now)).update.apply()
         SQL("insert into issue22 values (?,?)").bind(12, Option(new java.util.Date)).update.apply()
       } finally {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
@@ -71,7 +71,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           SQL("drop table issue118").execute.apply()
         } catch { case e: Exception => }
         SQL("create table issue118 (id int primary key, created_at timestamp)").execute.apply()
-        SQL("insert into issue118 values (?,?)").bind(1, DateTime.now).update.apply()
+        SQL("insert into issue118 values (?,?)").bind(1, LocalDateTime.now).update.apply()
       } finally {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
         try {
@@ -104,7 +104,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
           SQL("drop table query_completion_listener").execute.apply()
         } catch { case e: Exception => }
         SQL("create table query_completion_listener (id int primary key, created_at timestamp)").execute.apply()
-        SQL("insert into query_completion_listener values (?,?)").bind(1, DateTime.now).update.apply()
+        SQL("insert into query_completion_listener values (?,?)").bind(1, LocalDateTime.now).update.apply()
 
         var result: String = ""
         GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => {
@@ -156,7 +156,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
           SQL("insert into tagged_query_completion_listener values (?,?)")
-            .tags("1", "2", "3").bind(1, DateTime.now).update.apply()
+            .tags("1", "2", "3").bind(1, LocalDateTime.now).update.apply()
           result should equal(3)
         }
 
