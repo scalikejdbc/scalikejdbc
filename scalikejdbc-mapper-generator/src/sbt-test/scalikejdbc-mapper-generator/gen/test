@@ -80,7 +80,7 @@ $ newer src/main/scala/app/models/Programmers.scala src/main/scala/app/models/Pr
 
 $ delete src/test/scala/ProgrammersTest.scala
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.ZonedDateTime)}
+> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.JodaDateTime)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile
