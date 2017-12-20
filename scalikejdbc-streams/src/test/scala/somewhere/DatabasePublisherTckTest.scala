@@ -1,9 +1,10 @@
 package somewhere
 
+import org.reactivestreams.Publisher
 import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
-import org.reactivestreams.{ Publisher, Subscriber }
 import org.scalatest.testng.TestNGSuiteLike
+import org.testng.SkipException
 import org.testng.annotations.{ AfterClass, BeforeClass }
 import scalikejdbc._
 import scalikejdbc.streams._
@@ -34,16 +35,10 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   }
 
   override def createPublisher(elements: Long): Publisher[User] = {
-    if (elements == Long.MaxValue) {
-      new Publisher[User] {
-        override def subscribe(s: Subscriber[_ >: User]): Unit =
-          s.onError(new Exception("DatabasePublisher doesn't support infinite streaming."))
-      }
+    if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
 
-    } else {
-      DB readOnlyStream {
-        SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
-      }
+    DB readOnlyStream {
+      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
     }
   }
 
