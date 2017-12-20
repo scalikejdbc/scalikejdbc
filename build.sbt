@@ -18,9 +18,10 @@ lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "5.2.12.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
+lazy val mockitoVersion = "2.7.21"
 
 def gitHash: String = try {
-  sys.process.Process("git rev-parse HEAD").lines_!.head
+  sys.process.Process("git rev-parse HEAD").lineStream_!.head
 } catch {
   case e: Exception =>
     println(e)
@@ -36,7 +37,6 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  incOptions := incOptions.value.withNameHashing(true),
   scalatestVersion := "3.0.4",
   specs2Version := {
     CrossVersion.partialVersion(scalaVersion.value) match {
@@ -79,6 +79,7 @@ lazy val baseSettings = Seq(
 )
 
 lazy val scala211projects = List(
+  scalikejdbcJodaTime,
   scalikejdbcCore,
   scalikejdbcLibrary,
   scalikejdbcInterpolationMacro,
@@ -90,6 +91,8 @@ lazy val scala211projects = List(
   scalikejdbcSyntaxSupportMacro
 )
 
+disablePlugins(ScriptedPlugin)
+
 lazy val root211 = Project(
   "root211",
   file("root211")
@@ -100,7 +103,26 @@ lazy val root211 = Project(
   }
 ).aggregate(
   scala211projects.map(p => p: ProjectReference): _*
-)
+).disablePlugins(ScriptedPlugin)
+
+lazy val scalikejdbcJodaTime = Project(
+  id = "joda-time",
+  base = file("scalikejdbc-joda-time")
+).settings(
+  baseSettings,
+  mimaSettings,
+  name := "scalikejdbc-joda-time",
+  libraryDependencies ++= scalaTestDependenciesInTestScope(scalatestVersion.value),
+  libraryDependencies ++= Seq(
+    "org.mockito" % "mockito-core" % mockitoVersion % "test",
+    "joda-time" % "joda-time" % "2.9.9",
+    "org.joda" % "joda-convert" % "1.8.2"
+  )
+).dependsOn(
+  scalikejdbcLibrary,
+  scalikejdbcCore % "test->test",
+  scalikejdbcInterpolation % "test->test"
+).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc library
 lazy val scalikejdbcLibrary = Project(
@@ -112,7 +134,7 @@ lazy val scalikejdbcLibrary = Project(
   name := "scalikejdbc",
   libraryDependencies ++= scalaTestDependenciesInTestScope(scalatestVersion.value) ++
     Seq("com.h2database" % "h2" % _h2Version % "test")
-).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
+).dependsOn(scalikejdbcCore, scalikejdbcInterpolation).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc (core library)
 lazy val scalikejdbcCore = Project(
@@ -145,8 +167,6 @@ lazy val scalikejdbcCore = Project(
       "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
       "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-      "joda-time"               %  "joda-time"       % "2.9.9"           % "compile",
-      "org.joda"                %  "joda-convert"    % "1.8.2"           % "compile",
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
@@ -154,7 +174,7 @@ lazy val scalikejdbcCore = Project(
       "com.zaxxer"              %  "HikariCP"        % "2.6.3"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
-      "org.mockito"             %  "mockito-core"    % "2.7.21"          % "test"
+      "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
         Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6" % "compile")
@@ -174,7 +194,7 @@ lazy val scalikejdbcCore = Project(
         (sourceDirectory in Compile).value / "scala2.11"
     }
   }
-).enablePlugins(BuildInfoPlugin)
+).enablePlugins(BuildInfoPlugin).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-interpolation-macro
 lazy val scalikejdbcInterpolationMacro = Project(
@@ -190,7 +210,7 @@ lazy val scalikejdbcInterpolationMacro = Project(
       "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
     ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value)
   }
-).dependsOn(scalikejdbcCore)
+).dependsOn(scalikejdbcCore).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-interpolation
 lazy val scalikejdbcInterpolation = Project(
@@ -207,7 +227,7 @@ lazy val scalikejdbcInterpolation = Project(
       "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
+).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-mapper-generator-core
 // core library for mapper-generator
@@ -223,7 +243,7 @@ lazy val scalikejdbcMapperGeneratorCore = Project(
       scalaTestDependenciesInTestScope(scalatestVersion.value) ++
       jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcLibrary)
+).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
 
 // mapper-generator sbt plugin
 lazy val scalikejdbcMapperGenerator = Project(
@@ -231,7 +251,6 @@ lazy val scalikejdbcMapperGenerator = Project(
   base = file("scalikejdbc-mapper-generator")
 ).settings(
   baseSettings,
-  ScriptedPlugin.scriptedSettings,
   sbtPlugin := true,
   resolvers += Classpaths.sbtPluginReleases, // for sbt 0.13 test
   scriptedBufferLog := false,
@@ -274,7 +293,7 @@ lazy val scalikejdbcTest = Project(
       )
     ) ++ jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcLibrary)
+).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test").disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-config
 lazy val scalikejdbcConfig = Project(
@@ -291,7 +310,7 @@ lazy val scalikejdbcConfig = Project(
       "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
     ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcCore)
+).dependsOn(scalikejdbcCore).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-streams
 lazy val scalikejdbcStreams = Project(
@@ -318,7 +337,7 @@ lazy val scalikejdbcStreams = Project(
         (sourceDirectory in Compile).value / "scala2.10"
     }
   }
-).dependsOn(scalikejdbcLibrary)
+).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
 
 // scalikejdbc-support
 lazy val scalikejdbcSyntaxSupportMacro = Project(
@@ -333,7 +352,7 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion.value)
   }
-).dependsOn(scalikejdbcLibrary)
+).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
 
 def macroDependenciesInCompileScope(scalaVersion: String) = {
   if (scalaVersion.startsWith("2.10")) Seq(

@@ -68,7 +68,7 @@ object Binders {
     case None => null.asInstanceOf[B]
   }
 
-  private[this] def nullThrough[A, B](f: A => B)(a: A): B = if (a == null) null.asInstanceOf[B] else f(a)
+  private[scalikejdbc] def nullThrough[A, B](f: A => B)(a: A): B = if (a == null) null.asInstanceOf[B] else f(a)
 
   // --------------------------------------------------------------------------------------------
   // Built-in Binders
@@ -169,11 +169,6 @@ object Binders {
     val millis: Long = v.getTime
     new java.util.Date(millis).toLocalTime
   }), java.sql.Time.valueOf)
-
-  val jodaDateTime: Binders[org.joda.time.DateTime] = utilDate.xmap(nullThrough(_.toJodaDateTime), _.toDate)
-  val jodaLocalDateTime: Binders[org.joda.time.LocalDateTime] = utilDate.xmap(nullThrough(_.toJodaLocalDateTime), _.toDate)
-  val jodaLocalDate: Binders[org.joda.time.LocalDate] = sqlDate.xmap(nullThrough(_.toJodaLocalDate), _.toDate.toSqlDate)
-  val jodaLocalTime: Binders[org.joda.time.LocalTime] = sqlTime.xmap(nullThrough(_.toJodaLocalTime), _.toSqlTime)
 
   val binaryStream: Binders[InputStream] = Binders(_ getBinaryStream _)(_ getBinaryStream _)(v => (ps, idx) => ps.setBinaryStream(idx, v))
   val blob: Binders[java.sql.Blob] = Binders(_ getBlob _)(_ getBlob _)(v => (ps, idx) => ps.setBlob(idx, v))

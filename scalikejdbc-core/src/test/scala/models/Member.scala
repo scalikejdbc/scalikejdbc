@@ -1,14 +1,14 @@
 package models
 
 import scalikejdbc._
-import org.joda.time.{ LocalDate, DateTime }
+import java.time.{ LocalDate, LocalDateTime }
 
 case class Member(
   id: Long,
   name: String,
   description: Option[String] = None,
   birthday: Option[LocalDate] = None,
-  createdAt: DateTime) {
+  createdAt: LocalDateTime) {
 
   def save()(implicit session: DBSession = AutoSession): Member = Member.save(this)(session)
 
@@ -65,7 +65,7 @@ object Member extends UnixTimeInMillisConverterImplicits {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = AutoSession): Member = {
+    createdAt: LocalDateTime)(implicit session: DBSession = AutoSession): Member = {
     SQL("""
         INSERT INTO MEMBER (
           ID,
@@ -130,7 +130,7 @@ case class NamedMember(
   name: String,
   description: Option[String] = None,
   birthday: Option[LocalDate] = None,
-  createdAt: DateTime) {
+  createdAt: LocalDateTime) {
 
   def save(): NamedMember = NamedMember.save(this)
 
@@ -186,7 +186,7 @@ object NamedMember {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: DateTime)(implicit session: DBSession = NamedAutoSession('named)): NamedMember = {
+    createdAt: LocalDateTime)(implicit session: DBSession = NamedAutoSession('named)): NamedMember = {
     SQL("""
         INSERT INTO NAMED_MEMBER (
           ID,

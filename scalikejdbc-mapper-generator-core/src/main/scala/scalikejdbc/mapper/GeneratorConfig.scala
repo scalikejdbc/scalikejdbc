@@ -11,7 +11,7 @@ case class GeneratorConfig(
   encoding: String = "UTF-8",
   autoConstruct: Boolean = false,
   defaultAutoSession: Boolean = true,
-  dateTimeClass: DateTimeClass = DateTimeClass.JodaDateTime,
+  dateTimeClass: DateTimeClass = DateTimeClass.ZonedDateTime,
   tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
   columnNameToFieldName: String => String = GeneratorConfig.columnNameToFieldNameBasic andThen GeneratorConfig.addSuffixIfConflict("Column"),
   returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,

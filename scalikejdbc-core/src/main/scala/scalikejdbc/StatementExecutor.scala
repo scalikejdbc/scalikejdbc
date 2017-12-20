@@ -1,6 +1,7 @@
 package scalikejdbc
 
 import java.sql.PreparedStatement
+import scala.language.reflectiveCalls
 
 /**
  * Companion object.
@@ -97,10 +98,6 @@ case class StatementExecutor(
       case p: java.sql.Timestamp => underlying.setTimestamp(i, p)
       case p: java.net.URL => underlying.setURL(i, p)
       case p: java.util.Date => underlying.setTimestamp(i, p.toSqlTimestamp)
-      case p: org.joda.time.DateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-      case p: org.joda.time.LocalDateTime => underlying.setTimestamp(i, p.toDate.toSqlTimestamp)
-      case p: org.joda.time.LocalDate => underlying.setDate(i, p.toDate.toSqlDate)
-      case p: org.joda.time.LocalTime => underlying.setTime(i, p.toSqlTime)
       case p: java.time.ZonedDateTime =>
         underlying.setTimestamp(i, java.sql.Timestamp.from(p.toInstant))
       case p: java.time.OffsetDateTime =>
@@ -117,10 +114,24 @@ case class StatementExecutor(
         val time = new java.sql.Time(millis)
         underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
-      case p => {
-        log.debug("The parameter(" + p + ") is bound as an Object.")
-        underlying.setObject(i, p)
-      }
+      case p =>
+        param.getClass.getCanonicalName match {
+          case "org.joda.time.DateTime" =>
+            val t = p.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp
+            underlying.setTimestamp(i, t)
+          case "org.joda.time.LocalDateTime" =>
+            val t = p.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp
+            underlying.setTimestamp(i, t)
+          case "org.joda.time.LocalDate" =>
+            val t = p.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlDate
+            underlying.setDate(i, t)
+          case "org.joda.time.LocalTime" =>
+            val millis = p.asInstanceOf[{ def toDateTimeToday: { def getMillis: Long } }].toDateTimeToday.getMillis
+            underlying.setTime(i, new java.sql.Time(millis))
+          case _ =>
+            log.debug("The parameter(" + p + ") is bound as an Object.")
+            underlying.setObject(i, p)
+        }
     }
   }
 
@@ -141,11 +152,19 @@ case class StatementExecutor(
             case Some(p) => normalize(p)
             case p: String => p
             case p: java.util.Date => p.toSqlTimestamp.toString
-            case p: org.joda.time.DateTime => p.toDate.toSqlTimestamp.toString
-            case p: org.joda.time.LocalDateTime => p.toDate.toSqlTimestamp
-            case p: org.joda.time.LocalDate => p.toDate.toSqlDate
-            case p: org.joda.time.LocalTime => p.toSqlTime
-            case p => p
+            case _ =>
+              param.getClass().getCanonicalName match {
+                case "org.joda.time.DateTime" =>
+                  param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp.toString
+                case "org.joda.time.LocalDateTime" =>
+                  param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp
+                case "org.joda.time.LocalDate" =>
+                  param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlDate
+                case "org.joda.time.LocalTime" =>
+                  val millis = param.asInstanceOf[{ def toDateTimeToday: { def getMillis: Long } }].toDateTimeToday.getMillis
+                  new java.sql.Time(millis)
+                case p => p
+              }
           }
         }
         (normalize(param) match {

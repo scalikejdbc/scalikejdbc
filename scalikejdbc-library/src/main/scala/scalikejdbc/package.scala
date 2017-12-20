@@ -67,7 +67,4 @@ package object scalikejdbc
    */
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
-  @deprecated(message = "Use scalikejdbc.jodatime.LocalTimeConverter instead", since = "3.0.0")
-  type LocalTimeConverter = scalikejdbc.jodatime.LocalTimeConverter
-
 }

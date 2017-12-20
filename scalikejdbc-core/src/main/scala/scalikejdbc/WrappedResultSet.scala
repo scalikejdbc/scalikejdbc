@@ -3,12 +3,6 @@ package scalikejdbc
 import java.time._
 import java.sql.ResultSet
 import java.util.Calendar
-import org.joda.time.{
-  LocalDateTime => JodaLocalDateTime,
-  LocalTime => JodaLocalTime,
-  LocalDate => JodaLocalDate,
-  _
-}
 import collection.JavaConverters._
 
 /**
@@ -405,18 +399,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     get[java.sql.Timestamp](columnLabel)
   }
 
-  def jodaDateTime(columnIndex: Int): DateTime = get[DateTime](columnIndex)
-  def jodaDateTime(columnLabel: String): DateTime = get[DateTime](columnLabel)
-
-  def jodaLocalDate(columnIndex: Int): JodaLocalDate = get[JodaLocalDate](columnIndex)
-  def jodaLocalDate(columnLabel: String): JodaLocalDate = get[JodaLocalDate](columnLabel)
-
-  def jodaLocalTime(columnIndex: Int): JodaLocalTime = get[JodaLocalTime](columnIndex)
-  def jodaLocalTime(columnLabel: String): JodaLocalTime = get[JodaLocalTime](columnLabel)
-
-  def jodaLocalDateTime(columnIndex: Int): JodaLocalDateTime = get[JodaLocalDateTime](columnIndex)
-  def jodaLocalDateTime(columnLabel: String): JodaLocalDateTime = get[JodaLocalDateTime](columnLabel)
-
   def timestampOpt(columnIndex: Int): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnIndex)
 
   def timestampOpt(columnLabel: String): Option[java.sql.Timestamp] = get[Option[java.sql.Timestamp]](columnLabel)
@@ -430,18 +412,6 @@ case class WrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, inde
     implicit val binder: TypeBinder[java.sql.Timestamp] = TypeBinder((rs, i) => rs.getTimestamp(i, cal))((rs, l) => rs.getTimestamp(l, cal))
     get[Option[java.sql.Timestamp]](columnLabel)
   }
-
-  def jodaDateTimeOpt(columnIndex: Int): Option[DateTime] = get[Option[DateTime]](columnIndex)
-  def jodaDateTimeOpt(columnLabel: String): Option[DateTime] = get[Option[DateTime]](columnLabel)
-
-  def jodaLocalDateOpt(columnIndex: Int): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnIndex)
-  def jodaLocalDateOpt(columnLabel: String): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnLabel)
-
-  def jodaLocalTimeOpt(columnIndex: Int): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnIndex)
-  def jodaLocalTimeOpt(columnLabel: String): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnLabel)
-
-  def jodaLocalDateTimeOpt(columnIndex: Int): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnIndex)
-  def jodaLocalDateTimeOpt(columnLabel: String): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnLabel)
 
   def url(columnIndex: Int): java.net.URL = get[java.net.URL](columnIndex)
 

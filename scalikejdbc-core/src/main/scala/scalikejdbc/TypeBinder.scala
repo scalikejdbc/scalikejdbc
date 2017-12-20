@@ -2,10 +2,6 @@ package scalikejdbc
 
 import java.sql.ResultSet
 import java.time._
-import org.joda.time.{ DateTime => JodaDateTime }
-import org.joda.time.{ LocalDate => JodaLocalDate }
-import org.joda.time.{ LocalTime => JodaLocalTime }
-import org.joda.time.{ LocalDateTime => JodaLocalDateTime }
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -93,11 +89,6 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
   implicit val javaTimeLocalDate: TypeBinder[LocalDate] = Binders.javaTimeLocalDate
   implicit val javaTimeLocalTime: TypeBinder[LocalTime] = Binders.javaTimeLocalTime
   implicit val javaTimeLocalDateTime: TypeBinder[LocalDateTime] = Binders.javaTimeLocalDateTime
-
-  implicit val jodaDateTime: TypeBinder[JodaDateTime] = Binders.jodaDateTime
-  implicit val jodaLocalDate: TypeBinder[JodaLocalDate] = Binders.jodaLocalDate
-  implicit val jodaLocalTime: TypeBinder[JodaLocalTime] = Binders.jodaLocalTime
-  implicit val jodaLocalDateTime: TypeBinder[JodaLocalDateTime] = Binders.jodaLocalDateTime
 
   implicit val url: TypeBinder[java.net.URL] = Binders.url
 

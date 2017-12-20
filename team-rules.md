@@ -52,13 +52,13 @@ https://issues.sonatype.org/browse/OSSRH-14350
 
 If you're already allowed to release ScalikeJDBC libs, use your own Sonatype account:
 
-- $HOME/.sbt/0.13/sonatype.sbt
+- $HOME/.sbt/1.0/sonatype.sbt
 
 ``` scala
 credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", "xxx", "yyy")
 ```
 
-- $HOME/.sbt/0.13/plugins/gpg.sbt
+- $HOME/.sbt/1.0/plugins/gpg.sbt
 
 ```scala
 // Use latest version

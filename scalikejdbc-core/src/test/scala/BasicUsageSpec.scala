@@ -1,4 +1,4 @@
-import org.joda.time.DateTime
+import java.time.LocalDateTime
 import org.scalatest._
 import util.control.Exception._
 import java.sql.Connection
@@ -89,8 +89,8 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
 
     // connect and begin a block (ConnectionPool required)
     DB autoCommit { session =>
-      session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 1, Some("name1"), new DateTime)
-      session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 2, Some("name2"), new DateTime)
+      session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 1, Some("name1"), LocalDateTime.now)
+      session.update("insert into " + tableName + " (id, name, created_at) values (?, ? ,?)", 2, Some("name2"), LocalDateTime.now)
     }
 
     // named datasources
@@ -265,7 +265,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
             "Typesafe",
             """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
              From multicore to cloud computing, it's purpose built for scale.""",
-            new DateTime).update.apply()
+            LocalDateTime.now).update.apply()
 
         // Anorm like template
         SQL("""
@@ -278,7 +278,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 2,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime).update.apply()
+          'createdAt -> LocalDateTime.now).update.apply()
 
         // executable template
         SQL("""
@@ -291,7 +291,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
           'id -> 3,
           'name -> "Typesafe",
           'description -> "xxx",
-          'createdAt -> new DateTime).update.apply()
+          'createdAt -> LocalDateTime.now).update.apply()
 
       }
     } finally { TestUtils.deleteTable("emp") }

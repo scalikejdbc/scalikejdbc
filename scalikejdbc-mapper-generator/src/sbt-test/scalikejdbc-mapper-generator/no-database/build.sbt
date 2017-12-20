@@ -10,6 +10,7 @@ scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
+  "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikejdbcVersion,
   "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version")
 )
 

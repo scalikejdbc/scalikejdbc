@@ -3,7 +3,7 @@ package outside
 import org.scalatest._
 import scalikejdbc._
 import java.util.TimeZone
-import org.joda.time.{ DateTime, DateTimeZone }
+//import org.joda.time.{ DateTime, DateTimeZone }
 
 class DateTimeConversions_JavaSqlDateSpec extends FlatSpec with Matchers {
 
