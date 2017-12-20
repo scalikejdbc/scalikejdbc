@@ -1,19 +1,24 @@
 package somewhere
 
-import org.reactivestreams.Publisher
 import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
-import org.testng.SkipException
-import org.testng.annotations.{ AfterClass, BeforeClass, Test }
+import org.reactivestreams.{ Publisher, Subscriber }
+import org.scalatest.testng.TestNGSuiteLike
+import org.testng.annotations.{ AfterClass, BeforeClass }
 import scalikejdbc._
 import scalikejdbc.streams._
 import somewhere.DatabasePublisherTckTest.User
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DatabasePublisherTckTest
-  extends PublisherVerification[User](DatabasePublisherTckTest.environment)
-  with TestDBSettings {
-  private val env = DatabasePublisherTckTest.environment
+class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: Long)
+  extends PublisherVerification[User](env, publisherShutdownTimeout)
+  with TestDBSettings
+  with TestNGSuiteLike {
+
+  def this() {
+    this(DatabasePublisherTckTest.environment, 1000)
+  }
 
   private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
 
@@ -29,10 +34,16 @@ class DatabasePublisherTckTest
   }
 
   override def createPublisher(elements: Long): Publisher[User] = {
-    if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
+    if (elements == Long.MaxValue) {
+      new Publisher[User] {
+        override def subscribe(s: Subscriber[_ >: User]): Unit =
+          s.onError(new Exception("DatabasePublisher doesn't support infinite streaming."))
+      }
 
-    DB readOnlyStream {
-      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
+    } else {
+      DB readOnlyStream {
+        SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
+      }
     }
   }
 
@@ -48,7 +59,6 @@ class DatabasePublisherTckTest
 
   // If there is 0 record at the first data fetch, complete the streaming and should not leave the DBConnection unnecessarily open.
   // test for https://github.com/scalikejdbc/scalikejdbc/pull/614/commits/0c1c120272fe49cde399a7e57a42f78701d5f830
-  @Test
   def optional_spec105_shouldSignalOnCompleteWithoutRequestWhenResultSetIsEmptyAtFirstFetch(): Unit = {
     optionalActivePublisherTest(0, true, new PublisherTestRun[User] {
       override def run(pub: Publisher[User]): Unit = {
@@ -71,7 +81,6 @@ class DatabasePublisherTckTest
 
   // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.1
   // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L195-L216
-  @Test
   override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(): Unit = {
     activePublisherTest(5, false, new PublisherTestRun[User] {
       @throws[InterruptedException]
@@ -94,7 +103,6 @@ class DatabasePublisherTckTest
 
   // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.11
   // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L540-L552
-  @Test
   override def optional_spec111_maySupportMultiSubscribe(): Unit = {
     optionalActivePublisherTest(1, false, new PublisherTestRun[User] {
       @throws[Throwable]
