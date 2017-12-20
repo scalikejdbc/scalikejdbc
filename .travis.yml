@@ -45,18 +45,14 @@ env:
 
 matrix:
   include:
-    - scala: "scripted-test"
-      env: SCALIKEJDBC_DATABASE="mysql" SBT_1_BUILD=true
-      script:
-      # - sbt '++ 2.12.4' root211/publishLocal '++ 2.11.12' root211/publishLocal '++ 2.10.6' publishLocal
-      # - find ./scalikejdbc-mapper-generator/src/sbt-test/ -name build.properties | xargs rm
-      - sbt '++ 2.12.4' "project mapper-generator" "^^ 1.0.4" compile # scripted
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="mysql"
+      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="0.13.16"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="postgresql"
+      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="1.0.4"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="h2"
+      env: SCALIKEJDBC_DATABASE="postgresql" TEST_SBT_VERSION="1.0.4"
+    - scala: scripted-test
+      env: SCALIKEJDBC_DATABASE="h2" TEST_SBT_VERSION="1.0.4"
     - scala: 2.12.3
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.3
