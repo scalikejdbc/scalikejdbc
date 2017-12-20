@@ -13,12 +13,12 @@ lazy val _reactiveStreamsVersion = "1.0.1"
 lazy val _logbackVersion = "1.2.3"
 lazy val _h2Version = "1.4.196"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-lazy val _mysqlVersion = "5.1.44"
+lazy val _mysqlVersion = "5.1.45"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "5.2.12.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
-lazy val mockitoVersion = "2.7.21"
+lazy val mockitoVersion = "2.13.0"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -45,7 +45,7 @@ lazy val baseSettings = Seq(
         // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
         "3.9.5"
       case _ =>
-        "4.0.1"
+        "4.0.2"
     }
   },
   //scalaVersion := "2.11.12",
@@ -171,7 +171,7 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "2.6.3"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "2.7.4"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
@@ -384,7 +384,7 @@ def specs2DependenciesInTestScope(v: String) =
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.14.1.0"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.20.1"           % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.21.0.1"         % "test",
   "org.hsqldb"        % "hsqldb"               % "2.4.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
