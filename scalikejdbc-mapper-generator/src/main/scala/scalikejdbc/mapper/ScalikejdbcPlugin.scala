@@ -28,17 +28,17 @@ object SbtPlugin {
 object ScalikejdbcPlugin extends AutoPlugin {
 
   object autoImport {
-    val scalikejdbcGen = InputKey[Unit]("scalikejdbc-gen", "Generates a model for a specified table")
-    val scalikejdbcGenForce = InputKey[Unit]("scalikejdbc-gen-force", "Generates and overwrites a model for a specified table")
-    val scalikejdbcGenAll = InputKey[Unit]("scalikejdbc-gen-all", "Generates models for all tables")
-    val scalikejdbcGenAllForce = InputKey[Unit]("scalikejdbc-gen-all-force", "Generates and overwrites models for all tables")
-    val scalikejdbcGenEcho = InputKey[Unit]("scalikejdbc-gen-echo", "Prints a model for a specified table")
+    val scalikejdbcGen = inputKey[Unit]("Generates a model for a specified table")
+    val scalikejdbcGenForce = inputKey[Unit]("Generates and overwrites a model for a specified table")
+    val scalikejdbcGenAll = inputKey[Unit]("Generates models for all tables")
+    val scalikejdbcGenAllForce = inputKey[Unit]("Generates and overwrites models for all tables")
+    val scalikejdbcGenEcho = inputKey[Unit]("Prints a model for a specified table")
 
-    val scalikejdbcJDBCSettings = TaskKey[JDBCSettings]("scalikejdbcJDBCSettings")
-    val scalikejdbcGeneratorSettings = TaskKey[GeneratorSettings]("scalikejdbcGeneratorSettings")
+    val scalikejdbcJDBCSettings = taskKey[JDBCSettings]("")
+    val scalikejdbcGeneratorSettings = taskKey[GeneratorSettings]("")
 
-    val scalikejdbcCodeGeneratorSingle = TaskKey[(String, Option[String], JDBCSettings, GeneratorSettings) => Option[Generator]]("scalikejdbcCodeGeneratorSingle")
-    val scalikejdbcCodeGeneratorAll = TaskKey[(JDBCSettings, GeneratorSettings) => Seq[Generator]]("scalikejdbcCodeGeneratorAll")
+    val scalikejdbcCodeGeneratorSingle = taskKey[(String, Option[String], JDBCSettings, GeneratorSettings) => Option[Generator]]("")
+    val scalikejdbcCodeGeneratorAll = taskKey[(JDBCSettings, GeneratorSettings) => Seq[Generator]]("")
 
     case class JDBCSettings(driver: String, url: String, username: String, password: String, schema: String)
 
