@@ -124,6 +124,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       val res2: java.lang.Boolean = rs.nullableBoolean(0)
       val res3: Option[scala.Boolean] = rs.booleanOpt("foo")
       val res4: Option[scala.Boolean] = rs.booleanOpt(0)
+      when(underlying.getObject("boolean")).thenReturn("true", Array[Object](): _*)
+      when(underlying.getObject(1)).thenReturn("false", Array[Object](): _*)
       res1 should be(null)
       res2 should be(null)
       res3.isDefined should be(false)
@@ -135,6 +137,8 @@ class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
       rs.boolean("zero") should be(false)
       rs.boolean("minusOne") should be(true)
       rs.boolean("str") should be(true)
+      rs.boolean("boolean") should be(true)
+      rs.boolean(1) should be(false)
     }
 
     {
