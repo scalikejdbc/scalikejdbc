@@ -164,7 +164,6 @@ lazy val scalikejdbcCore = Project(
   libraryDependencies ++= {
     Seq(
       // scope: compile
-      "org.scala-lang"          %  "scala-reflect"   % scalaVersion.value,
       "org.apache.commons"      %  "commons-dbcp2"   % "2.1.1"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       // scope: provided
@@ -185,14 +184,6 @@ lazy val scalikejdbcCore = Project(
       case _ =>
         Nil
     }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
-  },
-  unmanagedSourceDirectories in Compile += {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 10)) =>
-        (sourceDirectory in Compile).value / "scala2.10"
-      case _ =>
-        (sourceDirectory in Compile).value / "scala2.11"
-    }
   }
 ).enablePlugins(BuildInfoPlugin).disablePlugins(ScriptedPlugin)
 
@@ -346,6 +337,14 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
 ).settings(
   baseSettings,
   name := "scalikejdbc-syntax-support-macro",
+  unmanagedSourceDirectories in Compile += {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 10)) =>
+        (sourceDirectory in Compile).value / "scala2.10"
+      case _ =>
+        (sourceDirectory in Compile).value / "scala2.11"
+    }
+  },
   libraryDependencies ++= {
     Seq(
       "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
