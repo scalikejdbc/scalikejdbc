@@ -1,4 +1,4 @@
-scalikejdbcSettings
+enablePlugins(ScalikejdbcPlugin)
 
 scalaVersion := "2.12.4"
 lazy val scalikejdbcVersion = scalikejdbc.ScalikejdbcBuildInfo.version
