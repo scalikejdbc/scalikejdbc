@@ -53,9 +53,9 @@ matrix:
       env: SCALIKEJDBC_DATABASE="postgresql" TEST_SBT_VERSION="1.0.4"
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="h2" TEST_SBT_VERSION="1.0.4"
-    - scala: 2.12.3
+    - scala: 2.12.4
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.3
+    - scala: 2.12.4
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M2
       env: SCALIKEJDBC_DATABASE="mysql"
