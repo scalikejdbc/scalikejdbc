@@ -1,8 +1,8 @@
 package scalikejdbc
 
-import scala.reflect.macros.blackbox.Context
-
 private[scalikejdbc] object MacroCompatible {
+
+  type Context = scala.reflect.macros.Context
 
   def decls(c: Context)(tpe: c.universe.Type) = tpe.declarations
 

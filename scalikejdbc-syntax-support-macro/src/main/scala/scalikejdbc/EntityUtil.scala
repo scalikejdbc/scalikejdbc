@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import scala.reflect.macros.blackbox.Context
 import scalikejdbc.MacroCompatible._
 
 private[scalikejdbc] object EntityUtil {
