@@ -162,4 +162,12 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[Option[java.net.URL]]].apply(rs, 1) should be(None)
   }
 
+  it should "handle result values of type java.lang.Boolean" in {
+    val rs: ResultSet = mock[ResultSet]
+    when(rs.getObject("boolean")).thenReturn("true", Array[Object](): _*)
+    when(rs.getObject(1)).thenReturn("false", Array[Object](): _*)
+    implicitly[TypeBinder[Boolean]].apply(rs, "boolean") should be(true)
+    implicitly[TypeBinder[Boolean]].apply(rs, 1) should be(false)
+  }
+
 }

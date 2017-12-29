@@ -3,7 +3,7 @@ package scalikejdbc
 /**
  * Connection Pool Factory
  *
- * @see [[http://commons.apache.org/dbcp/]]
+ * @see [[http://commons.apache.org/proper/commons-dbcp/]]
  */
 object CommonsConnectionPoolFactory extends ConnectionPoolFactory {
 
