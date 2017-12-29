@@ -78,6 +78,7 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
   implicit val sqlTimestampParameterBinderFactory: ParameterBinderFactory[java.sql.Timestamp] = Binders.sqlTimestamp
   implicit val utilDateParameterBinderFactory: ParameterBinderFactory[java.util.Date] = Binders.utilDate
 
+  implicit val javaTimeInstantParameterBinderFactory: ParameterBinderFactory[java.time.Instant] = Binders.javaTimeInstant
   implicit val javaTimeZonedDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.ZonedDateTime] = Binders.javaTimeZonedDateTime
   implicit val javaTimeOffsetDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.OffsetDateTime] = Binders.javaTimeOffsetDateTime
   implicit val javaTimeLocalDateTimeParameterBinderFactory: ParameterBinderFactory[java.time.LocalDateTime] = Binders.javaTimeLocalDateTime
