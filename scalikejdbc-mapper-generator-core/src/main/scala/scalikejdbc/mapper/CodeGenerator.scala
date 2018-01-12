@@ -15,6 +15,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(config.tableNameToClassName(table.name))
+  private val syntaxNameString = config.tableNameToSyntaxName(table.name)
   private val syntaxName = {
     val name = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
     if (name == "rs") "r" else name
@@ -734,7 +735,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       eol +
       interpolationMapper +
       eol +
-      1.indent + "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" + eol + eol +
+      1.indent + "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxNameString + "\")" + eol + eol +
       autoSession +
       eol +
       findMethod +
@@ -1061,7 +1062,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }.mkString(", "))
       .replace(
         "%syntaxObject%",
-        if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxName + "\")" else "")
+        if (isQueryDsl) "val " + syntaxName + " = " + className + ".syntax(\"" + syntaxNameString + "\")" else "")
       .replace(
         "%whereExample%",
         if (isQueryDsl)

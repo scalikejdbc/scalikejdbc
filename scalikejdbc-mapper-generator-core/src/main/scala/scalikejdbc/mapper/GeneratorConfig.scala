@@ -1,5 +1,7 @@
 package scalikejdbc.mapper
 
+import java.util.Locale.ENGLISH
+
 case class GeneratorConfig(
   srcDir: String = "src/main/scala",
   testDir: String = "src/test/scala",
@@ -18,11 +20,11 @@ case class GeneratorConfig(
   view: Boolean = false,
   tableNamesToSkip: Seq[String] = List(),
   tableNameToBaseTypes: String => Seq[String] = _ => Nil,
-  tableNameToCompanionBaseTypes: String => Seq[String] = _ => Nil)
+  tableNameToCompanionBaseTypes: String => Seq[String] = _ => Nil,
+  tableNameToSyntaxName: String => String = GeneratorConfig.tableNameToSyntaxNameDefault)
 
 object GeneratorConfig {
   private def toProperCase(s: String): String = {
-    import java.util.Locale.ENGLISH
     if (s == null || s.trim.isEmpty) ""
     else s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1).toLowerCase(ENGLISH)
   }
@@ -65,5 +67,10 @@ object GeneratorConfig {
 
   val columnNameToFieldNameBasic: String => String = {
     GeneratorConfig.lowerCamelCase andThen GeneratorConfig.quoteReservedWord
+  }
+
+  private val tableNameToSyntaxNameDefault: String => String = { tableName =>
+    val name = "[A-Z]".r.findAllIn(toCamelCase(tableName)).mkString.toLowerCase(ENGLISH)
+    if (name == "rs" || name.isEmpty) "r" else name
   }
 }
