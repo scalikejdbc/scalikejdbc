@@ -1,5 +1,7 @@
 > createTestDatabase
 
+> scalikejdbcGenEcho address_street
+
 > scalikejdbcGenEcho programmers
 -$ exists src/main/scala/app/models/Programmers.scala
 -$ exists src/test/scala/app/models/ProgrammersSpec.scala
@@ -36,6 +38,7 @@ $ newer src/main/scala/app/models/Programmers.scala src/main/scala/app/models/Pr
 > + compile
 > + test:compile
 > + testOnly app.models.ProgrammersTest
+> + testOnly app.models.Issue810
 
 > set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho programmers

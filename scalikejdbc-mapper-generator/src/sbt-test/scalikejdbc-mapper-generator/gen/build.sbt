@@ -1,5 +1,14 @@
 val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
+scalikejdbcGeneratorSettings in Compile ~= { setting =>
+  setting.copy(tableNameToSyntaxName = { tableName =>
+    setting.tableNameToSyntaxName(tableName) match {
+      case "as" => "as_"
+      case syntaxName => syntaxName
+    }
+  })
+}
+
 scalikejdbcJDBCSettings in Compile := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))
@@ -22,6 +31,9 @@ TaskKey[Unit]("createTestDatabase") := {
     sql"create table if not exists programmers (id SERIAL PRIMARY KEY, name varchar(128), t1 timestamp not null, t2 date, t3 time, type int, to_string int, hash_code int, wait int, get_class int, notify int, notify_all int, product_arity int, product_iterator int, product_prefix int, copy int)"
       .execute.apply()
     sql"create view programmers_view as (select * from programmers)"
+      .execute.apply()
+    // https://github.com/scalikejdbc/scalikejdbc/issues/810
+    sql"create table address_street (id int not null)"
       .execute.apply()
   }
 }
@@ -82,3 +94,7 @@ TaskKey[Unit]("generateCodeForIssue339") := {
   assert(code.contains("rs.anyOpt("))
   generator.writeModel()
 }
+
+testResultLogger := TestResultLogger.Defaults.Main(
+  printNoTests = TestResultLogger((_, _, _) => sys.error("invalid test name"))
+)
