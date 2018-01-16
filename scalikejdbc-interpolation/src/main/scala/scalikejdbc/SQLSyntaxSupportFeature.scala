@@ -154,7 +154,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def columns: Seq[String] = {
       if (columnNames.isEmpty) {
         SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableNameWithSchema), {
-          NamedDB(connectionPoolName, settings).getColumnNames(tableNameWithSchema).map(_.toLowerCase(en)) match {
+          NamedDB(connectionPoolName, settings).getColumnNames(tableNameWithSchema, tableTypes).map(_.toLowerCase(en)) match {
             case Nil => throw new IllegalStateException(
               "No column found for " + tableName + ". If you use NamedDB, you must override connectionPoolName.")
             case cs => cs
@@ -181,6 +181,11 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * If you prefer columnNames than columns, override this method to customize.
      */
     def columnNames: Seq[String] = Nil
+
+    /**
+     * If you need some exotic table types like `MATERIALIZED VIEW` from PostgreSQL, override this method.
+     */
+    def tableTypes: Array[String] = DBConnection.tableTypes
 
     /**
      * True if you need forcing upper column names in SQL.
