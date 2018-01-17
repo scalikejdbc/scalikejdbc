@@ -387,7 +387,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableNamePattern table name pattern (with schema optionally)
    * @return table information
    */
-  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
+  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = DBConnection.tableTypes): List[String] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableNamePattern.replaceAll("\\*", "%"), tableTypes).map {
@@ -423,7 +423,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   /**
    * Returns all the column names on the matched table name
    */
-  def getColumnNames(tableName: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): List[String] = {
+  def getColumnNames(tableName: String, tableTypes: Array[String] = DBConnection.tableTypes): List[String] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableName, tableTypes).map {
@@ -439,7 +439,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param table table name (with schema optionally)
    * @return table information
    */
-  def getTable(table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
+  def getTable(table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
 
@@ -461,7 +461,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableTypes target table types
    * @return table information
    */
-  private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = Array("TABLE", "VIEW")): Option[Table] = {
+  private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
     val tableList = new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map {
       rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
     }
@@ -551,7 +551,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableTypes table types
    * @return table name list
    */
-  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = Array("TABLE", "VIEW")): String = {
+  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = DBConnection.tableTypes): String = {
     getTableNames(tableNamePattern, tableTypes).mkString("\n")
   }
 
@@ -596,4 +596,13 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       .orElse(_getSchemaAndTableName(meta, tablePattern.toLowerCase(en), tableTypes))
   }
 
+}
+
+object DBConnection {
+
+  /**
+   * Default table types used for metadata introspection.
+   * See [[java.sql.DatabaseMetaData#getTableTypes]] for details.
+   */
+  val tableTypes = Array("TABLE", "VIEW")
 }
