@@ -1,0 +1,33 @@
+ScalikeJDBC 3.2.0 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #765 Return correct LocalDateTime class for jodaLocalDateTimeOpt by @ulejon
+- [core] #768 Fix toOptionalOne to wrap value with Option by @katainaka0503
+- [core] #778 Update the patch version of typesafe-config by @xuwei-k
+- [core] #785 Fix dead links in scaladoc by xuwei-k
+- [core] #787 Fix a bug where Subquery.syntax doesn't work properly by @ushjp
+- [core] #788 #796 #807 Upgrade sbt version to 1.x by @xuwei-k
+- [core] #790 #794 Separate joda-time dependency from core lib to an optional module by @xuwei-k
+- [core] #791 Remove unused imports by @zaneli
+- [core] #801 Add "true" and "false" in Build-in Binders by @t-mochizuki
+- [core] #802 Organize scala-reflect dependency and macro classes by @xuwei-k
+- [core] #804 Fixes #803 "package macros contains object and package with same name: blackbox" by @xuwei-k
+- [core] #806 Add ParameterBinderFactory[java.time.Instant] by @xuwei-k
+- [core] #812 Update the patch version of commons-dbcp2 by @xuwei-k
+- [core] #813 Custom table types for column names introspection by @valericus
+- [core] #815 Add functions lower and upper to SQLSyntax by @mitgard
+- [mapper-generator] #795 Change the default dateTimeClass from joda's DateTime to ZonedDateTime by @xuwei-k
+- [mapper-generator] #800 Use inputKey and taskKey instead of InputKey, TaskKey by @xuwei-k
+- [mapper-generator] #811 Add GeneratorConfig#tableNameToSyntaxName by @xuwei-k
+- [streams] #797 Update Reactive Streams v1.0.2 by @yoskhdia
+- [streams] #798 Use ScalaTest's TestNGSuiteLike instead of sbt-testng by @yoskhdia
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
