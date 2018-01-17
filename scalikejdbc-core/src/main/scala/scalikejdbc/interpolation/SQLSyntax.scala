@@ -322,8 +322,8 @@ object SQLSyntax {
   def exists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.exists(sqlPart)
   def notExists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.notExists(sqlPart)
 
-  def toLower(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.lower(column)
-  def toUpper(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.upper(column)
+  def lower(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.lower(column)
+  def upper(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.upper(column)
 
   def distinct(columns: SQLSyntax*): SQLSyntax = sqls"distinct ${csv(columns: _*)}"
 
