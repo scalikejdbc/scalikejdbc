@@ -255,12 +255,12 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
   }
 
   it should "have #lower" in {
-    val s = SQLSyntax.toLower(sqls"name")
+    val s = SQLSyntax.lower(sqls"name")
     s.value should equal("lower(name)")
   }
 
   it should "have #upper" in {
-    val s = SQLSyntax.toUpper(sqls"name")
+    val s = SQLSyntax.upper(sqls"name")
     s.value should equal("upper(name)")
   }
 
