@@ -254,6 +254,16 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq("%abc%"))
   }
 
+  it should "have #lower" in {
+    val s = SQLSyntax.lower(sqls"name")
+    s.value should equal("lower(name)")
+  }
+
+  it should "have #upper" in {
+    val s = SQLSyntax.upper(sqls"name")
+    s.value should equal("upper(name)")
+  }
+
   it should "have #exists with subQuery" in {
     val s = SQLSyntax.exists(sqls"select id from users where deleted = ${false}")
     s.value should equal(" exists (select id from users where deleted = ?)")

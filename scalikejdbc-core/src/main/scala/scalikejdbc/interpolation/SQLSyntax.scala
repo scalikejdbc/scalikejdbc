@@ -193,6 +193,9 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   def exists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} exists (${sqlPart})"
   def notExists(sqlPart: SQLSyntax): SQLSyntax = sqls"${this} not exists (${sqlPart})"
 
+  def lower(column: SQLSyntax): SQLSyntax = sqls"lower($column)"
+  def upper(column: SQLSyntax): SQLSyntax = sqls"upper($column)"
+
   def stripMargin: SQLSyntax = new SQLSyntax(value.stripMargin, rawParameters)
 
   def stripMargin(marginChar: Char): SQLSyntax = new SQLSyntax(value.stripMargin(marginChar), rawParameters)
@@ -318,6 +321,9 @@ object SQLSyntax {
 
   def exists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.exists(sqlPart)
   def notExists(sqlPart: SQLSyntax): SQLSyntax = SQLSyntax.empty.notExists(sqlPart)
+
+  def lower(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.lower(column)
+  def upper(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.upper(column)
 
   def distinct(columns: SQLSyntax*): SQLSyntax = sqls"distinct ${csv(columns: _*)}"
 
