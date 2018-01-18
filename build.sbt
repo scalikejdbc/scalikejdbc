@@ -243,6 +243,7 @@ lazy val scalikejdbcMapperGenerator = Project(
 ).settings(
   baseSettings,
   sbtPlugin := true,
+  crossSbtVersions := Vector("0.13.16", "1.1.0"),
   resolvers += Classpaths.sbtPluginReleases, // for sbt 0.13 test
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
