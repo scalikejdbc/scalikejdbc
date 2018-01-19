@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import scala.reflect.macros._
+import scala.reflect.macros.blackbox.Context
 
 import scalikejdbc.interpolation.SQLSyntax
 
@@ -9,19 +9,19 @@ import scalikejdbc.interpolation.SQLSyntax
  */
 object SQLInterpolationMacro {
 
-  def selectDynamic[E: c.WeakTypeTag](c: Context)(name: c.Expr[String]): c.Expr[SQLSyntax] = {
+  def selectDynamic[E: c.WeakTypeTag](c: Context)(name: c.Tree): c.Tree = {
     import c.universe._
 
-    val nameOpt: Option[String] = name.tree match {
+    val nameOpt: Option[String] = name match {
       case Literal(Constant(value: String)) => Some(value)
       case _ => None
     }
 
     // primary constructor args of type E
-    val expectedNames = c.weakTypeOf[E].declarations.collectFirst {
+    val expectedNames = c.weakTypeOf[E].decls.collectFirst {
       case m: MethodSymbol if m.isPrimaryConstructor => m
     }.map { const =>
-      const.paramss.map { symbols: List[Symbol] => symbols.map(s => s.name.encoded.trim) }.flatten
+      const.paramLists.map { symbols: List[Symbol] => symbols.map(s => s.name.encodedName.toString.trim) }.flatten
     }.getOrElse(Nil)
 
     nameOpt.map { _name =>
@@ -30,7 +30,7 @@ object SQLInterpolationMacro {
       }
     }
 
-    c.Expr[SQLSyntax](Apply(Select(c.prefix.tree, newTermName("field")), List(name.tree)))
+    Apply(Select(c.prefix.tree, TermName("field")), List(name))
   }
 
 }

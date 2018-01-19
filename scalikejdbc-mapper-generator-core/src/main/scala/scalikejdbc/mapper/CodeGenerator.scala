@@ -215,53 +215,24 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   def classPart: String = {
     val defaultAutoSession = if (config.defaultAutoSession) s" = ${className}.autoSession" else ""
 
-    if (config.caseClassOnly || table.allColumns.size <= 22) {
-      val constructorArgs = table.allColumns.map {
-        c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
-      }.mkString("," + eol)
+    val constructorArgs = table.allColumns.map {
+      c => 1.indent + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
+    }.mkString("," + eol)
 
-      val baseTypes = {
-        val types = config.tableNameToBaseTypes(table.name)
-        if (types.isEmpty) ""
-        else types.mkString("extends ", " with ", " ")
-      }
-
-      s"""case class ${className}(
-        |${constructorArgs}) ${baseTypes}{
-        |
-        |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
-        |
-        |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
-        |
-        |}""".stripMargin + eol
-
-    } else {
-
-      val constructorArgs1 = table.allColumns.map {
-        c => 1.indent + "val " + c.nameInScala + ": " + c.typeInScala + (if (c.isNotNull) "" else " = None")
-      }.mkString(comma + eol)
-      val copyArgs = table.allColumns.map {
-        c => 2.indent + c.nameInScala + ": " + c.typeInScala + " = this." + c.nameInScala
-      }.mkString(comma + eol)
-      val constructorArgs3 = table.allColumns.map {
-        c => 3.indent + c.nameInScala + " = " + c.nameInScala
-      }.mkString(comma + eol)
-
-      s"""class ${className}(
-        |${constructorArgs1}) {
-        |
-        |  def copy(
-        |${copyArgs}): ${className} = {
-        |    new ${className}(
-        |${constructorArgs3})
-        |  }
-        |
-        |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
-        |
-        |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
-        |
-        |}""".stripMargin + eol
+    val baseTypes = {
+      val types = config.tableNameToBaseTypes(table.name)
+      if (types.isEmpty) ""
+      else types.mkString("extends ", " with ", " ")
     }
+
+    s"""case class ${className}(
+      |${constructorArgs}) ${baseTypes}{
+      |
+      |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
+      |
+      |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
+      |
+      |}""".stripMargin + eol
   }
 
   /**
@@ -381,7 +352,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         }) +
         eol +
         eol +
-        2.indent + (if (allColumns.size > 22) "new " else "") + className + "(" + eol +
+        2.indent + className + "(" + eol +
         (if (autoIncrement)
           table.autoIncrementColumns.headOption.map { c =>
           3.indent + c.nameInScala +

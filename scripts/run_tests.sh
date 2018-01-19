@@ -10,7 +10,6 @@ cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/sr
 mkdir -p logs
 
 sbt \
-  "++2.10.6! -v" \
   clean \
   core/test \
   joda-time/test \

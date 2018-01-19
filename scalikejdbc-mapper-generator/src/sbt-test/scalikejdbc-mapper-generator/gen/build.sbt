@@ -49,20 +49,9 @@ testOptions in Test += {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.12.4", "2.11.12", "2.10.6")
+crossScalaVersions := List("2.12.4", "2.11.12")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
-
-val specs2Version = Def.setting {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 10)) =>
-      // specs2 4 does not support Scala 2.10
-      // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
-      "3.9.5"
-    case _ =>
-      System.getProperty("specs2.version")
-  }
-}
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"     %% "scalikejdbc"                      % scalikejdbcVersion,
@@ -74,7 +63,7 @@ libraryDependencies ++= Seq(
   "mysql"               %  "mysql-connector-java"             % System.getProperty("mysql.version"),
   "org.postgresql"      %  "postgresql"                       % System.getProperty("postgresql.version"),
   "org.scalatest"       %% "scalatest"                        % System.getProperty("scalatest.version") % "test",
-  "org.specs2"          %% "specs2-core"                      % specs2Version.value % "test"
+  "org.specs2"          %% "specs2-core"                      % System.getProperty("specs2.version") % "test"
 )
 
 TaskKey[Unit]("generateCodeForIssue339") := {

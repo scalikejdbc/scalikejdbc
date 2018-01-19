@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import scala.language.experimental.macros
-import scalikejdbc.MacroCompatible.Context
+import scala.reflect.macros.blackbox.Context
 
 object autoColumns {
 

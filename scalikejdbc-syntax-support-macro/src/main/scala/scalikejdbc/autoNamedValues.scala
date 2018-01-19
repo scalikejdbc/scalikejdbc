@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import scala.language.experimental.macros
-import scalikejdbc.MacroCompatible.Context
+import scala.reflect.macros.blackbox.Context
 
 object autoNamedValues {
   def apply_impl[E: c.WeakTypeTag](c: Context)(entity: c.Expr[E], column: c.Expr[ColumnName[E]], excludes: c.Expr[String]*): c.Expr[Map[SQLSyntax, ParameterBinder]] = {

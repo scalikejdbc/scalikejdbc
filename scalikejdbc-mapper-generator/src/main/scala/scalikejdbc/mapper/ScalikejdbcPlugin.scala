@@ -47,7 +47,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       template: String,
       testTemplate: String,
       lineBreak: String,
-      caseClassOnly: Boolean,
+      @deprecated("will be removed", "3.3.0") caseClassOnly: Boolean,
       encoding: String,
       autoConstruct: Boolean,
       defaultAutoSession: Boolean,
@@ -90,7 +90,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] final val TEMPLATE = GENERATOR + "template"
   private[this] final val TEST_TEMPLATE = GENERATOR + "testTemplate"
   private[this] final val LINE_BREAK = GENERATOR + "lineBreak"
-  private[this] final val CASE_CLASS_ONLY = GENERATOR + "caseClassOnly"
   private[this] final val ENCODING = GENERATOR + "encoding"
   private[this] final val AUTO_CONSTRUCT = GENERATOR + "autoConstruct"
   private[this] final val DEFAULT_AUTO_SESSION = GENERATOR + "defaultAutoSession"
@@ -104,7 +103,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] val jdbcKeys = Set(
     JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA)
   private[this] val generatorKeys = Set(
-    PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK, CASE_CLASS_ONLY,
+    PACKAGE_NAME, TEMPLATE, TEST_TEMPLATE, LINE_BREAK,
     ENCODING, AUTO_CONSTRUCT, DEFAULT_AUTO_SESSION, DATETIME_CLASS, RETURN_COLLECTION_TYPE,
     VIEW, TABLE_NAMES_TO_SKIP, BASE_TYPES, COMPANION_BASE_TYPES)
   private[this] val allKeys = jdbcKeys ++ generatorKeys
@@ -134,7 +133,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       template = getString(props, TEMPLATE).getOrElse(defaultConfig.template.name),
       testTemplate = getString(props, TEST_TEMPLATE).getOrElse(GeneratorTestTemplate.specs2unit.name),
       lineBreak = getString(props, LINE_BREAK).getOrElse(defaultConfig.lineBreak.name),
-      caseClassOnly = getString(props, CASE_CLASS_ONLY).map(_.toBoolean).getOrElse(defaultConfig.caseClassOnly),
+      caseClassOnly = defaultConfig.caseClassOnly,
       encoding = getString(props, ENCODING).getOrElse(defaultConfig.encoding),
       autoConstruct = getString(props, AUTO_CONSTRUCT).map(_.toBoolean).getOrElse(defaultConfig.autoConstruct),
       defaultAutoSession = getString(props, DEFAULT_AUTO_SESSION).map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),

@@ -1,7 +1,6 @@
 language: scala
 
 scala:
-  - 2.10.6
   - 2.11.12
   - 2.12.4
 
@@ -46,13 +45,11 @@ env:
 matrix:
   include:
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="0.13.16"
+      env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="1.1.0"
+      env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="postgresql" TEST_SBT_VERSION="1.1.0"
-    - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="h2" TEST_SBT_VERSION="1.1.0"
+      env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.4
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.4
