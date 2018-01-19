@@ -58,13 +58,6 @@ If you're already allowed to release ScalikeJDBC libs, use your own Sonatype acc
 credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", "xxx", "yyy")
 ```
 
-- $HOME/.sbt/1.0/plugins/gpg.sbt
-
-```scala
-// Use latest version
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
-```
-
 #### Operations
 
 The release manager is @seratch. Currently, all the following operations should be done by @seratch.
