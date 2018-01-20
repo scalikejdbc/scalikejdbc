@@ -64,12 +64,12 @@ Seq("Alice", "Bob", "Chris") foreach { name =>
 val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
 
 // define an entity object and extractor
-import org.joda.time._
+import java.time._
 case class Member(id: Long, name: Option[String], createdAt: DateTime)
 object Member extends SQLSyntaxSupport[Member] {
   override val tableName = "members"
   def apply(rs: WrappedResultSet): Member = new Member(
-    rs.long("id"), rs.stringOpt("name"), rs.jodaDateTime("created_at"))
+    rs.long("id"), rs.stringOpt("name"), rs.zonedDateTime("created_at"))
 }
 
 // find all Members
