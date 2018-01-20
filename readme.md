@@ -65,7 +65,7 @@ val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).l
 
 // define an entity object and extractor
 import java.time._
-case class Member(id: Long, name: Option[String], createdAt: DateTime)
+case class Member(id: Long, name: Option[String], createdAt: ZonedDateTime)
 object Member extends SQLSyntaxSupport[Member] {
   override val tableName = "members"
   def apply(rs: WrappedResultSet): Member = new Member(
