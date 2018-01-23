@@ -1,18 +1,9 @@
 > createTestDatabase
 
 > set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = false)}
-> set scalaVersion :="2.10.6"
-> scalikejdbcGenEcho twenty_three
-> scalikejdbcGenForce twenty_three
-> compile
-> test:compile
-
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(caseClassOnly = true)}
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 
--> compile
 > set scalaVersion :="2.11.12"
 > compile
 > test:compile

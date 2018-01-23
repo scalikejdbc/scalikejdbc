@@ -38,16 +38,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.4",
-  specs2Version := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 10)) =>
-        // specs2 4 does not support Scala 2.10
-        // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
-        "3.9.5"
-      case _ =>
-        "4.0.2"
-    }
-  },
+  specs2Version := "4.0.2",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
@@ -243,8 +234,7 @@ lazy val scalikejdbcMapperGenerator = Project(
 ).settings(
   baseSettings,
   sbtPlugin := true,
-  crossSbtVersions := Vector("0.13.16", "1.1.0"),
-  resolvers += Classpaths.sbtPluginReleases, // for sbt 0.13 test
+  crossSbtVersions := sbtVersion.value :: Nil,
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
     a => Seq("-XX","-Xss").exists(a.startsWith)
@@ -326,7 +316,7 @@ lazy val scalikejdbcStreams = Project(
       case Some((2, v)) if v >= 12 =>
         (sourceDirectory in Compile).value / "scala2.12"
       case _ =>
-        (sourceDirectory in Compile).value / "scala2.10"
+        (sourceDirectory in Compile).value / "scala2.11"
     }
   }
 ).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
@@ -338,28 +328,13 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
 ).settings(
   baseSettings,
   name := "scalikejdbc-syntax-support-macro",
-  unmanagedSourceDirectories in Compile += {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 10)) =>
-        (sourceDirectory in Compile).value / "scala2.10"
-      case _ =>
-        (sourceDirectory in Compile).value / "scala2.11"
-    }
-  },
   libraryDependencies ++= {
     Seq(
       "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope ++ macroDependenciesInCompileScope(scalaVersion.value)
+    ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
   }
 ).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
-
-def macroDependenciesInCompileScope(scalaVersion: String) = {
-  if (scalaVersion.startsWith("2.10")) Seq(
-    "org.scalamacros" % "quasiquotes_2.10" % "2.1.0" % "compile",
-    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-  ) else Seq()
-}
 
 def _publishTo(v: String) = {
   val nexus = "https://oss.sonatype.org/"
