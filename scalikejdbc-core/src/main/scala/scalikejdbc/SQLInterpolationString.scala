@@ -7,7 +7,7 @@ private[scalikejdbc] object LastParameter
 /**
  * SQLInterpolation definition
  */
-class SQLInterpolationString(val s: StringContext) extends AnyVal {
+class SQLInterpolationString(private val s: StringContext) extends AnyVal {
 
   import scalikejdbc.interpolation.SQLSyntax
 
