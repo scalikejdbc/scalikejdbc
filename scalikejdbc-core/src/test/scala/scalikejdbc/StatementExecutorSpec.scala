@@ -3,6 +3,7 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import java.sql.PreparedStatement
+import scala.reflect.runtime.{ universe => ru }
 
 class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
 
@@ -21,9 +22,11 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
     val template: String = "select id, name from members where id = ? and name = ?"
     val params: Seq[Any] = Seq(1, "name1")
     val instance = new StatementExecutor(underlying, template, DBConnectionAttributes(), params)
-    val m = instance.getClass.getDeclaredMethod("sqlString$lzycompute")
-    m.setAccessible(true)
-    m.invoke(instance) should equal("select id, name from members where id = 1 and name = 'name1'")
+    val runtimeMirror = ru.runtimeMirror(instance.getClass.getClassLoader)
+    val instanceMirror = runtimeMirror.reflect(instance)
+    val method = ru.typeOf[StatementExecutor].member(ru.newTermName("sqlString")).asMethod
+    val m = instanceMirror.reflectMethod(method)
+    m.apply() should equal("select id, name from members where id = 1 and name = 'name1'")
   }
 
 }
