@@ -6,7 +6,7 @@ package jodatime
  *
  * @param millis the milliseconds from 1970-01-01T00:00:00Z
  */
-class JodaUnixTimeInMillisConverter(val millis: Long) extends AnyVal {
+class JodaUnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
 
   def toJodaDateTime: org.joda.time.DateTime = new org.joda.time.DateTime(millis)
 

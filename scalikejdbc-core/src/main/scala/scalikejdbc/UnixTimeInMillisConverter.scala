@@ -7,7 +7,7 @@ import java.util.Calendar
  *
  * @param millis the milliseconds from 1970-01-01T00:00:00Z
  */
-class UnixTimeInMillisConverter(val millis: Long) extends AnyVal {
+class UnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
 
   // --------------------
   // java.util.Date

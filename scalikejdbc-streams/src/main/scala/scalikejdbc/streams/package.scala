@@ -36,7 +36,7 @@ package object streams {
    * }
    * }}}
    */
-  implicit class EnableDBCodeBlockToProvideDatabasePublisher(val db: DB.type) extends AnyVal {
+  implicit class EnableDBCodeBlockToProvideDatabasePublisher(private val db: DB.type) extends AnyVal {
 
     def readOnlyStream[A](sql: StreamReadySQL[A])(implicit
       executionContext: ExecutionContext,
@@ -56,7 +56,7 @@ package object streams {
    * }
    * }}}
    */
-  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(val db: NamedDB) extends AnyVal {
+  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(private val db: NamedDB) extends AnyVal {
 
     def readOnlyStream[A, E <: WithExtractor](sql: StreamReadySQL[A])(implicit
       executionContext: ExecutionContext,
@@ -75,7 +75,7 @@ package object streams {
    * }
    * }}}
    */
-  implicit class FromSQLToStreamSQLConverter[A, E <: WithExtractor](val sql: SQL[A, E]) extends AnyVal {
+  implicit class FromSQLToStreamSQLConverter[A, E <: WithExtractor](private val sql: SQL[A, E]) extends AnyVal {
 
     def iterator()(
       implicit

@@ -6,7 +6,7 @@ import org.joda.time.LocalTime
  * org.joda.time.LocalTime converter.
  * @param value LocalTime object
  */
-class LocalTimeConverter(val value: LocalTime) extends AnyVal {
+class LocalTimeConverter(private val value: LocalTime) extends AnyVal {
 
   def toSqlTime: java.sql.Time = new java.sql.Time(value.toDateTimeToday.getMillis)
 
