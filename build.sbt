@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.2.0-SNAPSHOT"
+lazy val _version = "3.2.0"
 
 lazy val _organization = "org.scalikejdbc"
 
@@ -116,7 +116,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
     "joda-time" % "joda-time" % "2.9.9",
-    "org.joda" % "joda-convert" % "1.8.2"
+    "org.joda" % "joda-convert" % "1.9.2"
   )
 ).dependsOn(
   scalikejdbcLibrary,
