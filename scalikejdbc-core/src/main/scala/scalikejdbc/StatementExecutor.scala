@@ -152,7 +152,7 @@ case class StatementExecutor(
             case Some(p) => normalize(p)
             case p: String => p
             case p: java.util.Date => p.toSqlTimestamp.toString
-            case _ =>
+            case p =>
               param.getClass().getCanonicalName match {
                 case "org.joda.time.DateTime" =>
                   param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp.toString
@@ -163,7 +163,7 @@ case class StatementExecutor(
                 case "org.joda.time.LocalTime" =>
                   val millis = param.asInstanceOf[{ def toDateTimeToday: { def getMillis: Long } }].toDateTimeToday.getMillis
                   new java.sql.Time(millis)
-                case p => p
+                case _ => p
               }
           }
         }
