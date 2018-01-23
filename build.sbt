@@ -47,8 +47,6 @@ lazy val baseSettings = Seq(
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 11)) =>
         "-target:jvm-1.8" :: Nil
-      case Some((2, 10)) =>
-        "-target:jvm-1.7" :: Nil
       case _ =>
         Nil
     }
@@ -157,6 +155,7 @@ lazy val scalikejdbcCore = Project(
       // scope: compile
       "org.apache.commons"      %  "commons-dbcp2"   % "2.2.0"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
+      "org.scala-lang.modules"  %% "scala-parser-combinators" % "1.0.6"  % "compile",
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
@@ -165,16 +164,7 @@ lazy val scalikejdbcCore = Project(
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
-    ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6" % "compile")
-      case Some((2, 10)) =>
-        libraryDependencies.value ++ Seq(
-          compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-          "org.scalamacros" %% "quasiquotes" % "2.1.0" cross CrossVersion.binary)
-      case _ =>
-        Nil
-    }) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
+    ) ++ scalaTestDependenciesInTestScope(scalatestVersion.value) ++ jdbcDriverDependenciesInTestScope
   }
 ).enablePlugins(BuildInfoPlugin).disablePlugins(ScriptedPlugin)
 
