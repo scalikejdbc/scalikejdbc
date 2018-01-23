@@ -55,19 +55,19 @@ s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
     if (result.contains(o)) {
       ${(1 to n).map("to" + _).mkString("(", " orElse ", ")")}.map { _ =>
         val (${(1 to n).map("ts" + _).mkString(", ")}) = result.apply(o)
-        result += (o -> (
+        result += (o -> ((
 ${(1 to n).map{i =>
 s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
           }.mkString(",\n")}
-        ))
+        )))
       }.getOrElse(result)
     } else {
       result += (
-        o -> (
+        o -> ((
 ${(1 to n).map{i =>
 s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
           }.mkString(",\n")}
-        )
+        ))
       )
     }
   }

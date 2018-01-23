@@ -19,12 +19,12 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
     if (result.contains(o)) {
       to1.orElse(to2).map { _ =>
         val (ts1, ts2) = result.apply(o)
-        result += (o -> (
+        result += ((o -> ((
           to1.map(t => if (ts1.contains(t)) ts1 else ts1 :+ t).getOrElse(ts1),
-          to2.map(t => if (ts2.contains(t)) ts2 else ts2 :+ t).getOrElse(ts2)))
+          to2.map(t => if (ts2.contains(t)) ts2 else ts2 :+ t).getOrElse(ts2)))))
       }.getOrElse(result)
     } else {
-      result += (o -> (to1.map(t => Vector(t)).getOrElse(Vector()), to2.map(t => Vector(t)).getOrElse(Vector())))
+      result += ((o -> ((to1.map(t => Vector(t)).getOrElse(Vector()), to2.map(t => Vector(t)).getOrElse(Vector())))))
     }
   }
 

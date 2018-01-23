@@ -859,13 +859,13 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
 
   it should "cache columns" in {
     SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
-      .get(Order.connectionPoolName, Order.tableName).value.values.forall(_.nonEmpty) should be(true)
+      .get(Order.connectionPoolName -> Order.tableName).value.values.forall(_.nonEmpty) should be(true)
   }
 
   it should "clear loaded columns" in {
     Order.clearLoadedColumns()
     SQLSyntaxSupportFeature.SQLSyntaxSupportCachedColumns
-      .get(Order.connectionPoolName, Order.tableName).value.values.forall(_.isEmpty) should be(true)
+      .get(Order.connectionPoolName -> Order.tableName).value.values.forall(_.isEmpty) should be(true)
 
     SQLSyntaxSupport.clearLoadedColumns(ConnectionPool.DEFAULT_NAME)
     SQLSyntaxSupport.clearAllLoadedColumns()

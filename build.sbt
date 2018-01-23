@@ -365,7 +365,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
 
-val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
+val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture", "-Yno-adapted-args")
 val _pomExtra = <url>http://scalikejdbc.org/</url>
     <licenses>
       <license>
