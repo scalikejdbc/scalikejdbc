@@ -20,6 +20,14 @@ class SQLSyntaxSpec extends FlatSpec with Matchers {
     s.parameters should equal(Seq(123))
   }
 
+  it should "have #+" in {
+    val baseSql = sqls"select id from users"
+    val whereSql = SQLSyntax.eq(sqls"where id", 234)
+    val s = baseSql + whereSql
+    s.value should equal("select id from users  where id = ?")
+    s.parameters should equal(Seq(234))
+  }
+
   it should "have #join" in {
     val s = SQLSyntax.join(Seq(sqls"id", sqls"name"), sqls"and")
     s.value should equal("id and name")
