@@ -15,8 +15,8 @@ import scala.annotation.implicitNotFound
 
   (example1)
     implicit val intParameterBinderFactory: ParameterBinderFactory[Int] = ParameterBinderFactory {
-       value => (stmt, idx) => stmt.setInt(idx, value)
-     }
+      value => (stmt, idx) => stmt.setInt(idx, value)
+    }
 
   (example2)
     case class Price(value: Int)
