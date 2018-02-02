@@ -147,6 +147,7 @@ case class StatementExecutor(
         @annotation.tailrec
         def normalize(param: Any): Any = {
           param match {
+            case null => null
             case ParameterBinder(v) => normalize(v)
             case None => null
             case Some(p) => normalize(p)
