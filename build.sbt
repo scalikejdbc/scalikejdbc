@@ -18,6 +18,7 @@ lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "5.2.12.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
+lazy val parserCombinatorsVersion = settingKey[String]("")
 lazy val mockitoVersion = "2.13.0"
 
 def gitHash: String = try {
@@ -39,6 +40,14 @@ lazy val baseSettings = Seq(
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.4",
   specs2Version := "4.0.2",
+  parserCombinatorsVersion := {
+    // parser-combinators 1.1.0 for Scala 2.13.0-M2 does not exists
+    // TODO remove this line when drop Scala 2.13.0-M2 and update Scala 2.13.0-M3
+    if(scalaVersion.value == "2.13.0-M2")
+      "1.0.6"
+    else
+      "1.1.0"
+  },
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
@@ -155,7 +164,7 @@ lazy val scalikejdbcCore = Project(
       // scope: compile
       "org.apache.commons"      %  "commons-dbcp2"   % "2.2.0"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
-      "org.scala-lang.modules"  %% "scala-parser-combinators" % "1.0.6"  % "compile",
+      "org.scala-lang.modules"  %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
