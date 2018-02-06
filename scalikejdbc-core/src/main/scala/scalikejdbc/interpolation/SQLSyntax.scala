@@ -34,6 +34,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   }
 
   def append(syntax: SQLSyntax): SQLSyntax = sqls"${this} ${syntax}"
+  def +(syntax: SQLSyntax): SQLSyntax = this.append(syntax)
 
   def groupBy(columns: SQLSyntax*): SQLSyntax = {
     if (columns.isEmpty) this else sqls"${this} group by ${csv(columns: _*)}"
