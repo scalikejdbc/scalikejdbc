@@ -1,0 +1,16 @@
+ScalikeJDBC 3.2.1 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #824 Fix sqlString to print not param type but param value by @zaneli
+- [core] #831 Backporting #829 to 3.2 series by @larochef
+- [core] #832 Backporting #826 add plus method for SQLSyntax by @t-mochizuki
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
