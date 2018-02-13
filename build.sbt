@@ -38,16 +38,9 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.4",
+  scalatestVersion := "3.0.5-M1",
   specs2Version := "4.0.2",
-  parserCombinatorsVersion := {
-    // parser-combinators 1.1.0 for Scala 2.13.0-M2 does not exists
-    // TODO remove this line when drop Scala 2.13.0-M2 and update Scala 2.13.0-M3
-    if(scalaVersion.value == "2.13.0-M2")
-      "1.0.6"
-    else
-      "1.1.0"
-  },
+  parserCombinatorsVersion := "1.1.0",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
