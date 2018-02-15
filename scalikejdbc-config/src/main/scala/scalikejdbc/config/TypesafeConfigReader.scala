@@ -98,13 +98,13 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
 
   def loadGlobalSettings(): Unit = {
     readConfig(config, envPrefix + "scalikejdbc.global").foreach { globalConfig =>
-      GlobalSettings.loggingSQLErrors = readBoolean(globalConfig, "loggingSQLErrors").getOrElse(false)
-      GlobalSettings.loggingConnections = readBoolean(globalConfig, "loggingConnections").getOrElse(false)
+      GlobalSettings.loggingSQLErrors = readBoolean(globalConfig, "loggingSQLErrors").getOrElse(GlobalSettings.loggingSQLErrors)
+      GlobalSettings.loggingConnections = readBoolean(globalConfig, "loggingConnections").getOrElse(GlobalSettings.loggingConnections)
 
       for {
         logConfig <- readConfig(globalConfig, "loggingSQLAndTime")
       } {
-        val enabled = readBoolean(logConfig, "enabled").getOrElse(false)
+        val enabled = readBoolean(logConfig, "enabled").getOrElse(GlobalSettings.loggingSQLAndTime.enabled)
         if (enabled) {
           val default = LoggingSQLAndTimeSettings()
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(

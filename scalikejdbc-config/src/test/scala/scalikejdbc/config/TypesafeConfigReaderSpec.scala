@@ -14,6 +14,10 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
     override lazy val config: Config = ConfigFactory.load("empty.conf")
   }
 
+  val emptyGlobalConfigReader = new TypesafeConfigReader with TypesafeConfig {
+    override lazy val config: Config = ConfigFactory.load("application-empty-global.conf")
+  }
+
   val badConfigReader = new TypesafeConfigReader with TypesafeConfig {
     override lazy val config: Config = ConfigFactory.load("application-bad.conf")
   }
@@ -221,6 +225,17 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
       describe("When the config file is empty") {
         it("should not throw Exception") {
           emptyConfigReader.loadGlobalSettings()
+        }
+
+        it("set default value(true) to logging settings") {
+          emptyConfigReader.loadGlobalSettings()
+          GlobalSettings.loggingSQLErrors should be(true)
+          GlobalSettings.loggingConnections should be(true)
+          GlobalSettings.loggingSQLAndTime.enabled should be(true)
+          emptyGlobalConfigReader.loadGlobalSettings()
+          GlobalSettings.loggingSQLErrors should be(true)
+          GlobalSettings.loggingConnections should be(true)
+          GlobalSettings.loggingSQLAndTime.enabled should be(true)
         }
       }
     }
