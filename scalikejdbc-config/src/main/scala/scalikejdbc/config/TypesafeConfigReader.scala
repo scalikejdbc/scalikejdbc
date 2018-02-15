@@ -97,24 +97,28 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
   }
 
   def loadGlobalSettings(): Unit = {
-    for {
-      globalConfig <- readConfig(config, envPrefix + "scalikejdbc.global")
-      logConfig <- readConfig(globalConfig, "loggingSQLAndTime")
-    } {
-      val enabled = readBoolean(logConfig, "enabled").getOrElse(false)
-      if (enabled) {
-        val default = LoggingSQLAndTimeSettings()
-        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
-          enabled = enabled,
-          singleLineMode = readBoolean(logConfig, "singleLineMode").getOrElse(default.singleLineMode),
-          printUnprocessedStackTrace = readBoolean(logConfig, "printUnprocessedStackTrace").getOrElse(default.printUnprocessedStackTrace),
-          stackTraceDepth = readInt(logConfig, "stackTraceDepth").getOrElse(default.stackTraceDepth),
-          logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
-          warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
-          warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
-          warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel))
-      } else {
-        GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
+    readConfig(config, envPrefix + "scalikejdbc.global").foreach { globalConfig =>
+      GlobalSettings.loggingSQLErrors = readBoolean(globalConfig, "loggingSQLErrors").getOrElse(false)
+      GlobalSettings.loggingConnections = readBoolean(globalConfig, "loggingConnections").getOrElse(false)
+
+      for {
+        logConfig <- readConfig(globalConfig, "loggingSQLAndTime")
+      } {
+        val enabled = readBoolean(logConfig, "enabled").getOrElse(false)
+        if (enabled) {
+          val default = LoggingSQLAndTimeSettings()
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+            enabled = enabled,
+            singleLineMode = readBoolean(logConfig, "singleLineMode").getOrElse(default.singleLineMode),
+            printUnprocessedStackTrace = readBoolean(logConfig, "printUnprocessedStackTrace").getOrElse(default.printUnprocessedStackTrace),
+            stackTraceDepth = readInt(logConfig, "stackTraceDepth").getOrElse(default.stackTraceDepth),
+            logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
+            warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
+            warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
+            warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel))
+        } else {
+          GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
+        }
       }
     }
   }

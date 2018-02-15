@@ -203,6 +203,14 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
         TypesafeConfigReader.loadGlobalSettings()
       }
 
+      it("should load global settings loggingSQLErrors & loggingConnections") {
+        GlobalSettings.loggingSQLErrors = false
+        GlobalSettings.loggingConnections = false
+        TypesafeConfigReader.loadGlobalSettings()
+        GlobalSettings.loggingSQLErrors should be(true)
+        GlobalSettings.loggingConnections should be(true)
+      }
+
       describe("When the format of config file is bad") {
         it("should not throw Exception") {
           badConfigReader.loadGlobalSettings()
