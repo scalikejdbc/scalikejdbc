@@ -45,6 +45,24 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
         params = Seq(123))
       sql should equal("select * from users where id = 123")
     }
+
+    // Handle escaped question marks when printing queries.
+    //  Postgres has some operators for working with JSON data that include `?`.
+    //    As a result, its JDBC driver treats `??` as an escaped question mark,
+    //  rather than two parameter placeholders, so that these operators can be used
+    //  in prepared statements.  Scalikejdbc mostly handles this correctly except
+    //  that the queries it logs for debugging purposes do not correctly account
+    //  for this and instead treat `??` as two parameters.  This PR fixes that.
+    //
+    //  I don't think this will do any harm when used with non-Postgres JDBC
+    //    drivers because `??` is not sensical as two parameter placeholders anyway.
+    {
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = "select id, data from some_table where data ?? ?",
+        settingsProvider = SettingsProvider.default,
+        params = Seq("key"))
+      sql should equal("select id, data from some_table where data ?? 'key'")
+    }
   }
 
 }
