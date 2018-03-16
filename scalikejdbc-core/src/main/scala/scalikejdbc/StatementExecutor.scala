@@ -189,28 +189,26 @@ case class StatementExecutor(
         case i => trimSpaces(s.replaceAll("  ", " "), i + 1)
       }
 
-      var isInsideOfText = false
-      val sql = trimSpaces(SQLTemplateParser.trimComments(template)
-        .replaceAll("\r", " ")
-        .replaceAll("\n", " ")
-        .replaceAll("\t", " "))
-        .map { c =>
-          if (c == '\'') {
-            isInsideOfText = !isInsideOfText
-            c
-          } else if (!isInsideOfText && c == '?') {
-            i += 1
-            if (params.size >= i) {
-              toPrintable(params(i - 1))
-            } else {
-              // In this case, SQLException will be thrown later.
-              // At least, throwing java.lang.IndexOutOfBoundsException here is meaningless.
-              c
-            }
+      // Find ? placeholders, but ignore ?? because that's an escaped question mark.
+      val substituteRegex = "(?<!\\?)(\\?)(?!\\?)".r
+
+      val sqlWithPlaceholders = trimSpaces(SQLTemplateParser.trimComments(template)
+        .replaceAll("[\r\n\t]", " "))
+
+      val sql = sqlWithPlaceholders.split('\'').zipWithIndex.map {
+        // Even numbered parts are outside quotes, odd numbered are inside
+        case (s, quoteCount) if (quoteCount % 2 == 0) => substituteRegex.replaceAllIn(s, m => {
+          i += 1
+          if (params.size >= i) {
+            toPrintable(params(i - 1))
           } else {
-            c
+            // In this case, SQLException will be thrown later.
+            // At least, throwing java.lang.IndexOutOfBoundsException here is meaningless.
+            m.source.toString()
           }
-        }.mkString
+        })
+        case (s, quoteCount) if (quoteCount % 2 == 1) => s
+      }.mkString
 
       try {
         settingsProvider.sqlFormatter(GlobalSettings.sqlFormatter).formatter match {
