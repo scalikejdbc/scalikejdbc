@@ -139,14 +139,14 @@ run_sbt "console"
 echo 'scalaVersion := "2.11.12"
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"    %% "scalikejdbc"         % "2.3.2",
-  "org.slf4j"          % "slf4j-simple"         % "1.7.13",
-  "com.h2database"     % "h2"                   % "1.4.190",
-  "org.apache.derby"   % "derby"                % "10.12.1.1",
-  "org.xerial"         % "sqlite-jdbc"          % "3.8.11.2",
-  "org.hsqldb"         % "hsqldb"               % "2.3.3",
-  "mysql"              % "mysql-connector-java" % "5.1.38",
-  "org.postgresql"     % "postgresql"           % "9.4-1201-jdbc41"
+  "org.scalikejdbc"    %% "scalikejdbc"         % "3.2.1",
+  "org.slf4j"          % "slf4j-simple"         % "1.7.25",
+  "com.h2database"     % "h2"                   % "1.4.196",
+  "org.apache.derby"   % "derby"                % "10.14.1.0",
+  "org.xerial"         % "sqlite-jdbc"          % "3.21.0.1",
+  "org.hsqldb"         % "hsqldb"               % "2.4.0",
+  "mysql"              % "mysql-connector-java" % "5.1.45",
+  "org.postgresql"     % "postgresql"           % "9.4.1212"
 )
 
 initialCommands := {

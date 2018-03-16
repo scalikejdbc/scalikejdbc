@@ -120,14 +120,14 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo scalaVersion := "2.11.12"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "2.3.2",
->>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.13",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.190",
->>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.12.1.1",
->>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.8.11.2",
->>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.3.3",
->>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.38",
->>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "9.4-1201-jdbc41"
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.2.1",
+>>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.25",
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.196",
+>>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.1.0",
+>>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.21.0.1",
+>>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.4.0",
+>>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.45",
+>>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "9.4.1212"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
