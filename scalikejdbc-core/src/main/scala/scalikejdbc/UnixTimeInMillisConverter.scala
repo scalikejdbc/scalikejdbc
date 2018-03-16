@@ -37,7 +37,7 @@ class UnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
 
   def toLocalTimeWithZoneId(zoneId: java.time.ZoneId): java.time.LocalTime = toInstant.atZone(zoneId).toLocalTime
 
-  def toLocalTime: java.time.LocalTime = toInstant.atZone(defaultZoneId).toLocalTime
+  def toLocalTime: java.time.LocalTime = toInstant.atOffset(java.time.ZoneOffset.UTC).toLocalTime
 
   def toLocalDateTimeWithZoneId(zoneId: java.time.ZoneId): java.time.LocalDateTime = toInstant.atZone(zoneId).toLocalDateTime
 
