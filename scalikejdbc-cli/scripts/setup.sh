@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.9/sbt-launch.jar
+wget https://oss.sonatype.org/content/repositories/releases/org/scala-sbt/sbt-launch/1.1.1/sbt-launch.jar
 
 mkdir -p ./db
 cd ./db
@@ -151,7 +151,7 @@ libraryDependencies ++= Seq(
 
 initialCommands := {
   def using[A, R <: { def close() }](r : R)(f : R => A) : A = try { f(r) } finally { r.close() }
-  def readFileAsString(file: File): String = using (io.Source.fromFile(file)) { _.mkString }
+  def readFileAsString(file: File): String = using (_root_.scala.io.Source.fromFile(file)) { _.mkString }
   readFileAsString(new File("init/init.scala")) +
   ";" +
   new File("init").listFiles.filter(f => f.isFile && f.getName != "init.scala").map(f => readFileAsString(f)).mkString("\\n")
