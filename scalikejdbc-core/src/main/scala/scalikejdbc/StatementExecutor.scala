@@ -188,8 +188,7 @@ case class StatementExecutor(
       case p: java.time.LocalDate =>
         underlying.setDate(i, java.sql.Date.valueOf(p))
       case p: java.time.LocalTime =>
-        val offset = java.time.OffsetDateTime.now.getOffset
-        val millis = p.atDate(StatementExecutor.LocalDateEpoch).toInstant(offset).toEpochMilli
+        val millis = p.atDate(StatementExecutor.LocalDateEpoch).atZone(java.time.ZoneId.systemDefault).toInstant.toEpochMilli
         val time = new java.sql.Time(millis)
         underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
