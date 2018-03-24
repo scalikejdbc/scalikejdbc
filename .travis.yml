@@ -46,13 +46,13 @@ env:
 matrix:
   include:
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="0.13.16"
+      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="0.13.17"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="1.1.0"
+      env: SCALIKEJDBC_DATABASE="mysql" TEST_SBT_VERSION="1.1.1"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="postgresql" TEST_SBT_VERSION="1.1.0"
+      env: SCALIKEJDBC_DATABASE="postgresql" TEST_SBT_VERSION="1.1.1"
     - scala: scripted-test
-      env: SCALIKEJDBC_DATABASE="h2" TEST_SBT_VERSION="1.1.0"
+      env: SCALIKEJDBC_DATABASE="h2" TEST_SBT_VERSION="1.1.1"
     - scala: 2.12.5
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.5

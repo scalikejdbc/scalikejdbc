@@ -37,7 +37,7 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.4",
+  scalatestVersion := "3.0.5",
   specs2Version := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 10)) =>
@@ -243,7 +243,7 @@ lazy val scalikejdbcMapperGenerator = Project(
 ).settings(
   baseSettings,
   sbtPlugin := true,
-  crossSbtVersions := Vector("0.13.16", "1.1.0"),
+  crossSbtVersions := Vector("0.13.17", "1.1.1"),
   resolvers += Classpaths.sbtPluginReleases, // for sbt 0.13 test
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
