@@ -1,0 +1,19 @@
+ScalikeJDBC 3.2.2 is out for Scala 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #850 #663 Handle escaped question marks when printing queries by @kring
+- [core] #849 #848 Fix SQLInterpolation of java.time.LocalTime to deal with DST by @tanishiking
+- [core] #852 #842 Enable scalikejdbc.Log#withLevel to pass throwable to logging methods by @tanishiking
+- [core] #853 #843 Suppress CP debug log #780 by @todokr
+- [core] #854 #838 Add more support for logging global settings to scalikejdbc-config by @yoskhdia
+- [core] #855 library dependencies upgrades by @seratch
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
