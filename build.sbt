@@ -6,19 +6,19 @@ lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.25"
-lazy val _typesafeConfigVersion = "1.3.2"
+lazy val _typesafeConfigVersion = "1.3.3"
 lazy val _reactiveStreamsVersion = "1.0.2"
 
 // internal only
 lazy val _logbackVersion = "1.2.3"
-lazy val _h2Version = "1.4.196"
+lazy val _h2Version = "1.4.197"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-lazy val _mysqlVersion = "5.1.45"
+lazy val _mysqlVersion = "5.1.46"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.2.12.Final"
+lazy val _hibernateVersion = "5.2.16.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
-lazy val mockitoVersion = "2.13.0"
+lazy val mockitoVersion = "2.16.0"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -45,7 +45,7 @@ lazy val baseSettings = Seq(
         // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
         "3.9.5"
       case _ =>
-        "4.0.2"
+        "4.0.3"
     }
   },
   //scalaVersion := "2.11.12",
@@ -116,7 +116,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
     "joda-time" % "joda-time" % "2.9.9",
-    "org.joda" % "joda-convert" % "1.9.2"
+    "org.joda" % "joda-convert" % "2.0.1"
   )
 ).dependsOn(
   scalikejdbcLibrary,
@@ -170,13 +170,13 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "2.7.6"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "2.7.8"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6" % "compile")
+        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.0" % "compile")
       case Some((2, 10)) =>
         libraryDependencies.value ++ Seq(
           compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
