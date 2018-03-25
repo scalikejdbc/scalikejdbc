@@ -15,7 +15,7 @@ class StatementExecutorSpec extends FunSpec with Matchers {
     it("should work with JSR-310 APIs") {
       implicit val session = NamedAutoSession('jsr310)
 
-      sql"create table accounts (id bigserial not null, birthday date not null, alert_time time not null, local_created_at timestamp not null, created_at timestamp not null, updated_at timestamp not null )"
+      sql"create table accounts (id bigserial not null, birthday date not null, alert_time time(3) not null, local_created_at timestamp not null, created_at timestamp not null, updated_at timestamp not null )"
         .execute.apply()
 
       val birthday = LocalDate.now
