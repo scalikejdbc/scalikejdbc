@@ -3,9 +3,9 @@
 set -e
 
 if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
-  if [[ "${TEST_SBT_VERSION}" = "0.13.16" ]]; then
+  if [[ "${TEST_SBT_VERSION}" = "0.13.17" ]]; then
     sbt \
-    '++ 2.12.4! -v' \
+    '++ 2.12.5! -v' \
     root211/publishLocal \
     '++ 2.11.12! -v' \
     root211/publishLocal \
@@ -25,7 +25,7 @@ if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   else
     sbt \
     "^^ $TEST_SBT_VERSION" \
-    '++ 2.12.4! -v' \
+    '++ 2.12.5! -v' \
     publishLocal \
     '++ 2.11.12! -v' \
     root211/publishLocal \
