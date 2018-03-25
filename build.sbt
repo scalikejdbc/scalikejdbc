@@ -37,7 +37,14 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.5",
+  scalatestVersion := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v >= 13 =>
+        "3.0.5-M1"
+      case _ =>
+        "3.0.5"
+    }
+  },
   specs2Version := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 10)) =>
@@ -45,8 +52,8 @@ lazy val baseSettings = Seq(
         // https://repo1.maven.org/maven2/org/specs2/specs2-core_2.10/
         "3.9.5"
       case Some((2, 13)) =>
-        // http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.specs2%22%20AND%20a%3A%22specs2-core_2.13.0-M2%22
-        "4.0.2"
+        // http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.specs2%22%20AND%20a%3A%22specs2-core_2.13.0-M3%22
+        "4.0.3"
       case _ =>
         "4.0.3"
     }
@@ -180,7 +187,7 @@ lazy val scalikejdbcCore = Project(
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, scalaMajor)) if scalaMajor >= 13 =>
-        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.7" % "compile")
+        Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.0" % "compile")
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
         Seq("org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.0" % "compile")
       case Some((2, 10)) =>
