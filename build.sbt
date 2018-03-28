@@ -6,20 +6,20 @@ lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.25"
-lazy val _typesafeConfigVersion = "1.3.2"
+lazy val _typesafeConfigVersion = "1.3.3"
 lazy val _reactiveStreamsVersion = "1.0.2"
 
 // internal only
 lazy val _logbackVersion = "1.2.3"
-lazy val _h2Version = "1.4.196"
+lazy val _h2Version = "1.4.197"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-lazy val _mysqlVersion = "5.1.45"
+lazy val _mysqlVersion = "5.1.46"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.2.12.Final"
+lazy val _hibernateVersion = "5.2.16.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "2.13.0"
+lazy val mockitoVersion = "2.17.0"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -38,8 +38,13 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.5-M1",
-  specs2Version := "4.0.2",
+  scalatestVersion := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v >= 13 => "3.0.5-M1"
+      case _ =>                       "3.0.5"
+    }
+  },
+  specs2Version := "4.0.3",
   parserCombinatorsVersion := "1.1.0",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
@@ -107,7 +112,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
     "joda-time" % "joda-time" % "2.9.9",
-    "org.joda" % "joda-convert" % "1.9.2"
+    "org.joda" % "joda-convert" % "2.0.1"
   )
 ).dependsOn(
   scalikejdbcLibrary,
