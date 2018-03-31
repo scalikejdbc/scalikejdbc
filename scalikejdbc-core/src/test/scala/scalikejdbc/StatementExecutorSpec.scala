@@ -63,6 +63,29 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
         params = Seq("key"))
       sql should equal("select id, data from some_table where data ?? 'key'")
     }
+
+    /*
+      [info] - should have PrintableQueryBuilder inside *** FAILED ***
+      [info]   java.lang.IllegalArgumentException: Illegal group reference
+      [info]   at java.util.regex.Matcher.appendReplacement(Matcher.java:857)
+      [info]   at scala.util.matching.Regex$Replacement.replace(Regex.scala:897)
+      [info]   at scala.util.matching.Regex$Replacement.replace$(Regex.scala:897)
+      [info]   at scala.util.matching.Regex$MatchIterator$$anon$1.replace(Regex.scala:875)
+      [info]   at scala.util.matching.Regex.$anonfun$replaceAllIn$1(Regex.scala:505)
+      [info]   at scala.collection.Iterator.foreach(Iterator.scala:929)
+      [info]   at scala.collection.Iterator.foreach$(Iterator.scala:929)
+      [info]   at scala.collection.AbstractIterator.foreach(Iterator.scala:1417)
+      [info]   at scala.util.matching.Regex.replaceAllIn(Regex.scala:505)
+      [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.$anonfun$build$2(StatementExecutor.scala:87)
+      [info]   ...
+     */
+    {
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = "select * from users where foo = ? and bar = ?",
+        settingsProvider = SettingsProvider.default,
+        params = Seq("foo$", "^bar$\\+$"))
+      sql should equal("select * from users where foo = 'foo$' and bar = '^bar$\\+$'")
+    }
   }
 
 }
