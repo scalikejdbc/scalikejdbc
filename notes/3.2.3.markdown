@@ -1,0 +1,14 @@
+ScalikeJDBC 3.2.3 is out for Scala 2.13.0-M3, 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #861 Fix IllegalArgumentException: Illegal group reference when a param which contains '$' by @seratch
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
