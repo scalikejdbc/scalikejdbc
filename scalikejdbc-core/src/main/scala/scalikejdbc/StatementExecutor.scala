@@ -2,6 +2,8 @@ package scalikejdbc
 
 import java.sql.PreparedStatement
 
+import org.slf4j.LoggerFactory
+
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 
@@ -26,9 +28,15 @@ object StatementExecutor {
   object PrintableQueryBuilder extends PrintableQueryBuilder {
     // Find ? placeholders, but ignore ?? because that's an escaped question mark.
     private val substituteRegex = "(?<!\\?)(\\?)(?!\\?)".r
+
+    /**
+     * Logger
+     */
+    private val log = new Log(LoggerFactory.getLogger(classOf[PrintableQueryBuilder]))
+
   }
 
-  trait PrintableQueryBuilder extends UnixTimeInMillisConverterImplicits with LogSupport {
+  trait PrintableQueryBuilder extends UnixTimeInMillisConverterImplicits {
 
     import PrintableQueryBuilder._
 
