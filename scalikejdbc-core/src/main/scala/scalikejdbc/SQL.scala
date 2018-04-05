@@ -555,16 +555,16 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
-    updateAndReturnGeneratedKey(1)
+  def updateAndReturnGeneratedKey[T](): SQLUpdateWithGeneratedKey[T] = {
+    updateAndReturnGeneratedKey[T](1)
   }
 
-  def updateAndReturnGeneratedKey(name: String): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, rawParameters, this.tags)(name)
+  def updateAndReturnGeneratedKey[T](name: String): SQLUpdateWithGeneratedKey[T] = {
+    new SQLUpdateWithGeneratedKey[T](statement, rawParameters, this.tags)(name)
   }
 
-  def updateAndReturnGeneratedKey(index: Int): SQLUpdateWithGeneratedKey = {
-    new SQLUpdateWithGeneratedKey(statement, rawParameters, this.tags)(index)
+  def updateAndReturnGeneratedKey[T](index: Int): SQLUpdateWithGeneratedKey[T] = {
+    new SQLUpdateWithGeneratedKey[T](statement, rawParameters, this.tags)(index)
   }
 
   def stripMargin(marginChar: Char): SQL[A, E] =
@@ -766,11 +766,11 @@ class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: Seq[An
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(val key: Any) {
+class SQLUpdateWithGeneratedKey[T](val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(val key: Any) {
 
-  def apply()(implicit session: DBSession): Long = {
+  def apply()(implicit session: DBSession): T = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
-    val f: DBSession => Long = DBSessionWrapper(_, attributesSwitcher).updateAndReturnSpecifiedGeneratedKey(statement, parameters: _*)(key)
+    val f: DBSession => T = DBSessionWrapper(_, attributesSwitcher).updateAndReturnSpecifiedGeneratedKey[T](statement, parameters: _*)(key)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -785,7 +785,7 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any],
 }
 
 object SQLUpdateWithGeneratedKey {
-  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Option[(String, Seq[Any], Seq[String], Any)] = {
+  def unapply[T](sqlObject: SQLUpdateWithGeneratedKey[T]): Option[(String, Seq[Any], Seq[String], Any)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
   }
 }

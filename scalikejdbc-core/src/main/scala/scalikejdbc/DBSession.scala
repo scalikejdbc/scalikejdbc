@@ -617,9 +617,9 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    *
    * @param template SQL template
    * @param params parameters
-   * @return generated key as a long value
+   * @return generated key as a T value
    */
-  def updateAndReturnGeneratedKey(template: String, params: Any*): Long = updateAndReturnSpecifiedGeneratedKey(template, params: _*)(1)
+  def updateAndReturnGeneratedKey[T](template: String, params: Any*): T = updateAndReturnSpecifiedGeneratedKey[T](template, params: _*)(1)
 
   /**
    * Executes java.sql.PreparedStatement#executeUpdate() and returns the generated key.
@@ -627,11 +627,11 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param template SQL template
    * @param params parameters
    * @param key name
-   * @return generated key as a long value
+   * @return generated key as a T value
    */
-  def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
+  def updateAndReturnSpecifiedGeneratedKey[T](template: String, params: Any*)(key: Any): T = {
     var generatedKeyFound = false
-    var generatedKey: Long = -1
+    var generatedKey: T = null.asInstanceOf[T]
     val before = (stmt: PreparedStatement) => {}
     val after = (stmt: PreparedStatement) => {
       val rs = stmt.getGeneratedKeys
@@ -639,18 +639,18 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
         generatedKeyFound = true
         generatedKey = key match {
           case name: String => try {
-            rs.getLong(name)
+            rs.getObject(name).asInstanceOf[T]
           } catch {
             case e: Exception =>
               log.warn("Failed to get generated key value via index " + name + ". Going to retrieve it via index 1.")
-              rs.getLong(1)
+              rs.getObject(name).asInstanceOf[T]
           }
           case index: Int => try {
-            rs.getLong(index)
+            rs.getObject(index).asInstanceOf[T]
           } catch {
             case e: Exception =>
               log.warn("Failed to get generated key value via index " + index + ". Going to retrieve it via index 1.")
-              rs.getLong(1)
+              rs.getObject(1).asInstanceOf[T]
           }
           case _ => throw new IllegalArgumentException(ErrorMessage.FAILED_TO_RETRIEVE_GENERATED_KEY + "(key:" + key + ")")
         }
