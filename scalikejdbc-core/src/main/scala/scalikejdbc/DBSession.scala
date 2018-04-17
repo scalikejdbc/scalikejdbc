@@ -721,12 +721,12 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return generated keys
    */
-  def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: Seq[Any]*)(
+  def batchAndReturnGeneratedKey[C[_], T](template: String, paramsList: Seq[Any]*)(
     implicit
-    cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    cbf: CanBuildFrom[Nothing, T, C[T]]): C[T] = {
     ensureNotReadOnlySession(template)
     paramsList match {
-      case Nil => Seq.empty[Long].to[C]
+      case Nil => Seq.empty[T].to[C]
       case _ =>
         using(createBatchStatementExecutor(
           conn = conn,
@@ -739,7 +739,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(1)).to[C]
+          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.any(1).asInstanceOf[T]).to[C]
         }
     }
   }
@@ -752,12 +752,12 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return generated keys
    */
-  def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: Seq[Any]*)(
+  def batchAndReturnSpecifiedGeneratedKey[C[_], T](template: String, key: String, paramsList: Seq[Any]*)(
     implicit
-    cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    cbf: CanBuildFrom[Nothing, T, C[T]]): C[T] = {
     ensureNotReadOnlySession(template)
     paramsList match {
-      case Nil => Seq.empty[Long].to[C]
+      case Nil => Seq.empty[T].to[C]
       case _ =>
         using(createBatchStatementExecutor(
           conn = conn,
@@ -770,7 +770,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(key)).to[C]
+          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.any(key).asInstanceOf[T]).to[C]
         }
     }
   }

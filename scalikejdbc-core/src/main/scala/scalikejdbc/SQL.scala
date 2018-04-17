@@ -299,8 +299,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchAndReturnGeneratedKey(parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
-    new SQLBatchWithGeneratedKey(statement, parameters, tags)(None)
+  def batchAndReturnGeneratedKey[T](parameters: Seq[Any]*): SQLBatchWithGeneratedKey[T] = {
+    new SQLBatchWithGeneratedKey[T](statement, parameters, tags)(None)
   }
 
   /**
@@ -310,8 +310,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchAndReturnGeneratedKey(generatedKeyName: String, parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
-    new SQLBatchWithGeneratedKey(statement, parameters, tags)(Some(generatedKeyName))
+  def batchAndReturnGeneratedKey[T](generatedKeyName: String, parameters: Seq[Any]*): SQLBatchWithGeneratedKey[T] = {
+    new SQLBatchWithGeneratedKey[T](statement, parameters, tags)(Some(generatedKeyName))
   }
 
   /**
@@ -632,11 +632,11 @@ class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: Seq[Seq
   }
 }
 
-class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(val key: Option[String]) {
+class SQLBatchWithGeneratedKey[T](val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(val key: Option[String]) {
 
-  def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  def apply[C[_], T]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, T, C[T]]): C[T] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
-    val f: DBSession => C[Long] = (session) => {
+    val f: DBSession => C[T] = (session) => {
       key match {
         case Some(k) => DBSessionWrapper(session, attributesSwitcher).batchAndReturnSpecifiedGeneratedKey(statement, k, parameters: _*)
         case _ => DBSessionWrapper(session, attributesSwitcher).batchAndReturnGeneratedKey(statement, parameters: _*)
@@ -656,7 +656,7 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[An
 }
 
 object SQLBatchWithGeneratedKey {
-  def unapply(sqlObject: SQLBatchWithGeneratedKey): Option[(String, Seq[Seq[Any]], Seq[String], Option[String])] = {
+  def unappl[T](sqlObject: SQLBatchWithGeneratedKey[T]): Option[(String, Seq[Seq[Any]], Seq[String], Option[String])] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
   }
 }

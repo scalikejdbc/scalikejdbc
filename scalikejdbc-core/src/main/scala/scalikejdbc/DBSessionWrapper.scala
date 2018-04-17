@@ -94,10 +94,10 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def batch[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
   }
-  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnGeneratedKey[C[_], T](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, T, C[T]]): C[T] = {
     withAttributesSwitchedDBSession(_.batchAndReturnGeneratedKey(template, paramsList: _*))
   }
-  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnSpecifiedGeneratedKey[C[_], T](template: String, key: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, T, C[T]]): C[T] = {
     withAttributesSwitchedDBSession(_.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*))
   }
 
