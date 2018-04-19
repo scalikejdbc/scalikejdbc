@@ -483,6 +483,13 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
       val vs = sqls.csv(values.map(v => sqls"${v}"): _*)
       this.copy(sql = sqls"${sql} values (${vs})")
     }
+    def multipleValues(multipleValues: Seq[Any]*): InsertSQLBuilder = {
+      val vs = multipleValues match {
+        case Nil => Seq(sqls"()")
+        case ss => ss.map(s => sqls"(${sqls.csv(s.map(v => sqls"${v}"): _*)})")
+      }
+      this.copy(sql = sqls"${sql} values ${sqls.join(vs, sqls",", false)}")
+    }
 
     def namedValues(columnsAndValues: (SQLSyntax, ParameterBinder)*): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.unzip
