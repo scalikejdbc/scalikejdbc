@@ -851,10 +851,55 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   }
 
   it should "return statement and parameters" in {
-    val (id, name) = (123, "Alice")
-    val sql = sql"insert into company values (${id}, ${name})"
-    sql.statement should equal("insert into company values (?, ?)")
-    sql.parameters should equal(Seq(123, "Alice"))
+    {
+      val (id, name) = (123, "Alice")
+      val sql = sql"insert into company values (${id}, ${name})"
+      sql.statement should equal("insert into company values (?, ?)")
+      sql.parameters should equal(Seq(123, "Alice"))
+    }
+
+    {
+      val sql = insert.into(Order).values().toSQL
+      sql.statement should equal("insert into orders values ()")
+    }
+
+    {
+      val sql = insert.into(Order).values(Nil).toSQL
+      sql.statement should equal("insert into orders values ()")
+    }
+
+    {
+      val (id, customer_id, product_id, ordered_at) = (11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0))
+      val sql = insert.into(Order).values(id, customer_id, product_id, ordered_at).toSQL
+      sql.statement should equal("insert into orders values (?, ?, ?, ?)")
+      sql.parameters should equal(Seq(11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0)))
+    }
+
+    {
+      val sql = insert.into(Order).multipleValues().toSQL
+      sql.statement should equal("insert into orders values ()")
+    }
+
+    {
+      val sql = insert.into(Order).multipleValues(Nil).toSQL
+      sql.statement should equal("insert into orders values ()")
+    }
+
+    {
+      val vs = Seq(11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0))
+      val sql = insert.into(Order).multipleValues(vs).toSQL
+      sql.statement should equal("insert into orders values (?, ?, ?, ?)")
+      sql.parameters should equal(Seq(11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0)))
+    }
+
+    {
+      val Seq(vs1, vs2) = Seq(
+        Seq(11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0)),
+        Seq(12, 2, Some(2), LocalDateTime.of(2018, 1, 2, 3, 4)))
+      val sql = insert.into(Order).multipleValues(vs1, vs2).toSQL
+      sql.statement should equal("insert into orders values (?, ?, ?, ?), (?, ?, ?, ?)")
+      sql.parameters should equal(Seq(11, 1, Some(1), LocalDateTime.of(2018, 4, 20, 0, 0), 12, 2, Some(2), LocalDateTime.of(2018, 1, 2, 3, 4)))
+    }
   }
 
   it should "cache columns" in {
