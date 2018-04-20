@@ -845,6 +845,22 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     }
     // format: ON
   }
+  def applyUpdate()(
+    implicit
+    session: DBSession,
+    context: ConnectionPoolContext = NoConnectionPoolContext,
+    hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
+    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val f: DBSession => C[A] = s => result[A](extractor, DBSessionWrapper(s, attributesSwitcher))
+    // format: OFF
+    session match {
+      case AutoSession | ReadOnlyAutoSession => DB.autoCommit(f)
+      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).autoCommit(f)
+      case _                                 => f(session)
+    }
+    // format: ON
+  }
 
 }
 
