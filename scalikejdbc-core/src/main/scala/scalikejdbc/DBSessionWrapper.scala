@@ -91,6 +91,9 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def updateAndReturnSpecifiedGeneratedKey[T](template: String, params: Any*)(key: Any): T = {
     withAttributesSwitchedDBSession(_.updateAndReturnSpecifiedGeneratedKey[T](template, params: _*)(key))
   }
+  override def updateAndReturnRow(template: String, params: Any*): WrappedResultSet = {
+    withAttributesSwitchedDBSession(_.updateAndReturnRow(template, params: _*))
+  }
   override def batch[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
   }

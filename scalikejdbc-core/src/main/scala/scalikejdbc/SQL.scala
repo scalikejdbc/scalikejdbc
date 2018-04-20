@@ -566,6 +566,9 @@ abstract class SQL[A, E <: WithExtractor](
   def updateAndReturnGeneratedKey[T](index: Int): SQLUpdateWithGeneratedKey[T] = {
     new SQLUpdateWithGeneratedKey[T](statement, rawParameters, this.tags)(index)
   }
+  def updateAndReturnRow(): SQLUpdateWithRow = {
+    new SQLUpdateWithRow(statement, rawParameters, this.tags)
+  }
 
   def stripMargin(marginChar: Char): SQL[A, E] =
     withStatementAndParameters(statement.stripMargin(marginChar), rawParameters)
@@ -787,6 +790,36 @@ class SQLUpdateWithGeneratedKey[T](val statement: String, val parameters: Seq[An
 object SQLUpdateWithGeneratedKey {
   def unapply[T](sqlObject: SQLUpdateWithGeneratedKey[T]): Option[(String, Seq[Any], Seq[String], Any)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
+  }
+}
+
+/**
+ * SQL which execute java.sql.Statement#executeUpdate() and get generated model.
+ *
+ * @param statement SQL template
+ * @param parameters parameters
+ */
+class SQLUpdateWithRow(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil) {
+
+  def apply()(implicit session: DBSession): WrappedResultSet = {
+    val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
+    val f: DBSession => WrappedResultSet = DBSessionWrapper(_, attributesSwitcher).updateAndReturnRow(statement, parameters: _*)
+    // format: OFF
+    session match {
+      case AutoSession                       => DB.autoCommit(f)
+      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case ReadOnlyAutoSession               => DB.readOnly(f)
+      case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
+      case _                                 => f(session)
+    }
+    // format: ON
+  }
+
+}
+
+object SQLUpdateWithRow {
+  def unapply(sqlObject: SQLUpdateWithRow): Option[(String, Seq[Any], Seq[String])] = {
+    Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags))
   }
 }
 

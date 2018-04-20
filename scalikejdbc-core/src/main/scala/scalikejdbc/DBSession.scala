@@ -667,6 +667,33 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   }
 
   /**
+   * Executes java.sql.PreparedStatement#executeUpdate() and returns the row.
+   *
+   * @param template SQL template
+   * @param params parameters
+   * @return row as WrappedResultSet
+   */
+  def updateAndReturnRow(template: String, params: Any*): WrappedResultSet =
+    {
+      val before = (stmt: PreparedStatement) =>
+        {}
+      var row: WrappedResultSet = null
+      var foundRow = false
+      val after = (stmt: PreparedStatement) =>
+        {
+          val rs = stmt.getResultSet()
+          val cursor: ResultSetCursor = new ResultSetCursor(0)
+          row = WrappedResultSet(rs, cursor, cursor.position)
+          foundRow = true
+        }
+      updateWithFilters(true, before, after, template, params: _*)
+      if (!foundRow) {
+        throw new IllegalStateException(ErrorMessage.FAILED_TO_RETRIEVE_ROW + " (template:" + template + ")")
+      }
+      row
+    }
+
+  /**
    * Executes java.sql.PreparedStatement#executeBatch().
    * @param template SQL template
    * @param paramsList list of parameters
