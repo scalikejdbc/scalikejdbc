@@ -44,7 +44,7 @@ lazy val baseSettings = Seq(
       case _ =>                       "3.0.5"
     }
   },
-  specs2Version := "4.0.3",
+  specs2Version := "4.2.0",
   parserCombinatorsVersion := "1.1.0",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
