@@ -547,7 +547,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
      *
      * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
      */
-    def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}")(collection.breakOut): _*))
+    def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}").toSeq: _*))
 
     /**
      *  `returning` for PostgreSQL
