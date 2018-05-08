@@ -11,5 +11,5 @@ object ReturnCollectionType {
   private[this] val all: Set[ReturnCollectionType] = Set(
     List, Vector, Array, CanBuildFrom)
   private[scalikejdbc] val map: Map[String, ReturnCollectionType] =
-    all.map(c => c.name -> c)(collection.breakOut)
+    all.map(c => c.name -> c).toMap
 }
