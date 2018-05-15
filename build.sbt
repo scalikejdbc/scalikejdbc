@@ -233,9 +233,15 @@ lazy val scalikejdbcMapperGenerator = Project(
   sbtPlugin := true,
   crossSbtVersions := sbtVersion.value :: Nil,
   scriptedBufferLog := false,
-  scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
-    a => Seq("-XX","-Xss").exists(a.startsWith)
-  ) ++ Seq("-Xmx3G"),
+  scriptedLaunchOpts ++= {
+    val javaVmArgs = {
+      import scala.collection.JavaConverters._
+      java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
+    }
+    javaVmArgs.filter(
+      a => Seq("-XX","-Xss").exists(a.startsWith)
+    ) ++ Seq("-Xmx3G")
+  },
   scriptedLaunchOpts ++= Seq(
     "-Dplugin.version=" + version.value,
     "-Dslf4j.version=" + _slf4jApiVersion,
