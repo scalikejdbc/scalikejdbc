@@ -11,13 +11,13 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
   // -------------------------------------
 
   private[this] val fetchSizeCameFromSQLObject: Option[Int] = sql.fetchSize
-  private[this] val tagsCameFromSQLObject: Seq[String] = sql.tags
+  private[this] val tagsCameFromSQLObject: collection.Seq[String] = sql.tags
   private[this] val queryTimeoutCameFromSQLObject: Option[Int] = sql.queryTimeout
 
   private[this] var dbSession: Option[DBSession] = None
 
   private[this] var originalFetchSize: Option[Int] = None
-  private[this] var originalTags: Seq[String] = Seq.empty
+  private[this] var originalTags: collection.Seq[String] = Seq.empty
   private[this] var originalQueryTimeout: Option[Int] = None
 
   // -------------------------------------

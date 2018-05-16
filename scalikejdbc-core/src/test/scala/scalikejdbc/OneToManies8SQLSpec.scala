@@ -73,13 +73,13 @@ class OneToManies8SQLSpec extends FlatSpec with Matchers with BeforeAndAfter wit
             id: Int,
             ownerId: Int,
             owner: Owner,
-            events: Seq[Event] = Nil,
-            news: Seq[News] = Nil,
-            members: Seq[Member] = Nil,
-            sponsors: Seq[Sponsor] = Nil,
-            entity6: Seq[Entity6] = Nil,
-            entity7: Seq[Entity7] = Nil,
-            entity8: Seq[Entity8] = Nil)
+            events: collection.Seq[Event] = Nil,
+            news: collection.Seq[News] = Nil,
+            members: collection.Seq[Member] = Nil,
+            sponsors: collection.Seq[Sponsor] = Nil,
+            entity6: collection.Seq[Entity6] = Nil,
+            entity7: collection.Seq[Entity7] = Nil,
+            entity8: collection.Seq[Entity8] = Nil)
 
           class Owner(val id: Int) extends EntityEquality {
             override val entityIdentity = id

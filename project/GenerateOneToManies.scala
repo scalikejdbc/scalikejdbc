@@ -72,7 +72,7 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
     }
   }
 
-  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: Seq[_], zExtractor: (A, $seq) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, $seq) => Z): Traversable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters: _*)(LinkedHashMap[A, ($seq)]())(processResultSet).map {
       case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
@@ -83,7 +83,7 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
 
 class OneToManies${n}SQL[A, $bs, E <: WithExtractor, Z](
   override val statement: String,
-  override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
+  override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1]...)) is specified, use #map((A,B) =>Z) instead."))
     with AllOutputDecisionsUnsupported[Z, E] {
 
@@ -121,7 +121,7 @@ object OneToManies${n}SQL {
 
 class OneToManies${n}SQLToList[A, $bs, E <: WithExtractor, Z](
   override val statement: String,
-  override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
+  override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToList[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
@@ -146,7 +146,7 @@ object OneToManies${n}SQLToList {
 
 final class OneToManies${n}SQLToCollection[A, $bs, E <: WithExtractor, Z] private[scalikejdbc](
   override val statement: String,
-  override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
+  override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toManies(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToCollection[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
@@ -171,7 +171,7 @@ object OneToManies${n}SQLToCollection {
 
 class OneToManies${n}SQLToTraversable[A, $bs, E <: WithExtractor, Z](
   override val statement: String,
-  override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
+  override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToTraversable[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]
@@ -196,7 +196,7 @@ object OneToManies${n}SQLToTraversable {
 
 class OneToManies${n}SQLToOption[A, $bs, E <: WithExtractor, Z](
   override val statement: String,
-  override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)(val isSingle: Boolean = true)
+  override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)($resultSetToOptions)(val zExtractor: (A, $seq) => Z)(val isSingle: Boolean = true)
     extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B1])) is specified, use #map((A,B) =>Z) instead."))
     with SQLToOption[Z, E]
     with AllOutputDecisionsUnsupported[Z, E]

@@ -23,7 +23,7 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def fetchSize: Option[Int] = session.fetchSize
 
   override def tags(tags: String*): this.type = unexpectedInvocation
-  override def tags: Seq[String] = session.tags
+  override def tags: scala.collection.Seq[String] = session.tags
 
   override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
   override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
@@ -35,7 +35,7 @@ private[scalikejdbc] final class DBSessionWrapper(
     }
   }
 
-  override def toStatementExecutor(template: String, params: Seq[Any], returnGeneratedKeys: Boolean): StatementExecutor = {
+  override def toStatementExecutor(template: String, params: scala.collection.Seq[Any], returnGeneratedKeys: Boolean): StatementExecutor = {
     withAttributesSwitchedDBSession(_.toStatementExecutor(template, params, returnGeneratedKeys))
   }
   override def toBatchStatementExecutor(template: String): StatementExecutor = {
@@ -91,13 +91,13 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
     withAttributesSwitchedDBSession(_.updateAndReturnSpecifiedGeneratedKey(template, params: _*)(key))
   }
-  override def batch[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
+  override def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
   }
-  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(_.batchAndReturnGeneratedKey(template, paramsList: _*))
   }
-  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(_.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*))
   }
 

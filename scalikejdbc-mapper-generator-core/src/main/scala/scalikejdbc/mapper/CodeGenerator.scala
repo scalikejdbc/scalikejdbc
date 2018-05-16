@@ -625,8 +625,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
     /**
      * {{{
-     * def batchInsert(entities: Seq[Member])(implicit session: DBSession = autoSession): Seq[Int] = {
-     *   val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>
+     * def batchInsert(entities: collection.Seq[Member])(implicit session: DBSession = autoSession): collection.Seq[Int] = {
+     *   val params: collection.Seq[Seq[(Symbol, Any)]] = entities.map(entity =>
      *     Seq(
      *       'id -> entity.id,
      *       'name -> entity.name,
@@ -661,8 +661,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }
 
       // def batchInsert=(
-      1.indent + s"def batchInsert${typeParam}(entities: Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + canBuildFrom + s"): $returnType[Int] = {" + eol +
-        2.indent + "val params: Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
+      1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + canBuildFrom + s"): $returnType[Int] = {" + eol +
+        2.indent + "val params: collection.Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
         batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
         "))" + eol +

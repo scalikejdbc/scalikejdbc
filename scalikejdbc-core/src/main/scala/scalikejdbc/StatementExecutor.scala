@@ -43,7 +43,7 @@ object StatementExecutor {
     def build(
       template: String,
       settingsProvider: SettingsProvider,
-      params: Seq[Any]): String = {
+      params: collection.Seq[Any]): String = {
       try {
         def toPrintable(param: Any): String = {
           @annotation.tailrec
@@ -134,8 +134,8 @@ case class StatementExecutor(
   underlying: PreparedStatement,
   template: String,
   connectionAttributes: DBConnectionAttributes,
-  singleParams: Seq[Any] = Nil,
-  tags: Seq[String] = Nil,
+  singleParams: collection.Seq[Any] = Nil,
+  tags: collection.Seq[String] = Nil,
   isBatch: Boolean = false,
   settingsProvider: SettingsProvider = SettingsProvider.default) extends LogSupport with UnixTimeInMillisConverterImplicits with AutoCloseable {
 
@@ -159,7 +159,7 @@ case class StatementExecutor(
    * Binds parameters to the underlying java.sql.PreparedStatement object.
    * @param params parameters
    */
-  def bindParams(params: Seq[Any]): Unit = {
+  def bindParams(params: collection.Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
       case option: Option[_] => option.orNull[Any]
       case other => other
@@ -239,7 +239,7 @@ case class StatementExecutor(
    */
   private[this] lazy val sqlString: String = {
 
-    def singleSqlString(params: Seq[Any]): String = {
+    def singleSqlString(params: collection.Seq[Any]): String = {
 
       val sql = PrintableQueryBuilder.build(template, settingsProvider, params)
 

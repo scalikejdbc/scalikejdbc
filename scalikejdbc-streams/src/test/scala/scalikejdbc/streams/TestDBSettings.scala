@@ -34,7 +34,7 @@ trait TestDBSettings {
       do {
         val s = i * delta
         val e = if ((s + delta) > numberOfRecords) numberOfRecords else s + delta
-        val batchParams: Seq[Seq[Any]] = ((s + 1) to e).map(i => Seq(i))
+        val batchParams: collection.Seq[Seq[Any]] = ((s + 1) to e).map(i => Seq(i))
         SQL(s"insert into $tableName (id) values (?)").batch(batchParams: _*).apply()
         i += 1
       } while ((numberOfRecords - 1) / delta >= i)

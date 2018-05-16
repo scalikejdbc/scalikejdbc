@@ -55,7 +55,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     override val columns = Seq("id", "website_url")
     def apply(rs: WrappedResultSet, g: ResultName[Group]): Group = Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.field("websiteUrl")))
   }
-  case class Group(id: Int, websiteUrl: Option[String], members: Seq[User] = Nil)
+  case class Group(id: Int, websiteUrl: Option[String], members: collection.Seq[User] = Nil)
 
   object GroupMember extends SQLSyntaxSupport[GroupMember] {
     override val tableName = "group_members"
@@ -380,7 +380,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
     }
   }
 
-  case class Issue(id: Int, body: String, tags: Seq[Tag] = Vector())
+  case class Issue(id: Int, body: String, tags: collection.Seq[Tag] = Vector())
   object Issue extends SQLSyntaxSupport[Issue] {
     def apply(rs: WrappedResultSet, i: ResultName[Issue]): Issue = Issue(
       id = rs.int(i.id),
@@ -525,7 +525,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
       Customer(rs.int(c.id), rs.string(c.name))
     }
   }
-  case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None, orders: Seq[Order] = Nil)
+  case class Customer(id: Int, name: String, groupId: Option[Int] = None, group: Option[CustomerGroup] = None, orders: collection.Seq[Order] = Nil)
 
   object CustomerGroup extends SQLSyntaxSupport[CustomerGroup] {
     override val tableName = "customer_group"
@@ -1003,7 +1003,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
 
   val tableAliasName = "table"
   val delimiterForResultName = "_on_"
-  val columns: Seq[SQLSyntax] = Seq(sqls"first_name", sqls"last_name", sqls"birth_date", sqls"company_id", sqls"id", sqls"created_at")
+  val columns: collection.Seq[SQLSyntax] = Seq(sqls"first_name", sqls"last_name", sqls"birth_date", sqls"company_id", sqls"id", sqls"created_at")
   val cachedColumns = new TrieMap[String, SQLSyntax]()
 
   def columnNoCache(name: String): SQLSyntax = {

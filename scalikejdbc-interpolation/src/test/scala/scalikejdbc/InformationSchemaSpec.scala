@@ -15,7 +15,7 @@ class InformationSchemaSpec extends FlatSpec with Matchers with SQLInterpolation
   }
 
   it should "work" in {
-    val roles: Seq[Role] = DB autoCommit { implicit s =>
+    val roles: collection.Seq[Role] = DB autoCommit { implicit s =>
       try {
         sql"drop table roles if exists".execute.apply()
       } catch { case e: Exception => }

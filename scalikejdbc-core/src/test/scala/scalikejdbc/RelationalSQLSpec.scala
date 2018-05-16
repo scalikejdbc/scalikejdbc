@@ -162,7 +162,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
           SQL("insert into group_members_" + suffix + " values (4,2)").update.apply()
 
           case class User(id: Int)
-          case class Group(id: Int, name: String, members: Seq[User] = Nil)
+          case class Group(id: Int, name: String, members: collection.Seq[User] = Nil)
 
           {
             val groups = SQL("select u.id as u_id, g.id as g_id, g.name as g_name " +
@@ -172,7 +172,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " order by g.id, u.id desc")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
-              .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
+              .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
               .list.apply()
 
             groups.size should equal(2)
@@ -198,7 +198,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " order by g.id, u.id desc")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
-              .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
+              .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
               .collection[Vector]()
 
             groups.size should equal(2)
@@ -224,7 +224,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " order by g.id, u.id desc")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
-              .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
+              .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
               .traversable.apply()
 
             groups.size should equal(2)
@@ -238,7 +238,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               " where g.id = 1")
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
-              .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
+              .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
               .single.apply()
 
             group.get.id should equal(1)
@@ -253,7 +253,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
                 " order by g.id, u.id desc")
                 .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
                 .toMany(rs => Some(User(rs.int("u_id"))))
-                .map((g: Group, ms: Seq[User]) => g.copy(members = ms))
+                .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
                 .single.apply()
             }
           }
@@ -295,7 +295,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
           SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
           SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
 
-          case class Group(id: Int, members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+          case class Group(id: Int, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
           case class Member(id: Int, groupId: Int)
           case class Sponsor(id: Int, groupId: Int)
 
@@ -309,7 +309,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
-              .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
+              .map((g: Group, ms: collection.Seq[Member], ss: collection.Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .list.apply()
 
             groups.size should equal(4)
@@ -334,7 +334,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
-              .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
+              .map((g: Group, ms: collection.Seq[Member], ss: collection.Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .collection[Vector]()
 
             groups.size should equal(4)
@@ -359,7 +359,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .toManies(
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
-              .map((g: Group, ms: Seq[Member], ss: Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
+              .map((g: Group, ms: collection.Seq[Member], ss: collection.Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
               .single.apply().get
 
             group.id should equal(1)
@@ -415,7 +415,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
           SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
 
           case class GroupEntity(id: Int, ownerId: Int)
-          case class Group(id: Int, ownerId: Int, owner: Owner, members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+          case class Group(id: Int, ownerId: Int, owner: Owner, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
           case class Owner(id: Int)
           case class Member(id: Int, groupId: Int)
           case class Sponsor(id: Int, groupId: Int)
@@ -481,7 +481,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
           }
 
           {
-            case class GroupId(id: Int, members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+            case class GroupId(id: Int, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
 
             val group: Group = SQL("select g.id as g_id, o.id as o_id, m.id as m_id, s.id as s_id " +
               " from groups_" + suffix + " g " +
@@ -560,7 +560,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
 
           case class GroupEntity(id: Int, ownerId: Int)
           case class Group(id: Int, ownerId: Int, owner: Owner,
-            events: Seq[Event] = Nil, members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+            events: collection.Seq[Event] = Nil, members: collection.Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
           case class Owner(id: Int)
           case class Event(id: Int, groupId: Int)
           case class Member(id: Int, groupId: Int)
@@ -739,8 +739,8 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
 
       case class GroupEntity(id: Int, ownerId: Int)
       case class Group(id: Int, ownerId: Int, owner: Owner,
-        events: Seq[Event] = Nil, news: Seq[News] = Nil,
-        members: Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+        events: collection.Seq[Event] = Nil, news: collection.Seq[News] = Nil,
+        members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
 
       class Owner(val id: Int) extends EntityEquality {
         override val entityIdentity = id

@@ -723,7 +723,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
     try {
       val ac = Account.column
-      val params: Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> AsIsParameterBinder(None))
+      val params: collection.Seq[(SQLSyntax, Any)] = Seq(ac.id -> 123, ac.name -> AsIsParameterBinder(None))
       val query = insert.into(Account).namedValues(params.map { case (k, v) => k -> AsIsParameterBinder(v) }: _*).toSQL
       query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
       query.parameters should equal(Seq(123, None))

@@ -107,14 +107,14 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         SQL("insert into query_completion_listener values (?,?)").bind(1, LocalDateTime.now).update.apply()
 
         var result: String = ""
-        GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => {
+        GlobalSettings.queryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long) => {
           result = sql + params + millis
         }
         SQL("select * from query_completion_listener").map(_.toMap).list.apply()
         result.size should be > (0)
 
         var errorResult: String = ""
-        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => {
+        GlobalSettings.queryFailureListener = (sql: String, params: collection.Seq[Any], e: Throwable) => {
           errorResult = sql + params + e.getMessage
         }
         try {
@@ -123,8 +123,8 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         errorResult.size should be > (0)
 
       } finally {
-        GlobalSettings.queryCompletionListener = (sql: String, params: Seq[Any], millis: Long) => ()
-        GlobalSettings.queryFailureListener = (sql: String, params: Seq[Any], e: Throwable) => ()
+        GlobalSettings.queryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long) => ()
+        GlobalSettings.queryFailureListener = (sql: String, params: collection.Seq[Any], e: Throwable) => ()
         try {
           SQL("drop table query_completion_listener").execute.apply()
         } catch { case e: Exception => }
@@ -140,7 +140,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         } catch { case e: Exception => }
 
         var result: Int = -1
-        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => {
+        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long, tags: collection.Seq[String]) => {
           if (result == -1) {
             result = tags.size
           }
@@ -167,7 +167,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         }
 
         var errorResult: Int = -1
-        GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => {
+        GlobalSettings.taggedQueryFailureListener = (sql: String, params: collection.Seq[Any], e: Throwable, tags: collection.Seq[String]) => {
           if (errorResult == -1) {
             errorResult = tags.size
           }
@@ -193,8 +193,8 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         }
 
       } finally {
-        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: Seq[Any], millis: Long, tags: Seq[String]) => ()
-        GlobalSettings.taggedQueryFailureListener = (sql: String, params: Seq[Any], e: Throwable, tags: Seq[String]) => ()
+        GlobalSettings.taggedQueryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long, tags: collection.Seq[String]) => ()
+        GlobalSettings.taggedQueryFailureListener = (sql: String, params: collection.Seq[Any], e: Throwable, tags: collection.Seq[String]) => ()
         try {
           SQL("drop table tagged_query_completion_listener").execute.apply()
         } catch { case e: Exception => }
