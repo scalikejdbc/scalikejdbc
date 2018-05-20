@@ -48,7 +48,7 @@ trait AllOutputDecisionsUnsupported[Z, E <: scalikejdbc.WithExtractor] extends S
  * Endpoint of one-to-x APIs
  */
 class OneToXSQL[A, E <: WithExtractor, Z](
-  override val statement: String, override val rawParameters: Seq[Any])(val one: WrappedResultSet => A)
+  override val statement: String, override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)
   extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-one/one-to-many operation needs toOne(RS => Option[B]).map((A,B) => A) or toMany(RS => Option[B]).map((A,Seq(B) => A)."))
   with AllOutputDecisionsUnsupported[Z, E] {
 

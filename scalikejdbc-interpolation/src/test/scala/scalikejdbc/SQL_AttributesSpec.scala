@@ -6,7 +6,7 @@ class SQL_AttributesSpec extends FlatSpec with Matchers with DBSettings with SQL
 
   behavior of "SQL"
 
-  case class Company(id: Long, members: Seq[Member] = Seq.empty)
+  case class Company(id: Long, members: collection.Seq[Member] = Seq.empty)
   case class Member(id: Long, companyId: Long, name: Option[String])
 
   object Company extends SQLSyntaxSupport[Company] {

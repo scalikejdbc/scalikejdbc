@@ -29,7 +29,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
     SQLSyntax(buildQuery(fixedParams), buildParams(fixedParams))
   }
 
-  private def buildQuery(params: Seq[Any]): String =
+  private def buildQuery(params: collection.Seq[Any]): String =
     s.parts.zipAll(params, "", LastParameter).foldLeft(new StringBuilder) {
       case (sb, (previousQueryPart, param)) =>
         sb ++= previousQueryPart
@@ -52,7 +52,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
     case _ => sb += '?'
   }
 
-  private def buildParams(params: Seq[Any]): Seq[Any] = params.foldLeft(Seq.newBuilder[Any]) {
+  private def buildParams(params: collection.Seq[Any]): collection.Seq[Any] = params.foldLeft(Seq.newBuilder[Any]) {
     case (builder, strParam: String) => builder += strParam
     case (builder, traversable: Traversable[_]) => traversable.foldLeft(builder) {
       case (builder, SQLSyntax(_, params)) => builder ++= params

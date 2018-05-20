@@ -30,7 +30,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
     isAutoIncrement == "YES" || isAutoIncrement == "Y"
   } catch { case e: Exception => false }
 
-  private[this] def listAllTables(schema: String, types: List[String]): Seq[String] = {
+  private[this] def listAllTables(schema: String, types: List[String]): collection.Seq[String] = {
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
       val (catalog, _schema) = {
@@ -47,10 +47,10 @@ case class Model(url: String, username: String, password: String) extends AutoCl
     }
   }
 
-  def allTables(schema: String = null): Seq[Table] =
+  def allTables(schema: String = null): collection.Seq[Table] =
     listAllTables(schema, List("TABLE")).map(table(schema, _)).flatten
 
-  def allViews(schema: String = null): Seq[Table] =
+  def allViews(schema: String = null): collection.Seq[Table] =
     listAllTables(schema, List("VIEW")).map(table(schema, _)).flatten
 
   def table(schema: String = null, tableName: String): Option[Table] = {

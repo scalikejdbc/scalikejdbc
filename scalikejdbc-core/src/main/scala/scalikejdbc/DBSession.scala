@@ -45,7 +45,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   private[this] var _fetchSize: Option[Int] = None
 
   @volatile
-  private[this] var _tags: Seq[String] = Vector.empty
+  private[this] var _tags: scala.collection.Seq[String] = Vector.empty
 
   @volatile
   private[this] var _queryTimeout: Option[Int] = None
@@ -73,7 +73,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   private def createStatementExecutor(
     conn: Connection,
     template: String,
-    params: Seq[Any],
+    params: scala.collection.Seq[Any],
     returnGeneratedKeys: Boolean = false,
     generatedKeyName: Option[String] = None): StatementExecutor = {
     try {
@@ -128,7 +128,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     }
   }
 
-  def toStatementExecutor(template: String, params: Seq[Any],
+  def toStatementExecutor(template: String, params: scala.collection.Seq[Any],
     returnGeneratedKeys: Boolean = false): StatementExecutor = {
     createStatementExecutor(conn, template, params, returnGeneratedKeys)
   }
@@ -221,7 +221,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    *
    * @return tags
    */
-  def tags: Seq[String] = this._tags
+  def tags: scala.collection.Seq[String] = this._tags
 
   /**
    * Set queryTimeout to this session.
@@ -522,7 +522,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     after: (PreparedStatement) => Unit,
     template: String,
     execute: StatementExecutor => A,
-    params: Seq[Any]): A = {
+    params: scala.collection.Seq[Any]): A = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(
       conn = conn,
@@ -596,7 +596,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     after: (PreparedStatement) => Unit,
     template: String,
     execute: StatementExecutor => A,
-    params: Seq[Any]): A = {
+    params: scala.collection.Seq[Any]): A = {
     ensureNotReadOnlySession(template)
     using(createStatementExecutor(
       conn = conn,
@@ -672,7 +672,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return count list
    */
-  def batch[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
+  def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     batchInternal[C, Int](
       template = template,
       paramsList = paramsList,
@@ -685,7 +685,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return count list
    */
-  def largeBatch[C[_]](template: String, paramsList: Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] =
+  def largeBatch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] =
     batchInternal[C, Long](
       template = template,
       paramsList = paramsList,
@@ -693,7 +693,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
 
   private[this] def batchInternal[C[_], A](
     template: String,
-    paramsList: Seq[Seq[Any]],
+    paramsList: scala.collection.Seq[Seq[Any]],
     execute: StatementExecutor => scala.Array[A])(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
     ensureNotReadOnlySession(template)
     paramsList match {
@@ -721,7 +721,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return generated keys
    */
-  def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: Seq[Any]*)(
+  def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(
     implicit
     cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     ensureNotReadOnlySession(template)
@@ -752,7 +752,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return generated keys
    */
-  def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: Seq[Any]*)(
+  def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(
     implicit
     cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     ensureNotReadOnlySession(template)

@@ -708,7 +708,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       TestUtils.initialize(tableName)
 
       {
-        val result: Seq[String] = DB readOnly { session =>
+        val result: collection.Seq[String] = DB readOnly { session =>
           session.fetchSize(111)
           session.list("select * from " + tableName + "")(rs => rs.string("name"))
         }
@@ -716,7 +716,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
 
       {
-        val result: Seq[String] = DB readOnly { implicit session =>
+        val result: collection.Seq[String] = DB readOnly { implicit session =>
           SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list.apply()
         }
         result.size should be > 0
@@ -762,7 +762,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       TestUtils.initialize(tableName)
 
       {
-        val result: Seq[String] = DB readOnly { session =>
+        val result: collection.Seq[String] = DB readOnly { session =>
           session.queryTimeout(111)
           session.list("select * from " + tableName + "")(rs => rs.string("name"))
         }
@@ -770,7 +770,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
 
       {
-        val result: Seq[String] = DB readOnly { implicit session =>
+        val result: collection.Seq[String] = DB readOnly { implicit session =>
           SQL("select * from " + tableName + "").queryTimeout(222).map(rs => rs.string("name")).list.apply()
         }
         result.size should be > 0

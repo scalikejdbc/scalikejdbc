@@ -356,18 +356,18 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
 
           val paramss = Seq(Seq("xxx"), Seq("yyy"), Seq("zzz"))
 
-          val ids1: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
+          val ids1: collection.Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
           ids1.size should equal(3)
           ids1.last should be <= 3L
 
-          val ids2: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
+          val ids2: collection.Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey(paramss: _*).apply()
           ids2.size should equal(3)
           ids2.last should be <= 6L
 
           // for Oracle DB
           // just check compilation
           SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*)
-          //  val ids3: Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*).apply()
+          //  val ids3: collection.Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*).apply()
           //  ids3.size should equal(3)
           //  ids3.last should be <= 9L
         }

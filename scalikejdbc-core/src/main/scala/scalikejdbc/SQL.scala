@@ -55,13 +55,13 @@ object SQL {
  */
 private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSupport {
 
-  def apply(sql: String, settings: SettingsProvider, parameters: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, Seq[Any]) = {
     val names = SQLTemplateParser.extractAllParameters(sql)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     apply(sql, sqlWithPlaceHolders, names, settings, parameters)
   }
 
-  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, Seq[Any]) = {
 
     // check all the parameters passed by #bindByName are actually used
     import scalikejdbc.globalsettings._
@@ -142,10 +142,10 @@ private[scalikejdbc] trait Extractor[A] {
  */
 abstract class SQL[A, E <: WithExtractor](
   val statement: String,
-  private[scalikejdbc] val rawParameters: Seq[Any])(f: WrappedResultSet => A)
+  private[scalikejdbc] val rawParameters: scala.collection.Seq[Any])(f: WrappedResultSet => A)
   extends Extractor[A] {
 
-  final lazy val parameters: Seq[Any] = rawParameters.map {
+  final lazy val parameters: scala.collection.Seq[Any] = rawParameters.map {
     case ParameterBinder(v) => v
     case x => x
   }
@@ -160,9 +160,9 @@ abstract class SQL[A, E <: WithExtractor](
   type ThisSQL = SQL[A, E]
   type SQLWithExtractor = SQL[A, HasExtractor]
 
-  protected def withParameters(params: Seq[Any]): SQL[A, E] = ???
+  protected def withParameters(params: scala.collection.Seq[Any]): SQL[A, E] = ???
 
-  protected def withStatementAndParameters(state: String, params: Seq[Any]): SQL[A, E] = ???
+  protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQL[A, E] = ???
 
   protected def withExtractor[B](f: WrappedResultSet => B): SQL[B, HasExtractor] = ???
 
@@ -203,7 +203,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return tags
    */
-  def tags: Seq[String] = this._tags.toSeq
+  def tags: scala.collection.Seq[String] = this._tags.toSeq
 
   /**
    * Returns fetchSize for this query.
@@ -280,7 +280,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batch(parameters: Seq[Any]*): SQLBatch = {
+  def batch(parameters: scala.collection.Seq[Any]*): SQLBatch = {
     new SQLBatch(statement, parameters, tags)
   }
 
@@ -290,7 +290,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def largeBatch(parameters: Seq[Any]*): SQLLargeBatch =
+  def largeBatch(parameters: scala.collection.Seq[Any]*): SQLLargeBatch =
     new SQLLargeBatch(statement, parameters, tags)
 
   /**
@@ -299,7 +299,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchAndReturnGeneratedKey(parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
+  def batchAndReturnGeneratedKey(parameters: scala.collection.Seq[Any]*): SQLBatchWithGeneratedKey = {
     new SQLBatchWithGeneratedKey(statement, parameters, tags)(None)
   }
 
@@ -310,7 +310,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchAndReturnGeneratedKey(generatedKeyName: String, parameters: Seq[Any]*): SQLBatchWithGeneratedKey = {
+  def batchAndReturnGeneratedKey(generatedKeyName: String, parameters: scala.collection.Seq[Any]*): SQLBatchWithGeneratedKey = {
     new SQLBatchWithGeneratedKey(statement, parameters, tags)(Some(generatedKeyName))
   }
 
@@ -320,11 +320,11 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchByName(parameters: Seq[(Symbol, Any)]*): SQLBatch = {
+  def batchByName(parameters: scala.collection.Seq[(Symbol, Any)]*): SQLBatch = {
     val names = SQLTemplateParser.extractAllParameters(statement)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(statement)
     val _sql = validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, parameters.headOption.getOrElse(Seq.empty))._1
-    val _parameters: Seq[Seq[Any]] = parameters.map { p =>
+    val _parameters: scala.collection.Seq[Seq[Any]] = parameters.map { p =>
       validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, p)._2
     }
     new SQLBatch(_sql, _parameters, tags)
@@ -583,7 +583,7 @@ abstract class SQL[A, E <: WithExtractor](
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLBatch(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil) {
+class SQLBatch(val statement: String, val parameters: scala.collection.Seq[Seq[Any]], val tags: scala.collection.Seq[String] = Nil) {
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
@@ -613,7 +613,7 @@ object SQLBatch {
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: Seq[Seq[Any]], tags: Seq[String]) {
+class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: scala.collection.Seq[Seq[Any]], tags: scala.collection.Seq[String]) {
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
     val f: DBSession => C[Long] = DBSessionWrapper(_, attributesSwitcher).largeBatch(statement, parameters: _*)
@@ -632,7 +632,7 @@ class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: Seq[Seq
   }
 }
 
-class SQLBatchWithGeneratedKey(val statement: String, val parameters: Seq[Seq[Any]], val tags: Seq[String] = Nil)(val key: Option[String]) {
+class SQLBatchWithGeneratedKey(val statement: String, val parameters: scala.collection.Seq[Seq[Any]], val tags: scala.collection.Seq[String] = Nil)(val key: Option[String]) {
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
@@ -669,7 +669,7 @@ object SQLBatchWithGeneratedKey {
  * @param before before filter
  * @param after after filter
  */
-class SQLExecution(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
+class SQLExecution(val statement: String, val parameters: scala.collection.Seq[Any], val tags: scala.collection.Seq[String] = Nil)(
   val before: (PreparedStatement) => Unit)(
   val after: (PreparedStatement) => Unit) {
 
@@ -703,7 +703,7 @@ object SQLExecution {
  * @param before before filter
  * @param after after filter
  */
-class SQLUpdate(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(
+class SQLUpdate(val statement: String, val parameters: scala.collection.Seq[Any], val tags: scala.collection.Seq[String] = Nil)(
   val before: (PreparedStatement) => Unit)(
   val after: (PreparedStatement) => Unit) {
 
@@ -739,7 +739,7 @@ object SQLUpdate {
  * @param before before filter
  * @param after after filter
  */
-class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: Seq[Any], tags: Seq[String] = Nil)(
+class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: scala.collection.Seq[Any], tags: scala.collection.Seq[String] = Nil)(
   before: PreparedStatement => Unit)(
   after: PreparedStatement => Unit) {
 
@@ -766,7 +766,7 @@ class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: Seq[An
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLUpdateWithGeneratedKey(val statement: String, val parameters: Seq[Any], val tags: Seq[String] = Nil)(val key: Any) {
+class SQLUpdateWithGeneratedKey(val statement: String, val parameters: scala.collection.Seq[Any], val tags: scala.collection.Seq[String] = Nil)(val key: Any) {
 
   def apply()(implicit session: DBSession): Long = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
@@ -795,7 +795,7 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): C[AA]
   val statement: String
-  private[scalikejdbc] val rawParameters: Seq[Any]
+  private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply()(
     implicit
     session: DBSession,
@@ -837,16 +837,16 @@ trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversa
  * @tparam A return type
  */
 class SQLToTraversableImpl[A, E <: WithExtractor](
-  override val statement: String, override val rawParameters: Seq[Any])(
+  override val statement: String, override val rawParameters: scala.collection.Seq[Any])(
   override val extractor: WrappedResultSet => A)
   extends SQL[A, E](statement, rawParameters)(extractor)
   with SQLToTraversable[A, E] {
 
-  override protected def withParameters(params: Seq[Any]): SQLToResult[A, E, Traversable] = {
+  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToResult[A, E, Traversable] = {
     new SQLToTraversableImpl[A, E](statement, params)(extractor)
   }
 
-  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToResult[A, E, Traversable] = {
+  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToResult[A, E, Traversable] = {
     new SQLToTraversableImpl[A, E](state, params)(extractor)
   }
 
@@ -871,7 +871,7 @@ object SQLToTraversableImpl {
 trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
   val statement: String
-  private[scalikejdbc] val rawParameters: Seq[Any]
+  private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
     val f: DBSession => C[A] = DBSessionWrapper(_, attributesSwitcher).collection[A, C](statement, rawParameters: _*)(extractor)
@@ -888,16 +888,16 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
 }
 
 class SQLToCollectionImpl[A, E <: WithExtractor](
-  override val statement: String, override val rawParameters: Seq[Any])(
+  override val statement: String, override val rawParameters: scala.collection.Seq[Any])(
   override val extractor: WrappedResultSet => A)
   extends SQL[A, E](statement, rawParameters)(extractor)
   with SQLToCollection[A, E] {
 
-  override protected def withParameters(params: Seq[Any]): SQLToCollection[A, E] = {
+  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToCollection[A, E] = {
     new SQLToCollectionImpl[A, E](statement, params)(extractor)
   }
 
-  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToCollection[A, E] = {
+  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToCollection[A, E] = {
     new SQLToCollectionImpl[A, E](state, params)(extractor)
   }
 
@@ -936,16 +936,16 @@ trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
  * @tparam A return type
  */
 class SQLToListImpl[A, E <: WithExtractor](
-  override val statement: String, override val rawParameters: Seq[Any])(
+  override val statement: String, override val rawParameters: scala.collection.Seq[Any])(
   override val extractor: WrappedResultSet => A)
   extends SQL[A, E](statement, rawParameters)(extractor)
   with SQLToList[A, E] {
 
-  override protected def withParameters(params: Seq[Any]): SQLToList[A, E] = {
+  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, params)(extractor)
   }
 
-  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToList[A, E] = {
+  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToList[A, E] = {
     new SQLToListImpl[A, E](state, params)(extractor)
   }
 
@@ -990,16 +990,16 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
  * @tparam A return type
  */
 class SQLToOptionImpl[A, E <: WithExtractor](
-  override val statement: String, override val rawParameters: Seq[Any])(
+  override val statement: String, override val rawParameters: scala.collection.Seq[Any])(
   override val extractor: WrappedResultSet => A)(val isSingle: Boolean = true)
   extends SQL[A, E](statement, rawParameters)(extractor)
   with SQLToOption[A, E] {
 
-  override protected def withParameters(params: Seq[Any]): SQLToOption[A, E] = {
+  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, params)(extractor)(isSingle)
   }
 
-  override protected def withStatementAndParameters(state: String, params: Seq[Any]): SQLToOption[A, E] = {
+  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](state, params)(extractor)(isSingle)
   }
 

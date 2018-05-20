@@ -23,8 +23,8 @@ object autoColumns {
     expr
   }
 
-  def apply[A](excludes: String*): Seq[String] = macro apply_impl[A]
+  def apply[A](excludes: String*): collection.Seq[String] = macro apply_impl[A]
 
-  def debug[A](excludes: String*): Seq[String] = macro debug_impl[A]
+  def debug[A](excludes: String*): collection.Seq[String] = macro debug_impl[A]
 
 }

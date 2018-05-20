@@ -22,7 +22,7 @@ object SbtPlugin {
   type GeneratorSettings = ScalikejdbcPlugin.autoImport.GeneratorSettings
 
   @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-  val scalikejdbcSettings: Seq[Def.Setting[_]] = ScalikejdbcPlugin.projectSettings
+  val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = ScalikejdbcPlugin.projectSettings
 }
 
 object ScalikejdbcPlugin extends AutoPlugin {
@@ -56,13 +56,13 @@ object ScalikejdbcPlugin extends AutoPlugin {
       columnNameToFieldName: String => String,
       returnCollectionType: ReturnCollectionType,
       view: Boolean,
-      tableNamesToSkip: Seq[String],
-      baseTypes: Seq[String],
-      companionBaseTypes: Seq[String],
+      tableNamesToSkip: collection.Seq[String],
+      baseTypes: collection.Seq[String],
+      companionBaseTypes: collection.Seq[String],
       tableNameToSyntaxName: String => String)
 
     @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-    lazy val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
+    lazy val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = projectSettings
   }
 
   import autoImport._
@@ -75,7 +75,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       } else str
     }
 
-  private[this] def commaSeparated(props: Properties, key: String): Seq[String] =
+  private[this] def commaSeparated(props: Properties, key: String): collection.Seq[String] =
     getString(props, key).map(_.split(',').map(_.trim).filter(_.nonEmpty).toList).getOrElse(Nil)
 
   private[this] final val JDBC = "jdbc."
@@ -213,7 +213,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       }
   }
 
-  def allGenerators(srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): Seq[CodeGenerator] = {
+  def allGenerators(srcDir: File, testDir: File, jdbc: JDBCSettings, generatorSettings: GeneratorSettings): collection.Seq[CodeGenerator] = {
     val config = generatorConfig(srcDir, testDir, generatorSettings)
     val className = None
     Class.forName(jdbc.driver) // load specified jdbc driver
@@ -236,7 +236,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private def genTaskParser(keyName: String): complete.Parser[GenTaskParameter] = (
     Space ~> token(StringBasic, "tableName") ~ (Space ~> token(StringBasic, "(class-name)")).?).map(GenTaskParameter.tupled).!!!("Usage: " + keyName + " [table-name (class-name)]")
 
-  override val projectSettings: Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
+  override val projectSettings: collection.Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
     scalikejdbcCodeGeneratorSingle := {
       val srcDir = (scalaSource in Compile).value
       val testDir = (scalaSource in Test).value
@@ -289,7 +289,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)))
 
   @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-  val scalikejdbcSettings: Seq[Def.Setting[_]] = projectSettings
+  val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = projectSettings
 
   def using[R <: { def close(): Unit }, A](resource: R)(f: R => A): A = ultimately {
     ignoring(classOf[Throwable]) apply resource.close()

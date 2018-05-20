@@ -11,7 +11,7 @@ import java.util.Locale.ENGLISH
  * Note: The constructor should NOT be used by library users at the considerable risk of SQL injection vulnerability.
  * [[https://github.com/scalikejdbc/scalikejdbc/issues/116]]
  */
-class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] val rawParameters: Seq[Any] = Vector()) {
+class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] val rawParameters: collection.Seq[Any] = Vector()) {
   import Implicits._
   import SQLSyntax._
 
@@ -28,7 +28,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
 
   override def toString(): String = s"SQLSyntax(value: ${value}, parameters: ${parameters})"
 
-  lazy val parameters: Seq[Any] = rawParameters.map {
+  lazy val parameters: collection.Seq[Any] = rawParameters.map {
     case ParameterBinder(v) => v
     case x => x
   }
@@ -86,14 +86,14 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   def between[A, B, C](a: A, b: B, c: C)(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = sqls"${this} ${ev1(a)} between ${ev2(b)} and ${ev3(c)}"
   def notBetween[A, B, C](a: A, b: B, c: C)(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = sqls"${this} not ${ev1(a)} between ${ev2(b)} and ${ev3(c)}"
 
-  def in[A](column: SQLSyntax, values: Seq[A])(implicit ev: ParameterBinderFactory[A]): SQLSyntax = {
+  def in[A](column: SQLSyntax, values: collection.Seq[A])(implicit ev: ParameterBinderFactory[A]): SQLSyntax = {
     if (values.isEmpty) {
       sqls"${this} FALSE"
     } else {
       sqls"${this} ${column} in (${values.map(ev.apply)})"
     }
   }
-  def notIn[A](column: SQLSyntax, values: Seq[A])(implicit ev: ParameterBinderFactory[A]): SQLSyntax = {
+  def notIn[A](column: SQLSyntax, values: collection.Seq[A])(implicit ev: ParameterBinderFactory[A]): SQLSyntax = {
     if (values.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -104,7 +104,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   def in(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = sqls"${this} ${column} in (${subQuery})"
   def notIn(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = sqls"${this} ${column} not in (${subQuery})"
 
-  def in[A, B](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B]): SQLSyntax = {
+  def in[A, B](columns: (SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -114,7 +114,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} ${inClause}"
     }
   }
-  def notIn[A, B](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B]): SQLSyntax = {
+  def notIn[A, B](columns: (SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -125,7 +125,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
     }
   }
 
-  def in[A, B, C](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = {
+  def in[A, B, C](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -135,7 +135,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} ${inClause}"
     }
   }
-  def notIn[A, B, C](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = {
+  def notIn[A, B, C](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -146,7 +146,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
     }
   }
 
-  def in[A, B, C, D](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D]): SQLSyntax = {
+  def in[A, B, C, D](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -156,7 +156,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} ${inClause}"
     }
   }
-  def notIn[A, B, C, D](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D]): SQLSyntax = {
+  def notIn[A, B, C, D](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -167,7 +167,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
     }
   }
 
-  def in[A, B, C, D, E](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D, E)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D], ev5: ParameterBinderFactory[E]): SQLSyntax = {
+  def in[A, B, C, D, E](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D, E)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D], ev5: ParameterBinderFactory[E]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} FALSE"
     } else {
@@ -177,7 +177,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} ${inClause}"
     }
   }
-  def notIn[A, B, C, D, E](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D, E)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D], ev5: ParameterBinderFactory[E]): SQLSyntax = {
+  def notIn[A, B, C, D, E](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D, E)])(implicit ev1: ParameterBinderFactory[A], ev2: ParameterBinderFactory[B], ev3: ParameterBinderFactory[C], ev4: ParameterBinderFactory[D], ev5: ParameterBinderFactory[E]): SQLSyntax = {
     if (valueSeqs.isEmpty) {
       sqls"${this} TRUE"
     } else {
@@ -230,16 +230,16 @@ object SQLSyntax {
 
   // #apply method should NOT be used by library users at the considerable risk of SQL injection vulnerability.
   // https://github.com/scalikejdbc/scalikejdbc/issues/116
-  private[scalikejdbc] def apply(value: String, parameters: Seq[Any] = Nil): SQLSyntax = new SQLSyntax(value, parameters)
+  private[scalikejdbc] def apply(value: String, parameters: collection.Seq[Any] = Nil): SQLSyntax = new SQLSyntax(value, parameters)
 
   /**
    * WARNING: Be aware of SQL injection vulnerability.
    */
-  def createUnsafely(value: String, parameters: Seq[Any] = Nil): SQLSyntax = apply(value, parameters)
+  def createUnsafely(value: String, parameters: collection.Seq[Any] = Nil): SQLSyntax = apply(value, parameters)
 
   def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.rawParameters))
 
-  def join(parts: Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimiter: Boolean = true): SQLSyntax = {
+  def join(parts: collection.Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimiter: Boolean = true): SQLSyntax = {
     val sep = if (spaceBeforeDelimiter) {
       s" ${delimiter.value} "
     } else {
@@ -299,20 +299,20 @@ object SQLSyntax {
   def between[A: ParameterBinderFactory, B: ParameterBinderFactory](column: SQLSyntax, a: A, b: B): SQLSyntax = SQLSyntax.empty.between(column, a, b)
   def notBetween[A: ParameterBinderFactory, B: ParameterBinderFactory](column: SQLSyntax, a: A, b: B): SQLSyntax = SQLSyntax.empty.notBetween(column, a, b)
 
-  def in[A: ParameterBinderFactory](column: SQLSyntax, values: Seq[A]): SQLSyntax = SQLSyntax.empty.in(column, values)
-  def notIn[A: ParameterBinderFactory](column: SQLSyntax, values: Seq[A]): SQLSyntax = SQLSyntax.empty.notIn(column, values)
+  def in[A: ParameterBinderFactory](column: SQLSyntax, values: collection.Seq[A]): SQLSyntax = SQLSyntax.empty.in(column, values)
+  def notIn[A: ParameterBinderFactory](column: SQLSyntax, values: collection.Seq[A]): SQLSyntax = SQLSyntax.empty.notIn(column, values)
 
-  def in[A: ParameterBinderFactory, B: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in[A: ParameterBinderFactory, B: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
-  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D, E)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
-  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: Seq[(A, B, C, D, E)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
+  def in[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D, E)]): SQLSyntax = SQLSyntax.empty.in(columns, valueSeqs)
+  def notIn[A: ParameterBinderFactory, B: ParameterBinderFactory, C: ParameterBinderFactory, D: ParameterBinderFactory, E: ParameterBinderFactory](columns: (SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax, SQLSyntax), valueSeqs: collection.Seq[(A, B, C, D, E)]): SQLSyntax = SQLSyntax.empty.notIn(columns, valueSeqs)
 
   def in(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = SQLSyntax.empty.in(column, subQuery)
   def notIn(column: SQLSyntax, subQuery: SQLSyntax): SQLSyntax = SQLSyntax.empty.notIn(column, subQuery)
@@ -360,7 +360,7 @@ object SQLSyntax {
    * }}}
    */
   def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: Seq[SQLSyntax] = conditions.flatten
+    val cs: collection.Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
   }
 
@@ -375,7 +375,7 @@ object SQLSyntax {
    * }}}
    */
   def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: Seq[SQLSyntax] = conditions.flatten
+    val cs: collection.Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
   }
 

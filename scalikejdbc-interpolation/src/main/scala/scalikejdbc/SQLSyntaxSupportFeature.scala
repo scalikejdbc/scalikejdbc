@@ -151,7 +151,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     /**
      * Column names for this table (default: column names that are loaded from JDBC metadata).
      */
-    def columns: Seq[String] = {
+    def columns: collection.Seq[String] = {
       if (columnNames.isEmpty) {
         SQLSyntaxSupportFeature.SQLSyntaxSupportLoadedColumns.getOrElseUpdate((connectionPoolName, tableNameWithSchema), {
           NamedDB(connectionPoolName, settings).getColumnNames(tableNameWithSchema, tableTypes).map(_.toLowerCase(en)) match {
@@ -180,7 +180,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     /**
      * If you prefer columnNames than columns, override this method to customize.
      */
-    def columnNames: Seq[String] = Nil
+    def columnNames: collection.Seq[String] = Nil
 
     /**
      * If you need some exotic table types like `MATERIALIZED VIEW` from PostgreSQL, override this method.
@@ -268,7 +268,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   case class TableAsAliasSQLSyntax private[scalikejdbc] (
     override val value: String,
-    override val rawParameters: Seq[Any] = Vector(),
+    override val rawParameters: collection.Seq[Any] = Vector(),
     resultAllProvider: Option[ResultAllProvider] = None) extends SQLSyntax(value, rawParameters)
 
   /**
@@ -276,7 +276,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   case class TableDefSQLSyntax private[scalikejdbc] (
     override val value: String,
-    override val rawParameters: Seq[Any] = Vector()) extends SQLSyntax(value, rawParameters)
+    override val rawParameters: collection.Seq[Any] = Vector()) extends SQLSyntax(value, rawParameters)
 
   /**
    * SQLSyntax Provider
@@ -372,7 +372,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     /**
      * Returns the shortened name for the name.
      */
-    def toShortenedName(name: String, columns: Seq[String]): String = {
+    def toShortenedName(name: String, columns: collection.Seq[String]): String = {
       def shorten(s: String): String = s.split("_").map(word => word.take(1)).mkString
 
       val shortenedName = shorten(toAlphabetOnly(name))
@@ -428,7 +428,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
-    lazy val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
+    lazy val columns: collection.Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
     lazy val * : SQLSyntax = SQLSyntax(columns.map(_.value).mkString(", "))
 
@@ -463,7 +463,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val forceUpperCase: Boolean = support.forceUpperCase
     val useSnakeCaseColumnName: Boolean = support.useSnakeCaseColumnName
     val delimiterForResultName: String = support.delimiterForResultName
-    lazy val columns: Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
+    lazy val columns: collection.Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 
     def notFoundInColumns(aliasName: String, name: String): InvalidColumnNameException = notFoundInColumns(aliasName, name, columns.map(_.value).mkString(","))
 
@@ -571,7 +571,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait ResultNameSQLSyntaxProvider[S <: SQLSyntaxSupport[A], A] extends SQLSyntaxProvider[A] {
     def * : SQLSyntax
-    def namedColumns: Seq[SQLSyntax]
+    def namedColumns: collection.Seq[SQLSyntax]
     def namedColumn(name: String): SQLSyntax
     def column(name: String): SQLSyntax
   }
@@ -591,7 +591,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       s"${name}${delimiterForResultName}${tableAliasName}"
     }.mkString(", "))
 
-    lazy val namedColumns: Seq[SQLSyntax] = support.columns.map { columnName: String =>
+    lazy val namedColumns: collection.Seq[SQLSyntax] = support.columns.map { columnName: String =>
       val name = toAliasName(columnName, support)
       SQLSyntax(s"${name}${delimiterForResultName}${tableAliasName}")
     }
@@ -658,7 +658,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQuerySQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) extends ResultAllProvider
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]) extends ResultAllProvider
     with AsteriskProvider {
 
     val result: SubQueryResultSQLSyntaxProvider = SubQueryResultSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
@@ -697,7 +697,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQueryResultSQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     private[scalikejdbc] val nameProvider: SubQueryResultNameSQLSyntaxProvider = SubQueryResultNameSQLSyntaxProvider(aliasName, delimiterForResultName, resultNames)
 
@@ -723,7 +723,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQueryResultNameSQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]) {
 
     lazy val * : SQLSyntax = SQLSyntax(resultNames.map { rn =>
       rn.namedColumns.map { c =>
@@ -731,7 +731,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       }.mkString(", ")
     }.mkString(", "))
 
-    lazy val columns: Seq[SQLSyntax] = resultNames.flatMap { rn =>
+    lazy val columns: collection.Seq[SQLSyntax] = resultNames.flatMap { rn =>
       rn.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
     }
 
@@ -839,7 +839,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       s"${c.value}${delimiterForResultName}${aliasName}"
     }.mkString(", "))
 
-    override lazy val columns: Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
+    override lazy val columns: collection.Seq[SQLSyntax] = underlying.namedColumns.map { c => SQLSyntax(s"${c.value}${delimiterForResultName}${aliasName}") }
 
     private[this] lazy val cachedColumns = {
       val cc = new scala.collection.concurrent.TrieMap[String, SQLSyntax]
@@ -857,7 +857,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       }
     })
 
-    lazy val namedColumns: Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
+    lazy val namedColumns: collection.Seq[SQLSyntax] = underlying.namedColumns.map { nc: SQLSyntax =>
       SQLSyntax(s"${nc.value}${delimiterForResultName}${aliasName}")
     }
 

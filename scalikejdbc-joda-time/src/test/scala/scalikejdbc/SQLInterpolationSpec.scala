@@ -19,7 +19,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
   val poolSettings = new ConnectionPoolSettings(initialSize = 50, maxSize = 50)
   ConnectionPool.singleton(url, user, password, poolSettings)
 
-  case class Group(id: Int, websiteUrl: Option[String], members: Seq[User] = Nil)
+  case class Group(id: Int, websiteUrl: Option[String], members: collection.Seq[User] = Nil)
   case class User(id: Int, name: Option[String], groupId: Option[Int] = None, group: Option[Group] = None)
 
   it should "be available with here document values" in {
@@ -231,8 +231,8 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
           Seq((1, "foo"), (2, "bar"), (3, "baz")) foreach {
             case (id, name) => sql"""insert into interpolation_users_216 values (${id}, ${name})""".update.apply()
           }
-          val columns: Seq[SQLSyntax] = Seq("id", "name").map(SQLSyntax.createUnsafely(_, Nil))
-          val values: Seq[SQLSyntax] = Seq(Seq(1, "foo"), Seq(2, "bar"), Seq(3, "bazzzz")).map { xs => sqls"($xs)" }
+          val columns: collection.Seq[SQLSyntax] = Seq("id", "name").map(SQLSyntax.createUnsafely(_, Nil))
+          val values: collection.Seq[SQLSyntax] = Seq(Seq(1, "foo"), Seq(2, "bar"), Seq(3, "bazzzz")).map { xs => sqls"($xs)" }
           val sql = sql"select count(1) from interpolation_users_216 where ${columns} in (${values})"
 
           sql.statement should equal("select count(1) from interpolation_users_216 where id, name in ((?, ?), (?, ?), (?, ?))")

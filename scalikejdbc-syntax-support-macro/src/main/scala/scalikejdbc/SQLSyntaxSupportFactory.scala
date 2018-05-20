@@ -15,7 +15,7 @@ object SQLSyntaxSupportFactory {
     c.Expr[SQLSyntaxSupportImpl[A]](q"""
       new scalikejdbc.SQLSyntaxSupportImpl[${weakTypeTag[A].tpe}] {
         override lazy val tableName: String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${weakTypeOf[A].toString})
-        override lazy val columns: Seq[String] = ${autoColumns.apply_impl(c)(excludes: _*)}
+        override lazy val columns: collection.Seq[String] = ${autoColumns.apply_impl(c)(excludes: _*)}
         def apply(rn: scalikejdbc.ResultName[${weakTypeTag[A].tpe}])(rs: scalikejdbc.WrappedResultSet): ${weakTypeTag[A].tpe} = new ${weakTypeTag[A].tpe}(..$constParams)
       }
     """)
