@@ -1,4 +1,6 @@
 package scalikejdbc.mapper
 
-case class Column(name: String, dataType: Int, isNotNull: Boolean, isAutoIncrement: Boolean)
+import java.sql.JDBCType
+
+case class Column(name: String, dataType: JDBCType, isNotNull: Boolean, isAutoIncrement: Boolean)
 

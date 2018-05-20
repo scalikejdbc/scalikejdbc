@@ -67,12 +67,12 @@ libraryDependencies ++= Seq(
 )
 
 TaskKey[Unit]("generateCodeForIssue339") := {
-  import java.sql.Types
+  import java.sql.JDBCType
   import scalikejdbc.mapper._
-  val key = Column("key", Types.INTEGER, true, true)
+  val key = Column("key", JDBCType.INTEGER, true, true)
   val other = List(
-    Column("column1", Types.OTHER, true, false),
-    Column("column2", Types.OTHER, false, false)
+    Column("column1", JDBCType.OTHER, true, false),
+    Column("column2", JDBCType.OTHER, false, false)
   )
   val all = key :: other
   val table = Table("Issue339table", all, all.filter(_.isAutoIncrement), key :: Nil)
