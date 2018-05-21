@@ -10,7 +10,7 @@ import java.util.Locale.{ ENGLISH => en }
 class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(implicit config: GeneratorConfig = GeneratorConfig())
   extends Generator with LoanPattern {
 
-  import java.sql.{ Types => JavaSqlTypes }
+  import java.sql.{ JDBCType => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
   private val packageName = config.packageName

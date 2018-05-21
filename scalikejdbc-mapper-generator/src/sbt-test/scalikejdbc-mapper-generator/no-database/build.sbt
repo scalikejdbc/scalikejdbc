@@ -23,11 +23,11 @@ libraryDependencies ++= Seq(
 )
 
 (scalikejdbcCodeGeneratorAll in Compile) := { (_, generatorSettings) =>
-  val idColumn = Column("id", java.sql.Types.INTEGER, true, true)
+  val idColumn = Column("id", java.sql.JDBCType.INTEGER, true, true)
   val columns = List(
     idColumn,
-    Column("name", java.sql.Types.VARCHAR, true, false),
-    Column("updated_at", java.sql.Types.TIMESTAMP, false, false)
+    Column("name", java.sql.JDBCType.VARCHAR, true, false),
+    Column("updated_at", java.sql.JDBCType.TIMESTAMP, false, false)
   )
   val table = Table(
     "Programmers",
