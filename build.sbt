@@ -15,11 +15,11 @@ lazy val _h2Version = "1.4.197"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.46"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.2.16.Final"
+lazy val _hibernateVersion = "5.3.0.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "2.17.0"
+lazy val mockitoVersion = "2.18.3"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -163,14 +163,14 @@ lazy val scalikejdbcCore = Project(
   libraryDependencies ++= {
     Seq(
       // scope: compile
-      "org.apache.commons"      %  "commons-dbcp2"   % "2.2.0"           % "compile",
+      "org.apache.commons"      %  "commons-dbcp2"   % "2.3.0"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "org.scala-lang.modules"  %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "2.7.6"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "3.1.0"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
@@ -364,9 +364,9 @@ def specs2DependenciesInTestScope(v: String) =
 
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
-  "org.apache.derby"  % "derby"                % "10.14.1.0"        % "test",
+  "org.apache.derby"  % "derby"                % "10.14.2.0"        % "test",
   "org.xerial"        % "sqlite-jdbc"          % "3.21.0.1"         % "test",
-  "org.hsqldb"        % "hsqldb"               % "2.4.0"            % "test",
+  "org.hsqldb"        % "hsqldb"               % "2.4.1"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
