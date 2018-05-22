@@ -2,7 +2,6 @@ package scalikejdbc.mapper
 
 import java.util.UUID
 import scalikejdbc._
-import scalikejdbc.{ ResultSetTraversable => RSTraversable }
 
 case class Model(url: String, username: String, password: String) extends AutoCloseable {
 
@@ -41,7 +40,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
           case (s, _) => (null, s)
         }
       }
-      new RSTraversable(meta.getTables(catalog, _schema, "%", types.toArray))
+      new ResultSetIterator(meta.getTables(catalog, _schema, "%", types.toArray))
         .map { rs => rs.string("TABLE_NAME") }
         .toList
     }
@@ -58,7 +57,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
     val _schema = if (schema == null || schema.isEmpty) null else schema
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
-      new RSTraversable(meta.getColumns(catalog, _schema, tableName, "%"))
+      new ResultSetIterator(meta.getColumns(catalog, _schema, tableName, "%"))
         .map { implicit rs => Column(columnName, columnDataType, isNotNull, isAutoIncrement) }
         .toList.distinct match {
           case Nil => None
@@ -69,7 +68,7 @@ case class Model(url: String, username: String, password: String) extends AutoCl
               allColumns = allColumns,
               autoIncrementColumns = allColumns.filter(c => c.isAutoIncrement).distinct,
               primaryKeyColumns = {
-                new RSTraversable(meta.getPrimaryKeys(catalog, _schema, tableName))
+                new ResultSetIterator(meta.getPrimaryKeys(catalog, _schema, tableName))
                   .flatMap { implicit rs => allColumns.find(column => column.name == columnName) }
                   .toList.distinct
               }))
