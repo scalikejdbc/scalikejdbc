@@ -261,7 +261,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
         val resultSet = new ResultSetTraversable(proxy)
-        val rows = (resultSet map (rs => extract(rs))).toList
+        val rows = (resultSet map extract).toList
         rows match {
           case Nil => None
           case one :: Nil => Option(one)
@@ -326,7 +326,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy) foreach (rs => f(rs))
+        new ResultSetTraversable(proxy) foreach f
     }
   }
 
