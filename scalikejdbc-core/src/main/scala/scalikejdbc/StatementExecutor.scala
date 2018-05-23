@@ -12,8 +12,6 @@ import scala.util.control.NonFatal
  */
 object StatementExecutor {
 
-  type MutableList[A] = collection.mutable.MutableList[A]
-
   val eol: String = System.getProperty("line.separator")
 
   private trait Executor {
@@ -141,7 +139,7 @@ case class StatementExecutor(
 
   import StatementExecutor._
 
-  private[this] lazy val batchParamsList = new MutableList[Seq[Any]]
+  private[this] lazy val batchParamsList = scala.collection.mutable.ArrayBuffer.empty[Seq[Any]]
 
   initialize()
 
