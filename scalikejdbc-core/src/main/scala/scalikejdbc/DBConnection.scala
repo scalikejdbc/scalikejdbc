@@ -12,8 +12,6 @@ import java.util.Locale.{ ENGLISH => en }
  */
 trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
 
-  type RSTraversable = ResultSetTraversable
-
   protected[this] val settingsProvider: SettingsProvider
   private[this] lazy val jtaDataSourceCompatible: Boolean =
     settingsProvider.jtaDataSourceCompatible(GlobalSettings.jtaDataSourceCompatible)
@@ -392,7 +390,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableNamePattern.replaceAll("\\*", "%"), tableTypes).map {
         case (schema, tableNamePattern) =>
-          new RSTraversable(meta.getTables(null, schema, tableNamePattern, tableTypes))
+          new ResultSetIterator(meta.getTables(null, schema, tableNamePattern, tableTypes))
             .map { rs =>
               val schemaName = rs.string("TABLE_SCHEM")
               if (schema != null && schema.nonEmpty && schemaName != null) {
@@ -428,7 +426,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableName, tableTypes).map {
         case (schema, tableName) =>
-          new RSTraversable(getAllColumns(meta, schema, tableName)).map(_.string("COLUMN_NAME")).toList.distinct
+          new ResultSetIterator(getAllColumns(meta, schema, tableName)).map(_.string("COLUMN_NAME")).toList.distinct
       }
     }.getOrElse(Nil)
   }
@@ -462,19 +460,19 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @return table information
    */
   private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
-    val tableList = new RSTraversable(meta.getTables(null, schema, table, tableTypes)).map {
+    val tableList = new ResultSetIterator(meta.getTables(null, schema, table, tableTypes)).map {
       rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
-    }
+    }.toStream
 
     tableList.headOption.map {
       case (schema, table, remarks) =>
-        val pkNames: Traversable[String] = new RSTraversable(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME"))
+        val pkNames: List[String] = new ResultSetIterator(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME")).toList
 
         Table(
           name = table,
           schema = schema,
           description = remarks,
-          columns = new RSTraversable(getAllColumns(meta, schema, table)).map { rs =>
+          columns = new ResultSetIterator(getAllColumns(meta, schema, table)).map { rs =>
             Column(
               name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
               typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
@@ -495,7 +493,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
           }.toList.distinct,
           foreignKeys = {
             try {
-              new RSTraversable(meta.getImportedKeys(null, schema, table)).map { rs =>
+              new ResultSetIterator(meta.getImportedKeys(null, schema, table)).map { rs =>
                 ForeignKey(
                   name = rs.string("FKCOLUMN_NAME"),
                   foreignColumnName = rs.string("PKCOLUMN_NAME"),
@@ -505,7 +503,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
           },
           indices = {
             try {
-              new RSTraversable(meta.getIndexInfo(null, schema, table, false, true))
+              new ResultSetIterator(meta.getIndexInfo(null, schema, table, false, true))
                 .foldLeft(Map[String, Index]()) {
                   case (map, rs) =>
                     val indexName: String = rs.string("INDEX_NAME")
@@ -584,7 +582,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
         _schema
       }
 
-      if (new RSTraversable(meta.getTables(null, schema, table, tableTypes)).isEmpty) {
+      if (new ResultSetIterator(meta.getTables(null, schema, table, tableTypes)).isEmpty) {
         None
       } else {
         Some((schema, table))

@@ -260,7 +260,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        val resultSet = new ResultSetTraversable(proxy)
+        val resultSet = new ResultSetIterator(proxy)
         val rows = (resultSet map extract).toList
         rows match {
           case Nil => None
@@ -310,7 +310,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy).map(extract)(breakOut)
+        new ResultSetIterator(proxy).map(extract).to[C]
     }
   }
 
@@ -326,7 +326,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy) foreach f
+        new ResultSetIterator(proxy) foreach f
     }
   }
 
@@ -343,7 +343,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy).foldLeft(z)(op)
+        new ResultSetIterator(proxy).foldLeft(z)(op)
     }
   }
 
@@ -739,7 +739,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(1)).to[C]
+          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(1)).to[C]
         }
     }
   }
@@ -770,7 +770,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(key)).to[C]
+          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(key)).to[C]
         }
     }
   }
