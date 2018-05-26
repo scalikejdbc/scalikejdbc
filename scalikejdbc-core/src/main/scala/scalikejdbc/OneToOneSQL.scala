@@ -24,7 +24,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
   private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, B) => Z): Traversable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
     DBSessionWrapper(session, attributesSwitcher)
-      .foldLeft(statement, rawParameters: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
+      .foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
         case (one, Some(to)) => zExtractor(one, to)
         case (one, None) => one.asInstanceOf[Z]
       }

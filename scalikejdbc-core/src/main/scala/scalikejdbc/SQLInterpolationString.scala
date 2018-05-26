@@ -13,7 +13,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
 
   def sql[A](params: Any*): SQL[A, NoExtractor] = {
     val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.rawParameters: _*)
+    SQL[A](syntax.value).bind(syntax.rawParameters.toSeq: _*)
   }
 
   def sqls(params: Any*): SQLSyntax = {
