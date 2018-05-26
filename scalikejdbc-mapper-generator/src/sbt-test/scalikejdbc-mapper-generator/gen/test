@@ -108,7 +108,7 @@ $ delete src/test/scala/ProgrammersTest.scala
 > scalikejdbcGenForce programmers
 > + test:compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.CanBuildFrom)}
+> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Factory)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
 > + test:compile

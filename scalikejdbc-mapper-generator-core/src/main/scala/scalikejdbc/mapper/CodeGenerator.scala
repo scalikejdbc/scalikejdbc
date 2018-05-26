@@ -546,14 +546,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       }).stripMargin + eol
 
     val C = "C"
-    val canBuildFromParam = {
-      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
-        s", $C: CanBuildFrom[Nothing, $className, $C[$className]]"
+    val factoryParam = {
+      if (config.returnCollectionType == ReturnCollectionType.Factory)
+        s", $C: Factory[$className, $C[$className]]"
       else
         ""
     }
     val typeParam = {
-      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
+      if (config.returnCollectionType == ReturnCollectionType.Factory)
         s"[$C[_]]"
       else
         ""
@@ -562,14 +562,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case ReturnCollectionType.List => "List"
       case ReturnCollectionType.Vector => "Vector"
       case ReturnCollectionType.Array => "Array"
-      case ReturnCollectionType.CanBuildFrom => C
+      case ReturnCollectionType.Factory => C
     }
 
     val toResult = config.returnCollectionType match {
       case ReturnCollectionType.List => "list.apply()"
       case ReturnCollectionType.Vector => "collection.apply[Vector]()"
       case ReturnCollectionType.Array => "collection.apply[Array]()"
-      case ReturnCollectionType.CanBuildFrom => s"collection.apply[$C]()"
+      case ReturnCollectionType.Factory => s"collection.apply[$C]()"
     }
 
     /**
@@ -584,24 +584,24 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val findAllMethod =
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
             |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}}\"\"\".map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
             |    withSQL(select.from(${className} as ${syntaxName})).map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
       }).stripMargin + eol
 
     val interpolationFindAllByMethod = {
-      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
         |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
         |      .map(${className}(${syntaxName}.resultName)).${toResult}
         |  }""".stripMargin + eol
     }
 
     val queryDslFindAllByMethod = {
-      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${canBuildFromParam}): $returnType[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
         |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(where)
         |    }.map(${className}(${syntaxName}.resultName)).${toResult}
@@ -653,15 +653,15 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         else
           allColumns
 
-      val canBuildFrom = {
-        if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom)
-          s", $C: CanBuildFrom[Nothing, Int, $C[Int]]"
+      val factory = {
+        if (config.returnCollectionType == ReturnCollectionType.Factory)
+          s", $C: Factory[Int, $C[Int]]"
         else
           ""
       }
 
       // def batchInsert=(
-      1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + canBuildFrom + s"): $returnType[Int] = {" + eol +
+      1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + factory + s"): $returnType[Int] = {" + eol +
         2.indent + "val params: collection.Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
         batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
@@ -764,16 +764,16 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       case classes if classes.nonEmpty => "import java.sql.{" + classes.distinct.mkString(", ") + "}" + eol
       case _ => ""
     }
-    val canBuildFromImport =
-      if (config.returnCollectionType == ReturnCollectionType.CanBuildFrom) {
-        "import scala.collection.generic.CanBuildFrom" + eol
+    val compatImport =
+      if (config.returnCollectionType == ReturnCollectionType.Factory) {
+        "import scala.collection.compat._" + eol
       } else {
         ""
       }
 
     "package " + config.packageName + eol +
       eol +
-      canBuildFromImport +
+      compatImport +
       "import scalikejdbc._" + eol +
       timeImport +
       javaSqlImport +

@@ -19,7 +19,7 @@ private[scalikejdbc] object EntityUtil {
         None
       }
     }.toSet
-    val paramsStrs: Set[String] = allParams.map(_.name.decodedName.toString)(collection.breakOut)
+    val paramsStrs: Set[String] = allParams.map(_.name.decodedName.toString).toSet
     excludeStrs.foreach { ex =>
       if (!paramsStrs(ex)) c.error(c.enclosingPosition, s"$ex does not found in ${weakTypeTag[A].tpe}")
     }

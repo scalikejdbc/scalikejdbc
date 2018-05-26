@@ -33,14 +33,14 @@ class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
       nextOpt = null
       result
     } else if (closed) {
-      Iterator.empty.next
+      Iterator.empty.next()
     } else if (rs.next) {
       cursor.position += 1
       new WrappedResultSet(rs, cursor, cursor.position)
     } else {
       rs.close()
       closed = true
-      Iterator.empty.next
+      Iterator.empty.next()
     }
   }
 }

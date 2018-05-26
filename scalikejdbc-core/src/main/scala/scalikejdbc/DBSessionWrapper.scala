@@ -2,7 +2,7 @@ package scalikejdbc
 
 import java.sql.PreparedStatement
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -51,7 +51,7 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def list[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): List[A] = {
     withAttributesSwitchedDBSession(_.list(template, params: _*)(extract))
   }
-  override def collection[A, C[_]](template: String, params: Any*)(extract: (WrappedResultSet) => A)(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
+  override def collection[A, C[_]](template: String, params: Any*)(extract: (WrappedResultSet) => A)(implicit f: Factory[A, C[A]]): C[A] = {
     withAttributesSwitchedDBSession(_.collection(template, params: _*)(extract))
   }
   override def foreach(template: String, params: Any*)(f: (WrappedResultSet) => Unit): Unit = {
@@ -91,13 +91,13 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
     withAttributesSwitchedDBSession(_.updateAndReturnSpecifiedGeneratedKey(template, params: _*)(key))
   }
-  override def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
+  override def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Int, C[Int]]): C[Int] = {
     withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
   }
-  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(_.batchAndReturnGeneratedKey(template, paramsList: _*))
   }
-  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(_.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*))
   }
 
