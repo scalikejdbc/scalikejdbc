@@ -237,7 +237,7 @@ object SQLSyntax {
    */
   def createUnsafely(value: String, parameters: collection.Seq[Any] = Nil): SQLSyntax = apply(value, parameters)
 
-  def unapply(syntax: SQLSyntax): Option[(String, Seq[Any])] = Some((syntax.value, syntax.rawParameters))
+  def unapply(syntax: SQLSyntax): Option[(String, collection.Seq[Any])] = Some((syntax.value, syntax.rawParameters))
 
   def join(parts: collection.Seq[SQLSyntax], delimiter: SQLSyntax, spaceBeforeDelimiter: Boolean = true): SQLSyntax = {
     val sep = if (spaceBeforeDelimiter) {
@@ -249,7 +249,7 @@ object SQLSyntax {
     val parameters = if (delimiter.rawParameters.isEmpty) {
       parts.flatMap(_.rawParameters)
     } else {
-      parts.tail.foldLeft(parts.headOption.fold(Seq.empty[Any])(_.rawParameters)) {
+      parts.tail.foldLeft(parts.headOption.fold(collection.Seq.empty[Any])(_.rawParameters)) {
         case (params, part) => params ++ delimiter.rawParameters ++ part.rawParameters
       }
     }

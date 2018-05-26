@@ -65,7 +65,7 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](
 }
 
 object OneToOneSQL {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQL[A, B, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQL[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toOne, sqlObject.zExtractor))
   }
 }
@@ -89,7 +89,7 @@ class OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z](
 }
 
 object OneToOneSQLToTraversable {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToTraversable[A, B, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToTraversable[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toOne, sqlObject.zExtractor))
   }
 }
@@ -113,7 +113,7 @@ class OneToOneSQLToList[A, B, E <: WithExtractor, Z](
 }
 
 object OneToOneSQLToList {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToList[A, B, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToList[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toOne, sqlObject.zExtractor))
   }
 }
@@ -137,7 +137,7 @@ class OneToOneSQLToCollection[A, B, E <: WithExtractor, Z](
 }
 
 object OneToOneSQLToCollection {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToCollection[A, B, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToCollection[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toOne, sqlObject.zExtractor))
   }
 }
@@ -160,7 +160,7 @@ class OneToOneSQLToOption[A, B, E <: WithExtractor, Z](
 }
 
 object OneToOneSQLToOption {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToOption[A, B, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z, Boolean)] = {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToOneSQLToOption[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, B) => Z, Boolean)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toOne, sqlObject.zExtractor, sqlObject.isSingle))
   }
 }

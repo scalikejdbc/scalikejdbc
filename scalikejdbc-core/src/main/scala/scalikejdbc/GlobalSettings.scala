@@ -40,21 +40,21 @@ object GlobalSettings {
    */
   var nameBindingSQLValidator: NameBindingSQLValidatorSettings = NameBindingSQLValidatorSettings()
 
-  type QueryCompletionListener = (String, Seq[Any], Long) => Unit
+  type QueryCompletionListener = (String, collection.Seq[Any], Long) => Unit
 
   /**
    * Event handler to be called every query completion.
    */
   var queryCompletionListener: QueryCompletionListener = (statement: String, params: collection.Seq[Any], millis: Long) => ()
 
-  type QueryFailureListener = (String, Seq[Any], Throwable) => Unit
+  type QueryFailureListener = (String, collection.Seq[Any], Throwable) => Unit
 
   /**
    * Event handler to be called every query failure.
    */
   var queryFailureListener: QueryFailureListener = (statement: String, params: collection.Seq[Any], e: Throwable) => ()
 
-  type TaggedQueryCompletionListener = (String, Seq[Any], Long, Seq[String]) => Unit
+  type TaggedQueryCompletionListener = (String, collection.Seq[Any], Long, collection.Seq[String]) => Unit
 
   /**
    * Event handler to be called every query completion when specifying tags.
@@ -63,7 +63,7 @@ object GlobalSettings {
     (statement: String, params: collection.Seq[Any], millis: Long, tags: collection.Seq[String]) => ()
   }
 
-  type TaggedQueryFailureListener = (String, Seq[Any], Throwable, Seq[String]) => Unit
+  type TaggedQueryFailureListener = (String, collection.Seq[Any], Throwable, collection.Seq[String]) => Unit
 
   /**
    * Event handler to be called every query failure when specifying tags.

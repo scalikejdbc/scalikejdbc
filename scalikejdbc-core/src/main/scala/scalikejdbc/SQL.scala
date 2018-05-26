@@ -55,13 +55,13 @@ object SQL {
  */
 private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSupport {
 
-  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, scala.collection.Seq[Any]) = {
     val names = SQLTemplateParser.extractAllParameters(sql)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     apply(sql, sqlWithPlaceHolders, names, settings, parameters)
   }
 
-  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, Seq[Any]) = {
+  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, scala.collection.Seq[Any]) = {
 
     // check all the parameters passed by #bindByName are actually used
     import scalikejdbc.globalsettings._
@@ -324,7 +324,7 @@ abstract class SQL[A, E <: WithExtractor](
     val names = SQLTemplateParser.extractAllParameters(statement)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(statement)
     val _sql = validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, parameters.headOption.getOrElse(Seq.empty))._1
-    val _parameters: scala.collection.Seq[Seq[Any]] = parameters.map { p =>
+    val _parameters: scala.collection.Seq[scala.collection.Seq[Any]] = parameters.map { p =>
       validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, p)._2
     }
     new SQLBatch(_sql, _parameters, tags)
@@ -583,7 +583,7 @@ abstract class SQL[A, E <: WithExtractor](
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLBatch(val statement: String, val parameters: scala.collection.Seq[Seq[Any]], val tags: scala.collection.Seq[String] = Nil) {
+class SQLBatch(val statement: String, val parameters: scala.collection.Seq[scala.collection.Seq[Any]], val tags: scala.collection.Seq[String] = Nil) {
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
@@ -602,7 +602,7 @@ class SQLBatch(val statement: String, val parameters: scala.collection.Seq[Seq[A
 }
 
 object SQLBatch {
-  def unapply(sqlObject: SQLBatch): Option[(String, Seq[Seq[Any]], Seq[String])] = {
+  def unapply(sqlObject: SQLBatch): Option[(String, scala.collection.Seq[scala.collection.Seq[Any]], scala.collection.Seq[String])] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags))
   }
 }
@@ -613,7 +613,7 @@ object SQLBatch {
  * @param statement SQL template
  * @param parameters parameters
  */
-class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: scala.collection.Seq[Seq[Any]], tags: scala.collection.Seq[String]) {
+class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: scala.collection.Seq[scala.collection.Seq[Any]], tags: scala.collection.Seq[String]) {
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
     val f: DBSession => C[Long] = DBSessionWrapper(_, attributesSwitcher).largeBatch(statement, parameters: _*)
@@ -632,7 +632,7 @@ class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: scala.c
   }
 }
 
-class SQLBatchWithGeneratedKey(val statement: String, val parameters: scala.collection.Seq[Seq[Any]], val tags: scala.collection.Seq[String] = Nil)(val key: Option[String]) {
+class SQLBatchWithGeneratedKey(val statement: String, val parameters: scala.collection.Seq[scala.collection.Seq[Any]], val tags: scala.collection.Seq[String] = Nil)(val key: Option[String]) {
 
   def apply[C[_]]()(implicit session: DBSession, cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags: _*))
@@ -656,7 +656,7 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: scala.coll
 }
 
 object SQLBatchWithGeneratedKey {
-  def unapply(sqlObject: SQLBatchWithGeneratedKey): Option[(String, Seq[Seq[Any]], Seq[String], Option[String])] = {
+  def unapply(sqlObject: SQLBatchWithGeneratedKey): Option[(String, scala.collection.Seq[scala.collection.Seq[Any]], scala.collection.Seq[String], Option[String])] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
   }
 }
@@ -690,7 +690,7 @@ class SQLExecution(val statement: String, val parameters: scala.collection.Seq[A
 }
 
 object SQLExecution {
-  def unapply(sqlObject: SQLExecution): Option[(String, Seq[Any], Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
+  def unapply(sqlObject: SQLExecution): Option[(String, scala.collection.Seq[Any], scala.collection.Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.before, sqlObject.after))
   }
 }
@@ -726,7 +726,7 @@ class SQLUpdate(val statement: String, val parameters: scala.collection.Seq[Any]
 }
 
 object SQLUpdate {
-  def unapply(sqlObject: SQLUpdate): Option[(String, Seq[Any], Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
+  def unapply(sqlObject: SQLUpdate): Option[(String, scala.collection.Seq[Any], scala.collection.Seq[String], PreparedStatement => Unit, PreparedStatement => Unit)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.before, sqlObject.after))
   }
 }
@@ -785,7 +785,7 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: scala.col
 }
 
 object SQLUpdateWithGeneratedKey {
-  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Option[(String, Seq[Any], Seq[String], Any)] = {
+  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Option[(String, scala.collection.Seq[Any], scala.collection.Seq[String], Any)] = {
     Some((sqlObject.statement, sqlObject.parameters, sqlObject.tags, sqlObject.key))
   }
 }
@@ -857,7 +857,7 @@ class SQLToTraversableImpl[A, E <: WithExtractor](
 }
 
 object SQLToTraversableImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToTraversableImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToTraversableImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -908,7 +908,7 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
 }
 
 object SQLToCollectionImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToCollectionImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToCollectionImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -956,7 +956,7 @@ class SQLToListImpl[A, E <: WithExtractor](
 }
 
 object SQLToListImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToListImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToListImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -1010,7 +1010,7 @@ class SQLToOptionImpl[A, E <: WithExtractor](
 }
 
 object SQLToOptionImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToOptionImpl[A, E]): Option[(String, Seq[Any], WrappedResultSet => A, Boolean)] = {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToOptionImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, Boolean)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor, sqlObject.isSingle))
   }
 }
