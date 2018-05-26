@@ -139,7 +139,7 @@ case class StatementExecutor(
 
   import StatementExecutor._
 
-  private[this] lazy val batchParamsList = scala.collection.mutable.ArrayBuffer.empty[Seq[Any]]
+  private[this] lazy val batchParamsList = scala.collection.mutable.ArrayBuffer.empty[collection.Seq[Any]]
 
   initialize()
 

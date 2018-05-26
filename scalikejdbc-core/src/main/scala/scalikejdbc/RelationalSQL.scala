@@ -181,7 +181,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
 }
 
 object OneToXSQL {
-  def unapply[A, E <: WithExtractor, Z](sqlObject: OneToXSQL[A, E, Z]): Option[(String, Seq[Any], WrappedResultSet => A)] = {
+  def unapply[A, E <: WithExtractor, Z](sqlObject: OneToXSQL[A, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one))
   }
   def handleException(e: Exception) = e match {
