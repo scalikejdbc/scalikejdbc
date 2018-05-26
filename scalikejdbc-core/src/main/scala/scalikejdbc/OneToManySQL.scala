@@ -39,7 +39,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQL[A, B, HasExtractor, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -47,7 +47,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQLToTraversable[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -55,7 +55,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQLToList[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -63,7 +63,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)(true)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -71,7 +71,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)(false)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -79,7 +79,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     val q = new OneToManySQLToCollection[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 

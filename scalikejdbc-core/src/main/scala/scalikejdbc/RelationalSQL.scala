@@ -64,7 +64,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
     val q: OneToManySQL[A, B, E, Z] = new OneToManySQL(statement, rawParameters)(one)(to)((a, bs) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -75,7 +75,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2)((a, bs1, bs2) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -87,7 +87,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3)((a, bs1, bs2, bs3) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
     q
   }
 
@@ -100,7 +100,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4)((a, bs1, bs2, bs3, bs4) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
   def toManies[B1, B2, B3, B4, B5](
@@ -113,7 +113,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4, to5)((a, bs1, bs2, bs3, bs4, bs5) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
   def toManies[B1, B2, B3, B4, B5, B6](
@@ -127,7 +127,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4, to5, to6)((a, bs1, bs2, bs3, bs4, bs5, bs6) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
   def toManies[B1, B2, B3, B4, B5, B6, B7](
@@ -142,7 +142,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4, to5, to6, to7)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
   def toManies[B1, B2, B3, B4, B5, B6, B7, B8](
@@ -158,7 +158,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4, to5, to6, to7, to8)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7, bs8) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
   def toManies[B1, B2, B3, B4, B5, B6, B7, B8, B9](
@@ -175,7 +175,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
       statement, rawParameters)(one)(to1, to2, to3, to4, to5, to6, to7, to8, to9)((a, bs1, bs2, bs3, bs4, bs5, bs6, bs7, bs8, bs9) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags: _*)
+    q.tags(tags.toSeq: _*)
   }
 
 }
