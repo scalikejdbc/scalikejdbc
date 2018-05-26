@@ -3,7 +3,6 @@ package scalikejdbc
 import java.sql._
 import util.control.Exception._
 import scala.collection.generic.CanBuildFrom
-import scala.collection.breakOut
 import scala.language.higherKinds
 
 /**
