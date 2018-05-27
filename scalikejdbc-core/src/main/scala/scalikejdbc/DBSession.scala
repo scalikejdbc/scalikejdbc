@@ -2,7 +2,7 @@ package scalikejdbc
 
 import java.sql._
 import util.control.Exception._
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -305,11 +305,11 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam C return collection type
    * @return result as C[A]
    */
-  def collection[A, C[_]](template: String, params: Any*)(extract: WrappedResultSet => A)(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
+  def collection[A, C[_]](template: String, params: Any*)(extract: WrappedResultSet => A)(implicit f: Factory[A, C[A]]): C[A] = {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetIterator(proxy).map(extract).to[C]
+        f.fromSpecific(new ResultSetIterator(proxy).map(extract))
     }
   }
 
@@ -671,7 +671,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return count list
    */
-  def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Int, C[Int]]): C[Int] = {
+  def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Int, C[Int]]): C[Int] = {
     batchInternal[C, Int](
       template = template,
       paramsList = paramsList,
@@ -684,7 +684,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @param paramsList list of parameters
    * @return count list
    */
-  def largeBatch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] =
+  def largeBatch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Long, C[Long]]): C[Long] =
     batchInternal[C, Long](
       template = template,
       paramsList = paramsList,
@@ -693,10 +693,10 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   private[this] def batchInternal[C[_], A](
     template: String,
     paramsList: scala.collection.Seq[scala.collection.Seq[Any]],
-    execute: StatementExecutor => scala.Array[A])(implicit cbf: CanBuildFrom[Nothing, A, C[A]]): C[A] = {
+    execute: StatementExecutor => scala.Array[A])(implicit f: Factory[A, C[A]]): C[A] = {
     ensureNotReadOnlySession(template)
     paramsList match {
-      case Nil => Seq.empty[A].to[C]
+      case Nil => f.fromSpecific(Seq.empty[A])
       case _ =>
         using(createBatchStatementExecutor(
           conn = conn,
@@ -708,7 +708,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.bindParams(params)
               executor.addBatch()
           }
-          execute(executor).to[C]
+          f.fromSpecific(execute(executor))
         }
     }
   }
@@ -722,10 +722,10 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    */
   def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(
     implicit
-    cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    f: Factory[Long, C[Long]]): C[Long] = {
     ensureNotReadOnlySession(template)
     paramsList match {
-      case Nil => Seq.empty[Long].to[C]
+      case Nil => f.fromSpecific(Seq.empty[Long])
       case _ =>
         using(createBatchStatementExecutor(
           conn = conn,
@@ -738,7 +738,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(1)).to[C]
+          f.fromSpecific(new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(1)))
         }
     }
   }
@@ -753,10 +753,10 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    */
   def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(
     implicit
-    cbf: CanBuildFrom[Nothing, Long, C[Long]]): C[Long] = {
+    f: Factory[Long, C[Long]]): C[Long] = {
     ensureNotReadOnlySession(template)
     paramsList match {
-      case Nil => Seq.empty[Long].to[C]
+      case Nil => f.fromSpecific(Seq.empty[Long])
       case _ =>
         using(createBatchStatementExecutor(
           conn = conn,
@@ -769,7 +769,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(key)).to[C]
+          f.fromSpecific(new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(key)))
         }
     }
   }

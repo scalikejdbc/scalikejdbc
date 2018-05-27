@@ -35,7 +35,7 @@ s"""/*
 package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 private[scalikejdbc] trait OneToManies${n}Extractor[$A, $bs, E <: WithExtractor, Z]
@@ -74,7 +74,7 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
 
   private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, $seq) => Z): Traversable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
-    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet).map {
+    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
       case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
     }
   }
@@ -154,8 +154,8 @@ final class OneToManies${n}SQLToCollection[A, $bs, E <: WithExtractor, Z] privat
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, Z, C[Z]]): C[Z] = {
-    executeQuery(session, (session: DBSession) => toTraversable(session, statement, rawParameters, zExtractor).to[C])
+  override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, f: Factory[Z, C[Z]]): C[Z] = {
+    executeQuery(session, (session: DBSession) => f.fromSpecific(toTraversable(session, statement, rawParameters, zExtractor)))
   }
 
 $extractOne

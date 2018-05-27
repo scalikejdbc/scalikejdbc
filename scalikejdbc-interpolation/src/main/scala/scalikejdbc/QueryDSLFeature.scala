@@ -486,7 +486,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     def multipleValues(multipleValues: collection.Seq[Any]*): InsertSQLBuilder = {
       val vs = multipleValues match {
         case Nil => Seq(sqls"()")
-        case ss => ss.map(s => sqls"(${sqls.csv(s.map(v => sqls"${v}"): _*)})")
+        case ss => ss.map(s => sqls"(${sqls.toCSV(s.map(v => sqls"${v}"))})")
       }
       this.copy(sql = sqls"${sql} values ${sqls.join(vs, sqls",", false)}")
     }

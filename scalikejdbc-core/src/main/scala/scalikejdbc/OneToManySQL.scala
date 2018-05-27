@@ -1,7 +1,7 @@
 package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
@@ -17,13 +17,13 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     if (oneToMany.contains(o)) {
       extractTo(rs).map(many => oneToMany += (o -> (oneToMany.apply(o) :+ many))).getOrElse(oneToMany)
     } else {
-      oneToMany += (o -> extractTo(rs).map(many => Vector(many)).getOrElse(Nil))
+      oneToMany += (o -> extractTo(rs).map(many => Vector(many): Seq[B]).getOrElse(Nil))
     }
   }
 
   private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, scala.collection.Seq[B]) => Z): Traversable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
-    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters: _*)(LinkedHashMap[A, (scala.collection.Seq[B])]())(processResultSet).map {
+    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, (scala.collection.Seq[B])]())(processResultSet).map {
       case (one, (to)) => zExtractor(one, to)
     }
   }
@@ -154,8 +154,8 @@ class OneToManySQLToCollection[A, B, E <: WithExtractor, Z](
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, cbf: CanBuildFrom[Nothing, Z, C[Z]]): C[Z] = {
-    executeQuery(session, (session: DBSession) => toTraversable(session, statement, rawParameters, zExtractor).to[C])
+  override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, f: Factory[Z, C[Z]]): C[Z] = {
+    executeQuery(session, (session: DBSession) => f.fromSpecific(toTraversable(session, statement, rawParameters, zExtractor)))
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one

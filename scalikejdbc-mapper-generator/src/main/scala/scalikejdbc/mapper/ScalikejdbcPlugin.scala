@@ -126,7 +126,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       schema = getString(props, JDBC_SCHEMA).orNull[String])
   }
 
-  private[this] def loadGeneratorSettings(props: Properties): GeneratorSettings = {
+  private[this] val loadGeneratorSettings: Def.Initialize[Task[Properties => GeneratorSettings]] = Def.task { props =>
     val defaultConfig = GeneratorConfig()
     GeneratorSettings(
       packageName = getString(props, PACKAGE_NAME).getOrElse(defaultConfig.packageName),
@@ -143,7 +143,16 @@ object ScalikejdbcPlugin extends AutoPlugin {
       defaultConfig.tableNameToClassName,
       defaultConfig.columnNameToFieldName,
       returnCollectionType = getString(props, RETURN_COLLECTION_TYPE).map { name =>
-        ReturnCollectionType.map.getOrElse(name.toLowerCase(en), sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
+        val CBF = "canbuildfrom"
+        name.toLowerCase(en) match {
+          case CBF =>
+            streams.value.log.warn(s"""$CBF deprecated. use "$RETURN_COLLECTION_TYPE = factory" instead""")
+            ReturnCollectionType.Factory
+          case n =>
+            ReturnCollectionType.map.getOrElse(
+              n,
+              sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
+        }
       }.getOrElse(defaultConfig.returnCollectionType),
       view = getString(props, VIEW).map(_.toBoolean).getOrElse(defaultConfig.view),
       tableNamesToSkip = getString(props, TABLE_NAMES_TO_SKIP).map(_.split(",").toList).getOrElse(defaultConfig.tableNamesToSkip),
@@ -286,7 +295,14 @@ object ScalikejdbcPlugin extends AutoPlugin {
       gen.foreach(g => g.specAll().foreach(spec => println(spec)))
     },
     scalikejdbcJDBCSettings := loadPropertiesFromFile().fold(throw _, loadJDBCSettings),
-    scalikejdbcGeneratorSettings := loadPropertiesFromFile().fold(throw _, loadGeneratorSettings)))
+    scalikejdbcGeneratorSettings := {
+      loadPropertiesFromFile() match {
+        case Left(e) =>
+          throw e
+        case Right(p) =>
+          loadGeneratorSettings.value.apply(p)
+      }
+    }))
 
   @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
   val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = projectSettings

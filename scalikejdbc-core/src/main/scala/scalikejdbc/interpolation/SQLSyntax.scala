@@ -37,12 +37,12 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   def +(syntax: SQLSyntax): SQLSyntax = this.append(syntax)
 
   def groupBy(columns: SQLSyntax*): SQLSyntax = {
-    if (columns.isEmpty) this else sqls"${this} group by ${csv(columns: _*)}"
+    if (columns.isEmpty) this else sqls"${this} group by ${toCSV(columns)}"
   }
   def having(condition: SQLSyntax): SQLSyntax = sqls"${this} having ${condition}"
 
   def orderBy(columns: SQLSyntax*): SQLSyntax = {
-    if (columns.isEmpty) this else sqls"${this} order by ${csv(columns: _*)}"
+    if (columns.isEmpty) this else sqls"${this} order by ${toCSV(columns)}"
   }
   def asc = sqls"${this} asc"
   def desc = sqls"${this} desc"
@@ -109,7 +109,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} FALSE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value})")
-      val values = csv(valueSeqs.map { case (v1, v2) => sqls"(${ev1(v1)}, ${ev2(v2)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2) => sqls"(${ev1(v1)}, ${ev2(v2)})" })
       val inClause = sqls"${column} in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -119,7 +119,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} TRUE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value})")
-      val values = csv(valueSeqs.map { case (v1, v2) => sqls"(${ev1(v1)}, ${ev2(v2)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2) => sqls"(${ev1(v1)}, ${ev2(v2)})" })
       val inClause = sqls"${column} not in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -130,7 +130,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} FALSE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)})" })
       val inClause = sqls"${column} in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -140,7 +140,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} TRUE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)})" })
       val inClause = sqls"${column} not in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -151,7 +151,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} FALSE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3, v4) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3, v4) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)})" })
       val inClause = sqls"${column} in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -161,7 +161,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} TRUE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3, v4) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3, v4) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)})" })
       val inClause = sqls"${column} not in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -172,7 +172,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} FALSE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value}, ${columns._5.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)}, ${ev5(v5)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)}, ${ev5(v5)})" })
       val inClause = sqls"${column} in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -182,7 +182,7 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
       sqls"${this} TRUE"
     } else {
       val column = SQLSyntax(s"(${columns._1.value}, ${columns._2.value}, ${columns._3.value}, ${columns._4.value}, ${columns._5.value})")
-      val values = csv(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)}, ${ev5(v5)})" }: _*)
+      val values = toCSV(valueSeqs.map { case (v1, v2, v3, v4, v5) => sqls"(${ev1(v1)}, ${ev2(v2)}, ${ev3(v3)}, ${ev4(v4)}, ${ev5(v5)})" })
       val inClause = sqls"${column} not in (${values})"
       sqls"${this} ${inClause}"
     }
@@ -255,7 +255,8 @@ object SQLSyntax {
     }
     apply(value, parameters)
   }
-  def csv(parts: SQLSyntax*): SQLSyntax = join(parts, sqls",", false)
+  def csv(parts: SQLSyntax*): SQLSyntax = toCSV(parts)
+  private[scalikejdbc] def toCSV(parts: scala.collection.Seq[SQLSyntax]): SQLSyntax = join(parts, sqls",", false)
 
   private[this] def hasAndOr(s: SQLSyntax): Boolean = {
     val statement = s.value.toLowerCase(ENGLISH)
@@ -326,7 +327,7 @@ object SQLSyntax {
   def lower(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.lower(column)
   def upper(column: SQLSyntax): SQLSyntax = SQLSyntax.empty.upper(column)
 
-  def distinct(columns: SQLSyntax*): SQLSyntax = sqls"distinct ${csv(columns: _*)}"
+  def distinct(columns: SQLSyntax*): SQLSyntax = sqls"distinct ${toCSV(columns)}"
 
   def avg(column: SQLSyntax): SQLSyntax = sqls"avg(${column})"
 
@@ -360,7 +361,7 @@ object SQLSyntax {
    * }}}
    */
   def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: collection.Seq[SQLSyntax] = conditions.flatten
+    val cs: Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
   }
 
@@ -375,7 +376,7 @@ object SQLSyntax {
    * }}}
    */
   def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
-    val cs: collection.Seq[SQLSyntax] = conditions.flatten
+    val cs: Seq[SQLSyntax] = conditions.flatten
     if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
   }
 
