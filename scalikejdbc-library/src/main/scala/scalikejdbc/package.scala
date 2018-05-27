@@ -50,6 +50,7 @@
 package object scalikejdbc
   extends SQLInterpolation
   with ScalaBigDecimalConverterImplicits
+  with DeprecatedOneToManiesTraversable
   with UnixTimeInMillisConverterImplicits {
 
   // -----
@@ -67,4 +68,21 @@ package object scalikejdbc
    */
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 
+  @deprecated(message = "use OneToOneSQLToIterable instead", since = "3.3.0")
+  type OneToOneSQLToTraversable[A, B, E <: WithExtractor, Z] = OneToOneSQLToIterable[A, B, E, Z]
+  @deprecated(message = "use OneToOneSQLToIterable instead", since = "3.3.0")
+  val OneToOneSQLToTraversable = OneToOneSQLToIterable
+
+  @deprecated(message = "use SQLToIterableImpl instead", since = "3.3.0")
+  type SQLToTraversableImpl[A, E <: WithExtractor] = SQLToIterableImpl[A, E]
+  @deprecated(message = "use SQLToIterableImpl instead", since = "3.3.0")
+  val SQLToTraversableImpl = SQLToIterableImpl
+
+  @deprecated(message = "use OneToManySQLToIterable instead", since = "3.3.0")
+  type OneToManySQLToTraversable[A, B, E <: WithExtractor, Z] = OneToManySQLToIterable[A, B, E, Z]
+  @deprecated(message = "use OneToManySQLToIterable instead", since = "3.3.0")
+  val OneToManySQLToTraversable = OneToManySQLToIterable
+
+  @deprecated(message = "use SQLToIterable instead", since = "3.3.0")
+  type SQLToTraversable[A, E <: WithExtractor] = SQLToIterable[A, E]
 }

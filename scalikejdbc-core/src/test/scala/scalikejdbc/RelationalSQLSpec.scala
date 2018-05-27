@@ -60,7 +60,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
               .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .map((u: User, g: Group) => u.copy(group = Some(g)))
-              .traversable.apply()
+              .iterable.apply()
 
             users.size should equal(6)
             users.foreach {
@@ -225,7 +225,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
-              .traversable.apply()
+              .iterable.apply()
 
             groups.size should equal(2)
           }

@@ -185,9 +185,9 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         }
         es.size should equal(2)
 
-        val tr: Traversable[Emp] = DB readOnly { implicit session =>
+        val tr: Iterable[Emp] = DB readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
-            .map(rs => Emp(rs.int("id"), rs.string("name"))).traversable.apply()
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).iterable.apply()
         }
 
         {

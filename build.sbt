@@ -136,6 +136,12 @@ lazy val scalikejdbcLibrary = Project(
   baseSettings,
   mimaSettings,
   name := "scalikejdbc",
+  (sourceGenerators in Compile) += task{
+    val dir = (sourceManaged in Compile).value
+    val file = dir / "scalikejdbc" / "DeprecatedOneToManiesTraversable.scala"
+    IO.write(file, GenerateDeprecatedOneToManiesTraversable.value)
+    Seq(file)
+  },
   libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
     Seq("com.h2database" % "h2" % _h2Version % "test")
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolation).disablePlugins(ScriptedPlugin)

@@ -45,7 +45,7 @@ object SQL {
     throw new IllegalStateException(message)
   }
 
-  def apply[A](sql: String): SQL[A, NoExtractor] = new SQLToTraversableImpl[A, NoExtractor](sql, Seq.empty)(noExtractor[A](
+  def apply[A](sql: String): SQL[A, NoExtractor] = new SQLToIterableImpl[A, NoExtractor](sql, Seq.empty)(noExtractor[A](
     ErrorMessage.THIS_IS_A_BUG))
 
 }
@@ -458,21 +458,27 @@ abstract class SQL[A, E <: WithExtractor](
   def collection: SQLToCollection[A, E] = toCollection
 
   /**
-   * Same as #traversable.
+   * Same as #iterable.
    *
    * @return SQL instance
    */
-  def toTraversable(): SQLToTraversable[A, E] = {
-    new SQLToTraversableImpl[A, E](statement, rawParameters)(extractor)
+  def toIterable(): SQLToIterable[A, E] = {
+    new SQLToIterableImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
 
+  @deprecated(message = "will be removed. use toIterable() instead", since = "3.3.0")
+  def toTraverable(): SQLToIterable[A, E] = toIterable()
+
   /**
-   * Set execution type as traversable.
+   * Set execution type as iterable.
    *
    * @return SQL instance
    */
-  def traversable(): SQLToTraversable[A, E] = toTraversable()
+  def iterable(): SQLToIterable[A, E] = toIterable()
+
+  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
+  def traversable(): SQLToIterable[A, E] = toIterable()
 
   /**
    * Set execution type as execute
@@ -816,48 +822,48 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
 }
 
 /**
- * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Traversable value.
+ * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Iterable value.
  *
  * @tparam A return type
  */
-trait SQLToTraversable[A, E <: WithExtractor] extends SQLToResult[A, E, Traversable] {
+trait SQLToIterable[A, E <: WithExtractor] extends SQLToResult[A, E, Iterable] {
 
-  def result[AA](f: WrappedResultSet => AA, session: DBSession): Traversable[AA] = {
-    session.traversable[AA](statement, rawParameters.toSeq: _*)(f)
+  def result[AA](f: WrappedResultSet => AA, session: DBSession): Iterable[AA] = {
+    session.iterable[AA](statement, rawParameters.toSeq: _*)(f)
   }
 
 }
 
 /**
- * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Traversable value.
+ * SQL which execute java.sql.Statement#executeQuery() and returns the result as scala.collection.Iterable value.
  *
  * @param statement SQL template
  * @param rawParameters parameters
  * @param extractor  extractor function
  * @tparam A return type
  */
-class SQLToTraversableImpl[A, E <: WithExtractor](
+class SQLToIterableImpl[A, E <: WithExtractor](
   override val statement: String, override val rawParameters: scala.collection.Seq[Any])(
   override val extractor: WrappedResultSet => A)
   extends SQL[A, E](statement, rawParameters)(extractor)
-  with SQLToTraversable[A, E] {
+  with SQLToIterable[A, E] {
 
-  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToResult[A, E, Traversable] = {
-    new SQLToTraversableImpl[A, E](statement, params)(extractor)
+  override protected def withParameters(params: scala.collection.Seq[Any]): SQLToResult[A, E, Iterable] = {
+    new SQLToIterableImpl[A, E](statement, params)(extractor)
   }
 
-  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToResult[A, E, Traversable] = {
-    new SQLToTraversableImpl[A, E](state, params)(extractor)
+  override protected def withStatementAndParameters(state: String, params: scala.collection.Seq[Any]): SQLToResult[A, E, Iterable] = {
+    new SQLToIterableImpl[A, E](state, params)(extractor)
   }
 
-  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToResult[B, HasExtractor, Traversable] = {
-    new SQLToTraversableImpl[B, HasExtractor](statement, rawParameters)(f)
+  override protected def withExtractor[B](f: WrappedResultSet => B): SQLToResult[B, HasExtractor, Iterable] = {
+    new SQLToIterableImpl[B, HasExtractor](statement, rawParameters)(f)
   }
 
 }
 
-object SQLToTraversableImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToTraversableImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
+object SQLToIterableImpl {
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToIterableImpl[A, E]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
