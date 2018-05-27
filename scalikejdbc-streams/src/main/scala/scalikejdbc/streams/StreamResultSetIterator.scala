@@ -4,7 +4,7 @@ import java.io.Closeable
 import java.sql.ResultSet
 import scalikejdbc.{ LogSupport, ResultSetCursor, WrappedResultSet }
 import scala.util.control.NonFatal
-
+import scala.collection.BufferedIterator
 import scalikejdbc.streams.StreamResultSetIterator._
 
 /**
