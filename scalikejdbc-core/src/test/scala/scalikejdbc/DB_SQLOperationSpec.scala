@@ -149,7 +149,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       DB autoCommit {
         implicit session =>
-          SQL("select id from " + tableName + "").map(rs => rs.int("id")).toTraversable().apply()
+          SQL("select id from " + tableName + "").map(rs => rs.int("id")).toIterable().apply()
             .foreach {
               case (id) => println(id)
             }

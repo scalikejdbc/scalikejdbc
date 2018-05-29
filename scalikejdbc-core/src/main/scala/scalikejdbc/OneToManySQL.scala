@@ -21,7 +21,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     }
   }
 
-  private[scalikejdbc] def toTraversable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, scala.collection.Seq[B]) => Z): Traversable[Z] = {
+  private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, scala.collection.Seq[B]) => Z): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher()
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, (scala.collection.Seq[B])]())(processResultSet).map {
       case (one, (to)) => zExtractor(one, to)
@@ -43,8 +43,8 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def toTraversable(): OneToManySQLToTraversable[A, B, E, Z] = {
-    val q = new OneToManySQLToTraversable[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
+  override def toIterable(): OneToManySQLToIterable[A, B, E, Z] = {
+    val q = new OneToManySQLToIterable[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
     q.tags(tags.toSeq: _*)
@@ -86,7 +86,9 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
   override def single(): OneToManySQLToOption[A, B, E, Z] = toOption()
   override def first(): OneToManySQLToOption[A, B, E, Z] = headOption()
   override def list(): OneToManySQLToList[A, B, E, Z] = toList()
-  override def traversable(): OneToManySQLToTraversable[A, B, E, Z] = toTraversable()
+  override def iterable(): OneToManySQLToIterable[A, B, E, Z] = toIterable()
+  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
+  override def traversable(): OneToManySQLToIterable[A, B, E, Z] = iterable()
   override def collection: OneToManySQLToCollection[A, B, E, Z] = toCollection
 
 }
@@ -107,7 +109,7 @@ class OneToManySQLToList[A, B, E <: WithExtractor, Z](
   import GeneralizedTypeConstraintsForWithExtractor._
 
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): List[Z] = {
-    executeQuery[List](session, (session: DBSession) => toTraversable(session, statement, rawParameters, zExtractor).toList)
+    executeQuery[List](session, (session: DBSession) => toIterable(session, statement, rawParameters, zExtractor).toList)
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
@@ -121,17 +123,17 @@ object OneToManySQLToList {
   }
 }
 
-class OneToManySQLToTraversable[A, B, E <: WithExtractor, Z](
+class OneToManySQLToIterable[A, B, E <: WithExtractor, Z](
   override val statement: String, override val rawParameters: scala.collection.Seq[Any])(val one: WrappedResultSet => A)(val toMany: WrappedResultSet => Option[B])(val zExtractor: (A, scala.collection.Seq[B]) => Z)
   extends SQL[Z, E](statement, rawParameters)(SQL.noExtractor[Z]("one-to-many extractor(one(RS => A).toMany(RS => Option[B])) is specified, use #map((A,B) =>Z) instead."))
-  with SQLToTraversable[Z, E]
+  with SQLToIterable[Z, E]
   with AllOutputDecisionsUnsupported[Z, E]
   with OneToManyExtractor[A, B, E, Z] {
 
   import GeneralizedTypeConstraintsForWithExtractor._
 
-  override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Traversable[Z] = {
-    executeQuery[Traversable](session, (session: DBSession) => toTraversable(session, statement, rawParameters, zExtractor))
+  override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Iterable[Z] = {
+    executeQuery[Iterable](session, (session: DBSession) => toIterable(session, statement, rawParameters, zExtractor))
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
@@ -139,8 +141,8 @@ class OneToManySQLToTraversable[A, B, E <: WithExtractor, Z](
   private[scalikejdbc] def transform: (A, scala.collection.Seq[B]) => Z = zExtractor
 }
 
-object OneToManySQLToTraversable {
-  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToManySQLToTraversable[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, scala.collection.Seq[B]) => Z)] = {
+object OneToManySQLToIterable {
+  def unapply[A, B, E <: WithExtractor, Z](sqlObject: OneToManySQLToIterable[A, B, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, WrappedResultSet => Option[B], (A, scala.collection.Seq[B]) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, sqlObject.toMany, sqlObject.zExtractor))
   }
 }
@@ -155,7 +157,7 @@ class OneToManySQLToCollection[A, B, E <: WithExtractor, Z](
   import GeneralizedTypeConstraintsForWithExtractor._
 
   override def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, f: Factory[Z, C[Z]]): C[Z] = {
-    executeQuery(session, (session: DBSession) => f.fromSpecific(toTraversable(session, statement, rawParameters, zExtractor)))
+    executeQuery(session, (session: DBSession) => f.fromSpecific(toIterable(session, statement, rawParameters, zExtractor)))
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one
@@ -178,7 +180,7 @@ class OneToManySQLToOption[A, B, E <: WithExtractor, Z](
 
   import GeneralizedTypeConstraintsForWithExtractor._
   override def apply()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor): Option[Z] = {
-    executeQuery[Option](session, (session: DBSession) => toSingle(toTraversable(session, statement, rawParameters, zExtractor)))
+    executeQuery[Option](session, (session: DBSession) => toSingle(toIterable(session, statement, rawParameters, zExtractor)))
   }
 
   private[scalikejdbc] def extractOne: WrappedResultSet => A = one

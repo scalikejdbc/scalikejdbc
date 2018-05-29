@@ -274,7 +274,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
 
           {
             val gm = GroupMember.syntax
-            val groupsWithMembers: Traversable[Group] = sql"""
+            val groupsWithMembers: Iterable[Group] = sql"""
             select
               ${u.result.*}, ${g.result.*}
             from
@@ -286,7 +286,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
               .one(rs => Group(rs, g.resultName))
               .toMany(rs => Some(User(rs, u.resultName)))
               .map { (g, us) => g.copy(members = us) }
-              .traversable.apply()
+              .iterable.apply()
 
             groupsWithMembers.size should equal(2)
             groupsWithMembers.head.members.size should equal(2)
@@ -622,7 +622,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
             val (c, cg) = (Customer.syntax("c"), CustomerGroup.syntax("cg"))
             val sq = SubQuery.syntax("sq", c.resultName)
 
-            val customers: Traversable[Customer] = sql"""
+            val customers: Iterable[Customer] = sql"""
             select
               ${sq.result.*}, ${cg.result.*}
             from
@@ -635,7 +635,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
               .one(rs => Customer(rs.int(sq(c).resultName.id), rs.string(sq(c).resultName.name)))
               .toOptionalOne(rs => rs.intOpt(cg.resultName.id).map(id => CustomerGroup(id, rs.string(cg.resultName.name))))
               .map { (c, cg) => c.copy(group = cg) }
-              .traversable
+              .iterable
               .apply()
 
             customers.map(u => u.id) should equal(Seq(4, 5))

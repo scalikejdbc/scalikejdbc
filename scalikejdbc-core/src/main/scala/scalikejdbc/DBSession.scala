@@ -279,7 +279,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @return result optionally
    */
   def first[A](template: String, params: Any*)(extract: WrappedResultSet => A): Option[A] = {
-    traversable(template, params: _*)(extract).headOption
+    iterable(template, params: _*)(extract).headOption
   }
 
   /**
@@ -347,17 +347,21 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   }
 
   /**
-   * Returns query result as scala.collection.Traversable object.
+   * Returns query result as scala.collection.Iterable object.
    *
    * @param template SQL template
    * @param params parameters
    * @param extract extract function
    * @tparam A return type
-   * @return result as traversable
+   * @return result as iterable
    */
-  def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Traversable[A] = {
-    collection[A, Traversable](template, params: _*)(extract)
+  def iterable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterable[A] = {
+    collection[A, Iterable](template, params: _*)(extract)
   }
+
+  @deprecated(message = "will be removed. use iterable instead", since = "3.3.0")
+  def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterable[A] =
+    iterable[A](template, params: _*)(extract)
 
   /**
    * Executes java.sql.PreparedStatement#execute().

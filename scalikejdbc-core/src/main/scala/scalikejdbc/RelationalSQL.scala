@@ -8,7 +8,7 @@ import scala.language.higherKinds
 
 private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
-  private[scalikejdbc] def toSingle(rows: Traversable[Z]): Option[Z] = {
+  private[scalikejdbc] def toSingle(rows: Iterable[Z]): Option[Z] = {
     if (rows.size > 1) throw new TooManyRowsException(1, rows.size)
     else rows.headOption
   }
@@ -38,8 +38,8 @@ trait AllOutputDecisionsUnsupported[Z, E <: scalikejdbc.WithExtractor] extends S
   override def first(): SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
   override def toList(): SQLToList[Z, E] = throw new UnsupportedOperationException(message)
   override def list(): SQLToList[Z, E] = throw new UnsupportedOperationException(message)
-  override def toTraversable(): SQLToTraversable[Z, E] = throw new UnsupportedOperationException(message)
-  override def traversable(): SQLToTraversable[Z, E] = throw new UnsupportedOperationException(message)
+  override def toIterable(): SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
+  override def iterable(): SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
   override def toCollection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
   override def collection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
 }

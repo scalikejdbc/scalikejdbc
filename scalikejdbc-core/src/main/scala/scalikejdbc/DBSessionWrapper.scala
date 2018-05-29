@@ -60,8 +60,8 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def foldLeft[A](template: String, params: Any*)(z: A)(op: (A, WrappedResultSet) => A): A = {
     withAttributesSwitchedDBSession(_.foldLeft(template, params: _*)(z)(op))
   }
-  override def traversable[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): Traversable[A] = {
-    withAttributesSwitchedDBSession(_.traversable(template, params: _*)(extract))
+  override def iterable[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): Iterable[A] = {
+    withAttributesSwitchedDBSession(_.iterable(template, params: _*)(extract))
   }
 
   override def execute(template: String, params: Any*): Boolean = {
