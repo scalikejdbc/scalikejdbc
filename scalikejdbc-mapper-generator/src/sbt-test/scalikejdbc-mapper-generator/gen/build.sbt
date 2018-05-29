@@ -41,7 +41,7 @@ TaskKey[Unit]("createTestDatabase") := {
 testOptions in Test += {
   val setting = (scalikejdbcJDBCSettings in Compile).value
   Tests.Setup{ loader =>
-    type Initializer = {def run(url: String, username: String, password: String)}
+    type Initializer = {def run(url: String, username: String, password: String): Unit}
     val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
     initializer.run(setting.url, setting.username, setting.password)
   }
