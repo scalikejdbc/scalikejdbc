@@ -467,7 +467,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
     def map(mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]): SelectSQLBuilder[A] = mapper.apply(this)
 
-    private def lazyLoadedPart: SQLSyntax = sqls"select ${sqls.join(resultAllProviders.reverseMap(_.resultAll), sqls",")}"
+    private def lazyLoadedPart: SQLSyntax = sqls"select ${sqls.join(resultAllProviders.reverseIterator.map(_.resultAll).toSeq, sqls",")}"
 
     override def toSQLSyntax: SQLSyntax = if (lazyColumns) sqls"${lazyLoadedPart} ${sql}" else sqls"${sql}"
     override def toSQL: SQL[A, NoExtractor] = if (lazyColumns) sql"${lazyLoadedPart} ${sql}" else sql"${sql}"
