@@ -35,11 +35,6 @@ lazy val baseSettings = Seq(
   publishTo := _publishTo(version.value),
   publishMavenStyle := true,
   resolvers ++= _resolvers,
-  resolvers ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
-    case Some((2, 13)) =>
-      // TODO remove when parser-combinators available maven central https://github.com/scala/scala-parser-combinators/issues/151
-      "staging" at "https://oss.sonatype.org/content/repositories/staging"
-  }.toList,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
@@ -50,7 +45,7 @@ lazy val baseSettings = Seq(
     }
   },
   specs2Version := "4.2.0",
-  parserCombinatorsVersion := "1.1.0",
+  parserCombinatorsVersion := "1.1.1",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
