@@ -16,10 +16,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   private val packageName = config.packageName
   private val className = specifiedClassName.getOrElse(config.tableNameToClassName(table.name))
   private val syntaxNameString = config.tableNameToSyntaxName(table.name)
-  private val syntaxName = {
-    val name = "[A-Z]".r.findAllIn(className).mkString.toLowerCase(en)
-    if (name == "rs") "r" else name
-  }
+  private val syntaxName = config.tableNameToSyntaxVariableName(table.name)
   private val comma = ","
   private val eol = config.lineBreak.value
 
