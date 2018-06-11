@@ -13,7 +13,7 @@ class JDBCSettingsSpec extends FlatSpec with Matchers {
     val driverName: String = "myDriverName"
     val instance = new JDBCSettings(url, user, password, driverName)
     instance should not be null
-    instance.toString should be ("JDBCSettings(myUrl,myUser,[REDACTED],myDriverName)")
+    instance.toString should be("JDBCSettings(myUrl,myUser,[REDACTED],myDriverName)")
   }
 
 }
