@@ -1,4 +1,4 @@
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 resolvers ++= Seq(
   "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
