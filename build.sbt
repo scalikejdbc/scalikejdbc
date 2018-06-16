@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v >= 13 => "3.0.5-M1"
+      case Some((2, v)) if v >= 13 => "3.0.6-SNAP1"
       case _ =>                       "3.0.5"
     }
   },
@@ -360,12 +360,7 @@ val _resolvers = Seq(
   "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
-  if (scalaVersion.value == "2.13.0-M4") {
-    // TODO https://github.com/scalatest/scalatest/issues/1367
-    Nil
-  } else {
-    Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
-  }
+  Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
 }
 
 lazy val specs2DependenciesInTestScope = Def.setting{

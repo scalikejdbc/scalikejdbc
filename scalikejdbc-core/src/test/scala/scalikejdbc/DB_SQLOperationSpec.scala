@@ -437,7 +437,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         db.begin()
         val count1 = db withinTx {
           implicit s =>
-            val params: collection.Seq[Seq[Any]] = (1001 to 2000).map {
+            val params: Seq[Seq[Any]] = (1001 to 2000).map {
               i => Seq(i, "name" + i.toString)
             }
             SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params: _*).apply()
@@ -449,7 +449,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
             // https://github.com/scalikejdbc/scalikejdbc/issues/481
             SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(Nil: _*).apply()
 
-            val params: collection.Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
+            val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
               i =>
                 Seq[(Symbol, Any)](
                   'id -> i,
@@ -473,13 +473,13 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         db.begin()
         implicit val session = db.withinTxSession()
 
-        val params1: collection.Seq[Seq[Any]] = (1001 to 2000).map {
+        val params1: Seq[Seq[Any]] = (1001 to 2000).map {
           i => Seq(i, "name" + i.toString)
         }
         val count1 = SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params1: _*).apply()
         count1.size should equal(1000)
 
-        val params2: collection.Seq[Seq[(Symbol, Any)]] = (2001 to 2003).map {
+        val params2: Seq[Seq[(Symbol, Any)]] = (2001 to 2003).map {
           i => Seq[(Symbol, Any)]('id -> i, 'name -> ("name" + i.toString))
         }
         try {
