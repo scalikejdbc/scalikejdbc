@@ -440,7 +440,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
                 ${i.id} = ${1}
             """.foldLeft(Option.empty[Issue]) { (result, rs) =>
               val tag = rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name)))
-              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.to[Vector]))
+              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.toVector))
             }
 
             issue.map(i => i.id) should equal(Some(1))
@@ -454,7 +454,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
                 .where.eq(i.id, 1)
             }.foldLeft(Option.empty[Issue]) { (result, rs) =>
               val tag = rs.intOpt(t.resultName.id).map(id => Tag(id, rs.string(t.resultName.name)))
-              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.to[Vector]))
+              result.map(i => i.copy(tags = i.tags ++ tag)) orElse Some(Issue(rs.int(i.resultName.id), rs.string(i.resultName.body), tag.toVector))
             }
             issue.map(i => i.id) should equal(Some(1))
           }

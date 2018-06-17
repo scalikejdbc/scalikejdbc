@@ -560,7 +560,7 @@ class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with 
 
           case class GroupEntity(id: Int, ownerId: Int)
           case class Group(id: Int, ownerId: Int, owner: Owner,
-            events: collection.Seq[Event] = Nil, members: collection.Seq[Member] = Nil, sponsors: Seq[Sponsor] = Nil)
+            events: collection.Seq[Event] = Nil, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
           case class Owner(id: Int)
           case class Event(id: Int, groupId: Int)
           case class Member(id: Int, groupId: Int)
