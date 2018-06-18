@@ -56,5 +56,3 @@ matrix:
       env: SCALIKEJDBC_DATABASE="hsqldb"
     - scala: 2.13.0-M4
       env: SCALIKEJDBC_DATABASE="mysql"
-      script:
-      - sbt "++ ${TRAVIS_SCALA_VERSION}! -v" core/test interpolation/test interpolation-macro/test library/test config/test syntax-support-macro/test streams/test mapper-generator-core/test joda-time/test
