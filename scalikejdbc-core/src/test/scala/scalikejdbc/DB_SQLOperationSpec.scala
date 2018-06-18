@@ -2,6 +2,8 @@ package scalikejdbc
 
 import org.scalatest._
 import java.sql.SQLException
+import java.time.Instant
+
 import util.control.Exception._
 
 class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
@@ -574,7 +576,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
+        SQL("insert into " + tableName + " values (?, ?, ?)").bind(4, Option(null), Instant.now).update.apply()
         SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap).single.apply()
       }
       result.isDefined should equal(true)
@@ -594,7 +596,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
+        SQL("insert into " + tableName + " values (?, ?, ?)").bind(4, Option(null), Instant.now).update.apply()
         SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
       }
       result.isDefined should equal(true)

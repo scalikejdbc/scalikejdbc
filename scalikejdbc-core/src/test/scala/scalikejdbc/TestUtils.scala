@@ -6,8 +6,8 @@ object TestUtils {
 
   def initializeEmpRecords(session: DBSession, tableName: String): Unit = {
     session.update("delete from " + tableName)
-    session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-    session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+    session.update("insert into " + tableName + " (id, name, x_timestamp) values (?, ?, ?)", 1, "name1", java.time.Instant.now)
+    session.update("insert into " + tableName + " (id, name, x_timestamp) values (?, ?, ?)", 2, "name2", java.time.Instant.now)
   }
 
   def initialize(tableName: String): Unit = {
@@ -16,10 +16,10 @@ object TestUtils {
         handling(classOf[Throwable]) by {
           t =>
             try {
-              session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+              session.execute("create table " + tableName + " (id integer primary key, name varchar(30), x_timestamp timestamp with time zone)")
             } catch {
               case e: Exception =>
-                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+                session.execute("create table " + tableName + " (id integer primary key, name varchar(30), x_timestamp timestamp with time zone)")
             }
             initializeEmpRecords(session, tableName)
         } apply {

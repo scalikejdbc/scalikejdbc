@@ -19,8 +19,8 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
       import scalikejdbc.StringSQLRunner._
 
       // run insert SQL
-      ("insert into " + tableName + " values (3, 'Ben')").run
-      ("insert into " + tableName + " values (4, 'Chris')").execute
+      ("insert into " + tableName + " values (3, 'Ben', NULL)").run
+      ("insert into " + tableName + " values (4, 'Chris', NULL)").execute
 
       // run select SQL
       val result = ("select id,name from " + tableName + " where id = 3").run

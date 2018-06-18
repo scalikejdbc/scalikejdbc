@@ -2,13 +2,16 @@ package scalikejdbc
 
 import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 import scalikejdbc.jodatime.JodaWrappedResultSet._
+
 import scala.util.control.Exception._
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import org.joda.time.DateTime
 import java.sql._
+
 import scala.concurrent.ExecutionContext
 import java.io.ByteArrayInputStream
+import java.time.Instant
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
   with LoanPattern with UnixTimeInMillisConverterImplicits {
@@ -45,7 +48,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           val session = db.autoCommitSession()
           val before = (stmt: PreparedStatement) => println("before")
           val after = (stmt: PreparedStatement) => println("after")
-          session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+          session.executeWithFilters(before, after, "insert into " + tableName + " values (?, ?, ?)", 3, Option("Ben"), Instant.now)
           val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
           benOpt.get._1 should equal(3)
           benOpt.get._2 should equal("Ben")
@@ -73,12 +76,12 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       using(new DB(ConnectionPool.borrow())) {
         db =>
           val session = db.autoCommitSession()
-          session.execute("insert into " + tableName + " values (?, ?)", 3, Option("Ben"))
+          session.execute("insert into " + tableName + " values (?, ?, ?)", 3, Option("Ben"), Instant.now)
           val benOpt = session.single("select id,name from " + tableName + " where id = ?", 3)(rs => (rs.int("id"), rs.string("name")))
           benOpt.get._1 should equal(3)
           benOpt.get._2 should equal("Ben")
 
-          session.execute("insert into " + tableName + " values (?, ?)", 4, Option(null))
+          session.execute("insert into " + tableName + " values (?, ?, ?)", 4, Option(null), Instant.now)
           val noName = session.single("select id,name from " + tableName + " where id = ?", 4)(rs => (rs.int("id"), rs.string("name")))
           noName.get._1 should equal(4)
           noName.get._2 should equal(null)
@@ -262,8 +265,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       val batchTime: Long = DB localTx {
         session =>
           val before = System.currentTimeMillis()
-          val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
-          session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
+          val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i, Instant.now))
+          session.batch("insert into " + tableName + " (id, name, x_timestamp) values (?, ?, ?)", paramsList: _*)
           System.currentTimeMillis() - before
       }
       val loopTime: Long = DB localTx {
@@ -271,7 +274,7 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           val before = System.currentTimeMillis()
           (30001 to 40000) foreach {
             i =>
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", i, "Name" + i)
+              session.update("insert into " + tableName + " (id, name, x_timestamp) values (?, ?, ?)", i, "Name" + i, Instant.now)
           }
           System.currentTimeMillis() - before
       }
@@ -288,8 +291,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
       try {
         DB localTx {
           session =>
-            val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i))
-            session.batch("insert into " + tableName + " (id, name) values (?, ?)", paramsList: _*)
+            val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i, Instant.now))
+            session.batch("insert into " + tableName + " (id, name, x_timestamp) values (?, ?, ?)", paramsList: _*)
             throw new RuntimeException
         }
       } catch {
