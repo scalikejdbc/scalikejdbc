@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.sql.ResultSet
 import java.time._
+import scalikejdbc.UnixTimeInMillisConverterImplicits._
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -84,11 +85,16 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
   implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] = Binders.javaUtilCalendar
 
   implicit val javaTimeInstant: TypeBinder[Instant] = Binders.javaTimeInstant
-  implicit val javaTimeZonedDateTime: TypeBinder[ZonedDateTime] = Binders.javaTimeZonedDateTime
-  implicit val javaTimeOffsetDateTime: TypeBinder[OffsetDateTime] = Binders.javaTimeOffsetDateTime
-  implicit val javaTimeLocalDate: TypeBinder[LocalDate] = Binders.javaTimeLocalDate
-  implicit val javaTimeLocalTime: TypeBinder[LocalTime] = Binders.javaTimeLocalTime
-  implicit val javaTimeLocalDateTime: TypeBinder[LocalDateTime] = Binders.javaTimeLocalDateTime
+  implicit def javaTimeZonedDateTimeTypeBinder(implicit z: OverwrittenZoneId): TypeBinder[ZonedDateTime] =
+    Binders.sqlTimestamp.map(Binders.nullThrough(_.toZonedDateTimeWithZoneId(z.value)))
+  implicit def javaTimeOffsetDateTimeTypeBinder(implicit z: OverwrittenZoneId): TypeBinder[OffsetDateTime] =
+    Binders.sqlTimestamp.map(Binders.nullThrough(_.toOffsetDateTimeWithZoneId(z.value)))
+  implicit def javaTimeLocalDateTypeBinder(implicit z: OverwrittenZoneId): TypeBinder[LocalDate] =
+    Binders.sqlDate.map(Binders.nullThrough(_.toLocalDateWithZoneId(z.value)))
+  implicit def javaTimeLocalTimeTypeBinder(implicit z: OverwrittenZoneId): TypeBinder[LocalTime] =
+    Binders.sqlTime.map(Binders.nullThrough(_.toLocalTimeWithZoneId(z.value)))
+  implicit def javaTimeLocalDateTimeTypeBinder(implicit z: OverwrittenZoneId): TypeBinder[LocalDateTime] =
+    Binders.sqlTimestamp.map(Binders.nullThrough(_.toLocalDateTimeWithZoneId(z.value)))
 
   implicit val url: TypeBinder[java.net.URL] = Binders.url
 
@@ -98,7 +104,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
 
 }
 
-trait LowPriorityTypeBinderImplicits {
+trait LowPriorityTypeBinderImplicits extends LowPriorityTypeBinderImplicits2 {
 
   implicit def option[A](implicit ev: TypeBinder[A]): TypeBinder[Option[A]] = new TypeBinder[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] = wrap(ev(rs, columnIndex))
@@ -106,5 +112,15 @@ trait LowPriorityTypeBinderImplicits {
     private def wrap(a: => A): Option[A] =
       try Option(a) catch { case _: NullPointerException | _: UnexpectedNullValueException => None }
   }
+
+}
+
+sealed abstract class LowPriorityTypeBinderImplicits2 {
+
+  implicit val javaTimeZonedDateTime: TypeBinder[ZonedDateTime] = Binders.javaTimeZonedDateTime
+  implicit val javaTimeOffsetDateTime: TypeBinder[OffsetDateTime] = Binders.javaTimeOffsetDateTime
+  implicit val javaTimeLocalDate: TypeBinder[LocalDate] = Binders.javaTimeLocalDate
+  implicit val javaTimeLocalTime: TypeBinder[LocalTime] = Binders.javaTimeLocalTime
+  implicit val javaTimeLocalDateTime: TypeBinder[LocalDateTime] = Binders.javaTimeLocalDateTime
 
 }

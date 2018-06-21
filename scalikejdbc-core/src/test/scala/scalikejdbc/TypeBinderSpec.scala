@@ -170,4 +170,88 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[Boolean]].apply(rs, 1) should be(false)
   }
 
+  it should "configurable timezone" in {
+    val current = System.currentTimeMillis
+    val date = new java.util.Date(current)
+    val rs: ResultSet = mock[ResultSet]
+
+    when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(current))
+    when(rs.getDate("date")).thenReturn(new java.sql.Date(current))
+    when(rs.getTime("time")).thenReturn(new java.sql.Time(current))
+
+    val defaultZone = ZoneId.systemDefault
+    val anohterZone = {
+      val hawaii = ZoneId.of("US/Hawaii")
+      if (defaultZone == hawaii) {
+        ZoneId.of("Asia/Tokyo")
+      } else {
+        hawaii
+      }
+    }
+
+    case class Values(
+      zonedDateTime: ZonedDateTime,
+      offsetDateTime: OffsetDateTime,
+      localDate: LocalDate,
+      localTime: LocalTime,
+      localDateTime: LocalDateTime) {
+      def notEqualAll(that: Values) = {
+        this.zonedDateTime should not be that.zonedDateTime
+        this.offsetDateTime should not be that.offsetDateTime
+        this.localTime should not be that.localTime
+        this.localDateTime should not be that.localDateTime
+      }
+    }
+
+    val valuesDefault = locally {
+      val values = Values(
+        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
+        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+
+      values.zonedDateTime shouldBe date.toZonedDateTime
+      values.offsetDateTime shouldBe date.toOffsetDateTime
+      values.localDate shouldBe date.toLocalDate
+      values.localTime shouldBe date.toLocalTime
+      values.localDateTime shouldBe date.toLocalDateTime
+
+      values
+    }
+
+    val valuesAnother = locally {
+      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anohterZone)
+
+      val values = Values(
+        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
+        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+
+      values.zonedDateTime shouldBe date.toZonedDateTimeWithZoneId(anohterZone)
+      values.offsetDateTime shouldBe date.toOffsetDateTimeWithZoneId(anohterZone)
+      values.localDate shouldBe date.toLocalDateWithZoneId(anohterZone)
+      values.localTime shouldBe date.toLocalTimeWithZoneId(anohterZone)
+      values.localDateTime shouldBe date.toLocalDateTimeWithZoneId(anohterZone)
+
+      values
+    }
+
+    valuesDefault notEqualAll valuesAnother
+
+    val valuesExplicitDefault = locally {
+      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(ZoneId.systemDefault)
+
+      Values(
+        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
+        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+    }
+
+    valuesDefault shouldBe valuesExplicitDefault
+  }
 }
