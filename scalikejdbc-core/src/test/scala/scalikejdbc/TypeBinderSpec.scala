@@ -10,6 +10,13 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
 
   behavior of "TypeBinder"
 
+  it should "have TypeBinder.from" in {
+    case class TestValue(a: Long)
+
+    val t = TypeBinder.from(TestValue.apply)
+    t: TypeBinder[TestValue]
+  }
+
   it should "be able to return an Option value when NPE" in {
     val result: Option[String] = implicitly[TypeBinder[Option[String]]].apply(null, 1)
     result should be(None)
