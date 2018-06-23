@@ -30,10 +30,19 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     implicitly[TypeBinder[BigDecimal]].apply(rs, "decimal") should be(BigDecimal("1234567"))
     implicitly[TypeBinder[BigDecimal]].apply(rs, 1) should be(BigDecimal("2345678"))
 
-    implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, "decimal") should be(Some(BigDecimal("1234567")))
-    implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, 1) should be(Some(BigDecimal("2345678")))
-    implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, "none") should be(None)
-    implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, 2) should be(None)
+    locally {
+      implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, "decimal") should be(Some(BigDecimal("1234567")))
+      implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, 1) should be(Some(BigDecimal("2345678")))
+      implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, "none") should be(None)
+      implicitly[TypeBinder[Option[BigDecimal]]].apply(rs, 2) should be(None)
+    }
+
+    locally {
+      TypeBinder.of[Option[BigDecimal]].apply(rs, "decimal") should be(Some(BigDecimal("1234567")))
+      TypeBinder.of[Option[BigDecimal]].apply(rs, 1) should be(Some(BigDecimal("2345678")))
+      TypeBinder.of[Option[BigDecimal]].apply(rs, "none") should be(None)
+      TypeBinder.of[Option[BigDecimal]].apply(rs, 2) should be(None)
+    }
   }
 
   it should "have TypeBinder for scala.BigInt" in {
@@ -41,13 +50,25 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     when(rs.getBigDecimal("integer")).thenReturn(new java.math.BigDecimal("1234567"))
     when(rs.getBigDecimal(1)).thenReturn(new java.math.BigDecimal("2345678"))
 
-    implicitly[TypeBinder[BigInt]].apply(rs, "integer") should be(BigInt("1234567"))
-    implicitly[TypeBinder[BigInt]].apply(rs, 1) should be(BigInt("2345678"))
+    locally {
+      implicitly[TypeBinder[BigInt]].apply(rs, "integer") should be(BigInt("1234567"))
+      implicitly[TypeBinder[BigInt]].apply(rs, 1) should be(BigInt("2345678"))
 
-    implicitly[TypeBinder[Option[BigInt]]].apply(rs, "integer") should be(Some(BigInt("1234567")))
-    implicitly[TypeBinder[Option[BigInt]]].apply(rs, 1) should be(Some(BigInt("2345678")))
-    implicitly[TypeBinder[Option[BigInt]]].apply(rs, "none") should be(None)
-    implicitly[TypeBinder[Option[BigInt]]].apply(rs, 2) should be(None)
+      implicitly[TypeBinder[Option[BigInt]]].apply(rs, "integer") should be(Some(BigInt("1234567")))
+      implicitly[TypeBinder[Option[BigInt]]].apply(rs, 1) should be(Some(BigInt("2345678")))
+      implicitly[TypeBinder[Option[BigInt]]].apply(rs, "none") should be(None)
+      implicitly[TypeBinder[Option[BigInt]]].apply(rs, 2) should be(None)
+    }
+
+    locally {
+      TypeBinder.of[BigInt].apply(rs, "integer") should be(BigInt("1234567"))
+      TypeBinder.of[BigInt].apply(rs, 1) should be(BigInt("2345678"))
+
+      TypeBinder.of[Option[BigInt]].apply(rs, "integer") should be(Some(BigInt("1234567")))
+      TypeBinder.of[Option[BigInt]].apply(rs, 1) should be(Some(BigInt("2345678")))
+      TypeBinder.of[Option[BigInt]].apply(rs, "none") should be(None)
+      TypeBinder.of[Option[BigInt]].apply(rs, 2) should be(None)
+    }
   }
 
   it should "have TypeBinder for java.util.Date/Calendar" in {
@@ -55,14 +76,25 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(System.currentTimeMillis))
     when(rs.getDate("date")).thenReturn(new java.sql.Date(System.currentTimeMillis))
 
-    implicitly[TypeBinder[java.sql.Timestamp]].apply(rs, "time") should not be (null)
-    implicitly[TypeBinder[LocalDateTime]].apply(rs, "time") should not be (null)
-    implicitly[TypeBinder[LocalDate]].apply(rs, "date") should not be (null)
+    locally {
+      implicitly[TypeBinder[java.sql.Timestamp]].apply(rs, "time") should not be (null)
+      implicitly[TypeBinder[LocalDateTime]].apply(rs, "time") should not be (null)
+      implicitly[TypeBinder[LocalDate]].apply(rs, "date") should not be (null)
 
-    //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
-    implicitly[TypeBinder[java.sql.Timestamp]].apply(rs, "time").toJavaUtilDate should not be (null)
+      //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
+      implicitly[TypeBinder[java.sql.Timestamp]].apply(rs, "time").toJavaUtilDate should not be (null)
+      implicitly[TypeBinder[java.util.Calendar]].apply(rs, "time") should not be (null)
+    }
 
-    implicitly[TypeBinder[java.util.Calendar]].apply(rs, "time") should not be (null)
+    locally {
+      TypeBinder.of[java.sql.Timestamp].apply(rs, "time") should not be (null)
+      TypeBinder.of[LocalDateTime].apply(rs, "time") should not be (null)
+      TypeBinder.of[LocalDate].apply(rs, "date") should not be (null)
+
+      //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
+      TypeBinder.of[java.sql.Timestamp].apply(rs, "time").toJavaUtilDate should not be (null)
+      TypeBinder.of[java.util.Calendar].apply(rs, "time") should not be (null)
+    }
   }
 
   it should "handle result values of type java.math.BigDecimal" in {
@@ -187,7 +219,7 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     when(rs.getTime("time")).thenReturn(new java.sql.Time(current))
 
     val defaultZone = ZoneId.systemDefault
-    val anohterZone = {
+    val anotherZone = {
       val hawaii = ZoneId.of("US/Hawaii")
       if (defaultZone == hawaii) {
         ZoneId.of("Asia/Tokyo")
@@ -212,11 +244,11 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
 
     val valuesDefault = locally {
       val values = Values(
-        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
-        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        TypeBinder.of[ZonedDateTime].apply(rs, "time"),
+        TypeBinder.of[OffsetDateTime].apply(rs, "time"),
+        TypeBinder.of[LocalDate].apply(rs, "date"),
+        TypeBinder.of[LocalTime].apply(rs, "time"),
+        TypeBinder.of[LocalDateTime].apply(rs, "time"))
 
       values.zonedDateTime shouldBe date.toZonedDateTime
       values.offsetDateTime shouldBe date.toOffsetDateTime
@@ -228,20 +260,20 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
     }
 
     val valuesAnother = locally {
-      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anohterZone)
+      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anotherZone)
 
       val values = Values(
-        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
-        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        TypeBinder.of[ZonedDateTime].apply(rs, "time"),
+        TypeBinder.of[OffsetDateTime].apply(rs, "time"),
+        TypeBinder.of[LocalDate].apply(rs, "date"),
+        TypeBinder.of[LocalTime].apply(rs, "time"),
+        TypeBinder.of[LocalDateTime].apply(rs, "time"))
 
-      values.zonedDateTime shouldBe date.toZonedDateTimeWithZoneId(anohterZone)
-      values.offsetDateTime shouldBe date.toOffsetDateTimeWithZoneId(anohterZone)
-      values.localDate shouldBe date.toLocalDateWithZoneId(anohterZone)
-      values.localTime shouldBe date.toLocalTimeWithZoneId(anohterZone)
-      values.localDateTime shouldBe date.toLocalDateTimeWithZoneId(anohterZone)
+      values.zonedDateTime shouldBe date.toZonedDateTimeWithZoneId(anotherZone)
+      values.offsetDateTime shouldBe date.toOffsetDateTimeWithZoneId(anotherZone)
+      values.localDate shouldBe date.toLocalDateWithZoneId(anotherZone)
+      values.localTime shouldBe date.toLocalTimeWithZoneId(anotherZone)
+      values.localDateTime shouldBe date.toLocalDateTimeWithZoneId(anotherZone)
 
       values
     }
@@ -252,11 +284,11 @@ class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with UnixT
       implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(ZoneId.systemDefault)
 
       Values(
-        implicitly[TypeBinder[ZonedDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[OffsetDateTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
-        implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        TypeBinder.of[ZonedDateTime].apply(rs, "time"),
+        TypeBinder.of[OffsetDateTime].apply(rs, "time"),
+        TypeBinder.of[LocalDate].apply(rs, "date"),
+        TypeBinder.of[LocalTime].apply(rs, "time"),
+        TypeBinder.of[LocalDateTime].apply(rs, "time"))
     }
 
     valuesDefault shouldBe valuesExplicitDefault
