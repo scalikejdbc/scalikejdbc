@@ -26,6 +26,9 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
     def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
   }
 
+  def from[A, B](f: A => B)(implicit a: TypeBinder[A]): TypeBinder[B] =
+    a.map(f)
+
   private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
   implicit val array: TypeBinder[java.sql.Array] = Binders.sqlArray
 
