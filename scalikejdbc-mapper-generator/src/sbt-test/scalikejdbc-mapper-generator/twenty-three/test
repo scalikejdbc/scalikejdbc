@@ -17,7 +17,7 @@
 > compile
 > test:compile
 
-> set scalaVersion :="2.12.5"
+> set scalaVersion :="2.12.6"
 > compile
 > test:compile
 

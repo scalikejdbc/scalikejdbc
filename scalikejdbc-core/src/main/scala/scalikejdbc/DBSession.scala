@@ -3,7 +3,6 @@ package scalikejdbc
 import java.sql._
 import util.control.Exception._
 import scala.collection.generic.CanBuildFrom
-import scala.collection.breakOut
 import scala.language.higherKinds
 
 /**
@@ -260,8 +259,8 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        val resultSet = new ResultSetTraversable(proxy)
-        val rows = (resultSet map (rs => extract(rs))).toList
+        val resultSet = new ResultSetIterator(proxy)
+        val rows = (resultSet map extract).toList
         rows match {
           case Nil => None
           case one :: Nil => Option(one)
@@ -310,7 +309,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy).map(extract)(breakOut)
+        new ResultSetIterator(proxy).map(extract).to[C]
     }
   }
 
@@ -326,7 +325,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy) foreach (rs => f(rs))
+        new ResultSetIterator(proxy) foreach f
     }
   }
 
@@ -343,7 +342,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     using(createStatementExecutor(conn, template, params)) {
       executor =>
         val proxy = new DBConnectionAttributesWiredResultSet(executor.executeQuery(), connectionAttributes)
-        new ResultSetTraversable(proxy).foldLeft(z)(op)
+        new ResultSetIterator(proxy).foldLeft(z)(op)
     }
   }
 
@@ -739,7 +738,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(1)).to[C]
+          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(1)).to[C]
         }
     }
   }
@@ -770,7 +769,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
               executor.addBatch()
           }
           executor.executeBatch()
-          new ResultSetTraversable(executor.generatedKeysResultSet).map(_.long(key)).to[C]
+          new ResultSetIterator(executor.generatedKeysResultSet).map(_.long(key)).to[C]
         }
     }
   }

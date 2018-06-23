@@ -41,7 +41,7 @@ TaskKey[Unit]("createTestDatabase") := {
 testOptions in Test += {
   val setting = (scalikejdbcJDBCSettings in Compile).value
   Tests.Setup{ loader =>
-    type Initializer = {def run(url: String, username: String, password: String)}
+    type Initializer = {def run(url: String, username: String, password: String): Unit}
     val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
     initializer.run(setting.url, setting.username, setting.password)
   }
@@ -49,7 +49,7 @@ testOptions in Test += {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.12.5", "2.11.12", "2.10.6")
+crossScalaVersions := List("2.12.6", "2.11.12", "2.10.6")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
 

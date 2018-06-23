@@ -256,7 +256,7 @@ lazy val scalikejdbcMapperGenerator = Project(
 ).settings(
   baseSettings,
   sbtPlugin := true,
-  crossSbtVersions := Vector("0.13.17", "1.1.1"),
+  crossSbtVersions := Vector("0.13.17", "1.1.6"),
   resolvers += Classpaths.sbtPluginReleases, // for sbt 0.13 test
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(
@@ -380,7 +380,7 @@ def _publishTo(v: String) = {
   else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
 val _resolvers = Seq(
-  "typesafe repo" at "http://repo.typesafe.com/typesafe/releases",
+  "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
   "sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
   "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
