@@ -116,7 +116,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
 
 }
 
-trait LowPriorityTypeBinderImplicits {
+sealed abstract class LowPriorityTypeBinderImplicits {
 
   implicit val javaTimeZonedDateTimeDefault: TypeBinder[ZonedDateTime] = Binders.javaTimeZonedDateTime
   implicit val javaTimeOffsetDateTimeDefault: TypeBinder[OffsetDateTime] = Binders.javaTimeOffsetDateTime

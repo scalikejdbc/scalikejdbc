@@ -112,7 +112,7 @@ object ParameterBinderFactory extends LowPriorityImplicitsParameterBinderFactory
 
 }
 
-trait LowPriorityImplicitsParameterBinderFactory1 {
+sealed abstract class LowPriorityImplicitsParameterBinderFactory1 {
 
   implicit def optionalParameterBinderFactory[A](implicit ev: ParameterBinderFactory[A]): ParameterBinderFactory[Option[A]] = new ParameterBinderFactory[Option[A]] {
     def apply(value: Option[A]): ParameterBinderWithValue = {
