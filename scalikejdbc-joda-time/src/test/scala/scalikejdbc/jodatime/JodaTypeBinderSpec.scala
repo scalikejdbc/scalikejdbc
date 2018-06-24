@@ -32,7 +32,7 @@ class JodaTypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
     Mockito.when(rs.getTime("time")).thenReturn(new java.sql.Time(current))
 
     val defaultZone = ZoneId.systemDefault
-    val anohterZone = {
+    val anotherZone = {
       val hawaii = ZoneId.of("US/Hawaii")
       if (defaultZone == hawaii) {
         ZoneId.of("Asia/Tokyo")
@@ -69,7 +69,7 @@ class JodaTypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
     }
 
     val valuesAnother = locally {
-      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anohterZone)
+      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anotherZone)
 
       val values = Values(
         implicitly[TypeBinder[DateTime]].apply(rs, "time"),
@@ -77,10 +77,10 @@ class JodaTypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
         implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
         implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
 
-      values.dateTime shouldBe date.toJodaDateTimeWithZoneId(anohterZone)
-      values.localDate shouldBe date.toJodaLocalDateWithZoneId(anohterZone)
-      values.localTime shouldBe date.toJodaLocalTimeWithZoneId(anohterZone)
-      values.localDateTime shouldBe date.toJodaLocalDateTimeWithZoneId(anohterZone)
+      values.dateTime shouldBe date.toJodaDateTimeWithZoneId(anotherZone)
+      values.localDate shouldBe date.toJodaLocalDateWithZoneId(anotherZone)
+      values.localTime shouldBe date.toJodaLocalTimeWithZoneId(anotherZone)
+      values.localDateTime shouldBe date.toJodaLocalDateTimeWithZoneId(anotherZone)
 
       values
     }
