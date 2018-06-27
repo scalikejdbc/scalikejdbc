@@ -20,10 +20,22 @@ trait TypeBinder[+A] {
  */
 object TypeBinder extends LowPriorityTypeBinderImplicits {
 
+  /**
+   * same as `implicitly[TypeBinder[A]]`
+   *
+   * @example {{{
+   *   TypeBinder.of[Long]
+   * }}}
+   */
+  @inline def of[A](implicit a: TypeBinder[A]): TypeBinder[A] = a
+
   def apply[A](index: (ResultSet, Int) => A)(label: (ResultSet, String) => A): TypeBinder[A] = new TypeBinder[A] {
     def apply(rs: ResultSet, columnIndex: Int): A = index(rs, columnIndex)
     def apply(rs: ResultSet, columnLabel: String): A = label(rs, columnLabel)
   }
+
+  def from[A, B](f: A => B)(implicit a: TypeBinder[A]): TypeBinder[B] =
+    a.map(f)
 
   private[scalikejdbc] val any: TypeBinder[Any] = TypeBinder(_ getObject _)(_ getObject _)
   implicit val array: TypeBinder[java.sql.Array] = Binders.sqlArray
