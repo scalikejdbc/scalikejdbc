@@ -1,0 +1,30 @@
+ScalikeJDBC 3.3.0 is out for Scala 2.13.0-M4, 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #866 Supporting insert statement with multiple values in QueryDSL by @t-mochizuki
+- [core] #873 #884 Remove the usage of scala.collection.breakOut as preparation for Scala 2.13 by @xuwei-k
+- [core] #878 #885 Replace scala.Seq with scala.collection.Seq as preparation for Scala 2.13 by @xuwei-k
+- [core] #888 Replace scala.BufferedIterator with scala.collection.BufferedIterator as preparation for Scala 2.13 by @xuwei-k
+- [core] #880 Code refactoring not to allocate unnecessary function objects by @xuwei-k
+- [core] #881 #889 Make ResultSetTraversable deprecated + introduce ResultSetIterator, the successor by @xuwei-k
+- [core] #883 Replace MutableList with ArrayBuffer as preparation for Scala 2.13 by @xuwei-k
+- [core] #887 Complete supporting Scala 2.13.0-M4 by @xuwei-k
+- [core] #891 Fix a warning encouraging to use "reverseIterator.map" instead of "reverseMap" by @xuwei-k
+- [core] #895 Bump scala-parser-combinators to 1.1.1 by @xuwei-k
+- [core] #908 #911 TypeBinder timezone should be configurable by @xuwei-k
+- [core] #902 Use 'https' for SBT resolvers by @sullis
+- [core] #913 Introduce TypeBinder.from as a more handy way to call implicitly + map by @xuwei-k
+- [core] #914 #916 Introduce TypeBinder.of as a more handy way to call implicitly by @xuwei-k
+- [core] #915 Use abstract class instead of trait for "LowPriority" traits by @xuwei-k
+- [mapper-generator] #879 use java.sql.JDBCType instead of java.sql.Types by @t-mochizuki
+- [mapper-generator] #896 Add tableNameToSyntaxVariableName by @xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
