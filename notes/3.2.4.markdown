@@ -1,0 +1,16 @@
+ScalikeJDBC 3.2.4 is out for Scala 2.13.0-M4, 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] [3.2.x] #866 Add one insert statement with multiple values #867 by @t-mochizuki @seratch
+- [core] #912 Backport bin-compatible changes from master branch by @xuwei-k
+- [core] #920 Backport TypeBinder.from/of (#913, #914) by @xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
