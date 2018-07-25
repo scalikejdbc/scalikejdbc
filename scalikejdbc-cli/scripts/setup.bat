@@ -117,12 +117,12 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 >>"%build_sbt%" echo.
->>"%build_sbt%" echo scalaVersion := "2.11.12"
+>>"%build_sbt%" echo scalaVersion := "2.12.6"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.2.3",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.3.0",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.25",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.196",
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.197",
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.1.0",
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.21.0.1",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.4.0",
