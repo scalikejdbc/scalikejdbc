@@ -39,3 +39,7 @@ sbt 'set scalaVersion := "2.13.0-M4"' \
   "project syntax-support-macro" 'set scalaVersion := "2.11.12"' publishSigned \
   "project test" 'set scalaVersion := "2.11.12"' publishSigned \
   "project mapper-generator-core" 'set scalaVersion := "2.11.12"' publishSigned
+
+
+`dirname $0`/release_sbt_plugins.sh
+

@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.3.0-RC2-SNAPSHOT"
+lazy val _version = "3.3.0"
 
 lazy val _organization = "org.scalikejdbc"
 
@@ -19,7 +19,7 @@ lazy val _hibernateVersion = "5.3.3.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "2.19.1"
+lazy val mockitoVersion = "2.20.0"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
