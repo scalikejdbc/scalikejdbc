@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import org.scalatest._
 import java.sql.SQLException
+import java.time.Instant
 
 import org.slf4j.LoggerFactory
 
@@ -547,7 +548,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     }) {
       TestUtils.initialize(tableName)
       DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update.apply()
+        SQL("insert into " + tableName + " values (?,?,?)").bind(3, "so what?", Instant.now).update.apply()
       }
       GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = true,

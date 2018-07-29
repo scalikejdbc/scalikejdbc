@@ -3,7 +3,8 @@ package scalikejdbc
 import util.control.Exception._
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
-import java.sql.{ SQLException, PreparedStatement }
+import java.sql.{ PreparedStatement, SQLException }
+import java.time.Instant
 
 class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
@@ -18,7 +19,7 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
       using(new DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
 
-        SQL("insert into " + tableName + " values (?, ?)").bind(3, Option("Ben")).execute().apply()
+        SQL("insert into " + tableName + " values (?, ?, ?)").bind(3, Option("Ben"), Instant.now).execute().apply()
 
         val benOpt = SQL("select id,name from " + tableName + " where id = ?").bind(3)
           .map(rs => (rs.int("id"), rs.string("name"))).toOption()
@@ -27,7 +28,7 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
         benOpt.get._1 should equal(3)
         benOpt.get._2 should equal("Ben")
 
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).execute().apply()
+        SQL("insert into " + tableName + " values (?, ?, ?)").bind(4, Option(null), Instant.now).execute().apply()
 
         val noName = SQL("select id,name from " + tableName + " where id = ?").bind(4)
           .map(rs => (rs.int("id"), rs.string("name"))).toOption
@@ -38,7 +39,7 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
 
         val before = (s: PreparedStatement) => println("before")
         val after = (s: PreparedStatement) => println("before")
-        SQL("insert into " + tableName + " values (?, ?)").bind(5, Option(null)).executeWithFilters(before, after).apply()
+        SQL("insert into " + tableName + " values (?, ?, ?)").bind(5, Option(null), Instant.now).executeWithFilters(before, after).apply()
       }
     }
   }

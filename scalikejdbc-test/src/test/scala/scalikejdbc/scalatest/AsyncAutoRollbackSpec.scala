@@ -9,7 +9,7 @@ import org.scalatest._
 
 import scala.concurrent.Future
 
-trait AsyncFlatSpecWithCommonTraits extends AsyncFlatSpec with Matchers with DBSettings with PreparingTables
+trait AsyncFlatSpecWithCommonTraits extends AsyncFlatSpec with Matchers with unit.DBSettings with PreparingTables
 
 class AsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback {
 
