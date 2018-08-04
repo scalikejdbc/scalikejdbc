@@ -489,6 +489,42 @@ class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSuppo
       }
     }
   }
+  it should "get all columns" in {
+
+    if (driverClassName == "com.mysql.jdbc.Driver") {
+      try {
+        // There was a bug that MySQL returns all columns of same name tables.
+        DB autoCommit { implicit s =>
+          execute("create table getcolumns(id1 integer,c1 integer);")
+          execute("create database otherdb;")
+          execute("create table otherdb.getcolumns(id2 integer,c2 integer);")
+        }
+        DB.getTable("getcolumns").get.columns.map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+
+      } finally {
+        DB autoCommit { implicit s =>
+          execute("drop database otherdb")
+          execute("drop table if exists getcolumns")
+        }
+      }
+    } else {
+
+      try {
+
+        DB autoCommit { implicit s =>
+          execute("create table getcolumns(id1 integer, c1 integer);")
+        }
+
+        DB.getTable("getcolumns").get.columns.map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+
+      } finally {
+        DB autoCommit { implicit s =>
+          execute("drop table if exists getcolumns")
+        }
+      }
+    }
+
+  }
 
   private def execute(sqls: String*)(implicit session: DBSession): Unit = {
     for (sql <- sqls) {
