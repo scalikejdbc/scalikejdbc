@@ -413,7 +413,16 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    */
   def getAllColumns(meta: DatabaseMetaData, schema: String, table: String): ResultSet = {
     meta.getDatabaseProductName match {
-      case "MySQL" => meta.getColumns(schema, null, table, "%")
+      case "MySQL" => {
+        val catalog = if(schema == null || schema.isEmpty) {
+          // If you pass null to catalog, MySQL returns all columns which named {table}
+          // To avoid that, get using database from connection.
+          meta.getConnection.getCatalog()
+        } else {
+          schema
+        }
+        meta.getColumns(catalog, null, table, "%")
+      }
       case _ => meta.getColumns(null, schema, table, "%")
     }
   }
