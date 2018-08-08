@@ -178,7 +178,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
   }
 
   // issue #215 https://github.com/scalikejdbc/scalikejdbc/issues/215
-  it should "work wih toSeq (#215)" in {
+  it should "work with toSeq (#215)" in {
     DB localTx {
       implicit s =>
         try {
@@ -200,7 +200,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with L
     }
   }
 
-  it should "work wih toList (#215)" in {
+  it should "work with toList (#215)" in {
     DB localTx {
       implicit s =>
         try {
