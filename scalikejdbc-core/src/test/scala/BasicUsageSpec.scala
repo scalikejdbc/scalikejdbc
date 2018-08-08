@@ -126,7 +126,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
     }
   }
 
-  "localTx" should "execute in the same transation" in {
+  "localTx" should "execute in the same transaction" in {
     val tableName = tableNamePrefix + "_localTx"
     try {
       TestUtils.initialize(tableName)

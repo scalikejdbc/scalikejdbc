@@ -20,7 +20,7 @@ object AutoRollbackSpec extends Specification with DBSettings with PreparingTabl
     MutableMember.count() must_== (1)
   }
 
-  "Transactions should be commited without AutoRollback" in {
+  "Transactions should be committed without AutoRollback" in {
     MutableMember.count() must_== (1)
     MutableMember.delete(0)
     MutableMember.count() must_== (0)
@@ -61,7 +61,7 @@ object AutoRollbackSpec extends Specification with DBSettings with PreparingTabl
     MutableMember2.count() must_== (1)
   }
 
-  "Transactions should be commited without AutoRollback for NamedDB" in {
+  "Transactions should be committed without AutoRollback for NamedDB" in {
     MutableMember2.count() must_== (1)
     MutableMember2.delete(0)
     MutableMember2.count() must_== (0)

@@ -202,7 +202,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         }
       } catch { case e: Exception => }
 
-      // should be commited
+      // should be committed
       val name = DB readOnly { implicit s =>
         SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single.apply().get
       }
@@ -288,7 +288,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         }
       } catch { case e: Exception => }
 
-      // should not be commited
+      // should not be committed
       val name = DB readOnly { implicit s =>
         SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single.apply().get
       }
