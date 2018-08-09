@@ -53,7 +53,7 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
   /**
    * Trims comments
    *
-   * @param input SQL tempalte
+   * @param input SQL template
    * @return SQL template without comments
    */
   def trimComments(input: String): String = ExecutableToAnormConverter(input).trimComments()
