@@ -53,7 +53,8 @@ object GeneratorConfig {
 
   val conflictMethods: Set[String] = Set(
     "toString", "hashCode", "wait", "getClass", "notify", "notifyAll",
-    "productArity", "productIterator", "productPrefix", "copy")
+    "productArity", "productElementName", "productElementNames",
+    "productIterator", "productPrefix", "copy")
 
   def addSuffixIfConflict(suffix: String): String => String = {
     name =>
