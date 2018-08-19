@@ -9,7 +9,7 @@ ScalikeJDBC is practical and production-ready. Use this library for your real pr
 http://scalikejdbc.org/
 
 [![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=master)](https://travis-ci.org/scalikejdbc/scalikejdbc)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.12)
+[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc-core_2.12.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.scalikejdbc%22%20a%3A%22scalikejdbc-core_2.12%22)
 
 ## Gitter Chat for Casual Q&A
 
