@@ -262,7 +262,6 @@ lazy val scalikejdbcMapperGenerator = Project(
   libraryDependencies ++= {
     Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
       scalaTestDependenciesInTestScope.value ++
-      specs2DependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   }
 ).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore).enablePlugins(SbtPlugin)
@@ -358,17 +357,6 @@ val _resolvers = Seq(
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
-}
-
-lazy val specs2DependenciesInTestScope = Def.setting{
-  if (scalaVersion.value == "2.13.0-M4") {
-    // TODO specs2 for Scala 2.13
-    Nil
-  } else {
-    Seq(
-      "org.specs2" %% "specs2-core" % specs2Version.value % "test"
-    )
-  }
 }
 
 val jdbcDriverDependenciesInTestScope = Seq(
