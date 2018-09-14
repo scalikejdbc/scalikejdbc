@@ -64,7 +64,7 @@ object GeneratorConfig {
 
   val lowerCamelCase: String => String =
     GeneratorConfig.toCamelCase.andThen {
-      camelCase => camelCase.head.toLower + camelCase.tail
+      camelCase => s"${camelCase.head.toLower}${camelCase.tail}"
     }
 
   val columnNameToFieldNameBasic: String => String = {
