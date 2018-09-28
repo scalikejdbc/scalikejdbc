@@ -57,18 +57,20 @@ object ConnectionPool extends LogSupport {
   }
 
   /**
-   * Returns Connection pool. If the specified Connection pool does not exist, returns null.
+   * Returns Connection pool. If the specified Connection pool does not exist, throws IllegalStateException.
    *
    * @param name pool name
    * @return connection pool
+   * @throws IllegalStateException if the specified Connection pool does not exist
    */
   def apply(name: Any = DEFAULT_NAME): ConnectionPool = get(name)
 
   /**
-   * Returns Connection pool. If the specified Connection pool does not exist, returns null.
+   * Returns Connection pool. If the specified Connection pool does not exist, throws IllegalStateException.
    *
    * @param name pool name
    * @return connection pool
+   * @throws IllegalStateException if the specified Connection pool does not exist
    */
   def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
     pools.getOrElse(name, {
