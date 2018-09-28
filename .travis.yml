@@ -4,6 +4,9 @@ scala:
   - 2.11.12
   - 2.12.7
 
+# The project supports OpenJDK 8+ / Oracle JDK 8,9,10
+# As of October 2018, Oracle JDK 8 is the most widely used JDK for Scala applications.
+# Thereby, we use Oracle JDK 8 as the default for now. We may change the default JDK for testing.
 jdk:
   - oraclejdk8
 
@@ -44,19 +47,38 @@ env:
 
 matrix:
   include:
+    # scripted test
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="postgresql"
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="h2"
+    # h2, hsqldb
     - scala: 2.12.7
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.7
       env: SCALIKEJDBC_DATABASE="hsqldb"
+    # Oracle JDK 8,9,10 / OpenJDK 8,9,10,11+
     - scala: 2.12.7
       env: SCALIKEJDBC_DATABASE="mysql"
-      jdk: oraclejdk11
+      jdk: oraclejdk9
+    - scala: 2.12.7
+      env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: oraclejdk10
+    - scala: 2.12.7
+      env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: openjdk8
+    - scala: 2.12.7
+      env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: openjdk9
+    - scala: 2.12.7
+      env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: openjdk10
+    - scala: 2.12.7
+      env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: openjdk11
+   # Scala 2.13.0 Milestone Releases
     - scala: 2.13.0-M4
       env: SCALIKEJDBC_DATABASE="mysql"
     - scala: 2.13.0-M5
