@@ -13,13 +13,13 @@ lazy val _reactiveStreamsVersion = "1.0.2"
 lazy val _logbackVersion = "1.2.3"
 lazy val _h2Version = "1.4.197"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
-lazy val _mysqlVersion = "5.1.46"
+lazy val _mysqlVersion = "5.1.47"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.3.3.Final"
+lazy val _hibernateVersion = "5.3.6.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "2.20.0"
+lazy val mockitoVersion = "2.22.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
