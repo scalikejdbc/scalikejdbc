@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
+import JavaUtilDateConverterImplicits._
 
 /**
  * Companion object.
@@ -34,7 +35,7 @@ object StatementExecutor {
 
   }
 
-  trait PrintableQueryBuilder extends UnixTimeInMillisConverterImplicits {
+  trait PrintableQueryBuilder {
 
     import PrintableQueryBuilder._
 
@@ -135,7 +136,7 @@ case class StatementExecutor(
   singleParams: collection.Seq[Any] = Nil,
   tags: collection.Seq[String] = Nil,
   isBatch: Boolean = false,
-  settingsProvider: SettingsProvider = SettingsProvider.default) extends LogSupport with UnixTimeInMillisConverterImplicits with AutoCloseable {
+  settingsProvider: SettingsProvider = SettingsProvider.default) extends LogSupport with AutoCloseable {
 
   import StatementExecutor._
 

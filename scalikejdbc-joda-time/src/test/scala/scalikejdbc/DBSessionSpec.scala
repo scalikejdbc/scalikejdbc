@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 import java.io.ByteArrayInputStream
 
 class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
-  with LoanPattern with UnixTimeInMillisConverterImplicits {
+  with LoanPattern with JavaUtilDateConverterImplicits {
 
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])
 

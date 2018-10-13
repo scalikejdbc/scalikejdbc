@@ -16,7 +16,7 @@ case class Member(
 
 }
 
-object Member extends UnixTimeInMillisConverterImplicits {
+object Member extends JavaUtilDateConverterImplicits {
 
   val tableName = "MEMBER"
 
