@@ -51,7 +51,7 @@ package object scalikejdbc
   extends SQLInterpolation
   with ScalaBigDecimalConverterImplicits
   with DeprecatedOneToManiesTraversable
-  with UnixTimeInMillisConverterImplicits {
+  with JavaUtilDateConverterImplicits {
 
   // -----
   // Loan Pattern everywhere

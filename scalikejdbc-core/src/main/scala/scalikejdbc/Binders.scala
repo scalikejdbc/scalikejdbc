@@ -3,7 +3,7 @@ package scalikejdbc
 import java.io.InputStream
 import java.sql.{ PreparedStatement, ResultSet }
 import java.time.ZoneId
-import scalikejdbc.UnixTimeInMillisConverterImplicits._
+import JavaUtilDateConverterImplicits._
 
 /**
  * Provides both of TypeBinder and ParameterBinderFactory for the specified type A.
