@@ -2,8 +2,8 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.{ PreparedStatement, ResultSet }
-
-import scalikejdbc.UnixTimeInMillisConverterImplicits._
+import java.time.ZoneId
+import JavaUtilDateConverterImplicits._
 
 /**
  * Provides both of TypeBinder and ParameterBinderFactory for the specified type A.
@@ -69,6 +69,13 @@ object Binders {
   }
 
   private[scalikejdbc] def nullThrough[A, B](f: A => B)(a: A): B = if (a == null) null.asInstanceOf[B] else f(a)
+
+  private[scalikejdbc] def convertJavaTimeZonedDateTime(z: ZoneId): java.sql.Timestamp => java.time.ZonedDateTime =
+    nullThrough(x => java.time.ZonedDateTime.ofInstant(x.toInstant, z))
+  private[scalikejdbc] def convertJavaTimeOffsetDateTime(z: ZoneId): java.sql.Timestamp => java.time.OffsetDateTime =
+    nullThrough(x => java.time.OffsetDateTime.ofInstant(x.toInstant, z))
+  private[scalikejdbc] def convertJavaTimeLocalDateTime(z: ZoneId): java.sql.Timestamp => java.time.LocalDateTime =
+    nullThrough(x => java.time.LocalDateTime.ofInstant(x.toInstant, z))
 
   // --------------------------------------------------------------------------------------------
   // Built-in Binders
@@ -160,10 +167,13 @@ object Binders {
   val url: Binders[java.net.URL] = Binders(_ getURL _)(_ getURL _)(v => (ps, idx) => ps.setURL(idx, v))
   val utilDate: Binders[java.util.Date] = sqlTimestamp.xmap(identity, _.toSqlTimestamp)
 
-  val javaTimeInstant: Binders[java.time.Instant] = utilDate.xmap(nullThrough(_.toInstant), java.util.Date.from)
-  val javaTimeZonedDateTime: Binders[java.time.ZonedDateTime] = utilDate.xmap(nullThrough(_.toZonedDateTime), v => java.util.Date.from(v.toInstant))
-  val javaTimeOffsetDateTime: Binders[java.time.OffsetDateTime] = utilDate.xmap(nullThrough(_.toOffsetDateTime), v => java.util.Date.from(v.toInstant))
-  val javaTimeLocalDateTime: Binders[java.time.LocalDateTime] = utilDate.xmap(nullThrough(_.toLocalDateTime), v => java.util.Date.from(v.atZone(java.time.ZoneId.systemDefault()).toInstant))
+  val javaTimeInstant: Binders[java.time.Instant] = sqlTimestamp.xmap(nullThrough(_.toInstant), java.sql.Timestamp.from)
+  val javaTimeZonedDateTime: Binders[java.time.ZonedDateTime] =
+    sqlTimestamp.xmap(convertJavaTimeZonedDateTime(java.time.ZoneId.systemDefault()), v => java.sql.Timestamp.from(v.toInstant))
+  val javaTimeOffsetDateTime: Binders[java.time.OffsetDateTime] =
+    sqlTimestamp.xmap(convertJavaTimeOffsetDateTime(java.time.ZoneId.systemDefault()), v => java.sql.Timestamp.from(v.toInstant))
+  val javaTimeLocalDateTime: Binders[java.time.LocalDateTime] =
+    sqlTimestamp.xmap(convertJavaTimeLocalDateTime(java.time.ZoneId.systemDefault()), v => java.sql.Timestamp.from(v.atZone(java.time.ZoneId.systemDefault()).toInstant))
   val javaTimeLocalDate: Binders[java.time.LocalDate] = sqlDate.xmap(nullThrough(_.toLocalDate), java.sql.Date.valueOf)
   val javaTimeLocalTime: Binders[java.time.LocalTime] = sqlTime.xmap(nullThrough(v => {
     // java.sql.Time#toLocalTime drops its millisecond value

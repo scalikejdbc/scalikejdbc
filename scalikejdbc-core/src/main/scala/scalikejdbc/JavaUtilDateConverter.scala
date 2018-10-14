@@ -3,18 +3,16 @@ package scalikejdbc
 import java.util.Calendar
 
 /**
- * Unix Time Converter to several types.
- *
- * @param millis the milliseconds from 1970-01-01T00:00:00Z
+ * `java.util.Date` Converter to several types.
  */
-@deprecated("use JavaUtilDateConverter", "3.3.2")
-class UnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
+class JavaUtilDateConverter(private val value: java.util.Date) extends AnyVal {
+  private[this] def millis: Long = value.getTime
 
   // --------------------
   // java.util.Date
   // --------------------
 
-  def toJavaUtilDate: java.util.Date = new java.util.Date(millis)
+  def toJavaUtilDate: java.util.Date = value
 
   // --------------------
   // java.time
@@ -22,7 +20,14 @@ class UnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
 
   private def defaultZoneId: java.time.ZoneId = java.time.ZoneId.systemDefault()
 
-  def toInstant: java.time.Instant = java.time.Instant.ofEpochMilli(millis)
+  def toInstant: java.time.Instant = {
+    value match {
+      case t: java.sql.Timestamp =>
+        t.toInstant
+      case _ =>
+        java.time.Instant.ofEpochMilli(millis)
+    }
+  }
 
   def toZonedDateTimeWithZoneId(zoneId: java.time.ZoneId): java.time.ZonedDateTime = java.time.ZonedDateTime.ofInstant(toInstant, zoneId)
 
@@ -49,24 +54,43 @@ class UnixTimeInMillisConverter(private val millis: Long) extends AnyVal {
   // --------------------
 
   def toSqlDate: java.sql.Date = {
-    // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html
-    // -----
-    // To conform with the definition of SQL DATE,
-    // the millisecond values wrapped by a java.sql.Date instance must be 'normalized'
-    // by setting the hours, minutes, seconds, and milliseconds to zero
-    // in the particular time zone with which the instance is associated.
-    // -----
-    val cal = Calendar.getInstance()
-    cal.setTimeInMillis(millis)
-    cal.set(Calendar.HOUR_OF_DAY, 0)
-    cal.set(Calendar.MINUTE, 0)
-    cal.set(Calendar.SECOND, 0)
-    cal.set(Calendar.MILLISECOND, 0)
-    new java.sql.Date(cal.getTimeInMillis)
+    value match {
+      case t: java.sql.Date =>
+        t
+      case _ =>
+        // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html
+        // -----
+        // To conform with the definition of SQL DATE,
+        // the millisecond values wrapped by a java.sql.Date instance must be 'normalized'
+        // by setting the hours, minutes, seconds, and milliseconds to zero
+        // in the particular time zone with which the instance is associated.
+        // -----
+        val cal = Calendar.getInstance()
+        cal.setTimeInMillis(millis)
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        new java.sql.Date(cal.getTimeInMillis)
+    }
   }
 
-  def toSqlTime: java.sql.Time = new java.sql.Time(millis)
+  def toSqlTime: java.sql.Time = {
+    value match {
+      case t: java.sql.Time =>
+        t
+      case _ =>
+        new java.sql.Time(millis)
+    }
+  }
 
-  def toSqlTimestamp: java.sql.Timestamp = new java.sql.Timestamp(millis)
+  def toSqlTimestamp: java.sql.Timestamp = {
+    value match {
+      case t: java.sql.Timestamp =>
+        t
+      case _ =>
+        new java.sql.Timestamp(millis)
+    }
+  }
 
 }

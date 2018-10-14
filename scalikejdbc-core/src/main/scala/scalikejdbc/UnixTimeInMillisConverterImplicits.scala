@@ -7,16 +7,22 @@ import java.util.{ Date => utilDate }
 /**
  * Implicit conversions for date time values.
  */
+@deprecated("use JavaUtilDateConverterImplicits", "3.3.2")
 trait UnixTimeInMillisConverterImplicits {
 
-  implicit def convertJavaUtilDateToConverter(t: utilDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
+  @deprecated("use JavaUtilDateConverterImplicits.toJavaUtilDateConverter", "3.3.2")
+  def convertJavaUtilDateToConverter(t: utilDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlDateToConverter(t: sqlDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
+  @deprecated("use JavaUtilDateConverterImplicits.toJavaUtilDateConverter", "3.3.2")
+  def convertJavaSqlDateToConverter(t: sqlDate): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlTimeToConverter(t: sqlTime): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
+  @deprecated("use JavaUtilDateConverterImplicits.toJavaUtilDateConverter", "3.3.2")
+  def convertJavaSqlTimeToConverter(t: sqlTime): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
-  implicit def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
+  @deprecated("use JavaUtilDateConverterImplicits.toJavaUtilDateConverter", "3.3.2")
+  def convertJavaSqlTimestampToConverter(t: sqlTimestamp): UnixTimeInMillisConverter = new UnixTimeInMillisConverter(t.getTime)
 
 }
 
+@deprecated("use JavaUtilDateConverterImplicits", "3.3.2")
 object UnixTimeInMillisConverterImplicits extends UnixTimeInMillisConverterImplicits

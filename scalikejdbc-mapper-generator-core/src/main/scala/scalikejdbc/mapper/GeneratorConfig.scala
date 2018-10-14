@@ -53,7 +53,8 @@ object GeneratorConfig {
 
   val conflictMethods: Set[String] = Set(
     "toString", "hashCode", "wait", "getClass", "notify", "notifyAll",
-    "productArity", "productIterator", "productPrefix", "copy")
+    "productArity", "productElementName", "productElementNames",
+    "productIterator", "productPrefix", "copy")
 
   def addSuffixIfConflict(suffix: String): String => String = {
     name =>
@@ -63,7 +64,7 @@ object GeneratorConfig {
 
   val lowerCamelCase: String => String =
     GeneratorConfig.toCamelCase.andThen {
-      camelCase => camelCase.head.toLower + camelCase.tail
+      camelCase => s"${camelCase.head.toLower}${camelCase.tail}"
     }
 
   val columnNameToFieldNameBasic: String => String = {

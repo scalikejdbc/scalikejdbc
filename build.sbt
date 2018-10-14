@@ -20,6 +20,7 @@ lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
 lazy val mockitoVersion = "2.20.0"
+lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -39,13 +40,31 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v >= 13 => "3.0.6-SNAP1"
-      case _ =>                       "3.0.5"
+    scalaVersion.value match {
+      case "2.13.0-M5" =>
+        "3.0.6-SNAP3"
+      case "2.13.0-M4" =>
+        "3.0.6-SNAP1"
+      case _ =>
+        "3.0.5"
     }
   },
-  specs2Version := "4.3.2",
+  specs2Version := {
+    scalaVersion.value match {
+      case "2.13.0-M5" =>
+        "4.3.5"
+      case _ =>
+        "4.3.2"
+    }
+  },
   parserCombinatorsVersion := "1.1.1",
+  collectionCompatVersion := {
+    // TODO https://github.com/scala/scala-collection-compat/pull/152
+    if (scalaVersion.value == "2.13.0-M5")
+      "0.2.0"
+    else
+      "0.1.1"
+  },
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
@@ -172,7 +191,7 @@ lazy val scalikejdbcCore = Project(
       "org.apache.commons"      %  "commons-dbcp2"   % "2.5.0"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "org.scala-lang.modules"  %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
-      "org.scala-lang.modules"  %% "scala-collection-compat" % "0.1.1",
+      "org.scala-lang.modules"  %% "scala-collection-compat" % collectionCompatVersion.value,
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
@@ -265,7 +284,6 @@ lazy val scalikejdbcMapperGenerator = Project(
   libraryDependencies ++= {
     Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
       scalaTestDependenciesInTestScope.value ++
-      specs2DependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   }
 ).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore)
@@ -361,17 +379,6 @@ val _resolvers = Seq(
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
-}
-
-lazy val specs2DependenciesInTestScope = Def.setting{
-  if (scalaVersion.value == "2.13.0-M4") {
-    // TODO specs2 for Scala 2.13
-    Nil
-  } else {
-    Seq(
-      "org.specs2" %% "specs2-core" % specs2Version.value % "test"
-    )
-  }
 }
 
 val jdbcDriverDependenciesInTestScope = Seq(

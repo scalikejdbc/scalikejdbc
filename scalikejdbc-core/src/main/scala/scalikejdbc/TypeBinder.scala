@@ -2,7 +2,7 @@ package scalikejdbc
 
 import java.sql.ResultSet
 import java.time._
-import scalikejdbc.UnixTimeInMillisConverterImplicits._
+import scalikejdbc.JavaUtilDateConverterImplicits._
 
 /**
  * Type binder for java.sql.ResultSet.
@@ -98,15 +98,15 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
 
   implicit val javaTimeInstant: TypeBinder[Instant] = Binders.javaTimeInstant
   implicit def javaTimeZonedDateTime(implicit z: OverwrittenZoneId): TypeBinder[ZonedDateTime] =
-    Binders.sqlTimestamp.map(Binders.nullThrough(_.toZonedDateTimeWithZoneId(z.value)))
+    Binders.sqlTimestamp.map(Binders.convertJavaTimeZonedDateTime(z.value))
   implicit def javaTimeOffsetDateTime(implicit z: OverwrittenZoneId): TypeBinder[OffsetDateTime] =
-    Binders.sqlTimestamp.map(Binders.nullThrough(_.toOffsetDateTimeWithZoneId(z.value)))
+    Binders.sqlTimestamp.map(Binders.convertJavaTimeOffsetDateTime(z.value))
   implicit def javaTimeLocalDate(implicit z: OverwrittenZoneId): TypeBinder[LocalDate] =
     Binders.sqlDate.map(Binders.nullThrough(_.toLocalDateWithZoneId(z.value)))
   implicit def javaTimeLocalTime(implicit z: OverwrittenZoneId): TypeBinder[LocalTime] =
     Binders.sqlTime.map(Binders.nullThrough(_.toLocalTimeWithZoneId(z.value)))
   implicit def javaTimeLocalDateTime(implicit z: OverwrittenZoneId): TypeBinder[LocalDateTime] =
-    Binders.sqlTimestamp.map(Binders.nullThrough(_.toLocalDateTimeWithZoneId(z.value)))
+    Binders.sqlTimestamp.map(Binders.convertJavaTimeLocalDateTime(z.value))
 
   implicit val url: TypeBinder[java.net.URL] = Binders.url
 
