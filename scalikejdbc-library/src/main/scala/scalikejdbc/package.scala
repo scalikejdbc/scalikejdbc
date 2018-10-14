@@ -1,3 +1,5 @@
+import scala.language.implicitConversions
+
 /**
  * ScalikeJDBC - SQL-Based DB Access Library for Scala
  *
@@ -85,4 +87,7 @@ package object scalikejdbc
 
   @deprecated(message = "use SQLToIterable instead", since = "3.3.0")
   type SQLToTraversable[A, E <: WithExtractor] = SQLToIterable[A, E]
+
+  implicit def toJavaUtilDateConverter(value: java.util.Date): JavaUtilDateConverter =
+    new JavaUtilDateConverter(value)
 }

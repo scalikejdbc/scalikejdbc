@@ -4,7 +4,7 @@ import org.scalatest._
 import org.joda.time._
 import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with UnixTimeInMillisConverterImplicits {
+class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with JavaUtilDateConverterImplicits {
 
   behavior of "SQLInterpolation"
 

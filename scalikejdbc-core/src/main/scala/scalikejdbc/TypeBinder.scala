@@ -2,7 +2,7 @@ package scalikejdbc
 
 import java.sql.ResultSet
 import java.time._
-import scalikejdbc.UnixTimeInMillisConverterImplicits._
+import scalikejdbc.JavaUtilDateConverterImplicits._
 
 /**
  * Type binder for java.sql.ResultSet.
