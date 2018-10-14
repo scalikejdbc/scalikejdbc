@@ -40,12 +40,23 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v >= 13 => "3.0.6-SNAP1"
-      case _ =>                       "3.0.5"
+    scalaVersion.value match {
+      case "2.13.0-M5" =>
+        "3.0.6-SNAP3"
+      case "2.13.0-M4" =>
+        "3.0.6-SNAP1"
+      case _ =>
+        "3.0.5"
     }
   },
-  specs2Version := "4.3.2",
+  specs2Version := {
+    scalaVersion.value match {
+      case "2.13.0-M5" =>
+        "4.3.5"
+      case _ =>
+        "4.3.2"
+    }
+  },
   parserCombinatorsVersion := "1.1.1",
   collectionCompatVersion := {
     // TODO https://github.com/scala/scala-collection-compat/pull/152
@@ -367,10 +378,7 @@ val _resolvers = Seq(
   "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
-  if (scalaVersion.value == "2.13.0-M5")
-    Nil
-  else
-    Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
+  Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
 }
 
 val jdbcDriverDependenciesInTestScope = Seq(
