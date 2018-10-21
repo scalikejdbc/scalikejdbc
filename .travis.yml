@@ -65,9 +65,6 @@ matrix:
       jdk: oraclejdk9
     - scala: 2.12.7
       env: SCALIKEJDBC_DATABASE="mysql"
-      jdk: oraclejdk10
-    - scala: 2.12.7
-      env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk8
     # Disabled because the sbt initialization with OpenJDK9/10 are somehow unstable
     #- scala: 2.12.7
