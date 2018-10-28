@@ -26,6 +26,11 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
       timestamp
     }
 
+  private[this] def convertTimeZoneIfNeeded[T](any: T): T = any match {
+    case any: Timestamp => convertTimeZoneIfNeeded(any).asInstanceOf[T]
+    case _ => any
+  }
+
   // --------------------------------------------
   // Converts timezone if needed
   // --------------------------------------------
@@ -34,6 +39,13 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
   def getTimestamp(columnLabel: String): Timestamp = convertTimeZoneIfNeeded(underlying.getTimestamp(columnLabel))
   def getTimestamp(columnIndex: Int, cal: Calendar): Timestamp = convertTimeZoneIfNeeded(underlying.getTimestamp(columnIndex, cal))
   def getTimestamp(columnLabel: String, cal: Calendar): Timestamp = convertTimeZoneIfNeeded(underlying.getTimestamp(columnLabel, cal))
+
+  def getObject(columnIndex: Int): AnyRef = convertTimeZoneIfNeeded(underlying.getObject(columnIndex))
+  def getObject(columnLabel: String): AnyRef = convertTimeZoneIfNeeded(underlying.getObject(columnLabel))
+  def getObject(columnIndex: Int, map: util.Map[String, Class[_]]): AnyRef = convertTimeZoneIfNeeded(underlying.getObject(columnIndex, map))
+  def getObject(columnLabel: String, map: util.Map[String, Class[_]]): AnyRef = convertTimeZoneIfNeeded(underlying.getObject(columnLabel, map))
+  def getObject[T](columnIndex: Int, `type`: Class[T]): T = convertTimeZoneIfNeeded(underlying.getObject(columnIndex, `type`))
+  def getObject[T](columnLabel: String, `type`: Class[T]): T = convertTimeZoneIfNeeded(underlying.getObject(columnLabel, `type`))
 
   // --------------------------------------------
   // Just delegates to underlying methods
@@ -161,12 +173,6 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
   def getAsciiStream(columnLabel: String): InputStream = underlying.getAsciiStream(columnLabel)
   def getShort(columnIndex: Int): Short = underlying.getShort(columnIndex)
   def getShort(columnLabel: String): Short = underlying.getShort(columnLabel)
-  def getObject(columnIndex: Int): AnyRef = underlying.getObject(columnIndex)
-  def getObject(columnLabel: String): AnyRef = underlying.getObject(columnLabel)
-  def getObject(columnIndex: Int, map: util.Map[String, Class[_]]): AnyRef = underlying.getObject(columnIndex, map)
-  def getObject(columnLabel: String, map: util.Map[String, Class[_]]): AnyRef = underlying.getObject(columnLabel, map)
-  def getObject[T](columnIndex: Int, `type`: Class[T]): T = underlying.getObject(columnIndex, `type`)
-  def getObject[T](columnLabel: String, `type`: Class[T]): T = underlying.getObject(columnLabel, `type`)
   def updateShort(columnIndex: Int, x: Short): Unit = underlying.updateShort(columnIndex, x)
   def updateShort(columnLabel: String, x: Short): Unit = underlying.updateShort(columnLabel, x)
   def getNCharacterStream(columnIndex: Int): Reader = underlying.getNCharacterStream(columnIndex)

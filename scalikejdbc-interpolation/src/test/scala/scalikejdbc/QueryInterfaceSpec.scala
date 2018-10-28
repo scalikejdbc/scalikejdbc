@@ -785,6 +785,13 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         val expectedTime2 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 2)).map(TimeHolder(t)(_)).single.apply().get.time
         expectedTime2.isEqual(time) should equal(true)
+
+        val map = withSQL(select(sqls"time").from(TimeHolder as t).where.eq(t.id, 2)).map(_.toMap()).single.apply().get
+        if (map.get("time").isDefined) {
+          map.get("time") should equal(Some(java.sql.Timestamp.from(time.toInstant)))
+        } else {
+          map.get("TIME") should equal(Some(java.sql.Timestamp.from(time.toInstant)))
+        }
       }
     } finally {
       DB autoCommit { implicit session =>
