@@ -312,7 +312,7 @@ private[streams] class DatabaseSubscription[A](
         if (log.isDebugEnabled) {
           log.debug(s"Failed to close the occupied database session because ${e.getMessage}", e)
         } else {
-          log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
+          log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${e.getClass.getName}")
         }
     } finally {
       _maybeOccupiedDBSession = None
@@ -391,7 +391,7 @@ private[streams] class DatabaseSubscription[A](
                   if (log.isDebugEnabled) {
                     log.debug(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}", e)
                   } else {
-                    log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${e.getClass.getCanonicalName}")
+                    log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${e.getClass.getName}")
                   }
                   cleanUpResources()
                   throw e

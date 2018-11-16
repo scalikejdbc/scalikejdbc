@@ -47,13 +47,6 @@ object StatementExecutor {
         def toPrintable(param: Any): String = {
           @annotation.tailrec
           def normalize(param: Any): Any = {
-            def getCanonicalName(param: Any): String = {
-              try {
-                param.getClass().getCanonicalName
-              } catch {
-                case e: InternalError if e.getMessage == "Malformed class name" => ""
-              }
-            }
             param match {
               case null => null
               case ParameterBinder(v) => normalize(v)
@@ -62,7 +55,7 @@ object StatementExecutor {
               case p: String => p
               case p: java.util.Date => p.toSqlTimestamp.toString
               case p =>
-                getCanonicalName(p) match {
+                param.getClass.getName match {
                   case "org.joda.time.DateTime" =>
                     param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp.toString
                   case "org.joda.time.LocalDateTime" =>
@@ -220,7 +213,7 @@ case class StatementExecutor(
         underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
       case p =>
-        param.getClass.getCanonicalName match {
+        param.getClass.getName match {
           case "org.joda.time.DateTime" =>
             val t = p.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp
             underlying.setTimestamp(i, t)
