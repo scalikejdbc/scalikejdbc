@@ -3,7 +3,7 @@ package scalikejdbc.streams
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicLong }
 
 import org.reactivestreams.{ Subscriber, Subscription }
-import scalikejdbc.{ DBConnectionAttributesWiredResultSet, DBSession, DBSessionWrapper, LogSupport, NamedDB }
+import scalikejdbc._
 
 import scala.concurrent.Promise
 import scala.util.{ Failure, Success }
@@ -312,7 +312,7 @@ private[streams] class DatabaseSubscription[A](
         if (log.isDebugEnabled) {
           log.debug(s"Failed to close the occupied database session because ${e.getMessage}", e)
         } else {
-          log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${e.getClass.getName}")
+          log.info(s"Failed to close the occupied database session because ${e.getMessage}, exception: ${ClassNameUtil.getClassName(e.getClass)}")
         }
     } finally {
       _maybeOccupiedDBSession = None
@@ -391,7 +391,7 @@ private[streams] class DatabaseSubscription[A](
                   if (log.isDebugEnabled) {
                     log.debug(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}", e)
                   } else {
-                    log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${e.getClass.getName}")
+                    log.info(s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${ClassNameUtil.getClassName(e.getClass)}")
                   }
                   cleanUpResources()
                   throw e

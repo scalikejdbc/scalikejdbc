@@ -55,7 +55,7 @@ object StatementExecutor {
               case p: String => p
               case p: java.util.Date => p.toSqlTimestamp.toString
               case p =>
-                param.getClass.getName match {
+                ClassNameUtil.getClassName(param.getClass) match {
                   case "org.joda.time.DateTime" =>
                     param.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp.toString
                   case "org.joda.time.LocalDateTime" =>
@@ -213,7 +213,7 @@ case class StatementExecutor(
         underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
       case p =>
-        param.getClass.getName match {
+        ClassNameUtil.getClassName(param.getClass) match {
           case "org.joda.time.DateTime" =>
             val t = p.asInstanceOf[{ def toDate: java.util.Date }].toDate.toSqlTimestamp
             underlying.setTimestamp(i, t)
