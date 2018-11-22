@@ -1,9 +1,10 @@
 package scalikejdbc
 
-object ClassNameUtil {
+private[scalikejdbc] object ClassNameUtil {
+
   /**
-   * Returns clazz.getCanonicalName, or clazz.getName if clazz.getCanonicalName throws Error.
-   * @param clazz class
+   * Returns the canonical name of a given class. If getCanonicalName doesn't return expected value, this method returns the value came from getName instead.
+   * @param clazz a given class object
    */
   def getClassName(clazz: Class[_]): String = {
     val canonicalName: Option[String] = try {
