@@ -111,6 +111,78 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
     }
   }
 
+  /*
+    [info] scalikejdbc.StatementExecutorSpec *** ABORTED ***
+    [info]   java.lang.InternalError: Malformed class name
+    [info]   at java.lang.Class.getSimpleName(Class.java:1330)
+    [info]   at java.lang.Class.getCanonicalName(Class.java:1399)
+    [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.normalize$1(StatementExecutor.scala:65)
+    [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.toPrintable$1(StatementExecutor.scala:80)
+    [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.$anonfun$build$3(StatementExecutor.scala:110)
+    [info]   at scala.util.matching.Regex.$anonfun$replaceAllIn$1(Regex.scala:504)
+    [info]   at scala.collection.Iterator.foreach(Iterator.scala:937)
+    [info]   at scala.collection.Iterator.foreach$(Iterator.scala:937)
+    [info]   at scala.collection.AbstractIterator.foreach(Iterator.scala:1425)
+    [info]   at scala.util.matching.Regex.replaceAllIn(Regex.scala:504)
+    [info]   ...
+  */
+  {
+    val sql = StatementExecutor.PrintableQueryBuilder.build(
+      template = "select * from users where bar = ?",
+      settingsProvider = SettingsProvider.default,
+      params = Seq(Foo.Bar))
+    sql should equal("select * from users where bar = Bar")
+  }
+
+  // #968 Embedded quotes in SQL statements are removed in debug logging
+  it should "have PrintableQueryBuilder resolving #968" in {
+
+    {
+      val statement = "select id, name from users where id = 123 and name = 'Alice'"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+    {
+      val statement = "select id, name from users where first_name = 'Bob' and id = 123 and last_name = 'Marley' and code = 777"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+
+    // escaped quotes
+    {
+      val statement = "select id, name from users where name = 'Bob' and venue = 'Bob'' house' and id = 123"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+
+    // invalid statements
+    {
+      {
+        val sql = StatementExecutor.PrintableQueryBuilder.build(
+          template = "select id, name from users where name = ''Bob and id = 123",
+          settingsProvider = SettingsProvider.default,
+          params = Seq.empty)
+        sql should equal("select id, name from users where name = ''Bob and id = 123")
+      }
+      {
+        val sql = StatementExecutor.PrintableQueryBuilder.build(
+          template = "select id, name from users where name = 'Bob and id = 123",
+          settingsProvider = SettingsProvider.default,
+          params = Seq.empty)
+        sql should equal("select id, name from users where name = 'Bob and id = 123'")
+      }
+    }
+  }
+
   object Foo {
     case object Bar
   }
