@@ -111,6 +111,55 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
     }
   }
 
+  // #968 Embedded quotes in SQL statements are removed in debug logging
+  it should "have PrintableQueryBuilder resolving #968" in {
+
+    {
+      val statement = "select id, name from users where id = 123 and name = 'Alice'"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+    {
+      val statement = "select id, name from users where first_name = 'Bob' and id = 123 and last_name = 'Marley' and code = 777"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+
+    // escaped quotes
+    {
+      val statement = "select id, name from users where name = 'Bob' and venue = 'Bob'' house' and id = 123"
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = statement,
+        settingsProvider = SettingsProvider.default,
+        params = Seq.empty)
+      sql should equal(statement)
+    }
+
+    // invalid statements
+    {
+      {
+        val sql = StatementExecutor.PrintableQueryBuilder.build(
+          template = "select id, name from users where name = ''Bob and id = 123",
+          settingsProvider = SettingsProvider.default,
+          params = Seq.empty)
+        sql should equal("select id, name from users where name = ''Bob and id = 123")
+      }
+      {
+        val sql = StatementExecutor.PrintableQueryBuilder.build(
+          template = "select id, name from users where name = 'Bob and id = 123",
+          settingsProvider = SettingsProvider.default,
+          params = Seq.empty)
+        sql should equal("select id, name from users where name = 'Bob and id = 123'")
+      }
+    }
+  }
+
   object Foo {
     case object Bar
   }
