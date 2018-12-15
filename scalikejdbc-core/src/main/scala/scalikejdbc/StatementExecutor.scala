@@ -108,7 +108,11 @@ object StatementExecutor {
               }
             })
           }
-          case (s, quoteCount) if (quoteCount % 2 == 1) => s
+          case (s, quoteCount) if (quoteCount % 2 == 1) =>
+            // If the statement is valid, we can always expect an odd number of elements
+            // Thus, we can add two quotes here.
+            "'" + s + "'"
+          case (s, _) => s
         }.mkString
 
       } catch {
