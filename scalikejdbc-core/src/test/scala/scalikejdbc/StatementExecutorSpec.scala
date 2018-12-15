@@ -86,6 +86,32 @@ class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
         params = Seq("foo$", "^bar$\\+$"))
       sql should equal("select * from users where foo = 'foo$' and bar = '^bar$\\+$'")
     }
+
+    /*
+      [info] scalikejdbc.StatementExecutorSpec *** ABORTED ***
+      [info]   java.lang.InternalError: Malformed class name
+      [info]   at java.lang.Class.getSimpleName(Class.java:1330)
+      [info]   at java.lang.Class.getCanonicalName(Class.java:1399)
+      [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.normalize$1(StatementExecutor.scala:65)
+      [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.toPrintable$1(StatementExecutor.scala:80)
+      [info]   at scalikejdbc.StatementExecutor$PrintableQueryBuilder.$anonfun$build$3(StatementExecutor.scala:110)
+      [info]   at scala.util.matching.Regex.$anonfun$replaceAllIn$1(Regex.scala:504)
+      [info]   at scala.collection.Iterator.foreach(Iterator.scala:937)
+      [info]   at scala.collection.Iterator.foreach$(Iterator.scala:937)
+      [info]   at scala.collection.AbstractIterator.foreach(Iterator.scala:1425)
+      [info]   at scala.util.matching.Regex.replaceAllIn(Regex.scala:504)
+      [info]   ...
+     */
+    {
+      val sql = StatementExecutor.PrintableQueryBuilder.build(
+        template = "select * from users where bar = ?",
+        settingsProvider = SettingsProvider.default,
+        params = Seq(Foo.Bar))
+      sql should equal("select * from users where bar = Bar")
+    }
   }
 
+  object Foo {
+    case object Bar
+  }
 }
