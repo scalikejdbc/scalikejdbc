@@ -15,7 +15,7 @@ lazy val _h2Version = "1.4.197"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.47"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.3.7.Final"
+lazy val _hibernateVersion = "5.4.0.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -45,7 +45,7 @@ lazy val baseSettings = Seq(
       case _ =>                       "3.0.5"
     }
   },
-  specs2Version := "4.3.5",
+  specs2Version := "4.3.6",
   parserCombinatorsVersion := "1.1.1",
   collectionCompatVersion := {
     // TODO https://github.com/scala/scala-collection-compat/pull/152
