@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.3.2-SNAPSHOT"
+lazy val _version = "3.3.2"
 
 lazy val _organization = "org.scalikejdbc"
 
