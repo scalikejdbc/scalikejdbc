@@ -1,0 +1,20 @@
+ScalikeJDBC 3.3.2 is out for Scala 2.13.0-M5, 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #931 Support for Scala 2.13 "scala.Product" changes by @xuwei-k
+- [core] #955 Fix scaladoc for ConnectionPool.{apply, get} methods by @savulchik
+- [core] Fix #945 JDK >= 9 date precision problem by @xuwei-k
+- [core] #955 Backport binary compatible changes to 3.3.x from master by @xuwei-k
+- [core] #970 #961 catch error thrown by nested object's getCanonicalName by @xuwei-k
+- [core] #971 #968 backport of "#968 Embedded quotes in SQL statements are removed in debug logging" by @xuwei-k
+- [mapper-generator] #936 Remove unused specs2 settings in mapper-generator by @xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
