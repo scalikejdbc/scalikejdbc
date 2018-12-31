@@ -1,4 +1,4 @@
-ScalikeJDBC 1.5.1 has been released. Just fixed implicit convertion confliction.
+ScalikeJDBC 1.5.1 has been released. Just fixed implicit conversion confliction.
 
 ## library
 

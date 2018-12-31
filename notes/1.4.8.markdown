@@ -57,7 +57,7 @@ for Play 2.1.x and 2.0.x:
     curl -L http://git.io/dbconsole | sh
 
 * Added useful profile selector by @tototoshi
-* Enabled users to customize intial commands by @tototoshi [(GH-91)](https://github.com/seratch/scalikejdbc/issues/91)
+* Enabled users to customize initial commands by @tototoshi [(GH-91)](https://github.com/seratch/scalikejdbc/issues/91)
 * Bumped sbt version to 0.12.2
 * Deprecated update operations by #run (use #execute instead)
 

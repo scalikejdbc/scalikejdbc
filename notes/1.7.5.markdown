@@ -18,7 +18,7 @@ http://scalikejdbc.org/
 
 ## test
 
-- Fixed ScalaTest imcompatible overridering error by @tlync
+- Fixed ScalaTest incompatible overridering error by @tlync
 
 Enjoy writing mostly type-safe SQL and get things done!
 
