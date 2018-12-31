@@ -6,7 +6,7 @@ http://scalikejdbc.org/
 
 ### Changes
 
-- [core] #241 Compliation time improvement by @todesking
+- [core] #241 Compilation time improvement by @todesking
 
 When using SQLInterpolation, compilation is more than two times faster than RC2. Great contribution!
 
