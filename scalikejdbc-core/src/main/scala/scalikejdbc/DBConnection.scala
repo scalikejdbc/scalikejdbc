@@ -323,9 +323,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    */
   def localTx[A](execution: DBSession => A)(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     val doClose = if (autoCloseEnabled) () => conn.close() else () => ()
-    val tx = newTx
-    begin(tx)
-    val txResult = try {
+    val txResult: A = try {
+      val tx = newTx
+      begin(tx)
       rollbackIfThrowable[A] {
         val session = DBSession(
           conn = conn,
