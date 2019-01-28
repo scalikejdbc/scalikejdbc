@@ -45,7 +45,7 @@ lazy val baseSettings = Seq(
       case _ =>                       "3.0.5"
     }
   },
-  specs2Version := "4.4.0",
+  specs2Version := "4.4.1",
   parserCombinatorsVersion := "1.1.1",
   collectionCompatVersion := {
     // TODO https://github.com/scala/scala-collection-compat/pull/152
