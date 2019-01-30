@@ -42,7 +42,7 @@ lazy val baseSettings = Seq(
   scalatestVersion := {
     scalaVersion.value match {
       case "2.13.0-M5" =>
-        "3.0.6-SNAP3"
+        "3.0.6-SNAP6"
       case "2.13.0-M4" =>
         "3.0.6-SNAP1"
       case _ =>
@@ -133,8 +133,8 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10",
-    "org.joda" % "joda-convert" % "2.1.1"
+    "joda-time" % "joda-time" % "2.10.1",
+    "org.joda" % "joda-convert" % "2.2.0"
   )
 ).dependsOn(
   scalikejdbcLibrary,
