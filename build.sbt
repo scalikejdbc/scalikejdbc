@@ -47,13 +47,7 @@ lazy val baseSettings = Seq(
   },
   specs2Version := "4.4.1",
   parserCombinatorsVersion := "1.1.1",
-  collectionCompatVersion := {
-    // TODO https://github.com/scala/scala-collection-compat/pull/152
-    if (scalaVersion.value == "2.13.0-M5")
-      "0.2.0"
-    else
-      "0.1.1"
-  },
+  collectionCompatVersion := "0.3.0",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
