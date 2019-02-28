@@ -819,8 +819,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     }
 
     def column(name: String): SQLSyntax = cachedColumns.getOrElseUpdate(name, {
-      underlying.namedColumns.find(_.value.equalsIgnoreCase(name)).map { nc =>
-        SQLSyntax(s"${aliasName}.${nc.value} as ${nc.value}${delimiterForResultName}${aliasName}")
+      underlying.columns.find(_.value.equalsIgnoreCase(name)).map { original =>
+        val underlyingResultName = underlying.column(original.value).value
+        SQLSyntax(s"${aliasName}.${underlyingResultName} as ${underlyingResultName}${delimiterForResultName}${aliasName}")
       }.getOrElse {
         throw notFoundInColumns(aliasName, name, underlying.columns.map(_.value).mkString(","))
       }
