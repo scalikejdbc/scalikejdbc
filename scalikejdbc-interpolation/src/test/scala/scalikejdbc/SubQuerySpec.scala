@@ -31,4 +31,13 @@ class SubQuerySpec extends FlatSpec with Matchers with SQLInterpolation {
     }
   }
 
+  case class Member(id: Long, groupId: Long)
+  object Member extends SQLSyntaxSupport[Member] { override val columnNames = Seq("id", "group_id") }
+
+  it should "work with #989" in {
+    val m = Member.syntax("m")
+    val s = SubQuery.syntax("s").include(m)
+    s(m).result.id.value should equal("s.i_on_m as i_on_m_on_s")
+  }
+
 }
