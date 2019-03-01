@@ -1,0 +1,16 @@
+ScalikeJDBC 3.3.3 is out for Scala 2.13.0-M5, 2.12, 2.11 and 2.10.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #981 Fix #977 Issue with open connection after exception in begin(tx) method by @seratch
+- [core] #982 Bump scalatest, joda-time versions by @seratch
+- [core] #989 Fix PartialSubQueryResultSQLSyntaxProvider#column by @saikyouyaki
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
