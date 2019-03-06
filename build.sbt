@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.3.3"
+lazy val _version = "3.3.4-SNAPSHOT"
 
 lazy val _organization = "org.scalikejdbc"
 
@@ -374,8 +374,7 @@ def _publishTo(v: String) = {
 }
 val _resolvers = Seq(
   "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
-  "sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
-  "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
