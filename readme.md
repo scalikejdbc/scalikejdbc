@@ -9,7 +9,7 @@ ScalikeJDBC is practical and production-ready. Use this library for your real pr
 http://scalikejdbc.org/
 
 [![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=master)](https://travis-ci.org/scalikejdbc/scalikejdbc)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.scalikejdbc/scalikejdbc_2.12)
+[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.12)
 
 ## Gitter Chat for Casual Q&A
 
@@ -22,7 +22,7 @@ Just add ScalikeJDBC, a JDBC driver, and an slf4j implementation to your sbt bui
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"        % "3.2.+",
+  "org.scalikejdbc" %% "scalikejdbc"        % "3.3.+",
   "com.h2database"  %  "h2"                 % "1.4.+",
   "ch.qos.logback"  %  "logback-classic"    % "1.2.+"
 )
@@ -97,4 +97,3 @@ Copyright scalikejdbc.org
 Apache License, Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0.html
 ```
-
