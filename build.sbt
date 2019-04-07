@@ -41,29 +41,21 @@ lazy val baseSettings = Seq(
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := {
     scalaVersion.value match {
-      case "2.13.0-M5" =>
-        "3.0.6-SNAP6"
-      case "2.13.0-M4" =>
-        "3.0.6-SNAP1"
-      case _ =>
-        "3.0.5"
+      case "2.13.0-RC1" => "3.0.8-RC2"
+      case _ =>            "3.0.5"
     }
   },
-  specs2Version := {
-    scalaVersion.value match {
-      case "2.13.0-M5" =>
-        "4.3.5"
-      case _ =>
-        "4.3.2"
+  specs2Version := "4.5.1",
+  parserCombinatorsVersion := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+       case Some((2, 11)) => "1.1.1"
+       case _ =>             "1.1.2"
     }
   },
-  parserCombinatorsVersion := "1.1.1",
   collectionCompatVersion := {
-    // TODO https://github.com/scala/scala-collection-compat/pull/152
-    if (scalaVersion.value == "2.13.0-M5")
-      "0.2.0"
-    else
-      "0.1.1"
+    // https://github.com/scala/scala-collection-compat/pull/152
+    if (scalaVersion.value == "2.13.0-RC1") "1.0.0"
+    else "0.1.1" // keep using this version for bin compatibilities
   },
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),

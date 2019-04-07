@@ -44,7 +44,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
       TestUtils.initialize(tableName)
       implicit val session = DB.readOnlySession()
       try {
-        val result = SQL("select * from " + tableName + "") map (rs => Some(rs.string("name"))) toList () apply ()
+        val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).toList().apply()
         result.size should be > 0
       } finally {
         session.close()
