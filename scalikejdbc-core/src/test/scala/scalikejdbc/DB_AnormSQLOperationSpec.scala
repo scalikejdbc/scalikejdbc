@@ -25,7 +25,7 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
         val idOpt = db autoCommit {
           implicit session =>
             SQL("select id from " + tableName + " where id = {id}")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
         }
         idOpt.get should equal(1)
@@ -41,12 +41,12 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
         implicit session =>
           intercept[IllegalArgumentException] {
             SQL("select id from " + tableName + " where id = {id} and name = {name}")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
           }
           intercept[IllegalStateException] {
             SQL("select id from " + tableName + " where id = {id}")
-              .bindByName('idd -> 1)
+              .bindByName(Symbol("idd") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
           }
       }
@@ -63,8 +63,8 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
           implicit session =>
             SQL("update " + tableName + " set name = {name} where id = {id}")
               .bindByName(
-                'name -> "foo",
-                'id -> 1).executeUpdate().apply()
+                Symbol("name") -> "foo",
+                Symbol("id") -> 1).executeUpdate().apply()
         }
         count should equal(1)
       }
@@ -73,7 +73,7 @@ class DB_AnormSQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfte
         val name = (DB(conn) autoCommit {
           implicit session =>
             SQL("select name from " + tableName + " where id = {id}")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.string("name")).single.apply()
         }).get
         name should equal("foo")

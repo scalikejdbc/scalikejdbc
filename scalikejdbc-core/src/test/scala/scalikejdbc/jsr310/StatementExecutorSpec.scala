@@ -13,8 +13,8 @@ class StatementExecutorSpec extends FunSpec with Matchers with Settings {
       DB.autoCommit { s =>
         implicit val session: DBSession = {
           if (driverClassName == "org.h2.Driver") {
-            ConnectionPool.add('jsr310, "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
-            NamedAutoSession('jsr310)
+            ConnectionPool.add(Symbol("jsr310"), "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
+            NamedAutoSession(Symbol("jsr310"))
           } else {
             s
           }

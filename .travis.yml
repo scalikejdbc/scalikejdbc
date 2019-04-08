@@ -34,8 +34,7 @@ script:
 
 before_cache:
   - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
-  - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
 
 env:
   matrix:
@@ -57,7 +56,6 @@ matrix:
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: oraclejdk11
-    - scala: 2.13.0-M4
-      env: SCALIKEJDBC_DATABASE="mysql"
-    - scala: 2.13.0-M5
+    # Scala 2.13.0 Milestone Releases
+    - scala: 2.13.0-RC1
       env: SCALIKEJDBC_DATABASE="mysql"

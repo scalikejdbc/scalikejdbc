@@ -28,7 +28,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
   // create singleton(default) connection pool
   ConnectionPool.singleton(url, user, password, poolSettings)
   // named connection pool
-  ConnectionPool.add('named, url, user, password, poolSettings)
+  ConnectionPool.add(Symbol("named"), url, user, password, poolSettings)
 
   // ---------------------------
   // Borrow a connection from the ConnectionPool
@@ -50,7 +50,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
   }
 
   it should "borrow a connection from named ConnectionPool" in {
-    using(ConnectionPool('named).borrow()) { conn =>
+    using(ConnectionPool(Symbol("named")).borrow()) { conn =>
       conn should not be null
     }
   }
@@ -94,7 +94,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
     }
 
     // named datasources
-    NamedDB('named) autoCommit { session =>
+    NamedDB(Symbol("named")) autoCommit { session =>
       session.list("select * from " + tableName)(rs => rs.int("id"))
     }
 
@@ -275,10 +275,10 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
             {description},
             {createdAt}
           );""").bindByName(
-          'id -> 2,
-          'name -> "Typesafe",
-          'description -> "xxx",
-          'createdAt -> LocalDateTime.now).update.apply()
+          Symbol("id") -> 2,
+          Symbol("name") -> "Typesafe",
+          Symbol("description") -> "xxx",
+          Symbol("createdAt") -> LocalDateTime.now).update.apply()
 
         // executable template
         SQL("""
@@ -288,10 +288,10 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
             /*'description */'xxxx',
             /*'createdAt */''
           );""").bindByName(
-          'id -> 3,
-          'name -> "Typesafe",
-          'description -> "xxx",
-          'createdAt -> LocalDateTime.now).update.apply()
+          Symbol("id") -> 3,
+          Symbol("name") -> "Typesafe",
+          Symbol("description") -> "xxx",
+          Symbol("createdAt") -> LocalDateTime.now).update.apply()
 
       }
     } finally { TestUtils.deleteTable("emp") }
@@ -317,7 +317,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = 'INFO,
+          warningLogLevel = Symbol("INFO"),
           warningThresholdMillis = 10L)
         // this query will spend more than 10 millis
         SQL("select  *  from logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
@@ -344,7 +344,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
         val params2: Seq[Seq[Any]] = (2001 to 3000).map { i => Seq(i, "name" + i) }
         SQL("insert into " + tableName + " (id, name) values (?, ?)").batch(params2: _*).apply()
 
-        val params3: Seq[Seq[(Symbol, Any)]] = (3001 to 4000).map { i => Seq('id -> i, 'name -> ("name" + i)) }
+        val params3: Seq[Seq[(Symbol, Any)]] = (3001 to 4000).map { i => Seq(Symbol("id") -> i, Symbol("name") -> ("name" + i)) }
         SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params3: _*).apply()
 
       }

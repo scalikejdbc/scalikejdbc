@@ -71,7 +71,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
 
   case class NamedDBEntity(id: Long)
   object NamedDBEntity extends SQLSyntaxSupport[NamedDBEntity] {
-    override def connectionPoolName = 'yetanother
+    override def connectionPoolName = Symbol("yetanother")
   }
 
   it should "throw exception if table not found" in {
@@ -79,7 +79,7 @@ class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with S
   }
 
   it should "load column names from NamedDB" in {
-    NamedDB('yetanother) autoCommit { implicit s =>
+    NamedDB(Symbol("yetanother")) autoCommit { implicit s =>
       try sql"select count(1) from named_db_entity".map(_.toMap).single.apply()
       catch { case e: Exception => sql"create table named_db_entity(id bigint)".execute.apply() }
     }
