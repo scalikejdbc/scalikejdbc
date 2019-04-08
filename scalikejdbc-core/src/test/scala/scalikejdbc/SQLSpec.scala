@@ -250,20 +250,20 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
       TestUtils.initialize(tableName)
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.InfoLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.WarnLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.ExceptionForIgnoredParams)
       intercept[IllegalStateException] {
         DB readOnly { implicit s =>
-          SQL("select 1 from " + tableName).bindByName('foo -> "bar").map(_.toMap).list.apply()
+          SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
         }
       }
     }
@@ -319,7 +319,7 @@ class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings w
     val tableName = tableNamePrefix + "_readOnlyNamedAutoSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      implicit val session = ReadOnlyNamedAutoSession('named)
+      implicit val session = ReadOnlyNamedAutoSession(Symbol("named"))
 
       SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
 

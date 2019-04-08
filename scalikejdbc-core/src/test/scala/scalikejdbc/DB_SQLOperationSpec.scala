@@ -28,9 +28,9 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         implicit session =>
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
             enabled = true,
-            logLevel = 'info)
+            logLevel = Symbol("info"))
           val result = SQL("select * from " + tableName + " where name = 'name1' and id = /*'id*/123;")
-            .bindByName('id -> 1)
+            .bindByName(Symbol("id") -> 1)
             .map(rs => Some(rs.string("name"))).toList.apply()
           result.size should equal(1)
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
@@ -452,8 +452,8 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
             val params: Seq[Seq[(Symbol, Any)]] = (2001 to 3000).map {
               i =>
                 Seq[(Symbol, Any)](
-                  'id -> i,
-                  'name -> ("name" + i.toString))
+                  Symbol("id") -> i,
+                  Symbol("name") -> ("name" + i.toString))
             }
             SQL("insert into " + tableName + " (id, name) values ({id}, {name})").batchByName(params: _*).apply()
         }
@@ -480,7 +480,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         count1.size should equal(1000)
 
         val params2: Seq[Seq[(Symbol, Any)]] = (2001 to 2003).map {
-          i => Seq[(Symbol, Any)]('id -> i, 'name -> ("name" + i.toString))
+          i => Seq[(Symbol, Any)](Symbol("id") -> i, Symbol("name") -> ("name" + i.toString))
         }
         try {
           val count2 = SQL("insert into " + tableName + " (id, name) values (?, {name})").batchByName(params2: _*).apply()
@@ -542,7 +542,7 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
   it should "solve issue #30" in {
     GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
       enabled = true,
-      logLevel = 'info)
+      logLevel = Symbol("info"))
     try {
       DB autoCommit { implicit session =>
         try {
@@ -598,14 +598,14 @@ class DB_SQLOperationSpec extends FlatSpec with Matchers with BeforeAndAfter wit
         SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
       }
       result.isDefined should equal(true)
-      if (result.get.get('ID).isDefined) {
-        result.get.get('ID) should equal(Some(4))
-        result.get.keys should equal(Set('ID))
+      if (result.get.get(Symbol("ID")).isDefined) {
+        result.get.get(Symbol("ID")) should equal(Some(4))
+        result.get.keys should equal(Set(Symbol("ID")))
       } else {
-        result.get.get('id) should equal(Some(4))
-        result.get.keys should equal(Set('id))
+        result.get.get(Symbol("id")) should equal(Some(4))
+        result.get.keys should equal(Set(Symbol("id")))
       }
-      result.get.get('Name) should equal(None)
+      result.get.get(Symbol("Name")) should equal(None)
     }
   }
 

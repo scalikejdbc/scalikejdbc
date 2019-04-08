@@ -17,10 +17,10 @@ private[scalikejdbc] class Log(logger: Logger) {
 
   def withLevel(level: Symbol)(msg: => String, e: Throwable = null): Unit = {
     level match {
-      case 'debug | 'DEBUG => if (e == null) debug(msg) else debug(msg, e)
-      case 'info | 'INFO => if (e == null) info(msg) else info(msg, e)
-      case 'warn | 'WARN => if (e == null) warn(msg) else warn(msg, e)
-      case 'error | 'ERROR => if (e == null) error(msg) else error(msg, e)
+      case Symbol("debug") | Symbol("DEBUG") => if (e == null) debug(msg) else debug(msg, e)
+      case Symbol("info") | Symbol("INFO") => if (e == null) info(msg) else info(msg, e)
+      case Symbol("warn") | Symbol("WARN") => if (e == null) warn(msg) else warn(msg, e)
+      case Symbol("error") | Symbol("ERROR") => if (e == null) error(msg) else error(msg, e)
       case _ => // nothing to do
     }
   }
