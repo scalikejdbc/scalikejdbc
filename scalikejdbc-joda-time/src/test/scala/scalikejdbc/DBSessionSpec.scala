@@ -911,8 +911,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
           try {
             SQL("insert into image_data (name, data) values ({name}, {data});")
               .bindByName(
-                'name -> "logo",
-                'data -> stream)
+                Symbol("name") -> "logo",
+                Symbol("data") -> stream)
               .update.apply()
           } catch {
             case e: Exception =>
@@ -960,8 +960,8 @@ class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Sett
             bos.flush()
             SQL("insert into image_data2 (name, data) values ({name}, {data});")
               .bindByName(
-                'name -> "logo",
-                'data -> bos.toByteArray)
+                Symbol("name") -> "logo",
+                Symbol("data") -> bos.toByteArray)
               .update.apply()
           }
         }

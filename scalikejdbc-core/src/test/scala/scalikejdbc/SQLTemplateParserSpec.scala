@@ -10,8 +10,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sql = "select * from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal("select * from user where id = ? and user_name = ?")
   }
@@ -20,8 +20,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sql = "select * from user where id = /* 'id */123 and user_name = /* 'userName */\"Alice\""
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal("select * from user where id = ? and user_name = ?")
   }
@@ -30,8 +30,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sql = "SELECT * FROM USER WHERE ID = /* 'id */123 AND USER_NAME = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE ID = ? AND USER_NAME = ?")
   }
@@ -40,8 +40,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sql = "SELECT * FROM USER WHERE `ID` = /* 'id */123 AND `USER_NAME` = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE `ID` = ? AND `USER_NAME` = ?")
   }
@@ -58,8 +58,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
     val sql = "select user.* from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal("select user.* from user where id = ? and user_name = ?")
   }
@@ -74,8 +74,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('id)
-    params(1) should equal('userName)
+    params(0) should equal(Symbol("id"))
+    params(1) should equal(Symbol("userName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "select * from user where id = ? and user_name = ?")
@@ -92,7 +92,7 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(1)
-    params(0) should equal('groupName)
+    params(0) should equal(Symbol("groupName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "SELECT customer_state, COUNT(customer_id) As total FROM customers WHERE group = ? " +
@@ -106,8 +106,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('customerId)
-    params(1) should equal('customerName)
+    params(0) should equal(Symbol("customerId"))
+    params(1) should equal(Symbol("customerName"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "INSERT INTO customers(customer_id, customer_name) VALUES(?, ?)")
@@ -152,8 +152,8 @@ class SQLTemplateParserSpec extends FlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
-    params(0) should equal('rating)
-    params(1) should equal('orderDate)
+    params(0) should equal(Symbol("rating"))
+    params(1) should equal(Symbol("orderDate"))
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "UPDATE customers SET rating = ? FROM orders WHERE orderdate > ? and orders.customer_id = customers.customer_id")
