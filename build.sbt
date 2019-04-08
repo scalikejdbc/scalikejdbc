@@ -39,10 +39,17 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.7",
+  scalatestVersion := "3.0.8-RC2",
   specs2Version := "4.5.1",
-  parserCombinatorsVersion := "1.1.1",
-  collectionCompatVersion := "0.3.0",
+  parserCombinatorsVersion := {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, 11)) =>
+        "1.1.1"
+      case _ =>
+        "1.1.2"
+    }
+  },
+  collectionCompatVersion := "1.0.0",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
