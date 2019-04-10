@@ -23,8 +23,8 @@ class LogSpec extends FlatSpec with Matchers {
     val log = new Log(logger)
     log.isDebugEnabled = true
 
-    log.withLevel('debug)("Hi")
-    log.withLevel('debug)("Hi Hi", ex)
+    log.withLevel(Symbol("debug"))("Hi")
+    log.withLevel(Symbol("debug"))("Hi Hi", ex)
 
     verify(logger, times(1)).debug("Hi")
     verify(logger, times(1)).debug("Hi Hi", ex)
