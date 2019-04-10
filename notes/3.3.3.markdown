@@ -1,4 +1,4 @@
-ScalikeJDBC 3.3.3 is out for Scala 2.13.0-M5, 2.12, 2.11 and 2.10.
+ScalikeJDBC 3.3.3 is out for Scala 2.13.0-M5, 2.12 and 2.11.
 
 http://scalikejdbc.org/
 
