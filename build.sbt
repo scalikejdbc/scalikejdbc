@@ -62,8 +62,12 @@ lazy val baseSettings = Seq(
   javacOptions in doc := Seq("-source", "1.8"),
   scalacOptions ++= _scalacOptions,
   scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
-    case Some((2, v)) if v <= 12 => "-Yno-adapted-args"
-  }.toList,
+    case Some((2, v)) if v <= 12 =>
+      Seq(
+        "-Yno-adapted-args",
+        "-Xfuture"
+      )
+  }.toList.flatten,
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 11)) =>
@@ -381,7 +385,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
 
-val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
+val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
 val _pomExtra = <url>http://scalikejdbc.org/</url>
     <licenses>
       <license>
