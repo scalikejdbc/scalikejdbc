@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.mockito._
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
 
