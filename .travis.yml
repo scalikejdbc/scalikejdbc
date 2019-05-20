@@ -77,5 +77,8 @@ matrix:
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk11
    # Scala 2.13.0 Milestone Releases
-    - scala: 2.13.0-RC1
-      env: SCALIKEJDBC_DATABASE="mysql"
+    - scala: 2.13.0-RC2
+      script:
+      - sbt
+        "++${TRAVIS_SCALA_VERSION}!"
+        "all config/test core/test interpolation/test interpolation-macro/test joda-time/test library/test mapper-generator-core/test syntax-support-macro/test"
