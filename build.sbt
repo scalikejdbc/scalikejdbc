@@ -39,14 +39,7 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v <= 12 =>
-        "3.0.8-RC3"
-      case _ =>
-        "3.1.0-SNAP11"
-    }
-  },
+  scalatestVersion := "3.0.8-RC4",
   specs2Version := "4.5.1",
   parserCombinatorsVersion := {
     CrossVersion.partialVersion(scalaVersion.value) match {
