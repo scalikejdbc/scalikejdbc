@@ -1,14 +1,17 @@
 language: scala
 
+dist: xenial
+
+services:
+  - mysql
+
 scala:
   - 2.11.12
   - 2.12.8
 
 # The project supports OpenJDK 8+ / Oracle JDK 8,9,10
-# As of October 2018, Oracle JDK 8 is the most widely used JDK for Scala applications.
-# Thereby, we use Oracle JDK 8 as the default for now. We may change the default JDK for testing.
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 addons:
   postgresql: "9.4"
@@ -62,7 +65,7 @@ matrix:
     # Oracle JDK 8,9,10 / OpenJDK 8,9,10,11+
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="mysql"
-      jdk: oraclejdk9
+      jdk: openjdk9
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk8
