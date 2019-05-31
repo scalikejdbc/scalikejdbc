@@ -21,8 +21,19 @@ class StatementExecutorSpec extends FunSpec with Matchers with Settings {
         }
 
         try {
-          sql"create table accounts (birthday date not null, alert_time time(6) not null, local_created_at timestamp(6) not null, created_at timestamp(6) not null, updated_at timestamp(6) not null, deleted_at timestamp(6) not null )"
-            .execute.apply()
+          if (driverClassName == "com.mysql.jdbc.Driver") {
+            sql"""create table accounts (
+               birthday         date         not null,
+               alert_time       time(6)      not null,
+               local_created_at timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6),
+               created_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6),
+               updated_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6),
+               deleted_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6)
+            )""".execute.apply()
+          } else {
+            sql"create table accounts (birthday date not null, alert_time time(6) not null, local_created_at timestamp(6) not null, created_at timestamp(6) not null, updated_at timestamp(6) not null, deleted_at timestamp(6) not null )"
+              .execute.apply()
+          }
 
           val birthday = LocalDate.now
           val alertTime = if (Set("org.hsqldb.jdbc.JDBCDriver", "com.mysql.jdbc.Driver") contains driverClassName) {
