@@ -15,7 +15,7 @@ lazy val _h2Version = "1.4.199"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.47"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.2.Final"
+lazy val _hibernateVersion = "5.4.3.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -39,7 +39,7 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.0.8-RC4",
+  scalatestVersion := "3.0.8-RC5",
   specs2Version := "4.5.1",
   parserCombinatorsVersion := {
     CrossVersion.partialVersion(scalaVersion.value) match {
