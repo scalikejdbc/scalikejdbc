@@ -168,9 +168,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default, F: OnFinish[A]): A = {
     val cp = connectionPool(context)
-    using(cp.borrow()) { conn =>
+    F.using(cp.borrow()) { conn =>
       DB(conn, cp.connectionAttributes, settings).autoClose(false).readOnly(execution)
     }
   }
@@ -184,9 +184,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default, F: OnFinish[A]): A = {
     val cp = connectionPool(context)
-    using(cp.borrow()) { conn =>
+    F.using(cp.borrow()) { conn =>
       DB(conn, cp.connectionAttributes, settings).autoClose(false).readOnlyWithConnection(execution)
     }
   }
@@ -210,9 +210,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default, F: OnFinish[A]): A = {
     val cp = connectionPool(context)
-    using(cp.borrow()) { conn =>
+    F.using(cp.borrow()) { conn =>
       DB(conn, cp.connectionAttributes, settings).autoClose(false).autoCommit(execution)
     }
   }
@@ -226,9 +226,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default, F: OnFinish[A]): A = {
     val cp = connectionPool(context)
-    using(cp.borrow()) { conn =>
+    F.using(cp.borrow()) { conn =>
       DB(conn, cp.connectionAttributes, settings).autoClose(false).autoCommitWithConnection(execution)
     }
   }

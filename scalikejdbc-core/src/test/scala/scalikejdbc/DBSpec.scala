@@ -74,6 +74,23 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
     }
   }
 
+  implicit val patienceTimeout = PatienceConfig(10.seconds)
+
+  // --------------------
+  // future readOnly
+
+  it should "execute query in future readOnly block" in {
+    val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      import OnFinish.Future.futureOnFinish
+      val fResult = DB readOnly {
+        session => Future(session.list("select * from " + tableName + "")(rs => rs.string("name")))
+      }
+      whenReady(fResult) { _.size should be > 0 }
+    }
+  }
+
   // --------------------
   // autoCommit
 
@@ -189,6 +206,22 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
   }
 
   // --------------------
+  // future autoCommit
+
+  it should "execute query in future autoCommit block" in {
+    val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      import OnFinish.Future.futureOnFinish
+      val fResult = DB autoCommit {
+        session =>
+          Future(session.list("select * from " + tableName + "")(rs => Some(rs.string("name"))))
+      }
+      whenReady(fResult) { _.size should be > 0 }
+    }
+  }
+
+  // --------------------
   // localTx
 
   it should "execute single in localTx block" in {
@@ -248,8 +281,6 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
 
   // --------------------
   // futureLocalTx
-
-  implicit val patienceTimeout = PatienceConfig(10.seconds)
 
   it should "execute single in futureLocalTx block" in {
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"

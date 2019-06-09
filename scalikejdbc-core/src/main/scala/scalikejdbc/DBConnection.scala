@@ -206,8 +206,8 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def readOnly[A](execution: DBSession => A): A = {
-    if (autoCloseEnabled) using(conn)(_ => execution(readOnlySession()))
+  def readOnly[A](execution: DBSession => A)(implicit F: OnFinish[A]): A = {
+    if (autoCloseEnabled) F.using(conn)(_ => execution(readOnlySession()))
     else execution(readOnlySession())
   }
 
@@ -217,7 +217,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def readOnlyWithConnection[A](execution: Connection => A): A = {
+  def readOnlyWithConnection[A](execution: Connection => A)(implicit F: OnFinish[A]): A = {
     readOnly(s => execution(s.conn))
   }
 
@@ -237,8 +237,8 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def autoCommit[A](execution: DBSession => A): A = {
-    if (autoCloseEnabled) using(conn)(_ => execution(autoCommitSession()))
+  def autoCommit[A](execution: DBSession => A)(implicit F: OnFinish[A]): A = {
+    if (autoCloseEnabled) F.using(conn)(_ => execution(autoCommitSession()))
     else execution(autoCommitSession())
   }
 
@@ -248,7 +248,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def autoCommitWithConnection[A](execution: Connection => A): A = {
+  def autoCommitWithConnection[A](execution: Connection => A)(implicit F: OnFinish[A]): A = {
     autoCommit(s => execution(s.conn))
   }
 
