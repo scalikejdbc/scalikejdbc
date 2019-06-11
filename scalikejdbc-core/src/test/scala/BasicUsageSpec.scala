@@ -362,7 +362,7 @@ class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
     try {
       TestUtils.initialize(tableName)
       DB localTx { implicit session =>
-        SQL("insert into " + tableName + " (id, name) values (999, 'Alice')").batchByName(Seq.empty: _*).apply()
+        SQL("insert into " + tableName + " (id, name) values (999, 'Alice')").batchByName(Seq.empty[Seq[(String, Any)]]: _*).apply()
       }
     } finally { TestUtils.deleteTable(tableName) }
   }
