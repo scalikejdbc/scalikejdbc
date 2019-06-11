@@ -55,13 +55,19 @@ object SQL {
  */
 private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSupport {
 
-  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, scala.collection.Seq[Any]) = {
-    val names = SQLTemplateParser.extractAllParameters(sql)
+  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)])(implicit dummy: DummyImplicit): (String, scala.collection.Seq[Any]) =
+    apply(sql, settings, parameters.map { case (k, v) => (k.name, v) })
+
+  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(String, Any)]): (String, scala.collection.Seq[Any]) = {
+    val names = SQLTemplateParser.extractAllParametersString(sql)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     apply(sql, sqlWithPlaceHolders, names, settings, parameters)
   }
 
-  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)]): (String, scala.collection.Seq[Any]) = {
+  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)])(implicit dummy: DummyImplicit): (String, scala.collection.Seq[Any]) =
+    apply(sql, sqlWithPlaceHolders, names.map(_.name), settings, parameters.map { case (k, v) => (k.name, v) })
+
+  def apply(sql: String, sqlWithPlaceHolders: String, names: List[String], settings: SettingsProvider, parameters: scala.collection.Seq[(String, Any)]): (String, scala.collection.Seq[Any]) = {
 
     // check all the parameters passed by #bindByName are actually used
     import scalikejdbc.globalsettings._
@@ -320,8 +326,18 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  def batchByName(parameters: scala.collection.Seq[(Symbol, Any)]*): SQLBatch = {
-    val names = SQLTemplateParser.extractAllParameters(statement)
+  final def batchByName(parameters: scala.collection.Seq[(Symbol, Any)]*)(implicit dummy: DummyImplicit): SQLBatch = {
+    batchByName(parameters.map { _.map { case (k, v) => (k.name, v) } }: _*)
+  }
+
+  /**
+   * Binds parameters for batch
+   *
+   * @param parameters parameters
+   * @return SQL for batch
+   */
+  def batchByName(parameters: scala.collection.Seq[(String, Any)]*): SQLBatch = {
+    val names = SQLTemplateParser.extractAllParametersString(statement)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(statement)
     val _sql = validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, parameters.headOption.getOrElse(Seq.empty))._1
     val _parameters: scala.collection.Seq[scala.collection.Seq[Any]] = parameters.map { p =>
