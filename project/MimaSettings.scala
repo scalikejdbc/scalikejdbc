@@ -27,7 +27,13 @@ object MimaSettings {
     mimaPreviousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 12 =>
-          previousVersions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
+          val versions = if (name.value == "scalikejdbc-mapper-generator-core") {
+            // https://github.com/scalikejdbc/scalikejdbc/issues/1025
+            previousVersions - "3.3.4"
+          } else {
+            previousVersions
+          }
+          versions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
         case _ => Set.empty
       }
     },

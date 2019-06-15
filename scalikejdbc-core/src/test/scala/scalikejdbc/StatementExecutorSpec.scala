@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import org.scalatest._
-import org.scalatest.mockito.MockitoSugar
 import java.sql.PreparedStatement
 import scala.reflect.runtime.{ universe => ru }
 

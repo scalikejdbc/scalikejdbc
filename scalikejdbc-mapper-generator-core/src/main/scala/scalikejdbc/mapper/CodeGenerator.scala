@@ -286,8 +286,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *       /*'birthday*/'1958-09-06'
      *     )
      *   """).bindByName(
-     *     'name -> name,
-     *     'birthday -> birthday
+     *     Symbol("name") -> name,
+     *     Symbol("birthday") -> birthday
      *   ).updateAndReturnGeneratedKey.apply()
      *
      *   Member(
@@ -383,9 +383,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *     where
      *       ID = /*'id*/123
      * """).bindByName(
-     *     'id -> entity.id,
-     *     'name -> entity.name,
-     *     'birthday -> entity.birthday
+     *     Symbol("id") -> entity.id,
+     *     Symbol("name") -> entity.name,
+     *     Symbol("birthday") -> entity.birthday
      *   ).update.apply()
      *   entity
      * }
@@ -443,7 +443,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def destroy(entity: Member)(implicit session: DBSession = autoSession): Int = {
      *   SQL("""delete from member where id = /*'id*/123""")
-     *     .bindByName('id -> entity.id)
+     *     .bindByName(Symbol("id") -> entity.id)
      *     .update.apply()
      * }
      * }}}
@@ -476,7 +476,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * def find(id: Long): Option[Member] = {
      *   DB readOnly { implicit session =>
      *     SQL("""select * from member where id = /*'id*/123""")
-     *       .bindByName('id -> id).map(*).single.apply()
+     *       .bindByName(Symbol("id") -> id).map(*).single.apply()
      *   }
      * }
      * }}}
@@ -625,9 +625,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * def batchInsert(entities: collection.Seq[Member])(implicit session: DBSession = autoSession): collection.Seq[Int] = {
      *   val params: collection.Seq[Seq[(Symbol, Any)]] = entities.map(entity =>
      *     Seq(
-     *       'id -> entity.id,
-     *       'name -> entity.name,
-     *       'birthday -> entity.birthday))
+     *       Symbol("id") -> entity.id,
+     *       Symbol("name") -> entity.name,
+     *       Symbol("birthday") -> entity.birthday))
      *   SQL("""insert into member (
      *     id,
      *     name,
@@ -636,7 +636,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *     {id},
      *     {name},
      *     {birthday}
-     *   )""").batchByName(params: _*).apply()
+     *   )""").batchByName(params.toSeq: _*).apply()
      * }
      * }}}
      */
@@ -661,13 +661,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + factory + s"): $returnType[Int] = {" + eol +
         2.indent + "val params: collection.Seq[Seq[(Symbol, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
-        batchInsertColumns.map(c => 4.indent + "'" + c.nameInScala.replace("`", "") + " -> entity." + c.nameInScala).mkString(comma + eol) +
+        batchInsertColumns.map(c => 4.indent + "Symbol(\"" + c.nameInScala.replace("`", "") + "\") -> entity." + c.nameInScala).mkString(comma + eol) +
         "))" + eol +
         2.indent + "SQL(\"\"\"insert into " + table.name + "(" + eol +
         batchInsertColumns.map(c => 3.indent + c.name.replace("`", "")).mkString(comma + eol) + eol +
         2.indent + ")" + " values (" + eol +
         batchInsertColumns.map(c => 3.indent + "{" + c.nameInScala.replace("`", "") + "}").mkString(comma + eol) + eol +
-        2.indent + ")\"\"\").batchByName(params: _*).apply[" + returnType + "]()" + eol +
+        2.indent + ")\"\"\").batchByName(params.toSeq: _*).apply[" + returnType + "]()" + eol +
         1.indent + "}" + eol
     }
 

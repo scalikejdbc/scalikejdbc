@@ -56,6 +56,6 @@ matrix:
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: oraclejdk11
-    # Scala 2.13.0 Milestone Releases
-    - scala: 2.13.0-RC1
+    - scala: 2.13.0
       env: SCALIKEJDBC_DATABASE="mysql"
+      jdk: openjdk8

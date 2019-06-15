@@ -6,7 +6,7 @@ lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.25"
-lazy val _typesafeConfigVersion = "1.3.3"
+lazy val _typesafeConfigVersion = "1.3.4"
 lazy val _reactiveStreamsVersion = "1.0.2"
 
 // internal only
@@ -17,6 +17,7 @@ lazy val _mysqlVersion = "5.1.46"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "5.3.3.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
+lazy val scalatestVersionForScala213 = "3.0.8"
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
 lazy val mockitoVersion = "2.20.0"
@@ -40,9 +41,11 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := {
-    scalaVersion.value match {
-      case "2.13.0-RC1" => "3.0.8-RC2"
-      case _ =>            "3.0.5"
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v >= 13 =>
+        scalatestVersionForScala213
+      case _ =>
+        "3.0.5" // keep using this version for bin compatibilities
     }
   },
   specs2Version := "4.5.1",
@@ -53,17 +56,24 @@ lazy val baseSettings = Seq(
     }
   },
   collectionCompatVersion := {
-    // https://github.com/scala/scala-collection-compat/pull/152
-    if (scalaVersion.value == "2.13.0-RC1") "1.0.0"
-    else "0.1.1" // keep using this version for bin compatibilities
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v >= 13 =>
+        "2.0.0"
+      case _ =>
+        "0.1.1" // keep using this version for bin compatibilities
+    }
   },
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   scalacOptions ++= _scalacOptions,
   scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
-    case Some((2, v)) if v <= 12 => "-Yno-adapted-args"
-  }.toList,
+    case Some((2, v)) if v <= 12 =>
+      Seq(
+        "-Yno-adapted-args",
+        "-Xfuture"
+      )
+  }.toList.flatten,
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 11)) =>
@@ -270,7 +280,7 @@ lazy val scalikejdbcMapperGenerator = Project(
     "-Dpostgresql.version=" + _postgresqlVersion,
     "-Dh2.version=" + _h2Version,
     "-Dspecs2.version=" + specs2Version.value,
-    "-Dscalatest.version=" + scalatestVersion.value
+    "-Dscalatest.version=" + scalatestVersionForScala213
   ),
   name := "scalikejdbc-mapper-generator",
   libraryDependencies ++= {
@@ -381,7 +391,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
 
-val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
+val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
 val _pomExtra = <url>http://scalikejdbc.org/</url>
     <licenses>
       <license>
