@@ -26,6 +26,10 @@ object MimaSettings {
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     mimaPreviousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 13)) =>
+          (previousVersions -- (0 to 4).map("3.3." + _)).map {
+            organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _
+          }
         case Some((2, scalaMajor)) if scalaMajor <= 12 =>
           previousVersions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
         case _ => Set.empty
