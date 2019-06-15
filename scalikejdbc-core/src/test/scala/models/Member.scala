@@ -41,7 +41,7 @@ object Member extends JavaUtilDateConverterImplicits {
   }
 
   def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
-    SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""").bindByName(Symbol("id") -> id).map(*).single.apply()
+    SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""").bindByName("id" -> id).map(*).single.apply()
   }
 
   def findAll()(implicit session: DBSession = AutoSession): List[Member] = {
@@ -52,11 +52,11 @@ object Member extends JavaUtilDateConverterImplicits {
     SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): List[Member] = {
+  def findBy(where: String, params: (String, Any)*)(implicit session: DBSession = AutoSession): List[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE """ + where).bindByName(params: _*).map(*).list.apply()
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = AutoSession): Long = {
+  def countBy(where: String, params: (String, Any)*)(implicit session: DBSession = AutoSession): Long = {
     SQL("""SELECT count(1) FROM MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
 
@@ -82,11 +82,11 @@ object Member extends JavaUtilDateConverterImplicits {
         )
                   """)
       .bindByName(
-        Symbol("id") -> id,
-        Symbol("name") -> name,
-        Symbol("description") -> description,
-        Symbol("birthday") -> birthday,
-        Symbol("createdAt") -> createdAt).update.apply()
+        "id" -> id,
+        "name" -> name,
+        "description" -> description,
+        "birthday" -> birthday,
+        "createdAt" -> createdAt).update.apply()
 
     Member(
       id = id,
@@ -110,17 +110,17 @@ object Member extends JavaUtilDateConverterImplicits {
           ID = /*'id*/1
                   """)
       .bindByName(
-        Symbol("id") -> m.id,
-        Symbol("name") -> m.name,
-        Symbol("description") -> m.description,
-        Symbol("birthday") -> m.birthday,
-        Symbol("createdAt") -> m.createdAt).update.apply()
+        "id" -> m.id,
+        "name" -> m.name,
+        "description" -> m.description,
+        "birthday" -> m.birthday,
+        "createdAt" -> m.createdAt).update.apply()
     m
   }
 
   def delete(m: Member)(implicit session: DBSession = AutoSession): Unit = {
     SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
-      .bindByName(Symbol("id") -> m.id).update.apply()
+      .bindByName("id" -> m.id).update.apply()
   }
 
 }
@@ -162,7 +162,7 @@ object NamedMember {
   }
 
   def find(id: Long)(implicit session: DBSession = NamedAutoSession("named")): Option[NamedMember] = {
-    SQL("""SELECT * FROM NAMED_MEMBER WHERE ID = /*'id*/1""").bindByName(Symbol("id") -> id).map(*).single.apply()
+    SQL("""SELECT * FROM NAMED_MEMBER WHERE ID = /*'id*/1""").bindByName("id" -> id).map(*).single.apply()
   }
 
   def findAll()(implicit session: DBSession = NamedAutoSession("named")): List[NamedMember] = {
@@ -173,11 +173,11 @@ object NamedMember {
     SQL("""SELECT COUNT(1) FROM NAMED_MEMBER""").map(rs => rs.long(1)).single.apply().get
   }
 
-  def findBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NamedAutoSession("named")): List[NamedMember] = {
+  def findBy(where: String, params: (String, Any)*)(implicit session: DBSession = NamedAutoSession("named")): List[NamedMember] = {
     SQL("""SELECT * FROM NAMED_MEMBER WHERE """ + where).bindByName(params: _*).map(*).list.apply()
   }
 
-  def countBy(where: String, params: (Symbol, Any)*)(implicit session: DBSession = NamedAutoSession("named")): Long = {
+  def countBy(where: String, params: (String, Any)*)(implicit session: DBSession = NamedAutoSession("named")): Long = {
     SQL("""SELECT count(1) FROM NAMED_MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
   }
 
@@ -203,11 +203,11 @@ object NamedMember {
         )
                   """)
       .bindByName(
-        Symbol("id") -> id,
-        Symbol("name") -> name,
-        Symbol("description") -> description,
-        Symbol("birthday") -> birthday,
-        Symbol("createdAt") -> createdAt).update.apply()
+        "id" -> id,
+        "name" -> name,
+        "description" -> description,
+        "birthday" -> birthday,
+        "createdAt" -> createdAt).update.apply()
 
     NamedMember(
       id = id,
@@ -231,17 +231,17 @@ object NamedMember {
           ID = /*'id*/1
                   """)
       .bindByName(
-        Symbol("id") -> m.id,
-        Symbol("name") -> m.name,
-        Symbol("description") -> m.description,
-        Symbol("birthday") -> m.birthday,
-        Symbol("createdAt") -> m.createdAt).update.apply()
+        "id" -> m.id,
+        "name" -> m.name,
+        "description" -> m.description,
+        "birthday" -> m.birthday,
+        "createdAt" -> m.createdAt).update.apply()
     m
   }
 
   def delete(m: NamedMember)(implicit session: DBSession = NamedAutoSession("named")): Unit = {
     SQL("""DELETE FROM NAMED_MEMBER WHERE ID = /*'id*/1""")
-      .bindByName(Symbol("id") -> m.id).update.apply()
+      .bindByName("id" -> m.id).update.apply()
   }
 
 }

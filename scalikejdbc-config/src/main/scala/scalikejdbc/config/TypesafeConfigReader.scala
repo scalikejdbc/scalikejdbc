@@ -24,29 +24,29 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
     "url", "driver", "user", "username", "password",
     "poolInitialSize", "poolMaxSize", "poolConnectionTimeoutMillis", "connectionTimeoutMillis", "poolValidationQuery", "poolFactoryName", "poolWarmUpTimeMillis", "timeZone")
 
-  def readAsMap(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
+  def readAsMap(dbName: String = ConnectionPool.DEFAULT_NAME): Map[String, String] = try {
     val configMap: MutableMap[String, String] = MutableMap.empty
 
     {
-      val dbConfig = config.getConfig(envPrefix + "db." + dbName.name)
+      val dbConfig = config.getConfig(envPrefix + "db." + dbName)
       val iter = dbConfig.entrySet.iterator
       while (iter.hasNext) {
         val entry = iter.next()
         val key = entry.getKey
         if (attributeNames.contains(key)) {
-          configMap(key) = config.getString(envPrefix + "db." + dbName.name + "." + key)
+          configMap(key) = config.getString(envPrefix + "db." + dbName + "." + key)
         }
       }
     }
 
     try {
-      val topLevelConfig = config.getConfig("db." + dbName.name)
+      val topLevelConfig = config.getConfig("db." + dbName)
       val iter = topLevelConfig.entrySet.iterator
       while (iter.hasNext) {
         val entry = iter.next()
         val key = entry.getKey
         if (attributeNames.contains(key) && !configMap.contains(key)) {
-          configMap(key) = config.getString("db." + dbName.name + "." + key)
+          configMap(key) = config.getString("db." + dbName + "." + key)
         }
       }
     } catch { case e: ConfigException => }
@@ -56,7 +56,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
     case e: ConfigException => throw new ConfigurationException(e)
   }
 
-  def readJDBCSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): JDBCSettings = {
+  def readJDBCSettings(dbName: String = ConnectionPool.DEFAULT_NAME): JDBCSettings = {
     val configMap = self.readAsMap(dbName)
     // https://github.com/scalikejdbc/scalikejdbc/issues/494#issuecomment-184015480
     // never forcing scalikejdbc-config users to load JDBC drivers in global
@@ -72,7 +72,7 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
     }
   }
 
-  def readConnectionPoolSettings(dbName: Symbol = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
+  def readConnectionPoolSettings(dbName: String = ConnectionPool.DEFAULT_NAME): ConnectionPoolSettings = {
     val configMap = self.readAsMap(dbName)
     val default = new ConnectionPoolSettings
 
@@ -112,10 +112,10 @@ trait TypesafeConfigReader extends NoEnvPrefix with LogSupport { self: TypesafeC
             singleLineMode = readBoolean(logConfig, "singleLineMode").getOrElse(default.singleLineMode),
             printUnprocessedStackTrace = readBoolean(logConfig, "printUnprocessedStackTrace").getOrElse(default.printUnprocessedStackTrace),
             stackTraceDepth = readInt(logConfig, "stackTraceDepth").getOrElse(default.stackTraceDepth),
-            logLevel = readString(logConfig, "logLevel").map(v => Symbol(v)).getOrElse(default.logLevel),
+            logLevel = readString(logConfig, "logLevel").getOrElse(default.logLevel),
             warningEnabled = readBoolean(logConfig, "warningEnabled").getOrElse(default.warningEnabled),
             warningThresholdMillis = readLong(logConfig, "warningThresholdMillis").getOrElse(default.warningThresholdMillis),
-            warningLogLevel = readString(logConfig, "warningLogLevel").map(v => Symbol(v)).getOrElse(default.warningLogLevel))
+            warningLogLevel = readString(logConfig, "warningLogLevel").getOrElse(default.warningLogLevel))
         } else {
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
         }
