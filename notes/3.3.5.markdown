@@ -1,0 +1,18 @@
+ScalikeJDBC 3.3.5 is out for Scala 2.13, 2.12, and 2.11.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [all] 9c3e6682 Scala 2.13.0 by xuwei-k
+- [all] 1fb74995 fix scalacOptions. "-Xfuture" deprecated since Scala 2.13 by xuwei-k
+- [all] eee0e020 Update typesafe:config to 1.3.4 by xuwei-k
+- [all] 440ad520 remove sonatype-releases resolver (#1005) by kenji yoshida
+- [mapper-generator] 31429d04 workaround for issue #1025 by xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
