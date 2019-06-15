@@ -20,20 +20,14 @@ object MimaSettings {
   //  - you're going to remove some of the methods in 3.0.2
   //  - in this case, the incompatibility won't be detected
   //
-  val previousVersions = Set(0, 1, 2, 3, 4).map(patch => s"3.3.$patch")
+  val previousVersions = Set(0, 1, 2, 3, 4, 5).map(patch => s"3.3.$patch")
   // val previousVersions = Set.empty[String]
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     mimaPreviousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 12 =>
-          val versions = if (name.value == "scalikejdbc-mapper-generator-core") {
-            // https://github.com/scalikejdbc/scalikejdbc/issues/1025
-            previousVersions - "3.3.4"
-          } else {
-            previousVersions
-          }
-          versions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
+          previousVersions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
         case _ => Set.empty
       }
     },
