@@ -1,4 +1,5 @@
 // workaround for https://github.com/scala/bug/issues/10870
+// TODO use Scala 2.12.9 https://github.com/scala/scala/pull/7996
 scalaVersion := "2.12.4"
 
 resolvers ++= Seq(
