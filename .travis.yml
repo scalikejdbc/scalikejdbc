@@ -62,10 +62,6 @@ matrix:
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="hsqldb"
-    # Oracle JDK 8,9,10 / OpenJDK 8,9,10,11+
-    - scala: 2.12.8
-      env: SCALIKEJDBC_DATABASE="mysql"
-      jdk: openjdk9
     - scala: 2.12.8
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk8
