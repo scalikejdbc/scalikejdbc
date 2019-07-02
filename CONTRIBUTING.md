@@ -28,7 +28,7 @@
 
 - Version 3.3 series maintenance branch
 - Breaking source compatibility is not acceptable
-- Must build against Scala 2.11, 2.12, and 2.13.0-M4
+- Must build against Scala 2.11, 2.12, and 2.13
 - Requires Java 8 or higher
 
 ##### 3.2.x
