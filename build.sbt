@@ -361,7 +361,7 @@ def _publishTo(v: String) = {
 val _resolvers = Seq(
   "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
   "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",
-  "sonatype snaphots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
