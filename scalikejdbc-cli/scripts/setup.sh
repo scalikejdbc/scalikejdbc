@@ -140,12 +140,12 @@ echo 'scalaVersion := "2.12.8"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "3.3.5",
-  "org.slf4j"          % "slf4j-simple"         % "1.7.25",
-  "com.h2database"     % "h2"                   % "1.4.197",
-  "org.apache.derby"   % "derby"                % "10.14.1.0",
+  "org.slf4j"          % "slf4j-simple"         % "1.7.26",
+  "com.h2database"     % "h2"                   % "1.4.199",
+  "org.apache.derby"   % "derby"                % "10.14.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.28.0",
-  "org.hsqldb"         % "hsqldb"               % "2.4.0",
-  "mysql"              % "mysql-connector-java" % "5.1.45",
+  "org.hsqldb"         % "hsqldb"               % "2.5.0",
+  "mysql"              % "mysql-connector-java" % "5.1.47",
   "org.postgresql"     % "postgresql"           % "9.4.1212"
 )
 
