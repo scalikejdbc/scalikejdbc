@@ -23,6 +23,8 @@ lazy val parserCombinatorsVersion = settingKey[String]("")
 lazy val mockitoVersion = "2.20.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
+disablePlugins(MimaPlugin)
+
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
 } catch {
@@ -123,7 +125,7 @@ lazy val root211 = Project(
   }
 ).aggregate(
   scala211projects.map(p => p: ProjectReference): _*
-).disablePlugins(ScriptedPlugin)
+).disablePlugins(ScriptedPlugin, MimaPlugin)
 
 lazy val scalikejdbcJodaTime = Project(
   id = "joda-time",
@@ -288,7 +290,7 @@ lazy val scalikejdbcMapperGenerator = Project(
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore)
+).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore).disablePlugins(MimaPlugin)
 
 // scalikejdbc-test
 lazy val scalikejdbcTest = Project(
@@ -367,7 +369,7 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   }
-).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin)
+).dependsOn(scalikejdbcLibrary).disablePlugins(ScriptedPlugin, MimaPlugin)
 
 def _publishTo(v: String) = {
   val nexus = "https://oss.sonatype.org/"
