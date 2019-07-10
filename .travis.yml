@@ -77,3 +77,12 @@ matrix:
       jdk: openjdk11
     - scala: 2.13.0
       env: SCALIKEJDBC_DATABASE="mysql"
+    - os: windows
+      language: bash
+      env: JDK="adopt@1.8.212-04"
+      before_script:
+      - curl "https://raw.githubusercontent.com/DanySK/Gravis-CI/c8f400623d8f756ef7c/.install-jdk-travis.sh" --output .install-jdk-travis.sh
+      - source .install-jdk-travis.sh
+      - wget https://raw.githubusercontent.com/paulp/sbt-extras/0ee2dae2eba72efb4a464a5ad255e348696ecda7/sbt && chmod +x ./sbt
+      script:
+      - ./sbt "project root211" "++ 2.12.8" test:compile testSequential
