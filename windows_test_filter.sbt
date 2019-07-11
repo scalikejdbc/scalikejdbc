@@ -5,6 +5,7 @@ val excludeTestsIfWindows = Set(
   "scalikejdbc.interpolation.SQLSyntaxSpec",
   // ???
   "scalikejdbc.jodatime.JodaTypeBinderSpec",
+  "somewhere.DatabasePublisherTckTest",
 )
 
 testOptions in Test in ThisBuild ++= {
