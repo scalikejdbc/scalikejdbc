@@ -145,7 +145,7 @@ libraryDependencies ++= Seq(
   "org.apache.derby"   % "derby"                % "10.14.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.28.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.0",
-  "mysql"              % "mysql-connector-java" % "5.1.47",
+  "mysql"              % "mysql-connector-java" % "5.1.48",
   "org.postgresql"     % "postgresql"           % "9.4.1212"
 )
 
