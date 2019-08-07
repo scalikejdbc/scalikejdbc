@@ -32,7 +32,7 @@ class AutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 
 class NamedAutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 
-  override def db = NamedDB('db2).toDB
+  override def db = NamedDB(Symbol("db2")).toDB
 
   override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into scalatest_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
@@ -55,7 +55,7 @@ class NamedAutoRollbackSpec extends FlatSpecWithCommonTraits with AutoRollback {
 
 class AutoRollbackWithNoArgTestFixtureSpec extends FlatSpecWithCommonTraits with AutoRollback with BufferMixin {
 
-  override def db = NamedDB('db2).toDB
+  override def db = NamedDB(Symbol("db2")).toDB
 
   behavior of "AutoRollback with NoArgTestFixture"
 

@@ -22,7 +22,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = 'INFO,
+          warningLogLevel = Symbol("INFO"),
           warningThresholdMillis = 10L)
         SQL("select  * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
@@ -44,7 +44,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = 'INFO,
+          warningLogLevel = Symbol("INFO"),
           warningThresholdMillis = 0L)
         SQL("insert into issue22 values (?,?)").bind(1, LocalDateTime.now).update.apply()
         SQL("insert into issue22 values (?,?)").bind(2, new java.util.Date).update.apply()
@@ -63,7 +63,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
     GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
       enabled = true,
       singleLineMode = true,
-      logLevel = 'ERROR)
+      logLevel = Symbol("ERROR"))
 
     DB autoCommit { implicit session =>
       try {
@@ -216,7 +216,7 @@ class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSu
         }
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
-          logLevel = 'WARN,
+          logLevel = Symbol("WARN"),
           printUnprocessedStackTrace = true,
           stackTraceDepth = 500)
         SQL("select  * from logging_stacktrace").map(rs => rs.int("id")).list.apply()

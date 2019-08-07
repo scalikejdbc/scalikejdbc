@@ -24,7 +24,7 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
         val idOpt = db autoCommit {
           implicit session =>
             SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
         }
         idOpt.get should equal(1)
@@ -40,12 +40,12 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
         implicit session =>
           intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
           }
           intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName('idd -> 1)
+              .bindByName(Symbol("idd") -> 1)
               .map(rs => rs.int("id")).toOption().apply()
           }
       }
@@ -62,8 +62,8 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
           implicit session =>
             SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
               .bindByName(
-                'name -> "foo",
-                'id -> 1).executeUpdate().apply()
+                Symbol("name") -> "foo",
+                Symbol("id") -> 1).executeUpdate().apply()
         }
         count should equal(1)
       }
@@ -72,7 +72,7 @@ class DB_ExecutableSQLOperationSpec extends FlatSpec with Matchers with BeforeAn
         val name = (DB(conn) autoCommit {
           implicit session =>
             SQL("select name from " + tableName + " where id = /* 'id */123")
-              .bindByName('id -> 1)
+              .bindByName(Symbol("id") -> 1)
               .map(rs => rs.string("name")).single.apply()
         }).get
         name should equal("foo")

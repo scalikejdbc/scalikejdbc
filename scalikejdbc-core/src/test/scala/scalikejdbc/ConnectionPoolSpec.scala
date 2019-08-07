@@ -35,18 +35,18 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
     Thread.sleep(100L)
     ConnectionPool.singleton(url, user, password, poolSettings)
 
-    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
 
-    using(ConnectionPool.borrow('secondary)) { conn =>
+    using(ConnectionPool.borrow(Symbol("secondary"))) { conn =>
       conn should not be (null)
     }
 
     Thread.sleep(100L)
-    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
     Thread.sleep(100L)
-    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
     Thread.sleep(100L)
-    ConnectionPool.add('secondary, url, user, password, poolSettings)
+    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
 
     // this test code affects other tests
     /*
@@ -66,9 +66,9 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
   }
 
   it should "accept javax.sql.DataSource" in {
-    ConnectionPool.add('sample, url, user, password)
+    ConnectionPool.add(Symbol("sample"), url, user, password)
     try {
-      NamedDB('sample) autoCommit { implicit s =>
+      NamedDB(Symbol("sample")) autoCommit { implicit s =>
         try SQL("create table data_source_test(id bigint not null)").execute.apply()
         catch { case e: Exception => e.printStackTrace }
         SQL("insert into data_source_test values (123)").update.apply()
@@ -77,15 +77,15 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
       ds.setUrl(url)
       ds.setUsername(user)
       ds.setPassword(password)
-      ConnectionPool.add('ds, new DataSourceConnectionPool(ds))
+      ConnectionPool.add(Symbol("ds"), new DataSourceConnectionPool(ds))
 
-      NamedDB('ds) readOnly { implicit s =>
+      NamedDB(Symbol("ds")) readOnly { implicit s =>
         val count = SQL("select count(1) from data_source_test").map(_.long(1)).single.apply().get
         count should equal(1L)
       }
 
     } finally {
-      NamedDB('sample) autoCommit { implicit s =>
+      NamedDB(Symbol("sample")) autoCommit { implicit s =>
         try SQL("drop table data_source_test").execute.apply()
         catch { case e: Exception => e.printStackTrace }
       }
@@ -111,15 +111,15 @@ class ConnectionPoolSpec extends FlatSpec with Matchers {
     }
 
     implicit val factory = new MyConnectionPoolFactory
-    ConnectionPool.add('xxxx, url, user, password)
-    val conn = ConnectionPool.borrow('xxxx)
+    ConnectionPool.add(Symbol("xxxx"), url, user, password)
+    val conn = ConnectionPool.borrow(Symbol("xxxx"))
     conn should be(null)
 
   }
 
   it should "throw exception if invalid connectionPoolFactoryName is given" in {
     intercept[IllegalArgumentException](
-      ConnectionPool.add('xxxx, url, user, password,
+      ConnectionPool.add(Symbol("xxxx"), url, user, password,
         ConnectionPoolSettings(connectionPoolFactoryName = "invalid")))
   }
 

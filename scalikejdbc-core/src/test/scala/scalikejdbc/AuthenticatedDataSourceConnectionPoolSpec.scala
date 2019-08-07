@@ -18,19 +18,19 @@ class AuthenticatedDataSourceConnectionPoolSpec extends FlatSpec with Matchers {
     val dataSource: DataSource = mock(classOf[DataSource])
     val dataSourceCloser = DummyDataSourceCloser()
     val instance = new AuthenticatedDataSourceConnectionPool(dataSource, "user", "password ", closer = dataSourceCloser)
-    ConnectionPool.add('close, instance)
+    ConnectionPool.add(Symbol("close"), instance)
     Thread.sleep(100L)
-    ConnectionPool.close('close)
+    ConnectionPool.close(Symbol("close"))
     dataSourceCloser.closed shouldBe true
   }
 
   it should "be impossible to close with DefaultDataSourceCloser" in {
     val dataSource: DataSource = mock(classOf[DataSource])
     val instance = new AuthenticatedDataSourceConnectionPool(dataSource, "user", "password")
-    ConnectionPool.add('close, instance)
+    ConnectionPool.add(Symbol("close"), instance)
     Thread.sleep(100L)
     assertThrows[UnsupportedOperationException] {
-      ConnectionPool.close('close)
+      ConnectionPool.close(Symbol("close"))
     }
   }
 

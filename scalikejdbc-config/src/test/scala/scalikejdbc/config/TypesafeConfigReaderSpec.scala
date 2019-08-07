@@ -41,13 +41,13 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
       it("should read configuration by db name and return as JDBCSettings") {
         val expected = JDBCSettings("jdbc:h2:mem:test2", "sa", "secret", "org.h2.Driver")
-        TypesafeConfigReader.readJDBCSettings('foo) should be(expected)
+        TypesafeConfigReader.readJDBCSettings(Symbol("foo")) should be(expected)
       }
 
       describe("When user and password is not specified in application.conf") {
         it("should return JDBCSettings the user and password of which is null") {
           val expected = JDBCSettings("jdbc:h2:mem:test4", null, null, "org.h2.Driver")
-          TypesafeConfigReader.readJDBCSettings('baz) should be(expected)
+          TypesafeConfigReader.readJDBCSettings(Symbol("baz")) should be(expected)
         }
       }
 
@@ -61,7 +61,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
       describe("When configuration file is empty") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
-            emptyConfigReader.readJDBCSettings('foo) should be(None)
+            emptyConfigReader.readJDBCSettings(Symbol("foo")) should be(None)
           }
         }
       }
@@ -74,14 +74,14 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
         it("should return foo JDBCSettings") {
           val expected = JDBCSettings("jdbc:h2:mem:test234", "user", "pass", "")
-          noDriverConfigReader.readJDBCSettings('foo) should be(expected)
+          noDriverConfigReader.readJDBCSettings(Symbol("foo")) should be(expected)
         }
       }
 
       describe("When an unknown database name is passed") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
-            TypesafeConfigReader.readJDBCSettings('unknown)
+            TypesafeConfigReader.readJDBCSettings(Symbol("unknown"))
           }
         }
       }
@@ -102,13 +102,13 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "poolValidationQuery" -> "select 1 as foo",
           "poolWarmUpTimeMillis" -> "10",
           "timeZone" -> "AST")
-        TypesafeConfigReader.readAsMap('foo) should be(expected)
+        TypesafeConfigReader.readAsMap(Symbol("foo")) should be(expected)
       }
 
       describe("When an unknown database name is passed") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
-            TypesafeConfigReader.readAsMap('unknown)
+            TypesafeConfigReader.readAsMap(Symbol("unknown"))
           }
         }
       }
@@ -145,7 +145,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "poolWarmUpTimeMillis" -> "10",
           "timeZone" -> "AST")
         val configReader = new TypesafeConfigReaderWithEnv("dev")
-        configReader.readAsMap('foo) should be(expected)
+        configReader.readAsMap(Symbol("foo")) should be(expected)
       }
 
       it("should read top level configuration and return as Map") {
@@ -154,7 +154,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "url" -> "jdbc:h2:mem:topLevelDefaults",
           "user" -> "xxx",
           "password" -> "yyy")
-        TypesafeConfigReader.readAsMap('topLevelDefaults) should be(expected)
+        TypesafeConfigReader.readAsMap(Symbol("topLevelDefaults")) should be(expected)
       }
 
       it("should read configuration by env and top level defaults and db name and return as Map") {
@@ -164,7 +164,7 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
           "user" -> "app",
           "password" -> "password")
         val configReader = new TypesafeConfigReaderWithEnv("prod")
-        configReader.readAsMap('topLevelDefaults) should be(expected)
+        configReader.readAsMap(Symbol("topLevelDefaults")) should be(expected)
       }
 
     }
@@ -183,18 +183,18 @@ class TypesafeConfigReaderSpec extends FunSpec with Matchers {
 
       it("should read configuration for foo db and return as ConnectionPoolSettings") {
         val expected = ConnectionPoolSettings(1, 2, 1000L, "select 1 as foo", null, "org.h2.Driver", 10L, "AST")
-        TypesafeConfigReader.readConnectionPoolSettings('foo) should be(expected)
+        TypesafeConfigReader.readConnectionPoolSettings(Symbol("foo")) should be(expected)
       }
 
       it("should read configuration for bar db and return as ConnectionPoolSettings") {
         val expected = ConnectionPoolSettings(2, 3, 1000L, "select 1 as bar", null, "org.h2.Driver", 10L)
-        TypesafeConfigReader.readConnectionPoolSettings('bar) should be(expected)
+        TypesafeConfigReader.readConnectionPoolSettings(Symbol("bar")) should be(expected)
       }
 
       describe("When an unknown database name is passed") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
-            TypesafeConfigReader.readConnectionPoolSettings('unknown)
+            TypesafeConfigReader.readConnectionPoolSettings(Symbol("unknown"))
           }
         }
       }

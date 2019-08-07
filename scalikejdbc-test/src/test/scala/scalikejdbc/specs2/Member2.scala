@@ -14,7 +14,7 @@ object Member2 {
       .bind(id, name, DateTime.now).update.apply()
   }
 
-  def delete(id: Long)(implicit session: DBSession = NamedAutoSession('db2)): Unit = {
+  def delete(id: Long)(implicit session: DBSession = NamedAutoSession(Symbol("db2"))): Unit = {
     SQL("delete from members2 where id = ?").bind(id).update.apply()
   }
 
