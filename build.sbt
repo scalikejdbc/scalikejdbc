@@ -19,7 +19,7 @@ lazy val _hibernateVersion = "5.4.4.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "2.23.4"
+lazy val mockitoVersion = "3.0.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -53,6 +53,8 @@ lazy val baseSettings = Seq(
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
+  fork in Test := true,
+  baseDirectory in Test := file("."),
   scalacOptions ++= _scalacOptions,
   scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
     case Some((2, v)) if v <= 12 =>
