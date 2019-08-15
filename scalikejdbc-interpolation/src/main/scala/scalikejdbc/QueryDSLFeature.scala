@@ -566,5 +566,23 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
     override def append(part: SQLSyntax): DeleteSQLBuilder = this.copy(sql = sqls"${sql} ${part}")
   }
 
+  case class BatchParamsBuilder(parameters: Seq[Seq[(SQLSyntax, ParameterBinder)]]) {
+
+    private[this] val results = parameters match {
+      case x +: xs =>
+        val (columns, params) = x.unzip
+        (withPlaceholders(columns), params +: xs.map(_.map(_._2)))
+      case _ =>
+        (Nil, Nil)
+    }
+
+    private[this] def withPlaceholders(columns: Seq[SQLSyntax]): Seq[(SQLSyntax, ParameterBinder)] = {
+      columns.zip(List.fill(columns.size)(SQLSyntaxParameterBinder(sqls.?)))
+    }
+
+    val columnsAndPlaceholders: Seq[(SQLSyntax, ParameterBinder)] = results._1
+    val batchParams: Seq[Seq[ParameterBinder]] = results._2
+  }
+
 }
 
