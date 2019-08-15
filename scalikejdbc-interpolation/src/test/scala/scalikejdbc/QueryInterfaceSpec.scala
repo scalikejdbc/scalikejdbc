@@ -154,7 +154,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
 
         // batch insert with BatchParamsBuilder
         {
-          val products: Seq[Product] = Seq(Product(3, Some("Coffee"), Price(90)), Product(3, Some("Coffee"), Price(200)))
+          val products: Seq[Product] = Seq(Product(3, Some("Coffee"), Price(90)), Product(4, Some("Coffee"), Price(200)))
           val params = BatchParamsBuilder {
             products.map { product =>
               Seq(

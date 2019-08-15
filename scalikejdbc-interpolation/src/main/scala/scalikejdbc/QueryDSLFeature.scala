@@ -568,16 +568,15 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   case class BatchParamsBuilder(parameters: Seq[Seq[(SQLSyntax, ParameterBinder)]]) {
 
-    private val results = parameters.foldLeft((Vector.empty: Seq[(SQLSyntax, ParameterBinder)], Vector.empty: Seq[Seq[ParameterBinder]])) {
-      case ((Vector(), paramsSeq), entry) =>
-        val (columns, params) = entry.unzip
-        (addPlaceholders(columns), paramsSeq :+ params)
-      case ((placeholders, paramsSeq), entry) =>
-        val (_, params) = entry.unzip
-        (placeholders, paramsSeq :+ params)
+    private[this] val results = parameters match {
+      case x +: xs =>
+        val (columns, params) = x.unzip
+        (withPlaceholders(columns), params +: xs.map(_.map(_._2)))
+      case _ =>
+        (Nil, Nil)
     }
 
-    private def addPlaceholders(columns: Seq[SQLSyntax]): Seq[(SQLSyntax, ParameterBinder)] = {
+    private[this] def withPlaceholders(columns: Seq[SQLSyntax]): Seq[(SQLSyntax, ParameterBinder)] = {
       columns.zip(List.fill(columns.size)(SQLSyntaxParameterBinder(sqls.?)))
     }
 
