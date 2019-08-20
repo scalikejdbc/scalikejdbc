@@ -494,7 +494,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     before = before,
     after = after,
     template = template,
-    params = params)
+    params = params: _*)
 
   /**
    * Executes java.sql.PreparedStatement#executeLargeUpdate().
