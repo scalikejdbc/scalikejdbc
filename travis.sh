@@ -8,7 +8,7 @@ if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   publishLocal \
   '++ 2.11.12! -v' \
   root211/publishLocal \
-  '++ 2.13.0! -v' \
+  '++ 2.13.1! -v' \
   root211/publishLocal \
   checkScalariform
 
