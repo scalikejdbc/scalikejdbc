@@ -1,8 +1,3 @@
-// workaround for https://github.com/scala/bug/issues/10870
-// TODO remove explicit scalaVersion setting when sbt depends on Scala 2.12.10 or higher
-// https://github.com/scala/scala/pull/7996
-scalaVersion := "2.12.10"
-
 resolvers ++= Seq(
   "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",
   "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
