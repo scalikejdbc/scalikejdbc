@@ -248,7 +248,9 @@ lazy val scalikejdbcMapperGenerator = Project(
   base = file("scalikejdbc-mapper-generator")
 ).settings(
   baseSettings,
-  crossSbtVersions := sbtVersion.value :: Nil,
+  // Don't update to sbt 1.3.x
+  // https://github.com/sbt/sbt/issues/5049
+  crossSbtVersions := "1.2.8" :: Nil,
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= {
     val javaVmArgs = {
