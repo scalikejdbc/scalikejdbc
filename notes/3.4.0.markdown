@@ -1,0 +1,19 @@
+ScalikeJDBC 3.4.0 is out for Scala 2.13, 2.12, and 2.11.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] #923 remove deprecated SQLInterpolation object by @xuwei-k
+- [core] #1044 Pass params correctly as varargs to largeUpdateWithFilters by @jriecken
+- [core] #984 use scala-collection-compat 0.3.0 across crossbuild by @SethTisue
+- [core] #1043 Add a handy way to create batch parameters with ParameterBinderFactory by @gakuzzzz
+- [core] Bump dependencies (scala-collection-compat, slf4j-api, typesafe-config, reactive-streams, scalatest, joda-time, commons-dbcp2) by @xuwei-k
+- [core] #1053 Fix LoanPattern#using not to swallow exceptions ocurred in close method #1049 by @seratch
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
