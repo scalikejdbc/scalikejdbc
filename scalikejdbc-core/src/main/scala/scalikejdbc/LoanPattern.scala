@@ -1,8 +1,10 @@
 package scalikejdbc
 
+import org.slf4j.LoggerFactory
+
 import scala.language.reflectiveCalls
-import util.control.Exception._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.control.NonFatal
 
 object LoanPattern extends LoanPattern
 
@@ -11,14 +13,19 @@ object LoanPattern extends LoanPattern
  */
 trait LoanPattern {
 
+  private[scalikejdbc] val loanPatternLogger = LoggerFactory.getLogger(classOf[LoanPattern])
+
   type Closable = { def close(): Unit }
 
   def using[R <: Closable, A](resource: R)(f: R => A): A = {
     try {
       f(resource)
     } finally {
-      ignoring(classOf[Throwable]) apply {
+      try {
         resource.close()
+      } catch {
+        case NonFatal(e) =>
+          loanPatternLogger.warn(s"Failed to close a resource (resource: ${resource.getClass().getName()} error: ${e.getMessage})")
       }
     }
   }
