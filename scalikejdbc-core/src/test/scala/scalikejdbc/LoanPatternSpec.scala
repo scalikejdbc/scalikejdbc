@@ -2,8 +2,12 @@ package scalikejdbc
 
 import org.scalatest._
 import java.sql.DriverManager
+
+import org.mockito.Mockito.{ mock, verify }
 import org.scalatest.concurrent.ScalaFutures
-import scala.concurrent.{ Future, ExecutionContext }
+import org.slf4j.Logger
+
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
 
@@ -32,6 +36,22 @@ class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPatt
     whenReady(fResult) { r =>
       r should be(3)
     }
+  }
+
+  class ExceptionResource extends AutoCloseable {
+    override def close(): Unit = {
+      throw new RuntimeException("test")
+    }
+  }
+
+  "close" should "throw exceptions" in {
+    val mockLogger = mock(classOf[Logger])
+
+    val loadPattern = new LoanPattern {
+      override val loanPatternLogger: Logger = mockLogger
+    }
+    loadPattern.using(new ExceptionResource()) { _ => }
+    verify(mockLogger).warn("Failed to close a resource (resource: scalikejdbc.LoanPatternSpec$ExceptionResource error: test)")
   }
 
 }
