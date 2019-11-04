@@ -139,9 +139,9 @@ run_sbt "console"
 echo 'scalaVersion := "2.12.10"
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"    %% "scalikejdbc"         % "3.3.5",
-  "org.slf4j"          % "slf4j-simple"         % "1.7.26",
-  "com.h2database"     % "h2"                   % "1.4.199",
+  "org.scalikejdbc"    %% "scalikejdbc"         % "3.4.0",
+  "org.slf4j"          % "slf4j-simple"         % "1.7.29",
+  "com.h2database"     % "h2"                   % "1.4.200",
   "org.apache.derby"   % "derby"                % "10.14.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.28.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.0",
