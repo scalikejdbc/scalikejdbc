@@ -16,7 +16,7 @@
 
 #### Branches
 
-##### master (will be 3.4.x, the default branch)
+##### master (will be 3.5.x, the default branch)
 
 - Latest stable version
 - Breaking source compatibility is not acceptable
@@ -24,10 +24,17 @@
 - Must build against Scala 2.11, 2.12, and 2.13
 - Requires Java 8 or higher
 
+##### 3.4.x
+
+- Version 3.4 series maintenance branch
+- Changes that bring binary/source incompatibility are not allowed
+- Must build against Scala 2.11, 2.12, and 2.13
+- Requires Java 8 or higher
+
 ##### 3.3.x
 
 - Version 3.3 series maintenance branch
-- Breaking source compatibility is not acceptable
+- Changes that bring binary/source incompatibility are not allowed
 - Must build against Scala 2.11, 2.12, and 2.13
 - Requires Java 8 or higher
 
