@@ -9,22 +9,6 @@ import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
 import java.util.Properties
 
-@deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin", "")
-object SbtPlugin {
-  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.JDBCSettings", "")
-  val JDBCSettings = ScalikejdbcPlugin.autoImport.JDBCSettings
-  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.JDBCSettings", "")
-  type JDBCSettings = ScalikejdbcPlugin.autoImport.JDBCSettings
-
-  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.GeneratorSettings", "")
-  val GeneratorSettings = ScalikejdbcPlugin.autoImport.GeneratorSettings
-  @deprecated("will be removed. use scalikejdbc.mapper.ScalikejdbcPlugin.autoImport.GeneratorSettings", "")
-  type GeneratorSettings = ScalikejdbcPlugin.autoImport.GeneratorSettings
-
-  @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-  val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = ScalikejdbcPlugin.projectSettings
-}
-
 object ScalikejdbcPlugin extends AutoPlugin {
 
   object autoImport {
@@ -61,9 +45,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
       companionBaseTypes: collection.Seq[String],
       tableNameToSyntaxName: String => String,
       tableNameToSyntaxVariableName: String => String)
-
-    @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-    lazy val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = projectSettings
   }
 
   import autoImport._
@@ -306,9 +287,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
           loadGeneratorSettings.value.apply(p)
       }
     }))
-
-  @deprecated("will be removed. add `enablePlugins(ScalikejdbcPlugin)` in your build.sbt", "")
-  val scalikejdbcSettings: collection.Seq[Def.Setting[_]] = projectSettings
 
   def using[R <: { def close(): Unit }, A](resource: R)(f: R => A): A = ultimately {
     ignoring(classOf[Throwable]) apply resource.close()
