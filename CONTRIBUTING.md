@@ -21,7 +21,7 @@
 - Latest stable version
 - Breaking source compatibility is not acceptable
 - Changes that bring binary incompatibility with reasonable reasons are **allowed**
-- Must build against Scala 2.11, 2.12, and 2.13
+- Must build against Scala 2.12, and 2.13
 - Requires Java 8 or higher
 
 ##### 3.4.x
