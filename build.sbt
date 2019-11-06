@@ -71,7 +71,7 @@ lazy val baseSettings = Seq(
   pomExtra := _pomExtra
 )
 
-lazy val scala211projects = List(
+lazy val scala213projects = List(
   scalikejdbcJodaTime,
   scalikejdbcCore,
   scalikejdbcLibrary,
@@ -90,10 +90,10 @@ lazy val root213 = Project(
 ).settings(
   baseSettings,
   commands += Command.command("testSequential"){
-    scala211projects.map(_.id + "/test").sorted ::: _
+    scala213projects.map(_.id + "/test").sorted ::: _
   }
 ).aggregate(
-  scala211projects.map(p => p: ProjectReference): _*
+  scala213projects.map(p => p: ProjectReference): _*
 )
 
 lazy val scalikejdbcJodaTime = Project(
