@@ -242,7 +242,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
   def objectPart: String = {
 
     val allColumns = table.allColumns
-    val pkColumns = if (table.primaryKeyColumns.size == 0) allColumns else table.primaryKeyColumns
+    val pkColumns = if (table.primaryKeyColumns.isEmpty) allColumns else table.primaryKeyColumns
 
     val interpolationMapper = {
       if (config.autoConstruct) {
@@ -1022,7 +1022,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
 
   private def replaceVariablesForTestPart(code: String): String = {
     val isQueryDsl = config.template == GeneratorTemplate.queryDsl
-    val pkColumns = if (table.primaryKeyColumns.size == 0) table.allColumns else table.primaryKeyColumns
+    val pkColumns = if (table.primaryKeyColumns.isEmpty) table.allColumns else table.primaryKeyColumns
     code.replace("%package%", packageName)
       .replace("%className%", className)
       .replace("%primaryKeys%", pkColumns.map {
