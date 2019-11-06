@@ -367,8 +367,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
         val result = DB localTx { s =>
           allCatch.either(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
         }
-        // Leave the warning; Keep the compatibilities with Scala 2.13-
-        result.right.get.size should equal(2)
+        result.map(_.size) should equal(Right(2))
       }
     }
 
@@ -380,8 +379,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
           allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }
         count should equal(Right(1))
-        // Leave the warning; Keep the compatibilities with Scala 2.13-
-        val name = count.right.flatMap { _ =>
+        val name = count.flatMap { _ =>
           DB localTx (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
         }
         name should be(Right(Some("foo")))
@@ -413,7 +411,7 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
         TestUtils.initialize(tableName)
         val failure = DB.localTx[Either[Throwable, Int]] { implicit s =>
           allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
-            .right.flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
+            .flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
         }
         failure should be(Symbol("left"))
         val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
