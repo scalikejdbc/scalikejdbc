@@ -41,16 +41,8 @@ lazy val baseSettings = Seq(
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.8",
   specs2Version := "4.8.0",
-  parserCombinatorsVersion := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 11)) =>
-        "1.1.1"
-      case _ =>
-        "1.1.2"
-    }
-  },
+  parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.2",
-  //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   fork in Test := true,
@@ -63,14 +55,6 @@ lazy val baseSettings = Seq(
         "-Xfuture"
       )
   }.toList.flatten,
-  scalacOptions ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 11)) =>
-        "-target:jvm-1.8" :: Nil
-      case _ =>
-        Nil
-    }
-  },
   scalacOptions in (Compile, doc) ++= Seq(
     "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
     "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
@@ -100,9 +84,9 @@ lazy val scala211projects = List(
   scalikejdbcSyntaxSupportMacro
 )
 
-lazy val root211 = Project(
-  "root211",
-  file("root211")
+lazy val root213 = Project(
+  "root213",
+  file("root213")
 ).settings(
   baseSettings,
   commands += Command.command("testSequential"){
@@ -332,14 +316,6 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  unmanagedSourceDirectories in Compile += {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v >= 12 =>
-        (sourceDirectory in Compile).value / "scala2.12"
-      case _ =>
-        (sourceDirectory in Compile).value / "scala2.11"
-    }
-  }
 ).dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support
