@@ -15,7 +15,7 @@ lazy val _h2Version = "1.4.199"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.48"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.8.Final"
+lazy val _hibernateVersion = "5.4.9.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.8",
-  specs2Version := "4.8.0",
+  specs2Version := "4.8.1",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.2",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
