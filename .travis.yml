@@ -6,8 +6,8 @@ services:
   - mysql
 
 scala:
-  - 2.11.12
-  - 2.12.8
+  - 2.12.10
+  - 2.13.1
 
 # The project supports OpenJDK 8+ / Oracle JDK 8,9,10
 jdk:
@@ -58,31 +58,26 @@ matrix:
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="h2"
     # h2, hsqldb
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: SCALIKEJDBC_DATABASE="hsqldb"
-    - scala: 2.12.8
-      env: SCALIKEJDBC_DATABASE="mysql"
-      jdk: openjdk8
     # Disabled because the sbt initialization with OpenJDK9/10 are somehow unstable
-    #- scala: 2.12.8
+    #- scala: 2.12.10
     #  env: SCALIKEJDBC_DATABASE="mysql"
     #  jdk: openjdk9
-    #- scala: 2.12.8
+    #- scala: 2.12.10
     #  env: SCALIKEJDBC_DATABASE="mysql"
     #  jdk: openjdk10
-    - scala: 2.12.8
+    - scala: 2.12.10
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk11
-    - scala: 2.13.0
-      env: SCALIKEJDBC_DATABASE="mysql"
     - os: windows
       language: bash
-      env: JDK="adopt@1.8.212-04"
+      env: JDK="adopt@1.8.0-222"
       before_script:
       - curl "https://raw.githubusercontent.com/DanySK/Gravis-CI/c8f400623d8f756ef7c/.install-jdk-travis.sh" --output .install-jdk-travis.sh
       - source .install-jdk-travis.sh
       - wget https://raw.githubusercontent.com/paulp/sbt-extras/0ee2dae2eba72efb4a464a5ad255e348696ecda7/sbt && chmod +x ./sbt
       script:
-      - ./sbt "project root211" "++ 2.12.8" test:compile testSequential
+      - ./sbt "project root213" "++ 2.12.10" test:compile testSequential

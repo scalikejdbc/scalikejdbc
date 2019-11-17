@@ -1,13 +1,13 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.4.0-RC2-SNAPSHOT"
+lazy val _version = "3.5.0-SNAPSHOT"
 
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "1.7.28"
-lazy val _typesafeConfigVersion = "1.3.4"
-lazy val _reactiveStreamsVersion = "1.0.2"
+lazy val _slf4jApiVersion = "1.7.29"
+lazy val _typesafeConfigVersion = "1.4.0"
+lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
 lazy val _logbackVersion = "1.2.3"
@@ -15,7 +15,7 @@ lazy val _h2Version = "1.4.199"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.48"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.4.Final"
+lazy val _hibernateVersion = "5.4.9.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -40,17 +40,9 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.8",
-  specs2Version := "4.7.0",
-  parserCombinatorsVersion := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 11)) =>
-        "1.1.1"
-      case _ =>
-        "1.1.2"
-    }
-  },
+  specs2Version := "4.8.1",
+  parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.2",
-  //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   fork in Test := true,
@@ -63,14 +55,6 @@ lazy val baseSettings = Seq(
         "-Xfuture"
       )
   }.toList.flatten,
-  scalacOptions ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 11)) =>
-        "-target:jvm-1.8" :: Nil
-      case _ =>
-        Nil
-    }
-  },
   scalacOptions in (Compile, doc) ++= Seq(
     "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
     "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
@@ -87,7 +71,7 @@ lazy val baseSettings = Seq(
   pomExtra := _pomExtra
 )
 
-lazy val scala211projects = List(
+lazy val scala213projects = List(
   scalikejdbcJodaTime,
   scalikejdbcCore,
   scalikejdbcLibrary,
@@ -100,16 +84,16 @@ lazy val scala211projects = List(
   scalikejdbcSyntaxSupportMacro
 )
 
-lazy val root211 = Project(
-  "root211",
-  file("root211")
+lazy val root213 = Project(
+  "root213",
+  file("root213")
 ).settings(
   baseSettings,
   commands += Command.command("testSequential"){
-    scala211projects.map(_.id + "/test").sorted ::: _
+    scala213projects.map(_.id + "/test").sorted ::: _
   }
 ).aggregate(
-  scala211projects.map(p => p: ProjectReference): _*
+  scala213projects.map(p => p: ProjectReference): _*
 )
 
 lazy val scalikejdbcJodaTime = Project(
@@ -122,7 +106,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.3",
+    "joda-time" % "joda-time" % "2.10.5",
     "org.joda" % "joda-convert" % "2.2.1"
   )
 ).dependsOn(
@@ -185,7 +169,7 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "3.3.1"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "3.4.1"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
@@ -248,7 +232,9 @@ lazy val scalikejdbcMapperGenerator = Project(
   base = file("scalikejdbc-mapper-generator")
 ).settings(
   baseSettings,
-  crossSbtVersions := sbtVersion.value :: Nil,
+  // Don't update to sbt 1.3.x
+  // https://github.com/sbt/sbt/issues/5049
+  crossSbtVersions := "1.2.8" :: Nil,
   scriptedBufferLog := false,
   scriptedLaunchOpts ++= {
     val javaVmArgs = {
@@ -330,14 +316,6 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  unmanagedSourceDirectories in Compile += {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, v)) if v >= 12 =>
-        (sourceDirectory in Compile).value / "scala2.12"
-      case _ =>
-        (sourceDirectory in Compile).value / "scala2.11"
-    }
-  }
 ).dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support

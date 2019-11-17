@@ -4,12 +4,10 @@ set -e
 
 if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   sbt \
-  '++ 2.12.8! -v' \
+  '++ 2.12.10! -v' \
   publishLocal \
-  '++ 2.11.12! -v' \
-  root211/publishLocal \
-  '++ 2.13.0! -v' \
-  root211/publishLocal \
+  '++ 2.13.1! -v' \
+  root213/publishLocal \
   checkScalariform
 
   sbt \
@@ -19,6 +17,6 @@ if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   "project mapper-generator" \
   scripted
 else
-  sbt "project root211" "++ ${TRAVIS_SCALA_VERSION}! -v" test:compile checkScalariform testSequential
+  sbt "project root213" "++ ${TRAVIS_SCALA_VERSION}! -v" test:compile checkScalariform testSequential
 fi
 

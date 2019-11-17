@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.2.8/sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.3.3/sbt-launch.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -117,12 +117,12 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 >>"%build_sbt%" echo.
->>"%build_sbt%" echo scalaVersion := "2.12.8"
+>>"%build_sbt%" echo scalaVersion := "2.12.10"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
->>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.3.5",
->>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.26",
->>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.199",
+>>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.4.0",
+>>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.29",
+>>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.200",
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.2.0",
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.28.0",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.0",
