@@ -20,6 +20,7 @@ lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
 lazy val mockitoVersion = "3.0.0"
+lazy val catsEffect = "1.3.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -165,6 +166,7 @@ lazy val scalikejdbcCore = Project(
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "org.scala-lang.modules"  %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
       "org.scala-lang.modules"  %% "scala-collection-compat" % collectionCompatVersion.value,
+      "org.typelevel"           %% "cats-effect" % catsEffect withSources() withJavadoc(),
       // scope: provided
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",

@@ -3,10 +3,12 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import java.sql.SQLException
+import cats.effect.IO
 import util.control.Exception._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import org.scalatest.concurrent.ScalaFutures
+
 import ExecutionContext.Implicits.global
 
 class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
@@ -338,6 +340,85 @@ class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settin
       }
       intercept[Exception] {
         Await.result(failure, 10.seconds)
+      }
+      val res = NamedDB(Symbol("named")) readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
+  // ioLocalTx
+
+  it should "execute single in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = NamedDB(Symbol("named")) ioLocalTx { s =>
+        IO(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      }
+      fResult.unsafeRunSync() should equal(Some("1"))
+    }
+  }
+
+  it should "execute list in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = NamedDB(Symbol("named")) ioLocalTx { s =>
+        IO(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      fResult.unsafeRunSync().size should equal(2)
+    }
+  }
+
+  it should "execute update in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fCount = NamedDB(Symbol("named")) ioLocalTx { s =>
+        IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      val result1 = fCount.unsafeRunSync()
+
+      result1 should equal(1)
+
+      val fName = IO(result1).flatMap { _ =>
+        DB ioLocalTx (s => IO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+      }
+      fName.unsafeRunSync() should be(Some("foo"))
+    }
+  }
+
+  it should "not be able to rollback in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      futureUsing(DB(ConnectionPool(Symbol("named")).borrow())) { db =>
+        val fCount = NamedDB(Symbol("named")) ioLocalTx { s =>
+          IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        fCount.unsafeRunSync() should equal(1)
+
+        db.rollbackIfActive()
+        val fName = NamedDB(Symbol("named")) ioLocalTx { s =>
+          IO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        fName.unsafeRunSync() should equal(Some("foo"))
+        fName.unsafeToFuture()
+      }
+    }
+  }
+
+  it should "do rollback in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = NamedDB(Symbol("named")) ioLocalTx { implicit s =>
+        IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .map(_ => s.update("update foo should be rolled back"))
+      }
+      intercept[Exception] {
+        Await.result(failure.unsafeToFuture(), 10.seconds)
       }
       val res = NamedDB(Symbol("named")) readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))

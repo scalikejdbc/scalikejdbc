@@ -1,6 +1,7 @@
 package scalikejdbc
 
 import java.sql.Connection
+import cats.effect.IO
 import scalikejdbc.metadata._
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -277,6 +278,24 @@ object DB extends LoanPattern {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
     localTx(execution)(context, implicitly, settings)
+  }
+
+  /**
+   * Begins a local-tx block that returns a IO value easily with ConnectionPool.
+   *
+   * @param execution execution that returns a IO value
+   * @param context connection pool context
+   * @tparam A IO result type
+   * @return IO result value
+   */
+  def ioLocalTx[A](execution: DBSession => IO[A])(
+    implicit
+    context: CPContext = NoCPContext,
+    ec: ExecutionContext,
+    settings: SettingsProvider = SettingsProvider.default): IO[A] = {
+    // Enable TxBoundary implicits
+    import scalikejdbc.TxBoundary.IO.ioTxBoundary
+    localTx(execution)(context, ioTxBoundary[A], settings)
   }
 
   /**

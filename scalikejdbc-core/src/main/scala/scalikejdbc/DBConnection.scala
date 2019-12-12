@@ -6,6 +6,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
 import java.util.Locale.{ ENGLISH => en }
+import cats.effect.IO
 
 /**
  * Basic Database Accessor which holds a JDBC connection.
@@ -352,6 +353,19 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
     localTx(execution)
+  }
+
+  /**
+   * Easy way to checkout the current connection to be used in a transaction
+   * that needs to be committed/rolled back depending on IO results.
+   * @param execution block that takes a session and returns an IO
+   * @tparam A IO result type
+   * @return IO result
+   */
+  def ioLocalTx[A](execution: DBSession => IO[A])(implicit ec: ExecutionContext): IO[A] = {
+    // Enable TxBoundary implicits
+    import scalikejdbc.TxBoundary.IO.ioTxBoundary
+    localTx(execution)(ioTxBoundary)
   }
 
   /**

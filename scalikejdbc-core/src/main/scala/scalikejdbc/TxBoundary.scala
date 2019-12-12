@@ -2,6 +2,7 @@ package scalikejdbc
 
 import scala.concurrent.{ Promise, ExecutionContext, Future }
 import scala.util.{ Try, Failure, Success }
+import cats.effect.IO
 
 /**
  * This type class enable users to customize the behavior of transaction boundary(commit/rollback).
@@ -88,6 +89,30 @@ object TxBoundary {
 
       override def closeConnection(result: Future[A], doClose: () => Unit): Future[A] =
         onFinishTx(result)(_ => doClose())
+    }
+  }
+
+  /**
+   * cats.effect.IO TxBoundary type class instance.
+   */
+  object IO extends TxBoundaryMissingImplicits {
+
+    implicit def ioTxBoundary[A](implicit ec: ExecutionContext): TxBoundary[IO[A]] = new TxBoundary[IO[A]] {
+
+      def finishTx(result: IO[A], tx: Tx): IO[A] = {
+        result.attempt flatMap {
+          case Right(x) =>
+            tx.commit(); cats.effect.IO(x)
+          case Left(e) => tx.rollback(); cats.effect.IO.raiseError(e)
+        }
+      }
+
+      override def closeConnection(result: IO[A], doClose: () => Unit): IO[A] = {
+        result.map(x => {
+          doClose()
+          x
+        })
+      }
     }
   }
 

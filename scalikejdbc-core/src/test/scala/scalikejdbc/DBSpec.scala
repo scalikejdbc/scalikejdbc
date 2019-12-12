@@ -5,6 +5,7 @@ import java.sql.Connection
 import org.scalatest._
 import java.sql.SQLException
 
+import cats.effect.IO
 import org.slf4j.LoggerFactory
 
 import scala.util.control.Exception._
@@ -321,6 +322,85 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
       intercept[Exception] {
         Await.result(failure, 10.seconds)
+      }
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
+  // ioLocalTx
+
+  it should "execute single in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB ioLocalTx { s =>
+        IO(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      }
+      fResult.unsafeRunSync() should equal(Some("1"))
+    }
+  }
+
+  it should "execute list in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fResult = DB ioLocalTx { s =>
+        IO(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }
+      fResult.unsafeRunSync().size should equal(2)
+    }
+  }
+
+  it should "execute update in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val fCount = DB ioLocalTx { s =>
+        IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }
+      val firstResult = fCount.unsafeRunSync()
+      firstResult should equal(1)
+
+      val fName = IO(firstResult).flatMap { _ =>
+        DB ioLocalTx (s => IO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+      }
+      fName.unsafeRunSync() should be(Some("foo"))
+
+    }
+  }
+
+  it should "not be able to rollback in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_singleInIOLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      futureUsing(DB(ConnectionPool.borrow())) { db =>
+        val fCount = DB ioLocalTx { s =>
+          IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        fCount.unsafeRunSync() should equal(1)
+
+        db.rollbackIfActive()
+        val fName = DB ioLocalTx { s =>
+          IO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        fName.unsafeRunSync() should equal(Some("foo"))
+        fName.unsafeToFuture()
+      }
+    }
+  }
+
+  it should "do rollback in ioLocalTx block" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = DB ioLocalTx { implicit s =>
+        IO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .map(_ => s.update("update foo should be rolled back"))
+      }
+      intercept[Exception] {
+        Await.result(failure.unsafeToFuture(), 10.seconds)
       }
       val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))
