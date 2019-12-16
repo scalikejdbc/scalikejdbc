@@ -33,7 +33,7 @@ object TxBoundary {
    */
   object Exception {
 
-    implicit def exceptionTxBoundary[A] = new TxBoundary[A] {
+    implicit def exceptionTxBoundary[A]: TxBoundary[A] = new TxBoundary[A] {
       def finishTx(result: A, tx: Tx): A = {
         tx.commit()
         result
@@ -77,7 +77,7 @@ object TxBoundary {
    */
   object Future extends TxBoundaryMissingImplicits {
 
-    implicit def futureTxBoundary[A](implicit ec: ExecutionContext) = new TxBoundary[Future[A]] {
+    implicit def futureTxBoundary[A](implicit ec: ExecutionContext): TxBoundary[Future[A]] = new TxBoundary[Future[A]] {
 
       def finishTx(result: Future[A], tx: Tx): Future[A] = {
         onFinishTx(result) {
@@ -98,7 +98,7 @@ object TxBoundary {
    */
   object Either {
 
-    implicit def eitherTxBoundary[L, R] = new TxBoundary[Either[L, R]] {
+    implicit def eitherTxBoundary[L, R]: TxBoundary[Either[L, R]] = new TxBoundary[Either[L, R]] {
       def finishTx(result: Either[L, R], tx: Tx): Either[L, R] = {
         result match {
           case Right(_) => tx.commit()
@@ -114,7 +114,7 @@ object TxBoundary {
    */
   object Try {
 
-    implicit def tryTxBoundary[A] = new TxBoundary[Try[A]] {
+    implicit def tryTxBoundary[A]: TxBoundary[Try[A]] = new TxBoundary[Try[A]] {
       def finishTx(result: Try[A], tx: Tx): Try[A] = {
         doFinishTx(result) {
           case Success(_) => tx.commit()
