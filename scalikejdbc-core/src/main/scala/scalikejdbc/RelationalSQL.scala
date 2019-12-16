@@ -1,7 +1,5 @@
 package scalikejdbc
 
-import scala.language.higherKinds
-
 //------------------------------------
 // One-to-one / One-to-many
 //------------------------------------

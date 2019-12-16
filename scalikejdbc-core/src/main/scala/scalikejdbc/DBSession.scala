@@ -3,7 +3,6 @@ package scalikejdbc
 import java.sql._
 import util.control.Exception._
 import scala.collection.compat._
-import scala.language.higherKinds
 
 /**
  * DB Session
