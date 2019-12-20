@@ -611,5 +611,5 @@ object DBConnection {
    * Default table types used for metadata introspection.
    * See [[java.sql.DatabaseMetaData#getTableTypes]] for details.
    */
-  val tableTypes = Array("TABLE", "VIEW")
+  val tableTypes: Array[String] = Array("TABLE", "VIEW")
 }

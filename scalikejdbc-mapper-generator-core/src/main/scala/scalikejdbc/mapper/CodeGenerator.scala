@@ -46,7 +46,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     def indent: String = " " * i * 2
   }
 
-  implicit def convertIntToIndentGenerator(i: Int) = IndentGenerator(i)
+  implicit def convertIntToIndentGenerator(i: Int): IndentGenerator = IndentGenerator(i)
 
   case class ColumnInScala(underlying: Column) {
 

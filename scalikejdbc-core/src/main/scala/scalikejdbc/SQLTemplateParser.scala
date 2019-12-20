@@ -115,14 +115,14 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
     names => names.collect { case name if name != "" => name }
   }
 
-  private def name = "\\{\\w+\\}".r <~ opt(",") ^^ {
+  private def name: Parser[String] = "\\{\\w+\\}".r <~ opt(",") ^^ {
     name =>
       name.replaceFirst("\\{", "").replaceFirst("\\}", "").trim()
   }
 
-  private def other = literal | token ^^ (_ => "")
+  private def other: Parser[String] = literal | token ^^ (_ => "")
 
-  private def literal = {
+  private def literal: Parser[String] = {
     def charLiteral = "'[^']*'".r ^^ (_ => "")
     // JavaTokenParsers stringLiteral does not work for string contains backslash, etc..
     def stringLiteral = ("\"[^(\")]*\"".r | super.stringLiteral) ^^ (_ => "")
@@ -131,6 +131,6 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
 
   // square brackets are allowed in T-SQL
   // colon are allowed for postgres type cast
-  private def token = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
+  private def token: Parser[String] = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
 
 }
