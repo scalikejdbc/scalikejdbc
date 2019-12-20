@@ -426,7 +426,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     val forceUpperCase: Boolean = support.forceUpperCase
     val useSnakeCaseColumnName: Boolean = support.useSnakeCaseColumnName
 
-    lazy val delimiterForResultName = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
+    lazy val delimiterForResultName: String = throw new UnsupportedOperationException("It's a library bug if this exception is thrown.")
 
     lazy val columns: collection.Seq[SQLSyntax] = support.columns.map { c => if (support.forceUpperCase) c.toUpperCase(en) else c }.map(c => SQLSyntax(c))
 

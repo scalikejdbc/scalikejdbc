@@ -122,6 +122,6 @@ object StringSQLRunner {
    * @param sql SQL string
    * @return SQLRunner
    */
-  implicit def stringToSQLRunner(sql: String) = StringSQLRunner(sql)
+  implicit def stringToSQLRunner(sql: String): StringSQLRunner = StringSQLRunner(sql)
 
 }

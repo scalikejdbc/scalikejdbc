@@ -1,14 +1,16 @@
 package scalikejdbc
 
+import scala.util.matching.Regex
+
 /**
  * Companion object of JDBC URL
  */
 object JDBCUrl {
 
   // Heroku support
-  val HerokuPostgresRegexp = "^postgres://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
-  val HerokuMySQLRegexp = "^mysql://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
-  val MysqlCustomProperties = ".*\\?(.*)".r
+  val HerokuPostgresRegexp: Regex = "^postgres://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
+  val HerokuMySQLRegexp: Regex = "^mysql://([a-zA-Z0-9_]+):([^@]+)@([^/]+)/([^\\s]+)$".r
+  val MysqlCustomProperties: Regex = ".*\\?(.*)".r
 
   def apply(url: String): JDBCUrl = try {
     val urlParts = url.split("/")

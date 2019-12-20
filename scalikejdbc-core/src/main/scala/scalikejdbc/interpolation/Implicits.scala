@@ -1,6 +1,7 @@
 package scalikejdbc.interpolation
 
 import scala.language.implicitConversions
+import scalikejdbc.SQLInterpolationString
 
 /**
  * object to import.
@@ -21,7 +22,7 @@ trait Implicits {
    *   sql"select * from members ${whereClause}"
    * }}}
    */
-  @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext) = new scalikejdbc.SQLInterpolationString(s)
+  @inline implicit def scalikejdbcSQLInterpolationImplicitDef(s: StringContext): SQLInterpolationString = new SQLInterpolationString(s)
 
   /**
    * Returns String value when String type is expected for [[scalikejdbc.WrappedResultSet]].
