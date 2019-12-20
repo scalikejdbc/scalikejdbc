@@ -187,7 +187,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     }
   }
 
-  def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings) =
+  def generatorConfig(srcDir: File, testDir: File, generatorSettings: GeneratorSettings): GeneratorConfig =
     GeneratorConfig(
       srcDir = srcDir.getAbsolutePath,
       testDir = testDir.getAbsolutePath,

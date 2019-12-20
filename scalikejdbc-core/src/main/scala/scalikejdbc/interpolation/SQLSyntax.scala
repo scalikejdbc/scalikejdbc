@@ -44,24 +44,24 @@ class SQLSyntax private[scalikejdbc] (val value: String, private[scalikejdbc] va
   def orderBy(columns: SQLSyntax*): SQLSyntax = {
     if (columns.isEmpty) this else sqls"${this} order by ${toCSV(columns)}"
   }
-  def asc = sqls"${this} asc"
-  def desc = sqls"${this} desc"
+  def asc: SQLSyntax = sqls"${this} asc"
+  def desc: SQLSyntax = sqls"${this} desc"
 
   def limit(n: Int): SQLSyntax = sqls"${this} limit ${SQLSyntax(n.toString)}"
   def offset(n: Int): SQLSyntax = sqls"${this} offset ${SQLSyntax(n.toString)}"
 
-  def where = sqls"${this} where"
+  def where: SQLSyntax = sqls"${this} where"
   def where(where: SQLSyntax): SQLSyntax = sqls"${this} where ${where}"
   def where(whereOpt: Option[SQLSyntax]): SQLSyntax = whereOpt.fold(this)(where(_))
 
-  def and = sqls"${this} and"
+  def and: SQLSyntax = sqls"${this} and"
   def and(sqlPart: SQLSyntax): SQLSyntax = sqls"$this and ($sqlPart)"
   def and(andOpt: Option[SQLSyntax]): SQLSyntax = andOpt.fold(this)(and(_))
-  def or = sqls"${this} or"
+  def or: SQLSyntax = sqls"${this} or"
   def or(sqlPart: SQLSyntax): SQLSyntax = sqls"$this or ($sqlPart)"
   def or(orOpt: Option[SQLSyntax]): SQLSyntax = orOpt.fold(this)(or(_))
 
-  def roundBracket(inner: SQLSyntax) = sqls"$this ($inner)"
+  def roundBracket(inner: SQLSyntax): SQLSyntax = sqls"$this ($inner)"
 
   def eq[A](column: SQLSyntax, value: A)(implicit ev: ParameterBinderFactory[A]): SQLSyntax = {
     value match {
@@ -380,7 +380,7 @@ object SQLSyntax {
     if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
   }
 
-  def roundBracket(inner: SQLSyntax) = sqls"($inner)"
+  def roundBracket(inner: SQLSyntax): SQLSyntax = sqls"($inner)"
 
 }
 

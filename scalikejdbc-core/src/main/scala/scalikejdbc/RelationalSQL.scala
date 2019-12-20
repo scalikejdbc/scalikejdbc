@@ -182,7 +182,7 @@ object OneToXSQL {
   def unapply[A, E <: WithExtractor, Z](sqlObject: OneToXSQL[A, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one))
   }
-  def handleException(e: Exception) = e match {
+  def handleException(e: Exception): Nothing = e match {
     case invalidColumn: InvalidColumnNameException =>
       throw new ResultSetExtractorException(
         "Failed to extract ResultSet because the specified column name (" + invalidColumn.name + ") is invalid." +
