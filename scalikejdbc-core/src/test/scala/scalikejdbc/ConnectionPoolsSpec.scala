@@ -4,8 +4,10 @@ import org.scalatest._
 import java.util.Properties
 import javax.sql.DataSource
 import com.zaxxer.hikari.HikariDataSource
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConnectionPoolsSpec extends FlatSpec with Matchers {
+class ConnectionPoolsSpec extends AnyFlatSpec with Matchers {
 
   behavior of "connection pools"
 

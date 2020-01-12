@@ -1,8 +1,10 @@
 package scalikejdbc.metadata
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TableSpec extends FlatSpec with Matchers {
+class TableSpec extends AnyFlatSpec with Matchers {
 
   behavior of "Table"
 

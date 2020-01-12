@@ -8,8 +8,10 @@ import org.joda.time._
 import scalikejdbc.jodatime.JodaTypeBinder._
 import JodaUnixTimeInMillisConverterImplicits._
 import org.mockito.Mockito
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JodaTypeBinderSpec extends FlatSpec with Matchers with MockitoSugar {
+class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   behavior of "TypeBinder"
 

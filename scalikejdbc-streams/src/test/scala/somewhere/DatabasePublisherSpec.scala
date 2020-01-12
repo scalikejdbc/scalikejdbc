@@ -11,6 +11,8 @@ import scalikejdbc.streams._
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
+import org.scalatest.flatspec.AsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 class DatabasePublisherSpec
   extends AsyncFlatSpec

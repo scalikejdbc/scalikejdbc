@@ -3,8 +3,9 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
+import org.scalatest.flatspec.AnyFlatSpec
 
-class BindersSpec extends FlatSpec with MockitoSugar {
+class BindersSpec extends AnyFlatSpec with MockitoSugar {
 
   behavior of "Binders"
 

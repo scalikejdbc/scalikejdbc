@@ -3,8 +3,10 @@ package scalikejdbc
 import java.{ util => ju }
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQLInterpolationStringSuite extends FlatSpec with Matchers {
+class SQLInterpolationStringSuite extends AnyFlatSpec with Matchers {
 
   import scalikejdbc.interpolation.Implicits._
 

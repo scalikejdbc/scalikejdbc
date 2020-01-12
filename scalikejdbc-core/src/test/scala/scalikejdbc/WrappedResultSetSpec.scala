@@ -4,8 +4,10 @@ import org.scalatest._
 import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.util.Calendar
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class WrappedResultSetSpec extends FlatSpec with Matchers with MockitoSugar {
+class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   behavior of "WrappedResultSet"
 

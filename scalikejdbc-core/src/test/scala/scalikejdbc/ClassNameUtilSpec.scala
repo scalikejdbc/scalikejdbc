@@ -1,8 +1,9 @@
 package scalikejdbc
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ClassNameUtilSpec extends FlatSpec with Matchers {
+class ClassNameUtilSpec extends AnyFlatSpec with Matchers {
 
   object Foo {
     object Bar

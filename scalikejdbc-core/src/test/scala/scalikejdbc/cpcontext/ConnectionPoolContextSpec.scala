@@ -3,8 +3,10 @@ package scalikejdbc.cpcontext
 import org.scalatest._
 import scalikejdbc._
 import java.time._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
+class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings {
 
   import ConnectionPoolContextSpecUtils._
 
@@ -115,7 +117,7 @@ trait NamedCPContextAsDefault {
     Symbol("ConnectionPoolContextSpec") -> ConnectionPool.get())
 }
 
-class ConnectionPoolContextMixinSpec extends FlatSpec with Matchers with Settings with NamedCPContextAsDefault {
+class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Settings with NamedCPContextAsDefault {
 
   import ConnectionPoolContextSpecUtils._
 
@@ -190,7 +192,7 @@ object Sample {
 
 }
 
-class CPContextWithAutoSessionSpec extends FlatSpec with Matchers with DefaultSettings with InMemoryDB {
+class CPContextWithAutoSessionSpec extends AnyFlatSpec with Matchers with DefaultSettings with InMemoryDB {
 
   behavior of "ConnectionPoolContext with AutoSession"
 

@@ -4,12 +4,13 @@ import scalikejdbc._
 import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
-import org.scalatest.fixture.AsyncFlatSpec
 import org.scalatest._
 
 import scala.concurrent.Future
+import org.scalatest.flatspec.FixtureAsyncFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-trait AsyncFlatSpecWithCommonTraits extends AsyncFlatSpec with Matchers with DBSettings with PreparingTables
+trait AsyncFlatSpecWithCommonTraits extends FixtureAsyncFlatSpec with Matchers with DBSettings with PreparingTables
 
 class AsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback {
 

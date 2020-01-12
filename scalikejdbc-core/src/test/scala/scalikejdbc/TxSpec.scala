@@ -6,8 +6,10 @@ import org.mockito.Mockito.{ mock, times, verify, when }
 import org.scalatest._
 
 import scala.util.control.Exception._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TxSpec extends FlatSpec with Matchers with Settings {
+class TxSpec extends AnyFlatSpec with Matchers with Settings {
 
   behavior of "Tx"
 

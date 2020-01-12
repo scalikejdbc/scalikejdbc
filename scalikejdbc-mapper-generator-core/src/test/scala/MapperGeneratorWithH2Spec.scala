@@ -5,8 +5,10 @@ import mapper._
 import mapper.CodeGenerator
 import mapper.GeneratorConfig
 import mapper.Model
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class MapperGeneratorWithH2Spec extends FlatSpec with Matchers {
+class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
   Class.forName("org.h2.Driver")
   val url = "jdbc:h2:mem:mapper-generator-h2"

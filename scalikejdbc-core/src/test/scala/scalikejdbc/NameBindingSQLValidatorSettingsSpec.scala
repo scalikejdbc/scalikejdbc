@@ -2,8 +2,10 @@ package scalikejdbc
 
 import org.scalatest._
 import scalikejdbc.globalsettings._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class NameBindingSQLValidatorSettingsSpec extends FlatSpec with Matchers {
+class NameBindingSQLValidatorSettingsSpec extends AnyFlatSpec with Matchers {
 
   behavior of "NameBindingSQLValidatorSettings"
 

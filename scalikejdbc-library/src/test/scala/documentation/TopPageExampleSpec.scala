@@ -1,9 +1,10 @@
 package documentation
 
-import org.scalatest.{ Matchers, FlatSpec }
 import java.time.LocalDateTime
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TopPageExampleSpec extends FlatSpec with Matchers {
+class TopPageExampleSpec extends AnyFlatSpec with Matchers {
 
   behavior of "SQLInterpolation"
 

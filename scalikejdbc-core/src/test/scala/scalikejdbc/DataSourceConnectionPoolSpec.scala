@@ -4,8 +4,10 @@ import javax.sql.DataSource
 
 import org.mockito.Mockito.mock
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DataSourceConnectionPoolSpec extends FlatSpec with Matchers {
+class DataSourceConnectionPoolSpec extends AnyFlatSpec with Matchers {
 
   case class DummyDataSourceCloser() extends DataSourceCloser {
     var closed = false

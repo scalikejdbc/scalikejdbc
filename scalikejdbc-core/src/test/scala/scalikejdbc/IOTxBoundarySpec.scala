@@ -1,10 +1,11 @@
 package scalikejdbc
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ FlatSpec, Matchers }
 import scalikejdbc.iomonads.MyIO
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class MyIOTxBoundarySpec extends FlatSpec with Matchers with ScalaFutures {
+class MyIOTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
 
   behavior of "closeConnection()"
 

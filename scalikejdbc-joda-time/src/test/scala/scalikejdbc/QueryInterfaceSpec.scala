@@ -4,8 +4,10 @@ import org.scalatest._
 import org.joda.time._
 import scalikejdbc.jodatime.JodaWrappedResultSet._
 import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   def isH2: Boolean = driverClassName == "org.h2.Driver" || sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "h2")
 

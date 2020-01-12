@@ -2,9 +2,10 @@ package scalikejdbc
 
 import java.sql.Connection
 import org.mockito.Mockito.{ mock, verify, times, when }
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DBConnectionSpec extends FlatSpec with Matchers {
+class DBConnectionSpec extends AnyFlatSpec with Matchers {
 
   behavior of "DBConnection"
 

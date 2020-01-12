@@ -3,6 +3,8 @@ package scalikejdbc
 import org.scalatest._
 
 import scala.util.control.NonFatal
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 trait SyntaxProviderTestSupport extends TestSuiteMixin with SQLInterpolation { self: TestSuite =>
 
@@ -31,7 +33,7 @@ trait SyntaxProviderTestSupport extends TestSuiteMixin with SQLInterpolation { s
   }
 }
 
-trait SyntaxProviderSpec extends FunSpec
+trait SyntaxProviderSpec extends AnyFunSpec
   with Matchers
   with SQLInterpolation
   with SyntaxProviderTestSupport

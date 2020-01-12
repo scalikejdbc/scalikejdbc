@@ -2,8 +2,10 @@ package scalikejdbc
 
 import org.scalatest._
 import java.time.temporal.ChronoUnit
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JavaUtilDateConverterSpec extends FlatSpec with Matchers with JavaUtilDateConverterImplicits {
+class JavaUtilDateConverterSpec extends AnyFlatSpec with Matchers with JavaUtilDateConverterImplicits {
 
   behavior of "JavaUtilDateConverter"
 

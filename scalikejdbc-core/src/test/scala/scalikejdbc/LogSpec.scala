@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import org.slf4j._
 import org.mockito.Mockito.{ mock, verify, times, when }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LogSpec extends FlatSpec with Matchers {
+class LogSpec extends AnyFlatSpec with Matchers {
 
   behavior of "Log"
 

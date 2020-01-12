@@ -10,8 +10,10 @@ import org.slf4j.Logger
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LoanPatternSpec extends FlatSpec with Matchers with Settings with LoanPattern with ScalaFutures {
+class LoanPatternSpec extends AnyFlatSpec with Matchers with Settings with LoanPattern with ScalaFutures {
 
   implicit val patienceTimeout = PatienceConfig(30.seconds)
 

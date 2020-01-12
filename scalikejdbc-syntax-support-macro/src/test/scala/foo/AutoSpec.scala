@@ -2,8 +2,10 @@ package foo
 
 import org.scalatest._
 import scalikejdbc._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AutoSpec extends FlatSpec with Matchers with DBSettings {
+class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
 
   case class Issue(id: Long, firstName: String, groupId: Long)
   val IssueTable = SQLSyntaxSupportFactory[Issue]()

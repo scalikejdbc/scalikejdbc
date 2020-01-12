@@ -3,11 +3,11 @@ package jodatime
 
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
-import org.scalatest.FlatSpec
 import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import org.scalatest.flatspec.AnyFlatSpec
 
-class JodaParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
+class JodaParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 
   behavior of "ParameterBinderFactory"
 

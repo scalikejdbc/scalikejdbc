@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DB_MetaDataSpec extends FlatSpec with Matchers with Settings with LogSupport {
+class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSupport {
 
   behavior of "DB's metadata operations"
 
