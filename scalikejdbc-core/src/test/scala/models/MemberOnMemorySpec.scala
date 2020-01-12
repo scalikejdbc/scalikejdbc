@@ -4,8 +4,10 @@ import scalikejdbc._
 import java.time._
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class MemberOnMemorySpec extends FlatSpec with Matchers {
+class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
 
   Class.forName("org.h2.Driver")
   ConnectionPool.add(Symbol("MemberSpec"), "jdbc:h2:mem:MemberSpec", "", "")

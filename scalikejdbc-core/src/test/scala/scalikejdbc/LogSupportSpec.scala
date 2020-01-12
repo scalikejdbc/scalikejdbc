@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LogSupportSpec extends FlatSpec with Matchers {
+class LogSupportSpec extends AnyFlatSpec with Matchers {
 
   behavior of "LogSupport"
 

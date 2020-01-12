@@ -1,7 +1,6 @@
 package scalikejdbc.scalatest
 
-import org.scalatest.Outcome
-import org.scalatest.fixture.TestSuite
+import org.scalatest.{ FixtureTestSuite, Outcome }
 import scalikejdbc._
 
 /**
@@ -29,7 +28,7 @@ import scalikejdbc._
  * }
  * }}}
  */
-trait AutoRollback extends LoanPattern { self: TestSuite =>
+trait AutoRollback extends LoanPattern { self: FixtureTestSuite =>
 
   type FixtureParam = DBSession
 

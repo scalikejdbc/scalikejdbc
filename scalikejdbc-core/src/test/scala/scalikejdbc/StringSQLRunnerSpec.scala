@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import scala.util.control.Exception._
 import java.util.NoSuchElementException
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
+class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
 
   val tableNamePrefix = "emp_StringSQLRunnerSpec" + System.currentTimeMillis()
 

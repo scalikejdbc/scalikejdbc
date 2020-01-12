@@ -5,8 +5,10 @@ import org.scalatest._
 import java.sql.ResultSet
 import java.util.NoSuchElementException
 import scalikejdbc.LoanPattern._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ResultSetIteratorSpec extends FlatSpec with Matchers with Settings {
+class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
 
   val tableNamePrefix = "emp_ResultSetIteratorSpec" + System.currentTimeMillis()
 

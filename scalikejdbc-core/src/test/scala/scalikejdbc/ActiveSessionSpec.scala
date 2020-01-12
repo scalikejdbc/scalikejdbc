@@ -4,8 +4,10 @@ import org.scalatest._
 import org.mockito.Mockito.{ mock, when }
 
 import java.sql._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ActiveSessionSpec extends FlatSpec with Matchers {
+class ActiveSessionSpec extends AnyFlatSpec with Matchers {
 
   behavior of "ActiveSession"
 

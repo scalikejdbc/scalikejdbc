@@ -2,8 +2,10 @@ package foo
 
 import org.scalatest._
 import scalikejdbc._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AutoNamedValuesSpec extends FlatSpec with Matchers with DBSettings {
+class AutoNamedValuesSpec extends AnyFlatSpec with Matchers with DBSettings {
 
   case class Issue(id: Long, firstName: String, groupId: Long)
 

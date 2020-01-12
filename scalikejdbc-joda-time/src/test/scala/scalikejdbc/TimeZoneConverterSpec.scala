@@ -3,9 +3,10 @@ package scalikejdbc
 import java.util.TimeZone
 
 import org.joda.time.DateTime
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TimeZoneConverterSpec extends FlatSpec with Matchers {
+class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
 
   behavior of "TimeZoneConverter"
 

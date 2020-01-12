@@ -4,8 +4,10 @@ import org.scalatest._
 import org.slf4j.LoggerFactory
 
 import scala.util.control.NonFatal
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PostgreSQL_JSON_Objects_Spec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   behavior of "Handling of PostgreSQL JSON objects"
 

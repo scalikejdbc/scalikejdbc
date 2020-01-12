@@ -4,8 +4,10 @@ import java.time.format.DateTimeFormatter
 
 import org.scalatest._
 import java.time.{ ZoneId, ZonedDateTime }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   def isH2: Boolean = driverClassName == "org.h2.Driver" || sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "h2")
 

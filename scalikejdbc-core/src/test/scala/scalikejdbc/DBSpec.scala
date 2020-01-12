@@ -14,8 +14,10 @@ import org.scalatest.concurrent.ScalaFutures
 import scalikejdbc.iomonads.MyIO
 
 import ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
+class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
 
   val logger = LoggerFactory.getLogger(classOf[DBSpec])
 

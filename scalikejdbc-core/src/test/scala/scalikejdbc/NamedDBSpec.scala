@@ -10,8 +10,10 @@ import org.scalatest.concurrent.ScalaFutures
 import scalikejdbc.iomonads.MyIO
 
 import ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class NamedDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
+class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
 
   val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 

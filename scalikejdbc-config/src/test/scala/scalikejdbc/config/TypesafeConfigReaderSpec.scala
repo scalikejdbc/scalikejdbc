@@ -3,8 +3,10 @@ package scalikejdbc.config
 import org.scalatest._
 import scalikejdbc._
 import com.typesafe.config._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class TypesafeConfigReaderSpec extends FunSpec with Matchers {
+class TypesafeConfigReaderSpec extends AnyFunSpec with Matchers {
 
   val play24ConfigReader = new TypesafeConfigReader with TypesafeConfig {
     override lazy val config: Config = ConfigFactory.load("application-play24.conf")

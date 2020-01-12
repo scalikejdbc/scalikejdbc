@@ -5,8 +5,10 @@ import java.util.Properties
 import javax.sql.DataSource
 import java.sql.Connection
 import scalikejdbc.LoanPattern._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConnectionPoolSpec extends FlatSpec with Matchers {
+class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
 
   behavior of "ConnectionPool"
 

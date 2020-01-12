@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import org.joda.time._
 import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with LogSupport with LoanPattern with JavaUtilDateConverterImplicits {
+class SQLInterpolationSpec extends AnyFlatSpec with Matchers with LogSupport with LoanPattern with JavaUtilDateConverterImplicits {
 
   behavior of "SQLInterpolation"
 

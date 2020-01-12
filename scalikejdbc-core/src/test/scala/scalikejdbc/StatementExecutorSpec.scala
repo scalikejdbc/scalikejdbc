@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import java.sql.PreparedStatement
 import scala.reflect.runtime.{ universe => ru }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class StatementExecutorSpec extends FlatSpec with Matchers with MockitoSugar {
+class StatementExecutorSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   behavior of "StatementExecutor"
 

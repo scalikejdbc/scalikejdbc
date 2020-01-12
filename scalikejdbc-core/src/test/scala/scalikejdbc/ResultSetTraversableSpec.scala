@@ -4,8 +4,10 @@ import util.control.Exception._
 import org.scalatest._
 import java.sql.ResultSet
 import scalikejdbc.LoanPattern._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ResultSetTraversableSpec extends FlatSpec with Matchers with Settings {
+class ResultSetTraversableSpec extends AnyFlatSpec with Matchers with Settings {
 
   val tableNamePrefix = "emp_ResultSetTraversableSpec" + System.currentTimeMillis()
 

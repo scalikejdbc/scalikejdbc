@@ -5,8 +5,10 @@ import scalikejdbc.interpolation.Implicits._
 import org.scalatest._
 import java.time._
 import java.time.temporal.ChronoUnit
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class StatementExecutorSpec extends FunSpec with Matchers with Settings {
+class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
 
   describe("StatementExecutor") {
     it("should work with JSR-310 APIs") {

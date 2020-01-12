@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class InformationSchemaSpec extends FlatSpec with Matchers with SQLInterpolation with DBSettings {
+class InformationSchemaSpec extends AnyFlatSpec with Matchers with SQLInterpolation with DBSettings {
 
   behavior of "SQLSyntaxSupport with information_schema"
 

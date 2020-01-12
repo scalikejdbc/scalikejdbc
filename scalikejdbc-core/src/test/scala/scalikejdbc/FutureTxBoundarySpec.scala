@@ -2,13 +2,14 @@ package scalikejdbc
 
 import org.mockito.Mockito.{ mock, when }
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ FlatSpec, Matchers }
 import scalikejdbc.TxBoundary.Future.futureTxBoundary
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class FutureTxBoundarySpec extends FlatSpec with Matchers with ScalaFutures {
+class FutureTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
 
   behavior of "finishTx()"
 
