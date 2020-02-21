@@ -23,7 +23,7 @@ class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
     val a = Account.syntax("a")
     val s = SubQuery.syntax("s", a.resultName)
 
-    s(a.resultName.id) should equal(SQLSyntax(value = "s.i_on_a", parameters = List()))
+    s(a.resultName.id) should equal(SQLSyntax(value = "s.i_on_a", parameters = Nil))
 
     try {
       s(sqls"id")
