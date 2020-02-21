@@ -38,7 +38,7 @@ class StringSQLRunnerSpec extends FlatSpec with Matchers with Settings {
       ("select name from " + tableName + " where id = 3").as[String] should equal("Ben")
 
       // should not be found
-      ("select name from " + tableName + " where id = 999").asList[String] should equal(List())
+      ("select name from " + tableName + " where id = 999").asList[String] should equal(Nil)
       ("select name from " + tableName + " where id = 999").asOption[String] should equal(None)
       try {
         ("select name from " + tableName + " where id = 999").as[String]
