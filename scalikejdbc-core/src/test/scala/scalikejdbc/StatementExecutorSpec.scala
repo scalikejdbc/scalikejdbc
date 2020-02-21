@@ -1,7 +1,7 @@
 package scalikejdbc
 
+import java.lang.reflect.Modifier
 import java.sql.PreparedStatement
-import scala.reflect.runtime.{ universe => ru }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -22,11 +22,16 @@ class StatementExecutorSpec extends AnyFlatSpec with Matchers with MockitoSugar 
     val template: String = "select id, name from members where id = ? and name = ?"
     val params: collection.Seq[Any] = Seq(1, "name1")
     val instance = new StatementExecutor(underlying, template, DBConnectionAttributes(), params)
-    val runtimeMirror = ru.runtimeMirror(instance.getClass.getClassLoader)
-    val instanceMirror = runtimeMirror.reflect(instance)
-    val method = ru.typeOf[StatementExecutor].member(ru.TermName("sqlString")).asMethod
-    val m = instanceMirror.reflectMethod(method)
-    m.apply() should equal("select id, name from members where id = 1 and name = 'name1'")
+    val methods = classOf[StatementExecutor].getDeclaredMethods.filter { m =>
+      (m.getName contains "sqlString") &&
+        (Modifier isPublic m.getModifiers) &&
+        (m.getReturnType == classOf[String]) &&
+        (m.getParameterCount == 0)
+    }.toList
+    assert(methods.nonEmpty, methods)
+    methods.foreach { m =>
+      m.invoke(instance) should equal("select id, name from members where id = 1 and name = 'name1'")
+    }
   }
 
   it should "have PrintableQueryBuilder inside" in {
