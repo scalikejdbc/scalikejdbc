@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.sql.PreparedStatement
 import scala.reflect.runtime.{ universe => ru }
 import org.scalatest.flatspec.AnyFlatSpec
