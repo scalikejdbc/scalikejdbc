@@ -1,0 +1,21 @@
+ScalikeJDBC 3.4.1 is out for Scala 2.13, 2.12, and 2.11.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] 6a4b7092 org.joda.time.* must be in a quoted, when use StatementExecutor.PrintableQueryBuilder.build by takayahilton
+- [core] 06e11879 use Nil instead of List() by xuwei-k
+- [core] 7522c31a Test localTx on a simple IO monad implementation by Christophe Billiard
+- [core] 37e786bf add explicit type annotations by xuwei-k
+- [core] 7c02bbf6 avoid deprecate old-style constructor syntax by xuwei-k
+- [core] 1e0caef6 remove deprecate "import scala.language.higherKinds" by xuwei-k
+- [core] f889f363 Update dependencies by xuwei-k
+- [core] 09e769a2 use isEmpty instead of '.size == 0' by xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!
+
