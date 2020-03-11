@@ -382,7 +382,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .where.in(o.id, Seq[Int]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-          inClauseResults.map(_.id) should equal(List())
+          inClauseResults.map(_.id) should equal(Nil)
         }
         {
           val notInClauseResults = withSQL {
@@ -455,7 +455,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .where.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-          inClauseResults.map(_.id) should equal(List())
+          inClauseResults.map(_.id) should equal(Nil)
         }
         {
           val notInClauseResults = withSQL {

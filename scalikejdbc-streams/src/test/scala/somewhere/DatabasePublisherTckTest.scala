@@ -17,7 +17,7 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   with TestDBSettings
   with TestNGSuiteLike {
 
-  def this() {
+  def this() = {
     this(DatabasePublisherTckTest.environment, 1000)
   }
 

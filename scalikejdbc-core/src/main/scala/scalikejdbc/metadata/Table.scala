@@ -14,9 +14,9 @@ case class Table(
   name: String,
   schema: String = null,
   description: String = null,
-  columns: List[Column] = List(),
-  foreignKeys: List[ForeignKey] = List(),
-  indices: List[Index] = List()) {
+  columns: List[Column] = Nil,
+  foreignKeys: List[ForeignKey] = Nil,
+  indices: List[Index] = Nil) {
 
   /**
    * Returns name with schema(if exists)

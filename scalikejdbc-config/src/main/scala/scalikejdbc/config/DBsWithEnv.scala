@@ -8,6 +8,6 @@ case class DBsWithEnv(envValue: String) extends DBs
   with StandardTypesafeConfig
   with EnvPrefix {
 
-  override val env = Option(envValue)
+  override val env: Option[String] = Option(envValue)
 }
 

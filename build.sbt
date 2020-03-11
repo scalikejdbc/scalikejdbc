@@ -5,7 +5,7 @@ lazy val _version = "3.4.1-SNAPSHOT"
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "1.7.29"
+lazy val _slf4jApiVersion = "1.7.30"
 lazy val _typesafeConfigVersion = "1.4.0"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
@@ -15,11 +15,11 @@ lazy val _h2Version = "1.4.199"
 // 6.0.x is still under development? https://dev.mysql.com/downloads/connector/j/
 lazy val _mysqlVersion = "5.1.48"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.8.Final"
+lazy val _hibernateVersion = "5.4.12.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.0.0"
+lazy val mockitoVersion = "3.3.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.8",
-  specs2Version := "4.8.0",
+  specs2Version := "4.9.2",
   parserCombinatorsVersion := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 11)) =>
@@ -49,7 +49,7 @@ lazy val baseSettings = Seq(
         "1.1.2"
     }
   },
-  collectionCompatVersion := "2.1.2",
+  collectionCompatVersion := "2.1.4",
   //scalaVersion := "2.11.12",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
@@ -185,7 +185,7 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "3.4.1"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "3.4.2"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
@@ -374,13 +374,13 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.14.2.0"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.28.0"           % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.30.1"           % "test",
   "org.hsqldb"        % "hsqldb"               % "2.5.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
 
-val _scalacOptions = Seq("-deprecation", "-unchecked", "-feature")
+val _scalacOptions = Seq("-language:higherKinds", "-deprecation", "-unchecked", "-feature")
 val _pomExtra = <url>http://scalikejdbc.org/</url>
     <licenses>
       <license>
