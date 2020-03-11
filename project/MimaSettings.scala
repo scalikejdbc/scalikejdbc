@@ -1,6 +1,6 @@
 import sbt._, Keys._
 import com.typesafe.tools.mima.plugin.MimaPlugin
-import com.typesafe.tools.mima.plugin.MimaKeys.{mimaPreviousArtifacts, mimaReportBinaryIssues}
+import com.typesafe.tools.mima.plugin.MimaKeys._
 
 /*
  * MiMa settings of ScalikeJDBC libs.
@@ -22,7 +22,9 @@ object MimaSettings {
   //
   val previousVersions = Set(0).map(patch => s"3.4.$patch")
 
-  val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
+  val mimaSettings = Seq(
+    ThisBuild / mimaReportSignatureProblems := true,
+    ThisBuild / mimaFailOnNoPrevious := false,
     mimaPreviousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 13 =>
