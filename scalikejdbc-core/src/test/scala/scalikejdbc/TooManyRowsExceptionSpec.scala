@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TooManyRowsExceptionSpec extends FlatSpec with Matchers {
+class TooManyRowsExceptionSpec extends AnyFlatSpec with Matchers {
 
   behavior of "TooManyRowsException"
 

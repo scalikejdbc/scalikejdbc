@@ -18,7 +18,7 @@ trait ConnectionPoolContext {
  */
 case class MultipleConnectionPoolContext(contexts: (Any, ConnectionPool)*) extends ConnectionPoolContext {
 
-  def this() {
+  def this() = {
     this(Nil: _*)
   }
 

@@ -3,8 +3,10 @@ package jodatime
 
 import org.scalatest._
 import org.joda.time._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JodaUnixTimeInMillisConverterSpec extends FlatSpec with Matchers with JodaUnixTimeInMillisConverterImplicits {
+class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with JodaUnixTimeInMillisConverterImplicits {
 
   behavior of "JodaUnixTimeInMillisConverter"
 

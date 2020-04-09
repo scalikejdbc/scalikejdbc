@@ -2,8 +2,10 @@ package scalikejdbc
 
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OneToManies9SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class OneToManies9SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings {
 
   behavior of "OneToManies9SQL"
 

@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class InvalidColumnNameExceptionSpec extends FlatSpec with Matchers {
+class InvalidColumnNameExceptionSpec extends AnyFlatSpec with Matchers {
 
   behavior of "InvalidColumnNameException"
 

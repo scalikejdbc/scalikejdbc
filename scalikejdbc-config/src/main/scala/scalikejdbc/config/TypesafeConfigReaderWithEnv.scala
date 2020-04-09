@@ -10,7 +10,7 @@ case class TypesafeConfigReaderWithEnv(envValue: String)
   with StandardTypesafeConfig
   with EnvPrefix {
 
-  override val env = Option(envValue)
+  override val env: Option[String] = Option(envValue)
 
   override lazy val config: Config = {
     val topLevelConfig = ConfigFactory.load()

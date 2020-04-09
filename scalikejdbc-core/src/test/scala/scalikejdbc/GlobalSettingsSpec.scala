@@ -2,8 +2,10 @@ package scalikejdbc
 
 import org.scalatest._
 import java.time._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class GlobalSettingsSpec extends FlatSpec with Matchers with Settings with LogSupport {
+class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with LogSupport {
 
   behavior of "GlobalSettings"
 

@@ -3,11 +3,11 @@ package scalikejdbc
 import java.io.InputStream
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
-import org.scalatest.FlatSpec
 import scalikejdbc.JavaUtilDateConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
+import org.scalatest.flatspec.AnyFlatSpec
 
-class ParameterBinderFactorySpec extends FlatSpec with MockitoSugar {
+class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 
   behavior of "ParameterBinderFactory"
 

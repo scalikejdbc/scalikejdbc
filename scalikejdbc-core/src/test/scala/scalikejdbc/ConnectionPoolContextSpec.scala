@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConnectionPoolContextSpec extends FlatSpec with Matchers with Settings {
+class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings {
 
   behavior of "ConnectionPoolContext"
 

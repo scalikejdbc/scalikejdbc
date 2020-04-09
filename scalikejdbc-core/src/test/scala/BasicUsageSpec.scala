@@ -3,8 +3,10 @@ import org.scalatest._
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class BasicUsageSpec extends FlatSpec with Matchers with LoanPattern {
+class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 
   behavior of "Basic usage of ScalikeJDBC"
 

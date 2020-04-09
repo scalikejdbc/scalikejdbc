@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQL_AttributesSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   behavior of "SQL"
 

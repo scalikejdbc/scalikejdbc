@@ -3,7 +3,7 @@ package somewhere
 import org.reactivestreams.Publisher
 import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
-import org.scalatest.testng.TestNGSuiteLike
+import org.scalatestplus.testng.TestNGSuiteLike
 import org.testng.SkipException
 import org.testng.annotations.{ AfterClass, BeforeClass, Test }
 import scalikejdbc._
@@ -17,7 +17,7 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   with TestDBSettings
   with TestNGSuiteLike {
 
-  def this() {
+  def this() = {
     this(DatabasePublisherTckTest.environment, 1000)
   }
 

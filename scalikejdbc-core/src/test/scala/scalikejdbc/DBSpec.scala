@@ -11,10 +11,13 @@ import scala.util.control.Exception._
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 import org.scalatest.concurrent.ScalaFutures
+import scalikejdbc.iomonads.MyIO
 
 import ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
+class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
 
   val logger = LoggerFactory.getLogger(classOf[DBSpec])
 
@@ -321,6 +324,86 @@ class DBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings wi
       }
       intercept[Exception] {
         Await.result(failure, 10.seconds)
+      }
+      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      res.get should not be (Some("foo"))
+    }
+  }
+
+  // --------------------
+  // localTx with an IO monad example
+
+  it should "execute single in localTx block with an IO monad" in {
+    val tableName = tableNamePrefix + "_singleInFLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+
+      val myIOResult = DB.localTx[MyIO[Option[String]]] { s =>
+        MyIO(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      }
+      myIOResult.run() should equal(Some("1"))
+    }
+  }
+
+  it should "execute list in localTx block with an IO monad" in {
+    val tableName = tableNamePrefix + "_singleInFLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val myIOResult = DB.localTx[MyIO[List[Option[String]]]] { s =>
+        MyIO(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      }(boundary = MyIO.myIOTxBoundary)
+      myIOResult.run().size should equal(2)
+    }
+  }
+
+  it should "execute update in localTx block with an IO monad" in {
+    val tableName = tableNamePrefix + "_singleInFLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val myIOCount = DB.localTx[MyIO[Int]] { s =>
+        MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      }(boundary = MyIO.myIOTxBoundary)
+      val firstResult = myIOCount.run()
+      firstResult should equal(1)
+
+      val myIOName = MyIO(firstResult).flatMap { _ =>
+        DB.localTx[MyIO[Option[String]]](s => MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))(boundary=MyIO.myIOTxBoundary)
+      }
+      myIOName.run() should be(Some("foo"))
+
+    }
+  }
+
+  it should "not be able to rollback in localTx block with an IO monad" in {
+    val tableName = tableNamePrefix + "_singleInFLocalTx"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      futureUsing(DB(ConnectionPool.borrow())) { db =>
+        val myIOCount = DB localTx[MyIO[Int]] { s =>
+          MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+        }
+        myIOCount.run() should equal(1)
+
+        db.rollbackIfActive()
+        val myIOName = DB localTx[MyIO[Option[String]]] { s =>
+          MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        }
+        myIOName.run() should equal(Some("foo"))
+        Future(myIOName.run())
+      }
+    }
+  }
+
+  it should "do rollback in localTx block with an IO monad" in {
+    val tableName = tableNamePrefix + "_rollback"
+    ultimately(TestUtils.deleteTable(tableName)) {
+      TestUtils.initialize(tableName)
+      val failure = DB localTx[MyIO[Int]] { implicit s =>
+        MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+          .map(_ => s.update("update foo should be rolled back"))
+      }
+      intercept[Exception] {
+        failure.run()
       }
       val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))

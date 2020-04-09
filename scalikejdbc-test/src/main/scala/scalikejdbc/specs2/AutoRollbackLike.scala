@@ -29,7 +29,7 @@ trait AutoRollbackLike extends After with LoanPattern {
   // ------------------------------
   // before execution
   // ------------------------------
-  val _db = db()
+  val _db: DB = db()
   _db.begin()
 
   try {

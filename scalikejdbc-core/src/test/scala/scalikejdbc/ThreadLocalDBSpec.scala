@@ -3,8 +3,10 @@ package scalikejdbc
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import util.control.Exception._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ThreadLocalDBSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
+class ThreadLocalDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
   val tableNamePrefix = "emp_ThreadLocalDBSpec" + System.currentTimeMillis()
 

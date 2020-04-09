@@ -6,8 +6,10 @@ import org.slf4j._
 
 import scala.collection.concurrent.TrieMap
 import scala.util.control.NonFatal
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQLInterpolationSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation with OptionValues {
+class SQLInterpolationSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation with OptionValues {
 
   val logger: Logger = LoggerFactory.getLogger(classOf[SQLInterpolationSpec])
 

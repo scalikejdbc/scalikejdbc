@@ -4,8 +4,10 @@ import util.control.Exception._
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
 import java.sql.{ SQLException, PreparedStatement }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
+class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern {
 
   val tableNamePrefix = "emp_SQLSpec" + System.currentTimeMillis()
 

@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import java.sql.PreparedStatement
-import scala.language.higherKinds
 import scala.collection.compat._
 
 /**

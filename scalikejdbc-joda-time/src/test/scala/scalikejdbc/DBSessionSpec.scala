@@ -9,8 +9,10 @@ import org.joda.time.DateTime
 import java.sql._
 import scala.concurrent.ExecutionContext
 import java.io.ByteArrayInputStream
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DBSessionSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
+class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LogSupport
   with LoanPattern with JavaUtilDateConverterImplicits {
 
   def opt[A](v: Any): Option[A] = Option(v.asInstanceOf[A])

@@ -163,7 +163,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   // factory
   private[scalikejdbc] object GroupBySQLBuilder {
-    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with GroupBySQLBuilder[A]
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with GroupBySQLBuilder[A] = new RawSQLBuilder[A](sql) with GroupBySQLBuilder[A]
   }
 
   trait GroupBySQLBuilder[A] extends SQLBuilder[A]
@@ -176,7 +176,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   // factory
   private[scalikejdbc] object PagingSQLBuilder {
-    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] = new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
   }
 
   trait PagingSQLBuilder[A] extends SQLBuilder[A]
@@ -196,7 +196,7 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
 
   // factory
   private[scalikejdbc] object ConditionSQLBuilder {
-    def apply[A](sql: SQLSyntax) = new RawSQLBuilder[A](sql) with ConditionSQLBuilder[A]
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with ConditionSQLBuilder[A] = new RawSQLBuilder[A](sql) with ConditionSQLBuilder[A]
   }
 
   trait ConditionSQLBuilder[A] extends SQLBuilder[A]

@@ -36,7 +36,6 @@ package scalikejdbc
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.compat._
-import scala.language.higherKinds
 
 private[scalikejdbc] trait OneToManies${n}Extractor[$A, $bs, E <: WithExtractor, Z]
     extends SQL[Z, E]

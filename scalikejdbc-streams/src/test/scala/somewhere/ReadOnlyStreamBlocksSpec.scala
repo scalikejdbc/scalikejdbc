@@ -5,8 +5,10 @@ import scalikejdbc._
 import scalikejdbc.streams._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ReadOnlyStreamBlocksSpec extends FlatSpec with Matchers {
+class ReadOnlyStreamBlocksSpec extends AnyFlatSpec with Matchers {
 
   "DB.readOnlyStream" should "create DatabasePublisher" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {

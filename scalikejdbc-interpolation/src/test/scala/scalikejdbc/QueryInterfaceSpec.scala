@@ -4,8 +4,10 @@ import java.time.format.DateTimeFormatter
 
 import org.scalatest._
 import java.time.{ ZoneId, ZonedDateTime }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQLInterpolation {
+class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
 
   def isH2: Boolean = driverClassName == "org.h2.Driver" || sys.env.get("SCALIKEJDBC_DATABASE").exists(_ == "h2")
 
@@ -382,7 +384,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .where.in(o.id, Seq[Int]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-          inClauseResults.map(_.id) should equal(List())
+          inClauseResults.map(_.id) should equal(Nil)
         }
         {
           val notInClauseResults = withSQL {
@@ -455,7 +457,7 @@ class QueryInterfaceSpec extends FlatSpec with Matchers with DBSettings with SQL
               .where.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
-          inClauseResults.map(_.id) should equal(List())
+          inClauseResults.map(_.id) should equal(Nil)
         }
         {
           val notInClauseResults = withSQL {

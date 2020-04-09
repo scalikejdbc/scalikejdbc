@@ -3,8 +3,10 @@ package interpolation
 
 import org.scalatest._
 import java.time.LocalDateTime
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SQLSyntaxSpec extends FlatSpec with Matchers {
+class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
 
   import Implicits._
 

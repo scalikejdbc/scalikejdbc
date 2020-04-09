@@ -4,8 +4,10 @@ import org.scalatest._
 import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.time._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TypeBinderSpec extends FlatSpec with Matchers with MockitoSugar with JavaUtilDateConverterImplicits {
+class TypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar with JavaUtilDateConverterImplicits {
 
   behavior of "TypeBinder"
 

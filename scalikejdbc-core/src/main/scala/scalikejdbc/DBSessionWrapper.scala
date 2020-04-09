@@ -3,7 +3,6 @@ package scalikejdbc
 import java.sql.PreparedStatement
 
 import scala.collection.compat._
-import scala.language.higherKinds
 
 /**
  * A DBSession wrapper which is DBSessionAttributeSwitcher-wired.

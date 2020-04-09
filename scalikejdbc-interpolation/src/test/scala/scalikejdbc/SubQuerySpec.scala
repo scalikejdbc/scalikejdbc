@@ -1,8 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SubQuerySpec extends FlatSpec with Matchers with SQLInterpolation {
+class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
 
   Class.forName("org.h2.Driver")
   ConnectionPool.add(Symbol("SubQuerySpec"), "jdbc:h2:mem:SubQuerySpec", "user", "pass")
@@ -21,7 +23,7 @@ class SubQuerySpec extends FlatSpec with Matchers with SQLInterpolation {
     val a = Account.syntax("a")
     val s = SubQuery.syntax("s", a.resultName)
 
-    s(a.resultName.id) should equal(SQLSyntax(value = "s.i_on_a", parameters = List()))
+    s(a.resultName.id) should equal(SQLSyntax(value = "s.i_on_a", parameters = Nil))
 
     try {
       s(sqls"id")

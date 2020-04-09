@@ -2,8 +2,10 @@ package scalikejdbc
 
 import org.scalatest._
 import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RelationalSQLSpec extends FlatSpec with Matchers with BeforeAndAfter with Settings {
+class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings {
 
   val tableNamePrefix = "emp_RelationalSQLSpec" + System.currentTimeMillis()
 
