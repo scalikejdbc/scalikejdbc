@@ -7,7 +7,7 @@ services:
 
 scala:
   - 2.12.11
-  - 2.13.1
+  - 2.13.2
 
 # The project supports OpenJDK 8+ / Oracle JDK 8,9,10
 jdk:
