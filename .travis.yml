@@ -75,7 +75,7 @@ matrix:
     - scala: 2.12.11
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk11
-    - scala: 2.13.1
+    - scala: 2.13.2
       env: SCALIKEJDBC_DATABASE="mysql"
     - os: windows
       language: bash

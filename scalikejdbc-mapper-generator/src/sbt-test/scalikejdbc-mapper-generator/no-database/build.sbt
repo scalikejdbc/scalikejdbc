@@ -4,7 +4,7 @@ val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.1", "2.12.11", "2.11.12")
+crossScalaVersions := List("2.13.2", "2.12.11", "2.11.12")
 
 scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
 
