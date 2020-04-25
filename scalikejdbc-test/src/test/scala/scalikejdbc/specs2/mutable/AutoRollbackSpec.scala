@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
 
-object AutoRollbackSpec extends Specification with DBSettings with PreparingTables {
+class AutoRollbackSpec extends Specification with DBSettings with PreparingTables {
 
   sequential
 
