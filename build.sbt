@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.0.8",
-  specs2Version := "4.9.2",
+  specs2Version := "4.9.4",
   parserCombinatorsVersion := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 11)) =>
