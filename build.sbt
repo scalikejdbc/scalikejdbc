@@ -150,6 +150,12 @@ lazy val scalikejdbcCore = Project(
       sys.error("Working directory is dirty!\n" + diff)
     }
   },
+  (sourceGenerators in Compile) += task{
+    val dir = (sourceManaged in Compile).value
+    val file = dir / "scalikejdbc" / "OneToXSQL.scala"
+    IO.write(file, GenerateOneToXSQL.value)
+    Seq(file)
+  },
   (sourceGenerators in Compile) += task[Seq[File]]{
     val dir = (sourceManaged in Compile).value
     (3 to 21).map{ n =>
