@@ -1,4 +1,4 @@
-ScalikeJDBC 3.4.1 is out for Scala 2.13, 2.12, and 2.11.
+ScalikeJDBC 3.4.2 is out for Scala 2.13, 2.12, and 2.11.
 
 http://scalikejdbc.org/
 
