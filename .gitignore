@@ -65,3 +65,7 @@ sandbox/db
 
 
 .ensime*
+
+.bloop/
+.metals/
+project/metals.sbt
