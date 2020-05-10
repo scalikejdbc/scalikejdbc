@@ -20,7 +20,7 @@ object MimaSettings {
   //  - you're going to remove some of the methods in 3.0.2
   //  - in this case, the incompatibility won't be detected
   //
-  val previousVersions = Set(0, 1).map(patch => s"3.4.$patch")
+  val previousVersions = Set(0, 1, 2).map(patch => s"3.4.$patch")
 
   val mimaSettings = Seq(
     ThisBuild / mimaReportSignatureProblems := true,
