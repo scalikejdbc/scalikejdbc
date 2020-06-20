@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.1.2",
-  specs2Version := "4.9.4",
+  specs2Version := "4.10.0",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.6",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
@@ -357,7 +357,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.14.2.0"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.31.1"           % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.32.3"           % "test",
   "org.hsqldb"        % "hsqldb"               % "2.5.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
