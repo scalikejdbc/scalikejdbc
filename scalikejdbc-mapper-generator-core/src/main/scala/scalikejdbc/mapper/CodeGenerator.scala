@@ -814,12 +814,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       Some(replaceVariablesForTestPart(
         s"""package %package%
           |
-          |import org.scalatest._
+          |import org.scalatest.flatspec.FixtureAnyFlatSpec
+          |import org.scalatest.matchers.should.Matchers
           |import scalikejdbc.scalatest.AutoRollback
           |import scalikejdbc._
           |$timeImport
           |
-          |class %className%Spec extends fixture.FlatSpec with Matchers with AutoRollback {
+          |class %className%Spec extends FixtureAnyFlatSpec with Matchers with AutoRollback {
           |  %syntaxObject%
           |
           |  behavior of "%className%"
