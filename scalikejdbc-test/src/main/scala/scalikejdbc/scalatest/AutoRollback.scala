@@ -7,8 +7,8 @@ import scalikejdbc._
  * AutoRollback for ScalaTest
  *
  * {{{
- * import org.scalatest.fixture.FlatSpec
- * class MemberSpec extends FlatSpec with AutoRollback {
+ * import org.scalatest.flatspec.FixtureAnyFlatSpec
+ * class MemberSpec extends FixtureAnyFlatSpec with AutoRollback {
  *   describe of "Member"
  *   it should "create a new record" in { implicit session =>
  *     Member.create(1, "Alice")
