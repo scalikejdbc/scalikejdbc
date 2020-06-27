@@ -332,10 +332,10 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
     DB autoCommit {
       implicit session =>
         try {
-          SQL("create table dbsessionspec_judate (id integer primary key, date timestamp)").execute.apply()
-          SQL("insert into dbsessionspec_judate values (?, ?)").bind(1, new java.util.Date()).update.apply()
+          SQL("create table dbsessionspec_judate (id integer primary key, date timestamp)").execute().apply()
+          SQL("insert into dbsessionspec_judate values (?, ?)").bind(1, new java.util.Date()).update().apply()
         } finally {
-          SQL("drop table dbsessionspec_judate").execute.apply()
+          SQL("drop table dbsessionspec_judate").execute().apply()
         }
     }
   }
@@ -346,14 +346,14 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
         try {
           // NOTE: id column should be the first one for PostgreSQL
           try {
-            SQL("create table dbsessionspec_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
+            SQL("create table dbsessionspec_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsessionspec_genkey (id integer auto_increment, primary key(id), name varchar(30))").execute.apply()
+                SQL("create table dbsessionspec_genkey (id integer auto_increment, primary key(id), name varchar(30))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsessionspec_genkey (id serial not null, primary key(id), name varchar(30))").execute.apply()
+                  SQL("create table dbsessionspec_genkey (id serial not null, primary key(id), name varchar(30))").execute().apply()
               }
           }
           var id = -1L
@@ -381,7 +381,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           //    ids.last should be <= 8L
           //  }
         } finally {
-          SQL("drop table dbsessionspec_genkey").execute.apply()
+          SQL("drop table dbsessionspec_genkey").execute().apply()
         }
     }
   }
@@ -391,27 +391,27 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsessionspec_update_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute.apply()
+            SQL("create table dbsessionspec_update_genkey (id integer generated always as identity(start with 0), name varchar(30))").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsessionspec_update_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute.apply()
+                SQL("create table dbsessionspec_update_genkey (id integer auto_increment, name varchar(30), primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsessionspec_update_genkey (id serial not null, name varchar(30), primary key(id))").execute.apply()
+                  SQL("create table dbsessionspec_update_genkey (id serial not null, name varchar(30), primary key(id))").execute().apply()
               }
           }
 
-          val id1 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+          val id1 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey().apply()
           id1 should be <= 1L
-          val id2 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+          val id2 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey().apply()
           id2 should be <= 2L
-          val id3 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+          val id3 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey().apply()
           id3 should be <= 3L
-          val id4 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+          val id4 = SQL("insert into dbsessionspec_update_genkey (name) values (?)").bind("xxx").updateAndReturnGeneratedKey().apply()
           id4 should be <= 4L
         } finally {
-          SQL("drop table dbsessionspec_update_genkey").execute.apply()
+          SQL("drop table dbsessionspec_update_genkey").execute().apply()
         }
     }
   }
@@ -421,19 +421,19 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer generated always as identity(start with 0))").execute.apply()
+            SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer generated always as identity(start with 0))").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer auto_increment, primary key(id))").execute.apply()
+                SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id integer auto_increment, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id serial not null, primary key(id))").execute.apply()
+                  SQL("create table dbsessionspec_update_genkey2 (name varchar(30), id serial not null, primary key(id))").execute().apply()
               }
           }
 
           if (driverClassName == "org.h2.Driver" || driverClassName == "com.mysql.jdbc.Driver") {
-            val id1 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey.apply()
+            val id1 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey().apply()
             id1 should be <= 1L
           } else {
             val id1 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey("id").apply()
@@ -442,7 +442,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           val id2 = SQL("insert into dbsessionspec_update_genkey2 (name) values (?)").bind("xxx").updateAndReturnGeneratedKey(2).apply()
           id2 should be <= 2L
         } finally {
-          SQL("drop table dbsessionspec_update_genkey2").execute.apply()
+          SQL("drop table dbsessionspec_update_genkey2").execute().apply()
         }
     }
   }
@@ -470,7 +470,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               time_value time not null,
               timestamp_value timestamp not null
             )
-                   """).execute.apply()
+                   """).execute().apply()
             } catch {
               case e: Exception =>
                 try {
@@ -482,7 +482,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               timestamp_value timestamp not null,
               primary key(id)
             )
-                       """).execute.apply()
+                       """).execute().apply()
                 } catch {
                   case e: Exception =>
                     SQL("""
@@ -493,14 +493,14 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               timestamp_value timestamp not null,
               primary key(id)
             )
-                         """).execute.apply()
+                         """).execute().apply()
 
                 }
 
             }
 
             // clean table
-            SQL("delete from dbsessionspec_dateTimeValues").update.apply()
+            SQL("delete from dbsessionspec_dateTimeValues").update().apply()
 
             SQL("""
             insert into dbsessionspec_dateTimeValues
@@ -510,7 +510,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                  """).bind(
               date,
               time,
-              timestamp).update.apply()
+              timestamp).update().apply()
 
             SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
               rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
@@ -585,7 +585,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
 
           } finally {
             try {
-              SQL("drop table dbsessionspec_dateTimeValues").execute.apply()
+              SQL("drop table dbsessionspec_dateTimeValues").execute().apply()
             } catch {
               case e: Exception =>
             }
@@ -600,21 +600,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute.apply()
+            SQL("create table dbsession_work_with_short_values (id bigint generated always as identity, s smallint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute.apply()
+                SQL("create table dbsession_work_with_short_values (id bigint auto_increment, s smallint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_work_with_short_values (id serial not null, s smallint, primary key(id))").execute().apply()
               }
           }
           val s: Short = 123
-          SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update.apply()
+          SQL("insert into dbsession_work_with_short_values (s) values (?)").bind(s).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_short_values").execute.apply()
+            SQL("drop table dbsession_work_with_short_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -627,21 +627,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+            SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint generated always as identity, s bigint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+                SQL("create table dbsession_work_with_scala_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_work_with_scala_big_decimal_values (id serial not null, s bigint, primary key(id))").execute().apply()
               }
           }
           val s: BigDecimal = BigDecimal(123)
-          SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update.apply()
+          SQL("insert into dbsession_work_with_scala_big_decimal_values (s) values (?)").bind(s).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_scala_big_decimal_values").execute.apply()
+            SQL("drop table dbsession_work_with_scala_big_decimal_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -654,21 +654,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute.apply()
+            SQL("create table dbsession_work_with_java_big_decimal_values (id bigint generated always as identity, s bigint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+                SQL("create table dbsession_work_with_java_big_decimal_values (id bigint auto_increment, s bigint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_work_with_java_big_decimal_values (id serial not null, s bigint, primary key(id))").execute().apply()
               }
           }
           val s: BigDecimal = BigDecimal(123)
-          SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update.apply()
+          SQL("insert into dbsession_work_with_java_big_decimal_values (s) values (?)").bind(s).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_java_big_decimal_values").execute.apply()
+            SQL("drop table dbsession_work_with_java_big_decimal_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -681,21 +681,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_scala_big_int_values (id bigint generated always as identity, s bigint)").execute.apply()
+            SQL("create table dbsession_work_with_scala_big_int_values (id bigint generated always as identity, s bigint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_work_with_scala_big_int_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+                SQL("create table dbsession_work_with_scala_big_int_values (id bigint auto_increment, s bigint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_work_with_scala_big_int_values (id serial not null, s bigint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_work_with_scala_big_int_values (id serial not null, s bigint, primary key(id))").execute().apply()
               }
           }
           val s: BigInt = BigInt(123)
-          SQL("insert into dbsession_work_with_scala_big_int_values (s) values (?)").bind(s).update.apply()
+          SQL("insert into dbsession_work_with_scala_big_int_values (s) values (?)").bind(s).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_scala_big_int_values").execute.apply()
+            SQL("drop table dbsession_work_with_scala_big_int_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -708,21 +708,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_java_big_integer_values (id bigint generated always as identity, s bigint)").execute.apply()
+            SQL("create table dbsession_work_with_java_big_integer_values (id bigint generated always as identity, s bigint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_work_with_java_big_integer_values (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+                SQL("create table dbsession_work_with_java_big_integer_values (id bigint auto_increment, s bigint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_work_with_java_big_integer_values (id serial not null, s bigint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_work_with_java_big_integer_values (id serial not null, s bigint, primary key(id))").execute().apply()
               }
           }
           val s: BigInt = BigInt(123)
-          SQL("insert into dbsession_work_with_java_big_integer_values (s) values (?)").bind(s).update.apply()
+          SQL("insert into dbsession_work_with_java_big_integer_values (s) values (?)").bind(s).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_java_big_integer_values").execute.apply()
+            SQL("drop table dbsession_work_with_java_big_integer_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -747,7 +747,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
             v_short smallint,
             v_timestamp timestamp
           )
-                 """).execute.apply()
+                 """).execute().apply()
           } catch {
             case e: Exception =>
               try {
@@ -764,7 +764,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
             v_timestamp datetime,
             primary key(id)
           )
-                     """).execute.apply()
+                     """).execute().apply()
               } catch {
                 case e: Exception =>
                   SQL("""
@@ -780,7 +780,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
             v_timestamp timestamp,
             primary key(id)
           )
-                       """).execute.apply()
+                       """).execute().apply()
 
               }
 
@@ -790,7 +790,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           (v_boolean, v_byte, v_double, v_float, v_int, v_long, v_short, v_timestamp) values 
           (?,?,?,?,?,?,?,?)
                         """).bind(
-            None, None, None, None, None, None, None, None).updateAndReturnGeneratedKey.apply()
+            None, None, None, None, None, None, None, None).updateAndReturnGeneratedKey().apply()
 
           case class Result(vBoolean: Option[Boolean], vByte: Option[Byte], vDouble: Option[Double],
             vFloat: Option[Float], vInt: Option[Int], vLong: Option[Long], vShort: Option[Short],
@@ -834,7 +834,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
                 vTimestamp = rs.jodaDateTimeOpt("v_timestamp"))
-          }.single.apply())
+          }.single().apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
@@ -847,7 +847,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                 vLong = Option(rs.nullableLong("v_long").asInstanceOf[Long]),
                 vShort = Option(rs.nullableShort("v_short").asInstanceOf[Short]),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
-          }.single.apply())
+          }.single().apply())
 
           // should use nullable*** methods
           intercept[ResultSetExtractorException](SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
@@ -861,7 +861,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                 vLong = opt[Long](rs.long("v_long")),
                 vShort = opt[Short](rs.short("v_short")),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
-          }.single.apply())
+          }.single().apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
@@ -874,7 +874,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                 vLong = opt[Long](rs.nullableLong("v_long")),
                 vShort = opt[Short](rs.nullableShort("v_short")),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
-          }.single.apply())
+          }.single().apply())
 
           assert(SQL("select * from dbsession_work_with_optional_values where id = ?").bind(id).map {
             rs =>
@@ -887,11 +887,11 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
                 vLong = rs.longOpt("v_long"),
                 vShort = rs.shortOpt("v_short"),
                 vTimestamp = Option(rs.timestamp("v_timestamp")).map(_.toJodaDateTime))
-          }.single.apply())
+          }.single().apply())
 
         } finally {
           try {
-            SQL("drop table dbsession_work_with_optional_values").execute.apply()
+            SQL("drop table dbsession_work_with_optional_values").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -903,11 +903,11 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
     DB autoCommit { implicit s =>
       try {
         try {
-          SQL("create table image_data (name varchar(255), data blob);").execute.apply()
+          SQL("create table image_data (name varchar(255), data blob);").execute().apply()
         } catch {
           case e: Exception =>
             // PostgreSQL doesn't have blob
-            SQL("create table image_data (name varchar(255), data bytea);").execute.apply()
+            SQL("create table image_data (name varchar(255), data bytea);").execute().apply()
         }
         using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
           try {
@@ -915,7 +915,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               .bindByName(
                 Symbol("name") -> "logo",
                 Symbol("data") -> stream)
-              .update.apply()
+              .update().apply()
           } catch {
             case e: Exception =>
               // PostgreSQL does not support #setBinaryStream
@@ -923,7 +923,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               else fail("Failed to insert data because " + e.getMessage, e)
           }
         }
-        SQL("select * from image_data;").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
+        SQL("select * from image_data;").map(rs => rs.binaryStream("data")).single().apply().map { bs =>
           using(new java.io.ByteArrayOutputStream) { bos =>
             var next: Int = bs.read()
             while (next > -1) {
@@ -936,7 +936,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
         }
       } finally {
         try {
-          SQL("drop table image_data;").execute.apply()
+          SQL("drop table image_data;").execute().apply()
         } catch { case e: Exception => }
       }
     }
@@ -946,11 +946,11 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
     DB autoCommit { implicit s =>
       try {
         try {
-          SQL("create table image_data2 (name varchar(255), data blob);").execute.apply()
+          SQL("create table image_data2 (name varchar(255), data blob);").execute().apply()
         } catch {
           case e: Exception =>
             // PostgreSQL doesn't have blob
-            SQL("create table image_data2 (name varchar(255), data bytea);").execute.apply()
+            SQL("create table image_data2 (name varchar(255), data bytea);").execute().apply()
         }
         using(this.getClass.getClassLoader.getResourceAsStream("google.png")) { stream =>
           using(new java.io.ByteArrayOutputStream) { bos =>
@@ -964,10 +964,10 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               .bindByName(
                 Symbol("name") -> "logo",
                 Symbol("data") -> bos.toByteArray)
-              .update.apply()
+              .update().apply()
           }
         }
-        SQL("select * from image_data2").map(rs => rs.binaryStream("data")).single.apply().map { bs =>
+        SQL("select * from image_data2").map(rs => rs.binaryStream("data")).single().apply().map { bs =>
           using(new java.io.ByteArrayOutputStream) { bos =>
             var next: Int = bs.read()
             while (next > -1) {
@@ -980,7 +980,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
         }
       } finally {
         try {
-          SQL("drop table image_data2").execute.apply()
+          SQL("drop table image_data2").execute().apply()
         } catch { case e: Exception => }
       }
     }
@@ -992,17 +992,17 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_issue_218 (id bigint generated always as identity, s bigint)").execute.apply()
+            SQL("create table dbsession_issue_218 (id bigint generated always as identity, s bigint)").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table dbsession_issue_218 (id bigint auto_increment, s bigint, primary key(id))").execute.apply()
+                SQL("create table dbsession_issue_218 (id bigint auto_increment, s bigint, primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table dbsession_issue_218 (id serial not null, s bigint, primary key(id))").execute.apply()
+                  SQL("create table dbsession_issue_218 (id serial not null, s bigint, primary key(id))").execute().apply()
               }
           }
-          val sql = SQL("insert into dbsession_issue_218 (s) values (?)").bind(123).update
+          val sql = SQL("insert into dbsession_issue_218 (s) values (?)").bind(123).update()
           val executor = session.toStatementExecutor(sql.statement, sql.parameters)
           import ExecutionContext.Implicits.global
           scala.concurrent.Future {
@@ -1012,7 +1012,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           executor.underlying.cancel()
         } finally {
           try {
-            SQL("drop table dbsession_issue_218").execute.apply()
+            SQL("drop table dbsession_issue_218").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -1025,21 +1025,21 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       implicit session =>
         try {
           try {
-            SQL("create table dbsession_work_with_parameter_binder (id bigint, data blob)").execute.apply()
+            SQL("create table dbsession_work_with_parameter_binder (id bigint, data blob)").execute().apply()
           } catch {
             case e: Exception =>
               // PostgreSQL doesn't have blob
-              SQL("create table dbsession_work_with_parameter_binder (id bigint, data bytea)").execute.apply()
+              SQL("create table dbsession_work_with_parameter_binder (id bigint, data bytea)").execute().apply()
           }
           val bytes = scala.Array[Byte](1, 2, 3, 4, 5, 6, 7)
           val in = new ByteArrayInputStream(bytes)
           val v = ParameterBinder(
             value = in,
             binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, bytes.length))
-          SQL("insert into dbsession_work_with_parameter_binder (data) values (?)").bind(v).update.apply()
+          SQL("insert into dbsession_work_with_parameter_binder (data) values (?)").bind(v).update().apply()
         } finally {
           try {
-            SQL("drop table dbsession_work_with_parameter_binder").execute.apply()
+            SQL("drop table dbsession_work_with_parameter_binder").execute().apply()
           } catch {
             case e: Exception => e.printStackTrace()
           }
@@ -1061,10 +1061,10 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
 
     try {
       DB autoCommit { implicit session =>
-        try SQL("drop table zone_test").execute.apply()
+        try SQL("drop table zone_test").execute().apply()
         catch { case e: Exception => }
 
-        SQL("create table zone_test (id int primary key, t timestamp)").execute.apply()
+        SQL("create table zone_test (id int primary key, t timestamp)").execute().apply()
       }
 
       /**
@@ -1075,11 +1075,11 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           conn = session.conn,
           connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
 
-        SQL("insert into zone_test values (?, ?)").bind(1, time).execute.apply()(jstSession)
-        val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single.apply().get
+        SQL("insert into zone_test values (?, ?)").bind(1, time).execute().apply()(jstSession)
+        val jstString = SQL(s"select $castToString as s from zone_test where id = 1").map(_.string("s")).single().apply().get
         jstString should equal(time.toString("yyyy-MM-dd HH:mm:ss"))
 
-        val expectedTime1 = SQL("select t from zone_test where id = 1").map(_.jodaDateTime("t")).single.apply().get
+        val expectedTime1 = SQL("select t from zone_test where id = 1").map(_.jodaDateTime("t")).single().apply().get
         expectedTime1.isEqual(time) should equal(true)
       }
 
@@ -1091,16 +1091,16 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           conn = session.conn,
           connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
 
-        SQL("insert into zone_test values (?, ?)").bind(2, time).execute.apply()
-        val utcString = SQL(s"select $castToString as s from zone_test where id = 2").map(_.string("s")).single.apply().get
+        SQL("insert into zone_test values (?, ?)").bind(2, time).execute().apply()
+        val utcString = SQL(s"select $castToString as s from zone_test where id = 2").map(_.string("s")).single().apply().get
         utcString should equal(time.withZone(DateTimeZone.forID("UTC")).toString("yyyy-MM-dd HH:mm:ss"))
 
-        val expectedTime2 = SQL("select t from zone_test where id = 2").map(_.jodaDateTime("t")).single.apply().get
+        val expectedTime2 = SQL("select t from zone_test where id = 2").map(_.jodaDateTime("t")).single().apply().get
         expectedTime2.isEqual(time) should equal(true)
       }
     } finally {
       DB autoCommit { implicit session =>
-        try SQL("drop table zone_test").execute.apply()
+        try SQL("drop table zone_test").execute().apply()
         catch { case e: Exception => }
       }
     }

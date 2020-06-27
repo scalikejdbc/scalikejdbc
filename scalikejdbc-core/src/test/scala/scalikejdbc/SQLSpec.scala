@@ -32,7 +32,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
         SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).execute().apply()
 
         val noName = SQL("select id,name from " + tableName + " where id = ?").bind(4)
-          .map(rs => (rs.int("id"), rs.string("name"))).toOption
+          .map(rs => (rs.int("id"), rs.string("name"))).toOption()
           .apply()
 
         noName.get._1 should equal(4)
@@ -110,7 +110,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
 
-        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
+        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
         count should equal(1)
 
         val before = (s: PreparedStatement) => println("before")
@@ -134,7 +134,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
-        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update.apply()
+        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).update().apply()
         count should equal(1)
 
         val before = (s: PreparedStatement) => println("before")
@@ -252,20 +252,20 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap()).list().apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.InfoLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap()).list().apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.WarnLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap()).list().apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.ExceptionForIgnoredParams)
       intercept[IllegalStateException] {
         DB readOnly { implicit s =>
-          SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap).list.apply()
+          SQL("select 1 from " + tableName).bindByName(Symbol("foo") -> "bar").map(_.toMap()).list().apply()
         }
       }
     }
@@ -278,7 +278,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
 
       val results: List[Map[String, Any]] = DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).toMap.list.apply()
+        SQL("select 1 from " + tableName).toMap().list().apply()
       }
       results.size should be > (0)
     }
@@ -303,13 +303,13 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
 
       implicit val session = ReadOnlyAutoSession
 
-      SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
+      SQL("select id from " + tableName + "").map(_.long(1)).list().apply()
 
       intercept[SQLException] {
-        SQL("delete from " + tableName + "").update.apply()
+        SQL("delete from " + tableName + "").update().apply()
       }
       intercept[SQLException] {
-        SQL("update " + tableName + " set name = 'Anonymous'").update.apply()
+        SQL("update " + tableName + " set name = 'Anonymous'").update().apply()
       }
       intercept[SQLException] {
         SQL("update " + tableName + " set name = ?").batch(Seq("Anonymous")).apply()
@@ -323,13 +323,13 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
       implicit val session = ReadOnlyNamedAutoSession(Symbol("named"))
 
-      SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
+      SQL("select id from " + tableName + "").map(_.long(1)).list().apply()
 
       intercept[SQLException] {
-        SQL("delete from " + tableName + "").update.apply()
+        SQL("delete from " + tableName + "").update().apply()
       }
       intercept[SQLException] {
-        SQL("update " + tableName + " set name = 'Anonymous'").update.apply()
+        SQL("update " + tableName + " set name = 'Anonymous'").update().apply()
       }
       intercept[SQLException] {
         SQL("update " + tableName + " set name = ?").batch(Seq("Anonymous")).apply()
@@ -345,14 +345,14 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       ultimately(TestUtils.deleteTable("sqlspec_genkey")) {
         try {
           try {
-            SQL("create table sqlspec_genkey (id integer generated always as identity(start with 0), name varchar(10))").execute.apply()
+            SQL("create table sqlspec_genkey (id integer generated always as identity(start with 0), name varchar(10))").execute().apply()
           } catch {
             case e: Exception =>
               try {
-                SQL("create table sqlspec_genkey (id integer auto_increment, name varchar(10), primary key(id))").execute.apply()
+                SQL("create table sqlspec_genkey (id integer auto_increment, name varchar(10), primary key(id))").execute().apply()
               } catch {
                 case e: Exception =>
-                  SQL("create table sqlspec_genkey (id serial not null, name varchar(10), primary key(id))").execute.apply()
+                  SQL("create table sqlspec_genkey (id serial not null, name varchar(10), primary key(id))").execute().apply()
               }
           }
 

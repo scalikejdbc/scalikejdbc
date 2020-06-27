@@ -34,18 +34,18 @@ create table members (
   name varchar(64),
   created_at timestamp not null
 )
-""".execute.apply()
+""".execute().apply()
 
     // insert initial data
     Seq("Alice", "Bob", "Chris") foreach { name =>
-      sql"insert into members (name, created_at) values (${name}, current_timestamp)".update.apply()
+      sql"insert into members (name, created_at) values (${name}, current_timestamp)".update().apply()
     }
 
     // for now, retrieves all data as Map value
-    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
+    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap()).list().apply()
 
     // find all members
-    val members: List[Member] = sql"select * from members".map(rs => Member(rs)).list.apply()
+    val members: List[Member] = sql"select * from members".map(rs => Member(rs)).list().apply()
 
     entities.size should equal(3)
     members.size should equal(3)

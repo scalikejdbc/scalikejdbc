@@ -75,7 +75,7 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
           implicit session =>
             SQL("select name from " + tableName + " where id = /* 'id */123")
               .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.string("name")).single.apply()
+              .map(rs => rs.string("name")).single().apply()
         }).get
         name should equal("foo")
       }

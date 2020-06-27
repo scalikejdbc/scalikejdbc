@@ -27,7 +27,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
           _underscore varchar(30),
           primary key(id)
         )
-      """).execute.apply()
+      """).execute().apply()
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
       {
@@ -67,7 +67,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
           created_at timestamp not null,
           primary key(id)
         )
-      """).execute.apply()
+      """).execute().apply()
     }
 
     Model(url, username, password).table(null, "MEMBER").map {
@@ -150,7 +150,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
           created_at timestamp not null,
           primary key(id)
         )
-      """).execute.apply()
+      """).execute().apply()
     }
 
     Model(url, username, password).table(null, "UN_NORMALIZED").map {
@@ -175,7 +175,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
           bbb int,
           created_at timestamp not null
         )
-      """).execute.apply()
+      """).execute().apply()
     }
 
     Model(url, username, password).table(null, "WITHOUT_PK").map {
@@ -207,7 +207,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
           execution_time int not null,
           success bit not null
         )
-      """).execute.apply()
+      """).execute().apply()
     }
 
     Model(url, username, password).table(null, "SCHEMA_VERSION").map {

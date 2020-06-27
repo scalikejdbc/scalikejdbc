@@ -17,18 +17,18 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table users_" + suffix + " (id int not null, group_id int)").execute.apply()
-          SQL("create table groups_" + suffix + " (id int not null, name varchar(30))").execute.apply()
-          SQL("insert into users_" + suffix + " values (1,1)").update.apply()
-          SQL("insert into users_" + suffix + " values (2,1)").update.apply()
-          SQL("insert into users_" + suffix + " values (3,1)").update.apply()
-          SQL("insert into users_" + suffix + " values (4,1)").update.apply()
-          SQL("insert into users_" + suffix + " values (5,2)").update.apply()
-          SQL("insert into users_" + suffix + " values (6,2)").update.apply()
-          SQL("insert into users_" + suffix + " values (7,null)").update.apply()
-          SQL("insert into groups_" + suffix + " values (1, 'A')").update.apply()
-          SQL("insert into groups_" + suffix + " values (2, 'B')").update.apply()
-          SQL("insert into groups_" + suffix + " values (3, 'C')").update.apply()
+          SQL("create table users_" + suffix + " (id int not null, group_id int)").execute().apply()
+          SQL("create table groups_" + suffix + " (id int not null, name varchar(30))").execute().apply()
+          SQL("insert into users_" + suffix + " values (1,1)").update().apply()
+          SQL("insert into users_" + suffix + " values (2,1)").update().apply()
+          SQL("insert into users_" + suffix + " values (3,1)").update().apply()
+          SQL("insert into users_" + suffix + " values (4,1)").update().apply()
+          SQL("insert into users_" + suffix + " values (5,2)").update().apply()
+          SQL("insert into users_" + suffix + " values (6,2)").update().apply()
+          SQL("insert into users_" + suffix + " values (7,null)").update().apply()
+          SQL("insert into groups_" + suffix + " values (1, 'A')").update().apply()
+          SQL("insert into groups_" + suffix + " values (2, 'B')").update().apply()
+          SQL("insert into groups_" + suffix + " values (3, 'C')").update().apply()
 
           case class User(id: Int, groupId: Int, group: Option[Group] = None)
           case class Group(id: Int, name: String)
@@ -41,7 +41,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
             val users: List[User] = sql.one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
               .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .map((u: User, g: Group) => u.copy(group = Some(g)))
-              .list.apply()
+              .list().apply()
 
             users.size should equal(6)
             users.foreach {
@@ -62,7 +62,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
               .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .map((u: User, g: Group) => u.copy(group = Some(g)))
-              .iterable.apply()
+              .iterable().apply()
 
             users.size should equal(6)
             users.foreach {
@@ -77,7 +77,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
               .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .map((u: User, g: Group) => u.copy(group = Some(g)))
-              .single.apply()
+              .single().apply()
 
             user.get.id should equal(1)
           }
@@ -90,7 +90,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 .one(rs => User(rs.int("u_id"), rs.int("u_group_id"), None))
                 .toOne(rs => Group(rs.int("g_id"), rs.string("g_name")))
                 .map((u: User, g: Group) => u.copy(group = Some(g)))
-                .single.apply()
+                .single().apply()
             }
           }
 
@@ -101,7 +101,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => User(rs.intOpt("u_id").getOrElse(0), rs.intOpt("u_group_id").getOrElse(0), None))
               .toOptionalOne(rs => rs.intOpt("g_id").map(id => Group(id, rs.string("g_name"))))
               .map((u: User, g: Option[Group]) => u.copy(group = g))
-              .list.apply()
+              .list().apply()
 
             users.size should equal(1)
             users.foreach {
@@ -140,28 +140,28 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table users_" + suffix + " (id int not null)").execute.apply()
-          SQL("create table groups_" + suffix + " (id int not null, name varchar(30))").execute.apply()
-          SQL("create table group_members_" + suffix + " (user_id int not null, group_id int not null)").execute.apply()
-          SQL("insert into users_" + suffix + " values (1)").update.apply()
-          SQL("insert into users_" + suffix + " values (2)").update.apply()
-          SQL("insert into users_" + suffix + " values (3)").update.apply()
-          SQL("insert into users_" + suffix + " values (4)").update.apply()
-          SQL("insert into users_" + suffix + " values (5)").update.apply()
-          SQL("insert into users_" + suffix + " values (6)").update.apply()
-          SQL("insert into groups_" + suffix + " values (1, 'A')").update.apply()
-          SQL("insert into groups_" + suffix + " values (2, 'B')").update.apply()
-          SQL("insert into groups_" + suffix + " values (3, 'C')").update.apply()
-          SQL("insert into group_members_" + suffix + " values (1,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (2,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (3,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (4,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (5,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (6,1)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (1,2)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (2,2)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (3,2)").update.apply()
-          SQL("insert into group_members_" + suffix + " values (4,2)").update.apply()
+          SQL("create table users_" + suffix + " (id int not null)").execute().apply()
+          SQL("create table groups_" + suffix + " (id int not null, name varchar(30))").execute().apply()
+          SQL("create table group_members_" + suffix + " (user_id int not null, group_id int not null)").execute().apply()
+          SQL("insert into users_" + suffix + " values (1)").update().apply()
+          SQL("insert into users_" + suffix + " values (2)").update().apply()
+          SQL("insert into users_" + suffix + " values (3)").update().apply()
+          SQL("insert into users_" + suffix + " values (4)").update().apply()
+          SQL("insert into users_" + suffix + " values (5)").update().apply()
+          SQL("insert into users_" + suffix + " values (6)").update().apply()
+          SQL("insert into groups_" + suffix + " values (1, 'A')").update().apply()
+          SQL("insert into groups_" + suffix + " values (2, 'B')").update().apply()
+          SQL("insert into groups_" + suffix + " values (3, 'C')").update().apply()
+          SQL("insert into group_members_" + suffix + " values (1,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (2,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (3,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (4,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (5,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (6,1)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (1,2)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (2,2)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (3,2)").update().apply()
+          SQL("insert into group_members_" + suffix + " values (4,2)").update().apply()
 
           case class User(id: Int)
           case class Group(id: Int, name: String, members: collection.Seq[User] = Nil)
@@ -175,7 +175,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
-              .list.apply()
+              .list().apply()
 
             groups.size should equal(2)
             groups(0).members.size should equal(6)
@@ -227,7 +227,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
-              .iterable.apply()
+              .iterable().apply()
 
             groups.size should equal(2)
           }
@@ -241,7 +241,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
               .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
               .toMany(rs => Some(User(rs.int("u_id"))))
               .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
-              .single.apply()
+              .single().apply()
 
             group.get.id should equal(1)
           }
@@ -256,7 +256,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 .one(rs => Group(rs.int("g_id"), rs.string("g_name")))
                 .toMany(rs => Some(User(rs.int("u_id"))))
                 .map((g: Group, ms: collection.Seq[User]) => g.copy(members = ms))
-                .single.apply()
+                .single().apply()
             }
           }
       }
@@ -276,26 +276,26 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table groups_" + suffix + " (id int not null)").execute.apply()
-          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute.apply()
+          SQL("create table groups_" + suffix + " (id int not null)").execute().apply()
+          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute().apply()
 
-          SQL("insert into groups_" + suffix + " values (1)").update.apply()
-          SQL("insert into groups_" + suffix + " values (2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (3)").update.apply()
-          SQL("insert into groups_" + suffix + " values (4)").update.apply()
+          SQL("insert into groups_" + suffix + " values (1)").update().apply()
+          SQL("insert into groups_" + suffix + " values (2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (3)").update().apply()
+          SQL("insert into groups_" + suffix + " values (4)").update().apply()
 
-          SQL("insert into members_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (5, 1)").update.apply()
+          SQL("insert into members_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (5, 1)").update().apply()
 
-          SQL("insert into sponsors_" + suffix + " values (1, 1)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (3, 3)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
+          SQL("insert into sponsors_" + suffix + " values (1, 1)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (3, 3)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (5, 3)").update().apply()
 
           case class Group(id: Int, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
           case class Member(id: Int, groupId: Int)
@@ -312,7 +312,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map((g: Group, ms: collection.Seq[Member], ss: collection.Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
-              .list.apply()
+              .list().apply()
 
             groups.size should equal(4)
             groups(0).id should equal(1)
@@ -362,7 +362,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("m_id").map(id => Member(id, rs.int("g_id"))),
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map((g: Group, ms: collection.Seq[Member], ss: collection.Seq[Sponsor]) => g.copy(members = ms, sponsors = ss))
-              .single.apply().get
+              .single().apply().get
 
             group.id should equal(1)
 
@@ -391,30 +391,30 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute.apply()
-          SQL("create table owners_" + suffix + " (id int not null)").execute.apply()
-          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute.apply()
+          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute().apply()
+          SQL("create table owners_" + suffix + " (id int not null)").execute().apply()
+          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute().apply()
 
-          SQL("insert into groups_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into groups_" + suffix + " values (4, 2)").update.apply()
+          SQL("insert into groups_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into groups_" + suffix + " values (4, 2)").update().apply()
 
-          SQL("insert into owners_" + suffix + " values (1)").update.apply()
-          SQL("insert into owners_" + suffix + " values (2)").update.apply()
+          SQL("insert into owners_" + suffix + " values (1)").update().apply()
+          SQL("insert into owners_" + suffix + " values (2)").update().apply()
 
-          SQL("insert into members_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (5, 1)").update.apply()
+          SQL("insert into members_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (5, 1)").update().apply()
 
-          SQL("insert into sponsors_" + suffix + " values (1, 1)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (3, 3)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
+          SQL("insert into sponsors_" + suffix + " values (1, 1)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (3, 3)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (5, 3)").update().apply()
 
           case class GroupEntity(id: Int, ownerId: Int)
           case class Group(id: Int, ownerId: Int, owner: Owner, members: collection.Seq[Member] = Nil, sponsors: collection.Seq[Sponsor] = Nil)
@@ -436,7 +436,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, members = ms, sponsors = ss)
-              }.list.apply()
+              }.list().apply()
 
             groups.size should equal(4)
             groups(0).id should equal(1)
@@ -498,7 +498,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, ms, ss) =>
                 Group(id = g.id, ownerId = os.head.id, owner = os.head, members = ms, sponsors = ss)
-              }.single.apply().get
+              }.single().apply().get
 
             group.id should equal(1)
 
@@ -530,35 +530,35 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute.apply()
-          SQL("create table owners_" + suffix + " (id int not null)").execute.apply()
-          SQL("create table events_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute.apply()
+          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute().apply()
+          SQL("create table owners_" + suffix + " (id int not null)").execute().apply()
+          SQL("create table events_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute().apply()
 
-          SQL("insert into groups_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into groups_" + suffix + " values (4, 2)").update.apply()
+          SQL("insert into groups_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into groups_" + suffix + " values (4, 2)").update().apply()
 
-          SQL("insert into owners_" + suffix + " values (1)").update.apply()
-          SQL("insert into owners_" + suffix + " values (2)").update.apply()
+          SQL("insert into owners_" + suffix + " values (1)").update().apply()
+          SQL("insert into owners_" + suffix + " values (2)").update().apply()
 
-          SQL("insert into events_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into events_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into events_" + suffix + " values (3, 1)").update.apply()
+          SQL("insert into events_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into events_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into events_" + suffix + " values (3, 1)").update().apply()
 
-          SQL("insert into members_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (5, 1)").update.apply()
+          SQL("insert into members_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (5, 1)").update().apply()
 
-          SQL("insert into sponsors_" + suffix + " values (1, 1)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (3, 3)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
+          SQL("insert into sponsors_" + suffix + " values (1, 1)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (3, 3)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (5, 3)").update().apply()
 
           case class GroupEntity(id: Int, ownerId: Int)
           case class Group(id: Int, ownerId: Int, owner: Owner,
@@ -585,7 +585,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, es, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, members = ms, sponsors = ss)
-              }.list.apply()
+              }.list().apply()
 
             groups.size should equal(4)
             groups(0).id should equal(1)
@@ -659,7 +659,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
                 rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
               .map { (g, os, es, ms, ss) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, members = ms, sponsors = ss)
-              }.single.apply().get
+              }.single().apply().get
 
             group.id should equal(1)
 
@@ -696,45 +696,45 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       DB autoCommit {
         implicit s =>
 
-          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute.apply()
-          SQL("create table owners_" + suffix + " (id int not null)").execute.apply()
-          SQL("create table events_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table news_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute.apply()
-          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute.apply()
+          SQL("create table groups_" + suffix + " (id int not null, owner_id int not null)").execute().apply()
+          SQL("create table owners_" + suffix + " (id int not null)").execute().apply()
+          SQL("create table events_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table news_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table members_" + suffix + " (id int not null, group_id int not null)").execute().apply()
+          SQL("create table sponsors_" + suffix + " (id int not null, group_id int not null)").execute().apply()
 
-          SQL("insert into groups_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into groups_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into groups_" + suffix + " values (4, 2)").update.apply()
+          SQL("insert into groups_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into groups_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into groups_" + suffix + " values (4, 2)").update().apply()
 
-          SQL("insert into owners_" + suffix + " values (1)").update.apply()
-          SQL("insert into owners_" + suffix + " values (2)").update.apply()
+          SQL("insert into owners_" + suffix + " values (1)").update().apply()
+          SQL("insert into owners_" + suffix + " values (2)").update().apply()
 
-          SQL("insert into events_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into events_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into events_" + suffix + " values (3, 1)").update.apply()
+          SQL("insert into events_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into events_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into events_" + suffix + " values (3, 1)").update().apply()
 
-          SQL("insert into news_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into news_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into news_" + suffix + " values (3, 2)").update.apply()
-          SQL("insert into news_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into news_" + suffix + " values (5, 3)").update.apply()
-          SQL("insert into news_" + suffix + " values (6, 2)").update.apply()
-          SQL("insert into news_" + suffix + " values (7, 1)").update.apply()
-          SQL("insert into news_" + suffix + " values (8, 1)").update.apply()
+          SQL("insert into news_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into news_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into news_" + suffix + " values (3, 2)").update().apply()
+          SQL("insert into news_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into news_" + suffix + " values (5, 3)").update().apply()
+          SQL("insert into news_" + suffix + " values (6, 2)").update().apply()
+          SQL("insert into news_" + suffix + " values (7, 1)").update().apply()
+          SQL("insert into news_" + suffix + " values (8, 1)").update().apply()
 
-          SQL("insert into members_" + suffix + " values (1, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (2, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (3, 1)").update.apply()
-          SQL("insert into members_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into members_" + suffix + " values (5, 1)").update.apply()
+          SQL("insert into members_" + suffix + " values (1, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (2, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (3, 1)").update().apply()
+          SQL("insert into members_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into members_" + suffix + " values (5, 1)").update().apply()
 
-          SQL("insert into sponsors_" + suffix + " values (1, 1)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (2, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (3, 3)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (4, 2)").update.apply()
-          SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
+          SQL("insert into sponsors_" + suffix + " values (1, 1)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (2, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (3, 3)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (4, 2)").update().apply()
+          SQL("insert into sponsors_" + suffix + " values (5, 3)").update().apply()
       }
 
       implicit val session = ReadOnlyAutoSession
@@ -775,7 +775,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
             rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
           .map { (g, os, es, ns, ms, ss) =>
             Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
-          }.list.apply()
+          }.list().apply()
 
         groups.size should equal(4)
         groups(0).id should equal(1)
@@ -863,7 +863,7 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
             rs => rs.intOpt("s_id").map(id => Sponsor(id, rs.int("g_id"))))
           .map { (g, os, es, ns, ms, ss) =>
             Group(id = g.id, ownerId = g.ownerId, owner = os.head, events = es, news = ns, members = ms, sponsors = ss)
-          }.single.apply().get
+          }.single().apply().get
 
         group.id should equal(1)
 
@@ -879,11 +879,11 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
     } finally {
       DB autoCommit {
         implicit s =>
-          SQL("drop table groups_" + suffix).execute.apply()
-          SQL("drop table owners_" + suffix).execute.apply()
-          SQL("drop table events_" + suffix).execute.apply()
-          SQL("drop table members_" + suffix).execute.apply()
-          SQL("drop table sponsors_" + suffix).execute.apply()
+          SQL("drop table groups_" + suffix).execute().apply()
+          SQL("drop table owners_" + suffix).execute().apply()
+          SQL("drop table events_" + suffix).execute().apply()
+          SQL("drop table members_" + suffix).execute().apply()
+          SQL("drop table sponsors_" + suffix).execute().apply()
       }
     }
   }

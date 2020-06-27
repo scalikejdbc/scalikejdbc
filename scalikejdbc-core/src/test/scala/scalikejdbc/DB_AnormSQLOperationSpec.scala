@@ -76,7 +76,7 @@ class DB_AnormSQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndA
           implicit session =>
             SQL("select name from " + tableName + " where id = {id}")
               .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.string("name")).single.apply()
+              .map(rs => rs.string("name")).single().apply()
         }).get
         name should equal("foo")
       }

@@ -68,20 +68,20 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
     if (!isMySQL) {
       try {
         DB autoCommit { implicit s =>
-          try sql"drop table ${SchemaExample.table}".execute.apply()
+          try sql"drop table ${SchemaExample.table}".execute().apply()
           catch { case e: Exception => }
-          sql"create table ${SchemaExample.table} (id int not null)".execute.apply()
-          withSQL { insert.into(SchemaExample).values(1) }.update.apply()
+          sql"create table ${SchemaExample.table} (id int not null)".execute().apply()
+          withSQL { insert.into(SchemaExample).values(1) }.update().apply()
           val se = SchemaExample.syntax("se")
           select(sqls.count).from(SchemaExample as se).toSQL.statement should equal(
             "select count(1) from public.qi_schema_example se")
 
-          val count = withSQL { select(sqls.count).from(SchemaExample as se) }.map(_.long(1)).single.apply().get
+          val count = withSQL { select(sqls.count).from(SchemaExample as se) }.map(_.long(1)).single().apply().get
           count should equal(1L)
         }
       } finally {
         DB autoCommit { implicit s =>
-          sql"drop table ${SchemaExample.table}".execute.apply()
+          sql"drop table ${SchemaExample.table}".execute().apply()
         }
       }
     }
@@ -90,21 +90,21 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
   it should "be available with Query Interface" in {
     try {
       DB autoCommit { implicit s =>
-        try sql"drop table ${Order.table}".execute.apply()
+        try sql"drop table ${Order.table}".execute().apply()
         catch { case e: Exception => }
-        sql"create table ${Order.table} (id int not null, product_id int not null, account_id int, created_at timestamp not null)".execute.apply()
+        sql"create table ${Order.table} (id int not null, product_id int not null, account_id int, created_at timestamp not null)".execute().apply()
 
-        try sql"drop table ${Product.table}".execute.apply()
+        try sql"drop table ${Product.table}".execute().apply()
         catch { case e: Exception => }
-        sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute.apply()
+        sql"create table ${Product.table} (id int not null, name varchar(256), price int not null)".execute().apply()
 
-        try sql"drop table ${LegacyProduct.table}".execute.apply()
+        try sql"drop table ${LegacyProduct.table}".execute().apply()
         catch { case e: Exception => }
-        sql"create table ${LegacyProduct.table} (id int, name varchar(256), price int not null)".execute.apply()
+        sql"create table ${LegacyProduct.table} (id int, name varchar(256), price int not null)".execute().apply()
 
-        try sql"drop table ${Account.table}".execute.apply()
+        try sql"drop table ${Account.table}".execute().apply()
         catch { case e: Exception => }
-        sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+        sql"create table ${Account.table} (id int not null, name varchar(256))".execute().apply()
       }
 
       DB localTx { implicit s =>
@@ -142,7 +142,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           val p = Product.syntax("p")
           val products = withSQL {
             select.from(Product as p).orderBy(p.id)
-          }.map(Product(p)).list.apply()
+          }.map(Product(p)).list().apply()
           assert(products === List(Product(1, Some("Cookie"), Price(120)), Product(2, Some("Tea"), Price(80))))
         }
 
@@ -152,19 +152,19 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
         }
         batchInsertQuery.batch(Seq(3, "Coffee", 90), Seq(4, "Chocolate", 200)).apply()
 
-        withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update.apply()
+        withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update().apply()
 
         val (o, p, a) = (Order.syntax("o"), Product.syntax("p"), Account.syntax("a"))
 
         // simple query
-        val alice: Account = withSQL(select.from(Account as a).where.eq(a.name, "Alice")).map(Account(a)).single.apply().get
+        val alice: Account = withSQL(select.from(Account as a).where.eq(a.name, "Alice")).map(Account(a)).single().apply().get
         val ordersByAlice = withSQL {
           select.from(Order as o).where.eq(o.accountId, alice.id)
-        }.map(Order(o)).list.apply()
+        }.map(Order(o)).list().apply()
 
         ordersByAlice.size should equal(4)
 
-        val allAccounts = withSQL { select.from(Account as a).orderBy(a.id) }.map(Account(a)).list.apply()
+        val allAccounts = withSQL { select.from(Account as a).orderBy(a.id) }.map(Account(a)).list().apply()
         allAccounts.size should equal(4)
 
         // join query
@@ -177,7 +177,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .orderBy(o.id).desc
             .limit(4)
             .offset(0)
-        }.map(Order(o, p, a)).list.apply()
+        }.map(Order(o, p, a)).list().apply()
 
         cookieOrders.size should equal(4)
         cookieOrders(0).product.isEmpty should be(false)
@@ -190,10 +190,10 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           select
             .from(Order as o)
             .crossJoin(Product as p)
-        }.map(Order(o, p)).list.apply()
+        }.map(Order(o, p)).list().apply()
 
-        val productNum = withSQL(select.from(Product as p)).map(Product(p)).list.apply().size
-        val orderNum = withSQL(select.from(Order as o)).map(Order(o)).list.apply().size
+        val productNum = withSQL(select.from(Product as p)).map(Product(p)).list().apply().size
+        val orderNum = withSQL(select.from(Order as o)).map(Order(o)).list().apply().size
         ordersAndProducts.size should equal(productNum * orderNum)
         ordersAndProducts.head.id should equal(11)
         ordersAndProducts.head.productId should equal(1)
@@ -208,7 +208,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .where.eq(o.id, 13)
         }.map {
           rs => if (accountRequired) Order(o, p, a)(rs) else Order(o, p)(rs)
-        }.single.apply()
+        }.single().apply()
 
         findCookieOrder(true).get.account.isEmpty should be(false)
         findCookieOrder(false).get.account.isEmpty should be(true)
@@ -221,7 +221,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .where(sqls.toAndConditionOpt(
               accountName.map(sqls.eq(a.name, _))))
         }.map { rs => Order(o, p)(rs)
-        }.list.apply()
+        }.list().apply()
 
         findByOptionalAccountName(Some("Alice")).size should be(4)
         findByOptionalAccountName(Option.empty).size should be(11)
@@ -234,7 +234,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                 productId.map(id => sqls.eq(o.productId, id)),
                 accountId.map(id => sqls.eq(o.accountId, id))))
               .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
         }
         {
@@ -245,7 +245,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                 productId.map(id => sqls.eq(o.productId, id)),
                 accountId.map(id => sqls.eq(o.accountId, id))))
               .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           ids should equal(Seq(12))
         }
 
@@ -259,7 +259,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                 id1.map(id => sqls.eq(o.productId, id)),
                 id2.map(id => sqls.eq(o.productId, id))))
               .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           ids should equal(Seq(11, 12, 13, 14, 15))
         }
         {
@@ -272,7 +272,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                 id1.map(id => sqls.eq(o.productId, id)),
                 id2.map(id => sqls.eq(o.productId, id))))
               .orderBy(o.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           ids should equal(Seq(11, 12, 13, 14, 15, 21, 22, 23, 24, 25))
         }
 
@@ -281,7 +281,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
         val productId: Option[Int] = withSQL {
           select(sqls"${sp(p).id} id")
             .from(select.from(Product as p).where.eq(p.price, Price(80)).as(sp))
-        }.map(rs => rs.int("id")).single.apply()
+        }.map(rs => rs.int("id")).single().apply()
 
         productId should equal(Option(2))
 
@@ -294,7 +294,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .groupBy(x(o).accountId)
             .having(gt(sum(x(p).price), 300))
             .orderBy(sqls"amount")
-        }.map(rs => (rs.int("id"), rs.int("amount"))).list.apply()
+        }.map(rs => (rs.int("id"), rs.int("amount"))).list().apply()
 
         preferredClients.size should equal(2)
         preferredClients should equal(List((2, 360), (1, 440)))
@@ -307,7 +307,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
               _.eq(o.productId, 1).and.isNotNull(o.accountId)
             }.or.isNull(o.accountId)
             .orderBy(o.id)
-        }.map(_.int(o.resultName.id)).list.apply()
+        }.map(_.int(o.resultName.id)).list().apply()
 
         bracketTestResults should equal(List(11, 12, 13, 14, 15, 26))
 
@@ -318,7 +318,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .where.roundBracket(
               sqls.eq(o.productId, 1).and.isNotNull(o.accountId)).or.isNull(o.accountId)
             .orderBy(o.id)
-        }.map(_.int(o.resultName.id)).list.apply()
+        }.map(_.int(o.resultName.id)).list().apply()
 
         bracketTestResults2 should equal(List(11, 12, 13, 14, 15, 26))
 
@@ -333,7 +333,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                 Some(sqls.isNotNull(o.accountId))).map(s => sql.append(s)).getOrElse(sql))
               .or.isNull(o.accountId)
               .orderBy(o.id).append(sqls"desc")
-          }.map(_.int(o.resultName.id)).list.apply()
+          }.map(_.int(o.resultName.id)).list().apply()
 
           withConditionsTestResults should equal(List(26, 15, 14, 13, 12, 11))
         }
@@ -346,7 +346,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
               .where(sqls.toOrConditionOpt(
                 productId.map(i => sqls.eq(o.productId, i)),
                 Some(sqls.isNull(o.accountId)))).orderBy(o.id)
-          }.map(_.int(o.resultName.id)).list.apply()
+          }.map(_.int(o.resultName.id)).list().apply()
 
           withConditionsTestResults should equal(List(11, 12, 13, 14, 15, 26))
         }
@@ -357,7 +357,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(14, 15, 21, 22))
         }
         {
@@ -365,7 +365,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in(o.id, Seq[Int]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(Nil)
         }
         {
@@ -373,7 +373,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 21))
         }
         {
@@ -381,7 +381,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn(o.id, Seq[Int]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
         {
@@ -389,7 +389,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.not.in(o.id, Seq[Int]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
         {
@@ -397,7 +397,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in(o.id, select(o.id).from(Order as o).where.between(o.id, 14, 16))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(14, 15))
         }
         {
@@ -405,7 +405,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn(o.id, select(o.id).from(Order as o).where.between(o.id, 13, 30))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(11, 12))
         }
         {
@@ -413,7 +413,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in(o.id, select(o.id).from(Order as o).where.notBetween(o.id, 14, 16))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(11, 12, 13, 21, 22, 23, 24, 25, 26))
         }
         {
@@ -421,7 +421,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn(o.id, select(o.id).from(Order as o).where.notBetween(o.id, 13, 30))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
 
@@ -430,7 +430,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in((o.id, o.productId), Seq((11, 1), (12, 2), (21, 2)))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(List(11, 21))
         }
         {
@@ -438,7 +438,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           inClauseResults.map(_.id) should equal(Nil)
         }
         {
@@ -446,7 +446,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn((o.id, o.productId), Seq((11, 1), (12, 2), (13, 1), (14, 1), (15, 1), (21, 2)))
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(12, 22, 23, 24, 25, 26))
         }
         {
@@ -454,7 +454,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.notIn((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
         {
@@ -462,7 +462,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Order as o)
               .where.not.in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
-          }.map(Order(o)).list.apply()
+          }.map(Order(o)).list().apply()
           notInClauseResults.map(_.id) should equal(List(11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26))
         }
 
@@ -472,7 +472,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Account as a)
               .where.like(a.name, "%e%")
               .orderBy(a.id)
-          }.map(Account(a)).list.apply()
+          }.map(Account(a)).list().apply()
           results.map(_.id) should equal(List(1, 4))
         }
         {
@@ -480,7 +480,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select.from(Account as a)
               .where.notLike(a.name, "%e%")
               .orderBy(a.id)
-          }.map(Account(a)).list.apply()
+          }.map(Account(a)).list().apply()
           results.map(_.id) should equal(List(2, 3))
         }
 
@@ -489,7 +489,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           select(a.id).from(Account as a)
             .where.exists(select.from(Order as o).where.eq(o.accountId, a.id))
             .orderBy(a.id)
-        }.map(_.int(1)).list.apply()
+        }.map(_.int(1)).list().apply()
         existsClauseResults should equal(List(1, 2, 3))
 
         // not exists clause
@@ -498,7 +498,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select(a.id).from(Account as a)
               .where.not.exists(select.from(Order as o).where.eq(o.accountId, a.id))
               .orderBy(a.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           notExistsClauseResults should equal(List(4))
         }
         {
@@ -506,7 +506,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select(a.id).from(Account as a)
               .where.notExists(sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}")
               .orderBy(a.id)
-          }.map(_.int(1)).list.apply()
+          }.map(_.int(1)).list().apply()
           notExistsClauseResults should equal(List(4))
         }
 
@@ -514,7 +514,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
         import sqls.{ distinct, count }
         val productCount = withSQL {
           select(count(distinct(o.productId))).from(Order as o)
-        }.map(_.int(1)).single.apply().get
+        }.map(_.int(1)).single().apply().get
 
         productCount should equal(2)
 
@@ -529,7 +529,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .innerJoin(Product as p).on(o.productId, p.id)
             .leftJoin(Account as a).on(o.accountId, a.id)
             .groupBy(o.productId)
-        }.map(rs => (rs.int(1), rs.int(2), rs.int(3))).list.apply()
+        }.map(rs => (rs.int(1), rs.int(2), rs.int(3))).list().apply()
 
         wildcardCounts should equal(List((1, 5, 5), (2, 6, 5)))
 
@@ -541,7 +541,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .groupBy(o.accountId)
             .orderBy(o.accountId).desc
             .limit(2)
-        }.map(rs => (rs.int(1), rs.int(2))).list.apply()
+        }.map(rs => (rs.int(1), rs.int(2))).list().apply()
 
         groupByAfterWhereClauseResults should equal(List((3, 2), (2, 4)))
 
@@ -551,7 +551,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .union(select(sqls"${p.id} as id").from(Product as p))
             .orderBy(sqls"id").desc
             .limit(3).offset(0)
-        }.map(_.int("id")).list.apply()
+        }.map(_.int("id")).list().apply()
         unionResults should equal(List(4, 3, 2))
 
         // union all
@@ -559,7 +559,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           select(a.id).from(Account as a)
             .unionAll(select(p.id).from(Product as p))
             .unionAll(select(p.id).from(Product as p))
-        }.map(_.int(1)).list.apply()
+        }.map(_.int(1)).list().apply()
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
 
         // except
@@ -569,7 +569,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
               .except(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
-          }.map(_.int("id")).list.apply()
+          }.map(_.int("id")).list().apply()
           exceptResults should equal(List(1, 3))
         }
 
@@ -581,7 +581,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
               .exceptAll(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(2)))
-          }.map(_.int("id")).list.apply()
+          }.map(_.int("id")).list().apply()
           exceptAllResults should equal(List(1, 1, 3))
         }
 
@@ -591,7 +591,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           val intersectResults = withSQL {
             select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1, 2, 3))
               .intersect(select(sqls"${p.id} as id").from(Product as p).where.in(p.id, Seq(1, 2)))
-          }.map(_.int("id")).list.apply()
+          }.map(_.int("id")).list().apply()
           intersectResults should equal(List(1, 2))
         }
 
@@ -605,20 +605,20 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
                   .unionAll(select(sqls"${a.id} as id").from(Account as a).where.in(a.id, Seq(1)))
               }
               .orderBy(sqls"id")
-          }.map(_.int("id")).list.apply()
+          }.map(_.int("id")).list().apply()
           intersectAllResults should equal(List(1, 1, 2))
         }
 
         // between
         val betweenResults = withSQL {
           select(o.result.id).from(Order as o).where.between(o.id, 13, 22)
-        }.map(_.int(1)).list.apply()
+        }.map(_.int(1)).list().apply()
 
         betweenResults should equal(List(13, 14, 15, 21, 22))
 
         val notBetweenResults = withSQL {
           select(o.result.id).from(Order as o).where.notBetween(o.id, 13, 22)
-        }.map(_.int(1)).list.apply()
+        }.map(_.int(1)).list().apply()
 
         notBetweenResults should equal(List(11, 12, 23, 24, 25, 26))
 
@@ -636,18 +636,18 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
         val updateQuery = update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)
         applyUpdate(updateQuery)
         // of course, this code also works fine.
-        withSQL(update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)).update.apply()
+        withSQL(update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)).update().apply()
 
-        val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }.map(Account(a)).single.apply().get.name
+        val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }.map(Account(a)).single().apply().get.name
         newName should equal(Some("Bob Marley"))
 
         // TODO compilation error since 2.10.1
         // applyUpdate { delete.from(Order).where.isNull(Order.column.accountId) }
-        withSQL { delete.from(Order).where.isNull(Order.column.accountId) }.update.apply()
+        withSQL { delete.from(Order).where.isNull(Order.column.accountId) }.update().apply()
 
         val noAccountIdOrderCount = withSQL {
           select(count).from(Order as o).where.isNull(o.accountId)
-        }.map(_.long(1)).single.apply().get
+        }.map(_.long(1)).single().apply().get
         noAccountIdOrderCount should equal(0)
 
         val stmt1 = select(count).from(Order as o).where.isNull(o.accountId).toSQL.statement
@@ -656,7 +656,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
         stmt1 should equal(stmt2)
         stmt2 should equal(stmt3)
 
-        val orders = withSQL { QueryDSL.select.from(Order as o).where.isNotNull(o.accountId) }.map(Order(o)).list.apply()
+        val orders = withSQL { QueryDSL.select.from(Order as o).where.isNotNull(o.accountId) }.map(Order(o)).list().apply()
         orders.size should be > (0)
 
         QueryDSL.insert.into(Account).columns(ac.id, ac.name).values(1, "Alice")
@@ -683,7 +683,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
       // for update query
       val o = Order.syntax("o")
       DB localTx { implicit s =>
-        withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }.map(Order(o)).single.apply()
+        withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }.map(Order(o)).single().apply()
       }
 
     } catch {
@@ -693,10 +693,10 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
     } finally {
       DB localTx { implicit s =>
         try {
-          sql"drop table ${Order.table}".execute.apply()
-          sql"drop table ${LegacyProduct.table}".execute.apply()
-          sql"drop table ${Product.table}".execute.apply()
-          sql"drop table ${Account.table}".execute.apply()
+          sql"drop table ${Order.table}".execute().apply()
+          sql"drop table ${LegacyProduct.table}".execute().apply()
+          sql"drop table ${Product.table}".execute().apply()
+          sql"drop table ${Account.table}".execute().apply()
         } catch { case e: Exception => }
       }
     }
@@ -718,9 +718,9 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
 
   "insert.namedValues" should "accept None under nested AsIsParameterBinder" in {
     DB autoCommit { implicit s =>
-      try sql"drop table ${Account.table}".execute.apply()
+      try sql"drop table ${Account.table}".execute().apply()
       catch { case e: Exception => }
-      sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+      sql"create table ${Account.table} (id int not null, name varchar(256))".execute().apply()
     }
 
     try {
@@ -730,10 +730,10 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
       query.statement should equal("insert into qi_accounts (id, name) values (?, ?)")
       query.parameters should equal(Seq(123, None))
 
-      DB autoCommit { implicit s => query.update.apply() }
+      DB autoCommit { implicit s => query.update().apply() }
     } finally {
       DB autoCommit { implicit s =>
-        try sql"drop table ${Account.table}".execute.apply()
+        try sql"drop table ${Account.table}".execute().apply()
         catch { case e: Exception => }
       }
     }
@@ -753,9 +753,9 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
     }
 
     DB autoCommit { implicit session =>
-      try sql"drop table ${TimeHolder.table}".execute.apply()
+      try sql"drop table ${TimeHolder.table}".execute().apply()
       catch { case e: Exception => }
-      sql"create table ${TimeHolder.table} (id int, time timestamp)".execute.apply()
+      sql"create table ${TimeHolder.table} (id int, time timestamp)".execute().apply()
     }
 
     try {
@@ -766,10 +766,10 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("Asia/Tokyo"))))
 
         applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 1, TimeHolder.column.time -> time))
-        val jstString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 1").map(_.string("s")).single.apply().get
+        val jstString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 1").map(_.string("s")).single().apply().get
         jstString should equal(time.toString("yyyy-MM-dd HH:mm:ss"))
 
-        val expectedTime1 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 1)).map(TimeHolder(t)(_)).single.apply().get.time
+        val expectedTime1 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 1)).map(TimeHolder(t)(_)).single().apply().get.time
         expectedTime1.isEqual(time) should equal(true)
       }
 
@@ -780,15 +780,15 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
           connectionAttributes = session.connectionAttributes.copy(timeZoneSettings = TimeZoneSettings(true, TimeZone.getTimeZone("UTC"))))
 
         applyUpdate(insertInto(TimeHolder).namedValues(TimeHolder.column.id -> 2, TimeHolder.column.time -> time))
-        val utcString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 2").map(_.string("s")).single.apply().get
+        val utcString = SQL(s"select $castToString as s from ${TimeHolder.tableName} where id = 2").map(_.string("s")).single().apply().get
         utcString should equal(time.withZone(DateTimeZone.forID("UTC")).toString("yyyy-MM-dd HH:mm:ss"))
 
-        val expectedTime2 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 2)).map(TimeHolder(t)(_)).single.apply().get.time
+        val expectedTime2 = withSQL(selectFrom(TimeHolder as t).where.eq(t.id, 2)).map(TimeHolder(t)(_)).single().apply().get.time
         expectedTime2.isEqual(time) should equal(true)
       }
     } finally {
       DB autoCommit { implicit session =>
-        try sql"drop table ${TimeHolder.table}".execute.apply()
+        try sql"drop table ${TimeHolder.table}".execute().apply()
         catch { case e: Exception => }
       }
     }

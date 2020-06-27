@@ -531,7 +531,7 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
   private def execute(sqls: String*)(implicit session: DBSession): Unit = {
     for (sql <- sqls) {
       try {
-        SQL(sql).execute.apply()
+        SQL(sql).execute().apply()
         return
       } catch {
         case e: Exception =>

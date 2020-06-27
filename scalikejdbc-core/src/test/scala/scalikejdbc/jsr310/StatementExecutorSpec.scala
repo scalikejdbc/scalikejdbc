@@ -31,10 +31,10 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
                created_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6),
                updated_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6),
                deleted_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6)
-            )""".execute.apply()
+            )""".execute().apply()
           } else {
             sql"create table accounts (birthday date not null, alert_time time(6) not null, local_created_at timestamp(6) not null, created_at timestamp(6) not null, updated_at timestamp(6) not null, deleted_at timestamp(6) not null )"
-              .execute.apply()
+              .execute().apply()
           }
 
           val birthday = LocalDate.now
@@ -48,11 +48,11 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
           val updatedAt = Instant.now.plusNanos(333000)
           val deletedAt = OffsetDateTime.now.plusNanos(444000)
           val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at, deleted_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt}, ${deletedAt})"
-          query.execute.apply()
+          query.execute().apply()
 
           val account = sql"select birthday, alert_time, local_created_at, created_at, updated_at, deleted_at from accounts limit 1".map { rs =>
             (rs.get[LocalDate]("birthday"), rs.get[LocalTime]("alert_time"), rs.get[LocalDateTime]("local_created_at"), rs.get[ZonedDateTime]("created_at"), rs.get[Instant]("updated_at"), rs.get[OffsetDateTime]("deleted_at"))
-          }.headOption.apply()
+          }.headOption().apply()
 
           account.isDefined should equal(true)
           account.get._1 should equal(birthday)

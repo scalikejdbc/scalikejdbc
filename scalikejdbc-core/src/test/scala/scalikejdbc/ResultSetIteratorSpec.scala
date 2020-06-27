@@ -26,10 +26,10 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
         assert(i.hasNext === false)
         assert(i.size === 0)
         intercept[NoSuchElementException] {
-          i.next
+          i.next()
         }
         intercept[NoSuchElementException] {
-          i.next
+          i.next()
         }
       }
 
@@ -53,10 +53,10 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
           assert(i.hasNext === false)
           assert(i.hasNext === false)
           intercept[NoSuchElementException] {
-            i.next
+            i.next()
           }
           intercept[NoSuchElementException] {
-            i.next
+            i.next()
           }
         }
       }

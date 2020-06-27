@@ -15,8 +15,8 @@ trait AsyncFlatSpecWithCommonTraits extends FixtureAsyncFlatSpec with Matchers w
 class AsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback {
 
   override def fixture(implicit session: DBSession): Unit = {
-    SQL("insert into ScalaTest_members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into ScalaTest_members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    SQL("insert into ScalaTest_members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update().apply()
+    SQL("insert into ScalaTest_members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update().apply()
   }
 
   behavior of "AsyncAutoRollbackFixture"
@@ -39,11 +39,11 @@ class AsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAuto
 
 class NamedAsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback {
 
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db = NamedDB(Symbol("db2")).toDB()
 
   override def fixture(implicit session: DBSession): Unit = {
-    SQL("insert into scalatest_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into scalatest_members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    SQL("insert into scalatest_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update().apply()
+    SQL("insert into scalatest_members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update().apply()
   }
 
   behavior of "Named AsyncAutoRollbackFixture"
@@ -66,7 +66,7 @@ class NamedAsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with Asyn
 
 class AsyncAutoRollbackWithNoArgTestFixtureSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback with AsyncBufferMixin {
 
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db = NamedDB(Symbol("db2")).toDB()
 
   behavior of "AsyncAutoRollback with NoArgTestFixture"
 

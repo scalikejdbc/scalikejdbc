@@ -14,7 +14,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
 
     DB autoCommit { implicit session =>
       try {
-        SQL("drop table MEMBER").execute.apply()
+        SQL("drop table MEMBER").execute().apply()
       } catch {
         case e: Exception =>
       }
@@ -27,7 +27,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
               birthday date,
               created_at timestamp not null
             )
-            """).execute.apply()
+            """).execute().apply()
       } catch {
         case e: Exception =>
       }
@@ -79,7 +79,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
 
     NamedDB(Symbol("named")) autoCommit { implicit session =>
       try {
-        SQL("drop table NAMED_MEMBER").execute.apply()
+        SQL("drop table NAMED_MEMBER").execute().apply()
       } catch {
         case e: Exception =>
       }
@@ -91,7 +91,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
               birthday date,
               created_at timestamp not null
             )
-          """).execute.apply()
+          """).execute().apply()
     }
 
     // use model

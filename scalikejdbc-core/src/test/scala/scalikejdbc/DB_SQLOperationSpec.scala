@@ -33,7 +33,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
             logLevel = Symbol("info"))
           val result = SQL("select * from " + tableName + " where name = 'name1' and id = /*'id*/123;")
             .bindByName(Symbol("id") -> 1)
-            .map(rs => Some(rs.string("name"))).toList.apply()
+            .map(rs => Some(rs.string("name"))).toList().apply()
           result.size should equal(1)
           GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(enabled = false)
       }
@@ -46,7 +46,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
       TestUtils.initialize(tableName)
       implicit val session = DB.readOnlySession()
       try {
-        val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).toList.apply()
+        val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).toList().apply()
         result.size should be > 0
       } finally {
         session.close()
@@ -206,7 +206,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
 
       // should be committed
       val name = DB readOnly { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single.apply().get
+        SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single().apply().get
       }
       name should equal("foo")
     }
@@ -292,7 +292,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
 
       // should not be committed
       val name = DB readOnly { implicit s =>
-        SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single.apply().get
+        SQL("select name from " + tableName + " where id = ?").bind(1).map(_.string("name")).single().apply().get
       }
       name should equal("name1")
     }
@@ -534,7 +534,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
       using(ConnectionPool.borrow()) { conn =>
         val name = DB(conn) autoCommit {
           implicit session =>
-            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single.apply()
+            SQL("select name from " + tableName + " where id = ?").bind(1).map(rs => rs.string("name")).single().apply()
         }
         name.get should equal("name1")
       }
@@ -548,14 +548,14 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     try {
       DB autoCommit { implicit session =>
         try {
-          SQL("drop table issue30;").execute.apply()
+          SQL("drop table issue30;").execute().apply()
         } catch { case e: Exception => }
         SQL("""
         create table issue30 (
           id bigint not null,
           data1 varchar(255) not null,
           data2 varchar(255) not null
-        );""").execute.apply()
+        );""").execute().apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
           (101 to 121) map { i => Seq(i, "a", "b") }: _*).apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""").batch(
@@ -564,7 +564,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     } finally {
       try {
         DB autoCommit { implicit s =>
-          SQL("drop table issue30;").execute.apply()
+          SQL("drop table issue30;").execute().apply()
         }
       } catch { case e: Exception => }
       GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings()
@@ -576,8 +576,8 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
-        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap).single.apply()
+        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update().apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap()).single().apply()
       }
       result.isDefined should equal(true)
       if (result.get.get("ID").isDefined) {
@@ -596,8 +596,8 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
-        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
+        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update().apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap()).single().apply()
       }
       result.isDefined should equal(true)
       if (result.get.get(Symbol("ID")).isDefined) {

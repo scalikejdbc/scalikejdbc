@@ -18,12 +18,12 @@ trait SyntaxProviderTestSupport extends TestSuiteMixin with SQLInterpolation { s
   abstract override protected def withFixture(test: NoArgTest): Outcome = {
     DB.autoCommit { implicit session =>
       this.session = session
-      sql"create table ${Account.table} (id int not null, name varchar(256))".execute.apply()
+      sql"create table ${Account.table} (id int not null, name varchar(256))".execute().apply()
       try {
         super.withFixture(test)
       } finally {
         try {
-          sql"drop table ${Account.table}".execute.apply()
+          sql"drop table ${Account.table}".execute().apply()
         } catch {
           case NonFatal(e) =>
         }

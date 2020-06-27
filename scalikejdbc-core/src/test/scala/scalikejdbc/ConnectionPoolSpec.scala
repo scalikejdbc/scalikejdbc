@@ -71,9 +71,9 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     ConnectionPool.add(Symbol("sample"), url, user, password)
     try {
       NamedDB(Symbol("sample")) autoCommit { implicit s =>
-        try SQL("create table data_source_test(id bigint not null)").execute.apply()
+        try SQL("create table data_source_test(id bigint not null)").execute().apply()
         catch { case e: Exception => e.printStackTrace }
-        SQL("insert into data_source_test values (123)").update.apply()
+        SQL("insert into data_source_test values (123)").update().apply()
       }
       val ds = new org.apache.commons.dbcp.BasicDataSource
       ds.setUrl(url)
@@ -82,13 +82,13 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
       ConnectionPool.add(Symbol("ds"), new DataSourceConnectionPool(ds))
 
       NamedDB(Symbol("ds")) readOnly { implicit s =>
-        val count = SQL("select count(1) from data_source_test").map(_.long(1)).single.apply().get
+        val count = SQL("select count(1) from data_source_test").map(_.long(1)).single().apply().get
         count should equal(1L)
       }
 
     } finally {
       NamedDB(Symbol("sample")) autoCommit { implicit s =>
-        try SQL("drop table data_source_test").execute.apply()
+        try SQL("drop table data_source_test").execute().apply()
         catch { case e: Exception => e.printStackTrace }
       }
     }

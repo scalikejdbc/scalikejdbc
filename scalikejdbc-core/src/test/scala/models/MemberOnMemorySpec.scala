@@ -19,7 +19,7 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
     NamedDB(Symbol("MemberSpec")) autoCommit {
       implicit session =>
         try {
-          SQL("drop table member").execute.apply()
+          SQL("drop table member").execute().apply()
         } catch {
           case e: Exception =>
         }
@@ -31,7 +31,7 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
               birthday date,
               created_at timestamp not null
             )
-             """).execute.apply()
+             """).execute().apply()
     }
 
     NamedDB(Symbol("MemberSpec")) localTx {

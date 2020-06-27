@@ -630,7 +630,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     }) {
       TestUtils.initialize(tableName)
       DB localTx { implicit s =>
-        SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update.apply()
+        SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update().apply()
       }
       GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = true,
@@ -638,11 +638,11 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       DB readOnly { implicit s =>
         val res1 = SQL("select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?")
           .bind(3)
-          .map(rs => rs.string("name")).list.apply()
+          .map(rs => rs.string("name")).list().apply()
         res1.size should equal(1)
         val res2 = SQL("select * from " + tableName + " where name = /* why? */ 'so what?' and id = /*'id*/123 /* really? */ -- line?")
           .bindByName(Symbol("id") -> 3)
-          .map(rs => rs.string("name")).list.apply()
+          .map(rs => rs.string("name")).list().apply()
         res2.size should equal(1)
       }
     }
@@ -728,12 +728,12 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = s"issue245_${System.currentTimeMillis}"
       try {
         DB autoCommit { implicit s =>
-          SQL(s"create table `${tableName}` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute.apply()
+          SQL(s"create table `${tableName}` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute().apply()
         }
         val table = DB.getTable(tableName)
         table.isDefined should equal(true)
       } finally {
-        try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
+        try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute().apply() }
         catch { case e: Exception => }
       }
     }
@@ -800,7 +800,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
 
       {
         val result: collection.Seq[String] = DB readOnly { implicit session =>
-          SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list.apply()
+          SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list().apply()
         }
         result.size should be > 0
       }
@@ -854,7 +854,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
 
       {
         val result: collection.Seq[String] = DB readOnly { implicit session =>
-          SQL("select * from " + tableName + "").queryTimeout(222).map(rs => rs.string("name")).list.apply()
+          SQL("select * from " + tableName + "").queryTimeout(222).map(rs => rs.string("name")).list().apply()
         }
         result.size should be > 0
       }
@@ -863,7 +863,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
         // set invalid value
         intercept[java.sql.SQLException] {
           DB readOnly { implicit session =>
-            SQL("select * from " + tableName + "").queryTimeout(-1).map(rs => rs.string("name")).list.apply()
+            SQL("select * from " + tableName + "").queryTimeout(-1).map(rs => rs.string("name")).list().apply()
           }
         }
       }

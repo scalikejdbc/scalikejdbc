@@ -28,19 +28,19 @@ class ConnectionPoolsSpec extends AnyFlatSpec with Matchers {
 
     val tableName = "connection_pool_" + System.currentTimeMillis
     NamedDB(Symbol("dbcp")).autoCommit { implicit s =>
-      SQL(s"create table ${tableName} (id int, name varchar(256))").execute.apply()
-      SQL(s"insert into ${tableName} (id, name) values (1, 'commons-dbcp')").update.apply()
-      SQL(s"insert into ${tableName} (id, name) values (2, 'hikaricp')").update.apply()
-      SQL(s"insert into ${tableName} (id, name) values (3, 'bonecp')").update.apply()
+      SQL(s"create table ${tableName} (id int, name varchar(256))").execute().apply()
+      SQL(s"insert into ${tableName} (id, name) values (1, 'commons-dbcp')").update().apply()
+      SQL(s"insert into ${tableName} (id, name) values (2, 'hikaricp')").update().apply()
+      SQL(s"insert into ${tableName} (id, name) values (3, 'bonecp')").update().apply()
     }
 
     NamedDB(Symbol("dbcp")).readOnly { implicit s =>
-      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single.apply()
+      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single().apply()
       count should equal(Some(3))
     }
 
     NamedDB(Symbol("bonecp")).readOnly { implicit s =>
-      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single.apply()
+      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single().apply()
       count should equal(Some(3))
     }
 
@@ -56,7 +56,7 @@ class ConnectionPoolsSpec extends AnyFlatSpec with Matchers {
     ConnectionPool.add(Symbol("hikaricp"), new DataSourceConnectionPool(dataSource))
 
     NamedDB(Symbol("hikaricp")).readOnly { implicit s =>
-      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single.apply()
+      val count = SQL(s"select count(1) from ${tableName}").map(_.long(1)).single().apply()
       count should equal(Some(3))
     }
 

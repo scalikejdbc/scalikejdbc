@@ -27,14 +27,14 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
   it should "execute" in {
     DB autoCommit { implicit s =>
       try {
-        try sql"drop table issue".execute.apply() catch { case ignore: Exception => }
-        sql"create table issue (id int not null, first_name varchar(256), group_id int)".execute.apply()
+        try sql"drop table issue".execute().apply() catch { case ignore: Exception => }
+        sql"create table issue (id int not null, first_name varchar(256), group_id int)".execute().apply()
 
-        try sql"drop table organization".execute.apply() catch { case ignore: Exception => }
-        sql"create table organization (id int not null, website_url varchar(256))".execute.apply()
+        try sql"drop table organization".execute().apply() catch { case ignore: Exception => }
+        sql"create table organization (id int not null, website_url varchar(256))".execute().apply()
 
-        try sql"drop table person".execute.apply() catch { case ignore: Exception => }
-        sql"create table person(id int not null, name varchar(256) not null, organization_id bigint, group_id bigint)".execute.apply()
+        try sql"drop table person".execute().apply() catch { case ignore: Exception => }
+        sql"create table person(id int not null, name varchar(256) not null, organization_id bigint, group_id bigint)".execute().apply()
 
         val issue1 = Issue(1L, "ユーザ1", 1L)
         val issue2 = Issue(2L, "ユーザ2", 1L)
@@ -71,9 +71,9 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
         p1.flatMap(_.organizationId) should equal(Some(1L))
 
       } finally {
-        try sql"drop table issue".execute.apply() catch { case ignore: Exception => }
-        try sql"drop table organization".execute.apply() catch { case ignore: Exception => }
-        try sql"drop table person".execute.apply() catch { case ignore: Exception => }
+        try sql"drop table issue".execute().apply() catch { case ignore: Exception => }
+        try sql"drop table organization".execute().apply() catch { case ignore: Exception => }
+        try sql"drop table person".execute().apply() catch { case ignore: Exception => }
       }
     }
   }

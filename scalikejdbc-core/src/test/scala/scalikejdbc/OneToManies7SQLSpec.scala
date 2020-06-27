@@ -15,55 +15,55 @@ class OneToManies7SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
       DB autoCommit {
         implicit s =>
 
-          SQL(s"create table groups_${suffix} (id int not null, owner_id int not null)").execute.apply()
-          SQL(s"create table owners_${suffix} (id int not null)").execute.apply()
-          SQL(s"create table events_${suffix} (id int not null, group_id int not null)").execute.apply()
-          SQL(s"create table news_${suffix} (id int not null, group_id int not null)").execute.apply()
-          SQL(s"create table members_${suffix} (id int not null, group_id int not null)").execute.apply()
-          SQL(s"create table sponsors_${suffix} (id int not null, group_id int not null)").execute.apply()
-          SQL(s"create table entity6_${suffix} (id int not null, group_id int not null)").execute.apply()
-          SQL(s"create table entity7_${suffix} (id int not null, group_id int not null)").execute.apply()
+          SQL(s"create table groups_${suffix} (id int not null, owner_id int not null)").execute().apply()
+          SQL(s"create table owners_${suffix} (id int not null)").execute().apply()
+          SQL(s"create table events_${suffix} (id int not null, group_id int not null)").execute().apply()
+          SQL(s"create table news_${suffix} (id int not null, group_id int not null)").execute().apply()
+          SQL(s"create table members_${suffix} (id int not null, group_id int not null)").execute().apply()
+          SQL(s"create table sponsors_${suffix} (id int not null, group_id int not null)").execute().apply()
+          SQL(s"create table entity6_${suffix} (id int not null, group_id int not null)").execute().apply()
+          SQL(s"create table entity7_${suffix} (id int not null, group_id int not null)").execute().apply()
 
-          SQL(s"insert into groups_${suffix} values (1, 2)").update.apply()
-          SQL(s"insert into groups_${suffix} values (2, 2)").update.apply()
-          SQL(s"insert into groups_${suffix} values (3, 1)").update.apply()
-          SQL(s"insert into groups_${suffix} values (4, 2)").update.apply()
+          SQL(s"insert into groups_${suffix} values (1, 2)").update().apply()
+          SQL(s"insert into groups_${suffix} values (2, 2)").update().apply()
+          SQL(s"insert into groups_${suffix} values (3, 1)").update().apply()
+          SQL(s"insert into groups_${suffix} values (4, 2)").update().apply()
 
-          SQL(s"insert into owners_${suffix} values (1)").update.apply()
-          SQL(s"insert into owners_${suffix} values (2)").update.apply()
+          SQL(s"insert into owners_${suffix} values (1)").update().apply()
+          SQL(s"insert into owners_${suffix} values (2)").update().apply()
 
-          SQL(s"insert into events_${suffix} values (1, 2)").update.apply()
-          SQL(s"insert into events_${suffix} values (2, 1)").update.apply()
-          SQL(s"insert into events_${suffix} values (3, 1)").update.apply()
+          SQL(s"insert into events_${suffix} values (1, 2)").update().apply()
+          SQL(s"insert into events_${suffix} values (2, 1)").update().apply()
+          SQL(s"insert into events_${suffix} values (3, 1)").update().apply()
 
-          SQL(s"insert into news_${suffix} values (1, 2)").update.apply()
-          SQL(s"insert into news_${suffix} values (2, 1)").update.apply()
-          SQL(s"insert into news_${suffix} values (3, 2)").update.apply()
-          SQL(s"insert into news_${suffix} values (4, 2)").update.apply()
-          SQL(s"insert into news_${suffix} values (5, 3)").update.apply()
-          SQL(s"insert into news_${suffix} values (6, 2)").update.apply()
-          SQL(s"insert into news_${suffix} values (7, 1)").update.apply()
-          SQL(s"insert into news_${suffix} values (8, 1)").update.apply()
+          SQL(s"insert into news_${suffix} values (1, 2)").update().apply()
+          SQL(s"insert into news_${suffix} values (2, 1)").update().apply()
+          SQL(s"insert into news_${suffix} values (3, 2)").update().apply()
+          SQL(s"insert into news_${suffix} values (4, 2)").update().apply()
+          SQL(s"insert into news_${suffix} values (5, 3)").update().apply()
+          SQL(s"insert into news_${suffix} values (6, 2)").update().apply()
+          SQL(s"insert into news_${suffix} values (7, 1)").update().apply()
+          SQL(s"insert into news_${suffix} values (8, 1)").update().apply()
 
-          SQL(s"insert into members_${suffix} values (1, 2)").update.apply()
-          SQL(s"insert into members_${suffix} values (2, 1)").update.apply()
-          SQL(s"insert into members_${suffix} values (3, 1)").update.apply()
-          SQL(s"insert into members_${suffix} values (4, 2)").update.apply()
-          SQL(s"insert into members_${suffix} values (5, 1)").update.apply()
+          SQL(s"insert into members_${suffix} values (1, 2)").update().apply()
+          SQL(s"insert into members_${suffix} values (2, 1)").update().apply()
+          SQL(s"insert into members_${suffix} values (3, 1)").update().apply()
+          SQL(s"insert into members_${suffix} values (4, 2)").update().apply()
+          SQL(s"insert into members_${suffix} values (5, 1)").update().apply()
 
-          SQL(s"insert into sponsors_${suffix} values (1, 1)").update.apply()
-          SQL(s"insert into sponsors_${suffix} values (2, 2)").update.apply()
-          SQL(s"insert into sponsors_${suffix} values (3, 3)").update.apply()
-          SQL(s"insert into sponsors_${suffix} values (4, 2)").update.apply()
-          SQL(s"insert into sponsors_${suffix} values (5, 3)").update.apply()
+          SQL(s"insert into sponsors_${suffix} values (1, 1)").update().apply()
+          SQL(s"insert into sponsors_${suffix} values (2, 2)").update().apply()
+          SQL(s"insert into sponsors_${suffix} values (3, 3)").update().apply()
+          SQL(s"insert into sponsors_${suffix} values (4, 2)").update().apply()
+          SQL(s"insert into sponsors_${suffix} values (5, 3)").update().apply()
 
-          SQL(s"insert into entity6_${suffix} values (1, 1)").update.apply()
-          SQL(s"insert into entity6_${suffix} values (2, 2)").update.apply()
-          SQL(s"insert into entity6_${suffix} values (3, 1)").update.apply()
+          SQL(s"insert into entity6_${suffix} values (1, 1)").update().apply()
+          SQL(s"insert into entity6_${suffix} values (2, 2)").update().apply()
+          SQL(s"insert into entity6_${suffix} values (3, 1)").update().apply()
 
-          SQL(s"insert into entity7_${suffix} values (1, 1)").update.apply()
-          SQL(s"insert into entity7_${suffix} values (2, 2)").update.apply()
-          SQL(s"insert into entity7_${suffix} values (3, 1)").update.apply()
+          SQL(s"insert into entity7_${suffix} values (1, 1)").update().apply()
+          SQL(s"insert into entity7_${suffix} values (2, 2)").update().apply()
+          SQL(s"insert into entity7_${suffix} values (3, 1)").update().apply()
 
           case class GroupEntity(id: Int, ownerId: Int)
           case class Group(
@@ -117,7 +117,7 @@ class OneToManies7SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
               .map { (g, os, es, ns, ms, ss, e6, e7) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss, entity6 = e6, entity7 = e7)
-              }.list.apply()
+              }.list().apply()
 
             groups.size should equal(4)
             groups(0).id should equal(1)
@@ -226,7 +226,7 @@ class OneToManies7SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
               .map { (g, os, es, ns, ms, ss, e6, e7) =>
                 Group(id = g.id, ownerId = g.ownerId, owner = os.head,
                   events = es, news = ns, members = ms, sponsors = ss, entity6 = e6, entity7 = e7)
-              }.single.apply().get
+              }.single().apply().get
 
             group.id should equal(1)
 
@@ -245,13 +245,13 @@ class OneToManies7SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     } finally {
       DB autoCommit {
         implicit s =>
-          SQL(s"drop table groups_${suffix}").execute.apply()
-          SQL(s"drop table owners_${suffix}").execute.apply()
-          SQL(s"drop table events_${suffix}").execute.apply()
-          SQL(s"drop table members_${suffix}").execute.apply()
-          SQL(s"drop table sponsors_${suffix}").execute.apply()
-          SQL(s"drop table entity6_${suffix}").execute.apply()
-          SQL(s"drop table entity7_${suffix}").execute.apply()
+          SQL(s"drop table groups_${suffix}").execute().apply()
+          SQL(s"drop table owners_${suffix}").execute().apply()
+          SQL(s"drop table events_${suffix}").execute().apply()
+          SQL(s"drop table members_${suffix}").execute().apply()
+          SQL(s"drop table sponsors_${suffix}").execute().apply()
+          SQL(s"drop table entity6_${suffix}").execute().apply()
+          SQL(s"drop table entity7_${suffix}").execute().apply()
       }
     }
   }

@@ -171,31 +171,31 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 
         val eopt: Option[Emp] = DB readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL where id = ?").bind(1)
-            .map(rs => Emp(rs.int("id"), rs.string("name"))).single.apply()
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).single().apply()
         }
         eopt.isDefined should be(true)
 
         val ehead: Option[Emp] = DB readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
-            .map(rs => Emp(rs.int("id"), rs.string("name"))).first.apply()
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).first().apply()
         }
         ehead.isDefined should be(true)
 
         val es: List[Emp] = DB readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
-            .map(rs => Emp(rs.int("id"), rs.string("name"))).list.apply()
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).list().apply()
         }
         es.size should equal(2)
 
         val tr: Iterable[Emp] = DB readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
-            .map(rs => Emp(rs.int("id"), rs.string("name"))).iterable.apply()
+            .map(rs => Emp(rs.int("id"), rs.string("name"))).iterable().apply()
         }
 
         {
           implicit val session = DB(conn).readOnlySession()
           val e2s: List[Emp2] = SQL("select * from emp_BasicUsageSpec_SQL")
-            .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list.apply()
+            .map(rs => Emp2(rs.int("id"), Option(rs.string("name")))).list().apply()
           e2s.size should equal(2)
           var sum: Long = 0L
           SQL("select id from emp_BasicUsageSpec_SQL").foreach { rs => sum += rs.long("id") }
@@ -217,19 +217,19 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         DB autoCommit { implicit s =>
           try {
             val sql = SQL("select * from emp order by id limit 10").map(empMapper)
-            sql.list.apply() // trying limit keyword for this database
+            sql.list().apply() // trying limit keyword for this database
             sql // ok, this database supports limit keyword
           } catch {
             case e: Exception =>
               val sql = SQL("select * from emp order by id fetch first 10 rows only").map(empMapper)
-              sql.list.apply()
+              sql.list().apply()
               sql
           }
         }
       }
 
       // SQLTo* instances are also reusable
-      val get10EmpAllSQL: SQLToList[Emp, HasExtractor] = get10EmpSQL.list // or #toList
+      val get10EmpAllSQL: SQLToList[Emp, HasExtractor] = get10EmpSQL.list() // or #toList
 
       DB autoCommit { implicit s =>
 
@@ -237,17 +237,17 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         val emps: List[Emp] = get10EmpAllSQL.apply()
         emps.size should be <= 10
 
-        val getFirstOf10Emp: SQLToOption[Emp, HasExtractor] = get10EmpSQL.first // or #headOption
+        val getFirstOf10Emp: SQLToOption[Emp, HasExtractor] = get10EmpSQL.first() // or #headOption
         val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
         firstEmp.isDefined should be(true)
 
         // expects single result or nothing, when mutiple results are returned, Exception will be thrown.
-        val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single.apply() // or #toOption
+        val single: Option[Emp] = SQL("select * from emp where id = ?").bind(1).map(empMapper).single().apply() // or #toOption
         single.isDefined should be(true)
 
         // Execute DDL
         try {
-          SQL("drop table company").execute.apply()
+          SQL("drop table company").execute().apply()
         } catch { case e: Exception => }
         try {
           val result: Boolean = SQL("""
@@ -256,9 +256,9 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
               name varchar(30) not null,
               description varchar(1000),
               created_at timestamp
-            );""").execute.apply()
+            );""").execute().apply()
         } catch { case e: Exception => }
-        SQL("truncate table company").execute.apply()
+        SQL("truncate table company").execute().apply()
 
         // simply using statement with ?(place holder)
         SQL("""insert into company values (?, ?, ?, ?);""")
@@ -267,7 +267,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
             "Typesafe",
             """Typesafe makes it easy to build software based on the open source Scala programming language, Akka middleware, and Play web framework.
              From multicore to cloud computing, it's purpose built for scale.""",
-            LocalDateTime.now).update.apply()
+            LocalDateTime.now).update().apply()
 
         // Anorm like template
         SQL("""
@@ -280,7 +280,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
           Symbol("id") -> 2,
           Symbol("name") -> "Typesafe",
           Symbol("description") -> "xxx",
-          Symbol("createdAt") -> LocalDateTime.now).update.apply()
+          Symbol("createdAt") -> LocalDateTime.now).update().apply()
 
         // executable template
         SQL("""
@@ -293,7 +293,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
           Symbol("id") -> 3,
           Symbol("name") -> "Typesafe",
           Symbol("description") -> "xxx",
-          Symbol("createdAt") -> LocalDateTime.now).update.apply()
+          Symbol("createdAt") -> LocalDateTime.now).update().apply()
 
       }
     } finally { TestUtils.deleteTable("emp") }
@@ -307,13 +307,13 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings
 
         try {
-          SQL("drop table logging_sql_and_timing").execute.apply()
+          SQL("drop table logging_sql_and_timing").execute().apply()
         } catch { case e: Exception => }
-        SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)").execute.apply()
+        SQL("create table logging_sql_and_timing (id int primary key, name varchar(13) not null)").execute().apply()
 
         // bulk insert
         1 to 10000 foreach { i =>
-          SQL("insert into  logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update.apply()
+          SQL("insert into  logging_sql_and_timing values (?,?)").bind(i, "id_%010d".format(i)).update().apply()
         }
 
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
@@ -322,12 +322,12 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
           warningLogLevel = Symbol("INFO"),
           warningThresholdMillis = 10L)
         // this query will spend more than 10 millis
-        SQL("select  *  from logging_sql_and_timing").map(rs => rs.int("id")).list.apply()
+        SQL("select  *  from logging_sql_and_timing").map(rs => rs.int("id")).list().apply()
 
       } finally {
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings
         try {
-          SQL("drop table logging_sql_and_timing").execute.apply()
+          SQL("drop table logging_sql_and_timing").execute().apply()
         } catch { case e: Exception => }
       }
     }

@@ -17,7 +17,7 @@ class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
   it should "work" in {
 
     NamedDB(Symbol("SubQuerySpec")).autoCommit { implicit session =>
-      sql"create table account(id integer, name varchar(10))".execute.apply()
+      sql"create table account(id integer, name varchar(10))".execute().apply()
     }
 
     val a = Account.syntax("a")

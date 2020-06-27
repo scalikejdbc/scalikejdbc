@@ -13,6 +13,6 @@ class MyIOTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
     val exception = new RuntimeException
     val myIOTxBoundary = implicitly[TxBoundary[MyIO[Int]]]
     val result = myIOTxBoundary.closeConnection(MyIO(1), () => throw exception)
-    result.attempt.run should be(Left(exception))
+    result.attempt.run() should be(Left(exception))
   }
 }

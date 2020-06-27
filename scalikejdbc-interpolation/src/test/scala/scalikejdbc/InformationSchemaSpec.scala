@@ -19,15 +19,15 @@ class InformationSchemaSpec extends AnyFlatSpec with Matchers with SQLInterpolat
   it should "work" in {
     val roles: collection.Seq[Role] = DB autoCommit { implicit s =>
       try {
-        sql"drop table roles if exists".execute.apply()
+        sql"drop table roles if exists".execute().apply()
       } catch { case e: Exception => }
       try {
-        sql"create table roles (id int not null, name varchar(256) not null)".execute.apply()
-        sql"insert into roles (id, name) values (1, 'Alice')".update.apply()
+        sql"create table roles (id int not null, name varchar(256) not null)".execute().apply()
+        sql"insert into roles (id, name) values (1, 'Alice')".update().apply()
       } catch { case e: Exception => }
 
       val r = Roles.syntax("r")
-      withSQL { select.from(Roles as r) }.map(Roles(r)).list.apply()
+      withSQL { select.from(Roles as r) }.map(Roles(r)).list().apply()
     }
     roles.size should equal(1)
   }
