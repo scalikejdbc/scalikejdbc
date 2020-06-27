@@ -6,7 +6,7 @@ if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   sbt \
   '++ 2.12.11! -v' \
   publishLocal \
-  '++ 2.13.2! -v' \
+  '++ 2.13.3! -v' \
   root213/publishLocal \
   checkScalariform
 
