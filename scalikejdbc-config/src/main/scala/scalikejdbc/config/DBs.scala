@@ -26,7 +26,7 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
   }
 
   def closeAll(): Unit = {
-    ConnectionPool.closeAll
+    ConnectionPool.closeAll()
   }
 
 }

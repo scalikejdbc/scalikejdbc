@@ -257,7 +257,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @return session
    */
   def withinTxSession(tx: Tx = currentTx, settings: SettingsProvider = SettingsProvider.default): DBSession = {
-    if (!jtaDataSourceCompatible && !tx.isActive) {
+    if (!jtaDataSourceCompatible && !tx.isActive()) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     DBSession(
@@ -291,7 +291,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     // Start the transaction
     tx.begin()
     // Check if transaction is actually active
-    if (!jtaDataSourceCompatible && !tx.isActive) {
+    if (!jtaDataSourceCompatible && !tx.isActive()) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
   }

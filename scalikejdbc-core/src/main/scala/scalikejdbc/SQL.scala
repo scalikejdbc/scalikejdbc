@@ -402,7 +402,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap)
+  def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap())
 
   /**
    * Same as #single.

@@ -26,10 +26,10 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @return results as List[Map]
    */
   def run()(implicit session: DBSession = AutoSession): List[Map[String, Any]] = try {
-    SQL(sql).map(_.toMap()).list.apply()
+    SQL(sql).map(_.toMap()).list().apply()
   } catch {
     case e: java.sql.SQLException =>
-      val result = List(Map("RESULT" -> SQL(sql).execute.apply()))
+      val result = List(Map("RESULT" -> SQL(sql).execute().apply()))
       log.warn("The execution failed in read-only mode first, then was rerun in auto-commit mode. Using #execute from the first is highly recommended.")
       result
   }
@@ -39,7 +39,7 @@ case class StringSQLRunner(sql: String) extends LogSupport {
    * @param session DB Session
    * @return results as Boolean
    */
-  def execute()(implicit session: DBSession = AutoSession): Boolean = SQL(sql).execute.apply()
+  def execute()(implicit session: DBSession = AutoSession): Boolean = SQL(sql).execute().apply()
 
   /**
    * Shows all the result

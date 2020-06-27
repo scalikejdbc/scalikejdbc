@@ -120,21 +120,21 @@ trait QueryDSLFeature { self: SQLInterpolationFeature with SQLSyntaxSupportFeatu
    * withSQL and update.apply()
    */
   object applyUpdate {
-    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Int = withSQL[UpdateOperation](builder).update.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Int = withSQL[UpdateOperation](builder).update().apply()
   }
 
   /**
    * withSQL and updateAndReturnGeneratedKey.apply()
    */
   object applyUpdateAndReturnGeneratedKey {
-    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Long = withSQL[UpdateOperation](builder).updateAndReturnGeneratedKey.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Long = withSQL[UpdateOperation](builder).updateAndReturnGeneratedKey().apply()
   }
 
   /**
    * withSQL and execute.apply()
    */
   object applyExecute {
-    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Boolean = withSQL[UpdateOperation](builder).execute.apply()
+    def apply(builder: SQLBuilder[UpdateOperation])(implicit session: DBSession): Boolean = withSQL[UpdateOperation](builder).execute().apply()
   }
 
   // -----
