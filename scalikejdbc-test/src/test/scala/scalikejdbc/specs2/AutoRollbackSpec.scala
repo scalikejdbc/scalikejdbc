@@ -72,7 +72,7 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   }
 
   case class db2AutoRollback() extends AutoRollback {
-    override def db = NamedDB(Symbol("db2")).toDB
+    override def db() = NamedDB(Symbol("db2")).toDB
 
     def beforeTest = this{
       Member2.count() must_== (0)
@@ -85,7 +85,7 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   }
 
   case class db2AutoRollbackWithFixture() extends AutoRollback {
-    override def db = NamedDB(Symbol("db2")).toDB
+    override def db() = NamedDB(Symbol("db2")).toDB
 
     override def fixture(implicit session: DBSession): Unit = {
       SQL("insert into members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()

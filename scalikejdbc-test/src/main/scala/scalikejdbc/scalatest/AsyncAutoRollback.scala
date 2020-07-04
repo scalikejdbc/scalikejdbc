@@ -18,7 +18,7 @@ import scalikejdbc._
  *   }
  * }
  * class LegacyAccountSpec extends AsyncFlatSpec with AsyncAutoRollback {
- *   override def db = NamedDB('db2).toDB
+ *   override def db() = NamedDB('db2).toDB
  *   override def fixture(implicit session: DBSession) {
  *     SQL("insert into legacy_accounts values ...").update.apply()
  *   }

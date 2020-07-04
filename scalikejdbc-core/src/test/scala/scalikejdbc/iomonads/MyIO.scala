@@ -29,7 +29,7 @@ sealed abstract class MyIO[+A] {
 }
 
 object MyIO {
-  def apply[A](a: => A): MyIO[A] = Delay(a _)
+  def apply[A](a: => A): MyIO[A] = Delay(() => a)
 
   final case class Delay[+A](thunk: () => A) extends MyIO[A]
 
