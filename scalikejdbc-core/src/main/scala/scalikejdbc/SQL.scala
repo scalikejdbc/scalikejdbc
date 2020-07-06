@@ -356,8 +356,10 @@ abstract class SQL[A, E <: WithExtractor](
       DBSessionWrapper(_, attributesSwitcher).foreach(statement, rawParameters.toSeq: _*)(op)
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -377,8 +379,10 @@ abstract class SQL[A, E <: WithExtractor](
       DBSessionWrapper(_, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(z)(op)
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -611,8 +615,10 @@ class SQLBatch(val statement: String, val parameters: scala.collection.Seq[scala
     val f: DBSession => C[Int] = DBSessionWrapper(_, attributesSwitcher).batch(statement, parameters.toSeq: _*)
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -639,10 +645,14 @@ class SQLLargeBatch private[scalikejdbc] (statement: String, parameters: scala.c
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags.toSeq: _*))
     val f: DBSession => C[Long] = DBSessionWrapper(_, attributesSwitcher).largeBatch(statement, parameters.toSeq: _*)
     session match {
-      case AutoSession =>
+      case AutoSession(_, true) =>
         DB.autoCommit(f)
-      case NamedAutoSession(name, _) =>
+      case AutoSession(_, false) =>
+        DB.localTx(f)
+      case NamedAutoSession(name, _, true) =>
         NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false) =>
+        NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession =>
         DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) =>
@@ -665,8 +675,10 @@ class SQLBatchWithGeneratedKey(val statement: String, val parameters: scala.coll
     }
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -699,8 +711,10 @@ class SQLExecution(val statement: String, val parameters: scala.collection.Seq[A
     val f: DBSession => Boolean = DBSessionWrapper(_, attributesSwitcher).executeWithFilters(before, after, statement, parameters.toSeq: _*)
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -731,10 +745,14 @@ class SQLUpdate(val statement: String, val parameters: scala.collection.Seq[Any]
   def apply()(implicit session: DBSession): Int = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags.toSeq: _*))
     session match {
-      case AutoSession =>
+      case AutoSession(_, true) =>
         DB.autoCommit(DBSessionWrapper(_, attributesSwitcher).updateWithFilters(before, after, statement, parameters.toSeq: _*))
-      case NamedAutoSession(name, _) =>
+      case AutoSession(_, false) =>
+        DB.localTx(DBSessionWrapper(_, attributesSwitcher).updateWithFilters(before, after, statement, parameters.toSeq: _*))
+      case NamedAutoSession(name, _, true) =>
         NamedDB(name, session.settings).autoCommit(DBSessionWrapper(_, attributesSwitcher).updateWithFilters(before, after, statement, parameters.toSeq: _*))
+      case NamedAutoSession(name, _, false) =>
+        NamedDB(name, session.settings).localTx(DBSessionWrapper(_, attributesSwitcher).updateWithFilters(before, after, statement, parameters.toSeq: _*))
       case ReadOnlyAutoSession =>
         DB.readOnly(DBSessionWrapper(_, attributesSwitcher).updateWithFilters(before, after, statement, parameters.toSeq: _*))
       case ReadOnlyNamedAutoSession(name, _) =>
@@ -767,10 +785,14 @@ class SQLLargeUpdate private[scalikejdbc] (statement: String, parameters: scala.
   def apply()(implicit session: DBSession): Long = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(SQL("").tags(tags.toSeq: _*))
     session match {
-      case AutoSession =>
+      case AutoSession(_, true) =>
         DB.autoCommit(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters.toSeq: _*))
-      case NamedAutoSession(name, _) =>
+      case AutoSession(_, false) =>
+        DB.localTx(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters.toSeq: _*))
+      case NamedAutoSession(name, _, true) =>
         NamedDB(name, session.settings).autoCommit(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters.toSeq: _*))
+      case NamedAutoSession(name, _, false) =>
+        NamedDB(name, session.settings).localTx(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters.toSeq: _*))
       case ReadOnlyAutoSession =>
         DB.readOnly(DBSessionWrapper(_, attributesSwitcher).largeUpdateWithFilters(before, after, statement, parameters.toSeq: _*))
       case ReadOnlyNamedAutoSession(name, _) =>
@@ -794,8 +816,10 @@ class SQLUpdateWithGeneratedKey(val statement: String, val parameters: scala.col
     val f: DBSession => Long = DBSessionWrapper(_, attributesSwitcher).updateAndReturnSpecifiedGeneratedKey(statement, parameters.toSeq: _*)(key)
     // format: OFF
     session match {
-      case AutoSession                       => DB.autoCommit(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).autoCommit(f)
+      case AutoSession(_, true)              => DB.autoCommit(f)
+      case AutoSession(_, false)             => DB.localTx(f)
+      case NamedAutoSession(name, _, true)   => NamedDB(name, session.settings).autoCommit(f)
+      case NamedAutoSession(name, _, false)  => NamedDB(name, session.settings).localTx(f)
       case ReadOnlyAutoSession               => DB.readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
@@ -826,8 +850,8 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     val f: DBSession => C[A] = s => result[A](extractor, DBSessionWrapper(s, attributesSwitcher))
     // format: OFF
     session match {
-      case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).readOnly(f)
+      case AutoSession(_, _) | ReadOnlyAutoSession => DB.readOnly(f)
+      case NamedAutoSession(name, _, _)      => NamedDB(name, session.settings).readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
     }
@@ -898,8 +922,8 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
     val f: DBSession => C[A] = DBSessionWrapper(_, attributesSwitcher).collection[A, C](statement, rawParameters.toSeq: _*)(extractor)
     // format: OFF
     session match {
-      case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
-      case NamedAutoSession(name, _)         => NamedDB(name, session.settings).readOnly(f)
+      case AutoSession(_, _) | ReadOnlyAutoSession => DB.readOnly(f)
+      case NamedAutoSession(name, _, _)      => NamedDB(name, session.settings).readOnly(f)
       case ReadOnlyNamedAutoSession(name, _) => NamedDB(name, session.settings).readOnly(f)
       case _                                 => f(session)
     }

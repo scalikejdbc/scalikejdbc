@@ -5,7 +5,7 @@ import java.sql.Connection
 /**
  * Represents that already existing session will be used or a new session will be started.
  */
-case class AutoSession(settings: SettingsProvider) extends DBSession {
+case class AutoSession(settings: SettingsProvider = SettingsProvider.default, useAutoCommit: Boolean = true) extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
   override val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
@@ -18,13 +18,13 @@ case class AutoSession(settings: SettingsProvider) extends DBSession {
   override private[scalikejdbc] lazy val connectionAttributes: DBConnectionAttributes = unexpectedInvocation
 }
 
-object AutoSession extends AutoSession(SettingsProvider.default)
+object AutoSession extends AutoSession(SettingsProvider.default, useAutoCommit = true)
 
 /**
  * Represents that already existing session will be used or a new session
  * which is retrieved from named connection pool will be started.
  */
-case class NamedAutoSession(name: Any, settings: SettingsProvider = SettingsProvider.default) extends DBSession {
+case class NamedAutoSession(name: Any, settings: SettingsProvider = SettingsProvider.default, useAutoCommit: Boolean = true) extends DBSession {
   override private[scalikejdbc] val conn: Connection = null
   override val tx: Option[Tx] = None
   val isReadOnly: Boolean = false
