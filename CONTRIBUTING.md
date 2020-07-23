@@ -16,7 +16,7 @@
 
 #### Branches
 
-##### master (will be 3.6.x, the default branch)
+##### master (will be 4.0.x, the default branch)
 
 - Latest stable version
 - Breaking source compatibility is not acceptable
