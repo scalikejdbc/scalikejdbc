@@ -358,10 +358,6 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     collection[A, Iterable](template, params: _*)(extract)
   }
 
-  @deprecated(message = "will be removed. use iterable instead", since = "3.3.0")
-  def traversable[A](template: String, params: Any*)(extract: WrappedResultSet => A): Iterable[A] =
-    iterable[A](template, params: _*)(extract)
-
   /**
    * Executes java.sql.PreparedStatement#execute().
    *

@@ -86,8 +86,6 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
   override def first(): OneToManySQLToOption[A, B, E, Z] = headOption()
   override def list(): OneToManySQLToList[A, B, E, Z] = toList()
   override def iterable(): OneToManySQLToIterable[A, B, E, Z] = toIterable()
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  override def traversable(): OneToManySQLToIterable[A, B, E, Z] = iterable()
   override def collection: OneToManySQLToCollection[A, B, E, Z] = toCollection
 
 }

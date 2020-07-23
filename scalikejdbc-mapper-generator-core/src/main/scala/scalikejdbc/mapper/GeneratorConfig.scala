@@ -9,7 +9,6 @@ case class GeneratorConfig(
   template: GeneratorTemplate = GeneratorTemplate.queryDsl,
   testTemplate: GeneratorTestTemplate = GeneratorTestTemplate(""),
   lineBreak: LineBreak = LineBreak("\n"),
-  @deprecated("will be removed", "3.3.0") caseClassOnly: Boolean = false,
   encoding: String = "UTF-8",
   autoConstruct: Boolean = false,
   defaultAutoSession: Boolean = true,

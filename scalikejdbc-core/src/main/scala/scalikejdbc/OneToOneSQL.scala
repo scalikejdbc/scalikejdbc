@@ -40,9 +40,6 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](
     new OneToOneSQL(statement, rawParameters)(one)(toOne)(zExtractor)
   }
 
-  @deprecated(message = "will be removed. use toIterable() instead", since = "3.3.0")
-  def toTraversable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
-
   override def toIterable(): OneToOneSQLToIterable[A, B, E, Z] = {
     new OneToOneSQLToIterable[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)
   }
@@ -63,8 +60,6 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](
   override def first(): OneToOneSQLToOption[A, B, E, Z] = headOption()
   override def list(): OneToOneSQLToList[A, B, E, Z] = toList()
   override def iterable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  override def traversable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
   override def collection: OneToOneSQLToCollection[A, B, E, Z] = toCollection
 }
 

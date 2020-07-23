@@ -482,18 +482,12 @@ abstract class SQL[A, E <: WithExtractor](
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
 
-  @deprecated(message = "will be removed. use toIterable() instead", since = "3.3.0")
-  def toTraverable(): SQLToIterable[A, E] = toIterable()
-
   /**
    * Set execution type as iterable.
    *
    * @return SQL instance
    */
   def iterable(): SQLToIterable[A, E] = toIterable()
-
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  def traversable(): SQLToIterable[A, E] = toIterable()
 
   /**
    * Set execution type as execute

@@ -7,8 +7,6 @@ object ReturnCollectionType {
   case object Vector extends ReturnCollectionType("vector")
   case object Array extends ReturnCollectionType("array")
   case object Factory extends ReturnCollectionType("factory")
-  @deprecated("will be removed. use ReturnCollectionType.Factory instead", "3.3.0")
-  val CanBuildFrom = Factory
 
   private[this] val all: Set[ReturnCollectionType] = Set(
     List, Vector, Array, Factory)
