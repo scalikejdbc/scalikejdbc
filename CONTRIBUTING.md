@@ -119,7 +119,7 @@
 
 All pull requests should pass the Travis CI jobs before they can be merged:
 
-https://travis-ci.org/scalikejdbc/scalikejdbc
+https://travis-ci.com/scalikejdbc/scalikejdbc
 
 Testing with default settings is required when pushing changes:
 
