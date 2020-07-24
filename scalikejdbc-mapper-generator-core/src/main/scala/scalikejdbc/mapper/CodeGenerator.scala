@@ -2,7 +2,6 @@ package scalikejdbc.mapper
 
 import scalikejdbc._
 import scala.language.implicitConversions
-import java.util.Locale.{ ENGLISH => en }
 
 /**
  * Active Record like template generator

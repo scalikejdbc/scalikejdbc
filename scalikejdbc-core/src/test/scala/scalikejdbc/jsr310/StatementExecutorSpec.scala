@@ -2,7 +2,6 @@ package scalikejdbc
 package jsr310
 
 import scalikejdbc.interpolation.Implicits._
-import org.scalatest._
 import java.time._
 import java.time.temporal.ChronoUnit
 import org.scalatest.funspec.AnyFunSpec

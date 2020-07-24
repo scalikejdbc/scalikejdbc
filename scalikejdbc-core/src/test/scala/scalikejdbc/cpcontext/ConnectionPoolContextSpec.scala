@@ -1,6 +1,5 @@
 package scalikejdbc.cpcontext
 
-import org.scalatest._
 import scalikejdbc._
 import java.time._
 import org.scalatest.flatspec.AnyFlatSpec

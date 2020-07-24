@@ -1,6 +1,5 @@
 package foo
 
-import org.scalatest._
 import scalikejdbc._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -2,8 +2,6 @@ package scalikejdbc
 
 import scala.reflect.macros.blackbox.Context
 
-import scalikejdbc.interpolation.SQLSyntax
-
 /**
  * Macros for dynamic fields validation
  */

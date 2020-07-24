@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.slf4j._
 import org.mockito.Mockito.{ mock, verify, times, when }
 import org.scalatest.flatspec.AnyFlatSpec

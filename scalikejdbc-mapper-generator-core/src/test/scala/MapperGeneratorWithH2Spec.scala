@@ -1,4 +1,4 @@
-import org.scalatest._
+
 
 import scalikejdbc._
 import mapper._

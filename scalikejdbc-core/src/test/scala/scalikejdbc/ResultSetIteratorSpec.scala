@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import util.control.Exception._
-import org.scalatest._
 import java.sql.ResultSet
 import java.util.NoSuchElementException
 import scalikejdbc.LoanPattern._

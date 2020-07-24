@@ -2,7 +2,6 @@ package scalikejdbc
 
 import java.time.format.DateTimeFormatter
 
-import org.scalatest._
 import java.time.{ ZoneId, ZonedDateTime }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

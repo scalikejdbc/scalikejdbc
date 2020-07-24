@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
 import org.scalatest.flatspec.AnyFlatSpec

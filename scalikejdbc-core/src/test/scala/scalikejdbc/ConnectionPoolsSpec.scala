@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.util.Properties
 import javax.sql.DataSource
 import com.zaxxer.hikari.HikariDataSource

@@ -1,6 +1,5 @@
 package somewhere
 
-import org.scalatest._
 import scalikejdbc._
 import scalikejdbc.streams._
 

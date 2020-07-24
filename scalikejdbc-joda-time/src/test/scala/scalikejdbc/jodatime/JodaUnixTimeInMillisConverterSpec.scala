@@ -1,7 +1,6 @@
 package scalikejdbc
 package jodatime
 
-import org.scalatest._
 import org.joda.time._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

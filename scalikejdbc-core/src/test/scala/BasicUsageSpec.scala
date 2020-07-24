@@ -1,5 +1,4 @@
 import java.time.LocalDateTime
-import org.scalatest._
 import util.control.Exception._
 import java.sql.Connection
 import scalikejdbc._

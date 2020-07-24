@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.joda.time._
 import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 import org.scalatest.flatspec.AnyFlatSpec

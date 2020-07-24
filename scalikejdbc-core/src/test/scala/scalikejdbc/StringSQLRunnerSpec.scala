@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import scala.util.control.Exception._
 import java.util.NoSuchElementException
 import org.scalatest.flatspec.AnyFlatSpec

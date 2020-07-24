@@ -4,7 +4,6 @@ import scalikejdbc._
 import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
-import org.scalatest._
 
 import scala.concurrent.Future
 import org.scalatest.flatspec.FixtureAsyncFlatSpec

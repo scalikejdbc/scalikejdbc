@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.sql.DriverManager
 
 import org.mockito.Mockito.{ mock, verify }

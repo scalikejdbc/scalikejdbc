@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.slf4j.LoggerFactory
 
 import scala.util.control.NonFatal

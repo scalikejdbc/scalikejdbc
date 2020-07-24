@@ -3,7 +3,6 @@ package models
 import scalikejdbc._
 import java.time._
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

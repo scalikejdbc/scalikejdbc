@@ -1,6 +1,5 @@
 package scalikejdbc.config
 
-import org.scalatest._
 import scalikejdbc._
 import com.typesafe.config._
 import org.scalatest.funspec.AnyFunSpec

@@ -1,8 +1,5 @@
 package outside
 
-import org.scalatest._
-import scalikejdbc._
-import java.util.TimeZone
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 //import org.joda.time.{ DateTime, DateTimeZone }

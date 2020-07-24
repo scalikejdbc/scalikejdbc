@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.mockito.Mockito.{ mock, when }
 
 import java.sql._

@@ -4,7 +4,6 @@ import scalikejdbc._
 import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
-import org.scalatest._
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

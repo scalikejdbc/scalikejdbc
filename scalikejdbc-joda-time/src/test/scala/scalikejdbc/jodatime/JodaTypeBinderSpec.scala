@@ -1,7 +1,6 @@
 package scalikejdbc
 package jodatime
 
-import org.scalatest._
 import java.sql.ResultSet
 import java.time.ZoneId
 import org.joda.time._

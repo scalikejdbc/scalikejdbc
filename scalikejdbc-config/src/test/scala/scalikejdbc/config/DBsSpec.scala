@@ -1,6 +1,5 @@
 package scalikejdbc.config
 
-import org.scalatest._
 import scalikejdbc._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
