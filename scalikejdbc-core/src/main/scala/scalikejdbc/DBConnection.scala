@@ -2,6 +2,8 @@ package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection, ResultSet }
 import scalikejdbc.metadata._
+import scala.collection.compat._
+import scala.collection.compat.immutable.LazyList
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
@@ -471,7 +473,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
     val tableList = new ResultSetIterator(meta.getTables(null, schema, table, tableTypes)).map {
       rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
-    }.toStream
+    }.to(LazyList)
 
     tableList.headOption.map {
       case (schema, table, remarks) =>
