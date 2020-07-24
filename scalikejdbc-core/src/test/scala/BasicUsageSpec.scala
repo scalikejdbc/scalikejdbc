@@ -164,7 +164,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
   // ---------------------------
 
   "SQL" should "be available" in {
-    using(ConnectionPool.borrow()) { conn: Connection =>
+    using(ConnectionPool.borrow()) { conn =>
 
       try {
         TestUtils.initialize("emp_BasicUsageSpec_SQL")
