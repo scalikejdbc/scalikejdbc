@@ -12,7 +12,7 @@ http://scalikejdbc.org/
 - [core] 42f5d63b HikariCP 3.4.5 by xuwei-k
 - [core] ba8a4cf2 Update joda-time to 2.10.6 by xuwei-k
 - [core] ec3a0a30 specs2 4.9.4 by xuwei-k
-- [core] 7b2f4708 Scala 2.12.11 by xuwei-k
+- [core] 7b2f4708 Scala 2.12.12 by xuwei-k
 
 ---
 

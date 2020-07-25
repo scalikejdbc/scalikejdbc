@@ -4,7 +4,7 @@ set -e
 
 if [[ ${TRAVIS_SCALA_VERSION} = "scripted-test" ]]; then
   sbt \
-  '++ 2.12.11! -v' \
+  '++ 2.12.12! -v' \
   publishLocal \
   '++ 2.13.3! -v' \
   root213/publishLocal \
