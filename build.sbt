@@ -19,7 +19,7 @@ lazy val _hibernateVersion = "5.4.18.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.4.3"
+lazy val mockitoVersion = "3.4.4"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -40,7 +40,7 @@ lazy val baseSettings = Seq(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.0",
-  specs2Version := "4.10.0",
+  specs2Version := "4.10.1",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.6",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
