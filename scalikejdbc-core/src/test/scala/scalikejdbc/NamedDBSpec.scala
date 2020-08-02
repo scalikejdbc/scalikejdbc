@@ -270,7 +270,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
   // --------------------
   // futureLocalTx
 
-  implicit val patienceTimeout = PatienceConfig(10.seconds)
+  implicit val patienceTimeout: PatienceConfig = PatienceConfig(10.seconds)
 
   it should "execute single in futureLocalTx block" in {
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"

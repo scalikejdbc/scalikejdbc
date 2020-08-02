@@ -14,7 +14,7 @@ import org.scalatest.matchers.should.Matchers
 
 class LoanPatternSpec extends AnyFlatSpec with Matchers with Settings with LoanPattern with ScalaFutures {
 
-  implicit val patienceTimeout = PatienceConfig(30.seconds)
+  implicit val patienceTimeout: PatienceConfig = PatienceConfig(30.seconds)
 
   behavior of "LoanPattern"
 
