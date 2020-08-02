@@ -325,7 +325,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       intercept[Exception] {
         Await.result(failure, 10.seconds)
       }
-      val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = DB.readOnly(s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))
     }
   }
@@ -367,7 +367,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       firstResult should equal(1)
 
       val myIOName = MyIO(firstResult).flatMap { _ =>
-        DB.localTx[MyIO[Option[String]]](s => MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))(boundary=MyIO.myIOTxBoundary)
+        DB.localTx[MyIO[Option[String]]](s => MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))(boundary = MyIO.myIOTxBoundary)
       }
       myIOName.run() should be(Some("foo"))
 
@@ -405,7 +405,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       intercept[Exception] {
         failure.run()
       }
-      val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = DB.readOnly(s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))
     }
   }
@@ -463,7 +463,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
         }
         count should equal(Right(1))
         val name = count.flatMap { _ =>
-          DB.localTx (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+          DB.localTx(s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
         }
         name should be(Right(Some("foo")))
       }
@@ -497,7 +497,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
             .flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
         }
         failure should be(Symbol("left"))
-        val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        val res = DB.readOnly(s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
         res.get should not be (Some("foo"))
       }
     }
