@@ -46,7 +46,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB readOnly {
+      val result = DB.readOnly {
         session => session.list("select * from " + tableName + "")(rs => rs.string("name"))
       }
       result.size should be > 0
@@ -70,7 +70,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        DB readOnly {
+        DB.readOnly {
           session => session.update("update " + tableName + " set name = ?", "xxx")
         }
       }
@@ -84,7 +84,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = DB.autoCommit {
         session =>
           session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
       }
@@ -109,7 +109,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = DB.autoCommit {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
       }
       result.get should equal(1)
@@ -121,7 +121,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[TooManyRowsException] {
-        DB autoCommit {
+        DB.autoCommit {
           _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
         }
       }
@@ -133,7 +133,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = DB readOnly {
+      val name: Option[String] = DB.readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
       name.get should equal("name1")
@@ -144,7 +144,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit {
+      val result = DB.autoCommit {
         _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
       }
       result.size should equal(2)
@@ -155,7 +155,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB autoCommit {
+      DB.autoCommit {
         _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
       }
     }
@@ -165,11 +165,11 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB autoCommit {
+      val count = DB.autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB autoCommit {
+      val name = (DB.autoCommit {
         _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
       }).get
       name should equal("foo")
@@ -180,11 +180,11 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = (DB readOnly {
+      val name = (DB.readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
       }).get
       name should equal("name1")
-      val count = DB autoCommit {
+      val count = DB.autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -198,7 +198,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = DB.localTx {
         _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
       }
       result.get should equal("1")
@@ -209,7 +209,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = DB.localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
       result.size should equal(2)
@@ -220,7 +220,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB localTx {
+      val count = DB.localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -252,7 +252,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
   // --------------------
   // futureLocalTx
 
-  implicit val patienceTimeout = PatienceConfig(10.seconds)
+  implicit val patienceTimeout: PatienceConfig = PatienceConfig(10.seconds)
 
   it should "execute single in futureLocalTx block" in {
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
@@ -325,7 +325,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       intercept[Exception] {
         Await.result(failure, 10.seconds)
       }
-      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))
     }
   }
@@ -379,13 +379,13 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       futureUsing(DB(ConnectionPool.borrow())) { db =>
-        val myIOCount = DB localTx[MyIO[Int]] { s =>
+        val myIOCount = DB.localTx[MyIO[Int]] { s =>
           MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }
         myIOCount.run() should equal(1)
 
         db.rollbackIfActive()
-        val myIOName = DB localTx[MyIO[Option[String]]] { s =>
+        val myIOName = DB.localTx[MyIO[Option[String]]] { s =>
           MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
         }
         myIOName.run() should equal(Some("foo"))
@@ -398,14 +398,14 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     val tableName = tableNamePrefix + "_rollback"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val failure = DB localTx[MyIO[Int]] { implicit s =>
+      val failure = DB.localTx[MyIO[Int]] { implicit s =>
         MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
           .map(_ => s.update("update foo should be rolled back"))
       }
       intercept[Exception] {
         failure.run()
       }
-      val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
       res.get should not be (Some("foo"))
     }
   }
@@ -420,7 +420,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = tableNamePrefix + "_singleInLocalTxForReturnType_Try"
       ultimately(TestUtils.deleteTable(tableName)) {
         TestUtils.initialize(tableName)
-        val result = DB localTx { s =>
+        val result = DB.localTx { s =>
           allCatch.withTry { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
         }
         result.isSuccess should be(true)
@@ -436,7 +436,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = tableNamePrefix + "_singleInLocalTxForReturnType"
       ultimately(TestUtils.deleteTable(tableName)) {
         TestUtils.initialize(tableName)
-        val result = DB localTx { s =>
+        val result = DB.localTx { s =>
           allCatch.either { s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")) }
         }
         result should equal(Right(Some("1")))
@@ -447,7 +447,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = tableNamePrefix + "_singleInLocalTxForReturnType"
       ultimately(TestUtils.deleteTable(tableName)) {
         TestUtils.initialize(tableName)
-        val result = DB localTx { s =>
+        val result = DB.localTx { s =>
           allCatch.either(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
         }
         result.map(_.size) should equal(Right(2))
@@ -458,12 +458,12 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = tableNamePrefix + "_singleInLocalTxForReturnType"
       ultimately(TestUtils.deleteTable(tableName)) {
         TestUtils.initialize(tableName)
-        val count = DB localTx { s =>
+        val count = DB.localTx { s =>
           allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
         }
         count should equal(Right(1))
         val name = count.flatMap { _ =>
-          DB localTx (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+          DB.localTx (s => allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
         }
         name should be(Right(Some("foo")))
       }
@@ -474,12 +474,12 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       ultimately(TestUtils.deleteTable(tableName)) {
         TestUtils.initialize(tableName)
         using(DB(ConnectionPool.borrow())) { db =>
-          val count = DB localTx { s =>
+          val count = DB.localTx { s =>
             allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
           }
           count should equal(Right(1))
           db.rollbackIfActive()
-          val name = DB localTx { s =>
+          val name = DB.localTx { s =>
             allCatch.either(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
           }
           name should equal(Right(Some("foo")))
@@ -497,7 +497,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
             .flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
         }
         failure should be(Symbol("left"))
-        val res = DB readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        val res = DB.readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
         res.get should not be (Some("foo"))
       }
     }
@@ -629,13 +629,13 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       TestUtils.deleteTable(tableName)
     }) {
       TestUtils.initialize(tableName)
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         SQL("insert into " + tableName + " values (?,?)").bind(3, "so what?").update.apply()
       }
       GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
         enabled = true,
         logLevel = Symbol("info"))
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         val res1 = SQL("select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?")
           .bind(3)
           .map(rs => rs.string("name")).list.apply()
@@ -727,13 +727,13 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     if (driverClassName == "com.mysql.jdbc.Driver") {
       val tableName = s"issue245_${System.currentTimeMillis}"
       try {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           SQL(s"create table `${tableName}` (some_setting tinyint(1) NOT NULL DEFAULT '1')").execute.apply()
         }
         val table = DB.getTable(tableName)
         table.isDefined should equal(true)
       } finally {
-        try DB autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
+        try DB.autoCommit { implicit s => SQL(s"drop table ${tableName}").execute.apply() }
         catch { case e: Exception => }
       }
     }
@@ -791,7 +791,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       TestUtils.initialize(tableName)
 
       {
-        val result: collection.Seq[String] = DB readOnly { session =>
+        val result: collection.Seq[String] = DB.readOnly { session =>
           session.fetchSize(111)
           session.list("select * from " + tableName + "")(rs => rs.string("name"))
         }
@@ -799,7 +799,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       }
 
       {
-        val result: collection.Seq[String] = DB readOnly { implicit session =>
+        val result: collection.Seq[String] = DB.readOnly { implicit session =>
           SQL("select * from " + tableName + "").fetchSize(222).map(rs => rs.string("name")).list.apply()
         }
         result.size should be > 0
@@ -812,7 +812,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
 
-      DB readOnly { session =>
+      DB.readOnly { session =>
         session.fetchSize(111).queryTimeout(11)
         val result = session.list("select * from " + tableName + "")(rs => rs.string("name"))
         result.size should be > 0
@@ -820,7 +820,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
         session.queryTimeout should equal(Some(11))
       }
 
-      DB readOnly { implicit session =>
+      DB.readOnly { implicit session =>
         session.fetchSize(111).queryTimeout(11)
         val result = {
           SQL("select * from " + tableName + "")
@@ -845,7 +845,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       TestUtils.initialize(tableName)
 
       {
-        val result: collection.Seq[String] = DB readOnly { session =>
+        val result: collection.Seq[String] = DB.readOnly { session =>
           session.queryTimeout(111)
           session.list("select * from " + tableName + "")(rs => rs.string("name"))
         }
@@ -853,7 +853,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       }
 
       {
-        val result: collection.Seq[String] = DB readOnly { implicit session =>
+        val result: collection.Seq[String] = DB.readOnly { implicit session =>
           SQL("select * from " + tableName + "").queryTimeout(222).map(rs => rs.string("name")).list.apply()
         }
         result.size should be > 0
@@ -862,7 +862,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       {
         // set invalid value
         intercept[java.sql.SQLException] {
-          DB readOnly { implicit session =>
+          DB.readOnly { implicit session =>
             SQL("select * from " + tableName + "").queryTimeout(-1).map(rs => rs.string("name")).list.apply()
           }
         }
@@ -882,14 +882,14 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
       val tableName = tableNamePrefix + "_timezone"
       try {
         ultimately(TestUtils.deleteTable(tableName)) {
-          DB autoCommit { implicit s =>
+          DB.autoCommit { implicit s =>
             SQL(s"create table ${tableName} (id bigint, t timestamp without time zone not null, tz timestamp not null)").execute.apply()
             SQL(s"insert into ${tableName} (id, t, tz) values (?, ?, ?)").bind(1, now, now).update.apply()
           }
 
           case class Record(id: Long, t: DateTime, tz: DateTime)
 
-          val record1: Record = DB readOnly { implicit s =>
+          val record1: Record = DB.readOnly { implicit s =>
             SQL(s"select * from ${tableName}").map { rs =>
               Record(rs.get("id"), rs.jodaDateTime("t"), rs.jodaDateTime("tz"))
             }.list.apply().head
@@ -906,7 +906,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
           TimeZone.setDefault(utc)
           DateTimeZone.setDefault(DateTimeZone.forTimeZone(utc))
 
-          val record2: Record = DB readOnly { implicit s =>
+          val record2: Record = DB.readOnly { implicit s =>
             SQL(s"select * from ${tableName}").map { rs =>
               Record(rs.get("id"), rs.jodaDateTime("t"), rs.jodaDateTime("tz"))
             }.list.apply().head
