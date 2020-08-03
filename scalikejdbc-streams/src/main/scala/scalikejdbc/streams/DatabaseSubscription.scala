@@ -257,7 +257,7 @@ private[streams] class DatabaseSubscription[A](
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
 
     val occupiedDBSession = maybeOccupiedDBSession.getOrElse(occupyNewDBSession())
-    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher()).toStatementExecutor(sql.statement, sql.rawParameters)
+    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher).toStatementExecutor(sql.statement, sql.rawParameters)
     val resultSet = statementExecutor.executeQuery()
     val resultSetProxy = new DBConnectionAttributesWiredResultSet(resultSet, occupiedDBSession.connectionAttributes)
 

@@ -32,7 +32,7 @@ case class StreamReadySQL[A] private (
     new StreamReadySQL(underlying, adjuster)
   }
 
-  private[streams] def createDBSessionAttributesSwitcher(): DBSessionAttributesSwitcher = {
+  private[streams] def createDBSessionAttributesSwitcher: DBSessionAttributesSwitcher = {
     new DBSessionAttributesSwitcher(underlying) {
       override def withSwitchedDBSession[T](session: DBSession)(op: (DBSession) => T): T = {
         super.withSwitchedDBSession(session) { session =>

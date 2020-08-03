@@ -20,16 +20,16 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       using(new DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
 
-        SQL("insert into " + tableName + " values (?, ?)").bind(3, Option("Ben")).execute().apply()
+        SQL("insert into " + tableName + " values (?, ?)").bind(3, Option("Ben")).execute.apply()
 
         val benOpt = SQL("select id,name from " + tableName + " where id = ?").bind(3)
-          .map(rs => (rs.int("id"), rs.string("name"))).toOption()
+          .map(rs => (rs.int("id"), rs.string("name"))).toOption
           .apply()
 
         benOpt.get._1 should equal(3)
         benOpt.get._2 should equal("Ben")
 
-        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).execute().apply()
+        SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).execute.apply()
 
         val noName = SQL("select id,name from " + tableName + " where id = ?").bind(4)
           .map(rs => (rs.int("id"), rs.string("name"))).toOption
@@ -56,10 +56,10 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
         implicit val session = db.autoCommitSession()
 
         val singleResult = SQL("select id from " + tableName + " where id = ?").bind(1)
-          .map(rs => rs.string("id")).toOption().apply()
+          .map(rs => rs.string("id")).toOption.apply()
         singleResult.get should equal("1")
 
-        val firstResult = SQL("select id from " + tableName).map(rs => rs.string("id")).headOption().apply()
+        val firstResult = SQL("select id from " + tableName).map(rs => rs.string("id")).headOption.apply()
         firstResult.get should equal("1")
       }
     }
@@ -71,7 +71,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
-        val result = SQL("select id from " + tableName).map(rs => rs.string("id")).toList().apply()
+        val result = SQL("select id from " + tableName).map(rs => rs.string("id")).toList.apply()
         result.size should equal(2)
       }
     }
@@ -121,7 +121,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
 
         // should be updated
         val name = SQL("select name from " + tableName + " where id = ?").bind(1)
-          .map(rs => rs.string("name")).toOption().apply().getOrElse("---")
+          .map(rs => rs.string("name")).toOption.apply().getOrElse("---")
         name should equal("foo")
       }
     }
@@ -145,7 +145,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
 
         // should be updated
         val name = SQL("select name from " + tableName + " where id = ?").bind(1)
-          .map(rs => rs.string("name")).toOption().apply().getOrElse("---")
+          .map(rs => rs.string("name")).toOption.apply().getOrElse("---")
         name should equal("foo")
       }
     }
@@ -163,7 +163,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
         db.begin()
         implicit val session = db.withinTxSession()
         TestUtils.initializeEmpRecords(session, tableName)
-        val result = SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).toOption().apply()
+        val result = SQL("select id from " + tableName + " where id = ?").bind(1).map(rs => rs.string("id")).toOption.apply()
         result.get should equal("1")
         db.rollbackIfActive()
       }
@@ -180,7 +180,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
         TestUtils.initializeEmpRecords(session, tableName)
         val result = SQL("select id from " + tableName + "").map {
           rs => rs.string("id")
-        }.toList().apply()
+        }.toList.apply()
         result.size should equal(2)
         db.rollbackIfActive()
       }
@@ -231,16 +231,16 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
         TestUtils.initializeEmpRecords(session, tableName)
         val nameBefore = SQL("select name from " + tableName + " where id = ?").bind(1).map {
           rs => rs.string("name")
-        }.toOption().apply()
+        }.toOption.apply()
         nameBefore.get should equal("name1")
-        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate().apply()
+        val count = SQL("update " + tableName + " set name = ? where id = ?").bind("foo", 1).executeUpdate.apply()
         count should equal(1)
         db.rollback()
       }
       DB readOnly { implicit session =>
         val name = SQL("select name from " + tableName + " where id = ?").bind(1).map {
           rs => rs.string("name")
-        }.toOption().apply()
+        }.toOption.apply()
         name.get should equal("name1")
       }
     }
