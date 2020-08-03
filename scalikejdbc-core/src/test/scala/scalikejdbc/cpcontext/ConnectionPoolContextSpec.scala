@@ -46,7 +46,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
 
   it should "work with NamedConnectionPoolContext" in {
     val tableName = tableNamePrefix + "_withNamedCPContext"
-    implicit val context = MultipleConnectionPoolContext(
+    implicit val context: MultipleConnectionPoolContext = MultipleConnectionPoolContext(
       ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
       Symbol("ConnectionPoolContextSpec") -> ConnectionPool.get())
     try {
@@ -112,7 +112,7 @@ object ConnectionPoolContextSpecUtils {
 }
 
 trait NamedCPContextAsDefault {
-  implicit lazy val context = MultipleConnectionPoolContext(
+  implicit lazy val context: MultipleConnectionPoolContext = MultipleConnectionPoolContext(
     ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
     Symbol("ConnectionPoolContextSpec") -> ConnectionPool.get())
 }

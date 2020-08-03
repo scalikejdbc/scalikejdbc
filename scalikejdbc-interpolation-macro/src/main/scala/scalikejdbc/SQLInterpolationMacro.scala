@@ -21,7 +21,7 @@ object SQLInterpolationMacro {
     val expectedNames = c.weakTypeOf[E].decls.collectFirst {
       case m: MethodSymbol if m.isPrimaryConstructor => m
     }.map { const =>
-      const.paramLists.map { symbols: List[Symbol] => symbols.map(s => s.name.encodedName.toString.trim) }.flatten
+      const.paramLists.map { (symbols: List[Symbol]) => symbols.map(s => s.name.encodedName.toString.trim) }.flatten
     }.getOrElse(Nil)
 
     nameOpt.map { _name =>
