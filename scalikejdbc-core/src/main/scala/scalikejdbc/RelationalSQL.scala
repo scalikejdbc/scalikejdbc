@@ -30,14 +30,14 @@ private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
  */
 trait AllOutputDecisionsUnsupported[Z, E <: scalikejdbc.WithExtractor] extends SQL[Z, E] {
   val message = "You should call #toOne, #toMany or #toManies here."
-  override def toOption(): SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
-  override def single(): SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
-  override def headOption(): SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
-  override def first(): SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
-  override def toList(): SQLToList[Z, E] = throw new UnsupportedOperationException(message)
-  override def list(): SQLToList[Z, E] = throw new UnsupportedOperationException(message)
-  override def toIterable(): SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
-  override def iterable(): SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
+  override def toOption: SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
+  override def single: SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
+  override def headOption: SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
+  override def first: SQLToOption[Z, E] = throw new UnsupportedOperationException(message)
+  override def toList: SQLToList[Z, E] = throw new UnsupportedOperationException(message)
+  override def list: SQLToList[Z, E] = throw new UnsupportedOperationException(message)
+  override def toIterable: SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
+  override def iterable: SQLToIterable[Z, E] = throw new UnsupportedOperationException(message)
   override def toCollection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
   override def collection: SQLToCollection[Z, E] = throw new UnsupportedOperationException(message)
 }

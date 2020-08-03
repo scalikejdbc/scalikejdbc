@@ -825,7 +825,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
         val result = {
           SQL("select * from " + tableName + "")
             .map(rs => rs.string("name"))
-            .list()
+            .list
             .fetchSize(222)
             .queryTimeout(22)
             .apply()

@@ -351,7 +351,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
       }
 
       DB readOnly { implicit s =>
-        val count: Long = SQL("select count(1) from " + tableName).map(_.long(1)).single().apply().get
+        val count: Long = SQL("select count(1) from " + tableName).map(_.long(1)).single.apply().get
         count should be > 3000L
       }
 

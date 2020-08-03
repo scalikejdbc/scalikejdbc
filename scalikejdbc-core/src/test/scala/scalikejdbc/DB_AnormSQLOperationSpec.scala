@@ -28,7 +28,7 @@ class DB_AnormSQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndA
           implicit session =>
             SQL("select id from " + tableName + " where id = {id}")
               .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
+              .map(rs => rs.int("id")).toOption.apply()
         }
         idOpt.get should equal(1)
       }
@@ -44,12 +44,12 @@ class DB_AnormSQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndA
           intercept[IllegalArgumentException] {
             SQL("select id from " + tableName + " where id = {id} and name = {name}")
               .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
+              .map(rs => rs.int("id")).toOption.apply()
           }
           intercept[IllegalStateException] {
             SQL("select id from " + tableName + " where id = {id}")
               .bindByName(Symbol("idd") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
+              .map(rs => rs.int("id")).toOption.apply()
           }
       }
     }
@@ -66,7 +66,7 @@ class DB_AnormSQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndA
             SQL("update " + tableName + " set name = {name} where id = {id}")
               .bindByName(
                 Symbol("name") -> "foo",
-                Symbol("id") -> 1).executeUpdate().apply()
+                Symbol("id") -> 1).executeUpdate.apply()
         }
         count should equal(1)
       }

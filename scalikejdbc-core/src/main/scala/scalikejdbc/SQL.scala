@@ -243,7 +243,7 @@ abstract class SQL[A, E <: WithExtractor](
   /**
    * Creates a new DBSessionAttributesSwitcher which enables switching the attributes for a DBSession.
    */
-  protected def createDBSessionAttributesSwitcher(): DBSessionAttributesSwitcher = {
+  protected def createDBSessionAttributesSwitcher: DBSessionAttributesSwitcher = {
     new DBSessionAttributesSwitcher(this)
   }
 
@@ -351,7 +351,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => Unit =
       DBSessionWrapper(_, attributesSwitcher).foreach(statement, rawParameters.toSeq: _*)(op)
     // format: OFF
@@ -372,7 +372,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => A =
       DBSessionWrapper(_, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(z)(op)
     // format: OFF
@@ -402,14 +402,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap())
+  def toMap: SQL[Map[String, Any], HasExtractor] = map(_.toMap())
 
   /**
    * Same as #single.
    *
    * @return SQL instance
    */
-  def toOption(): SQLToOption[A, E] = {
+  def toOption: SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = true)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -419,14 +419,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def single(): SQLToOption[A, E] = toOption()
+  def single: SQLToOption[A, E] = toOption
 
   /**
    * Same as #first.
    *
    * @return SQL instance
    */
-  def headOption(): SQLToOption[A, E] = {
+  def headOption: SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = false)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -436,14 +436,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def first(): SQLToOption[A, E] = headOption()
+  def first: SQLToOption[A, E] = headOption
 
   /**
    * Same as #list
    *
    * @return SQL instance
    */
-  def toList(): SQLToList[A, E] = {
+  def toList: SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -453,7 +453,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def list(): SQLToList[A, E] = toList()
+  def list: SQLToList[A, E] = toList
 
   /**
    * Same as #collection
@@ -477,7 +477,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def toIterable(): SQLToIterable[A, E] = {
+  def toIterable: SQLToIterable[A, E] = {
     new SQLToIterableImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -487,14 +487,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def iterable(): SQLToIterable[A, E] = toIterable()
+  def iterable: SQLToIterable[A, E] = toIterable
 
   /**
    * Set execution type as execute
    *
    * @return SQL instance
    */
-  def execute(): SQLExecution = {
+  def execute: SQLExecution = {
     new SQLExecution(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
@@ -514,7 +514,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def executeUpdate(): SQLUpdate = update()
+  def executeUpdate: SQLUpdate = update
 
   /**
    * Set execution type as executeUpdate with filters
@@ -532,7 +532,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def update(): SQLUpdate = {
+  def update: SQLUpdate = {
     new SQLUpdate(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
@@ -552,7 +552,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def largeUpdate(): SQLLargeUpdate =
+  def largeUpdate: SQLLargeUpdate =
     new SQLLargeUpdate(statement, rawParameters, tags)(_ => {})(_ => {})
 
   /**
@@ -570,7 +570,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
+  def updateAndReturnGeneratedKey: SQLUpdateWithGeneratedKey = {
     updateAndReturnGeneratedKey(1)
   }
 
@@ -816,7 +816,7 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => C[A] = s => result[A](extractor, DBSessionWrapper(s, attributesSwitcher))
     // format: OFF
     session match {
@@ -888,7 +888,7 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
   val statement: String
   private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, factory: Factory[A, C[A]]): C[A] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => C[A] = DBSessionWrapper(_, attributesSwitcher).collection[A, C](statement, rawParameters.toSeq: _*)(extractor)
     // format: OFF
     session match {
