@@ -17,7 +17,7 @@ class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSett
   }
 
   it should "perform DDLs/DMLs" in {
-    if (isTestWithPostgreSQL) {
+    if (isTestWithPostgreSQL()) {
       implicit val session = AutoSession
       val tableName = sqls"json_data_table"
       // preparation
@@ -66,7 +66,7 @@ class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSett
 
   it should "perform json operators" in {
     // https://www.postgresql.org/docs/9.5/functions-json.html
-    if (isTestWithPostgreSQL) {
+    if (isTestWithPostgreSQL()) {
       val tableName = sqls"json_operators_table"
 
       DB.autoCommit { implicit s =>
