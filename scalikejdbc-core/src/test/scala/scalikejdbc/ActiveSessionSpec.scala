@@ -31,7 +31,7 @@ class ActiveSessionSpec extends AnyFlatSpec with Matchers {
     val conn: Connection = mock(classOf[Connection])
 
     val tx = mock(classOf[Tx])
-    when(tx.isActive).thenReturn(true)
+    when(tx.isActive()).thenReturn(true)
     val txOpt: Option[Tx] = Some(tx)
 
     val isReadOnly: Boolean = false
