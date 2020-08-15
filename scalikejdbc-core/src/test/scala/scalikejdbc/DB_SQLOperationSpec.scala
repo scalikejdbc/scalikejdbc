@@ -44,7 +44,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      implicit val session = DB.readOnlySession()
+      implicit val session: DBSession = DB.readOnlySession()
       try {
         val result = SQL("select * from " + tableName + "").map(rs => Some(rs.string("name"))).toList.apply()
         result.size should be > 0
@@ -84,7 +84,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
     val tableName = tableNamePrefix + "_queryInAutoCommitSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      implicit val session = DB.autoCommitSession()
+      implicit val session: DBSession = DB.autoCommitSession()
       try {
         val list = SQL("select id from " + tableName + " order by id").map(rs => rs.int("id")).toList.apply()
         list(0) should equal(1)
