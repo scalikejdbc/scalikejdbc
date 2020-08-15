@@ -36,7 +36,7 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
-    using(ConnectionPool(Symbol("default")).borrow()) { conn =>
+    using(ConnectionPool("default").borrow()) { conn =>
       val db = DB(conn)
       db.begin()
       db.beginIfNotYet()

@@ -23,7 +23,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = Symbol("INFO"),
+          warningLogLevel = "INFO",
           warningThresholdMillis = 10L)
         SQL("select  * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
@@ -45,7 +45,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = Symbol("INFO"),
+          warningLogLevel = "INFO",
           warningThresholdMillis = 0L)
         SQL("insert into issue22 values (?,?)").bind(1, LocalDateTime.now).update.apply()
         SQL("insert into issue22 values (?,?)").bind(2, new java.util.Date).update.apply()
@@ -64,7 +64,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
     GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
       enabled = true,
       singleLineMode = true,
-      logLevel = Symbol("ERROR"))
+      logLevel = "ERROR")
 
     DB autoCommit { implicit session =>
       try {
@@ -217,7 +217,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         }
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
-          logLevel = Symbol("WARN"),
+          logLevel = "WARN",
           printUnprocessedStackTrace = true,
           stackTraceDepth = 500)
         SQL("select  * from logging_stacktrace").map(rs => rs.int("id")).list.apply()

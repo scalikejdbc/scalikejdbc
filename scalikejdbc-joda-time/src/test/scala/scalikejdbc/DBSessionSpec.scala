@@ -913,8 +913,8 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           try {
             SQL("insert into image_data (name, data) values ({name}, {data});")
               .bindByName(
-                Symbol("name") -> "logo",
-                Symbol("data") -> stream)
+                "name" -> "logo",
+                "data" -> stream)
               .update.apply()
           } catch {
             case e: Exception =>
@@ -962,8 +962,8 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
             bos.flush()
             SQL("insert into image_data2 (name, data) values ({name}, {data});")
               .bindByName(
-                Symbol("name") -> "logo",
-                Symbol("data") -> bos.toByteArray)
+                "name" -> "logo",
+                "data" -> bos.toByteArray)
               .update.apply()
           }
         }

@@ -41,11 +41,11 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
       createdAt = LocalDateTime.now)
     Member.find(alice.id).get.id should equal(alice.id)
     intercept[IllegalStateException] {
-      Member.findBy("name like /*:nameMatch*/'Bob%'", Symbol("nameMatch") -> "Alice%").size should be > 0
+      Member.findBy("name like /*:nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
     }
-    Member.findBy("name like /*'nameMatch*/'Bob%'", Symbol("nameMatch") -> "Alice%").size should be > 0
+    Member.findBy("name like /*'nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
     val newAlice = alice.copy(name = "ALICE").save()
-    Member.findBy("name = /*'name*/'Alice'", Symbol("name") -> "ALICE").size should equal(1)
+    Member.findBy("name = /*'name*/'Alice'", "name" -> "ALICE").size should equal(1)
     newAlice.destroy()
 
     try {
@@ -56,11 +56,11 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
           description = Option("rollback test"),
           birthday = Option(LocalDate.of(1980, 1, 2)),
           createdAt = LocalDateTime.now)
-        Member.findBy("name = /*'name*/''", Symbol("name") -> "Rollback").size should equal(1)
+        Member.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
     } catch { case e: Exception => }
-    Member.findBy("name = /*'name*/''", Symbol("name") -> "Rollback").size should equal(0)
+    Member.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(0)
 
     // execute SQL directly
     MemberSQLTemplate.find().map(m => Member.delete(m))
@@ -102,11 +102,11 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
       createdAt = LocalDateTime.now)
     NamedMember.find(alice.id).get.id should equal(alice.id)
     intercept[IllegalStateException] {
-      NamedMember.findBy("name like /*:nameMatch*/'Bob%'", Symbol("nameMatch") -> "Alice%").size should be > 0
+      NamedMember.findBy("name like /*:nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
     }
-    NamedMember.findBy("name like /*'nameMatch*/'Bob%'", Symbol("nameMatch") -> "Alice%").size should be > 0
+    NamedMember.findBy("name like /*'nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
     val newAlice = alice.copy(name = "ALICE").save()
-    NamedMember.findBy("name = /*'name*/'Alice'", Symbol("name") -> "ALICE").size should equal(1)
+    NamedMember.findBy("name = /*'name*/'Alice'", "name" -> "ALICE").size should equal(1)
     newAlice.destroy()
 
     try {
@@ -117,11 +117,11 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
           description = Option("rollback test"),
           birthday = Option(LocalDate.of(1980, 1, 2)),
           createdAt = LocalDateTime.now)
-        NamedMember.findBy("name = /*'name*/''", Symbol("name") -> "Rollback").size should equal(1)
+        NamedMember.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(1)
         throw new RuntimeException
       }
     } catch { case e: Exception => }
-    NamedMember.findBy("name = /*'name*/''", Symbol("name") -> "Rollback").size should equal(0)
+    NamedMember.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(0)
 
   }
 }

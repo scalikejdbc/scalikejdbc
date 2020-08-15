@@ -36,19 +36,13 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
    * @param input input SQL
    * @return extracted parameter names
    */
-  def extractAllParameters(input: String): List[Symbol] = {
-    extractAllParametersString(input).map(Symbol(_))
-  }
-
-  /**
-   * Extracts binding names from the SQL template.
-   *
-   * @param input input SQL
-   * @return extracted parameter names
-   */
-  def extractAllParametersString(input: String): List[String] = {
+  def extractAllParameters(input: String): List[String] = {
     parse(mainParser, convertExecutableToAnorm(input)).getOrElse(Nil)
   }
+
+  /** alias for [[extractAllParameters]] */
+  def extractAllParametersString(input: String): List[String] =
+    extractAllParameters(input)
 
   /**
    * Converts the SQL template to SQL template with place holders.

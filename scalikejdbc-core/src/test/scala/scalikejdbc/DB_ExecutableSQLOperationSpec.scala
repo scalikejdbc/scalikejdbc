@@ -26,7 +26,7 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
         val idOpt = db autoCommit {
           implicit session =>
             SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName(Symbol("id") -> 1)
+              .bindByName("id" -> 1)
               .map(rs => rs.int("id")).toOption.apply()
         }
         idOpt.get should equal(1)
@@ -42,12 +42,12 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
         implicit session =>
           intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'")
-              .bindByName(Symbol("id") -> 1)
+              .bindByName("id" -> 1)
               .map(rs => rs.int("id")).toOption.apply()
           }
           intercept[Exception] {
             SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName(Symbol("idd") -> 1)
+              .bindByName("idd" -> 1)
               .map(rs => rs.int("id")).toOption.apply()
           }
       }
@@ -64,8 +64,8 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
           implicit session =>
             SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
               .bindByName(
-                Symbol("name") -> "foo",
-                Symbol("id") -> 1).executeUpdate.apply()
+                "name" -> "foo",
+                "id" -> 1).executeUpdate.apply()
         }
         count should equal(1)
       }
@@ -74,7 +74,7 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
         val name = (DB(conn) autoCommit {
           implicit session =>
             SQL("select name from " + tableName + " where id = /* 'id */123")
-              .bindByName(Symbol("id") -> 1)
+              .bindByName("id" -> 1)
               .map(rs => rs.string("name")).single.apply()
         }).get
         name should equal("foo")
