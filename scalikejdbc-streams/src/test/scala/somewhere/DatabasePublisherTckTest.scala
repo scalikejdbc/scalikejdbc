@@ -38,13 +38,13 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
     if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
 
     DB readOnlyStream {
-      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
+      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator()
     }
   }
 
   override def createFailedPublisher(): Publisher[User] = {
     DB readOnlyStream {
-      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).iterator
+      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).iterator()
     }
   }
 

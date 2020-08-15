@@ -252,20 +252,20 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
       TestUtils.initialize(tableName)
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap()).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.InfoLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap()).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.WarnLoggingForIgnoredParams)
       DB readOnly { implicit s =>
-        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap).list.apply()
+        SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap()).list.apply()
       }
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(globalsettings.ExceptionForIgnoredParams)
       intercept[IllegalStateException] {
         DB readOnly { implicit s =>
-          SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap).list.apply()
+          SQL("select 1 from " + tableName).bindByName("foo" -> "bar").map(_.toMap()).list.apply()
         }
       }
     }

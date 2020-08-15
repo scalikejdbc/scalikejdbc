@@ -104,7 +104,7 @@ trait AutoRollbackWithWrongFixture extends AutoRollback {
 }
 
 trait DB2AutoRollbackWithFixture extends AutoRollback {
-  override def db() = NamedDB("db2").toDB
+  override def db() = NamedDB("db2").toDB()
   override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into mutable_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
     SQL("insert into mutable_members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
@@ -112,6 +112,6 @@ trait DB2AutoRollbackWithFixture extends AutoRollback {
 }
 
 trait DB2AutoRollback extends AutoRollback {
-  override def db() = NamedDB("db2").toDB
+  override def db() = NamedDB("db2").toDB()
 }
 

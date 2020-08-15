@@ -111,7 +111,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.queryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long) => {
           result = sql + params + millis
         }
-        SQL("select * from query_completion_listener").map(_.toMap).list.apply()
+        SQL("select * from query_completion_listener").map(_.toMap()).list.apply()
         result.size should be > (0)
 
         var errorResult: String = ""
@@ -119,7 +119,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
           errorResult = sql + params + e.getMessage
         }
         try {
-          SQL("select * from query_failure_listener").map(_.toMap).list.apply()
+          SQL("select * from query_failure_listener").map(_.toMap()).list.apply()
         } catch { case e: Exception => }
         errorResult.size should be > (0)
 
@@ -163,7 +163,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
 
         result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap()).list.apply()
           result should equal(2)
         }
 
@@ -175,7 +175,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         }
         GlobalSettings.taggedQueryFailureListener.synchronized {
           try {
-            SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
+            SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap()).list.apply()
           } catch { case e: Exception => }
           errorResult should equal(3)
         }
@@ -184,12 +184,12 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         result = -1
         session.tags("foo")
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").tags("bar", "baz").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").tags("bar", "baz").map(_.toMap()).list.apply()
           result should equal(3)
         }
         result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").map(_.toMap()).list.apply()
           result should equal(1)
         }
 

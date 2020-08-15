@@ -20,11 +20,11 @@ class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
       import scalikejdbc.StringSQLRunner._
 
       // run insert SQL
-      ("insert into " + tableName + " values (3, 'Ben')").run
-      ("insert into " + tableName + " values (4, 'Chris')").execute
+      ("insert into " + tableName + " values (3, 'Ben')").run()
+      ("insert into " + tableName + " values (4, 'Chris')").execute()
 
       // run select SQL
-      val result = ("select id,name from " + tableName + " where id = 3").run
+      val result = ("select id,name from " + tableName + " where id = 3").run()
       if (result.head.get("ID").isDefined) {
         result.head.get("ID").get should equal(3)
         result.head.get("NAME").get should equal("Ben")

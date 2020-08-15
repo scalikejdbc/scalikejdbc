@@ -577,7 +577,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
         SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
-        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap).single.apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toMap()).single.apply()
       }
       result.isDefined should equal(true)
       if (result.get.get("ID").isDefined) {
@@ -597,7 +597,7 @@ class DB_SQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter 
       TestUtils.initialize(tableName)
       val result = DB localTx { implicit s =>
         SQL("insert into " + tableName + " values (?, ?)").bind(4, Option(null)).update.apply()
-        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap).single.apply()
+        SQL("select id, name from " + tableName + " where id = ?").bind(4).map(rs => rs.toSymbolMap()).single.apply()
       }
       result.isDefined should equal(true)
       if (result.get.get(Symbol("ID")).isDefined) {
