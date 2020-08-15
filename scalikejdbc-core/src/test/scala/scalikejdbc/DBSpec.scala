@@ -496,7 +496,7 @@ class DBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings
           allCatch.either(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
             .flatMap(_ => allCatch.either(s.update("update foo should be rolled back")))
         }
-        failure should be(Symbol("left"))
+        assert(failure.isLeft)
         val res = DB.readOnly(s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
         res.get should not be (Some("foo"))
       }
