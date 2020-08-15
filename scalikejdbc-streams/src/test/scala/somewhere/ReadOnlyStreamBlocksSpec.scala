@@ -17,7 +17,7 @@ class ReadOnlyStreamBlocksSpec extends AnyFlatSpec with Matchers {
   }
 
   "NamedDB.readOnlyStream" should "create DatabasePublisher" in {
-    val publisher: DatabasePublisher[Long] = NamedDB(Symbol("default")) readOnlyStream {
+    val publisher: DatabasePublisher[Long] = NamedDB("default") readOnlyStream {
       sql"select id from users".map(r => r.long("id")).iterator
     }
     publisher shouldBe a[DatabasePublisher[_]]

@@ -10,7 +10,7 @@ trait DBSettings extends LoanPattern {
     case _: Exception =>
       Class.forName("org.h2.Driver")
       ConnectionPool.singleton("jdbc:h2:mem:db", "", "")
-      ConnectionPool.add(Symbol("db2"), "jdbc:h2:mem:db2", "", "")
+      ConnectionPool.add("db2", "jdbc:h2:mem:db2", "", "")
   }
 
 }

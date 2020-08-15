@@ -17,7 +17,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
     val tableName = tableNamePrefix + "_withNoCPContext"
     try {
       createTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      createTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 4)(ConnectionPool.DEFAULT_NAME)
 
       val result1 = DB readOnly { implicit s =>
@@ -39,7 +39,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
 
     } finally {
       dropTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      dropTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      dropTable(tableName)("ConnectionPoolContextSpec")
     }
   }
 
@@ -47,10 +47,10 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
     val tableName = tableNamePrefix + "_withNamedCPContext"
     implicit val context: MultipleConnectionPoolContext = MultipleConnectionPoolContext(
       ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
-      Symbol("ConnectionPoolContextSpec") -> ConnectionPool.get())
+      "ConnectionPoolContextSpec" -> ConnectionPool.get())
     try {
       createTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      createTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 6)(ConnectionPool.DEFAULT_NAME)
 
       val result1 = DB readOnly { implicit s =>
@@ -64,7 +64,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
       result11.size should equal(6)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
-      val result2 = NamedDB(Symbol("ConnectionPoolContextSpec")) readOnly { implicit s =>
+      val result2 = NamedDB("ConnectionPoolContextSpec") readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(6)
@@ -72,7 +72,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
 
     } finally {
       dropTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      dropTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      dropTable(tableName)("ConnectionPoolContextSpec")
     }
   }
 
@@ -81,7 +81,7 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
 object ConnectionPoolContextSpecUtils {
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.add(Symbol("ConnectionPoolContextSpec"), "jdbc:h2:mem:ConnectionPoolContextSpec", "", "")
+  ConnectionPool.add("ConnectionPoolContextSpec", "jdbc:h2:mem:ConnectionPoolContextSpec", "", "")
 
   def createTable(tableName: String)(name: Any) = {
     NamedDB(name)(NoConnectionPoolContext) autoCommit { implicit s =>
@@ -113,7 +113,7 @@ object ConnectionPoolContextSpecUtils {
 trait NamedCPContextAsDefault {
   implicit lazy val context: MultipleConnectionPoolContext = MultipleConnectionPoolContext(
     ConnectionPool.DEFAULT_NAME -> ConnectionPool.get(),
-    Symbol("ConnectionPoolContextSpec") -> ConnectionPool.get())
+    "ConnectionPoolContextSpec" -> ConnectionPool.get())
 }
 
 class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Settings with NamedCPContextAsDefault {
@@ -128,7 +128,7 @@ class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Sett
     val tableName = tableNamePrefix + "_withNamedCPContextMixin"
     try {
       createTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      createTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 6)(ConnectionPool.DEFAULT_NAME)
 
       val result1 = DB readOnly { implicit s =>
@@ -142,7 +142,7 @@ class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Sett
       result11.size should equal(6)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
-      val result2 = NamedDB(Symbol("ConnectionPoolContextSpec")) readOnly { implicit s =>
+      val result2 = NamedDB("ConnectionPoolContextSpec") readOnly { implicit s =>
         SQL("select * from " + tableName).map(rs => rs.string("name")).list.apply()
       }
       result2.size should equal(6)
@@ -150,7 +150,7 @@ class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Sett
 
     } finally {
       dropTable(tableName)(ConnectionPool.DEFAULT_NAME)
-      dropTable(tableName)(Symbol("ConnectionPoolContextSpec"))
+      dropTable(tableName)("ConnectionPoolContextSpec")
     }
   }
 
@@ -158,14 +158,14 @@ class ConnectionPoolContextMixinSpec extends AnyFlatSpec with Matchers with Sett
 
 trait DefaultSettings {
   Class.forName("org.postgresql.Driver")
-  ConnectionPool.add(Symbol("CPContextWithAutoSessionSpec"), "jdbc:postgresql://localhost:5432/dummy", "never", "used")
+  ConnectionPool.add("CPContextWithAutoSessionSpec", "jdbc:postgresql://localhost:5432/dummy", "never", "used")
 }
 
 trait InMemoryDB {
   Class.forName("org.h2.Driver")
   implicit val context: ConnectionPoolContext = new MultipleConnectionPoolContext(
-    Symbol("CPContextWithAutoSessionSpec") -> CommonsConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", ""))
-  NamedDB(Symbol("CPContextWithAutoSessionSpec")) localTx { implicit session =>
+    "CPContextWithAutoSessionSpec" -> CommonsConnectionPoolFactory.apply("jdbc:h2:mem:CPContextWithAutoSessionSpec", "", ""))
+  NamedDB("CPContextWithAutoSessionSpec") localTx { implicit session =>
     SQL("create table users (id bigint primary key, name varchar(256), created_at timestamp not null);")
       .execute.apply()
     (1 to 1000) foreach { i =>
@@ -178,13 +178,13 @@ trait InMemoryDB {
 object Sample {
 
   def countAll()(implicit
-    session: DBSession = NamedAutoSession(Symbol("CPContextWithAutoSessionSpec")),
+    session: DBSession = NamedAutoSession("CPContextWithAutoSessionSpec"),
     context: ConnectionPoolContext = NoConnectionPoolContext): Long = {
     SQL("select count(1) c from users").map(rs => rs.long("c")).single.apply.get
   }
 
   def countAll2()(implicit context: ConnectionPoolContext = NoConnectionPoolContext): Long = {
-    NamedDB(Symbol("CPContextWithAutoSessionSpec")) readOnly { implicit s =>
+    NamedDB("CPContextWithAutoSessionSpec") readOnly { implicit s =>
       SQL("select count(1) c from users").map(rs => rs.long("c")).single.apply.get
     }
   }

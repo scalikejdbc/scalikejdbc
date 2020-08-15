@@ -321,7 +321,7 @@ class SQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Setting
     val tableName = tableNamePrefix + "_readOnlyNamedAutoSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      implicit val session = ReadOnlyNamedAutoSession(Symbol("named"))
+      implicit val session = ReadOnlyNamedAutoSession("named")
 
       SQL("select id from " + tableName + "").map(_.long(1)).list.apply()
 

@@ -29,7 +29,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
   // create singleton(default) connection pool
   ConnectionPool.singleton(url, user, password, poolSettings)
   // named connection pool
-  ConnectionPool.add(Symbol("named"), url, user, password, poolSettings)
+  ConnectionPool.add("named", url, user, password, poolSettings)
 
   // ---------------------------
   // Borrow a connection from the ConnectionPool
@@ -51,7 +51,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
   }
 
   it should "borrow a connection from named ConnectionPool" in {
-    using(ConnectionPool(Symbol("named")).borrow()) { conn =>
+    using(ConnectionPool("named").borrow()) { conn =>
       conn should not be null
     }
   }
@@ -95,7 +95,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     }
 
     // named datasources
-    NamedDB(Symbol("named")) autoCommit { session =>
+    NamedDB("named") autoCommit { session =>
       session.list("select * from " + tableName)(rs => rs.int("id"))
     }
 

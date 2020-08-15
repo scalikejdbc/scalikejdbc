@@ -48,7 +48,7 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
   }
 
   "#tx" should "not be available before beginning tx" in {
-    using(ConnectionPool(Symbol("named")).borrow()) { conn =>
+    using(ConnectionPool("named").borrow()) { conn =>
       val db = DB(conn)
       intercept[IllegalStateException] {
         db.tx.begin()

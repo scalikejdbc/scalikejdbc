@@ -21,7 +21,7 @@ trait DBSettings extends LoanPattern {
   }
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.add(Symbol("yetanother"), "jdbc:h2:mem:yetanother", "sa", "sa")
+  ConnectionPool.add("yetanother", "jdbc:h2:mem:yetanother", "sa", "sa")
 
 }
 

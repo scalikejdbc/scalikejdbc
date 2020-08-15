@@ -18,8 +18,8 @@ trait Settings extends BeforeAndAfter { self: Suite =>
       val poolSettings = new ConnectionPoolSettings(initialSize = 1, maxSize = 100)
       ConnectionPool.singleton(url, user, password, poolSettings)
 
-      try ConnectionPool.get(Symbol("named"))
-      catch { case e: IllegalStateException => ConnectionPool.add(Symbol("named"), url, user, password, poolSettings) }
+      try ConnectionPool.get("named")
+      catch { case e: IllegalStateException => ConnectionPool.add("named", url, user, password, poolSettings) }
     }
   }
 

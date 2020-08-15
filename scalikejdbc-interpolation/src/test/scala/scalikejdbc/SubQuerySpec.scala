@@ -6,16 +6,16 @@ import org.scalatest.matchers.should.Matchers
 class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.add(Symbol("SubQuerySpec"), "jdbc:h2:mem:SubQuerySpec", "user", "pass")
+  ConnectionPool.add("SubQuerySpec", "jdbc:h2:mem:SubQuerySpec", "user", "pass")
 
   case class Account(id: Int, name: String)
   object Account extends SQLSyntaxSupport[Account] {
-    override lazy val connectionPoolName = Symbol("SubQuerySpec")
+    override lazy val connectionPoolName = "SubQuerySpec"
   }
 
   it should "work" in {
 
-    NamedDB(Symbol("SubQuerySpec")).autoCommit { implicit session =>
+    NamedDB("SubQuerySpec").autoCommit { implicit session =>
       sql"create table account(id integer, name varchar(10))".execute.apply()
     }
 
