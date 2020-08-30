@@ -6,5 +6,6 @@ resolvers ++= Seq(
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.6.4")
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.10.0")
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.4.2")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
