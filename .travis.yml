@@ -52,7 +52,7 @@ matrix:
   include:
     - name: dotty
       script:
-      - sbt '++ 0.27.0-RC1!' "all core/compile config/compile"
+      - sbt '++ 0.27.0-RC1!' "all interpolation/compile joda-time/compile library/compile mapper-generator-core/compile streams/compile config/compile"
     # scripted test
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"

@@ -228,11 +228,16 @@ lazy val scalikejdbcInterpolationMacro = Project(
   mimaSettings,
   name := "scalikejdbc-interpolation-macro",
   libraryDependencies ++= {
-    Seq(
-      "org.scala-lang" %  "scala-reflect"    % scalaVersion.value % "compile",
-      "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
-    ) ++ scalaTestDependenciesInTestScope.value
+    if (isDotty.value) {
+      Nil
+    } else {
+      Seq(
+        "org.scala-lang" %  "scala-reflect"    % scalaVersion.value % "compile",
+        "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
+      )
+    }
   },
+  libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   dottySetting
 ).dependsOn(scalikejdbcCore)
 
