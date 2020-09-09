@@ -8,8 +8,7 @@ val dottySetting = {
     "org.scalatest"
   )
   libraryDependencies := libraryDependencies.value.map{ lib =>
-    // TODO scalatest for Dotty 0.27
-    if (groupIds(lib.organization) && scalaVersion.value == "0.26.0-RC1")
+    if (groupIds(lib.organization) && scalaVersion.value == "0.27.0-RC1")
       lib
     else
       lib.withDottyCompat(scalaVersion.value)
