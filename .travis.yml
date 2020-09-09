@@ -81,6 +81,6 @@ matrix:
       before_script:
       - curl "https://raw.githubusercontent.com/DanySK/Gravis-CI/c8f400623d8f756ef7c/.install-jdk-travis.sh" --output .install-jdk-travis.sh
       - source .install-jdk-travis.sh
-      - wget https://raw.githubusercontent.com/paulp/sbt-extras/0ee2dae2eba72efb4a464a5ad255e348696ecda7/sbt && chmod +x ./sbt
+      - wget https://raw.githubusercontent.com/paulp/sbt-extras/4d558c88ae6ae240e7a5eedc0cf33cc9e7bd0e58/sbt && chmod +x ./sbt
       script:
       - ./sbt "project root213" "++ 2.12.12" test:compile testSequential
