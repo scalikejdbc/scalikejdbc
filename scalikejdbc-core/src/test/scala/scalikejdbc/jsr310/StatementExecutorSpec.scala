@@ -43,10 +43,10 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
           } else {
             LocalTime.now.truncatedTo(ChronoUnit.MILLIS)
           }
-          val localCreatedAt = LocalDateTime.now.plusNanos(111000)
-          val createdAt = ZonedDateTime.now.plusNanos(222000)
-          val updatedAt = Instant.now.plusNanos(333000)
-          val deletedAt = OffsetDateTime.now.plusNanos(444000)
+          val localCreatedAt = LocalDateTime.now.plusNanos(111000).truncatedTo(ChronoUnit.MICROS)
+          val createdAt = ZonedDateTime.now.plusNanos(222000).truncatedTo(ChronoUnit.MICROS)
+          val updatedAt = Instant.now.plusNanos(333000).truncatedTo(ChronoUnit.MICROS)
+          val deletedAt = OffsetDateTime.now.plusNanos(444000).truncatedTo(ChronoUnit.MICROS)
           val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at, deleted_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt}, ${deletedAt})"
           query.execute.apply()
 
