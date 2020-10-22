@@ -37,8 +37,8 @@ object MyIO {
 
     def finishTx(result: MyIO[A], tx: Tx): MyIO[A] = {
       result.attempt.flatMap {
-        case Right(_) => MyIO(tx.commit()).flatMap(_ => result)
-        case Left(_) => MyIO(tx.rollback()).flatMap(_ => result)
+        case Right(a) => MyIO(tx.commit()).flatMap(_ => MyIO(a))
+        case Left(e) => MyIO(tx.rollback()).flatMap(_ => MyIO(throw e))
       }
     }
 
