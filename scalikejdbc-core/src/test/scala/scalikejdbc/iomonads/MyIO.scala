@@ -44,9 +44,10 @@ object MyIO {
 
     override def closeConnection(result: MyIO[A], doClose: () => Unit): MyIO[A] = {
       for {
-        x <- result
+        x <- result.attempt
         _ <- MyIO(doClose).map(x => x.apply())
-      } yield x
+        a <- MyIO(x.fold(throw _, identity))
+      } yield a
     }
   }
 }
