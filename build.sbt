@@ -19,7 +19,7 @@ lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.30"
-lazy val _typesafeConfigVersion = "1.4.0"
+lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
@@ -32,7 +32,7 @@ lazy val _hibernateVersion = "5.4.22.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.5.13"
+lazy val mockitoVersion = "3.5.15"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -144,7 +144,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.6",
+    "joda-time" % "joda-time" % "2.10.7",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
   dottySetting
