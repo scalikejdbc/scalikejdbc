@@ -37,16 +37,17 @@ object MyIO {
 
     def finishTx(result: MyIO[A], tx: Tx): MyIO[A] = {
       result.attempt.flatMap {
-        case Right(_) => MyIO(tx.commit()).flatMap(_ => result)
-        case Left(_) => MyIO(tx.rollback()).flatMap(_ => result)
+        case Right(a) => MyIO(tx.commit()).flatMap(_ => MyIO(a))
+        case Left(e) => MyIO(tx.rollback()).flatMap(_ => MyIO(throw e))
       }
     }
 
     override def closeConnection(result: MyIO[A], doClose: () => Unit): MyIO[A] = {
       for {
-        x <- result
+        x <- result.attempt
         _ <- MyIO(doClose).map(x => x.apply())
-      } yield x
+        a <- MyIO(x.fold(throw _, identity))
+      } yield a
     }
   }
 }
