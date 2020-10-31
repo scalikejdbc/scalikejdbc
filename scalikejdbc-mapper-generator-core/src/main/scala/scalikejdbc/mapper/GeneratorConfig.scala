@@ -32,7 +32,8 @@ object GeneratorConfig {
 
   private val toCamelCase: String => String = _.split("_").foldLeft("") {
     (camelCaseString, part) =>
-      camelCaseString + toProperCase(part)
+      val newPart = if (part.nonEmpty && Character.isDigit(part.charAt(0))) s"_$part" else part
+      camelCaseString + toProperCase(newPart)
   }
 
   val reservedWords: Set[String] = Set(
