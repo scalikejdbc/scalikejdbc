@@ -234,4 +234,31 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
     Thread.sleep(500)
   }
+
+  it should "retain underscores _[d] on table names with _[d]" in {
+    DB autoCommit { implicit session =>
+      SQL(
+        """
+        create table table_with_digits_1_2 (
+          x_column_with_digits_3_4 varchar(30) not null,
+          y_column_with_digits int,
+          created_at timestamp not null
+        )
+      """).execute.apply()
+    }
+
+    Model(url, username, password).table(null, "TABLE_WITH_DIGITS_1_2").map {
+      table =>
+        val generator = new CodeGenerator(table)(GeneratorConfig(
+          srcDir = srcDir,
+          packageName = "com.example",
+          tableNamesToSkip = List("schema_version")))
+        generator.specAll()
+        generator.writeModel()
+    } getOrElse {
+      fail("The table is not found.")
+    }
+    Thread.sleep(500)
+
+  }
 }
