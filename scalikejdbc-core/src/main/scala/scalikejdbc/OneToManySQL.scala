@@ -21,7 +21,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
   }
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, scala.collection.Seq[B]) => Z): Iterable[Z] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, (scala.collection.Seq[B])]())(processResultSet).map {
       case (one, (to)) => zExtractor(one, to)
     }
@@ -42,7 +42,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def toIterable(): OneToManySQLToIterable[A, B, E, Z] = {
+  override def toIterable: OneToManySQLToIterable[A, B, E, Z] = {
     val q = new OneToManySQLToIterable[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
@@ -50,7 +50,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def toList(): OneToManySQLToList[A, B, E, Z] = {
+  override def toList: OneToManySQLToList[A, B, E, Z] = {
     val q = new OneToManySQLToList[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
@@ -58,7 +58,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def toOption(): OneToManySQLToOption[A, B, E, Z] = {
+  override def toOption: OneToManySQLToOption[A, B, E, Z] = {
     val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)(true)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
@@ -66,7 +66,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def headOption(): OneToManySQLToOption[A, B, E, Z] = {
+  override def headOption: OneToManySQLToOption[A, B, E, Z] = {
     val q = new OneToManySQLToOption[A, B, E, Z](statement, rawParameters)(one)(toMany)(zExtractor)(false)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
@@ -82,12 +82,10 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     q
   }
 
-  override def single(): OneToManySQLToOption[A, B, E, Z] = toOption()
-  override def first(): OneToManySQLToOption[A, B, E, Z] = headOption()
-  override def list(): OneToManySQLToList[A, B, E, Z] = toList()
-  override def iterable(): OneToManySQLToIterable[A, B, E, Z] = toIterable()
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  override def traversable(): OneToManySQLToIterable[A, B, E, Z] = iterable()
+  override def single: OneToManySQLToOption[A, B, E, Z] = toOption
+  override def first: OneToManySQLToOption[A, B, E, Z] = headOption
+  override def list: OneToManySQLToList[A, B, E, Z] = toList
+  override def iterable: OneToManySQLToIterable[A, B, E, Z] = toIterable
   override def collection: OneToManySQLToCollection[A, B, E, Z] = toCollection
 
 }

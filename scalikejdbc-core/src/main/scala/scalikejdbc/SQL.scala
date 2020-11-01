@@ -54,17 +54,11 @@ object SQL {
  */
 private[scalikejdbc] object validateAndConvertToNormalStatement extends LogSupport {
 
-  def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)])(implicit dummy: DummyImplicit): (String, scala.collection.Seq[Any]) =
-    apply(sql, settings, parameters.map { case (k, v) => (k.name, v) })
-
   def apply(sql: String, settings: SettingsProvider, parameters: scala.collection.Seq[(String, Any)]): (String, scala.collection.Seq[Any]) = {
-    val names = SQLTemplateParser.extractAllParametersString(sql)
+    val names = SQLTemplateParser.extractAllParameters(sql)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     apply(sql, sqlWithPlaceHolders, names, settings, parameters)
   }
-
-  def apply(sql: String, sqlWithPlaceHolders: String, names: List[Symbol], settings: SettingsProvider, parameters: scala.collection.Seq[(Symbol, Any)])(implicit dummy: DummyImplicit): (String, scala.collection.Seq[Any]) =
-    apply(sql, sqlWithPlaceHolders, names.map(_.name), settings, parameters.map { case (k, v) => (k.name, v) })
 
   def apply(sql: String, sqlWithPlaceHolders: String, names: List[String], settings: SettingsProvider, parameters: scala.collection.Seq[(String, Any)]): (String, scala.collection.Seq[Any]) = {
 
@@ -243,7 +237,7 @@ abstract class SQL[A, E <: WithExtractor](
   /**
    * Creates a new DBSessionAttributesSwitcher which enables switching the attributes for a DBSession.
    */
-  protected def createDBSessionAttributesSwitcher(): DBSessionAttributesSwitcher = {
+  protected def createDBSessionAttributesSwitcher: DBSessionAttributesSwitcher = {
     new DBSessionAttributesSwitcher(this)
   }
 
@@ -274,7 +268,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parametersByName named parameters
    * @return SQL instance
    */
-  def bindByName(parametersByName: (Symbol, Any)*): SQL[A, E] = {
+  def bindByName(parametersByName: (String, Any)*): SQL[A, E] = {
     val (_statement, _parameters) = validateAndConvertToNormalStatement(statement, _settings, parametersByName)
     withStatementAndParameters(_statement, _parameters).fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -325,18 +319,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @param parameters parameters
    * @return SQL for batch
    */
-  final def batchByName(parameters: scala.collection.Seq[(Symbol, Any)]*)(implicit dummy: DummyImplicit): SQLBatch = {
-    batchByName(parameters.map { _.map { case (k, v) => (k.name, v) } }: _*)
-  }
-
-  /**
-   * Binds parameters for batch
-   *
-   * @param parameters parameters
-   * @return SQL for batch
-   */
   def batchByName(parameters: scala.collection.Seq[(String, Any)]*): SQLBatch = {
-    val names = SQLTemplateParser.extractAllParametersString(statement)
+    val names = SQLTemplateParser.extractAllParameters(statement)
     val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(statement)
     val _sql = validateAndConvertToNormalStatement(statement, sqlWithPlaceHolders, names, _settings, parameters.headOption.getOrElse(Seq.empty))._1
     val _parameters: scala.collection.Seq[scala.collection.Seq[Any]] = parameters.map { p =>
@@ -351,7 +335,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foreach(op: WrappedResultSet => Unit)(implicit session: DBSession): Unit = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => Unit =
       DBSessionWrapper(_, attributesSwitcher).foreach(statement, rawParameters.toSeq: _*)(op)
     // format: OFF
@@ -372,7 +356,7 @@ abstract class SQL[A, E <: WithExtractor](
    * @param op operation
    */
   def foldLeft[A](z: A)(op: (A, WrappedResultSet) => A)(implicit session: DBSession): A = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => A =
       DBSessionWrapper(_, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(z)(op)
     // format: OFF
@@ -402,14 +386,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def toMap(): SQL[Map[String, Any], HasExtractor] = map(_.toMap)
+  def toMap: SQL[Map[String, Any], HasExtractor] = map(_.toMap())
 
   /**
    * Same as #single.
    *
    * @return SQL instance
    */
-  def toOption(): SQLToOption[A, E] = {
+  def toOption: SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = true)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -419,14 +403,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def single(): SQLToOption[A, E] = toOption()
+  def single: SQLToOption[A, E] = toOption
 
   /**
    * Same as #first.
    *
    * @return SQL instance
    */
-  def headOption(): SQLToOption[A, E] = {
+  def headOption: SQLToOption[A, E] = {
     new SQLToOptionImpl[A, E](statement, rawParameters)(extractor)(isSingle = false)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -436,14 +420,14 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def first(): SQLToOption[A, E] = headOption()
+  def first: SQLToOption[A, E] = headOption
 
   /**
    * Same as #list
    *
    * @return SQL instance
    */
-  def toList(): SQLToList[A, E] = {
+  def toList: SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
@@ -453,7 +437,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def list(): SQLToList[A, E] = toList()
+  def list: SQLToList[A, E] = toList
 
   /**
    * Same as #collection
@@ -477,30 +461,24 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def toIterable(): SQLToIterable[A, E] = {
+  def toIterable: SQLToIterable[A, E] = {
     new SQLToIterableImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize).tags(tags.toSeq: _*).queryTimeout(queryTimeout)
   }
-
-  @deprecated(message = "will be removed. use toIterable() instead", since = "3.3.0")
-  def toTraverable(): SQLToIterable[A, E] = toIterable()
 
   /**
    * Set execution type as iterable.
    *
    * @return SQL instance
    */
-  def iterable(): SQLToIterable[A, E] = toIterable()
-
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  def traversable(): SQLToIterable[A, E] = toIterable()
+  def iterable: SQLToIterable[A, E] = toIterable
 
   /**
    * Set execution type as execute
    *
    * @return SQL instance
    */
-  def execute(): SQLExecution = {
+  def execute: SQLExecution = {
     new SQLExecution(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
@@ -520,7 +498,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def executeUpdate(): SQLUpdate = update()
+  def executeUpdate: SQLUpdate = update
 
   /**
    * Set execution type as executeUpdate with filters
@@ -538,7 +516,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def update(): SQLUpdate = {
+  def update: SQLUpdate = {
     new SQLUpdate(statement, rawParameters, tags)((stmt: PreparedStatement) => {})((stmt: PreparedStatement) => {})
   }
 
@@ -558,7 +536,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def largeUpdate(): SQLLargeUpdate =
+  def largeUpdate: SQLLargeUpdate =
     new SQLLargeUpdate(statement, rawParameters, tags)(_ => {})(_ => {})
 
   /**
@@ -576,7 +554,7 @@ abstract class SQL[A, E <: WithExtractor](
    *
    * @return SQL instance
    */
-  def updateAndReturnGeneratedKey(): SQLUpdateWithGeneratedKey = {
+  def updateAndReturnGeneratedKey: SQLUpdateWithGeneratedKey = {
     updateAndReturnGeneratedKey(1)
   }
 
@@ -822,7 +800,7 @@ trait SQLToResult[A, E <: WithExtractor, C[_]] extends SQL[A, E] with Extractor[
     session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
     hasExtractor: ThisSQL =:= SQLWithExtractor): C[A] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => C[A] = s => result[A](extractor, DBSessionWrapper(s, attributesSwitcher))
     // format: OFF
     session match {
@@ -894,7 +872,7 @@ trait SQLToCollection[A, E <: WithExtractor] extends SQL[A, E] with Extractor[A]
   val statement: String
   private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply[C[_]]()(implicit session: DBSession, context: ConnectionPoolContext = NoConnectionPoolContext, hasExtractor: ThisSQL =:= SQLWithExtractor, factory: Factory[A, C[A]]): C[A] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => C[A] = DBSessionWrapper(_, attributesSwitcher).collection[A, C](statement, rawParameters.toSeq: _*)(extractor)
     // format: OFF
     session match {

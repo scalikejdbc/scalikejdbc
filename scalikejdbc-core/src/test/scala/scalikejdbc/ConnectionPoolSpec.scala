@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.util.Properties
 import javax.sql.DataSource
 import java.sql.Connection
@@ -37,18 +36,18 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     Thread.sleep(100L)
     ConnectionPool.singleton(url, user, password, poolSettings)
 
-    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
+    ConnectionPool.add("secondary", url, user, password, poolSettings)
 
-    using(ConnectionPool.borrow(Symbol("secondary"))) { conn =>
+    using(ConnectionPool.borrow("secondary")) { conn =>
       conn should not be (null)
     }
 
     Thread.sleep(100L)
-    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
+    ConnectionPool.add("secondary", url, user, password, poolSettings)
     Thread.sleep(100L)
-    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
+    ConnectionPool.add("secondary", url, user, password, poolSettings)
     Thread.sleep(100L)
-    ConnectionPool.add(Symbol("secondary"), url, user, password, poolSettings)
+    ConnectionPool.add("secondary", url, user, password, poolSettings)
 
     // this test code affects other tests
     /*
@@ -68,9 +67,9 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "accept javax.sql.DataSource" in {
-    ConnectionPool.add(Symbol("sample"), url, user, password)
+    ConnectionPool.add("sample", url, user, password)
     try {
-      NamedDB(Symbol("sample")) autoCommit { implicit s =>
+      NamedDB("sample") autoCommit { implicit s =>
         try SQL("create table data_source_test(id bigint not null)").execute.apply()
         catch { case e: Exception => e.printStackTrace }
         SQL("insert into data_source_test values (123)").update.apply()
@@ -79,15 +78,15 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
       ds.setUrl(url)
       ds.setUsername(user)
       ds.setPassword(password)
-      ConnectionPool.add(Symbol("ds"), new DataSourceConnectionPool(ds))
+      ConnectionPool.add("ds", new DataSourceConnectionPool(ds))
 
-      NamedDB(Symbol("ds")) readOnly { implicit s =>
+      NamedDB("ds") readOnly { implicit s =>
         val count = SQL("select count(1) from data_source_test").map(_.long(1)).single.apply().get
         count should equal(1L)
       }
 
     } finally {
-      NamedDB(Symbol("sample")) autoCommit { implicit s =>
+      NamedDB("sample") autoCommit { implicit s =>
         try SQL("drop table data_source_test").execute.apply()
         catch { case e: Exception => e.printStackTrace }
       }
@@ -113,15 +112,15 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     }
 
     implicit val factory = new MyConnectionPoolFactory
-    ConnectionPool.add(Symbol("xxxx"), url, user, password)
-    val conn = ConnectionPool.borrow(Symbol("xxxx"))
+    ConnectionPool.add("xxxx", url, user, password)
+    val conn = ConnectionPool.borrow("xxxx")
     conn should be(null)
 
   }
 
   it should "throw exception if invalid connectionPoolFactoryName is given" in {
     intercept[IllegalArgumentException](
-      ConnectionPool.add(Symbol("xxxx"), url, user, password,
+      ConnectionPool.add("xxxx", url, user, password,
         ConnectionPoolSettings(connectionPoolFactoryName = "invalid")))
   }
 

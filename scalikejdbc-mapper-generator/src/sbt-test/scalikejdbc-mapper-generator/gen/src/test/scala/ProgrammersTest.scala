@@ -1,12 +1,13 @@
 package app.models
 
 import java.time._
-import org.scalatest._
+import org.scalatest.flatspec.FixtureAnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import scala.util.Random
 import scalikejdbc.scalatest.AutoRollback
 import scalikejdbc._
 
-class ProgrammersTest extends fixture.FlatSpec with Matchers with AutoRollback {
+class ProgrammersTest extends FixtureAnyFlatSpec with Matchers with AutoRollback {
   private[this] val p = Programmer.syntax("p")
 
   behavior of "Programmer"

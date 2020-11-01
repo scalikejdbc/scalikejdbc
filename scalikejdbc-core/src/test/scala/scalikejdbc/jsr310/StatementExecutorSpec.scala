@@ -2,7 +2,6 @@ package scalikejdbc
 package jsr310
 
 import scalikejdbc.interpolation.Implicits._
-import org.scalatest._
 import java.time._
 import java.time.temporal.ChronoUnit
 import org.scalatest.funspec.AnyFunSpec
@@ -15,8 +14,8 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
       DB.autoCommit { s =>
         implicit val session: DBSession = {
           if (driverClassName == "org.h2.Driver") {
-            ConnectionPool.add(Symbol("jsr310"), "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
-            NamedAutoSession(Symbol("jsr310"))
+            ConnectionPool.add("jsr310", "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
+            NamedAutoSession("jsr310")
           } else {
             s
           }
@@ -43,10 +42,10 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
           } else {
             LocalTime.now.truncatedTo(ChronoUnit.MILLIS)
           }
-          val localCreatedAt = LocalDateTime.now.plusNanos(111000)
-          val createdAt = ZonedDateTime.now.plusNanos(222000)
-          val updatedAt = Instant.now.plusNanos(333000)
-          val deletedAt = OffsetDateTime.now.plusNanos(444000)
+          val localCreatedAt = LocalDateTime.now.plusNanos(111000).truncatedTo(ChronoUnit.MICROS)
+          val createdAt = ZonedDateTime.now.plusNanos(222000).truncatedTo(ChronoUnit.MICROS)
+          val updatedAt = Instant.now.plusNanos(333000).truncatedTo(ChronoUnit.MICROS)
+          val deletedAt = OffsetDateTime.now.plusNanos(444000).truncatedTo(ChronoUnit.MICROS)
           val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at, deleted_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt}, ${deletedAt})"
           query.execute.apply()
 

@@ -257,7 +257,7 @@ private[streams] class DatabaseSubscription[A](
   private def issueQueryAndCreateNewIterator(): StreamResultSetIterator[A] = {
 
     val occupiedDBSession = maybeOccupiedDBSession.getOrElse(occupyNewDBSession())
-    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher()).toStatementExecutor(sql.statement, sql.rawParameters)
+    val statementExecutor = new DBSessionWrapper(occupiedDBSession, sql.createDBSessionAttributesSwitcher).toStatementExecutor(sql.statement, sql.rawParameters)
     val resultSet = statementExecutor.executeQuery()
     val resultSetProxy = new DBConnectionAttributesWiredResultSet(resultSet, occupiedDBSession.connectionAttributes)
 
@@ -346,7 +346,7 @@ private[streams] class DatabaseSubscription[A](
             var demand: Long = currentSubscription.demandBatch
             var realDemand: Long = if (demand < 0) demand - Long.MinValue else demand
 
-            do {
+            def loop(): Unit = {
               try {
 
                 if (currentSubscription.isCancellationAlreadyRequested) {
@@ -403,8 +403,12 @@ private[streams] class DatabaseSubscription[A](
 
               demand = currentSubscription.saveNumberOfDeliveredElementsAndReturnRemainingDemand(demand)
               realDemand = if (demand < 0) demand - Long.MinValue else demand
+            }
 
-            } while (maybeRemainingIterator.isDefined && realDemand > 0)
+            loop()
+            while (maybeRemainingIterator.isDefined && realDemand > 0) {
+              loop()
+            }
 
           } catch {
             case NonFatal(ex) =>

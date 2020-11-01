@@ -1,12 +1,25 @@
 import MimaSettings.mimaSettings
 
-lazy val _version = "3.5.0-SNAPSHOT"
+lazy val _version = "4.0.0-SNAPSHOT"
+val dottySetting = {
+  val groupIds = Set(
+    "org.scalatestplus",
+    "org.scalactic",
+    "org.scalatest"
+  )
+  libraryDependencies := libraryDependencies.value.map{ lib =>
+    if (groupIds(lib.organization) && scalaVersion.value == "0.27.0-RC1")
+      lib
+    else
+      lib.withDottyCompat(scalaVersion.value)
+  }
+}
 
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.30"
-lazy val _typesafeConfigVersion = "1.4.0"
+lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
@@ -15,11 +28,11 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.16.Final"
+lazy val _hibernateVersion = "5.4.22.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.3.3"
+lazy val mockitoVersion = "3.6.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -30,7 +43,7 @@ def gitHash: String = try {
     "master"
 }
 
-lazy val baseSettings = Seq(
+lazy val baseSettings = Def.settings(
   organization := _organization,
   version := _version,
   publishTo := _publishTo(version.value),
@@ -39,15 +52,40 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.1.2",
-  specs2Version := "4.9.4",
+  scalatestVersion := "3.2.2",
+  specs2Version := "4.10.5",
   parserCombinatorsVersion := "1.1.2",
-  collectionCompatVersion := "2.1.6",
+  collectionCompatVersion := "2.2.0",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   fork in Test := true,
   baseDirectory in Test := file("."),
-  scalacOptions ++= _scalacOptions,
+  Seq(Compile, Test).map { s =>
+    s / unmanagedSourceDirectories += {
+      val base = baseDirectory.value / "src"
+      val dir = base / Defaults.nameForSrc(s.name)
+      if (isDotty.value) {
+        dir / "scala3"
+      } else {
+        dir / "scala2"
+      }
+    }
+  },
+  scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+  scalacOptions ++= {
+    if (isDotty.value) {
+      Seq(
+        "-language:higherKinds,implicitConversions",
+        "-source", "3.0-migration",
+        "-Xignore-scala2-macros"
+      )
+    } else {
+      Seq(
+        "-language:higherKinds",
+        "-Xsource:3"
+      )
+    }
+  },
   scalacOptions ++= PartialFunction.condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
     case Some((2, v)) if v <= 12 =>
       Seq(
@@ -106,9 +144,10 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.6",
+    "joda-time" % "joda-time" % "2.10.8",
     "org.joda" % "joda-convert" % "2.2.1"
-  )
+  ),
+  dottySetting
 ).dependsOn(
   scalikejdbcLibrary,
   scalikejdbcCore % "test->test",
@@ -123,14 +162,9 @@ lazy val scalikejdbcLibrary = Project(
   baseSettings,
   mimaSettings,
   name := "scalikejdbc",
-  (sourceGenerators in Compile) += task{
-    val dir = (sourceManaged in Compile).value
-    val file = dir / "scalikejdbc" / "DeprecatedOneToManiesTraversable.scala"
-    IO.write(file, GenerateDeprecatedOneToManiesTraversable.value)
-    Seq(file)
-  },
   libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
-    Seq("com.h2database" % "h2" % _h2Version % "test")
+    Seq("com.h2database" % "h2" % _h2Version % "test"),
+  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
 // scalikejdbc (core library)
@@ -167,7 +201,7 @@ lazy val scalikejdbcCore = Project(
   libraryDependencies ++= {
     Seq(
       // scope: compile
-      "org.apache.commons"      %  "commons-dbcp2"   % "2.7.0"           % "compile",
+      "org.apache.commons"      %  "commons-dbcp2"   % "2.8.0"           % "compile",
       "org.slf4j"               %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "org.scala-lang.modules"  %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
       "org.scala-lang.modules"  %% "scala-collection-compat" % collectionCompatVersion.value,
@@ -180,7 +214,8 @@ lazy val scalikejdbcCore = Project(
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).enablePlugins(BuildInfoPlugin)
 
 // scalikejdbc-interpolation-macro
@@ -192,11 +227,17 @@ lazy val scalikejdbcInterpolationMacro = Project(
   mimaSettings,
   name := "scalikejdbc-interpolation-macro",
   libraryDependencies ++= {
-    Seq(
-      "org.scala-lang" %  "scala-reflect"    % scalaVersion.value % "compile",
-      "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
-    ) ++ scalaTestDependenciesInTestScope.value
-  }
+    if (isDotty.value) {
+      Nil
+    } else {
+      Seq(
+        "org.scala-lang" %  "scala-reflect"    % scalaVersion.value % "compile",
+        "org.scala-lang" %  "scala-compiler"   % scalaVersion.value % "optional"
+      )
+    }
+  },
+  libraryDependencies ++= scalaTestDependenciesInTestScope.value,
+  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-interpolation
@@ -213,7 +254,8 @@ lazy val scalikejdbcInterpolation = Project(
       "ch.qos.logback" %  "logback-classic"  % _logbackVersion   % "test",
       "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
 // scalikejdbc-mapper-generator-core
@@ -229,7 +271,8 @@ lazy val scalikejdbcMapperGeneratorCore = Project(
     Seq("org.slf4j"     %  "slf4j-api" % _slf4jApiVersion   % "compile") ++
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // mapper-generator sbt plugin
@@ -265,7 +308,8 @@ lazy val scalikejdbcMapperGenerator = Project(
     Seq("org.slf4j"     %  "slf4j-simple" % _slf4jApiVersion  % "compile") ++
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore).enablePlugins(SbtPlugin)
 
 // scalikejdbc-test
@@ -280,12 +324,13 @@ lazy val scalikejdbcTest = Project(
     Seq(
       "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
-      "org.scalatest"  %% "scalatest"       % scalatestVersion.value % "provided",
+      "org.scalatest"  %% "scalatest-core"  % scalatestVersion.value % "provided",
       "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" excludeAll(
         ExclusionRule(organization = "org.spire-math")
       )
-    ) ++ jdbcDriverDependenciesInTestScope
-  }
+    ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
+  },
+  dottySetting
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
 
 // scalikejdbc-config
@@ -302,7 +347,8 @@ lazy val scalikejdbcConfig = Project(
       "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion       % "compile",
       "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-streams
@@ -318,11 +364,12 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.1.2.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.2.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
+  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support
@@ -337,7 +384,8 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
       "ch.qos.logback"  %  "logback-classic"  % _logbackVersion   % "test",
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  }
+  },
+  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 def _publishTo(v: String) = {
@@ -357,13 +405,12 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.14.2.0"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.31.1"           % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.32.3.2"         % "test",
   "org.hsqldb"        % "hsqldb"               % "2.5.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
 
-val _scalacOptions = Seq("-language:higherKinds", "-deprecation", "-unchecked", "-feature")
 val _pomExtra = <url>http://scalikejdbc.org/</url>
     <licenses>
       <license>

@@ -3,7 +3,6 @@ package scalikejdbc
 import java.sql.Connection
 
 import org.mockito.Mockito.{ mock, times, verify, when }
-import org.scalatest._
 
 import scala.util.control.Exception._
 import org.scalatest.flatspec.AnyFlatSpec

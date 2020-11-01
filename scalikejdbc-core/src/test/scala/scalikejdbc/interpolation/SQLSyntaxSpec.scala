@@ -1,7 +1,6 @@
 package scalikejdbc
 package interpolation
 
-import org.scalatest._
 import java.time.LocalDateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

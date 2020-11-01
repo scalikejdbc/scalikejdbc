@@ -28,7 +28,7 @@ private[scalikejdbc] trait OneToManies2Extractor[A, B1, B2, E <: WithExtractor, 
   }
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, scala.collection.Seq[B1], scala.collection.Seq[B2]) => Z): Iterable[Z] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
       .foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, (Seq[B1], scala.collection.Seq[B2])]())(processResultSet).map {
         case (one, (t1, t2)) => zExtractor(one, t1, t2)
@@ -46,25 +46,25 @@ class OneToManies2SQL[A, B1, B2, E <: WithExtractor, Z](
   def map(zExtractor: (A, scala.collection.Seq[B1], scala.collection.Seq[B2]) => Z): OneToManies2SQL[A, B1, B2, HasExtractor, Z] = {
     new OneToManies2SQL(statement, rawParameters)(one)(to1, to2)(zExtractor)
   }
-  override def toIterable(): OneToManies2SQLToIterable[A, B1, B2, E, Z] = {
+  override def toIterable: OneToManies2SQLToIterable[A, B1, B2, E, Z] = {
     new OneToManies2SQLToIterable[A, B1, B2, E, Z](statement, rawParameters)(one)(to1, to2)(zExtractor)
   }
-  override def toList(): OneToManies2SQLToList[A, B1, B2, E, Z] = {
+  override def toList: OneToManies2SQLToList[A, B1, B2, E, Z] = {
     new OneToManies2SQLToList[A, B1, B2, E, Z](statement, rawParameters)(one)(to1, to2)(zExtractor)
   }
-  override def toOption(): OneToManies2SQLToOption[A, B1, B2, E, Z] = {
+  override def toOption: OneToManies2SQLToOption[A, B1, B2, E, Z] = {
     new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(one)(to1, to2)(zExtractor)(true)
   }
   override def toCollection: OneToManies2SQLToCollection[A, B1, B2, E, Z] = {
     new OneToManies2SQLToCollection[A, B1, B2, E, Z](statement, rawParameters)(one)(to1, to2)(zExtractor)
   }
-  override def headOption(): OneToManies2SQLToOption[A, B1, B2, E, Z] = {
+  override def headOption: OneToManies2SQLToOption[A, B1, B2, E, Z] = {
     new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(one)(to1, to2)(zExtractor)(false)
   }
-  override def single(): OneToManies2SQLToOption[A, B1, B2, E, Z] = toOption()
-  override def first(): OneToManies2SQLToOption[A, B1, B2, E, Z] = headOption()
-  override def list(): OneToManies2SQLToList[A, B1, B2, E, Z] = toList()
-  override def iterable(): OneToManies2SQLToIterable[A, B1, B2, E, Z] = toIterable()
+  override def single: OneToManies2SQLToOption[A, B1, B2, E, Z] = toOption
+  override def first: OneToManies2SQLToOption[A, B1, B2, E, Z] = headOption
+  override def list: OneToManies2SQLToList[A, B1, B2, E, Z] = toList
+  override def iterable: OneToManies2SQLToIterable[A, B1, B2, E, Z] = toIterable
   override def collection: OneToManies2SQLToCollection[A, B1, B2, E, Z] = toCollection
 
 }

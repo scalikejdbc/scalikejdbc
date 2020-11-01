@@ -42,7 +42,7 @@ create table members (
     }
 
     // for now, retrieves all data as Map value
-    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
+    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap()).list.apply()
 
     // find all members
     val members: List[Member] = sql"select * from members".map(rs => Member(rs)).list.apply()

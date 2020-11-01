@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.time._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -24,7 +23,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = Symbol("INFO"),
+          warningLogLevel = "INFO",
           warningThresholdMillis = 10L)
         SQL("select  * from settings_example").map(rs => rs.int("id")).list.apply()
       } finally {
@@ -46,7 +45,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
           warningEnabled = true,
-          warningLogLevel = Symbol("INFO"),
+          warningLogLevel = "INFO",
           warningThresholdMillis = 0L)
         SQL("insert into issue22 values (?,?)").bind(1, LocalDateTime.now).update.apply()
         SQL("insert into issue22 values (?,?)").bind(2, new java.util.Date).update.apply()
@@ -65,7 +64,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
     GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
       enabled = true,
       singleLineMode = true,
-      logLevel = Symbol("ERROR"))
+      logLevel = "ERROR")
 
     DB autoCommit { implicit session =>
       try {
@@ -112,7 +111,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         GlobalSettings.queryCompletionListener = (sql: String, params: collection.Seq[Any], millis: Long) => {
           result = sql + params + millis
         }
-        SQL("select * from query_completion_listener").map(_.toMap).list.apply()
+        SQL("select * from query_completion_listener").map(_.toMap()).list.apply()
         result.size should be > (0)
 
         var errorResult: String = ""
@@ -120,7 +119,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
           errorResult = sql + params + e.getMessage
         }
         try {
-          SQL("select * from query_failure_listener").map(_.toMap).list.apply()
+          SQL("select * from query_failure_listener").map(_.toMap()).list.apply()
         } catch { case e: Exception => }
         errorResult.size should be > (0)
 
@@ -164,7 +163,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
 
         result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").tags("foo", "bar").map(_.toMap()).list.apply()
           result should equal(2)
         }
 
@@ -176,7 +175,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         }
         GlobalSettings.taggedQueryFailureListener.synchronized {
           try {
-            SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap).list.apply()
+            SQL("select * from tagged_query_failure_listener").tags("foo", "bar", "baz").map(_.toMap()).list.apply()
           } catch { case e: Exception => }
           errorResult should equal(3)
         }
@@ -185,12 +184,12 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         result = -1
         session.tags("foo")
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").tags("bar", "baz").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").tags("bar", "baz").map(_.toMap()).list.apply()
           result should equal(3)
         }
         result = -1
         GlobalSettings.taggedQueryCompletionListener.synchronized {
-          SQL("select * from tagged_query_completion_listener").map(_.toMap).list.apply()
+          SQL("select * from tagged_query_completion_listener").map(_.toMap()).list.apply()
           result should equal(1)
         }
 
@@ -218,7 +217,7 @@ class GlobalSettingsSpec extends AnyFlatSpec with Matchers with Settings with Lo
         }
         GlobalSettings.loggingSQLAndTime = new LoggingSQLAndTimeSettings(
           enabled = true,
-          logLevel = Symbol("WARN"),
+          logLevel = "WARN",
           printUnprocessedStackTrace = true,
           stackTraceDepth = 500)
         SQL("select  * from logging_stacktrace").map(rs => rs.int("id")).list.apply()

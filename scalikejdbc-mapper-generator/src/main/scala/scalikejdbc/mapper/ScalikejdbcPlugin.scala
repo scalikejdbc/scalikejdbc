@@ -31,7 +31,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
       template: String,
       testTemplate: String,
       lineBreak: String,
-      @deprecated("will be removed", "3.3.0") caseClassOnly: Boolean,
       encoding: String,
       autoConstruct: Boolean,
       defaultAutoSession: Boolean,
@@ -115,7 +114,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
       template = getString(props, TEMPLATE).getOrElse(defaultConfig.template.name),
       testTemplate = getString(props, TEST_TEMPLATE).getOrElse(GeneratorTestTemplate.specs2unit.name),
       lineBreak = getString(props, LINE_BREAK).getOrElse(defaultConfig.lineBreak.name),
-      caseClassOnly = defaultConfig.caseClassOnly,
       encoding = getString(props, ENCODING).getOrElse(defaultConfig.encoding),
       autoConstruct = getString(props, AUTO_CONSTRUCT).map(_.toBoolean).getOrElse(defaultConfig.autoConstruct),
       defaultAutoSession = getString(props, DEFAULT_AUTO_SESSION).map(_.toBoolean).getOrElse(defaultConfig.defaultAutoSession),
@@ -125,16 +123,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
       defaultConfig.tableNameToClassName,
       defaultConfig.columnNameToFieldName,
       returnCollectionType = getString(props, RETURN_COLLECTION_TYPE).map { name =>
-        val CBF = "canbuildfrom"
-        name.toLowerCase(en) match {
-          case CBF =>
-            streams.value.log.warn(s"""$CBF deprecated. use "$RETURN_COLLECTION_TYPE = factory" instead""")
-            ReturnCollectionType.Factory
-          case n =>
-            ReturnCollectionType.map.getOrElse(
-              n,
-              sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
-        }
+        ReturnCollectionType.map.getOrElse(
+          name.toLowerCase(en),
+          sys.error(s"does not support $name. support types are ${ReturnCollectionType.map.keys.mkString(", ")}"))
       }.getOrElse(defaultConfig.returnCollectionType),
       view = getString(props, VIEW).map(_.toBoolean).getOrElse(defaultConfig.view),
       tableNamesToSkip = getString(props, TABLE_NAMES_TO_SKIP).map(_.split(",").toList).getOrElse(defaultConfig.tableNamesToSkip),
@@ -176,7 +167,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
       template = GeneratorTemplate(generatorSettings.template),
       testTemplate = GeneratorTestTemplate(generatorSettings.testTemplate),
       lineBreak = LineBreak(generatorSettings.lineBreak),
-      caseClassOnly = generatorSettings.caseClassOnly,
       encoding = generatorSettings.encoding,
       autoConstruct = generatorSettings.autoConstruct,
       defaultAutoSession = generatorSettings.defaultAutoSession,

@@ -1,6 +1,5 @@
 package foo
 
-import org.scalatest._
 import scalikejdbc._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -55,19 +54,19 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
 
         val (i, o, p) = (IssueTable.syntax("i"), Organization.syntax("o"), Person.syntax("p"))
 
-        val i1 = withSQL { select.from(IssueTable as i).where.eq(i.id, 1) }.map(IssueTable(i)).single().apply()
+        val i1 = withSQL { select.from(IssueTable as i).where.eq(i.id, 1) }.map(IssueTable(i)).single.apply()
         i1 should equal(Some(issue1))
-        val i2 = withSQL { select.from(IssueTable as i).where.eq(i.id, 2) }.map(IssueTable(i.resultName)).single().apply()
+        val i2 = withSQL { select.from(IssueTable as i).where.eq(i.id, 2) }.map(IssueTable(i.resultName)).single.apply()
         i2 should equal(Some(issue2))
 
-        val o1 = withSQL { select.from(Organization as o).where.eq(o.id, 1) }.map(Organization(o)).single().apply()
+        val o1 = withSQL { select.from(Organization as o).where.eq(o.id, 1) }.map(Organization(o)).single.apply()
         o1.map(_.id) should equal(Some(org1.id))
         o1.map(_.websiteUrl) should equal(Some(org1.websiteUrl))
-        val o2 = withSQL { select.from(Organization as o).where.eq(o.id, 2) }.map(Organization(o.resultName)).single().apply()
+        val o2 = withSQL { select.from(Organization as o).where.eq(o.id, 2) }.map(Organization(o.resultName)).single.apply()
         o2.map(_.id) should equal(Some(org2.id))
         o2.map(_.websiteUrl) should equal(Some(org2.websiteUrl))
 
-        val p1 = withSQL { select.from(Person as p).leftJoin(Organization as o).on(p.organizationId, o.id).where.eq(p.id, 1) }.map(Person(p)).single().apply()
+        val p1 = withSQL { select.from(Person as p).leftJoin(Organization as o).on(p.organizationId, o.id).where.eq(p.id, 1) }.map(Person(p)).single.apply()
         p1.flatMap(_.organizationId) should equal(Some(1L))
 
       } finally {

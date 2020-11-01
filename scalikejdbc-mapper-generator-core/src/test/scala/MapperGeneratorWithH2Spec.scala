@@ -1,4 +1,4 @@
-import org.scalatest._
+
 
 import scalikejdbc._
 import mapper._
@@ -157,7 +157,6 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       table =>
         val generator = new CodeGenerator(table)(GeneratorConfig(
           srcDir = srcDir,
-          //caseClassOnly = true,
           packageName = "com.example"))
         generator.writeModel()
     } getOrElse {

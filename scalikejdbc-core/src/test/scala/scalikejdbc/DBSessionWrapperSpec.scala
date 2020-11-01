@@ -1,7 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
-
 import scala.util.control.Exception.ultimately
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -21,7 +21,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
   }
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, B) => Z): Iterable[Z] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
       .foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, Option[B]]())(processResultSet).map {
         case (one, Some(to)) => zExtractor(one, to)
@@ -40,31 +40,26 @@ class OneToOneSQL[A, B, E <: WithExtractor, Z](
     new OneToOneSQL(statement, rawParameters)(one)(toOne)(zExtractor)
   }
 
-  @deprecated(message = "will be removed. use toIterable() instead", since = "3.3.0")
-  def toTraversable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
-
-  override def toIterable(): OneToOneSQLToIterable[A, B, E, Z] = {
+  override def toIterable: OneToOneSQLToIterable[A, B, E, Z] = {
     new OneToOneSQLToIterable[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)
   }
-  override def toList(): OneToOneSQLToList[A, B, E, Z] = {
+  override def toList: OneToOneSQLToList[A, B, E, Z] = {
     new OneToOneSQLToList[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)
   }
-  override def toOption(): OneToOneSQLToOption[A, B, E, Z] = {
+  override def toOption: OneToOneSQLToOption[A, B, E, Z] = {
     new OneToOneSQLToOption[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)(true)
   }
-  override def headOption(): OneToOneSQLToOption[A, B, E, Z] = {
+  override def headOption: OneToOneSQLToOption[A, B, E, Z] = {
     new OneToOneSQLToOption[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)(false)
   }
   override def toCollection: OneToOneSQLToCollection[A, B, E, Z] = {
     new OneToOneSQLToCollection[A, B, E, Z](statement, rawParameters)(one)(toOne)(zExtractor)
   }
 
-  override def single(): OneToOneSQLToOption[A, B, E, Z] = toOption()
-  override def first(): OneToOneSQLToOption[A, B, E, Z] = headOption()
-  override def list(): OneToOneSQLToList[A, B, E, Z] = toList()
-  override def iterable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
-  @deprecated(message = "will be removed. use iterable() instead", since = "3.3.0")
-  override def traversable(): OneToOneSQLToIterable[A, B, E, Z] = toIterable()
+  override def single: OneToOneSQLToOption[A, B, E, Z] = toOption
+  override def first: OneToOneSQLToOption[A, B, E, Z] = headOption
+  override def list: OneToOneSQLToList[A, B, E, Z] = toList
+  override def iterable: OneToOneSQLToIterable[A, B, E, Z] = toIterable
   override def collection: OneToOneSQLToCollection[A, B, E, Z] = toCollection
 }
 

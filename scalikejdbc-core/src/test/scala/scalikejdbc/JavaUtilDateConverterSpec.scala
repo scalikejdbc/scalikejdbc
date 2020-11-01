@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.time.temporal.ChronoUnit
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

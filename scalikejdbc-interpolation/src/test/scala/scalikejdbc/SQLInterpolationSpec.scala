@@ -73,7 +73,7 @@ class SQLInterpolationSpec extends AnyFlatSpec with Matchers with DBSettings wit
 
   case class NamedDBEntity(id: Long)
   object NamedDBEntity extends SQLSyntaxSupport[NamedDBEntity] {
-    override def connectionPoolName = Symbol("yetanother")
+    override def connectionPoolName = "yetanother"
   }
 
   it should "throw exception if table not found" in {
@@ -81,8 +81,8 @@ class SQLInterpolationSpec extends AnyFlatSpec with Matchers with DBSettings wit
   }
 
   it should "load column names from NamedDB" in {
-    NamedDB(Symbol("yetanother")) autoCommit { implicit s =>
-      try sql"select count(1) from named_db_entity".map(_.toMap).single.apply()
+    NamedDB("yetanother") autoCommit { implicit s =>
+      try sql"select count(1) from named_db_entity".map(_.toMap()).single.apply()
       catch { case e: Exception => sql"create table named_db_entity(id bigint)".execute.apply() }
     }
     NamedDBEntity.columns.size should equal(1)
@@ -840,7 +840,7 @@ class SQLInterpolationSpec extends AnyFlatSpec with Matchers with DBSettings wit
           {
             val groupByResult = withSQL {
               select(n.result.firstName, sqls"count(1)").from(Names as n).groupBy(n.firstName)
-            }.map(_.toMap).list.apply()
+            }.map(_.toMap()).list.apply()
             groupByResult.size should equal(2)
           }
       }

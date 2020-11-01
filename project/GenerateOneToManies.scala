@@ -72,7 +72,7 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
   }
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, $seq) => Z): Iterable[Z] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
       case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
     }
@@ -89,26 +89,26 @@ class OneToManies${n}SQL[A, $bs, E <: WithExtractor, Z](
   def map(zExtractor: (A, $seq) => Z): OneToManies${n}SQL[A, $bs, HasExtractor, Z] = {
     new OneToManies${n}SQL(statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toIterable(): OneToManies${n}SQLToIterable[A, $bs, E, Z] = {
+  override def toIterable: OneToManies${n}SQLToIterable[A, $bs, E, Z] = {
     new OneToManies${n}SQLToIterable[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toList(): OneToManies${n}SQLToList[A, $bs, E, Z] = {
+  override def toList: OneToManies${n}SQLToList[A, $bs, E, Z] = {
     new OneToManies${n}SQLToList[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toOption(): OneToManies${n}SQLToOption[A, $bs, E, Z] = {
+  override def toOption: OneToManies${n}SQLToOption[A, $bs, E, Z] = {
     new OneToManies${n}SQLToOption[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)(true)
   }
-  override def headOption(): OneToManies${n}SQLToOption[A, $bs, E, Z] = {
+  override def headOption: OneToManies${n}SQLToOption[A, $bs, E, Z] = {
     new OneToManies${n}SQLToOption[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)(false)
   }
   override def toCollection: OneToManies${n}SQLToCollection[A, $bs, E, Z] = {
     new OneToManies${n}SQLToCollection[A, ${bs}, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
 
-  override def single(): OneToManies${n}SQLToOption[A, $bs, E, Z] = toOption()
-  override def first(): OneToManies${n}SQLToOption[A, $bs, E, Z] = headOption()
-  override def list(): OneToManies${n}SQLToList[A, $bs, E, Z] = toList()
-  override def iterable(): OneToManies${n}SQLToIterable[A, $bs, E, Z] = toIterable()
+  override def single: OneToManies${n}SQLToOption[A, $bs, E, Z] = toOption
+  override def first: OneToManies${n}SQLToOption[A, $bs, E, Z] = headOption
+  override def list: OneToManies${n}SQLToList[A, $bs, E, Z] = toList
+  override def iterable: OneToManies${n}SQLToIterable[A, $bs, E, Z] = toIterable
   override def collection: OneToManies${n}SQLToCollection[A, $bs, E, Z] = toCollection
 }
 

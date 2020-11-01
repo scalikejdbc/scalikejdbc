@@ -8,8 +8,8 @@ import java.sql.Connection
  * It's easier to use named ConnectionPool with this class.
  *
  * {{{
- * ConnectionPool.add(Symbol("named"), "jdbc:...", "user", "password")
- * val users = NamedDB(Symbol("named")) readOnly { session =>
+ * ConnectionPool.add("named", "jdbc:...", "user", "password")
+ * val users = NamedDB("named") readOnly { session =>
  *   session.list("select * from user")
  * }
  * }}}

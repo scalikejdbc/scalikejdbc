@@ -16,11 +16,18 @@
 
 #### Branches
 
-##### master (will be 3.5.x, the default branch)
+##### master (will be 4.0.x, the default branch)
 
 - Latest stable version
 - Breaking source compatibility is not acceptable
 - Changes that bring binary incompatibility with reasonable reasons are **allowed**
+- Must build against Scala 2.12, and 2.13
+- Requires Java 8 or higher
+
+##### 3.5.x
+
+- Version 3.5 series maintenance branch
+- Changes that bring binary/source incompatibility are not allowed
 - Must build against Scala 2.12, and 2.13
 - Requires Java 8 or higher
 
@@ -112,7 +119,7 @@
 
 All pull requests should pass the Travis CI jobs before they can be merged:
 
-https://travis-ci.org/scalikejdbc/scalikejdbc
+https://travis-ci.com/scalikejdbc/scalikejdbc
 
 Testing with default settings is required when pushing changes:
 

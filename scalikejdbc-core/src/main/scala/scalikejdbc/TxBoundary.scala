@@ -67,7 +67,7 @@ object TxBoundary {
    * When the operation throws some exception, the exception will be returned without fail.
    */
   private def onFinishTx[A](resultF: Future[A])(doFinish: Try[A] => Unit)(implicit ec: ExecutionContext): Future[A] = {
-    val p = Promise[A]
+    val p = Promise[A]()
     resultF.onComplete(result => p.complete(doFinishTx(result)(doFinish)))
     p.future
   }

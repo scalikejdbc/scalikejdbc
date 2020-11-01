@@ -1,9 +1,10 @@
 package app.models
 
-import org.scalatest._
+import org.scalatest.flatspec.FixtureAnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import scalikejdbc.scalatest.AutoRollback
 
-class Issue810 extends fixture.FlatSpec with Matchers with AutoRollback {
+class Issue810 extends FixtureAnyFlatSpec with Matchers with AutoRollback {
   behavior of "AddressStreet"
 
   it should "be available" in { implicit session =>

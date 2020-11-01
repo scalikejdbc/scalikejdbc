@@ -106,7 +106,7 @@ case class AsIsParameterBinder(value: Any) extends ParameterBinderWithValue {
     throw new UnsupportedOperationException("Apply method doesn't work because this is an AsIsParameterBinder")
   }
 
-  override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError
+  override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError()
 
   override def toString: String = s"AsIsParameterBinder(value=$value)"
 

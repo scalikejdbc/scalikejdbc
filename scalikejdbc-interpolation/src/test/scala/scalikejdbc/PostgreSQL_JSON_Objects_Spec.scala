@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.slf4j.LoggerFactory
 
 import scala.util.control.NonFatal
@@ -18,7 +17,7 @@ class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSett
   }
 
   it should "perform DDLs/DMLs" in {
-    if (isTestWithPostgreSQL) {
+    if (isTestWithPostgreSQL()) {
       implicit val session = AutoSession
       val tableName = sqls"json_data_table"
       // preparation
@@ -67,7 +66,7 @@ class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSett
 
   it should "perform json operators" in {
     // https://www.postgresql.org/docs/9.5/functions-json.html
-    if (isTestWithPostgreSQL) {
+    if (isTestWithPostgreSQL()) {
       val tableName = sqls"json_operators_table"
 
       DB.autoCommit { implicit s =>
@@ -104,19 +103,19 @@ class PostgreSQL_JSON_Objects_Spec extends AnyFlatSpec with Matchers with DBSett
 
       DB.readOnly { implicit s =>
         val apps: Seq[Option[String]] = sql"select config::jsonb->'applications' apps from $tableName order by id"
-          .map(_.get[Option[String]]("apps"))
+          .map(_.getOpt[String]("apps"))
           .list
           .apply()
         apps should equal(Seq(None, Some("""["frontend", "backend-api", "database"]""")))
 
         val credentials: Seq[Option[String]] = sql"select config::jsonb#>'{credentials,api-2}' c from $tableName order by id"
-          .map(_.get[Option[String]]("c"))
+          .map(_.getOpt[String]("c"))
           .list
           .apply()
         credentials should equal(Seq(Some("\"abcdef\""), None))
 
         val credentials2: Seq[Option[String]] = sql"select config::jsonb#>>'{credentials,api-2}' c from $tableName order by id"
-          .map(_.get[Option[String]]("c"))
+          .map(_.getOpt[String]("c"))
           .list
           .apply()
         credentials2 should equal(Seq(Some("abcdef"), None))

@@ -4,7 +4,6 @@ import scalikejdbc._
 import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
-import org.scalatest._
 
 import scala.concurrent.Future
 import org.scalatest.flatspec.FixtureAsyncFlatSpec
@@ -39,7 +38,7 @@ class AsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAuto
 
 class NamedAsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback {
 
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db() = NamedDB("db2").toDB()
 
   override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into scalatest_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
@@ -66,7 +65,7 @@ class NamedAsyncAutoRollbackSpec extends AsyncFlatSpecWithCommonTraits with Asyn
 
 class AsyncAutoRollbackWithNoArgTestFixtureSpec extends AsyncFlatSpecWithCommonTraits with AsyncAutoRollback with AsyncBufferMixin {
 
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db() = NamedDB("db2").toDB()
 
   behavior of "AsyncAutoRollback with NoArgTestFixture"
 

@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -35,7 +34,7 @@ class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with 
         .tags("foo", "bar")
         .one(rs => Company(rs, c.resultName))
         .toMany(rs => rs.longOpt(m.resultName.id).map(_ => Member(rs, m.resultName)))
-        .single()
+        .single
     }
 
     query.queryTimeout should equal(Some(5))

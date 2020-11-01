@@ -1,6 +1,6 @@
 enablePlugins(ScalikejdbcPlugin)
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.12.12"
 lazy val scalikejdbcVersion = scalikejdbc.ScalikejdbcBuildInfo.version
 resolvers ++= Seq(
   "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
@@ -9,7 +9,7 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"        % scalikejdbcVersion,
   "org.scalikejdbc"    %% "scalikejdbc-test"   % scalikejdbcVersion,
   "org.slf4j"          %  "slf4j-simple"       % "1.7.+",
-  "org.hibernate"      %  "hibernate-core"     % "5.3.3.Final",
+  "org.hibernate"      %  "hibernate-core"     % "5.4.22.Final",
   "org.hsqldb"         %  "hsqldb"             % "2.4.+"
 )
 initialCommands := """import scalikejdbc._

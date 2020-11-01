@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.joda.time._
 import scalikejdbc.jodatime.JodaWrappedResultSet._
 import scalikejdbc.jodatime.JodaParameterBinderFactory._
@@ -148,7 +147,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
 
         // batch insert
         val batchInsertQuery = withSQL {
-          insert into Product columns (pc.id, pc.name, pc.price) values (sqls.?, sqls.?, sqls.?)
+          insert.into(Product).columns(pc.id, pc.name, pc.price).values(sqls.?, sqls.?, sqls.?)
         }
         batchInsertQuery.batch(Seq(3, "Coffee", 90), Seq(4, "Chocolate", 200)).apply()
 

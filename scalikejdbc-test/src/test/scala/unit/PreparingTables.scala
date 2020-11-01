@@ -23,19 +23,19 @@ trait PreparingTables {
   } catch { case e: Exception => }
 
   try {
-    NamedDB(Symbol("db2")) autoCommit { implicit s =>
+    NamedDB("db2") autoCommit { implicit s =>
       SQL("create table members2 (id integer primary key, name varchar(30), created_at timestamp not null)").execute.apply()
     }
   } catch { case e: Exception => }
 
   try {
-    NamedDB(Symbol("db2")) autoCommit { implicit s =>
+    NamedDB("db2") autoCommit { implicit s =>
       SQL("create table mutable_members2 (id integer primary key, name varchar(30), created_at timestamp not null)").execute.apply()
     }
   } catch { case e: Exception => }
 
   try {
-    NamedDB(Symbol("db2")) autoCommit { implicit s =>
+    NamedDB("db2") autoCommit { implicit s =>
       SQL("create table scalatest_members2 (id integer primary key, name varchar(30), created_at timestamp not null)").execute.apply()
     }
   } catch { case e: Exception => }

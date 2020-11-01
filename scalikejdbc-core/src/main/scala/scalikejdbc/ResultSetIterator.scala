@@ -27,7 +27,7 @@ class ResultSetIterator(rs: ResultSet) extends Iterator[WrappedResultSet] {
     }
   }
 
-  override def next: WrappedResultSet = {
+  override def next(): WrappedResultSet = {
     if (nextOpt != null) {
       val result = nextOpt
       nextOpt = null

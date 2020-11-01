@@ -47,17 +47,17 @@ case class JodaWrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, 
   def jodaLocalDateTime(columnIndex: Int): JodaLocalDateTime = get[JodaLocalDateTime](columnIndex)
   def jodaLocalDateTime(columnLabel: String): JodaLocalDateTime = get[JodaLocalDateTime](columnLabel)
 
-  def jodaDateTimeOpt(columnIndex: Int): Option[DateTime] = get[Option[DateTime]](columnIndex)
-  def jodaDateTimeOpt(columnLabel: String): Option[DateTime] = get[Option[DateTime]](columnLabel)
+  def jodaDateTimeOpt(columnIndex: Int): Option[DateTime] = getOpt[DateTime](columnIndex)
+  def jodaDateTimeOpt(columnLabel: String): Option[DateTime] = getOpt[DateTime](columnLabel)
 
-  def jodaLocalDateOpt(columnIndex: Int): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnIndex)
-  def jodaLocalDateOpt(columnLabel: String): Option[JodaLocalDate] = get[Option[JodaLocalDate]](columnLabel)
+  def jodaLocalDateOpt(columnIndex: Int): Option[JodaLocalDate] = getOpt[JodaLocalDate](columnIndex)
+  def jodaLocalDateOpt(columnLabel: String): Option[JodaLocalDate] = getOpt[JodaLocalDate](columnLabel)
 
-  def jodaLocalTimeOpt(columnIndex: Int): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnIndex)
-  def jodaLocalTimeOpt(columnLabel: String): Option[JodaLocalTime] = get[Option[JodaLocalTime]](columnLabel)
+  def jodaLocalTimeOpt(columnIndex: Int): Option[JodaLocalTime] = getOpt[JodaLocalTime](columnIndex)
+  def jodaLocalTimeOpt(columnLabel: String): Option[JodaLocalTime] = getOpt[JodaLocalTime](columnLabel)
 
-  def jodaLocalDateTimeOpt(columnIndex: Int): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnIndex)
-  def jodaLocalDateTimeOpt(columnLabel: String): Option[JodaLocalDateTime] = get[Option[JodaLocalDateTime]](columnLabel)
+  def jodaLocalDateTimeOpt(columnIndex: Int): Option[JodaLocalDateTime] = getOpt[JodaLocalDateTime](columnIndex)
+  def jodaLocalDateTimeOpt(columnLabel: String): Option[JodaLocalDateTime] = getOpt[JodaLocalDateTime](columnLabel)
 
   private[this] def get[A: TypeBinder](columnIndex: Int): A = {
     ensureCursor()
@@ -68,6 +68,10 @@ case class JodaWrappedResultSet(underlying: ResultSet, cursor: ResultSetCursor, 
     ensureCursor()
     wrapIfError(implicitly[TypeBinder[A]].apply(underlying, columnLabel))
   }
+
+  private[this] def getOpt[A: TypeBinder](columnIndex: Int): Option[A] = get[Option[A]](columnIndex)
+
+  private[this] def getOpt[A: TypeBinder](columnLabel: String): Option[A] = get[Option[A]](columnLabel)
 
 }
 

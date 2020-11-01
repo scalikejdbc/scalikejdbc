@@ -299,7 +299,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
       }
       val result = DB localTx {
         implicit session =>
-          SQL("select id from " + tableName + " where id = ?").bind(1001).map(_.long("id")).toOption().apply()
+          SQL("select id from " + tableName + " where id = ?").bind(1001).map(_.long("id")).toOption.apply()
       }
       result.isDefined should not be (true)
     }
@@ -514,7 +514,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
 
             SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
               rs => (rs.date("date_value"), rs.time("time_value"), rs.timestamp("timestamp_value"))
-            }.first().apply().map {
+            }.first.apply().map {
               case (d: java.sql.Date, t: java.sql.Time, ts: java.sql.Timestamp) =>
 
                 // java.sql.Date
@@ -546,7 +546,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
               import org.joda.time._
               SQL("select * from dbsessionspec_dateTimeValues where timestamp_value = ?").bind(timestamp).map {
                 rs => (rs.jodaLocalDate("date_value"), rs.jodaLocalTime("time_value"), rs.jodaDateTime("timestamp_value"), rs.jodaLocalDateTime("timestamp_value"))
-              }.first().apply().map {
+              }.first.apply().map {
                 case (d: LocalDate, t: LocalTime, ts: DateTime, ldt: LocalDateTime) =>
 
                   // LocalDate
@@ -913,8 +913,8 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           try {
             SQL("insert into image_data (name, data) values ({name}, {data});")
               .bindByName(
-                Symbol("name") -> "logo",
-                Symbol("data") -> stream)
+                "name" -> "logo",
+                "data" -> stream)
               .update.apply()
           } catch {
             case e: Exception =>
@@ -962,8 +962,8 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
             bos.flush()
             SQL("insert into image_data2 (name, data) values ({name}, {data});")
               .bindByName(
-                Symbol("name") -> "logo",
-                Symbol("data") -> bos.toByteArray)
+                "name" -> "logo",
+                "data" -> bos.toByteArray)
               .update.apply()
           }
         }

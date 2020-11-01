@@ -6,8 +6,8 @@ services:
   - mysql
 
 scala:
-  - 2.12.11
-  - 2.13.2
+  - 2.12.12
+  - 2.13.3
 
 # The project supports OpenJDK 8+ / Oracle JDK 8,9,10
 jdk:
@@ -50,6 +50,9 @@ env:
 
 matrix:
   include:
+    - name: dotty
+      script:
+      - sbt '++ 0.27.0-RC1!' "all interpolation/test:compile joda-time/compile library/test mapper-generator-core/test streams/test config/test"
     # scripted test
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="mysql"
@@ -58,18 +61,18 @@ matrix:
     - scala: scripted-test
       env: SCALIKEJDBC_DATABASE="h2"
     # h2, hsqldb
-    - scala: 2.12.11
+    - scala: 2.12.12
       env: SCALIKEJDBC_DATABASE="h2"
-    - scala: 2.12.11
+    - scala: 2.12.12
       env: SCALIKEJDBC_DATABASE="hsqldb"
     # Disabled because the sbt initialization with OpenJDK9/10 are somehow unstable
-    #- scala: 2.12.11
+    #- scala: 2.12.12
     #  env: SCALIKEJDBC_DATABASE="mysql"
     #  jdk: openjdk9
-    #- scala: 2.12.11
+    #- scala: 2.12.12
     #  env: SCALIKEJDBC_DATABASE="mysql"
     #  jdk: openjdk10
-    - scala: 2.12.11
+    - scala: 2.12.12
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk11
     - os: windows
@@ -78,6 +81,6 @@ matrix:
       before_script:
       - curl "https://raw.githubusercontent.com/DanySK/Gravis-CI/c8f400623d8f756ef7c/.install-jdk-travis.sh" --output .install-jdk-travis.sh
       - source .install-jdk-travis.sh
-      - wget https://raw.githubusercontent.com/paulp/sbt-extras/0ee2dae2eba72efb4a464a5ad255e348696ecda7/sbt && chmod +x ./sbt
+      - wget https://raw.githubusercontent.com/paulp/sbt-extras/4d558c88ae6ae240e7a5eedc0cf33cc9e7bd0e58/sbt && chmod +x ./sbt
       script:
-      - ./sbt "project root213" "++ 2.12.11" test:compile testSequential
+      - ./sbt "project root213" "++ 2.12.12" test:compile testSequential
