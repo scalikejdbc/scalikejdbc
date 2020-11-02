@@ -258,7 +258,5 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     } getOrElse {
       fail("The table is not found.")
     }
-    Thread.sleep(500)
-
   }
 }
