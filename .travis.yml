@@ -9,7 +9,7 @@ scala:
   - 2.12.12
   - 2.13.3
 
-# The project supports OpenJDK 8+ / Oracle JDK 8,9,10
+# The project supports OpenJDK 8+
 jdk:
   - openjdk8
 
@@ -65,13 +65,6 @@ matrix:
       env: SCALIKEJDBC_DATABASE="h2"
     - scala: 2.12.12
       env: SCALIKEJDBC_DATABASE="hsqldb"
-    # Disabled because the sbt initialization with OpenJDK9/10 are somehow unstable
-    #- scala: 2.12.12
-    #  env: SCALIKEJDBC_DATABASE="mysql"
-    #  jdk: openjdk9
-    #- scala: 2.12.12
-    #  env: SCALIKEJDBC_DATABASE="mysql"
-    #  jdk: openjdk10
     - scala: 2.12.12
       env: SCALIKEJDBC_DATABASE="mysql"
       jdk: openjdk11
