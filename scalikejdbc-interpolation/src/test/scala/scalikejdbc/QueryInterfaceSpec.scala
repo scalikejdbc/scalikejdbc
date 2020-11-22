@@ -548,7 +548,7 @@ class QueryInterfaceSpec extends AnyFlatSpec with Matchers with DBSettings with 
             .groupBy(o.productId)
         }.map(rs => (rs.int(1), rs.int(2), rs.int(3))).list.apply()
 
-        wildcardCounts should equal(List((1, 5, 5), (2, 6, 5)))
+        wildcardCounts.toSet should equal(Set((1, 5, 5), (2, 6, 5)))
 
         // group by after where clause
         val groupByAfterWhereClauseResults = withSQL {
