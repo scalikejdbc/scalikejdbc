@@ -1,0 +1,21 @@
+name: Windows
+on:
+  pull_request:
+  push:
+  schedule:
+  - cron: '0 18 * * 6'
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: olafurpg/setup-scala@v10
+      with:
+        java-version: "adopt@1.8"
+    - uses: coursier/cache-action@v5
+    - run: rm project/sbt-pgp.sbt
+    - run: rm project/sbt-updates.sbt
+    - run: git add . --all
+    - shell: bash
+      run: ./test.sh
