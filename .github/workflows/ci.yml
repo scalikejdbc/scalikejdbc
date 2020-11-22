@@ -27,7 +27,7 @@ jobs:
         ports:
           - 5432:5432
     strategy:
-      #fail-fast: false
+      fail-fast: false
       matrix:
         include:
           - name: scripted
