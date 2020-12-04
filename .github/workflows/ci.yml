@@ -93,7 +93,7 @@ jobs:
         case ${{ matrix.name }} in
           "scala_3")
             sbt -v \
-            '++ 3.0.0-M1!' \
+            SetScala3 \
             "all interpolation/test:compile joda-time/compile library/test mapper-generator-core/test streams/test config/test"
             ;;
           "test")

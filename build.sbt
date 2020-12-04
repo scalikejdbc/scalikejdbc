@@ -1,5 +1,7 @@
 import MimaSettings.mimaSettings
 
+def Scala3 = "3.0.0-M2"
+
 lazy val _version = "4.0.0-SNAPSHOT"
 val dottySetting = {
   val groupIds = Set(
@@ -8,7 +10,7 @@ val dottySetting = {
     "org.scalatest"
   )
   libraryDependencies := libraryDependencies.value.map{ lib =>
-    if (groupIds(lib.organization) && scalaVersion.value == "3.0.0-M1")
+    if (groupIds(lib.organization) && scalaVersion.value == Scala3)
       lib
     else
       lib.withDottyCompat(scalaVersion.value)
@@ -60,6 +62,7 @@ lazy val baseSettings = Def.settings(
   javacOptions in doc := Seq("-source", "1.8"),
   fork in Test := true,
   baseDirectory in Test := file("."),
+  addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
       val base = baseDirectory.value / "src"
