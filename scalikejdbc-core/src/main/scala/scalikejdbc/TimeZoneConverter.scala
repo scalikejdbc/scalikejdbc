@@ -11,20 +11,23 @@ import scala.collection.concurrent.TrieMap
 class TimeZoneConverter(fromTimeZone: TimeZone, toTimeZone: TimeZone) {
 
   def convert(timestamp: Timestamp): Timestamp =
-    if (timestamp != null) new Timestamp(convertMillis(timestamp)) else null
+    if (timestamp != null) convertInternal(timestamp) else null
 
-  private[this] def convertMillis(utilDate: java.util.Date): Long = {
+  private[this] def convertInternal(source: Timestamp): Timestamp = {
     val fromCal = Calendar.getInstance(fromTimeZone)
-    fromCal.setTime(utilDate)
+    fromCal.setTime(source)
     val fromOffset = fromCal.get(Calendar.ZONE_OFFSET) + fromCal.get(Calendar.DST_OFFSET)
 
     val toCal = Calendar.getInstance(toTimeZone)
-    toCal.setTime(utilDate)
+    toCal.setTime(source)
     val toOffset = toCal.get(Calendar.ZONE_OFFSET) + toCal.get(Calendar.DST_OFFSET)
 
     val delta = toOffset - fromOffset
 
-    utilDate.getTime + delta
+    val millis = source.getTime + delta
+    val converted = new Timestamp(millis)
+    converted.setNanos(source.getNanos)
+    converted
   }
 }
 
