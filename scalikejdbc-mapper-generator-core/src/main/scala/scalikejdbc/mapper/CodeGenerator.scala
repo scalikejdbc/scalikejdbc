@@ -287,7 +287,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *   """).bindByName(
      *     "name" -> name,
      *     "birthday" -> birthday
-     *   ).updateAndReturnGeneratedKey.apply()
+     *   ).updateAndReturnGeneratedKey().apply()
      *
      *   Member(
      *     id = generatedKey,
@@ -342,9 +342,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         placeHolderPart + eol + 3.indent + ")" + eol +
         (config.template match {
           case GeneratorTemplate.interpolation =>
-            3.indent + "\"\"\"" + (if (table.autoIncrementColumns.nonEmpty) ".updateAndReturnGeneratedKey.apply()" else ".update.apply()")
+            3.indent + "\"\"\"" + (if (table.autoIncrementColumns.nonEmpty) ".updateAndReturnGeneratedKey().apply()" else ".update().apply()")
           case GeneratorTemplate.queryDsl =>
-            2.indent + (if (table.autoIncrementColumns.nonEmpty) "}.updateAndReturnGeneratedKey.apply()" else "}.update.apply()")
+            2.indent + (if (table.autoIncrementColumns.nonEmpty) "}.updateAndReturnGeneratedKey().apply()" else "}.update().apply()")
         }) +
         eol +
         eol +
@@ -385,7 +385,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      *     "id" -> entity.id,
      *     "name" -> entity.name,
      *     "birthday" -> entity.birthday
-     *   ).update.apply()
+     *   ).update().apply()
      *   entity
      * }
      * }}}
@@ -423,7 +423,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |${placeHolderPart}
           |      where
           |${wherePart}
-          |      \"\"\".update.apply()
+          |      \"\"\".update().apply()
           |    entity
           |  }"""
         case GeneratorTemplate.queryDsl =>
@@ -432,7 +432,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
           |      update(${className}).set(
           |${placeHolderPart}
           |      ).where${wherePart}
-          |    }.update.apply()
+          |    }.update().apply()
           |    entity
           |  }"""
       }).stripMargin + eol
@@ -443,7 +443,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * def destroy(entity: Member)(implicit session: DBSession = autoSession): Int = {
      *   SQL("""delete from member where id = /*'id*/123""")
      *     .bindByName("id" -> entity.id)
-     *     .update.apply()
+     *     .update().apply()
      * }
      * }}}
      */
@@ -461,11 +461,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       (config.template match {
         case GeneratorTemplate.interpolation =>
           s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
-          |    sql\"\"\"delete from $${${className}.table} where ${wherePart}\"\"\".update.apply()
+          |    sql\"\"\"delete from $${${className}.table} where ${wherePart}\"\"\".update().apply()
           |  }"""
         case GeneratorTemplate.queryDsl =>
           s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
-          |    withSQL { delete.from(${className}).where${wherePart} }.update.apply()
+          |    withSQL { delete.from(${className}).where${wherePart} }.update().apply()
           |  }"""
       }).stripMargin + eol
     }
@@ -475,7 +475,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * def find(id: Long): Option[Member] = {
      *   DB readOnly { implicit session =>
      *     SQL("""select * from member where id = /*'id*/123""")
-     *       .bindByName("id" -> id).map(*).single.apply()
+     *       .bindByName("id" -> id).map(*).single().apply()
      *   }
      * }
      * }}}
@@ -493,13 +493,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         case GeneratorTemplate.interpolation =>
           s"""  def find(${argsPart})(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
             |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where ${wherePart}\"\"\"
-            |      .map(${className}(${syntaxName}.resultName)).single.apply()
+            |      .map(${className}(${syntaxName}.resultName)).single().apply()
             |  }"""
         case GeneratorTemplate.queryDsl =>
           s"""  def find(${argsPart})(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
             |    withSQL {
             |      select.from(${className} as ${syntaxName}).where${wherePart}
-            |    }.map(${className}(${syntaxName}.resultName)).single.apply()
+            |    }.map(${className}(${syntaxName}.resultName)).single().apply()
             |  }"""
       }).stripMargin + eol
     }
@@ -507,7 +507,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val interpolationFindByMethod = {
       s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
         |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
-        |      .map(${className}(${syntaxName}.resultName)).single.apply()
+        |      .map(${className}(${syntaxName}.resultName)).single().apply()
         |  }""".stripMargin + eol
     }
 
@@ -515,7 +515,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
         |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(where)
-        |    }.map(${className}(${syntaxName}.resultName)).single.apply()
+        |    }.map(${className}(${syntaxName}.resultName)).single().apply()
         |  }""".stripMargin + eol
     }
 
@@ -524,7 +524,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * def countAll(): Long = {
      *   DB readOnly { implicit session =>
      *     SQL("""select count(1) from member""")
-     *       .map(rs => rs.long(1)).single.apply().get
+     *       .map(rs => rs.long(1)).single().apply().get
      *   }
      * }
      * }}}
@@ -533,11 +533,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       (config.template match {
         case GeneratorTemplate.interpolation =>
           s"""  def countAll()(implicit session: DBSession$defaultAutoSession): Long = {
-            |    sql\"\"\"select count(1) from $${${className}.table}\"\"\".map(rs => rs.long(1)).single.apply().get
+            |    sql\"\"\"select count(1) from $${${className}.table}\"\"\".map(rs => rs.long(1)).single().apply().get
             |  }"""
         case GeneratorTemplate.queryDsl =>
           s"""  def countAll()(implicit session: DBSession$defaultAutoSession): Long = {
-            |    withSQL(select(sqls.count).from(${className} as ${syntaxName})).map(rs => rs.long(1)).single.apply().get
+            |    withSQL(select(sqls.count).from(${className} as ${syntaxName})).map(rs => rs.long(1)).single().apply().get
             |  }"""
       }).stripMargin + eol
 
@@ -562,7 +562,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     }
 
     val toResult = config.returnCollectionType match {
-      case ReturnCollectionType.List => "list.apply()"
+      case ReturnCollectionType.List => "list().apply()"
       case ReturnCollectionType.Vector => "collection.apply[Vector]()"
       case ReturnCollectionType.Array => "collection.apply[Array]()"
       case ReturnCollectionType.Factory => s"collection.apply[$C]()"
@@ -572,7 +572,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
      * {{{
      * def findAll(): List[Member] = {
      *   DB readOnly { implicit session =>
-     *     SQL("""select * from member""").map(*).list.apply()
+     *     SQL("""select * from member""").map(*).list().apply()
      *   }
      * }
      * }}}
@@ -607,7 +607,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
     val interpolationCountByMethod = {
       s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
         |    sql\"\"\"select count(1) from $${${className} as ${syntaxName}} where $${where}\"\"\"
-        |      .map(_.long(1)).single.apply().get
+        |      .map(_.long(1)).single().apply().get
         |  }""".stripMargin + eol
     }
 
@@ -615,7 +615,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
       s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
         |    withSQL {
         |      select(sqls.count).from(${className} as ${syntaxName}).where.append(where)
-        |    }.map(_.long(1)).single.apply().get
+        |    }.map(_.long(1)).single().apply().get
         |  }""".stripMargin + eol
     }
 
