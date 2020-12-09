@@ -30,7 +30,10 @@ def gitHash: String = try {
     "master"
 }
 
+mimaFailOnNoPrevious := false
+
 lazy val baseSettings = Seq(
+  ThisBuild / mimaReportSignatureProblems := true,
   organization := _organization,
   version := _version,
   publishTo := _publishTo(version.value),
@@ -89,6 +92,7 @@ lazy val root213 = Project(
   file("root213")
 ).settings(
   baseSettings,
+  mimaFailOnNoPrevious := false,
   commands += Command.command("testSequential"){
     scala213projects.map(_.id + "/test").sorted ::: _
   }
@@ -238,6 +242,7 @@ lazy val scalikejdbcMapperGenerator = Project(
   base = file("scalikejdbc-mapper-generator")
 ).settings(
   baseSettings,
+  mimaFailOnNoPrevious := false,
   // Don't update to sbt 1.3.x
   // https://github.com/sbt/sbt/issues/5049
   crossSbtVersions := "1.2.8" :: Nil,
@@ -331,6 +336,7 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
   base = file("scalikejdbc-syntax-support-macro")
 ).settings(
   baseSettings,
+  mimaSettings,
   name := "scalikejdbc-syntax-support-macro",
   libraryDependencies ++= {
     Seq(
