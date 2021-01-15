@@ -3,7 +3,7 @@
 set -eux
 
 sbt -v \
-  '++ 2.12.12! -v' \
+  '++ 2.12.13! -v' \
   publishLocal \
   '++ 2.13.4! -v' \
   "project root213" \
