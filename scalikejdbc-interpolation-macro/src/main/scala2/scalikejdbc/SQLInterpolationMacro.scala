@@ -22,7 +22,7 @@ object SQLInterpolationMacro {
       const.paramLists.map { (symbols: List[Symbol]) => symbols.map(s => s.name.encodedName.toString.trim) }.flatten
     }.getOrElse(Nil)
 
-    nameOpt.map { _name =>
+    nameOpt.foreach { _name =>
       if (expectedNames.nonEmpty && !expectedNames.contains(_name)) {
         c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
       }

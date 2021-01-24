@@ -117,9 +117,7 @@
 
 #### Testing your pull request
 
-All pull requests should pass the Travis CI jobs before they can be merged:
-
-https://travis-ci.com/scalikejdbc/scalikejdbc
+All pull requests should pass the CI jobs before they can be merged:
 
 Testing with default settings is required when pushing changes:
 

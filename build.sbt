@@ -1,5 +1,7 @@
 import MimaSettings.mimaSettings
 
+def Scala3 = "3.0.0-M3"
+
 lazy val _version = "4.0.0-SNAPSHOT"
 val dottySetting = {
   val groupIds = Set(
@@ -8,7 +10,7 @@ val dottySetting = {
     "org.scalatest"
   )
   libraryDependencies := libraryDependencies.value.map{ lib =>
-    if (groupIds(lib.organization) && scalaVersion.value == "0.27.0-RC1")
+    if (groupIds(lib.organization) && scalaVersion.value == Scala3)
       lib
     else
       lib.withDottyCompat(scalaVersion.value)
@@ -28,11 +30,11 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.4.23.Final"
+lazy val _hibernateVersion = "5.4.27.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.6.0"
+lazy val mockitoVersion = "3.7.7"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -52,14 +54,15 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.2",
-  specs2Version := "4.10.5",
+  scalatestVersion := "3.2.3",
+  specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
-  collectionCompatVersion := "2.2.0",
+  collectionCompatVersion := "2.3.2",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   javacOptions in doc := Seq("-source", "1.8"),
   fork in Test := true,
   baseDirectory in Test := file("."),
+  addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
       val base = baseDirectory.value / "src"
@@ -144,7 +147,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.8",
+    "joda-time" % "joda-time" % "2.10.9",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
   dottySetting
@@ -364,7 +367,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.2.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.3.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
@@ -404,8 +407,8 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
-  "org.apache.derby"  % "derby"                % "10.14.2.0"        % "test",
-  "org.xerial"        % "sqlite-jdbc"          % "3.32.3.2"         % "test",
+  "org.apache.derby"  % "derby"                % "10.15.2.0"        % "test",
+  "org.xerial"        % "sqlite-jdbc"          % "3.34.0"           % "test",
   "org.hsqldb"        % "hsqldb"               % "2.5.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"

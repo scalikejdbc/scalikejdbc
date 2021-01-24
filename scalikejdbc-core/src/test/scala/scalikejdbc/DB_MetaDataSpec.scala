@@ -528,17 +528,21 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
   }
 
   private def execute(sqls: String*)(implicit session: DBSession): Unit = {
-    for (sql <- sqls) {
-      try {
-        SQL(sql).execute.apply()
-        return
-      } catch {
-        case e: Exception =>
-          log.debug(e.toString)
+    @annotation.tailrec
+    def loop(xs: List[String], errors: List[Throwable]): Unit = {
+      xs match {
+        case sql :: t =>
+          try {
+            SQL(sql).execute.apply()
+          } catch {
+            case e: Exception =>
+              loop(t, e :: errors)
+          }
+        case Nil =>
+          throw new RuntimeException("Failed to execute sqls :" + sqls + " " + errors)
       }
     }
-
-    throw new RuntimeException("Failed to execute sqls :" + sqls)
+    loop(sqls.toList, Nil)
   }
 
   private def lower(list: List[String]): List[String] = Option(list).map(_.map(_.toLowerCase(en))).orNull

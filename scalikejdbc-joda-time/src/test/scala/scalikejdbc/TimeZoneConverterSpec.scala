@@ -1,5 +1,6 @@
 package scalikejdbc
 
+import java.time.temporal.ChronoUnit
 import java.util.TimeZone
 
 import org.joda.time.DateTime
@@ -40,5 +41,14 @@ class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
     val converter2 = TimeZoneConverter.from(jst).to(ast)
 
     converter1 should be theSameInstanceAs converter2
+  }
+
+  it should "keep nano seconds" in {
+    // https://github.com/scalikejdbc/scalikejdbc/issues/1133
+    val time1 = java.time.Instant.now.plusNanos(123456)
+    val time2 = converter.convert(java.sql.Timestamp.from(time1))
+    val time3 = time2.toInstant
+    val time4 = time1.plus(astOffset - jstOffset, ChronoUnit.MILLIS)
+    time3 should equal(time4)
   }
 }
