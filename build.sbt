@@ -53,15 +53,15 @@ lazy val baseSettings = Def.settings(
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
-  transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
+  Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.3",
   specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.4.2",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
-  javacOptions in doc := Seq("-source", "1.8"),
-  fork in Test := true,
-  baseDirectory in Test := file("."),
+  doc / javacOptions := Seq("-source", "1.8"),
+  Test / fork := true,
+  Test / baseDirectory := file("."),
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
@@ -96,19 +96,19 @@ lazy val baseSettings = Def.settings(
         "-Xfuture"
       )
   }.toList.flatten,
-  scalacOptions in (Compile, doc) ++= Seq(
-    "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+  (Compile / doc / scalacOptions) ++= Seq(
+    "-sourcepath", (LocalRootProject / baseDirectory).value.getAbsolutePath,
     "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
   ),
-  mappings in (Compile, packageSrc) ++= (managedSources in Compile).value.map{ f =>
+  (Compile / packageSrc / mappings) ++= (Compile / managedSources).value.map{ f =>
     // to merge generated sources into sources.jar as well
-    (f, f.relativeTo((sourceManaged in Compile).value).get.getPath)
+    (f, f.relativeTo((Compile / sourceManaged).value).get.getPath)
   },
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { x => false },
-  logBuffered in Test := false,
-  parallelExecution in Test := false,
+  Test / logBuffered := false,
+  Test / parallelExecution := false,
   pomExtra := _pomExtra
 )
 
@@ -187,14 +187,14 @@ lazy val scalikejdbcCore = Project(
       sys.error("Working directory is dirty!\n" + diff)
     }
   },
-  (sourceGenerators in Compile) += task{
-    val dir = (sourceManaged in Compile).value
+  (Compile / sourceGenerators) += task{
+    val dir = (Compile / sourceManaged).value
     val file = dir / "scalikejdbc" / "OneToXSQL.scala"
     IO.write(file, GenerateOneToXSQL.value)
     Seq(file)
   },
-  (sourceGenerators in Compile) += task[Seq[File]]{
-    val dir = (sourceManaged in Compile).value
+  (Compile / sourceGenerators) += task[Seq[File]]{
+    val dir = (Compile / sourceManaged).value
     (3 to 21).map{ n =>
       val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
       IO.write(file, GenerateOneToManies(n))
