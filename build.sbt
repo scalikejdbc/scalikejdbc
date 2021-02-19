@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-def Scala3 = "3.0.0-M3"
+def Scala3 = "3.0.0-RC1"
 
 lazy val _version = "4.0.0-SNAPSHOT"
 val dottySetting = {
