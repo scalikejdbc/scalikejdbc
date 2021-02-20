@@ -1,6 +1,6 @@
 import MimaSettings.mimaSettings
 
-def Scala3 = "3.0.0-M3"
+def Scala3 = "3.0.0-RC1"
 
 lazy val _version = "4.0.0-SNAPSHOT"
 val dottySetting = {
@@ -53,15 +53,15 @@ lazy val baseSettings = Def.settings(
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
-  transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.3",
+  Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
+  scalatestVersion := "3.2.4",
   specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
-  collectionCompatVersion := "2.3.2",
+  collectionCompatVersion := "2.4.2",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
-  javacOptions in doc := Seq("-source", "1.8"),
-  fork in Test := true,
-  baseDirectory in Test := file("."),
+  doc / javacOptions := Seq("-source", "1.8"),
+  Test / fork := true,
+  Test / baseDirectory := file("."),
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
@@ -96,19 +96,19 @@ lazy val baseSettings = Def.settings(
         "-Xfuture"
       )
   }.toList.flatten,
-  scalacOptions in (Compile, doc) ++= Seq(
-    "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+  (Compile / doc / scalacOptions) ++= Seq(
+    "-sourcepath", (LocalRootProject / baseDirectory).value.getAbsolutePath,
     "-doc-source-url", s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
   ),
-  mappings in (Compile, packageSrc) ++= (managedSources in Compile).value.map{ f =>
+  (Compile / packageSrc / mappings) ++= (Compile / managedSources).value.map{ f =>
     // to merge generated sources into sources.jar as well
-    (f, f.relativeTo((sourceManaged in Compile).value).get.getPath)
+    (f, f.relativeTo((Compile / sourceManaged).value).get.getPath)
   },
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { x => false },
-  logBuffered in Test := false,
-  parallelExecution in Test := false,
+  Test / logBuffered := false,
+  Test / parallelExecution := false,
   pomExtra := _pomExtra
 )
 
@@ -147,7 +147,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.9",
+    "joda-time" % "joda-time" % "2.10.10",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
   dottySetting
@@ -187,14 +187,14 @@ lazy val scalikejdbcCore = Project(
       sys.error("Working directory is dirty!\n" + diff)
     }
   },
-  (sourceGenerators in Compile) += task{
-    val dir = (sourceManaged in Compile).value
+  (Compile / sourceGenerators) += task{
+    val dir = (Compile / sourceManaged).value
     val file = dir / "scalikejdbc" / "OneToXSQL.scala"
     IO.write(file, GenerateOneToXSQL.value)
     Seq(file)
   },
-  (sourceGenerators in Compile) += task[Seq[File]]{
-    val dir = (sourceManaged in Compile).value
+  (Compile / sourceGenerators) += task[Seq[File]]{
+    val dir = (Compile / sourceManaged).value
     (3 to 21).map{ n =>
       val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
       IO.write(file, GenerateOneToManies(n))
@@ -212,7 +212,7 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "3.4.5"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "4.0.2"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
@@ -367,7 +367,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.3.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.4.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
@@ -430,7 +430,7 @@ val _pomExtra = <url>http://scalikejdbc.org/</url>
       <developer>
         <id>seratch</id>
         <name>Kazuhiro Sera</name>
-        <url>http://git.io/sera</url>
+        <url>https://git.io/sera</url>
       </developer>
       <developer>
         <id>tototoshi</id>
