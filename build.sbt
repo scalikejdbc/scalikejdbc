@@ -50,6 +50,17 @@ lazy val baseSettings = Def.settings(
   version := _version,
   publishTo := _publishTo(version.value),
   publishMavenStyle := true,
+  Seq(Compile, Test).map { x =>
+    (x / unmanagedSourceDirectories) += {
+      val dir = Defaults.nameForSrc(x.name)
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) =>
+          baseDirectory.value / "src" / "scala2" / dir
+        case Some((3, _)) =>
+          baseDirectory.value / "src" / "scala3" / dir
+      }
+    }
+  },
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
