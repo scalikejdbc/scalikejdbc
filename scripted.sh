@@ -3,9 +3,9 @@
 set -eux
 
 sbt -v \
-  '++ 2.12.13! -v' \
+  SetScala212 \
   publishLocal \
-  '++ 2.13.5! -v' \
+  SetScala213 \
   "project root213" \
   publishLocal
 
