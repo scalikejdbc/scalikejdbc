@@ -1,8 +1,13 @@
 import MimaSettings.mimaSettings
 
-def Scala3 = "3.0.0-RC1"
+publish / skip := true
 
-lazy val _version = "4.0.0-SNAPSHOT"
+def Scala3 = "3.0.0-RC1"
+def Scala212 = "2.12.13"
+def Scala213 = "2.13.5"
+
+ThisBuild / version := "4.0.0-SNAPSHOT"
+
 val dottySetting = {
   val groupIds = Set(
     "org.scalatestplus",
@@ -47,8 +52,7 @@ def gitHash: String = try {
 
 lazy val baseSettings = Def.settings(
   organization := _organization,
-  version := _version,
-  publishTo := _publishTo(version.value),
+  publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   Seq(Compile, Test).map { x =>
     (x / unmanagedSourceDirectories) += {
@@ -74,6 +78,8 @@ lazy val baseSettings = Def.settings(
   Test / fork := true,
   Test / baseDirectory := file("."),
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
+  addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
+  addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
       val base = baseDirectory.value / "src"
@@ -141,6 +147,7 @@ lazy val root213 = Project(
   file("root213")
 ).settings(
   baseSettings,
+  publish / skip := true,
   commands += Command.command("testSequential"){
     scala213projects.map(_.id + "/test").sorted ::: _
   }
@@ -402,11 +409,6 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
   dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
-def _publishTo(v: String) = {
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
 val _resolvers = Seq(
   "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
   "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",
