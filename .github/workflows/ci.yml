@@ -94,7 +94,7 @@ jobs:
           "scala_3")
             sbt -v \
             SetScala3 \
-            "all interpolation/test:compile joda-time/compile library/test mapper-generator-core/test streams/test config/test"
+            "all interpolation/test:compile joda-time/compile core/test:compile library/test mapper-generator-core/test streams/test config/test"
             ;;
           "test")
             ./test.sh

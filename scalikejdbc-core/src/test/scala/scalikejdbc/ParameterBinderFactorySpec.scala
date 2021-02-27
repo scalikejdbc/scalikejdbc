@@ -303,7 +303,7 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
   it should "have instance for None.type" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[None.type]].apply(None)(stmt, 1)
-    implicitly[ParameterBinderFactory[None.type]].apply(null)(stmt, 2)
+    implicitly[ParameterBinderFactory[None.type]].apply(null.asInstanceOf[None.type])(stmt, 2)
     verify(stmt).setObject(1, null)
     verify(stmt).setObject(2, null)
   }
