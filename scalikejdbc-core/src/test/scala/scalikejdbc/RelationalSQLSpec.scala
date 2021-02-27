@@ -737,8 +737,6 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
           SQL("insert into sponsors_" + suffix + " values (5, 3)").update.apply()
       }
 
-      implicit val session = ReadOnlyAutoSession
-
       case class GroupEntity(id: Int, ownerId: Int)
       case class Group(id: Int, ownerId: Int, owner: Owner,
         events: collection.Seq[Event] = Nil, news: collection.Seq[News] = Nil,
@@ -757,6 +755,8 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       case class Sponsor(id: Int, groupId: Int)
 
       {
+        implicit val session = ReadOnlyAutoSession
+
         val groups: List[Group] = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
           " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
           " from groups_" + suffix + " g " +
@@ -801,6 +801,8 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       }
 
       {
+        implicit val session = ReadOnlyAutoSession
+
         val groups: Vector[Group] = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
           " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
           " from groups_" + suffix + " g " +
@@ -845,6 +847,8 @@ class RelationalSQLSpec extends AnyFlatSpec with Matchers with BeforeAndAfter wi
       }
 
       {
+        implicit val session = ReadOnlyAutoSession
+
         val group: Group = SQL("select g.id as g_id, g.owner_id as g_owner_id, " +
           " o.id as o_id, e.id as e_id, n.id as n_id, m.id as m_id, s.id as s_id " +
           " from groups_" + suffix + " g " +

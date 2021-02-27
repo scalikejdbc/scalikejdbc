@@ -39,7 +39,7 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
         val issue2 = Issue(2L, "ユーザ2", 1L)
         val issue3 = Issue(3L, "ユーザ3", 2L)
         val org1 = new Organization(1L, "http://jp.scala-users.org/")
-        val org2 = new Organization(2L, "http://http://www.java-users.jp/")
+        val org2 = new Organization(2L, "https://www.java-users.jp/")
 
         val (ic, oc, pc) = (IssueTable.column, Organization.column, Person.column)
 

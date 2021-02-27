@@ -110,7 +110,7 @@ class SQLInterpolationSpec extends AnyFlatSpec with Matchers with DBSettings wit
               applyUpdate { insert.into(User).columns(c.id, c.firstName, c.groupId).values(id, name, groupId) }
           }
           sql"insert into groups values (1, ${"http://jp.scala-users.org/"})".update.apply()
-          sql"insert into groups values (2, ${"http://http://www.java-users.jp/"})".update.apply()
+          sql"insert into groups values (2, ${"https://www.java-users.jp/"})".update.apply()
           sql"insert into group_members values (1, 1)".update.apply()
           sql"insert into group_members values (2, 1)".update.apply()
           sql"insert into group_members values (1, 2)".update.apply()

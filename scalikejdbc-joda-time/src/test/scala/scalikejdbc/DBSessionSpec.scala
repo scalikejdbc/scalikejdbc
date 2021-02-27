@@ -369,7 +369,7 @@ class DBSessionSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with S
           session.updateWithFilters(true, before, after, "insert into dbsessionspec_genkey (name) values (?)", "xxx")
           id should be <= 2L
 
-          val ids: collection.Seq[Long] = session.batchAndReturnGeneratedKey(
+          val ids: collection.Seq[Long] = session.batchAndReturnGeneratedKey[collection.Seq](
             "insert into dbsessionspec_genkey (name) values (?)", Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*)
           ids.size should equal(3)
           ids.last should be <= 5L
