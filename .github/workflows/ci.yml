@@ -65,6 +65,10 @@ jobs:
     steps:
     - name: setup database
       run: |
+        while ! mysqladmin ping -h"127.0.0.1" ; do
+          echo "await mysql start"
+          sleep 1
+        done
         if [[ "${{ matrix.db }}" == "mysql" ]]; then
           mysql -h 127.0.0.1 -e "GRANT ALL ON *.* TO sa@'%';FLUSH PRIVILEGES;" -uroot -proot
           mysql -h 127.0.0.1 -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -uroot -proot
