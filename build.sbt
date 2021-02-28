@@ -6,7 +6,7 @@ def Scala3 = "3.0.0-RC1"
 def Scala212 = "2.12.13"
 def Scala213 = "2.13.5"
 
-ThisBuild / version := "4.0.0-SNAPSHOT"
+ThisBuild / version := "4.0.0-M1"
 
 val dottySetting = {
   val groupIds = Set(
