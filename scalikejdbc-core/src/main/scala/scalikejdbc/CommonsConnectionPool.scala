@@ -6,7 +6,7 @@ import java.sql.Connection
 /**
  * Commons DBCP Connection Pool
  *
- * @see [[http://commons.apache.org/proper/commons-dbcp/]]
+ * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 class CommonsConnectionPool(
   override val url: String,
