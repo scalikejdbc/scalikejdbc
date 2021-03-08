@@ -76,7 +76,7 @@ lazy val baseSettings = Def.settings(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   doc / javacOptions := Seq("-source", "1.8"),
   Test / fork := true,
-  Test / baseDirectory := file("."),
+  Test / baseDirectory := (ThisBuild / baseDirectory).value,
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
   addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
