@@ -45,10 +45,14 @@ class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
 
   it should "keep nano seconds" in {
     // https://github.com/scalikejdbc/scalikejdbc/issues/1133
-    val time1 = java.time.Instant.now.plusNanos(123456)
-    val time2 = converter.convert(java.sql.Timestamp.from(time1))
-    val time3 = time2.toInstant
-    val time4 = time1.plus(astOffset - jstOffset, ChronoUnit.MILLIS)
-    time3 should equal(time4)
+    Seq(
+      java.time.Instant.parse("2021-01-01T01:23:45.123456Z") -> astOffset,
+      java.time.Instant.parse("2021-07-07T02:34:18.123456Z") -> astOffsetWithDst).foreach {
+        case (time1, offset) =>
+          val time2 = converter.convert(java.sql.Timestamp.from(time1))
+          val time3 = time2.toInstant
+          val time4 = time1.plus(offset - jstOffset, ChronoUnit.MILLIS)
+          time3 should equal(time4)
+      }
   }
 }
