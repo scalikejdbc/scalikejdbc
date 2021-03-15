@@ -6,10 +6,10 @@
 
 > set scalaVersion :="2.12.13"
 > compile
-> test:compile
+> Test/compile
 
 > set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 > compile
-> test:compile
+> Test/compile
