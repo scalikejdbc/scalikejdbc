@@ -1,14 +1,7 @@
 val excludeTests = Set(
   "scalikejdbc.specs2.mutable.AutoRollbackSpec",
-  "scalikejdbc.QueryInterfaceSpec",
   "scalikejdbc.TxBoundaryMissingImplicitsSpec",
   "scalikejdbc.LoanPatternSpec",
-  "scalikejdbc.SubQuerySpec",
-  "scalikejdbc.SQL_AttributesSpec",
-  "scalikejdbc.SQLInterpolationSpec",
-  "scalikejdbc.InformationSchemaSpec",
-  "scalikejdbc.ColumnSQLSyntaxProviderSpec",
-  "scalikejdbc.PartialResultSQLSyntaxProviderSpec",
 )
 
 ThisBuild / Test / testOptions ++= {
