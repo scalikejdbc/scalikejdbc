@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.0.0-RC1"
+def Scala3 = "3.0.0-RC2"
 def Scala212 = "2.12.13"
 def Scala213 = "2.13.5"
 
@@ -65,11 +65,24 @@ lazy val baseSettings = Def.settings(
       }
     }
   },
+  allDependencies := {
+    val values = allDependencies.value
+    // workaround for
+    // https://twitter.com/olafurpg/status/1346777651550285824
+    // "Modules were resolved with conflicting cross-version suffixes"
+    // "   org.scala-lang.modules:scala-xml _3.0.0-RC2, _2.13"
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) =>
+        values.map(_.exclude("org.scala-lang.modules", "scala-xml_2.13"))
+      case _ =>
+        values
+    }
+  },
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.5",
+  scalatestVersion := "3.2.7",
   specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.4.3",
@@ -385,7 +398,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.6.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.7.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
