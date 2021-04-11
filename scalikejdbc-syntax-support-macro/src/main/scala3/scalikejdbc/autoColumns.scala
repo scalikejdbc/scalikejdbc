@@ -9,14 +9,23 @@ object autoColumns {
     SQLSyntaxProvider.toColumnName(fieldName, nameConverters, useSnakeCase)
   }
 
-  def apply_impl[A](exclues:Expr[Seq[String]])(using quotes:Quotes)(using Type[A]):Expr[Seq[String]] = {
+  def apply_impl[A](excludes:Expr[Seq[String]])(using quotes:Quotes)(using Type[A]):Expr[Seq[String]] = {
     import quotes.reflect._
+    // this.nameConverters
+    val nameConverters = Select.unique(This(Symbol.spliceOwner.owner.owner), "nameConverters").asExprOf[Map[String,String]]
+    // this.useSnakeCaseColumnName
+    val useSnakeCaseColumnName = Select.unique(This(Symbol.spliceOwner.owner.owner), "useSnakeCaseColumnName").asExprOf[Boolean]
     val r = EntityUtil.constructorParams[A](exclues).map{
       case (name, _) =>
-        //TODO: get context of quotes
-        scalikejdbc.autoColumns.camelToSnake(name, Map.empty, true)
+      '{
+        scalikejdbc.autoColumns.camelToSnake(${Expr(name)}, ${
+          nameConverters
+        }, ${
+          useSnakeCaseColumnName
+        })
+      }
     }
-    Expr(r)
+    Expr.ofList(r)
   }
 
   inline def apply[A](inline excludes: String*): collection.Seq[String] = ${apply_impl[A]('excludes)}
