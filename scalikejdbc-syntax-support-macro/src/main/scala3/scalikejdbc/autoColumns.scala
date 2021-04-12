@@ -15,7 +15,7 @@ object autoColumns {
     val nameConverters = Select.unique(This(Symbol.spliceOwner.owner.owner), "nameConverters").asExprOf[Map[String,String]]
     // this.useSnakeCaseColumnName
     val useSnakeCaseColumnName = Select.unique(This(Symbol.spliceOwner.owner.owner), "useSnakeCaseColumnName").asExprOf[Boolean]
-    val r = EntityUtil.constructorParams[A](exclues).map{
+    val r = EntityUtil.constructorParams[A](excludes).map{
       case (name, _) =>
       '{
         scalikejdbc.autoColumns.camelToSnake(${Expr(name)}, ${

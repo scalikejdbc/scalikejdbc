@@ -1,21 +1,20 @@
 package scalikejdbc
 
-import scalikejdbc.{SQLSyntaxSupportImpl, TypeBinder, using}
+import scalikejdbc.{SQLSyntaxSupportImpl, TypeBinder}
 import scala.quoted._
-import scala.compiletime._
-
 
 object SQLSyntaxSupportFactory {
-  inline def apply[A](inline excludes:String*):SQLSyntaxSupportImpl[A] = ${apply_impl[A]('excludes)}
 
-  inline def debug[A](inline excludes:String*):SQLSyntaxSupportImpl[A] = ${debug_impl[A]('excludes)}
-
+  def camelToSnake(className: String): String = {
+    val clazz = className.replaceFirst("\\$$", "").replaceFirst("^.+\\.", "").replaceFirst("^.+\\$", "")
+    SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
+  }
 
   def apply_impl[A](excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[SQLSyntaxSupportImpl[A]] = {
     import quotes.reflect._
     val tpeSym = TypeTree.of[A].symbol
     val excludeNames:Expr[List[String]] = Expr.ofList(excludes match {
-      case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
+      case Varargs(expr) if expr.exists(_.value.isEmpty) =>
         report.throwError(s"You must use String literal values for field names to exclude from case class ${tpeSym.fullName}", excludes.asTerm.pos)
       case Varargs(expr) =>
         expr
@@ -35,8 +34,6 @@ object SQLSyntaxSupportFactory {
                 case result:ImplicitSearchSuccess => result.tree
                 case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
               }
-              //val '[b] = typeTree.tpe.asType
-              //val exprs = '{rs.get[b](rn.field(${Expr(name)}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
               val exprs = typeTree.tpe.asType match {
                 case '[b] => '{rs.get[b](rn.field(${Expr(name)}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
               }
@@ -53,4 +50,8 @@ object SQLSyntaxSupportFactory {
     println(expr.show)
     expr
   }
+
+  inline def apply[A](inline excludes:String*):SQLSyntaxSupportImpl[A] = ${apply_impl[A]('excludes)}
+
+  inline def debug[A](inline excludes:String*):SQLSyntaxSupportImpl[A] = ${debug_impl[A]('excludes)}
 }
