@@ -44,7 +44,7 @@ Class.forName("org.h2.Driver")
 ConnectionPool.singleton("jdbc:h2:mem:hello", "user", "pass")
 
 // ad-hoc session provider on the REPL
-implicit val session = AutoSession
+implicit val session: DBSession = AutoSession
 
 // table creation, you can run DDL by using #execute as same as JDBC
 sql"""
