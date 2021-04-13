@@ -1,6 +1,6 @@
 > createTestDatabase
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="queryDsl")}
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 
@@ -8,7 +8,7 @@
 > compile
 > Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 > compile
