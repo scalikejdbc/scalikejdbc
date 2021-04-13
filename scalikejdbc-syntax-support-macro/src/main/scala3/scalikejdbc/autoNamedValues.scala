@@ -1,10 +1,12 @@
 package scalikejdbc
 import scala.quoted._
+import scalikejdbc.ParameterBinder
+
 object autoNamedValues {
 
   def apply_impl[E](entity:Expr[E], column:Expr[ColumnName[E]],excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[E]):Expr[Map[SQLSyntax,ParameterBinder]] = {
     import quotes.reflect._
-    val toMapParams = EntityUtil.constructorParams(excludes).map {
+    val toMapParams = Expr.ofList(EntityUtil.constructorParams(excludes).map {
       case (name,typeTree) =>
         val parameterBinderTree =
           Implicits.search(TypeRepr.of[Conversion].appliedTo(List(typeTree.tpe, TypeRepr.of[ParameterBinder]))) match {
@@ -15,8 +17,8 @@ object autoNamedValues {
         typeTree.tpe.asType match {
           case '[b] => '{($column.$name, $implicitExpr)}
         }
-    }
-    '{${Expr.ofList(toMapParams)}.toMap}
+    })
+    '{${toMapParams}.toMap}
   }
 
   inline def apply[E](entity: E, column: ColumnName[E], inline excludes: String*): Map[SQLSyntax, ParameterBinder] =

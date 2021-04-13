@@ -14,28 +14,31 @@ object SQLSyntaxSupportFactory {
     import quotes.reflect._
     val tpeSym = TypeTree.of[A].symbol
     val excludeNames:Expr[List[String]] = Expr.ofList(excludes match {
-      case Varargs(expr) if expr.exists(_.value.isEmpty) =>
+      case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
         report.throwError(s"You must use String literal values for field names to exclude from case class ${tpeSym.fullName}", excludes.asTerm.pos)
       case Varargs(expr) =>
         expr
     })
     val fields = EntityUtil.constructorParams(excludes)
+    val tableNameExpr = Expr(tpeSym.name)
+
     '{
       new SQLSyntaxSupportImpl[A] {
 
-        lazy val tableName:String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${Expr(tpeSym.name)})
+        lazy val tableName:String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${tableNameExpr})
 
         lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
 
-        def apply(rn: scalikejdbc.ResultName[A], rs: scalikejdbc.WrappedResultSet):A = {
+        def apply(rn:scalikejdbc.ResultName[A], rs:scalikejdbc.WrappedResultSet):A = {
           ${
             Apply(Select.unique(New(TypeTree.of[A]), "<init>"), fields.map{case (name, typeTree) => {
               val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
                 case result:ImplicitSearchSuccess => result.tree
                 case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
               }
+              val nameExpr = scala.quoted.Expr(name)
               val exprs = typeTree.tpe.asType match {
-                case '[b] => '{rs.get[b](rn.field(${Expr(name)}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
+                case '[b] => '{rs.get[b](rn.field(${nameExpr}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
               }
               NamedArg(name, exprs.asTerm)
             }}).asExprOf[A]
