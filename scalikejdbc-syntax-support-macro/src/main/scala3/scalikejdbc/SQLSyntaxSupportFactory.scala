@@ -10,7 +10,7 @@ object SQLSyntaxSupportFactory {
     SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
   }
 
-  def apply_impl[A](excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[SQLSyntaxSupportImpl[A]] = {
+  def apply_impl[A](excludes:Expr[Seq[String]])(using quotes:Quotes)(using Type[A]):Expr[SQLSyntaxSupportImpl[A]] = {
     import quotes.reflect._
     val tpeSym = TypeTree.of[A].symbol
     val excludeNames:Expr[List[String]] = Expr.ofList(excludes match {
@@ -21,7 +21,6 @@ object SQLSyntaxSupportFactory {
     })
     val fields = EntityUtil.constructorParams(excludes)
     val tableNameExpr = Expr(tpeSym.name)
-
     '{
       new SQLSyntaxSupportImpl[A] {
 
@@ -29,14 +28,14 @@ object SQLSyntaxSupportFactory {
 
         lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
 
-        def apply(rn:scalikejdbc.ResultName[A], rs:scalikejdbc.WrappedResultSet):A = {
+        def apply(rn:scalikejdbc.ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {
           ${
             Apply(Select.unique(New(TypeTree.of[A]), "<init>"), fields.map{case (name, typeTree) => {
               val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
                 case result:ImplicitSearchSuccess => result.tree
                 case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
               }
-              val nameExpr = scala.quoted.Expr(name)
+              val nameExpr = Expr(name)
               val exprs = typeTree.tpe.asType match {
                 case '[b] => '{rs.get[b](rn.field(${nameExpr}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
               }
