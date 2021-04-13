@@ -435,7 +435,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.15.2.0"        % "test",
   "org.xerial"        % "sqlite-jdbc"          % "3.34.0"           % "test",
-  "org.hsqldb"        % "hsqldb"               % "2.5.2"            % "test",
+  "org.hsqldb"        % "hsqldb"               % "2.6.0"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )
