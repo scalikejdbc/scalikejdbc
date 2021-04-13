@@ -2,6 +2,7 @@ package scalikejdbc
 
 import scalikejdbc.{SQLSyntaxSupportImpl, TypeBinder}
 import scala.quoted._
+import language.`3.0`
 
 object SQLSyntaxSupportFactory {
 
@@ -28,16 +29,18 @@ object SQLSyntaxSupportFactory {
 
         lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
 
-        def apply(rn:scalikejdbc.ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {
+        private def p(n:String):String = scalikejdbc.autoColumns.camelToSnake(n, nameConverters, useSnakeCaseColumnName)
+        def apply(rn:ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {
           ${
             Apply(Select.unique(New(TypeTree.of[A]), "<init>"), fields.map{case (name, typeTree) => {
               val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
                 case result:ImplicitSearchSuccess => result.tree
                 case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
               }
-              val nameExpr = Expr(name)
               val exprs = typeTree.tpe.asType match {
-                case '[b] => '{rs.get[b](rn.field(${nameExpr}))(using ${typeBinderTree.asExprOf[TypeBinder[b]]})}
+                case '[b] =>
+                  //generate must equal `implicitly[TypeBinder[FieldType]].apply(rs.underlying, scalikejdbc.autoColumns.camelToSnake(fieldName, nameConverters, useSnakeCaseColumnName)`
+                 '{${typeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, p(${Expr(name)}))}
               }
               NamedArg(name, exprs.asTerm)
             }}).asExprOf[A]
