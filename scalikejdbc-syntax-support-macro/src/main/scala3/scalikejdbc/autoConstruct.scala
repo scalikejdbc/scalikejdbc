@@ -1,6 +1,8 @@
 package scalikejdbc
+
 import scala.quoted._
 import java.sql.ResultSet
+import language.`3.0`
 
 object autoConstruct {
   def applyResultName_impl[A](rs:Expr[WrappedResultSet], rn:Expr[ResultName[A]], excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[A] = {
@@ -10,8 +12,9 @@ object autoConstruct {
         val typeBinderTpe = TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)
         val d = Implicits.search(typeBinderTpe) match {
           case result:ImplicitSearchSuccess =>
-            val resultSet= '{${rs}.underlying}.asTerm
-            Select.overloaded(result.tree, "apply", Nil,resultSet::Expr(name).asTerm::Nil, typeTree.tpe)
+            val resultSet = '{${rs}.underlying}.asTerm
+            val fieldName = '{${rn}.field(${Expr(name)}).value}.asTerm
+            Select.overloaded(result.tree, "apply", Nil,resultSet::fieldName::Nil, typeTree.tpe)
           case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
         }
         NamedArg(name, d)

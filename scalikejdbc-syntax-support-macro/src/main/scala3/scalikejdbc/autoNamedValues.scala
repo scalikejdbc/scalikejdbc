@@ -15,9 +15,6 @@ object autoNamedValues {
             case _ => report.throwError(s"could not find ParameterBinderFactory[${typeTree.show}]")
           }
 
-        //val implicitExpr = Apply(Select.unique(parameterBinderTree, "apply"), Select.unique(entity.asTerm, name)::Nil).asExprOf[ParameterBinder]
-
-
         '{($column.selectDynamic(${Expr(name)}), ${parameterBinderExpr})}
 
     })

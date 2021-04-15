@@ -27,12 +27,14 @@ object SQLSyntaxSupportFactory {
 
         override lazy val tableName:String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${tableNameExpr})
 
-        override lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
+        override lazy val columns:Seq[String] = ${autoColumns.apply_impl[A](excludes)}
 
-        private def p(n:String):String = scalikejdbc.autoColumns.camelToSnake(n, nameConverters, useSnakeCaseColumnName)
+        private def p(n:String):String = {
+          scalikejdbc.autoColumns.camelToSnake(n, nameConverters, useSnakeCaseColumnName)
+        }
         def apply(rn:ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {
           ${
-            Apply(Select.unique(New(TypeTree.of[A]), "<init>"), fields.map{case (name, typeTree) => {
+            val params = fields.map{case (name, typeTree) => {
               val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
                 case result:ImplicitSearchSuccess => result.tree
                 case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
@@ -43,7 +45,8 @@ object SQLSyntaxSupportFactory {
                  '{${typeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, p(${Expr(name)}))}
               }
               NamedArg(name, exprs.asTerm)
-            }}).asExprOf[A]
+            }}
+            Apply(Select.unique(New(TypeTree.of[A]), "<init>"), params).asExprOf[A]
           }
         }
       }
