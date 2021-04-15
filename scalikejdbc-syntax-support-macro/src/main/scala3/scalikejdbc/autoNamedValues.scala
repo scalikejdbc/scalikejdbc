@@ -1,22 +1,25 @@
 package scalikejdbc
 import scala.quoted._
-import scalikejdbc.ParameterBinder
-
+import scalikejdbc.{ParameterBinderFactory, ParameterBinder}
+import language.`3.0`
 object autoNamedValues {
 
   def apply_impl[E](entity:Expr[E], column:Expr[ColumnName[E]],excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[E]):Expr[Map[SQLSyntax,ParameterBinder]] = {
     import quotes.reflect._
     val toMapParams = Expr.ofList(EntityUtil.constructorParams(excludes).map {
       case (name,typeTree) =>
-        val parameterBinderTree =
-          Implicits.search(TypeRepr.of[Conversion].appliedTo(List(typeTree.tpe, TypeRepr.of[ParameterBinder]))) match {
-            case result:ImplicitSearchSuccess => result.tree
-            case _ => report.throwError(s"could not find Conversion[${typeTree.show}, ParameterBinder]")
+        val parameterBinderExpr =
+          Implicits.search(TypeRepr.of[ParameterBinderFactory].appliedTo(typeTree.tpe)) match {
+            case result:ImplicitSearchSuccess =>
+              Apply(Select.unique(result.tree, "apply"), Select.unique(entity.asTerm, name)::Nil).asExprOf[ParameterBinder]
+            case _ => report.throwError(s"could not find ParameterBinderFactory[${typeTree.show}]")
           }
-        val implicitExpr = Apply(Select.unique(parameterBinderTree, "apply"), Select.unique(entity.asTerm, name)::Nil).asExprOf[ParameterBinder]
-        typeTree.tpe.asType match {
-          case '[b] => '{($column.$name, $implicitExpr)}
-        }
+
+        //val implicitExpr = Apply(Select.unique(parameterBinderTree, "apply"), Select.unique(entity.asTerm, name)::Nil).asExprOf[ParameterBinder]
+
+
+        '{($column.selectDynamic(${Expr(name)}), ${parameterBinderExpr})}
+
     })
     '{${toMapParams}.toMap}
   }

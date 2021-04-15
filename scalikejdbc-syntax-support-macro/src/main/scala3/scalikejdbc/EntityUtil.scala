@@ -7,7 +7,6 @@ object EntityUtil {
   def constructorParams[A](excludes: Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):List[(String, quotes.reflect.TypeTree)] = {
     import quotes.reflect._
     val tpeSym = TypeTree.of[A].symbol
-
     if(!tpeSym.flags.is(Flags.Case)) {
       report.throwError(s"${tpeSym.fullName} is not case class")
     }

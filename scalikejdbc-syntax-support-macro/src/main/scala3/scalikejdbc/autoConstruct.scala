@@ -1,6 +1,6 @@
 package scalikejdbc
 import scala.quoted._
-import scala.compiletime._
+import java.sql.ResultSet
 
 object autoConstruct {
   def applyResultName_impl[A](rs:Expr[WrappedResultSet], rn:Expr[ResultName[A]], excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[A] = {
@@ -10,17 +10,20 @@ object autoConstruct {
         val typeBinderTpe = TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)
         val d = Implicits.search(typeBinderTpe) match {
           case result:ImplicitSearchSuccess =>
-            Apply(Select.unique(result.tree, "apply"), Expr(name).asTerm::Nil)
+            val resultSet= '{${rs}.underlying}.asTerm
+            Select.overloaded(result.tree, "apply", Nil,resultSet::Expr(name).asTerm::Nil, typeTree.tpe)
           case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
         }
         NamedArg(name, d)
     }
-    Apply(Select.unique(New(TypeTree.of[A]), "<init>"), params).asExprOf[A]
+    val companionSelect = This(TypeTree.of[A].symbol.companionClass)
+    Select.overloaded(companionSelect, "apply", Nil , params, TypeRepr.of[A]).asExprOf[A]
+    //Apply(Select.unique(New(TypeTree.of[A]), "<init>"), params).asExprOf[A] ,this needs give default value
   }
 
   def applySyntaxProvider_impl[A](rs:Expr[WrappedResultSet], sp:Expr[SQLSyntaxProvider[A]], excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[A] = {
     import quotes.reflect._
-    applyResultName_impl(rs, Select.unique(sp.asTerm, "resultNames").asExprOf[ResultName[A]], excludes)
+    applyResultName_impl(rs, Select.unique(sp.asTerm, "resultName").asExprOf[ResultName[A]], excludes)
   }
 
   inline def apply[A](rs: WrappedResultSet, sp: SyntaxProvider[A], inline excludes: String*):A = ${applySyntaxProvider_impl('rs,'sp, 'excludes)}

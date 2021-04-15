@@ -25,9 +25,9 @@ object SQLSyntaxSupportFactory {
     '{
       new SQLSyntaxSupportImpl[A] {
 
-        lazy val tableName:String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${tableNameExpr})
+        override lazy val tableName:String = scalikejdbc.SQLSyntaxSupportFactory.camelToSnake(${tableNameExpr})
 
-        lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
+        override lazy val columns:Seq[String] = ${excludeNames}.map(v => scalikejdbc.autoColumns.camelToSnake(v, nameConverters, useSnakeCaseColumnName))
 
         private def p(n:String):String = scalikejdbc.autoColumns.camelToSnake(n, nameConverters, useSnakeCaseColumnName)
         def apply(rn:ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {

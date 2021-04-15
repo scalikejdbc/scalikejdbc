@@ -10,7 +10,7 @@ class AutoNamedValuesSpec extends AnyFlatSpec with Matchers with DBSettings {
 
   val IssueTable = SQLSyntaxSupportFactory[Issue]()
 
-  class Organization(val id: Long, val websiteUrl: String)
+  case class Organization(id: Long, websiteUrl: String)
 
   object Organization extends SQLSyntaxSupport[Organization] {
     def apply(s: SyntaxProvider[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, s)
