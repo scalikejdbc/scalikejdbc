@@ -13,13 +13,8 @@ object SQLSyntaxSupportFactory {
 
   def apply_impl[A](excludes:Expr[Seq[String]])(using quotes:Quotes)(using Type[A]):Expr[SQLSyntaxSupportImpl[A]] = {
     import quotes.reflect._
-    val tpeSym = TypeTree.of[A].symbol
-    val excludeNames:Expr[List[String]] = Expr.ofList(excludes match {
-      case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
-        report.throwError(s"You must use String literal values for field names to exclude from case class ${tpeSym.fullName}", excludes.asTerm.pos)
-      case Varargs(expr) =>
-        expr
-    })
+    val typeTree = TypeTree.of[A]
+    val tpeSym = typeTree.symbol
     val fields = EntityUtil.constructorParams(excludes)
     val tableNameExpr = Expr(tpeSym.name)
     '{
@@ -34,19 +29,21 @@ object SQLSyntaxSupportFactory {
         }
         def apply(rn:ResultName[A])(rs:scalikejdbc.WrappedResultSet):A = {
           ${
-            val params = fields.map{case (name, typeTree) => {
-              val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
-                case result:ImplicitSearchSuccess => result.tree
-                case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
-              }
-              val exprs = typeTree.tpe.asType match {
-                case '[b] =>
-                  //generate must equal `implicitly[TypeBinder[FieldType]].apply(rs.underlying, scalikejdbc.autoColumns.camelToSnake(fieldName, nameConverters, useSnakeCaseColumnName)`
-                 '{${typeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, p(${Expr(name)}))}
-              }
-              NamedArg(name, exprs.asTerm)
-            }}
-            Apply(Select.unique(New(TypeTree.of[A]), "<init>"), params).asExprOf[A]
+            val params = fields.collect {
+              case (name, typeTree, false, _) =>
+                val typeBinderTree = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
+                  case result:ImplicitSearchSuccess => result.tree
+                  case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
+                }
+                val exprs = typeTree.tpe.asType match {
+                  case '[b] =>
+                   '{${typeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, p(${Expr(name)}))}
+                }
+                NamedArg(name, exprs.asTerm)
+              case (name, _, true, Some(ref)) =>
+                NamedArg(name, ref)
+            }
+            Select.overloaded(New(typeTree), "<init>", Nil , params).asExprOf[A]
           }
         }
       }

@@ -7,10 +7,9 @@ import language.`3.0`
 object autoConstruct {
   def applyResultName_impl[A](rs:Expr[WrappedResultSet], rn:Expr[ResultName[A]], excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[A] = {
     import quotes.reflect._
-    val params = EntityUtil.constructorParams[A](excludes).map {
-      case (name,typeTree) =>
-        val typeBinderTpe = TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)
-        val d = Implicits.search(typeBinderTpe) match {
+    val params = EntityUtil.constructorParams[A](excludes).collect {
+      case (name,typeTree,false, _) =>
+        val d = Implicits.search(TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)) match {
           case result:ImplicitSearchSuccess =>
             val resultSet = '{${rs}.underlying}.asTerm
             val fieldName = '{${rn}.field(${Expr(name)}).value}.asTerm
@@ -18,10 +17,11 @@ object autoConstruct {
           case _ => report.throwError(s"could not find implicit of TypeBinder[${typeTree.show}]")
         }
         NamedArg(name, d)
+      case (name,_, true, Some(ref)) =>
+        NamedArg(name,ref)
     }
-    val companionSelect = This(TypeTree.of[A].symbol.companionClass)
-    Select.overloaded(companionSelect, "apply", Nil , params, TypeRepr.of[A]).asExprOf[A]
-    //Apply(Select.unique(New(TypeTree.of[A]), "<init>"), params).asExprOf[A] ,this needs give default value
+    val typeTree = TypeTree.of[A]
+    Select.overloaded(New(typeTree), "<init>", Nil , params).asExprOf[A]
   }
 
   def applySyntaxProvider_impl[A](rs:Expr[WrappedResultSet], sp:Expr[SQLSyntaxProvider[A]], excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):Expr[A] = {

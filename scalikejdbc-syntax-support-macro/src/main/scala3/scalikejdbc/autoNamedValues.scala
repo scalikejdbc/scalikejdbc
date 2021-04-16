@@ -6,8 +6,8 @@ object autoNamedValues {
 
   def apply_impl[E](entity:Expr[E], column:Expr[ColumnName[E]],excludes:Expr[Seq[String]])(using quotes:Quotes)(using t:Type[E]):Expr[Map[SQLSyntax,ParameterBinder]] = {
     import quotes.reflect._
-    val toMapParams = Expr.ofList(EntityUtil.constructorParams(excludes).map {
-      case (name,typeTree) =>
+    val toMapParams = Expr.ofList(EntityUtil.constructorParams(excludes).collect {
+      case (name,typeTree, false, _) =>
         val parameterBinderExpr =
           Implicits.search(TypeRepr.of[ParameterBinderFactory].appliedTo(typeTree.tpe)) match {
             case result:ImplicitSearchSuccess =>

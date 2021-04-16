@@ -1,26 +1,36 @@
 package scalikejdbc
 
 import scala.quoted._
-import scala.compiletime._
 
 object EntityUtil {
-  def constructorParams[A](excludes: Expr[Seq[String]])(using quotes:Quotes)(using t:Type[A]):List[(String, quotes.reflect.TypeTree)] = {
-    import quotes.reflect._
-    val tpeSym = TypeTree.of[A].symbol
-    if(!tpeSym.flags.is(Flags.Case)) {
-      report.throwError(s"${tpeSym.fullName} is not case class")
-    }
 
+  def constructorParams[T](excludes: Expr[Seq[String]])(using qoutes:Quotes)(using Type[T]):List[(String, quotes.reflect.TypeTree, Boolean,Option[quotes.reflect.Ref])] = {
+    import qoutes.reflect._
+    val sym = TypeTree.of[T].symbol
+    val primaryConstructor = sym.primaryConstructor
+    if(primaryConstructor.isNoSymbol) {
+      report.throwError(s"Could not find the primary constructor for ${sym.fullName}. type ${sym.fullName} must be a class, not trait or type parameter")
+    }
     val excludeNames:Set[String] = (excludes match {
       case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
-        report.throwError(s"You must use String literal values for field names to exclude from case class ${tpeSym.fullName}", excludes.asTerm.pos)
+        report.throwError(s"You must use String literal values for field names to exclude from case class ${sym.fullName}", excludes.asTerm.pos)
       case Varargs(expr) =>
         expr.map(_.value.get)
     }).toSet
 
-    tpeSym.caseFields.map(_.tree).collect {
-      case ValDef(name, typeTree, _) if !excludeNames(name) =>
-        (name, typeTree)
+    val comp = sym.companionClass
+    val body = comp.tree.asInstanceOf[ClassDef].body
+    val defaultValuePrefix = "$lessinit$greater$default"
+    val defaulValues: Map[String, Ref] = body.collect {
+      case deff @ DefDef(name, _, _, _) if name.startsWith(defaultValuePrefix) =>
+        name -> Ref(deff.symbol)
+    }.toMap
+    primaryConstructor.tree.asInstanceOf[DefDef] match {
+      case DefDef(_,params,_,_) =>
+        params.head.params.zipWithIndex.map {
+          case  (ValDef(name,typeTree,_),index) =>
+            (name, typeTree, excludeNames.contains(name), defaulValues.get(s"$defaultValuePrefix$$${index+1}"))
+        }
     }
   }
 }

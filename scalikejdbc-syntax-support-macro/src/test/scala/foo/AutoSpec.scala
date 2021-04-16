@@ -9,7 +9,7 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
   case class Issue(id: Long, firstName: String, groupId: Long)
   val IssueTable = SQLSyntaxSupportFactory[Issue]()
 
-  case class Organization(id: Long, websiteUrl: String)
+  class Organization(val id: Long, val websiteUrl: String)
   object Organization extends SQLSyntaxSupport[Organization] {
     def apply(s: SyntaxProvider[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, s)
     def apply(r: ResultName[Organization])(rs: WrappedResultSet): Organization = autoConstruct(rs, r)
