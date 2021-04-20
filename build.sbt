@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.0.0-RC2"
+def Scala3 = "3.0.0-RC3"
 def Scala212 = "2.12.13"
 def Scala213 = "2.13.5"
 
@@ -82,7 +82,7 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.7",
+  scalatestVersion := "3.2.8",
   specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.4.3",
@@ -398,7 +398,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.7.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.8.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
