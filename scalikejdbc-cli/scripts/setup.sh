@@ -146,7 +146,7 @@ libraryDependencies ++= Seq(
   "org.xerial"         % "sqlite-jdbc"          % "3.34.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.2",
   "mysql"              % "mysql-connector-java" % "5.1.48",
-  "org.postgresql"     % "postgresql"           % "9.4.1212"
+  "org.postgresql"     % "postgresql"           % "42.2.20"
 )
 
 initialCommands := {
