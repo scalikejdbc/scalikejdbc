@@ -8,19 +8,9 @@ def Scala213 = "2.13.5"
 
 ThisBuild / version := "4.0.0-SNAPSHOT"
 
-val dottySetting = {
-  val groupIds = Set(
-    "org.scalatestplus",
-    "org.scalactic",
-    "org.scalatest"
-  )
-  libraryDependencies := libraryDependencies.value.map{ lib =>
-    if (groupIds(lib.organization) && scalaVersion.value == Scala3)
-      lib
-    else
-      lib.withDottyCompat(scalaVersion.value)
-  }
-}
+val isScala3 = Def.setting(
+  CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
+)
 
 lazy val _organization = "org.scalikejdbc"
 
@@ -84,7 +74,7 @@ lazy val baseSettings = Def.settings(
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.8",
   specs2Version := "4.11.0",
-  parserCombinatorsVersion := "1.1.2",
+  parserCombinatorsVersion := "1.2.0-RC2",
   collectionCompatVersion := "2.4.3",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   doc / javacOptions := Seq("-source", "1.8"),
@@ -97,7 +87,7 @@ lazy val baseSettings = Def.settings(
     s / unmanagedSourceDirectories += {
       val base = baseDirectory.value / "src"
       val dir = base / Defaults.nameForSrc(s.name)
-      if (isDotty.value) {
+      if (isScala3.value) {
         dir / "scala3"
       } else {
         dir / "scala2"
@@ -106,7 +96,7 @@ lazy val baseSettings = Def.settings(
   },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
-    if (isDotty.value) {
+    if (isScala3.value) {
       Seq(
         "-language:higherKinds,implicitConversions",
         "-source", "3.0-migration",
@@ -181,7 +171,6 @@ lazy val scalikejdbcJodaTime = Project(
     "joda-time" % "joda-time" % "2.10.10",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
-  dottySetting
 ).dependsOn(
   scalikejdbcLibrary,
   scalikejdbcCore % "test->test",
@@ -198,7 +187,6 @@ lazy val scalikejdbcLibrary = Project(
   name := "scalikejdbc",
   libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
     Seq("com.h2database" % "h2" % _h2Version % "test"),
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
 // scalikejdbc (core library)
@@ -249,7 +237,6 @@ lazy val scalikejdbcCore = Project(
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).enablePlugins(BuildInfoPlugin)
 
 // scalikejdbc-interpolation-macro
@@ -261,7 +248,7 @@ lazy val scalikejdbcInterpolationMacro = Project(
   mimaSettings,
   name := "scalikejdbc-interpolation-macro",
   libraryDependencies ++= {
-    if (isDotty.value) {
+    if (isScala3.value) {
       Nil
     } else {
       Seq(
@@ -271,7 +258,6 @@ lazy val scalikejdbcInterpolationMacro = Project(
     }
   },
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
-  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-interpolation
@@ -289,7 +275,6 @@ lazy val scalikejdbcInterpolation = Project(
       "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
 // scalikejdbc-mapper-generator-core
@@ -306,7 +291,6 @@ lazy val scalikejdbcMapperGeneratorCore = Project(
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // mapper-generator sbt plugin
@@ -343,7 +327,6 @@ lazy val scalikejdbcMapperGenerator = Project(
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore).enablePlugins(SbtPlugin)
 
 // scalikejdbc-test
@@ -359,12 +342,16 @@ lazy val scalikejdbcTest = Project(
       "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
       "org.scalatest"  %% "scalatest-core"  % scalatestVersion.value % "provided",
-      "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" excludeAll(
-        ExclusionRule(organization = "org.spire-math")
-      )
+      "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" cross CrossVersion.for3Use2_13
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
   },
-  dottySetting
+  libraryDependencies := {
+    if (isScala3.value) {
+      libraryDependencies.value.map(_.exclude("org.scala-lang.modules", "scala-parser-combinators_2.13"))
+    } else {
+      libraryDependencies.value
+    }
+  },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
 
 // scalikejdbc-config
@@ -382,7 +369,6 @@ lazy val scalikejdbcConfig = Project(
       "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-streams
@@ -403,7 +389,6 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support
@@ -419,7 +404,6 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 val _resolvers = Seq(
