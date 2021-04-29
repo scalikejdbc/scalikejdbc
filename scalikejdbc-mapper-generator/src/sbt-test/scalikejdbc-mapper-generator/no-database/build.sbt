@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version")
 )
 
-(scalikejdbcJDBCSettings in Compile) := JDBCSettings(
+Compile / scalikejdbcJDBCSettings := JDBCSettings(
   "dummy driver name",
   "dummy url",
   "dummy username",
@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   "dummy schema"
 )
 
-(scalikejdbcCodeGeneratorAll in Compile) := { (_, generatorSettings) =>
+(Compile / scalikejdbcCodeGeneratorAll) := { (_, generatorSettings) =>
   val idColumn = Column("id", java.sql.JDBCType.INTEGER, true, true)
   val columns = List(
     idColumn,

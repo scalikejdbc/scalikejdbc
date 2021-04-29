@@ -36,9 +36,6 @@ jobs:
           - name: scripted
             db: postgresql
             java: 8
-          - name: scripted
-            db: h2
-            java: 8
 
           - name: test
             db: hsqldb
