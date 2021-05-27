@@ -58,7 +58,7 @@ class JavaUtilDateConverter(private val value: java.util.Date) extends AnyVal {
       case t: java.sql.Date =>
         t
       case _ =>
-        // @see http://docs.oracle.com/javase/7/docs/api/java/sql/Date.html
+        // @see https://docs.oracle.com/javase/8/docs/api/java/sql/Date.html
         // -----
         // To conform with the definition of SQL DATE,
         // the millisecond values wrapped by a java.sql.Date instance must be 'normalized'

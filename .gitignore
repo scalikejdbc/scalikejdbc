@@ -69,3 +69,4 @@ sandbox/db
 .bloop/
 .metals/
 project/metals.sbt
+.bsp/

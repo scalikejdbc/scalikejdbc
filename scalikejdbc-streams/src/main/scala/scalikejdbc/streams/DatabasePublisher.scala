@@ -8,7 +8,7 @@ import scala.util.control.NonFatal
 /**
  * A database backend Publisher in the fashion of Reactive Streams
  *
- * see also: [[http://www.reactive-streams.org/]]
+ * see also: [[https://www.reactive-streams.org/]]
  */
 class DatabasePublisher[A] private[streams] (
   private[streams] val settings: DatabasePublisherSettings[A],

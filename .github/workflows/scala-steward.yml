@@ -4,6 +4,7 @@ on:
     branches: [ master ]
   schedule:
   - cron: '0 5 * * *'
+  workflow_dispatch:
 jobs:
   scala-steward:
     runs-on: ubuntu-latest
@@ -18,8 +19,9 @@ jobs:
         private_key: ${{ secrets.SCALIKEJDBC_BOT_KEY }}
     - name: Launch Scala Steward
       if: ${{ !github.event.repository.fork }}
-      uses: scala-steward-org/scala-steward-action@v2.11.0
+      uses: scala-steward-org/scala-steward-action@v2.13.3
       with:
         github-token: ${{ steps.generate_token.outputs.token }}
         author-email: "74833019+scalikejdbc-bot[bot]@users.noreply.github.com"
         author-name: scalikejdbc-bot[bot]
+        scala-steward-version: 0.9.1-262-08e2048c-SNAPSHOT # https://oss.sonatype.org/content/repositories/snapshots/org/scala-steward/scala-steward-core_2.13/        

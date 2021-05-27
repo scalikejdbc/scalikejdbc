@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext
 /**
  * Reactive Streams support.
  *
- * see also [[http://www.reactive-streams.org/]]
+ * see also [[https://www.reactive-streams.org/]]
  */
 package object streams {
 

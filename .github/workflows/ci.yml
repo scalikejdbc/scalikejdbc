@@ -36,9 +36,6 @@ jobs:
           - name: scripted
             db: postgresql
             java: 8
-          - name: scripted
-            db: h2
-            java: 8
 
           - name: test
             db: hsqldb
@@ -65,6 +62,10 @@ jobs:
     steps:
     - name: setup database
       run: |
+        while ! mysqladmin ping -h"127.0.0.1" ; do
+          echo "await mysql start"
+          sleep 1
+        done
         if [[ "${{ matrix.db }}" == "mysql" ]]; then
           mysql -h 127.0.0.1 -e "GRANT ALL ON *.* TO sa@'%';FLUSH PRIVILEGES;" -uroot -proot
           mysql -h 127.0.0.1 -e "ALTER DATABASE scalikejdbc CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" -uroot -proot
@@ -77,7 +78,7 @@ jobs:
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: "adopt@1.${{ matrix.java }}"
-    - uses: coursier/cache-action@v5
+    - uses: coursier/cache-action@v6
     - name: copy jdbc settings
       run: |
         if [[ "${{ matrix.name }}" == "scripted" ]]; then
@@ -94,7 +95,8 @@ jobs:
           "scala_3")
             sbt -v \
             SetScala3 \
-            "all interpolation/test:compile joda-time/compile library/test mapper-generator-core/test streams/test config/test"
+            "all test/test interpolation-macro/test interpolation/test joda-time/test core/test library/test mapper-generator-core/test streams/test config/test syntax-support-macro/compile" \
+            root213/publishLocal
             ;;
           "test")
             ./test.sh
@@ -106,3 +108,4 @@ jobs:
             echo "unknown job"
             exit 1
         esac
+    - run: rm -rf "$HOME/.ivy2/local" || true

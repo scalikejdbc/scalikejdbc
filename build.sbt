@@ -1,21 +1,16 @@
 import MimaSettings.mimaSettings
 
-def Scala3 = "3.0.0-RC1"
+publish / skip := true
 
-lazy val _version = "4.0.0-SNAPSHOT"
-val dottySetting = {
-  val groupIds = Set(
-    "org.scalatestplus",
-    "org.scalactic",
-    "org.scalatest"
-  )
-  libraryDependencies := libraryDependencies.value.map{ lib =>
-    if (groupIds(lib.organization) && scalaVersion.value == Scala3)
-      lib
-    else
-      lib.withDottyCompat(scalaVersion.value)
-  }
-}
+def Scala3 = "3.0.0"
+def Scala212 = "2.12.13"
+def Scala213 = "2.13.5"
+
+ThisBuild / version := "4.0.0-SNAPSHOT"
+
+val isScala3 = Def.setting(
+  CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
+)
 
 lazy val _organization = "org.scalikejdbc"
 
@@ -34,7 +29,7 @@ lazy val _hibernateVersion = "5.4.27.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.7.7"
+lazy val mockitoVersion = "3.10.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -47,27 +42,52 @@ def gitHash: String = try {
 
 lazy val baseSettings = Def.settings(
   organization := _organization,
-  version := _version,
-  publishTo := _publishTo(version.value),
+  publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
+  Seq(Compile, Test).map { x =>
+    (x / unmanagedSourceDirectories) += {
+      val dir = Defaults.nameForSrc(x.name)
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) =>
+          baseDirectory.value / "src" / "scala2" / dir
+        case Some((3, _)) =>
+          baseDirectory.value / "src" / "scala3" / dir
+      }
+    }
+  },
+  allDependencies := {
+    val values = allDependencies.value
+    // workaround for
+    // https://twitter.com/olafurpg/status/1346777651550285824
+    // "Modules were resolved with conflicting cross-version suffixes"
+    // "   org.scala-lang.modules:scala-xml _3.0.0-RC2, _2.13"
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) =>
+        values.map(_.exclude("org.scala-lang.modules", "scala-xml_2.13"))
+      case _ =>
+        values
+    }
+  },
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.4",
-  specs2Version := "4.10.6",
-  parserCombinatorsVersion := "1.1.2",
-  collectionCompatVersion := "2.4.2",
+  scalatestVersion := "3.2.9",
+  specs2Version := "4.12.0",
+  parserCombinatorsVersion := "2.0.0",
+  collectionCompatVersion := "2.4.4",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
   doc / javacOptions := Seq("-source", "1.8"),
   Test / fork := true,
-  Test / baseDirectory := file("."),
+  Test / baseDirectory := (ThisBuild / baseDirectory).value,
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
+  addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
+  addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
   Seq(Compile, Test).map { s =>
     s / unmanagedSourceDirectories += {
       val base = baseDirectory.value / "src"
       val dir = base / Defaults.nameForSrc(s.name)
-      if (isDotty.value) {
+      if (isScala3.value) {
         dir / "scala3"
       } else {
         dir / "scala2"
@@ -76,7 +96,7 @@ lazy val baseSettings = Def.settings(
   },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
-    if (isDotty.value) {
+    if (isScala3.value) {
       Seq(
         "-language:higherKinds,implicitConversions",
         "-source", "3.0-migration",
@@ -130,6 +150,7 @@ lazy val root213 = Project(
   file("root213")
 ).settings(
   baseSettings,
+  publish / skip := true,
   commands += Command.command("testSequential"){
     scala213projects.map(_.id + "/test").sorted ::: _
   }
@@ -150,7 +171,6 @@ lazy val scalikejdbcJodaTime = Project(
     "joda-time" % "joda-time" % "2.10.10",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
-  dottySetting
 ).dependsOn(
   scalikejdbcLibrary,
   scalikejdbcCore % "test->test",
@@ -167,7 +187,6 @@ lazy val scalikejdbcLibrary = Project(
   name := "scalikejdbc",
   libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
     Seq("com.h2database" % "h2" % _h2Version % "test"),
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
 // scalikejdbc (core library)
@@ -212,13 +231,12 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp"            %  "commons-dbcp"    % "1.4"             % "provided",
       "com.jolbox"              %  "bonecp"          % "0.8.0.RELEASE"   % "provided",
       // scope: test
-      "com.zaxxer"              %  "HikariCP"        % "4.0.2"           % "test",
+      "com.zaxxer"              %  "HikariCP"        % "4.0.3"           % "test",
       "ch.qos.logback"          %  "logback-classic" % _logbackVersion   % "test",
       "org.hibernate"           %  "hibernate-core"  % _hibernateVersion % "test",
       "org.mockito"             %  "mockito-core"    % mockitoVersion    % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).enablePlugins(BuildInfoPlugin)
 
 // scalikejdbc-interpolation-macro
@@ -230,7 +248,7 @@ lazy val scalikejdbcInterpolationMacro = Project(
   mimaSettings,
   name := "scalikejdbc-interpolation-macro",
   libraryDependencies ++= {
-    if (isDotty.value) {
+    if (isScala3.value) {
       Nil
     } else {
       Seq(
@@ -240,7 +258,6 @@ lazy val scalikejdbcInterpolationMacro = Project(
     }
   },
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
-  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-interpolation
@@ -258,7 +275,6 @@ lazy val scalikejdbcInterpolation = Project(
       "org.hibernate"  %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
 // scalikejdbc-mapper-generator-core
@@ -275,7 +291,6 @@ lazy val scalikejdbcMapperGeneratorCore = Project(
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // mapper-generator sbt plugin
@@ -312,7 +327,6 @@ lazy val scalikejdbcMapperGenerator = Project(
       scalaTestDependenciesInTestScope.value ++
       jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore).enablePlugins(SbtPlugin)
 
 // scalikejdbc-test
@@ -328,12 +342,16 @@ lazy val scalikejdbcTest = Project(
       "org.slf4j"      %  "slf4j-api"       % _slf4jApiVersion  % "compile",
       "ch.qos.logback" %  "logback-classic" % _logbackVersion   % "test",
       "org.scalatest"  %% "scalatest-core"  % scalatestVersion.value % "provided",
-      "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" excludeAll(
-        ExclusionRule(organization = "org.spire-math")
-      )
+      "org.specs2"     %% "specs2-core"     % specs2Version.value % "provided" cross CrossVersion.for3Use2_13
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
   },
-  dottySetting
+  libraryDependencies := {
+    if (isScala3.value) {
+      libraryDependencies.value.map(_.exclude("org.scala-lang.modules", "scala-parser-combinators_2.13"))
+    } else {
+      libraryDependencies.value
+    }
+  },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
 
 // scalikejdbc-config
@@ -351,7 +369,6 @@ lazy val scalikejdbcConfig = Project(
       "ch.qos.logback" %  "logback-classic" % _logbackVersion        % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcCore)
 
 // scalikejdbc-streams
@@ -367,12 +384,11 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.4.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.9.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support
@@ -388,14 +404,8 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
       "org.hibernate"   %  "hibernate-core"   % _hibernateVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
-  dottySetting
 ).dependsOn(scalikejdbcLibrary)
 
-def _publishTo(v: String) = {
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
 val _resolvers = Seq(
   "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
   "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",
@@ -409,7 +419,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database"    % "h2"                   % _h2Version         % "test",
   "org.apache.derby"  % "derby"                % "10.15.2.0"        % "test",
   "org.xerial"        % "sqlite-jdbc"          % "3.34.0"           % "test",
-  "org.hsqldb"        % "hsqldb"               % "2.5.0"            % "test",
+  "org.hsqldb"        % "hsqldb"               % "2.5.2"            % "test",
   "mysql"             % "mysql-connector-java" % _mysqlVersion      % "test",
   "org.postgresql"    % "postgresql"           % _postgresqlVersion % "test"
 )

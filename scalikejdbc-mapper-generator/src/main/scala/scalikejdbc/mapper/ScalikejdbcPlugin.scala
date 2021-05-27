@@ -221,15 +221,15 @@ object ScalikejdbcPlugin extends AutoPlugin {
 
   override val projectSettings: collection.Seq[Def.Setting[_]] = inConfig(Compile)(Seq(
     scalikejdbcCodeGeneratorSingle := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
+      val srcDir = (Compile / scalaSource).value
+      val testDir = (Test / scalaSource).value
       (table, clazz, jdbc, generatorSettings) => {
         generator(tableName = table, className = clazz, srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
       }
     },
     scalikejdbcCodeGeneratorAll := {
-      val srcDir = (scalaSource in Compile).value
-      val testDir = (scalaSource in Test).value
+      val srcDir = (Compile / scalaSource).value
+      val testDir = (Test / scalaSource).value
       (jdbc, generatorSettings) => {
         allGenerators(srcDir = srcDir, testDir = testDir, jdbc = jdbc, generatorSettings = generatorSettings)
       }
