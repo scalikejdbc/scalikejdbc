@@ -37,7 +37,7 @@ object SQLSyntaxSupportFactory {
                 }
                 val exprs = typeTree.tpe.asType match {
                   case '[b] =>
-                   '{${typeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, p(${Expr(name)}))}
+                    '{${ypeBinderTree.asExprOf[TypeBinder[b]]}.apply(rs.underlying, rn.field(p(${Expr(name)})).value)}
                 }
                 NamedArg(name, exprs.asTerm)
               case (name, _, true, Some(ref)) =>
