@@ -75,7 +75,7 @@ jobs:
           psql -h 127.0.0.1 -p 5432 -c "CREATE ROLE sa WITH SUPERUSER LOGIN PASSWORD 'sa';" -U postgres
         fi
     - uses: actions/checkout@v2.3.4
-    - uses: olafurpg/setup-scala@v10
+    - uses: olafurpg/setup-scala@v12
       with:
         java-version: "adopt@1.${{ matrix.java }}"
     - uses: coursier/cache-action@v6

@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.5.2/sbt-launch-1.5.2.jar
+wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.5.3/sbt-launch-1.5.3.jar
 
 mkdir -p ./db
 cd ./db
@@ -136,7 +136,7 @@ run_sbt "console"
 ' > ${DBCONSOLE_COMMAND}
 
 
-echo 'scalaVersion := "2.12.13"
+echo 'scalaVersion := "2.12.14"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "3.4.0",
