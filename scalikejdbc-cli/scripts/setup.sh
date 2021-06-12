@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.5.2/sbt-launch-1.5.2.jar
+wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.5.3/sbt-launch-1.5.3.jar
 
 mkdir -p ./db
 cd ./db
@@ -146,7 +146,7 @@ libraryDependencies ++= Seq(
   "org.xerial"         % "sqlite-jdbc"          % "3.34.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.2",
   "mysql"              % "mysql-connector-java" % "5.1.48",
-  "org.postgresql"     % "postgresql"           % "9.4.1212"
+  "org.postgresql"     % "postgresql"           % "42.2.21"
 )
 
 initialCommands := {

@@ -18,8 +18,7 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
       "Transactions should be committed without AutoRollback for NamedDB" ! db2ShouldBeCommittedWithoutAutoRollback ^
       "members2 table must be empty" ! db2AutoRollback().beforeTest ^
       "AutoRollback should roll all operations back for NamedDB" ! db2AutoRollbackWithFixture().test ^
-      "members2 table must be empty after a test" ! db2AutoRollback().afterTest ^
-      end
+      "members2 table must be empty after a test" ! db2AutoRollback().afterTest ^ end
 
   def withoutAutoRollback = {
     Member.count() must_== (0)
