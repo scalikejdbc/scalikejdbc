@@ -14,4 +14,3 @@ class IllegalRelationshipExceptionSpec extends AnyFlatSpec with Matchers {
   }
 
 }
-

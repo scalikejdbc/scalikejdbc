@@ -26,14 +26,18 @@ class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
     val sqlTimestamp = new java.sql.Timestamp(date)
     val convertedTimestamp = converter.convert(sqlTimestamp)
 
-    (sqlTimestamp.getTime - convertedTimestamp.getTime) should equal(jstOffset - astOffset)
+    (sqlTimestamp.getTime - convertedTimestamp.getTime) should equal(
+      jstOffset - astOffset
+    )
   }
 
   it should "convert timeZone of java.sql.Timestamp with DST" in {
     val sqlTimestamp = new java.sql.Timestamp(dstDate)
     val convertedTimestamp = converter.convert(sqlTimestamp)
 
-    (sqlTimestamp.getTime - convertedTimestamp.getTime) should equal(jstOffset - astOffsetWithDst)
+    (sqlTimestamp.getTime - convertedTimestamp.getTime) should equal(
+      jstOffset - astOffsetWithDst
+    )
   }
 
   it should "cache converter for same [from/to]" in {
@@ -47,12 +51,12 @@ class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
     // https://github.com/scalikejdbc/scalikejdbc/issues/1133
     Seq(
       java.time.Instant.parse("2021-01-01T01:23:45.123456Z") -> astOffset,
-      java.time.Instant.parse("2021-07-07T02:34:18.123456Z") -> astOffsetWithDst).foreach {
-        case (time1, offset) =>
-          val time2 = converter.convert(java.sql.Timestamp.from(time1))
-          val time3 = time2.toInstant
-          val time4 = time1.plus(offset - jstOffset, ChronoUnit.MILLIS)
-          time3 should equal(time4)
-      }
+      java.time.Instant.parse("2021-07-07T02:34:18.123456Z") -> astOffsetWithDst
+    ).foreach { case (time1, offset) =>
+      val time2 = converter.convert(java.sql.Timestamp.from(time1))
+      val time3 = time2.toInstant
+      val time4 = time1.plus(offset - jstOffset, ChronoUnit.MILLIS)
+      time3 should equal(time4)
+    }
   }
 }

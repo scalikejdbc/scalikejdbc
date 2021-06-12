@@ -6,9 +6,7 @@ import org.scalatest.matchers.should.Matchers
 
 class DBsSpec extends AnyFunSpec with Matchers {
 
-  def fixture = new {
-
-  }
+  def fixture = new {}
 
   describe("DBs") {
 

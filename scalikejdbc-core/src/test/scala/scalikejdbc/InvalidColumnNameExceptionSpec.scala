@@ -14,4 +14,3 @@ class InvalidColumnNameExceptionSpec extends AnyFlatSpec with Matchers {
   }
 
 }
-

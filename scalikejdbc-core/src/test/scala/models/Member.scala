@@ -8,11 +8,14 @@ case class Member(
   name: String,
   description: Option[String] = None,
   birthday: Option[LocalDate] = None,
-  createdAt: LocalDateTime) {
+  createdAt: LocalDateTime
+) {
 
-  def save()(implicit session: DBSession = AutoSession): Member = Member.save(this)(session)
+  def save()(implicit session: DBSession = AutoSession): Member =
+    Member.save(this)(session)
 
-  def destroy()(implicit session: DBSession = AutoSession): Unit = Member.delete(this)(session)
+  def destroy()(implicit session: DBSession = AutoSession): Unit =
+    Member.delete(this)(session)
 
 }
 
@@ -32,16 +35,24 @@ object Member extends JavaUtilDateConverterImplicits {
   val * = {
     import columnNames._
 
-    (rs: WrappedResultSet) => Member(
-      id = rs.get(id),
-      name = rs.get(name),
-      description = rs.get(description),
-      birthday = rs.get(birthday),
-      createdAt = rs.get(createdAt))
+    (rs: WrappedResultSet) =>
+      Member(
+        id = rs.get(id),
+        name = rs.get(name),
+        description = rs.get(description),
+        birthday = rs.get(birthday),
+        createdAt = rs.get(createdAt)
+      )
   }
 
-  def find(id: Long)(implicit session: DBSession = AutoSession): Option[Member] = {
-    SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""").bindByName("id" -> id).map(*).single.apply()
+  def find(
+    id: Long
+  )(implicit session: DBSession = AutoSession): Option[Member] = {
+    SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/1""")
+      .bindByName("id" -> id)
+      .map(*)
+      .single
+      .apply()
   }
 
   def findAll()(implicit session: DBSession = AutoSession): List[Member] = {
@@ -49,15 +60,32 @@ object Member extends JavaUtilDateConverterImplicits {
   }
 
   def countAll()(implicit session: DBSession = AutoSession): Long = {
-    SQL("""SELECT COUNT(1) FROM MEMBER""").map(rs => rs.long(1)).single.apply().get
+    SQL("""SELECT COUNT(1) FROM MEMBER""")
+      .map(rs => rs.long(1))
+      .single
+      .apply()
+      .get
   }
 
-  def findBy(where: String, params: (String, Any)*)(implicit session: DBSession = AutoSession): List[Member] = {
-    SQL("""SELECT * FROM MEMBER WHERE """ + where).bindByName(params: _*).map(*).list.apply()
+  def findBy(where: String, params: (String, Any)*)(implicit
+    session: DBSession = AutoSession
+  ): List[Member] = {
+    SQL("""SELECT * FROM MEMBER WHERE """ + where)
+      .bindByName(params: _*)
+      .map(*)
+      .list
+      .apply()
   }
 
-  def countBy(where: String, params: (String, Any)*)(implicit session: DBSession = AutoSession): Long = {
-    SQL("""SELECT count(1) FROM MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
+  def countBy(where: String, params: (String, Any)*)(implicit
+    session: DBSession = AutoSession
+  ): Long = {
+    SQL("""SELECT count(1) FROM MEMBER WHERE """ + where)
+      .bindByName(params: _*)
+      .map(rs => rs.long(1))
+      .single
+      .apply()
+      .get
   }
 
   def create(
@@ -65,7 +93,8 @@ object Member extends JavaUtilDateConverterImplicits {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: LocalDateTime)(implicit session: DBSession = AutoSession): Member = {
+    createdAt: LocalDateTime
+  )(implicit session: DBSession = AutoSession): Member = {
     SQL("""
         INSERT INTO MEMBER (
           ID,
@@ -86,14 +115,18 @@ object Member extends JavaUtilDateConverterImplicits {
         "name" -> name,
         "description" -> description,
         "birthday" -> birthday,
-        "createdAt" -> createdAt).update.apply()
+        "createdAt" -> createdAt
+      )
+      .update
+      .apply()
 
     Member(
       id = id,
       name = name,
       description = description,
       birthday = birthday,
-      createdAt = createdAt)
+      createdAt = createdAt
+    )
   }
 
   def save(m: Member)(implicit session: DBSession = AutoSession): Member = {
@@ -114,13 +147,18 @@ object Member extends JavaUtilDateConverterImplicits {
         "name" -> m.name,
         "description" -> m.description,
         "birthday" -> m.birthday,
-        "createdAt" -> m.createdAt).update.apply()
+        "createdAt" -> m.createdAt
+      )
+      .update
+      .apply()
     m
   }
 
   def delete(m: Member)(implicit session: DBSession = AutoSession): Unit = {
     SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/1""")
-      .bindByName("id" -> m.id).update.apply()
+      .bindByName("id" -> m.id)
+      .update
+      .apply()
   }
 
 }
@@ -130,7 +168,8 @@ case class NamedMember(
   name: String,
   description: Option[String] = None,
   birthday: Option[LocalDate] = None,
-  createdAt: LocalDateTime) {
+  createdAt: LocalDateTime
+) {
 
   def save(): NamedMember = NamedMember.save(this)
 
@@ -153,32 +192,61 @@ object NamedMember {
 
   val * = {
     import columnNames._
-    (rs: WrappedResultSet) => NamedMember(
-      id = rs.get(id),
-      name = rs.get(name),
-      description = rs.get(description),
-      birthday = rs.get(birthday),
-      createdAt = rs.get(createdAt))
+    (rs: WrappedResultSet) =>
+      NamedMember(
+        id = rs.get(id),
+        name = rs.get(name),
+        description = rs.get(description),
+        birthday = rs.get(birthday),
+        createdAt = rs.get(createdAt)
+      )
   }
 
-  def find(id: Long)(implicit session: DBSession = NamedAutoSession("named")): Option[NamedMember] = {
-    SQL("""SELECT * FROM NAMED_MEMBER WHERE ID = /*'id*/1""").bindByName("id" -> id).map(*).single.apply()
+  def find(id: Long)(implicit
+    session: DBSession = NamedAutoSession("named")
+  ): Option[NamedMember] = {
+    SQL("""SELECT * FROM NAMED_MEMBER WHERE ID = /*'id*/1""")
+      .bindByName("id" -> id)
+      .map(*)
+      .single
+      .apply()
   }
 
-  def findAll()(implicit session: DBSession = NamedAutoSession("named")): List[NamedMember] = {
+  def findAll()(implicit
+    session: DBSession = NamedAutoSession("named")
+  ): List[NamedMember] = {
     SQL("""SELECT * FROM NAMED_MEMBER""").map(*).list.apply()
   }
 
-  def countAll()(implicit session: DBSession = NamedAutoSession("named")): Long = {
-    SQL("""SELECT COUNT(1) FROM NAMED_MEMBER""").map(rs => rs.long(1)).single.apply().get
+  def countAll()(implicit
+    session: DBSession = NamedAutoSession("named")
+  ): Long = {
+    SQL("""SELECT COUNT(1) FROM NAMED_MEMBER""")
+      .map(rs => rs.long(1))
+      .single
+      .apply()
+      .get
   }
 
-  def findBy(where: String, params: (String, Any)*)(implicit session: DBSession = NamedAutoSession("named")): List[NamedMember] = {
-    SQL("""SELECT * FROM NAMED_MEMBER WHERE """ + where).bindByName(params: _*).map(*).list.apply()
+  def findBy(where: String, params: (String, Any)*)(implicit
+    session: DBSession = NamedAutoSession("named")
+  ): List[NamedMember] = {
+    SQL("""SELECT * FROM NAMED_MEMBER WHERE """ + where)
+      .bindByName(params: _*)
+      .map(*)
+      .list
+      .apply()
   }
 
-  def countBy(where: String, params: (String, Any)*)(implicit session: DBSession = NamedAutoSession("named")): Long = {
-    SQL("""SELECT count(1) FROM NAMED_MEMBER WHERE """ + where).bindByName(params: _*).map(rs => rs.long(1)).single.apply().get
+  def countBy(where: String, params: (String, Any)*)(implicit
+    session: DBSession = NamedAutoSession("named")
+  ): Long = {
+    SQL("""SELECT count(1) FROM NAMED_MEMBER WHERE """ + where)
+      .bindByName(params: _*)
+      .map(rs => rs.long(1))
+      .single
+      .apply()
+      .get
   }
 
   def create(
@@ -186,7 +254,8 @@ object NamedMember {
     name: String,
     description: Option[String] = None,
     birthday: Option[LocalDate] = None,
-    createdAt: LocalDateTime)(implicit session: DBSession = NamedAutoSession("named")): NamedMember = {
+    createdAt: LocalDateTime
+  )(implicit session: DBSession = NamedAutoSession("named")): NamedMember = {
     SQL("""
         INSERT INTO NAMED_MEMBER (
           ID,
@@ -207,17 +276,23 @@ object NamedMember {
         "name" -> name,
         "description" -> description,
         "birthday" -> birthday,
-        "createdAt" -> createdAt).update.apply()
+        "createdAt" -> createdAt
+      )
+      .update
+      .apply()
 
     NamedMember(
       id = id,
       name = name,
       description = description,
       birthday = birthday,
-      createdAt = createdAt)
+      createdAt = createdAt
+    )
   }
 
-  def save(m: NamedMember)(implicit session: DBSession = NamedAutoSession("named")): NamedMember = {
+  def save(
+    m: NamedMember
+  )(implicit session: DBSession = NamedAutoSession("named")): NamedMember = {
     SQL("""
         UPDATE
           NAMED_MEMBER
@@ -235,13 +310,20 @@ object NamedMember {
         "name" -> m.name,
         "description" -> m.description,
         "birthday" -> m.birthday,
-        "createdAt" -> m.createdAt).update.apply()
+        "createdAt" -> m.createdAt
+      )
+      .update
+      .apply()
     m
   }
 
-  def delete(m: NamedMember)(implicit session: DBSession = NamedAutoSession("named")): Unit = {
+  def delete(
+    m: NamedMember
+  )(implicit session: DBSession = NamedAutoSession("named")): Unit = {
     SQL("""DELETE FROM NAMED_MEMBER WHERE ID = /*'id*/1""")
-      .bindByName("id" -> m.id).update.apply()
+      .bindByName("id" -> m.id)
+      .update
+      .apply()
   }
 
 }
@@ -253,7 +335,9 @@ object MemberSQLTemplate {
   def find(): Option[Member] = {
     DB readOnly { implicit session =>
       SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/123""")
-        .map(*).single.apply()
+        .map(*)
+        .single
+        .apply()
     }
   }
 
@@ -266,7 +350,10 @@ object MemberSQLTemplate {
   def countAll(): Long = {
     DB readOnly { implicit session =>
       SQL("""SELECT COUNT(1) FROM MEMBER""")
-        .map(rs => rs.long(1)).single.apply().get
+        .map(rs => rs.long(1))
+        .single
+        .apply()
+        .get
     }
   }
 
@@ -311,8 +398,7 @@ object MemberSQLTemplate {
 
   def delete(): Unit = {
     DB localTx { implicit session =>
-      SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/123""")
-        .update.apply()
+      SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/123""").update.apply()
     }
   }
 

@@ -89,17 +89,18 @@ jobs:
         cp -p scalikejdbc-core/src/test/resources/jdbc_${{ matrix.db }}.properties scalikejdbc-core/src/test/resources/jdbc.properties
     - run: rm project/sbt-pgp.sbt
     - run: rm project/sbt-updates.sbt
-    - run: git add . --all
     - run: |
         case ${{ matrix.name }} in
           "scala_3")
             sbt -v \
+            "+ scalafmtCheckAll" \
+            scalafmtSbtCheck \
             SetScala3 \
             root213/test \
             root213/publishLocal
             ;;
           "test")
-            ./test.sh
+            sbt "+ scalafmtCheckAll" scalafmtSbtCheck && ./test.sh
             ;;
           "scripted")
             ./scripted.sh

@@ -109,6 +109,6 @@ class DateTimeConversions_JavaUtilDateSpec extends AnyFlatSpec with Matchers {
     val actual = date.toSqlTime
     actual should not be (null)
   }
-*/
+   */
 
 }

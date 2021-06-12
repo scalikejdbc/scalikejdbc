@@ -7,17 +7,24 @@ object GenerateOneToManies {
     val bs = tparams.mkString(", ")
     val seq = tparams.map("scala.collection.Seq[" + _ + "]").mkString(", ")
     val extractTo = "extractTo"
-    val extractToN = (1 to n).map{ i =>
-      s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i] = to$i"
-    }.mkString("\n")
-    val extractOne = "  private[scalikejdbc] def extractOne: WrappedResultSet => A = one"
-    val transform = s"  private[scalikejdbc] def transform: (A, $seq) => Z = zExtractor"
-    val resultSetToOptions = (1 to n).map{i => s"val to$i: WrappedResultSet => Option[B$i]"}.mkString(", ")
+    val extractToN = (1 to n)
+      .map { i =>
+        s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i] = to$i"
+      }
+      .mkString("\n")
+    val extractOne =
+      "  private[scalikejdbc] def extractOne: WrappedResultSet => A = one"
+    val transform =
+      s"  private[scalikejdbc] def transform: (A, $seq) => Z = zExtractor"
+    val resultSetToOptions = (1 to n)
+      .map { i => s"val to$i: WrappedResultSet => Option[B$i]" }
+      .mkString(", ")
     val to = (1 to n).map("to" + _).mkString(", ")
-    val resultSetToOptionsType = tparams.map("WrappedResultSet => Option[" + _ + "]").mkString(", ")
+    val resultSetToOptionsType =
+      tparams.map("WrappedResultSet => Option[" + _ + "]").mkString(", ")
     val sqlTo = (1 to n).map("sqlObject.to" + _).mkString(", ")
 
-s"""/*
+    s"""/*
  * Copyright 2013 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,30 +49,38 @@ private[scalikejdbc] trait OneToManies${n}Extractor[$A, $bs, E <: WithExtractor,
     with RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def extractOne: WrappedResultSet => $A
-${(1 to n).map{ i =>
-s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
-  }.mkString("\n")}
+${(1 to n)
+      .map { i =>
+        s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
+      }
+      .mkString("\n")}
   private[scalikejdbc] def transform: ($A, $seq) => Z
 
   private[scalikejdbc] def processResultSet(result: (LinkedHashMap[$A, ($seq)]),
     rs: WrappedResultSet): LinkedHashMap[A, ($seq)] = {
     val o = extractOne(rs)
-    val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n).map(extractTo + _ + "(rs)").mkString(", ")})
+    val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n)
+      .map(extractTo + _ + "(rs)")
+      .mkString(", ")})
     if (result.contains(o)) {
       ${(1 to n).map("to" + _).mkString("(", " orElse ", ")")}.map { _ =>
         val (${(1 to n).map("ts" + _).mkString(", ")}) = result.apply(o)
         result += (o -> ((
-${(1 to n).map{i =>
-s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
-          }.mkString(",\n")}
+${(1 to n)
+      .map { i =>
+        s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
+      }
+      .mkString(",\n")}
         )))
       }.getOrElse(result)
     } else {
       result += (
         o -> ((
-${(1 to n).map{i =>
-s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
-          }.mkString(",\n")}
+${(1 to n)
+      .map { i =>
+        s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
+      }
+      .mkString(",\n")}
         ))
       )
     }
@@ -74,7 +89,11 @@ s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, $seq) => Z): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
-      case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
+      case (one, (${(1 to n)
+      .map("t" + _)
+      .mkString(", ")})) => zExtractor(one, ${(1 to n)
+      .map("t" + _)
+      .mkString(", ")})
     }
   }
 

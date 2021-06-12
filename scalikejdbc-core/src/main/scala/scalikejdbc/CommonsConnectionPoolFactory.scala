@@ -11,7 +11,8 @@ object CommonsConnectionPoolFactory extends ConnectionPoolFactory {
     url: String,
     user: String,
     password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()): CommonsConnectionPool = {
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()
+  ): CommonsConnectionPool = {
     new CommonsConnectionPool(url, user, password, settings)
   }
 

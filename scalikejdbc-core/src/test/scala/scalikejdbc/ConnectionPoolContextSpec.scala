@@ -3,13 +3,18 @@ package scalikejdbc
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings {
+class ConnectionPoolContextSpec
+  extends AnyFlatSpec
+  with Matchers
+  with Settings {
 
   behavior of "ConnectionPoolContext"
 
   class DummyConnectionPoolContext extends ConnectionPoolContext {
-    override def set(name: Any, pool: ConnectionPool): Unit = throw new RuntimeException
-    override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool = null
+    override def set(name: Any, pool: ConnectionPool): Unit =
+      throw new RuntimeException
+    override def get(name: Any = ConnectionPool.DEFAULT_NAME): ConnectionPool =
+      null
   }
 
   it should "be available" in {
@@ -19,7 +24,9 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
   behavior of "NoConnectionPoolContext"
 
   it should "be available" in {
-    intercept[IllegalStateException] { NoConnectionPoolContext.set("aaa", null) }
+    intercept[IllegalStateException] {
+      NoConnectionPoolContext.set("aaa", null)
+    }
     intercept[IllegalStateException] { NoConnectionPoolContext.get("aaa") }
   }
 
@@ -31,4 +38,3 @@ class ConnectionPoolContextSpec extends AnyFlatSpec with Matchers with Settings 
   }
 
 }
-

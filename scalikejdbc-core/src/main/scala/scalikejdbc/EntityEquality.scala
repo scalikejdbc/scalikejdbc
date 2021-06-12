@@ -49,4 +49,3 @@ trait EntityEquality {
   }
 
 }
-

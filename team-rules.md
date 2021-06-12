@@ -16,7 +16,7 @@
 - Push "feature/xxx" branch first
 - Create a "feature/xxx" branch and create a pull request when you need code review
 - Compatibility always must be kept as far back as possible
-- scalariform must be applied to all Scala source code
+- scalafmt must be applied to all Scala source code
 - Prefer creating separate Scala source files for each class/object/trait (except, of course, for sealed traits)
 
 ### Testing

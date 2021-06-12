@@ -4,7 +4,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 //import org.joda.time.{ DateTime, DateTimeZone }
 
-class DateTimeConversions_JavaSqlTimestampSpec extends AnyFlatSpec with Matchers {
+class DateTimeConversions_JavaSqlTimestampSpec
+  extends AnyFlatSpec
+  with Matchers {
 
   behavior of "implicit conversions for java.sql.Timestamp"
 
@@ -110,6 +112,6 @@ class DateTimeConversions_JavaSqlTimestampSpec extends AnyFlatSpec with Matchers
     val actual = date.toSqlTime
     actual should not be (null)
   }
-*/
+   */
 
 }

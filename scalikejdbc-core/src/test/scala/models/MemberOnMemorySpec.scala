@@ -15,14 +15,13 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
 
   it should "be available" in {
 
-    NamedDB("MemberSpec") autoCommit {
-      implicit session =>
-        try {
-          SQL("drop table member").execute.apply()
-        } catch {
-          case e: Exception =>
-        }
-        SQL("""
+    NamedDB("MemberSpec") autoCommit { implicit session =>
+      try {
+        SQL("drop table member").execute.apply()
+      } catch {
+        case e: Exception =>
+      }
+      SQL("""
             create table member (
               id bigint primary key,
               name varchar(30) not null,
@@ -33,43 +32,51 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
              """).execute.apply()
     }
 
-    NamedDB("MemberSpec") localTx {
-      implicit session =>
+    NamedDB("MemberSpec") localTx { implicit session =>
+      // use model
+      val alice = Member.create(
+        id = 1,
+        name = "Alice",
+        description = Option("Alice's Adventures in Wonderland"),
+        birthday = Option(LocalDate.of(1980, 1, 2)),
+        createdAt = LocalDateTime.now
+      )
+      Member.find(alice.id).get.id should equal(alice.id)
+      intercept[IllegalStateException] {
+        Member
+          .findBy("name like /*:nameMatch*/'Bob%'", "nameMatch" -> "Alice%")
+          .size should be > 0
+      }
+      Member
+        .findBy("name like /*'nameMatch*/'Bob%'", "nameMatch" -> "Alice%")
+        .size should be > 0
+      val newAlice = alice.copy(name = "ALICE").save()
+      Member
+        .findBy("name = /*'name*/'Alice'", "name" -> "ALICE")
+        .size should equal(1)
+      newAlice.destroy()
 
-        // use model
-        val alice = Member.create(
-          id = 1,
-          name = "Alice",
-          description = Option("Alice's Adventures in Wonderland"),
-          birthday = Option(LocalDate.of(1980, 1, 2)),
-          createdAt = LocalDateTime.now)
-        Member.find(alice.id).get.id should equal(alice.id)
-        intercept[IllegalStateException] {
-          Member.findBy("name like /*:nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
+      try {
+        NamedDB("MemberSpec") localTx { implicit session =>
+          Member.create(
+            id = 999,
+            name = "Rollback",
+            description = Option("rollback test"),
+            birthday = Option(LocalDate.of(1980, 1, 2)),
+            createdAt = LocalDateTime.now
+          )
+          Member
+            .findBy("name = /*'name*/''", "name" -> "Rollback")
+            .size should equal(1)
+          throw new RuntimeException
         }
-        Member.findBy("name like /*'nameMatch*/'Bob%'", "nameMatch" -> "Alice%").size should be > 0
-        val newAlice = alice.copy(name = "ALICE").save()
-        Member.findBy("name = /*'name*/'Alice'", "name" -> "ALICE").size should equal(1)
-        newAlice.destroy()
-
-        try {
-          NamedDB("MemberSpec") localTx {
-            implicit session =>
-              Member.create(
-                id = 999,
-                name = "Rollback",
-                description = Option("rollback test"),
-                birthday = Option(LocalDate.of(1980, 1, 2)),
-                createdAt = LocalDateTime.now)
-              Member.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(1)
-              throw new RuntimeException
-          }
-        } catch {
-          case e: Exception =>
-        }
-        Member.findBy("name = /*'name*/''", "name" -> "Rollback").size should equal(0)
+      } catch {
+        case e: Exception =>
+      }
+      Member
+        .findBy("name = /*'name*/''", "name" -> "Rollback")
+        .size should equal(0)
     }
   }
 
 }
-

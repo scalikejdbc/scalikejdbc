@@ -33,7 +33,9 @@ private[streams] object AsyncExecutor extends LogSupport {
   }
 
   private class AsyncExecutorBuiltWithExecutionContext(
-    override val executionContext: ExecutionContext) extends AsyncExecutor with ExecutionContextPreparable {
+    override val executionContext: ExecutionContext
+  ) extends AsyncExecutor
+    with ExecutionContextPreparable {
 
     override def execute(runnable: Runnable): Unit = {
       preparedExecutionContext().execute(runnable)

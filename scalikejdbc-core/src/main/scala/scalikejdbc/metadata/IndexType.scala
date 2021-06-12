@@ -17,9 +17,10 @@ object IndexType {
     value match {
       case DatabaseMetaData.tableIndexStatistic => tableIndexStatistic
       case DatabaseMetaData.tableIndexClustered => tableIndexClustered
-      case DatabaseMetaData.tableIndexHashed => tableIndexHashed
-      case DatabaseMetaData.tableIndexOther => tableIndexOther
-      case _ => tableIndexOther // if some JDBC driver doesn't support metadata API correctly
+      case DatabaseMetaData.tableIndexHashed    => tableIndexHashed
+      case DatabaseMetaData.tableIndexOther     => tableIndexOther
+      case _ =>
+        tableIndexOther // if some JDBC driver doesn't support metadata API correctly
     }
   }
 

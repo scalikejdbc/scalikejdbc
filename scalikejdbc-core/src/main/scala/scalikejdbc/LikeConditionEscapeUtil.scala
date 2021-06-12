@@ -20,8 +20,7 @@ case class LikeConditionEscapeUtil(escapeChar: String) {
 
 }
 
-object LikeConditionEscapeUtil
-  extends LikeConditionEscapeUtil("\\") {
+object LikeConditionEscapeUtil extends LikeConditionEscapeUtil("\\") {
 
   val DEFAULT_ESCAPE_CHAR = "\\"
 }

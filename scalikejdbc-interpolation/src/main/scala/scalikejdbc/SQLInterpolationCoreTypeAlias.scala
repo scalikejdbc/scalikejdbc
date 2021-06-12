@@ -16,4 +16,3 @@ trait SQLInterpolationCoreTypeAlias {
   type AsteriskProvider = scalikejdbc.interpolation.AsteriskProvider
 
 }
-

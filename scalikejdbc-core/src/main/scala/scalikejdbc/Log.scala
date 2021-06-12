@@ -18,10 +18,10 @@ private[scalikejdbc] class Log(logger: Logger) {
   def withLevel(level: String)(msg: => String, e: Throwable = null): Unit = {
     level match {
       case "debug" | "DEBUG" => if (e == null) debug(msg) else debug(msg, e)
-      case "info" | "INFO" => if (e == null) info(msg) else info(msg, e)
-      case "warn" | "WARN" => if (e == null) warn(msg) else warn(msg, e)
+      case "info" | "INFO"   => if (e == null) info(msg) else info(msg, e)
+      case "warn" | "WARN"   => if (e == null) warn(msg) else warn(msg, e)
       case "error" | "ERROR" => if (e == null) error(msg) else error(msg, e)
-      case _ => // nothing to do
+      case _                 => // nothing to do
     }
   }
 

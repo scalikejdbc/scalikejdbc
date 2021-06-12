@@ -8,10 +8,18 @@ class LikeConditionEscapeUtilSpec extends AnyFlatSpec with Matchers {
   behavior of "LikeConditionEscapeUtil"
 
   it should "be available as singleton" in {
-    LikeConditionEscapeUtil.escape("foo%aa_bbb\\ccc") should equal("foo\\%aa\\_bbb\\\\ccc")
-    LikeConditionEscapeUtil.beginsWith("foo%aa_bbb\\ccc") should equal("foo\\%aa\\_bbb\\\\ccc%")
-    LikeConditionEscapeUtil.endsWith("foo%aa_bbb\\ccc") should equal("%foo\\%aa\\_bbb\\\\ccc")
-    LikeConditionEscapeUtil.contains("foo%aa_bbb\\ccc") should equal("%foo\\%aa\\_bbb\\\\ccc%")
+    LikeConditionEscapeUtil.escape("foo%aa_bbb\\ccc") should equal(
+      "foo\\%aa\\_bbb\\\\ccc"
+    )
+    LikeConditionEscapeUtil.beginsWith("foo%aa_bbb\\ccc") should equal(
+      "foo\\%aa\\_bbb\\\\ccc%"
+    )
+    LikeConditionEscapeUtil.endsWith("foo%aa_bbb\\ccc") should equal(
+      "%foo\\%aa\\_bbb\\\\ccc"
+    )
+    LikeConditionEscapeUtil.contains("foo%aa_bbb\\ccc") should equal(
+      "%foo\\%aa\\_bbb\\\\ccc%"
+    )
   }
 
   it should "be available" in {
