@@ -4,9 +4,17 @@ val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.6", "2.12.14")
+crossScalaVersions := List("2.13.6", "2.12.14", "3.0.1-RC1")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
+scalacOptions ++= Seq("-Xlint", "-language:higherKinds,implicitConversions,postfixOps", "-deprecation", "-unchecked")
+
+scalacOptions ++= {
+  if (scalaBinaryVersion.value == "3") {
+    Seq("-Xignore-scala2-macros")
+  } else {
+    Nil
+  }
+}
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
@@ -36,4 +44,14 @@ Compile / scalikejdbcJDBCSettings := JDBCSettings(
     idColumn :: Nil
   )
   Seq(new scalikejdbc.mapper.CodeGenerator(table))
+}
+
+testFrameworks --= {
+  if (scalaBinaryVersion.value == "3") {
+    // specs2 does not support Scala 3
+    // TODO remove this setting when specs2 for Scala 3 released
+    Seq(TestFrameworks.Specs2)
+  } else {
+    Nil
+  }
 }

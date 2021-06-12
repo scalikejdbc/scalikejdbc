@@ -49,9 +49,17 @@ TaskKey[Unit]("createTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.6", "2.12.14")
+crossScalaVersions := List("2.13.6", "2.12.14", "3.0.1-RC1")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
+scalacOptions ++= Seq("-Xlint", "-language:higherKinds,implicitConversions,postfixOps", "-deprecation", "-unchecked")
+
+scalacOptions ++= {
+  if (scalaBinaryVersion.value == "3") {
+    Seq("-Xignore-scala2-macros")
+  } else {
+    Nil
+  }
+}
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"     %% "scalikejdbc"                      % scalikejdbcVersion,
@@ -63,7 +71,7 @@ libraryDependencies ++= Seq(
   "mysql"               %  "mysql-connector-java"             % System.getProperty("mysql.version"),
   "org.postgresql"      %  "postgresql"                       % System.getProperty("postgresql.version"),
   "org.scalatest"       %% "scalatest"                        % System.getProperty("scalatest.version") % "test",
-  "org.specs2"          %% "specs2-core"                      % System.getProperty("specs2.version") % "test"
+  "org.specs2"          %% "specs2-core"                      % System.getProperty("specs2.version") % "test" cross CrossVersion.for3Use2_13
 )
 
 TaskKey[Unit]("generateCodeForIssue339") := {
@@ -87,3 +95,13 @@ TaskKey[Unit]("generateCodeForIssue339") := {
 testResultLogger := TestResultLogger.Defaults.Main(
   printNoTests = TestResultLogger((_, _, _) => sys.error("invalid test name"))
 )
+
+testFrameworks --= {
+  if (scalaBinaryVersion.value == "3") {
+    // specs2 does not support Scala 3
+    // TODO remove this setting when specs2 for Scala 3 released
+    Seq(TestFrameworks.Specs2)
+  } else {
+    Nil
+  }
+}
