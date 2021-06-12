@@ -258,7 +258,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(imp
         }
           .mkString(comma + eol)
         s"""  def apply(${syntaxName}: SyntaxProvider[${className}])(rs: WrappedResultSet): ${className} = apply(${syntaxName}.resultName)(rs)
-        |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = new ${className}(
+        |  def apply(${syntaxName}: ResultName[${className}])(rs: WrappedResultSet): ${className} = ${className}(
         |${_interpolationMapper}
         |  )""".stripMargin + eol
       }
