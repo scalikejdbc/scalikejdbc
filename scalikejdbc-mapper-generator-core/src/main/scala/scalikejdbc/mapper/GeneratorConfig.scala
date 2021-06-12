@@ -13,7 +13,7 @@ case class GeneratorConfig(
   autoConstruct: Boolean = false,
   defaultAutoSession: Boolean = true,
   dateTimeClass: DateTimeClass = DateTimeClass.ZonedDateTime,
-  tableNameToClassName: String => String = GeneratorConfig.toCamelCase,
+  tableNameToClassName: String => String = GeneratorConfig.toCamelCaseCaps,
   columnNameToFieldName: String => String = GeneratorConfig.columnNameToFieldNameBasic andThen GeneratorConfig.addSuffixIfConflict("Column"),
   returnCollectionType: ReturnCollectionType = ReturnCollectionType.List,
   view: Boolean = false,
@@ -29,9 +29,10 @@ object GeneratorConfig {
     else s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1).toLowerCase(ENGLISH)
   }
 
-  private val toCamelCase: String => String = _.split("_").foldLeft("") {
+  def toCamelCaseCaps: String => String = _.split("_").foldLeft("") {
     (camelCaseString, part) =>
-      camelCaseString + toProperCase(part)
+      val newPart = if (part.nonEmpty && Character.isDigit(part.charAt(0))) s"_$part" else part
+      camelCaseString + toProperCase(newPart)
   }
 
   val reservedWords: Set[String] = Set(
@@ -62,7 +63,7 @@ object GeneratorConfig {
   }
 
   val lowerCamelCase: String => String =
-    GeneratorConfig.toCamelCase.andThen {
+    GeneratorConfig.toCamelCaseCaps.andThen {
       camelCase => s"${camelCase.head.toLower}${camelCase.tail}"
     }
 
@@ -71,7 +72,7 @@ object GeneratorConfig {
   }
 
   private val tableNameToSyntaxNameDefault: String => String = { tableName =>
-    val name = "[A-Z]".r.findAllIn(toCamelCase(tableName)).mkString.toLowerCase(ENGLISH)
+    val name = "[A-Z]".r.findAllIn(toCamelCaseCaps(tableName)).mkString.toLowerCase(ENGLISH)
     if (name == "rs" || name.isEmpty) "r" else name
   }
 }
