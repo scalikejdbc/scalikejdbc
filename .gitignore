@@ -70,3 +70,4 @@ sandbox/db
 .metals/
 project/metals.sbt
 .bsp/
+.vscode/
