@@ -26,12 +26,30 @@ TaskKey[Unit]("createTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
+scalacOptions ++= Seq("-Xlint", "-language:higherKinds,implicitConversions,postfixOps", "-deprecation", "-unchecked")
+
+scalacOptions ++= {
+  if (scalaBinaryVersion.value == "3") {
+    Seq("-Xignore-scala2-macros")
+  } else {
+    Nil
+  }
+}
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"     %% "scalikejdbc"              % scalikejdbcVersion,
   "org.scalikejdbc"     %% "scalikejdbc-test"         % scalikejdbcVersion % "test",
   "org.slf4j"           %  "slf4j-simple"             % System.getProperty("slf4j.version"),
   "org.scalatest"       %% "scalatest"                % System.getProperty("scalatest.version") % "test",
-  "org.specs2"          %% "specs2-core"              % System.getProperty("specs2.version") % "test"
+  "org.specs2"          %% "specs2-core"              % System.getProperty("specs2.version") % "test" cross CrossVersion.for3Use2_13
 )
+
+testFrameworks --= {
+  if (scalaBinaryVersion.value == "3") {
+    // specs2 does not support Scala 3
+    // TODO remove this setting when specs2 for Scala 3 released
+    Seq(TestFrameworks.Specs2)
+  } else {
+    Nil
+  }
+}

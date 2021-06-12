@@ -1059,8 +1059,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |    "create new record"            ! autoRollback().create ^
           |    "save a record"                ! autoRollback().save ^
           |    "destroy a record"             ! autoRollback().destroy ^
-          |    "perform batch insert"         ! autoRollback().batchInsert ^
-          |                                   end
+          |    "perform batch insert"         ! autoRollback().batchInsert ^ end
           |
           |  case class autoRollback() extends AutoRollback {
           |    %syntaxObject%

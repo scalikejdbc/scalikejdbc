@@ -7,6 +7,8 @@ sbt -v \
   publishLocal \
   SetScala213 \
   "project root213" \
+  publishLocal \
+  SetScala3 \
   publishLocal
 
 sbt -v \
