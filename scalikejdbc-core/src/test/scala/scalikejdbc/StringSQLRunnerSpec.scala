@@ -34,13 +34,18 @@ class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
       }
 
       // should be found
-      ("select name from " + tableName + " where id = 3").asList[String] should equal(List("Ben"))
-      ("select name from " + tableName + " where id = 3").asOption[String] should equal(Some("Ben"))
-      ("select name from " + tableName + " where id = 3").as[String] should equal("Ben")
+      ("select name from " + tableName + " where id = 3")
+        .asList[String] should equal(List("Ben"))
+      ("select name from " + tableName + " where id = 3")
+        .asOption[String] should equal(Some("Ben"))
+      ("select name from " + tableName + " where id = 3")
+        .as[String] should equal("Ben")
 
       // should not be found
-      ("select name from " + tableName + " where id = 999").asList[String] should equal(Nil)
-      ("select name from " + tableName + " where id = 999").asOption[String] should equal(None)
+      ("select name from " + tableName + " where id = 999")
+        .asList[String] should equal(Nil)
+      ("select name from " + tableName + " where id = 999")
+        .asOption[String] should equal(None)
       try {
         ("select name from " + tableName + " where id = 999").as[String]
         fail("NoSuchElementException is expected")

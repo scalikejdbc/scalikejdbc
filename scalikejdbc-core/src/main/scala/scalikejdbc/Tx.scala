@@ -10,7 +10,10 @@ import scala.util.control.NonFatal
  * DB Transaction abstraction.
  * @param conn connection
  */
-class Tx(val conn: Connection, isolationLevel: IsolationLevel = IsolationLevel.Default) {
+class Tx(
+  val conn: Connection,
+  isolationLevel: IsolationLevel = IsolationLevel.Default
+) {
 
   private[this] def setTransactionIsolation(): Unit = {
     // Set isolation level for the transaction
@@ -43,9 +46,11 @@ class Tx(val conn: Connection, isolationLevel: IsolationLevel = IsolationLevel.D
    * Commits this transaction.
    */
   def commit(): Unit = {
-    try conn.commit() catch {
+    try conn.commit()
+    catch {
       case NonFatal(e) =>
-        try conn.rollback() catch {
+        try conn.rollback()
+        catch {
           case NonFatal(e2) => e.addSuppressed(e2)
         }
         throw e
@@ -58,7 +63,8 @@ class Tx(val conn: Connection, isolationLevel: IsolationLevel = IsolationLevel.D
    * Since connections from JTA managed DataSource should not be used as-is, we don't care autoCommit/readOnly props.
    * @return active
    */
-  def isActive(): Boolean = GlobalSettings.jtaDataSourceCompatible || !conn.getAutoCommit
+  def isActive(): Boolean =
+    GlobalSettings.jtaDataSourceCompatible || !conn.getAutoCommit
 
   /**
    * Rolls this transaction back.
@@ -83,4 +89,3 @@ class Tx(val conn: Connection, isolationLevel: IsolationLevel = IsolationLevel.D
   }
 
 }
-

@@ -24,4 +24,5 @@ case class Index(
   ascOrDesc: Option[String],
   cardinality: Option[Long],
   pages: Option[Long],
-  filterCondition: Option[String])
+  filterCondition: Option[String]
+)

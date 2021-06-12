@@ -13,7 +13,8 @@ object LoanPattern extends LoanPattern
  */
 trait LoanPattern {
 
-  private[scalikejdbc] val loanPatternLogger = LoggerFactory.getLogger(classOf[LoanPattern])
+  private[scalikejdbc] val loanPatternLogger =
+    LoggerFactory.getLogger(classOf[LoanPattern])
 
   type Closable = { def close(): Unit }
 
@@ -34,7 +35,9 @@ trait LoanPattern {
             case _ =>
               e
           }
-          loanPatternLogger.warn(s"Failed to close a resource (resource: ${resource.getClass().getName()} error: ${e2.getMessage})")
+          loanPatternLogger.warn(
+            s"Failed to close a resource (resource: ${resource.getClass().getName()} error: ${e2.getMessage})"
+          )
       }
     }
   }
@@ -43,7 +46,9 @@ trait LoanPattern {
    * Guarantees a Closeable resource will be closed after being passed to a block that takes
    * the resource as a parameter and returns a Future.
    */
-  def futureUsing[R <: Closable, A](resource: R)(f: R => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+  def futureUsing[R <: Closable, A](
+    resource: R
+  )(f: R => Future[A])(implicit ec: ExecutionContext): Future[A] = {
     f(resource) andThen { case _ => resource.close() } // close no matter what
   }
 

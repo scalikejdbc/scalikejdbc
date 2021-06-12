@@ -6,7 +6,9 @@ import scala.language.implicitConversions
  * Implicit conversions for date time values.
  */
 trait JavaUtilDateConverterImplicits {
-  implicit def toJavaUtilDateConverter(value: java.util.Date): JavaUtilDateConverter =
+  implicit def toJavaUtilDateConverter(
+    value: java.util.Date
+  ): JavaUtilDateConverter =
     new JavaUtilDateConverter(value)
 }
 

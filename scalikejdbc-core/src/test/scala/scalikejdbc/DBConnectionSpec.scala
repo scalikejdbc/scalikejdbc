@@ -11,9 +11,11 @@ class DBConnectionSpec extends AnyFlatSpec with Matchers {
 
   "#begin" should "simply work with mocked java.sql.Connection objects" in {
     val mockConn = mock(classOf[java.sql.Connection])
-    when(mockConn.setAutoCommit(false)).thenThrow(new IllegalStateException("Failed to start a transaction"))
+    when(mockConn.setAutoCommit(false))
+      .thenThrow(new IllegalStateException("Failed to start a transaction"))
     val conn = new DBConnection {
-      override protected[this] val settingsProvider: SettingsProvider = SettingsProvider.default
+      override protected[this] val settingsProvider: SettingsProvider =
+        SettingsProvider.default
       override def conn: Connection = mockConn
     }
     try {
@@ -30,9 +32,11 @@ class DBConnectionSpec extends AnyFlatSpec with Matchers {
 
   it should "close the resource when an exception is thrown in #begin" in {
     val mockConn = mock(classOf[java.sql.Connection])
-    when(mockConn.setAutoCommit(false)).thenThrow(new IllegalStateException("Failed to start a transaction"))
+    when(mockConn.setAutoCommit(false))
+      .thenThrow(new IllegalStateException("Failed to start a transaction"))
     val conn = new DBConnection {
-      override protected[this] val settingsProvider: SettingsProvider = SettingsProvider.default
+      override protected[this] val settingsProvider: SettingsProvider =
+        SettingsProvider.default
       override def conn: Connection = mockConn
     }
     try {

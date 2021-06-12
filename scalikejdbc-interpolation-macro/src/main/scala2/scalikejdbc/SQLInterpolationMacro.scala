@@ -12,19 +12,30 @@ object SQLInterpolationMacro {
 
     val nameOpt: Option[String] = name match {
       case Literal(Constant(value: String)) => Some(value)
-      case _ => None
+      case _                                => None
     }
 
     // primary constructor args of type E
-    val expectedNames = c.weakTypeOf[E].decls.collectFirst {
-      case m: MethodSymbol if m.isPrimaryConstructor => m
-    }.map { const =>
-      const.paramLists.map { (symbols: List[Symbol]) => symbols.map(s => s.name.encodedName.toString.trim) }.flatten
-    }.getOrElse(Nil)
+    val expectedNames = c
+      .weakTypeOf[E]
+      .decls
+      .collectFirst {
+        case m: MethodSymbol if m.isPrimaryConstructor => m
+      }
+      .map { const =>
+        const.paramLists.map { (symbols: List[Symbol]) =>
+          symbols.map(s => s.name.encodedName.toString.trim)
+        }.flatten
+      }
+      .getOrElse(Nil)
 
     nameOpt.foreach { _name =>
       if (expectedNames.nonEmpty && !expectedNames.contains(_name)) {
-        c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+        c.error(
+          c.enclosingPosition,
+          s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames
+            .mkString("#", ", #", "")}."
+        )
       }
     }
 
@@ -32,4 +43,3 @@ object SQLInterpolationMacro {
   }
 
 }
-

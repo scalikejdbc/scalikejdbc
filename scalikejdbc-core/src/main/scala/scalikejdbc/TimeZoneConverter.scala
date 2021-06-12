@@ -16,11 +16,13 @@ class TimeZoneConverter(fromTimeZone: TimeZone, toTimeZone: TimeZone) {
   private[this] def convertInternal(source: Timestamp): Timestamp = {
     val fromCal = Calendar.getInstance(fromTimeZone)
     fromCal.setTime(source)
-    val fromOffset = fromCal.get(Calendar.ZONE_OFFSET) + fromCal.get(Calendar.DST_OFFSET)
+    val fromOffset =
+      fromCal.get(Calendar.ZONE_OFFSET) + fromCal.get(Calendar.DST_OFFSET)
 
     val toCal = Calendar.getInstance(toTimeZone)
     toCal.setTime(source)
-    val toOffset = toCal.get(Calendar.ZONE_OFFSET) + toCal.get(Calendar.DST_OFFSET)
+    val toOffset =
+      toCal.get(Calendar.ZONE_OFFSET) + toCal.get(Calendar.DST_OFFSET)
 
     val delta = toOffset - fromOffset
 
@@ -33,14 +35,22 @@ class TimeZoneConverter(fromTimeZone: TimeZone, toTimeZone: TimeZone) {
 
 object TimeZoneConverter {
   class TimeZoneConverterBuilder(fromTimeZone: TimeZone) {
-    private[this] val converterCache: TrieMap[TimeZone, TimeZoneConverter] = TrieMap.empty
+    private[this] val converterCache: TrieMap[TimeZone, TimeZoneConverter] =
+      TrieMap.empty
 
     def to(toTimeZone: TimeZone): TimeZoneConverter =
-      converterCache.getOrElseUpdate(toTimeZone, new TimeZoneConverter(fromTimeZone, toTimeZone))
+      converterCache.getOrElseUpdate(
+        toTimeZone,
+        new TimeZoneConverter(fromTimeZone, toTimeZone)
+      )
   }
 
-  private[this] val builderCache: TrieMap[TimeZone, TimeZoneConverterBuilder] = TrieMap.empty
+  private[this] val builderCache: TrieMap[TimeZone, TimeZoneConverterBuilder] =
+    TrieMap.empty
 
   def from(timeZone: TimeZone): TimeZoneConverterBuilder =
-    builderCache.getOrElseUpdate(timeZone, new TimeZoneConverterBuilder(timeZone))
+    builderCache.getOrElseUpdate(
+      timeZone,
+      new TimeZoneConverterBuilder(timeZone)
+    )
 }

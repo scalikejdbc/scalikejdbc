@@ -9,6 +9,7 @@ trait ConnectionPoolFactory {
     url: String,
     user: String,
     password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()): ConnectionPool
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()
+  ): ConnectionPool
 
 }

@@ -8,61 +8,83 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
   behavior of "SQLTemplateParser"
 
   it should "parse a str select query" in {
-    val sql = "select * from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
+    val sql =
+      "select * from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    sqlWithPlaceHolders should equal("select * from user where id = ? and user_name = ?")
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal(
+      "select * from user where id = ? and user_name = ?"
+    )
   }
 
   it should "parse a str select query using double quart" in {
-    val sql = "select * from user where id = /* 'id */123 and user_name = /* 'userName */\"Alice\""
+    val sql =
+      "select * from user where id = /* 'id */123 and user_name = /* 'userName */\"Alice\""
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    sqlWithPlaceHolders should equal("select * from user where id = ? and user_name = ?")
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal(
+      "select * from user where id = ? and user_name = ?"
+    )
   }
 
   it should "parse an all capital str select query" in {
-    val sql = "SELECT * FROM USER WHERE ID = /* 'id */123 AND USER_NAME = /* 'userName */'Alice'"
+    val sql =
+      "SELECT * FROM USER WHERE ID = /* 'id */123 AND USER_NAME = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE ID = ? AND USER_NAME = ?")
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal(
+      "SELECT * FROM USER WHERE ID = ? AND USER_NAME = ?"
+    )
   }
 
   it should "parse a str select query with backtick quoted columns" in {
-    val sql = "SELECT * FROM USER WHERE `ID` = /* 'id */123 AND `USER_NAME` = /* 'userName */'Alice'"
+    val sql =
+      "SELECT * FROM USER WHERE `ID` = /* 'id */123 AND `USER_NAME` = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    sqlWithPlaceHolders should equal("SELECT * FROM USER WHERE `ID` = ? AND `USER_NAME` = ?")
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal(
+      "SELECT * FROM USER WHERE `ID` = ? AND `USER_NAME` = ?"
+    )
   }
 
   it should "parse an all capital str select query using functions" in {
-    val sql = "SELECT MAX(TEMP_F), MIN(TEMP_F), AVG(RAIN_I), ID, (TEMP_F-32)*5/(9+1) FROM STATS GROUP BY ID;"
+    val sql =
+      "SELECT MAX(TEMP_F), MIN(TEMP_F), AVG(RAIN_I), ID, (TEMP_F-32)*5/(9+1) FROM STATS GROUP BY ID;"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(0)
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(sql)
   }
 
   it should "parse a str select query with table name" in {
-    val sql = "select user.* from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
+    val sql =
+      "select user.* from user where id = /* 'id */123 and user_name = /* 'userName */'Alice'"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
-    sqlWithPlaceHolders should equal("select user.* from user where id = ? and user_name = ?")
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    sqlWithPlaceHolders should equal(
+      "select user.* from user where id = ? and user_name = ?"
+    )
   }
 
   it should "parse a str select query with other comments" in {
@@ -77,9 +99,11 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
     params.size should equal(2)
     params(0) should equal("id")
     params(1) should equal("userName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "select * from user where id = ? and user_name = ?")
+      "select * from user where id = ? and user_name = ?"
+    )
   }
 
   it should "parse a str contains >" in {
@@ -94,10 +118,12 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(1)
     params(0) should equal("groupName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
       "SELECT customer_state, COUNT(customer_id) As total FROM customers WHERE group = ? " +
-        "GROUP BY customer_state HAVING COUNT(customer_id) > 5;")
+        "GROUP BY customer_state HAVING COUNT(customer_id) > 5;"
+    )
   }
 
   it should "parse an insert SQL" in {
@@ -109,9 +135,11 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
     params.size should equal(2)
     params(0) should equal("customerId")
     params(1) should equal("customerName")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES(?, ?)")
+      "INSERT INTO customers(customer_id, customer_name) VALUES(?, ?)"
+    )
   }
 
   it should "parse an insert SQL without parameters" in {
@@ -121,9 +149,11 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(0)
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES('12345', 'GIS Experts')")
+      "INSERT INTO customers(customer_id, customer_name) VALUES('12345', 'GIS Experts')"
+    )
   }
 
   it should "parse an insert SQL without parameters using double quart" in {
@@ -133,9 +163,11 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
       """.stripMargin
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(0)
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "INSERT INTO customers(customer_id, customer_name) VALUES(\"12345\", \"GIS Experts\")")
+      "INSERT INTO customers(customer_id, customer_name) VALUES(\"12345\", \"GIS Experts\")"
+    )
   }
 
   it should "parse an update SQL" in {
@@ -155,24 +187,33 @@ class SQLTemplateParserSpec extends AnyFlatSpec with Matchers {
     params.size should equal(2)
     params(0) should equal("rating")
     params(1) should equal("orderDate")
-    val sqlWithPlaceHolders = SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
+    val sqlWithPlaceHolders =
+      SQLTemplateParser.convertToSQLWithPlaceHolders(sql)
     sqlWithPlaceHolders should equal(
-      "UPDATE customers SET rating = ? FROM orders WHERE orderdate > ? and orders.customer_id = customers.customer_id")
+      "UPDATE customers SET rating = ? FROM orders WHERE orderdate > ? and orders.customer_id = customers.customer_id"
+    )
   }
 
   it should "parse ddl" in {
-    val createTable = "create table user (id bigint auto_increment, name varchar(256), created_at timestamp)"
+    val createTable =
+      "create table user (id bigint auto_increment, name varchar(256), created_at timestamp)"
     SQLTemplateParser.extractAllParameters(createTable).size should equal(0)
-    SQLTemplateParser.convertToSQLWithPlaceHolders(createTable) should equal(createTable)
+    SQLTemplateParser.convertToSQLWithPlaceHolders(createTable) should equal(
+      createTable
+    )
     val dropTable = "drop table user"
     SQLTemplateParser.extractAllParameters(dropTable).size should equal(0)
-    SQLTemplateParser.convertToSQLWithPlaceHolders(dropTable) should equal(dropTable)
+    SQLTemplateParser.convertToSQLWithPlaceHolders(dropTable) should equal(
+      dropTable
+    )
   }
 
   it should "parse &&, || for MySQL" in {
-    val sql = "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = {id} && USER_RELATED_TO.relType = {relType} || foo = {bar}"
+    val sql =
+      "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = {id} && USER_RELATED_TO.relType = {relType} || foo = {bar}"
     SQLTemplateParser.extractAllParameters(sql).size should equal(3)
-    val expected = "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = ? && USER_RELATED_TO.relType = ? || foo = ?"
+    val expected =
+      "DELETE FROM USER_RELATED_TO Where USER_RELATED_TO.id = ? && USER_RELATED_TO.relType = ? || foo = ?"
     SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
   }
 
@@ -200,9 +241,11 @@ users"""
 
   // https://github.com/scalikejdbc/scalikejdbc/issues/434
   it should "support postgres type cast" in {
-    val sql = "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = {name}"
+    val sql =
+      "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = {name}"
     SQLTemplateParser.extractAllParameters(sql).size should equal(1)
-    val expected = "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = ?"
+    val expected =
+      "select name, to_char((to_timestamp(T.beforeEpoch) :: timestamp with time zone at time zone 'UTC' ), 'YYYY-MM-DD HH24:MI:SS tz') from user where name = ?"
     SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
   }
 

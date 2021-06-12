@@ -6,4 +6,3 @@ package scalikejdbc.config
 trait EnvPrefix {
   val env: Option[String]
 }
-

@@ -28,7 +28,8 @@ class FutureTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
     val tx = mock(classOf[Tx])
     when(tx.rollback()).thenThrow(rollbackException)
 
-    val result = futureTxBoundary[Int].finishTx(Future.failed(originException), tx)
+    val result =
+      futureTxBoundary[Int].finishTx(Future.failed(originException), tx)
     result.failed.futureValue should be(originException)
     result.failed.futureValue.getSuppressed should contain(rollbackException)
   }
@@ -37,7 +38,10 @@ class FutureTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
 
   it should "returns Failure when onClose() throws an exception" in {
     val exception = new RuntimeException
-    val result = futureTxBoundary[Int].closeConnection(Future.successful(1), () => throw exception)
+    val result = futureTxBoundary[Int].closeConnection(
+      Future.successful(1),
+      () => throw exception
+    )
     result.failed.futureValue should be(exception)
   }
 }

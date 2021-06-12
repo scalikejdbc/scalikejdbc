@@ -18,7 +18,8 @@ class DataSourceConnectionPoolSpec extends AnyFlatSpec with Matchers {
   it should "be close" in {
     val dataSource: DataSource = mock(classOf[DataSource])
     val dataSourceCloser = DummyDataSourceCloser()
-    val instance = new DataSourceConnectionPool(dataSource, closer = dataSourceCloser)
+    val instance =
+      new DataSourceConnectionPool(dataSource, closer = dataSourceCloser)
     ConnectionPool.add("close", instance)
     Thread.sleep(100L)
     ConnectionPool.close("close")

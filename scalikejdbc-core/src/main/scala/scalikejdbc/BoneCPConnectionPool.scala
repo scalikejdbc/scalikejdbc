@@ -27,8 +27,8 @@ class BoneCPConnectionPool(
   override val url: String,
   override val user: String,
   password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
-  extends ConnectionPool(url, user, password, settings) {
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
+) extends ConnectionPool(url, user, password, settings) {
 
   import com.jolbox.bonecp.BoneCPDataSource
 

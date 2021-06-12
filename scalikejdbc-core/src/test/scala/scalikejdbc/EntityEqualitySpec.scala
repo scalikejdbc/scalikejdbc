@@ -83,7 +83,9 @@ class EntityEqualitySpec extends AnyFlatSpec with Matchers {
     (c1 == c2 && c2 == c1) should be(true)
   }
 
-  class Person(val id: Long) extends EntityEquality { override val entityIdentity = id }
+  class Person(val id: Long) extends EntityEquality {
+    override val entityIdentity = id
+  }
   class Member(override val id: Long) extends Person(id)
 
   it should "works as comment" in {

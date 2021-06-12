@@ -16,6 +16,5 @@ jobs:
     - uses: coursier/cache-action@v6
     - run: rm project/sbt-pgp.sbt
     - run: rm project/sbt-updates.sbt
-    - run: git add . --all
     - shell: bash
       run: ./test.sh

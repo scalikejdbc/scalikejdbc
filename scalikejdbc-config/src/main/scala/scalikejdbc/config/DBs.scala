@@ -34,7 +34,8 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
 /**
  * Default DB setup executor
  */
-object DBs extends DBs
+object DBs
+  extends DBs
   with TypesafeConfigReader
   with StandardTypesafeConfig
   with NoEnvPrefix

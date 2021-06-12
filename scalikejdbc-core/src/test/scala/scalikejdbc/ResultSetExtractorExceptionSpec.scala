@@ -15,4 +15,3 @@ class ResultSetExtractorExceptionSpec extends AnyFlatSpec with Matchers {
   }
 
 }
-

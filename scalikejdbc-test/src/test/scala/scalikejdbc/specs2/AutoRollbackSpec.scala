@@ -5,7 +5,10 @@ import scalikejdbc._
 import org.joda.time.DateTime
 import unit._
 
-class AutoRollbackSpec extends Specification with DBSettings with PreparingTables {
+class AutoRollbackSpec
+  extends Specification
+  with DBSettings
+  with PreparingTables {
 
   def is =
     args(sequential = true) ^
@@ -33,10 +36,10 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   }
 
   case class autoRollback() extends AutoRollback {
-    def beforeTest = this{
+    def beforeTest = this {
       Member.count() must_== (0)
     }
-    def afterTest = this{
+    def afterTest = this {
       // all insertions should be rolled back
       Member.count() must_== (0)
     }
@@ -44,11 +47,17 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
 
   case class autoRollbackWithFixture() extends AutoRollback {
     override def fixture(implicit session: DBSession): Unit = {
-      SQL("insert into members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-      SQL("insert into members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+      SQL("insert into members values (?, ?, ?)")
+        .bind(1, "Alice", DateTime.now)
+        .update
+        .apply()
+      SQL("insert into members values (?, ?, ?)")
+        .bind(2, "Bob", DateTime.now)
+        .update
+        .apply()
     }
 
-    def shouldBeRolledBack = this{
+    def shouldBeRolledBack = this {
       // MemberAutoRollbackWithFixture insert 2 records
       Member.count() must_== (2)
       Member.create(3, "Chris")
@@ -73,11 +82,11 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   case class db2AutoRollback() extends AutoRollback {
     override def db() = NamedDB("db2").toDB()
 
-    def beforeTest = this{
+    def beforeTest = this {
       Member2.count() must_== (0)
     }
 
-    def afterTest = this{
+    def afterTest = this {
       // all insertions should be rolled back
       Member2.count() must_== (0)
     }
@@ -87,11 +96,17 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
     override def db() = NamedDB("db2").toDB()
 
     override def fixture(implicit session: DBSession): Unit = {
-      SQL("insert into members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-      SQL("insert into members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+      SQL("insert into members2 values (?, ?, ?)")
+        .bind(1, "Alice", DateTime.now)
+        .update
+        .apply()
+      SQL("insert into members2 values (?, ?, ?)")
+        .bind(2, "Bob", DateTime.now)
+        .update
+        .apply()
     }
 
-    def test = this{
+    def test = this {
       // db2AutoRollbackWithFixture insert 2 records
       Member2.count() must_== (2)
       Member2.create(3, "Chris")
@@ -100,4 +115,3 @@ class AutoRollbackSpec extends Specification with DBSettings with PreparingTable
   }
 
 }
-
