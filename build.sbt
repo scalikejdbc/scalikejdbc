@@ -45,17 +45,6 @@ lazy val baseSettings = Def.settings(
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   crossScalaVersions := Seq(Scala212, Scala213, Scala3),
-  Seq(Compile, Test).map { x =>
-    (x / unmanagedSourceDirectories) += {
-      val dir = Defaults.nameForSrc(x.name)
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, _)) =>
-          baseDirectory.value / "src" / "scala2" / dir
-        case Some((3, _)) =>
-          baseDirectory.value / "src" / "scala3" / dir
-      }
-    }
-  },
   allDependencies := {
     val values = allDependencies.value
     // workaround for
@@ -92,17 +81,6 @@ lazy val baseSettings = Def.settings(
   addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
   addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
   addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
-  Seq(Compile, Test).map { s =>
-    s / unmanagedSourceDirectories += {
-      val base = baseDirectory.value / "src"
-      val dir = base / Defaults.nameForSrc(s.name)
-      if (isScala3.value) {
-        dir / "scala3"
-      } else {
-        dir / "scala2"
-      }
-    }
-  },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
     if (isScala3.value) {
