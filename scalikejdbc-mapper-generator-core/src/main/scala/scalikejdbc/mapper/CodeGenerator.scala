@@ -2,6 +2,7 @@ package scalikejdbc.mapper
 
 import scalikejdbc._
 import scala.language.implicitConversions
+import scala.language.postfixOps
 
 /**
  * Active Record like template generator
