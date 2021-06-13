@@ -24,8 +24,7 @@ package scalikejdbc.specs2
  * class MemberSpec extends Specification { def is =
  *
  *   "Member should create a new record" ! autoRollback().create ^
- *   "LegacyAccount should create a new record" ! db2AutoRollback().create
- *   end
+ *   "LegacyAccount should create a new record" ! db2AutoRollback().create ^ end
  *
  *   case class autoRollback() extends AutoRollback {
  *     def create = this {
