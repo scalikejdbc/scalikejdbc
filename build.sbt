@@ -88,7 +88,6 @@ lazy val baseSettings = Def.settings(
         "-language:higherKinds,implicitConversions",
         "-source",
         "3.0-migration",
-        "-Xignore-scala2-macros"
       )
     } else {
       Seq(
@@ -327,6 +326,13 @@ lazy val scalikejdbcTest = Project(
   baseSettings,
   mimaSettings,
   name := "scalikejdbc-test",
+  Test / scalacOptions ++= {
+    if (isScala3.value) {
+      Seq("-Xignore-scala2-macros")
+    } else {
+      Nil
+    }
+  },
   libraryDependencies ++= {
     Seq(
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
