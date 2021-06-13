@@ -6,10 +6,10 @@ object EntityUtil {
 
   def constructorParams[T](
     excludes: Expr[Seq[String]]
-  )(using qoutes: Quotes)(using Type[T]): List[
+  )(using quotes: Quotes)(using Type[T]): List[
     (String, quotes.reflect.TypeTree, Boolean, Option[quotes.reflect.Ref])
   ] = {
-    import qoutes.reflect._
+    import quotes.reflect._
     val sym = TypeTree.of[T].symbol
     val primaryConstructor = sym.primaryConstructor
     if (primaryConstructor.isNoSymbol) {
