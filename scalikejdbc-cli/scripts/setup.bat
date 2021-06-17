@@ -127,7 +127,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.34.0",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.2",
 >>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.48",
->>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "9.4.1212"
+>>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "42.2.22"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
