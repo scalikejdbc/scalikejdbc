@@ -118,6 +118,7 @@ lazy val scala213projects = List(
   scalikejdbcLibrary,
   scalikejdbcInterpolationMacro,
   scalikejdbcInterpolation,
+  scalikejdbcOrm,
   scalikejdbcMapperGeneratorCore,
   scalikejdbcTest,
   scalikejdbcConfig,
@@ -259,6 +260,31 @@ lazy val scalikejdbcInterpolation = Project(
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
   },
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
+
+// scalikejdbc-orm
+lazy val scalikejdbcOrm = Project(
+  id = "orm",
+  base = file("scalikejdbc-orm")
+).settings(
+  baseSettings,
+  mimaSettings,
+  name := "scalikejdbc-orm",
+  libraryDependencies ++= {
+    Seq(
+      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+      "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
+    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+  },
+).dependsOn(
+  scalikejdbcCore,
+  scalikejdbcInterpolation,
+  scalikejdbcInterpolationMacro,
+  scalikejdbcSyntaxSupportMacro,
+  scalikejdbcConfig,
+  scalikejdbcJodaTime,
+  scalikejdbcTest % "test"
+)
 
 // scalikejdbc-mapper-generator-core
 // core library for mapper-generator
