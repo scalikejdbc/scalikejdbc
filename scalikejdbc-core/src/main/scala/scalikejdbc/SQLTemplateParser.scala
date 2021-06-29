@@ -137,6 +137,6 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
   // square brackets are allowed in T-SQL
   // colon are allowed for postgres type cast
   private def token: Parser[String] =
-    "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
+    "(?U)[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
 
 }
