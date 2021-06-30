@@ -254,6 +254,6 @@ users"""
     val sql = "SELECT 名前 FROM ユーザ WHERE user_id = {id})"
     val params = SQLTemplateParser.extractAllParameters(sql)
     params.size should equal(1)
-    params.head should equal('id)
+    params.head should equal("id")
   }
 }
