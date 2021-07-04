@@ -1,7 +1,9 @@
 package scalikejdbc
+
 import scala.quoted._
 import scalikejdbc.{ ParameterBinderFactory, ParameterBinder }
 import language.`3.0`
+
 object autoNamedValues {
 
   def apply_impl[E](
