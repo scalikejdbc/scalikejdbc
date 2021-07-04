@@ -9,6 +9,7 @@ Thanks for all the contributors for this release :+1:
 * @myazinn added `getOpt` method to `WrappedResultSet` for more convenience!
 * @dieselmat improved the mapper-generator to support more table name patterns like `TABLE_1_2_3`!
 * @capacman pointed "Working with IO monads" document issue and @matil019 resolved the issue in both the document and code examples!
+* @osiire enabled non-ascii character support in SQL templates
 
 Refer to [this release's GitHub milestone](https://github.com/scalikejdbc/scalikejdbc/milestone/44?closed=1) for all the pull requests by awesome contributors!
 
