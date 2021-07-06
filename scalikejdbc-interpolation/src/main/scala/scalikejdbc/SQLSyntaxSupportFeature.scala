@@ -345,7 +345,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     /**
      * Delimiter for alias names in SQL.
      */
-    val delimiterForResultName: String
+    def delimiterForResultName: String
 
     /**
      * True if you need to convert field names to snake_case column names in SQL.

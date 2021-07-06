@@ -32,7 +32,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
 
   private[scalikejdbc] val conn: Connection
 
-  private[scalikejdbc] val connectionAttributes: DBConnectionAttributes
+  private[scalikejdbc] def connectionAttributes: DBConnectionAttributes
 
   /**
    * Returns current transaction if exists.
