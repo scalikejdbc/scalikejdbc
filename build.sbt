@@ -45,19 +45,6 @@ lazy val baseSettings = Def.settings(
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   crossScalaVersions := Seq(Scala212, Scala213, Scala3),
-  allDependencies := {
-    val values = allDependencies.value
-    // workaround for
-    // https://twitter.com/olafurpg/status/1346777651550285824
-    // "Modules were resolved with conflicting cross-version suffixes"
-    // "   org.scala-lang.modules:scala-xml _3.0.0-RC2, _2.13"
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) =>
-        values.map(_.exclude("org.scala-lang.modules", "scala-xml_2.13"))
-      case _ =>
-        values
-    }
-  },
   resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
@@ -340,15 +327,6 @@ lazy val scalikejdbcTest = Project(
       "org.scalatest" %% "scalatest-core" % scalatestVersion.value % "provided",
       "org.specs2" %% "specs2-core" % specs2Version.value % "provided" cross CrossVersion.for3Use2_13
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
-  },
-  libraryDependencies := {
-    if (isScala3.value) {
-      libraryDependencies.value.map(
-        _.exclude("org.scala-lang.modules", "scala-parser-combinators_2.13")
-      )
-    } else {
-      libraryDependencies.value
-    }
   },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
 
