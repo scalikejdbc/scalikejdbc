@@ -205,7 +205,7 @@ lazy val scalikejdbcCore = Project(
       "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
       "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
       // scope: test
-      "com.zaxxer" % "HikariCP" % "4.0.3" % "test",
+      "com.zaxxer" % "HikariCP" % "5.0.0" % "test",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
       "org.hibernate" % "hibernate-core" % _hibernateVersion % "test",
       "org.mockito" % "mockito-core" % mockitoVersion % "test"
