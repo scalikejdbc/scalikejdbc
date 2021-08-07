@@ -75,7 +75,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
     )
 
     // execute SQL directly
-    MemberSQLTemplate.find().map(m => Member.delete(m))
+    MemberSQLTemplate.find().foreach(m => Member.delete(m))
     MemberSQLTemplate.create().id should equal(123)
     MemberSQLTemplate.find().isDefined should be(true)
     MemberSQLTemplate.countAll() should equal(1)

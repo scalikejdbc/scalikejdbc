@@ -243,7 +243,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   it should "work fine for all tables defined above" in {
     val allTables = Model(url, username, password).allTables(null)
     allTables should have size 5
-    allTables.map { table =>
+    allTables.foreach { table =>
       val generator = new CodeGenerator(table)(
         GeneratorConfig(srcDir = srcDir, packageName = "com.example.alltables")
       )
