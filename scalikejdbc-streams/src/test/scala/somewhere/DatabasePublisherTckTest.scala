@@ -70,12 +70,10 @@ class DatabasePublisherTckTest(
     optionalActivePublisherTest(
       0,
       true,
-      new PublisherTestRun[User] {
-        override def run(pub: Publisher[User]): Unit = {
-          val sub = env.newManualSubscriber(pub)
-          sub.expectCompletion()
-          sub.expectNone()
-        }
+      (pub: Publisher[User]) => {
+        val sub = env.newManualSubscriber(pub)
+        sub.expectCompletion()
+        sub.expectNone()
       }
     )
   }
@@ -98,43 +96,40 @@ class DatabasePublisherTckTest(
     activePublisherTest(
       5,
       false,
-      new PublisherTestRun[User] {
-        @throws[InterruptedException]
-        def run(pub: Publisher[User]) = {
-          val sub = env.newManualSubscriber(pub)
-          sub.expectNone(
-            String.format(
-              "Publisher %s produced value before the first `request`: ",
-              pub
-            )
+      (pub: Publisher[User]) => {
+        val sub = env.newManualSubscriber(pub)
+        sub.expectNone(
+          String.format(
+            "Publisher %s produced value before the first `request`: ",
+            pub
           )
-          sub.request(1)
-          sub.nextElement(
-            String.format(
-              "Publisher %s produced no element after first `request`",
-              pub
-            )
+        )
+        sub.request(1)
+        sub.nextElement(
+          String.format(
+            "Publisher %s produced no element after first `request`",
+            pub
           )
-          sub.expectNone(
-            String.format("Publisher %s produced unrequested: ", pub)
+        )
+        sub.expectNone(
+          String.format("Publisher %s produced unrequested: ", pub)
+        )
+        sub.request(1)
+        sub.request(2)
+        sub.nextElements(
+          3,
+          env.defaultTimeoutMillis,
+          String.format(
+            "Publisher %s produced less than 3 elements after two respective `request` calls",
+            pub
           )
-          sub.request(1)
-          sub.request(2)
-          sub.nextElements(
-            3,
-            env.defaultTimeoutMillis,
-            String.format(
-              "Publisher %s produced less than 3 elements after two respective `request` calls",
-              pub
-            )
-          )
-          sub.expectNone(
-            String.format("Publisher %sproduced unrequested ", pub)
-          )
+        )
+        sub.expectNone(
+          String.format("Publisher %sproduced unrequested ", pub)
+        )
 
-          // clean up for Connection release
-          sub.cancel()
-        }
+        // clean up for Connection release
+        sub.cancel()
       }
     )
   }
@@ -146,17 +141,14 @@ class DatabasePublisherTckTest(
     optionalActivePublisherTest(
       1,
       false,
-      new PublisherTestRun[User] {
-        @throws[Throwable]
-        override def run(pub: Publisher[User]): Unit = {
-          val sub1 = env.newManualSubscriber(pub)
-          val sub2 = env.newManualSubscriber(pub)
-          env.verifyNoAsyncErrors()
+      (pub: Publisher[User]) => {
+        val sub1 = env.newManualSubscriber(pub)
+        val sub2 = env.newManualSubscriber(pub)
+        env.verifyNoAsyncErrors()
 
-          // clean up for Connection release
-          sub1.cancel()
-          sub2.cancel()
-        }
+        // clean up for Connection release
+        sub1.cancel()
+        sub2.cancel()
       }
     )
   }
