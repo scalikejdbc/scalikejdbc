@@ -138,7 +138,7 @@ class DatabasePublisherSpec
     publisher.subscribe(subscriber)
     consumedCountPromise.future
       .map(count =>
-        assert(count == totalRows && passedStreamReadySwitcher.get() == true)
+        assert(count == totalRows && passedStreamReadySwitcher.get())
       )
   }
 
