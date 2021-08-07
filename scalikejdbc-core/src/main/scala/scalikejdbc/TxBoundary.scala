@@ -33,12 +33,11 @@ object TxBoundary {
    */
   object Exception {
 
-    implicit def exceptionTxBoundary[A]: TxBoundary[A] = new TxBoundary[A] {
-      def finishTx(result: A, tx: Tx): A = {
+    implicit def exceptionTxBoundary[A]: TxBoundary[A] = (result: A, tx: Tx) =>
+      {
         tx.commit()
         result
       }
-    }
   }
 
   /** This class will tell library users about missing implicit value by compilation error with the explanatory method name. */
@@ -113,14 +112,12 @@ object TxBoundary {
   object Either {
 
     implicit def eitherTxBoundary[L, R]: TxBoundary[Either[L, R]] =
-      new TxBoundary[Either[L, R]] {
-        def finishTx(result: Either[L, R], tx: Tx): Either[L, R] = {
-          result match {
-            case Right(_) => tx.commit()
-            case Left(_)  => tx.rollback()
-          }
-          result
+      (result: Either[L, R], tx: Tx) => {
+        result match {
+          case Right(_) => tx.commit()
+          case Left(_)  => tx.rollback()
         }
+        result
       }
   }
 
