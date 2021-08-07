@@ -23,9 +23,9 @@ object SQLInterpolationMacro {
         case m: MethodSymbol if m.isPrimaryConstructor => m
       }
       .map { const =>
-        const.paramLists.map { (symbols: List[Symbol]) =>
+        const.paramLists.flatMap { (symbols: List[Symbol]) =>
           symbols.map(s => s.name.encodedName.toString.trim)
-        }.flatten
+        }
       }
       .getOrElse(Nil)
 
