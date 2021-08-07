@@ -33,11 +33,9 @@ trait ParameterBinderFactory[A] { self =>
   def apply(value: A): ParameterBinderWithValue
 
   def contramap[B](g: B => A): ParameterBinderFactory[B] =
-    new ParameterBinderFactory[B] {
-      def apply(value: B): ParameterBinderWithValue = {
-        if (value == null) ParameterBinder.NullParameterBinder
-        else ContramappedParameterBinder(value, self(g(value)))
-      }
+    (value: B) => {
+      if (value == null) ParameterBinder.NullParameterBinder
+      else ContramappedParameterBinder(value, self(g(value)))
     }
 
 }
@@ -47,11 +45,9 @@ object ParameterBinderFactory
 
   def apply[A](
     f: A => (PreparedStatement, Int) => Unit
-  ): ParameterBinderFactory[A] = new ParameterBinderFactory[A] {
-    def apply(value: A): ParameterBinderWithValue = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else ParameterBinder(value, f(value))
-    }
+  ): ParameterBinderFactory[A] = (value: A) => {
+    if (value == null) ParameterBinder.NullParameterBinder
+    else ParameterBinder(value, f(value))
   }
 
   implicit val longParameterBinderFactory: ParameterBinderFactory[Long] =
@@ -142,30 +138,22 @@ object ParameterBinderFactory
   implicit val calendarParameterBinderFactory
     : ParameterBinderFactory[java.util.Calendar] = Binders.javaUtilCalendar
   implicit val nullParameterBinderFactory: ParameterBinderFactory[Null] =
-    new ParameterBinderFactory[Null] {
-      def apply(value: Null) = ParameterBinder.NullParameterBinder
-    }
+    (value: Null) => ParameterBinder.NullParameterBinder
   implicit val noneParameterBinderFactory: ParameterBinderFactory[None.type] =
-    new ParameterBinderFactory[None.type] {
-      def apply(value: None.type) = ParameterBinder.NullParameterBinder
-    }
+    (value: None.type) => ParameterBinder.NullParameterBinder
   implicit val sqlSyntaxParameterBinderFactory
     : ParameterBinderFactory[SQLSyntax] =
-    new ParameterBinderFactory[SQLSyntax] {
-      def apply(value: SQLSyntax) = SQLSyntaxParameterBinder(value)
-    }
+    (value: SQLSyntax) => SQLSyntaxParameterBinder(value)
 
   implicit val optionalSqlSyntaxParameterBinderFactory
     : ParameterBinderFactory[Option[SQLSyntax]] =
-    new ParameterBinderFactory[Option[SQLSyntax]] {
-      def apply(value: Option[SQLSyntax]): ParameterBinderWithValue = {
-        val result = value match {
-          case null         => SQLSyntaxParameterBinder(null)
-          case None         => SQLSyntaxParameterBinder(SQLSyntax.empty)
-          case Some(syntax) => SQLSyntaxParameterBinder(syntax)
-        }
-        ContramappedParameterBinder(value, result)
+    (value: Option[SQLSyntax]) => {
+      val result = value match {
+        case null         => SQLSyntaxParameterBinder(null)
+        case None         => SQLSyntaxParameterBinder(SQLSyntax.empty)
+        case Some(syntax) => SQLSyntaxParameterBinder(syntax)
       }
+      ContramappedParameterBinder(value, result)
     }
 
 }
@@ -174,17 +162,15 @@ sealed abstract class LowPriorityImplicitsParameterBinderFactory1 {
 
   implicit def optionalParameterBinderFactory[A](implicit
     ev: ParameterBinderFactory[A]
-  ): ParameterBinderFactory[Option[A]] = new ParameterBinderFactory[Option[A]] {
-    def apply(value: Option[A]): ParameterBinderWithValue = {
-      if (value == null) ParameterBinder.NullParameterBinder
-      else if (ev == asisParameterBinderFactory) AsIsParameterBinder(value)
-      else
-        value.fold[ParameterBinderWithValue](
-          ParameterBinder.NullParameterBinder
-        ) { v =>
-          ContramappedParameterBinder(v, ev(v))
-        }
-    }
+  ): ParameterBinderFactory[Option[A]] = (value: Option[A]) => {
+    if (value == null) ParameterBinder.NullParameterBinder
+    else if (ev == asisParameterBinderFactory) AsIsParameterBinder(value)
+    else
+      value.fold[ParameterBinderWithValue](
+        ParameterBinder.NullParameterBinder
+      ) { v =>
+        ContramappedParameterBinder(v, ev(v))
+      }
   }
 
   /**
@@ -193,10 +179,9 @@ sealed abstract class LowPriorityImplicitsParameterBinderFactory1 {
    * This implicit is not enabled by default. If you need this, have implicit val definition in your own code.
    */
   val asisParameterBinderFactory: ParameterBinderFactory[Any] =
-    new ParameterBinderFactory[Any] {
-      def apply(value: Any): ParameterBinderWithValue = AsIsParameterBinder(
+    (value: Any) =>
+      AsIsParameterBinder(
         value
       )
-    }
 
 }
