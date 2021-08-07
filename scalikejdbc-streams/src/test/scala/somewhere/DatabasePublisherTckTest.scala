@@ -1,7 +1,6 @@
 package somewhere
 
 import org.reactivestreams.Publisher
-import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
 import org.scalatestplus.testng.TestNGSuiteLike
 import org.testng.SkipException
