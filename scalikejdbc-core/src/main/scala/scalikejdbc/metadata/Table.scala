@@ -100,7 +100,7 @@ case class Table(
 
     "\n" +
       "Table: " + nameWithSchema + {
-        if (description == null || description.trim.length == 0) ""
+        if (description == null || description.trim.isEmpty) ""
         else if (length(description) > 120)
           " (" + take(description, 118) + "..)"
         else " (" + withoutCRLF(description) + ")"
