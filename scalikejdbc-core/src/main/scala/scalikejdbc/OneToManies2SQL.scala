@@ -19,7 +19,7 @@ private[scalikejdbc] trait OneToManies2Extractor[
     : (A, scala.collection.Seq[B1], scala.collection.Seq[B2]) => Z
 
   private[scalikejdbc] def processResultSet(
-    result: (LinkedHashMap[A, (Seq[B1], scala.collection.Seq[B2])]),
+    result: LinkedHashMap[A, (Seq[B1], scala.collection.Seq[B2])],
     rs: WrappedResultSet
   ): LinkedHashMap[A, (Seq[B1], scala.collection.Seq[B2])] = {
     val o = extractOne(rs)

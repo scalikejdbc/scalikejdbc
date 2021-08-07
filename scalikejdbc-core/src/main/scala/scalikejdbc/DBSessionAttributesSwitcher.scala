@@ -25,7 +25,7 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
   // public methods
   // -------------------------------------
 
-  def withSwitchedDBSession[A](session: DBSession)(op: (DBSession) => A): A = {
+  def withSwitchedDBSession[A](session: DBSession)(op: DBSession => A): A = {
     setDBSession(session)
     overwriteAttributes()
     try {

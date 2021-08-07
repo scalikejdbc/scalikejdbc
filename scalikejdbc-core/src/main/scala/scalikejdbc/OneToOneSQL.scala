@@ -12,7 +12,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
   private[scalikejdbc] def transform: (A, B) => Z
 
   private[scalikejdbc] def processResultSet(
-    oneToOne: (LinkedHashMap[A, Option[B]]),
+    oneToOne: LinkedHashMap[A, Option[B]],
     rs: WrappedResultSet
   ): LinkedHashMap[A, Option[B]] = {
     val o = extractOne(rs)

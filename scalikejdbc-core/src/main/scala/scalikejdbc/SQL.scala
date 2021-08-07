@@ -168,7 +168,7 @@ object GeneralizedTypeConstraintsForWithExtractor {
  */
 private[scalikejdbc] trait Extractor[A] {
 
-  def extractor: (WrappedResultSet) => A
+  def extractor: WrappedResultSet => A
 
 }
 
@@ -191,7 +191,7 @@ abstract class SQL[A, E <: WithExtractor](
     case x                  => x
   }
 
-  override def extractor: (WrappedResultSet) => A = f
+  override def extractor: WrappedResultSet => A = f
 
   private[this] var _fetchSize: Option[Int] = None
   private[this] val _tags: scala.collection.mutable.ListBuffer[String] =
@@ -294,7 +294,7 @@ abstract class SQL[A, E <: WithExtractor](
   /**
    * Returns One-to-X API builder.
    */
-  def one[Z](f: (WrappedResultSet) => A): OneToXSQL[A, E, Z] = {
+  def one[Z](f: WrappedResultSet => A): OneToXSQL[A, E, Z] = {
     val q: OneToXSQL[A, E, Z] =
       new OneToXSQL[A, E, Z](statement, rawParameters)(f)
     q.queryTimeout(queryTimeout)
@@ -603,8 +603,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def executeWithFilters(
-    before: (PreparedStatement) => Unit,
-    after: (PreparedStatement) => Unit
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit
   ): SQLExecution = {
     new SQLExecution(statement, rawParameters, tags)(before)(after)
   }
@@ -624,8 +624,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def executeUpdateWithFilters(
-    before: (PreparedStatement) => Unit,
-    after: (PreparedStatement) => Unit
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit
   ): SQLUpdate = {
     updateWithFilters(before, after)
   }
@@ -649,8 +649,8 @@ abstract class SQL[A, E <: WithExtractor](
    * @return SQL instance
    */
   def updateWithFilters(
-    before: (PreparedStatement) => Unit,
-    after: (PreparedStatement) => Unit
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit
   ): SQLUpdate = {
     new SQLUpdate(statement, rawParameters, tags)(before)(after)
   }
@@ -803,7 +803,7 @@ class SQLBatchWithGeneratedKey(
     val attributesSwitcher = new DBSessionAttributesSwitcher(
       SQL("").tags(tags.toSeq: _*)
     )
-    val f: DBSession => C[Long] = (session) => {
+    val f: DBSession => C[Long] = session => {
       key match {
         case Some(k) =>
           DBSessionWrapper(session, attributesSwitcher)
@@ -857,8 +857,8 @@ class SQLExecution(
   val statement: String,
   val parameters: scala.collection.Seq[Any],
   val tags: scala.collection.Seq[String] = Nil
-)(val before: (PreparedStatement) => Unit)(
-  val after: (PreparedStatement) => Unit
+)(val before: PreparedStatement => Unit)(
+  val after: PreparedStatement => Unit
 ) {
 
   def apply()(implicit session: DBSession): Boolean = {
@@ -914,8 +914,8 @@ class SQLUpdate(
   val statement: String,
   val parameters: scala.collection.Seq[Any],
   val tags: scala.collection.Seq[String] = Nil
-)(val before: (PreparedStatement) => Unit)(
-  val after: (PreparedStatement) => Unit
+)(val before: PreparedStatement => Unit)(
+  val after: PreparedStatement => Unit
 ) {
 
   def apply()(implicit session: DBSession): Int = {

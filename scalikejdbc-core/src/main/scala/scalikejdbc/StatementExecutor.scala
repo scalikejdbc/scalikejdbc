@@ -129,7 +129,7 @@ object StatementExecutor {
           .zipWithIndex
           .map {
             // Even numbered parts are outside quotes, odd numbered are inside
-            case (target, quoteCount) if (quoteCount % 2 == 0) => {
+            case (target, quoteCount) if quoteCount % 2 == 0 => {
               substituteRegex.replaceAllIn(
                 target,
                 m => {
@@ -146,7 +146,7 @@ object StatementExecutor {
                 }
               )
             }
-            case (s, quoteCount) if (quoteCount % 2 == 1) =>
+            case (s, quoteCount) if quoteCount % 2 == 1 =>
               // If the statement is valid, we can always expect an odd number of elements
               // Thus, we can add two quotes here.
               "'" + s + "'"

@@ -12,7 +12,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
   private[scalikejdbc] def transform: (A, scala.collection.Seq[B]) => Z
 
   private[scalikejdbc] def processResultSet(
-    oneToMany: (LinkedHashMap[A, scala.collection.Seq[B]]),
+    oneToMany: LinkedHashMap[A, scala.collection.Seq[B]],
     rs: WrappedResultSet
   ): LinkedHashMap[A, scala.collection.Seq[B]] = {
     val o = extractOne(rs)
@@ -36,7 +36,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
       .foldLeft(statement, rawParameters.toSeq: _*)(
-        LinkedHashMap[A, (scala.collection.Seq[B])]()
+        LinkedHashMap[A, scala.collection.Seq[B]]()
       )(processResultSet)
       .map { case (one, (to)) =>
         zExtractor(one, to)

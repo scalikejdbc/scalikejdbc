@@ -13,7 +13,7 @@ case class StreamReadySQL[A] private (
   private val adjuster: DBSessionForceAdjuster = defaultDBSessionForceAdjuster
 ) {
 
-  private[streams] lazy val extractor: (WrappedResultSet) => A =
+  private[streams] lazy val extractor: WrappedResultSet => A =
     underlying.extractor
 
   private[streams] def statement: String = underlying.statement
@@ -42,7 +42,7 @@ case class StreamReadySQL[A] private (
     new DBSessionAttributesSwitcher(underlying) {
       override def withSwitchedDBSession[T](
         session: DBSession
-      )(op: (DBSession) => T): T = {
+      )(op: DBSession => T): T = {
         super.withSwitchedDBSession(session) { session =>
           adjuster(session)
           op(session)
@@ -74,7 +74,7 @@ private[streams] object StreamReadySQL {
   /**
    * Forcibly changes the database session to be cursor query ready.
    */
-  val defaultDBSessionForceAdjuster: DBSessionForceAdjuster = (session) => {
+  val defaultDBSessionForceAdjuster: DBSessionForceAdjuster = session => {
 
     // setup required settings to enable cursor operations
     session.connectionAttributes.driverName match {

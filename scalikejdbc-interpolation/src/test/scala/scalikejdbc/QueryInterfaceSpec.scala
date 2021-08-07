@@ -57,14 +57,14 @@ class QueryInterfaceSpec
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product])(
       rs: WrappedResultSet
     ): Order = {
-      (apply(o)(rs)).copy(product = Some(Product(p)(rs)))
+      apply(o)(rs).copy(product = Some(Product(p)(rs)))
     }
     def apply(
       o: SyntaxProvider[Order],
       p: SyntaxProvider[Product],
       a: SyntaxProvider[Account]
     )(rs: WrappedResultSet): Order = {
-      (apply(o)(rs))
+      apply(o)(rs)
         .copy(product = Some(Product(p)(rs)), account = Account.opt(a)(rs))
     }
   }
