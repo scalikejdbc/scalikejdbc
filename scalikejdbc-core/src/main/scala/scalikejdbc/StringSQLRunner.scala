@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
 case class StringSQLRunner(sql: String) extends LogSupport {
 
   /**
-   * Runs all SQL and returns result as List[Map[String, Any]]
+   * Runs all SQL and returns result as `List[Map[String, Any]]`
    * @param session DB Session
    * @return results as List[Map]
    */
