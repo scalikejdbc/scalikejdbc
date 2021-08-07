@@ -83,7 +83,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
   val tableNamePrefix =
     "emp_BasicUsageSpec" + System.currentTimeMillis().toString.substring(8)
 
-  "autoCommit" should "excute without a transaction" in {
+  "autoCommit" should "execute without a transaction" in {
     val tableName = tableNamePrefix + "_autoCommit"
 
     // get a connection and create DB instance
@@ -295,7 +295,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         val firstEmp: Option[Emp] = getFirstOf10Emp.apply()
         firstEmp.isDefined should be(true)
 
-        // expects single result or nothing, when mutiple results are returned, Exception will be thrown.
+        // expects single result or nothing, when multiple results are returned, Exception will be thrown.
         val single: Option[Emp] = SQL("select * from emp where id = ?")
           .bind(1)
           .map(empMapper)

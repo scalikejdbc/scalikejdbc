@@ -742,7 +742,7 @@ class QueryInterfaceSpec
         productCount should equal(2)
 
         // enabled wildcard count but it doesn't work with all the RDBMS
-        // HSQLDB: sytax error, H2: always treated as *, MySQL: syntax error
+        // HSQLDB: syntax error, H2: always treated as *, MySQL: syntax error
         val wildCardCountSyntax = select(o.productId, count(p), count(a))
 
         val wildcardCounts = withSQL {
@@ -901,7 +901,7 @@ class QueryInterfaceSpec
         // update,delete
         // applyUpdate = withSQL { ... }.update.apply()
 
-        // TODO the folloing code becomes compilation error on Scala 2.10.1.
+        // TODO the following code becomes compilation error on Scala 2.10.1.
         // applyUpdate(update(Account as a).set(a.name -> "Bob Marley").where.eq(a.id, 2))
         /*
          [error]   scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala:162: erroneous or inaccessible type
@@ -977,7 +977,7 @@ class QueryInterfaceSpec
           .where
           .isNull(Order.column.field("accountId"))
 
-        // insert returing id for PostgreSQL
+        // insert returning id for PostgreSQL
         val returningIdQuery =
           insert.into(Account).namedValues(ac.name -> "Alice").returningId
         returningIdQuery.toSQL.statement should equal(

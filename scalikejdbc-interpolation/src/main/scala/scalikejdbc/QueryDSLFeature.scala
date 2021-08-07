@@ -643,7 +643,7 @@ trait QueryDSLFeature {
       GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.having(condition)}")
 
     // ---
-    // union, execept, intersect
+    // union, except, intersect
 
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${toSQLSyntax} union ${anotherQuery}")
@@ -773,7 +773,7 @@ trait QueryDSLFeature {
     }
 
     /**
-     * `returing id` for PostgreSQL
+     * `returning id` for PostgreSQL
      */
     def returningId: InsertSQLBuilder = append(sqls"returning id")
 

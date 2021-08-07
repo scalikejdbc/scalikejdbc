@@ -220,7 +220,7 @@ class NamedDBSpec
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val tableName = tableNamePrefix + "_updatInAutoCommitAfterReadOnly"
+    val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val name = (NamedDB("named") readOnly {
