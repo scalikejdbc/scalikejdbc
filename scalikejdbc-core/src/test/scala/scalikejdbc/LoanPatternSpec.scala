@@ -23,10 +23,6 @@ class LoanPatternSpec
 
   behavior of "LoanPattern"
 
-  it should "be available" in {
-    LoanPattern.isInstanceOf[Singleton] should equal(true)
-  }
-
   "using" should "be available" in {
     val conn = DriverManager.getConnection(url, user, password)
     using(conn) { conn =>
