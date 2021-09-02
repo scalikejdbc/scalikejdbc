@@ -17,10 +17,6 @@ class ThreadLocalDBSpec
 
   behavior of "ThreadLocalDB"
 
-  it should "be available" in {
-    ThreadLocalDB.isInstanceOf[Singleton] should equal(true)
-  }
-
   it should "work with multi threads" in {
     val conn = ConnectionPool.borrow()
     val tableName = tableNamePrefix + "_workWithMultiThreads"
