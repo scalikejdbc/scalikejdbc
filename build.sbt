@@ -51,7 +51,7 @@ lazy val baseSettings = Def.settings(
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.10",
   specs2Version := "4.12.12",
-  parserCombinatorsVersion := "2.0.0",
+  parserCombinatorsVersion := "2.1.0",
   collectionCompatVersion := "2.5.0",
   javacOptions ++= Seq(
     "-source",
