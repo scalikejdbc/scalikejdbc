@@ -24,8 +24,8 @@ lazy val _logbackVersion = "1.2.6"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.2.24"
-lazy val _hibernateVersion = "5.4.27.Final"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "5.5.7.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -51,7 +51,7 @@ lazy val baseSettings = Def.settings(
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.10",
   specs2Version := "4.12.12",
-  parserCombinatorsVersion := "2.0.0",
+  parserCombinatorsVersion := "2.1.0",
   collectionCompatVersion := "2.5.0",
   javacOptions ++= Seq(
     "-source",
@@ -148,7 +148,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.11",
+    "joda-time" % "joda-time" % "2.10.12",
     "org.joda" % "joda-convert" % "2.2.1"
   ),
 ).dependsOn(
