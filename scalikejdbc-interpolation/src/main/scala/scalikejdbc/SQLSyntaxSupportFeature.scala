@@ -384,7 +384,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     private val acronymRegExpStr = "[A-Z]{2,}"
     private val acronymRegExp = acronymRegExpStr.r
-    private val endsWithAcronymRegExpStr = "[A-Z]{2,}$"
+    private val endsWithAcronymRegExp = "[A-Z]{2,}$".r
     private val singleUpperCaseRegExp = """[A-Z]""".r
 
     /**
@@ -403,15 +403,11 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       }
       if (useSnakeCaseColumnName) {
         val acronymsFiltered = acronymRegExp.replaceAllIn(
-          acronymRegExp
-            .findFirstMatchIn(convertersApplied)
-            .map { m =>
-              convertersApplied.replaceFirst(
-                endsWithAcronymRegExpStr,
-                "_" + m.matched.toLowerCase(en)
-              )
-            }
-            .getOrElse(convertersApplied), // might end with an acronym
+          endsWithAcronymRegExp
+            .replaceAllIn(
+              convertersApplied,
+              { m => "_" + m.matched.toLowerCase(en) }
+            ), // might end with an acronym
           { m =>
             "_" + m.matched.init.toLowerCase(en) + "_" + m.matched.last.toString
               .toLowerCase(en)

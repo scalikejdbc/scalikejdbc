@@ -47,6 +47,9 @@ class SQLInterpolationSpec
       Map("wonderful" -> ""),
       true
     ) should equal("my_html")
+    SQLSyntaxProvider.toColumnName("mySQLAsHTML", Map(), true) should equal(
+      "my_sql_as_html"
+    )
 
     SQLSyntaxProvider.toColumnName("firstName", Map(), false) should equal(
       "firstName"
