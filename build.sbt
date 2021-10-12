@@ -24,12 +24,12 @@ lazy val _logbackVersion = "1.2.6"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.2.24"
-lazy val _hibernateVersion = "5.6.0.CR1"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "5.6.0.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "3.12.4"
+lazy val mockitoVersion = "4.0.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
