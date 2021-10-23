@@ -7,7 +7,7 @@ http://scalikejdbc.org/
 ### Changes
 
 - [core] 96939229 use sourceGenerators for OneToXSQL.scala by xuwei-k
-- [core] 6d6e8f6b scala-collection-compat 2.1.6 by xuwei-k
+- [core] 6d6e8f6b scala-collection-compat 2.5.0 by xuwei-k
 - [core] c00bd692 Scala 2.13.2 by xuwei-k
 - [core] 42f5d63b HikariCP 3.4.5 by xuwei-k
 - [core] ba8a4cf2 Update joda-time to 2.10.6 by xuwei-k
