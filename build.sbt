@@ -5,7 +5,7 @@ lazy val _version = "3.5.1-SNAPSHOT"
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "1.7.30"
+lazy val _slf4jApiVersion = "1.7.32"
 lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
@@ -42,8 +42,8 @@ lazy val baseSettings = Seq(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   transitiveClassifiers in Global := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.10",
-  specs2Version := "4.10.0",
+  scalatestVersion := "3.2.0",
+  specs2Version := "4.10.6",
   parserCombinatorsVersion := "1.1.2",
   collectionCompatVersion := "2.1.6",
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF-8", "-Xlint:-options"),
@@ -323,7 +323,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.3.0"               % "test",
+      "org.scalatestplus"   %% "testng-6-7"                % "3.2.10.0"               % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
