@@ -142,7 +142,7 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "3.4.0",
   "org.slf4j"          % "slf4j-simple"         % "1.7.29",
   "com.h2database"     % "h2"                   % "1.4.200",
-  "org.apache.derby"   % "derby"                % "10.14.2.0",
+  "org.apache.derby"   % "derby"                % "10.15.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.31.1",
   "org.hsqldb"         % "hsqldb"               % "2.5.0",
   "mysql"              % "mysql-connector-java" % "5.1.48",
