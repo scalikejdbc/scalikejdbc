@@ -314,7 +314,7 @@ class SQLInterpolationSpec
             .apply()
         }
 
-        //val names = """.*?""".r.findAllIn("""a&""").toSeq
+        // val names = """.*?""".r.findAllIn("""a&""").toSeq
         val names = """.*?""".r.findAllIn("""a&""").toList
         val users =
           sql"""select * from interpolation_users where name in (${names})"""
@@ -353,7 +353,7 @@ class SQLInterpolationSpec
         )
         sql.parameters should equal(Seq(1, "foo", 2, "bar", 3, "bazzzz"))
         // fails with h2/hsqldb
-        //sql.map(_.long(1)).single.apply() should equal(Some(2))
+        // sql.map(_.long(1)).single.apply() should equal(Some(2))
 
       } finally {
         sql"""drop table interpolation_users_216""".execute.apply()

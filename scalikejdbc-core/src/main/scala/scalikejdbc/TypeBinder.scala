@@ -106,7 +106,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
    * [error]               ^
    * [error] one error found
    */
-  //implicit val javaUtilDate: TypeBinder[java.util.Date] = option[java.sql.Timestamp].map(_.map(_.toJavaUtilDate).orNull[java.util.Date])
+  // implicit val javaUtilDate: TypeBinder[java.util.Date] = option[java.sql.Timestamp].map(_.map(_.toJavaUtilDate).orNull[java.util.Date])
   implicit val javaUtilCalendar: TypeBinder[java.util.Calendar] =
     Binders.javaUtilCalendar
 

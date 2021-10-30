@@ -249,7 +249,7 @@ users"""
     SQLTemplateParser.convertToSQLWithPlaceHolders(sql) should equal(expected)
   }
 
-  //https://github.com/scalikejdbc/scalikejdbc/issues/967
+  // https://github.com/scalikejdbc/scalikejdbc/issues/967
   it should "support SQL contains non-ascii characters" in {
     val sql = "SELECT 名前 FROM ユーザ WHERE user_id = {id})"
     val params = SQLTemplateParser.extractAllParameters(sql)
