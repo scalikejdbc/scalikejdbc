@@ -959,7 +959,7 @@ class DBSpec
 
       // default behavior
       using(DB(ConnectionPool.borrow())) { db =>
-        //db.autoClose(false)
+        // db.autoClose(false)
         db.localTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",

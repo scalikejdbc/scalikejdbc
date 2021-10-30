@@ -66,7 +66,7 @@ class SQLInterpolationSpec
     override val tableName = "users"
 
     // Both of columns and columnNames are OK
-    //override val columns = Seq("id", "first_name", "group_id")
+    // override val columns = Seq("id", "first_name", "group_id")
     override val columnNames = Seq("id", "first_name", "group_id")
 
     override val nameConverters = Map("uid" -> "id")

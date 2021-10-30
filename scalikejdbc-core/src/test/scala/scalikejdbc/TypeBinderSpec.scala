@@ -116,7 +116,7 @@ class TypeBinderSpec
         .apply(rs, "time") should not be (null)
       implicitly[TypeBinder[LocalDate]].apply(rs, "date") should not be (null)
 
-      //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
+      // implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
       implicitly[TypeBinder[java.sql.Timestamp]]
         .apply(rs, "time")
         .toJavaUtilDate should not be (null)
@@ -129,7 +129,7 @@ class TypeBinderSpec
       TypeBinder.of[LocalDateTime].apply(rs, "time") should not be (null)
       TypeBinder.of[LocalDate].apply(rs, "date") should not be (null)
 
-      //implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
+      // implicitly[TypeBinder[java.util.Date]].apply(rs, "time") should not be (null)
       TypeBinder
         .of[java.sql.Timestamp]
         .apply(rs, "time")
@@ -242,8 +242,8 @@ class TypeBinderSpec
     implicitly[TypeBinder[Option[Long]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.sql.NClob]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[String]]].apply(rs, 1) should be(None)
-    //implicitly[TypeBinder[Option[Any]]].apply(rs, 1) should be(None)
-    //implicitly[TypeBinder[Option[AnyRef]]].apply(rs, 1) should be(None)
+    // implicitly[TypeBinder[Option[Any]]].apply(rs, 1) should be(None)
+    // implicitly[TypeBinder[Option[AnyRef]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.sql.Ref]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.sql.RowId]]].apply(rs, 1) should be(None)
     implicitly[TypeBinder[Option[java.lang.Short]]].apply(rs, 1) should be(None)

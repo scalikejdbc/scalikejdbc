@@ -18,7 +18,7 @@ object autoColumns {
   )(using quotes: Quotes)(using Type[A]): Expr[Seq[String]] = {
     import quotes.reflect._
 
-    //SQLSyntaxSupportImpl
+    // SQLSyntaxSupportImpl
     val thi = if (Symbol.spliceOwner.owner.isClassDef) {
       This(Symbol.spliceOwner.owner) // use in SQLSyntaxSupportFactory
     } else {
@@ -27,11 +27,11 @@ object autoColumns {
     // this.nameConverters
     val nameConverters =
       Select.unique(thi, "nameConverters").asExprOf[Map[String, String]]
-    //val nameConverters = Select.unique(This(Symbol.spliceOwner.owner.owner), "nameConverters").asExprOf[Map[String,String]]
+    // val nameConverters = Select.unique(This(Symbol.spliceOwner.owner.owner), "nameConverters").asExprOf[Map[String,String]]
     // this.useSnakeCaseColumnName
     val useSnakeCaseColumnName =
       Select.unique(thi, "useSnakeCaseColumnName").asExprOf[Boolean]
-    //val useSnakeCaseColumnName = Select.unique(This(Symbol.spliceOwner.owner.owner), "useSnakeCaseColumnName").asExprOf[Boolean]
+    // val useSnakeCaseColumnName = Select.unique(This(Symbol.spliceOwner.owner.owner), "useSnakeCaseColumnName").asExprOf[Boolean]
 
     val r = EntityUtil.constructorParams[A](excludes).collect {
       case (name, _, false, _) =>

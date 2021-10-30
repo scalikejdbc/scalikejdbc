@@ -8,7 +8,7 @@ class TopPageExampleSpec extends AnyFlatSpec with Matchers {
 
   behavior of "SQLInterpolation"
 
-  //import scalikejdbc._, SQLInterpolation._
+  // import scalikejdbc._, SQLInterpolation._
   import scalikejdbc._
 
   // defines entity object and extractor
