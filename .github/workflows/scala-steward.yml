@@ -1,9 +1,7 @@
 name: scala-steward
 on:
   push:
-    branches: [ master ]
-  schedule:
-  - cron: '0 5 * * *'
+    branches: [ 4.0.x ]
   workflow_dispatch:
 jobs:
   scala-steward:
@@ -24,4 +22,4 @@ jobs:
         github-token: ${{ steps.generate_token.outputs.token }}
         author-email: "74833019+scalikejdbc-bot[bot]@users.noreply.github.com"
         author-name: scalikejdbc-bot[bot]
-        branches: master,3.5.x
+        branches: 4.0.x
