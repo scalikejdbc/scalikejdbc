@@ -6,7 +6,7 @@ def Scala3 = "3.1.0"
 def Scala212 = "2.12.15"
 def Scala213 = "2.13.6"
 
-ThisBuild / version := "4.0.0"
+ThisBuild / version := "4.0.1-SNAPSHOT"
 
 val isScala3 = Def.setting(
   CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
