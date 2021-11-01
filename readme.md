@@ -8,7 +8,7 @@ ScalikeJDBC is practical and production-ready. Use this library for your real pr
 
 http://scalikejdbc.org/
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.12)
+[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.13)
 [![Stargazers over time](https://starchart.cc/scalikejdbc/scalikejdbc.svg)](https://starchart.cc/scalikejdbc/scalikejdbc)
 
 ## Gitter Chat for Casual Q&A
