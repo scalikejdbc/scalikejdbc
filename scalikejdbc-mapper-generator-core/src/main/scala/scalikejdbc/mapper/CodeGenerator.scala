@@ -982,6 +982,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |import scalikejdbc._
           |$timeImport
           |
+          |import scala.language.postfixOps
+          |
           |class %className%Spec extends Specification {
           |
           |  "%className%" should {
@@ -1046,6 +1048,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |import org.specs2._
           |import scalikejdbc._
           |$timeImport
+          |
+          |import scala.language.postfixOps
           |
           |class %className%Spec extends Specification { def is =
           |
