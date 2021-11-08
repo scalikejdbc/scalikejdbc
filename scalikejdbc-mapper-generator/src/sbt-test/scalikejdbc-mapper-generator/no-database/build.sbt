@@ -8,7 +8,7 @@ crossScalaVersions := List("2.13.7", "2.12.15", "3.1.0")
 
 scalacOptions ++= Seq(
   "-Xlint",
-  "-language:higherKinds,implicitConversions,postfixOps",
+  "-language:higherKinds,implicitConversions",
   "-deprecation",
   "-unchecked"
 )

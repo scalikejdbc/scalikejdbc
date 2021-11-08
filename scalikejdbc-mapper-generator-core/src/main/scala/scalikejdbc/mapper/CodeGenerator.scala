@@ -1014,7 +1014,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |    }
           |    "create new record" in new AutoRollback {
           |      val created = %className%.create(%createFields%)
-          |      created should not beNull
+          |      created should not(beNull)
           |    }
           |    "save a record" in new AutoRollback {
           |      val entity = %className%.findAll().head
@@ -1090,7 +1090,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |    }
           |    def create = this {
           |      val created = %className%.create(%createFields%)
-          |      created should not beNull
+          |      created should not(beNull)
           |    }
           |    def save = this {
           |      val entity = %className%.findAll().head
