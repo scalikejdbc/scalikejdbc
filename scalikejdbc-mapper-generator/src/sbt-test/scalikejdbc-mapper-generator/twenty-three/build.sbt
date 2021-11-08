@@ -32,7 +32,7 @@ val scalikejdbcVersion = System.getProperty("plugin.version")
 
 scalacOptions ++= Seq(
   "-Xlint",
-  "-language:higherKinds,implicitConversions,postfixOps",
+  "-language:higherKinds,implicitConversions",
   "-deprecation",
   "-unchecked"
 )
