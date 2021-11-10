@@ -52,7 +52,7 @@ lazy val baseSettings = Def.settings(
   scalatestVersion := "3.2.10",
   specs2Version := "4.13.0",
   parserCombinatorsVersion := "2.1.0",
-  collectionCompatVersion := "2.5.0",
+  collectionCompatVersion := "2.6.0",
   javacOptions ++= Seq(
     "-source",
     "1.8",
