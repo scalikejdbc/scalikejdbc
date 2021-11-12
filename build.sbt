@@ -10,7 +10,7 @@ lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
-lazy val _logbackVersion = "1.2.6"
+lazy val _logbackVersion = "1.2.7"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
