@@ -12,7 +12,7 @@ trait QueryDSLFeature {
   trait UpdateOperation
 
   /**
-   * Prefix object to avoid name confliction.
+   * Prefix object to avoid name conflict.
    *
    * {{{
    *   withSQL { QueryDSL.select.from(User as u).where.eq(u.id, 123) }
@@ -488,15 +488,26 @@ trait QueryDSLFeature {
    */
   trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${sql} union ${anotherQuery}")
+      PagingSQLBuilder[A](
+        sqls"${considerRoundBracket(sql)} union ${considerRoundBracket(anotherQuery)}"
+      )
+
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${sql} union all ${anotherQuery}")
+      PagingSQLBuilder[A](
+        sqls"${considerRoundBracket(sql)} union all ${considerRoundBracket(anotherQuery)}"
+      )
+
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
       anotherQuery.toSQLSyntax
     )
     def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(
       anotherQuery.toSQLSyntax
     )
+
+    private def considerRoundBracket(sqlQuery: SQLSyntax): SQLSyntax =
+      if (sqlQuery.value.startsWith("(") && sqlQuery.value.endsWith(")"))
+        sqlQuery
+      else sqls"(${sqlQuery})"
   }
 
   /**
@@ -646,9 +657,14 @@ trait QueryDSLFeature {
     // union, except, intersect
 
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${toSQLSyntax} union ${anotherQuery}")
+      PagingSQLBuilder[A](
+        sqls"${considerRoundBracket(toSQLSyntax)} union ${considerRoundBracket(anotherQuery)}"
+      )
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${toSQLSyntax} union all ${anotherQuery}")
+      PagingSQLBuilder[A](
+        sqls"${considerRoundBracket(toSQLSyntax)} union all ${considerRoundBracket(anotherQuery)}"
+      )
+
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
       anotherQuery.toSQLSyntax
     )
@@ -699,6 +715,11 @@ trait QueryDSLFeature {
     def map(
       mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]
     ): SelectSQLBuilder[A] = mapper.apply(this)
+
+    private def considerRoundBracket(sqlSyntax: SQLSyntax): SQLSyntax =
+      if (sqlSyntax.value.startsWith("(") && sqlSyntax.value.endsWith(")"))
+        sqlSyntax
+      else sqls"(${sqlSyntax})"
 
     private def lazyLoadedPart: SQLSyntax =
       sqls"select ${sqls.join(resultAllProviders.reverseIterator.map(_.resultAll).toSeq, sqls",")}"
