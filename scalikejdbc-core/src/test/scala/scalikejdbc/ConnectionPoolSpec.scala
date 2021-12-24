@@ -73,8 +73,9 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     ConnectionPool.add("sample", url, user, password)
     try {
       NamedDB("sample") autoCommit { implicit s =>
-        try SQL("create table data_source_test(id bigint not null)").execute
-          .apply()
+        try
+          SQL("create table data_source_test(id bigint not null)").execute
+            .apply()
         catch { case e: Exception => e.printStackTrace }
         SQL("insert into data_source_test values (123)").update.apply()
       }
