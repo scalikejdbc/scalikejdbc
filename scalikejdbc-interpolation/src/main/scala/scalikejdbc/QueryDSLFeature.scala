@@ -205,10 +205,8 @@ trait QueryDSLFeature {
 
   // factory
   private[scalikejdbc] object PagingSQLBuilder {
-    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] = {
-      println(s"create $sql")
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] =
       new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
-    }
   }
 
   trait PagingSQLBuilder[A]
