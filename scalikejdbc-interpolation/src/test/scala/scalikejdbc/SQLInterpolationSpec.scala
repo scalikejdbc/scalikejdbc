@@ -135,10 +135,11 @@ class SQLInterpolationSpec
 
   it should "load column names from NamedDB" in {
     NamedDB("yetanother") autoCommit { implicit s =>
-      try sql"select count(1) from named_db_entity"
-        .map(_.toMap())
-        .single
-        .apply()
+      try
+        sql"select count(1) from named_db_entity"
+          .map(_.toMap())
+          .single
+          .apply()
       catch {
         case e: Exception =>
           sql"create table named_db_entity(id bigint)".execute.apply()

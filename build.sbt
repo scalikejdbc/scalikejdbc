@@ -20,16 +20,16 @@ lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
-lazy val _logbackVersion = "1.2.8"
+lazy val _logbackVersion = "1.2.10"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.6.2.Final"
+lazy val _hibernateVersion = "5.6.3.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "4.1.0"
+lazy val mockitoVersion = "4.2.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -149,7 +149,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
     "joda-time" % "joda-time" % "2.10.13",
-    "org.joda" % "joda-convert" % "2.2.1"
+    "org.joda" % "joda-convert" % "2.2.2"
   ),
 ).dependsOn(
   scalikejdbcLibrary,
