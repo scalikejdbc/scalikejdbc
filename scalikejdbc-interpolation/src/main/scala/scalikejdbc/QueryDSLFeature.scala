@@ -205,8 +205,10 @@ trait QueryDSLFeature {
 
   // factory
   private[scalikejdbc] object PagingSQLBuilder {
-    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] =
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] = {
+      println(s"create $sql")
       new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
+    }
   }
 
   trait PagingSQLBuilder[A]
@@ -489,12 +491,12 @@ trait QueryDSLFeature {
   trait UnionQuerySQLBuilder[A] extends SQLBuilder[A] {
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](
-        sqls"${considerRoundBracket(sql)} union ${considerRoundBracket(anotherQuery)}"
+        sqls"${withRoundBracket(sql)} union ${withRoundBracket(anotherQuery)}"
       )
 
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](
-        sqls"${considerRoundBracket(sql)} union all ${considerRoundBracket(anotherQuery)}"
+        sqls"${withRoundBracket(sql)} union all ${withRoundBracket(anotherQuery)}"
       )
 
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
@@ -504,10 +506,12 @@ trait QueryDSLFeature {
       anotherQuery.toSQLSyntax
     )
 
-    private def considerRoundBracket(sqlQuery: SQLSyntax): SQLSyntax =
-      if (sqlQuery.value.startsWith("(") && sqlQuery.value.endsWith(")"))
+    private def withRoundBracket(sqlQuery: SQLSyntax): SQLSyntax = {
+      val statement = sqlQuery.value.trim()
+      if (statement.startsWith("(") && statement.endsWith(")"))
         sqlQuery
       else sqls"(${sqlQuery})"
+    }
   }
 
   /**
@@ -658,11 +662,11 @@ trait QueryDSLFeature {
 
     def union(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](
-        sqls"${considerRoundBracket(toSQLSyntax)} union ${considerRoundBracket(anotherQuery)}"
+        sqls"${withRoundBracket(toSQLSyntax)} union ${withRoundBracket(anotherQuery)}"
       )
     def unionAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](
-        sqls"${considerRoundBracket(toSQLSyntax)} union all ${considerRoundBracket(anotherQuery)}"
+        sqls"${withRoundBracket(toSQLSyntax)} union all ${withRoundBracket(anotherQuery)}"
       )
 
     def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
@@ -716,10 +720,12 @@ trait QueryDSLFeature {
       mapper: SelectSQLBuilder[A] => SelectSQLBuilder[A]
     ): SelectSQLBuilder[A] = mapper.apply(this)
 
-    private def considerRoundBracket(sqlSyntax: SQLSyntax): SQLSyntax =
-      if (sqlSyntax.value.startsWith("(") && sqlSyntax.value.endsWith(")"))
+    private def withRoundBracket(sqlSyntax: SQLSyntax): SQLSyntax = {
+      val statement = sqlSyntax.value.trim()
+      if (statement.startsWith("(") && statement.endsWith(")"))
         sqlSyntax
       else sqls"(${sqlSyntax})"
+    }
 
     private def lazyLoadedPart: SQLSyntax =
       sqls"select ${sqls.join(resultAllProviders.reverseIterator.map(_.resultAll).toSeq, sqls",")}"
