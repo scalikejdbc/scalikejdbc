@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 = "3.1.0"
 def Scala212 = "2.12.15"
-def Scala213 = "2.13.7"
+def Scala213 = "2.13.8"
 
 ThisBuild / version := "4.0.1-SNAPSHOT"
 
