@@ -49,7 +49,7 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.10",
+  scalatestVersion := "3.2.11",
   specs2Version := "4.13.2",
   parserCombinatorsVersion := "2.1.0",
   collectionCompatVersion := "2.6.0",
@@ -368,7 +368,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-6-7" % "3.2.10.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.11.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
