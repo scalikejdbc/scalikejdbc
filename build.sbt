@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 = "3.1.0"
 def Scala212 = "2.12.15"
-def Scala213 = "2.13.7"
+def Scala213 = "2.13.8"
 
 ThisBuild / version := "4.1.0-SNAPSHOT"
 
@@ -15,7 +15,7 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "1.7.32"
+lazy val _slf4jApiVersion = "1.7.35"
 lazy val _typesafeConfigVersion = "1.4.1"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
@@ -25,11 +25,11 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "5.6.3.Final"
+lazy val _hibernateVersion = "6.0.0.CR1"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "4.2.0"
+lazy val mockitoVersion = "4.3.1"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -49,8 +49,8 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.10",
-  specs2Version := "4.13.1",
+  scalatestVersion := "3.2.11",
+  specs2Version := "4.13.2",
   parserCombinatorsVersion := "2.1.0",
   collectionCompatVersion := "2.6.0",
   javacOptions ++= Seq(
@@ -368,7 +368,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-6-7" % "3.2.10.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.11.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
