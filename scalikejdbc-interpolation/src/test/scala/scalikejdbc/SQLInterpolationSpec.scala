@@ -640,9 +640,9 @@ class SQLInterpolationSpec
           val sq = SubQuery.syntax("sq", i.resultName)
           val summary = sql"""
               select ${is.result(idCount).count}, ${is
-            .result(idSum)
-            .sum} from (select ${i.result.id} from ${Issue.as(i)}) ${SubQuery
-            .as(sq)}
+              .result(idSum)
+              .sum} from (select ${i.result.id} from ${Issue.as(i)}) ${SubQuery
+              .as(sq)}
               """.map(IssueSummary(is.resultName)).single.apply().get
           summary.count should equal(4)
           summary.sum should equal(10)
@@ -753,7 +753,7 @@ class SQLInterpolationSpec
               ${sq.result.*}, ${cg.result.*}
             from
               (select ${c.result.*} from ${Customer.as(c)} limit 5) ${SubQuery
-            .as(sq)}
+              .as(sq)}
                 left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
             where
               ${sq(c).id} > 3
@@ -806,8 +806,8 @@ class SQLInterpolationSpec
               ${sq.result.*}, ${cg.result.*}
             from
               (select ${c.result.*} from ${Customer.as(
-            c
-          )} order by id limit 5) ${SubQuery.as(sq)}
+              c
+            )} order by id limit 5) ${SubQuery.as(sq)}
                 left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
             where
               ${sq(c).id} > 3
@@ -841,8 +841,8 @@ class SQLInterpolationSpec
               ${sq.result.*}, ${cg.result.*}
             from
               (select ${c.result.*} from ${Customer.as(
-            c
-          )} order by id limit 5) ${SubQuery.as(sq)}
+              c
+            )} order by id limit 5) ${SubQuery.as(sq)}
                 left join ${CustomerGroup.as(cg)} on ${sq(c).groupId} = ${cg.id}
             where
               ${sq(c).id} = 4
@@ -899,7 +899,7 @@ class SQLInterpolationSpec
                    ${o.result.*}, ${p.result.*}
                  from
                    ${Order.as(o)} inner join ${Product
-            .as(p)} on ${o.productId} = ${p.id}
+              .as(p)} on ${o.productId} = ${p.id}
                 ) ${SubQuery.as(x)}
                 on ${c.id} = ${x(o).customerId}
               order by ${c.id}
