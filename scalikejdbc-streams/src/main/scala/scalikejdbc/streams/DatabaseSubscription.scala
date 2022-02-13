@@ -357,7 +357,7 @@ private[streams] class DatabaseSubscription[A](
         } else {
           log.info(
             s"Failed to close the occupied database session because ${e.getMessage}, exception: ${ClassNameUtil
-              .getClassName(e.getClass)}"
+                .getClassName(e.getClass)}"
           )
         }
     } finally {
@@ -454,7 +454,7 @@ private[streams] class DatabaseSubscription[A](
                   } else {
                     log.info(
                       s"Unexpectedly failed to deal with remaining iterator because ${e.getMessage}, exception: ${ClassNameUtil
-                        .getClassName(e.getClass)}"
+                          .getClassName(e.getClass)}"
                     )
                   }
                   cleanUpResources()
@@ -538,7 +538,7 @@ private[streams] class DatabaseSubscription[A](
 
     if (log.isDebugEnabled) {
       log.debug(s"Emitted $count element${if (count > 1) "s"
-      else ""} to subscriber: ${subscriber}, realDemand: ${realDemand}")
+        else ""} to subscriber: ${subscriber}, realDemand: ${realDemand}")
     }
 
     if (

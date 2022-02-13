@@ -28,7 +28,7 @@ object SelectDynamicMacroImpl {
       if (expectedNames.nonEmpty && !expectedNames.contains(_name)) {
         report.error(
           s"${typeSymbol.fullName}#${_name} not found. Expected fields are ${expectedNames
-            .mkString("#", ", #", "")}",
+              .mkString("#", ", #", "")}",
           name.asTerm.pos
         )
       }
