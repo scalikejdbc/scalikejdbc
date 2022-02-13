@@ -50,37 +50,37 @@ private[scalikejdbc] trait OneToManies${n}Extractor[$A, $bs, E <: WithExtractor,
 
   private[scalikejdbc] def extractOne: WrappedResultSet => $A
 ${(1 to n)
-      .map { i =>
-        s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
-      }
-      .mkString("\n")}
+        .map { i =>
+          s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
+        }
+        .mkString("\n")}
   private[scalikejdbc] def transform: ($A, $seq) => Z
 
   private[scalikejdbc] def processResultSet(result: (LinkedHashMap[$A, ($seq)]),
     rs: WrappedResultSet): LinkedHashMap[A, ($seq)] = {
     val o = extractOne(rs)
     val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n)
-      .map(extractTo + _ + "(rs)")
-      .mkString(", ")})
+        .map(extractTo + _ + "(rs)")
+        .mkString(", ")})
     if (result.contains(o)) {
       ${(1 to n).map("to" + _).mkString("(", " orElse ", ")")}.map { _ =>
         val (${(1 to n).map("ts" + _).mkString(", ")}) = result.apply(o)
         result += (o -> ((
 ${(1 to n)
-      .map { i =>
-        s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
-      }
-      .mkString(",\n")}
+        .map { i =>
+          s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
+        }
+        .mkString(",\n")}
         )))
       }.getOrElse(result)
     } else {
       result += (
         o -> ((
 ${(1 to n)
-      .map { i =>
-        s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
-      }
-      .mkString(",\n")}
+        .map { i =>
+          s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
+        }
+        .mkString(",\n")}
         ))
       )
     }
@@ -90,10 +90,10 @@ ${(1 to n)
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
       case (one, (${(1 to n)
-      .map("t" + _)
-      .mkString(", ")})) => zExtractor(one, ${(1 to n)
-      .map("t" + _)
-      .mkString(", ")})
+        .map("t" + _)
+        .mkString(", ")})) => zExtractor(one, ${(1 to n)
+        .map("t" + _)
+        .mkString(", ")})
     }
   }
 
