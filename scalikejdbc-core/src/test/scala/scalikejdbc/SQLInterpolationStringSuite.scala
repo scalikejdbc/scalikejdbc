@@ -40,6 +40,18 @@ class SQLInterpolationStringSuite extends AnyFlatSpec with Matchers {
     s.parameters should equal(List(1, 2, 3))
   }
 
+  it should "interpolate TypedParameterBinder" in {
+    val binder = TypedParameterBinder[EnumLike, String](
+      EnumLike.Foo,
+      "enum_like",
+      _.toString
+    )
+
+    val s = sqls"s = $binder"
+    s.value should equal("s = ? :: enum_like")
+    s.parameters should equal(Seq(EnumLike.Foo))
+  }
+
   it should "strip margin by stripMargin" in {
     sql"""SELECT
          |${1}

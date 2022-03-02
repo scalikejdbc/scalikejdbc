@@ -47,6 +47,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
           .map {
             case SQLSyntax(s, _)                           => s
             case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => s
+            case TypedParameterBinder(_, dbType, _)        => "? :: " + dbType
             case _                                         => "?"
           }
           .addString(sb, ", ")
@@ -54,6 +55,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
       case LastParameter                             => sb
       case SQLSyntax(s, _)                           => sb ++= s
       case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => sb ++= s
+      case TypedParameterBinder(_, dbType, _)        => sb ++= "? :: " + dbType
       case _                                         => sb += '?'
     }
 

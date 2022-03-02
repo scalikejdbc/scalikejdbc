@@ -145,6 +145,12 @@ object ParameterBinderFactory
     : ParameterBinderFactory[SQLSyntax] =
     (value: SQLSyntax) => SQLSyntaxParameterBinder(value)
 
+  def typedParameterBinderFactory[A, B](
+    dbType: String,
+    contramap: A => B
+  ): ParameterBinderFactory[A] =
+    (value: A) => TypedParameterBinder(value, dbType, contramap)
+
   implicit val optionalSqlSyntaxParameterBinderFactory
     : ParameterBinderFactory[Option[SQLSyntax]] =
     (value: Option[SQLSyntax]) => {
