@@ -92,7 +92,7 @@ private[scalikejdbc] case class ContramappedParameterBinder(
 
 private[scalikejdbc] case class TypedParameterBinder[A, B](
   value: A,
-  dbType: SQLSyntax,
+  typeName: SQLSyntax,
   contramap: A => B
 ) extends ParameterBinderWithValue {
   def apply(stmt: PreparedStatement, idx: Int): Unit = {

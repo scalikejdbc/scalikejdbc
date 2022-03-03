@@ -146,10 +146,10 @@ object ParameterBinderFactory
     (value: SQLSyntax) => SQLSyntaxParameterBinder(value)
 
   def typedParameterBinderFactory[A, B](
-    dbType: String,
+    typeName: String,
     contramap: A => B
   ): ParameterBinderFactory[A] =
-    (value: A) => TypedParameterBinder(value, SQLSyntax(dbType), contramap)
+    (value: A) => TypedParameterBinder(value, SQLSyntax(typeName), contramap)
 
   implicit val optionalSqlSyntaxParameterBinderFactory
     : ParameterBinderFactory[Option[SQLSyntax]] =
