@@ -616,6 +616,26 @@ class DB_MetaDataSpec
 
   }
 
+  it should "PostgreSQL enum" in {
+    if (driverClassName == "org.postgresql.Driver") {
+      DB autoCommit { implicit s =>
+        execute("drop table if exists enum_test")
+        execute("drop type if exists some_enum")
+        execute("create type some_enum as enum ('Foo', 'Bar')")
+        execute("""
+                  create table enum_test(
+                    enum_column some_enum not null
+                  );
+                  """)
+      }
+      DB.getTable("enum_test")
+        .get
+        .columns
+        .filter(_.name.toLowerCase == "enum_column")
+        .map(m => m.typeName) should contain("some_enum")
+    }
+  }
+
   private def execute(sqls: String*)(implicit session: DBSession): Unit = {
     @annotation.tailrec
     def loop(xs: List[String], errors: List[Throwable]): Unit = {
