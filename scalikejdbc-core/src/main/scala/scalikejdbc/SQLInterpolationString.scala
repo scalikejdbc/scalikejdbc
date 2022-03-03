@@ -47,16 +47,18 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
           .map {
             case SQLSyntax(s, _)                           => s
             case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => s
-            case TypedParameterBinder(_, dbType, _)        => "? :: " + dbType
-            case _                                         => "?"
+            case TypedParameterBinder(_, SQLSyntax(dbType, _), _) =>
+              "? :: " + dbType
+            case _ => "?"
           }
           .addString(sb, ", ")
       }
       case LastParameter                             => sb
       case SQLSyntax(s, _)                           => sb ++= s
       case SQLSyntaxParameterBinder(SQLSyntax(s, _)) => sb ++= s
-      case TypedParameterBinder(_, dbType, _)        => sb ++= "? :: " + dbType
-      case _                                         => sb += '?'
+      case TypedParameterBinder(_, SQLSyntax(dbType, _), _) =>
+        sb ++= "? :: " + dbType
+      case _ => sb += '?'
     }
 
   private def buildParams(params: collection.Seq[Any]): collection.Seq[Any] =

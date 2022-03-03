@@ -149,7 +149,7 @@ object ParameterBinderFactory
     dbType: String,
     contramap: A => B
   ): ParameterBinderFactory[A] =
-    (value: A) => TypedParameterBinder(value, dbType, contramap)
+    (value: A) => TypedParameterBinder(value, SQLSyntax(dbType), contramap)
 
   implicit val optionalSqlSyntaxParameterBinderFactory
     : ParameterBinderFactory[Option[SQLSyntax]] =

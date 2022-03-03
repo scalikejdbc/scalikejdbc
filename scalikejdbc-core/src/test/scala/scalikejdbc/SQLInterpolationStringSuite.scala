@@ -4,6 +4,7 @@ import java.{ util => ju }
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.interpolation.SQLSyntax
 
 class SQLInterpolationStringSuite extends AnyFlatSpec with Matchers {
 
@@ -43,7 +44,7 @@ class SQLInterpolationStringSuite extends AnyFlatSpec with Matchers {
   it should "interpolate TypedParameterBinder" in {
     val binder = TypedParameterBinder[EnumLike, String](
       EnumLike.Foo,
-      "enum_like",
+      SQLSyntax("enum_like"),
       _.toString
     )
 
