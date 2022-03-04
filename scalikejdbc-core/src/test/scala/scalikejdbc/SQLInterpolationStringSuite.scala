@@ -44,7 +44,7 @@ class SQLInterpolationStringSuite extends AnyFlatSpec with Matchers {
   it should "interpolate TypedParameterBinder" in {
     val binder = TypedParameterBinder[EnumLike, String](
       EnumLike.Foo,
-      SQLSyntax("enum_like"),
+      sqls"enum_like",
       _.toString
     )
 
