@@ -616,7 +616,7 @@ class DB_MetaDataSpec
 
   }
 
-  it should "PostgreSQL enum" in {
+  it should "accept PostgreSQL enum parameters" in {
     if (driverClassName == "org.postgresql.Driver") {
       DB autoCommit { implicit s =>
         execute("drop table if exists enum_test")
