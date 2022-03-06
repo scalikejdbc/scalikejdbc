@@ -15,8 +15,8 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "1.7.35"
-lazy val _typesafeConfigVersion = "1.4.1"
+lazy val _slf4jApiVersion = "1.7.36"
+lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
@@ -50,8 +50,8 @@ lazy val baseSettings = Def.settings(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.11",
-  specs2Version := "4.13.2",
-  parserCombinatorsVersion := "2.1.0",
+  specs2Version := "4.14.1",
+  parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.6.0",
   javacOptions ++= Seq(
     "-source",
