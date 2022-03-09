@@ -20,16 +20,16 @@ lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.3"
 
 // internal only
-lazy val _logbackVersion = "1.2.10"
+lazy val _logbackVersion = "1.2.11"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.3.3"
-lazy val _hibernateVersion = "6.0.0.CR1"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "6.0.0.CR2"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "4.3.1"
+lazy val mockitoVersion = "4.4.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -50,8 +50,8 @@ lazy val baseSettings = Def.settings(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.11",
-  specs2Version := "4.13.3",
-  parserCombinatorsVersion := "2.1.0",
+  specs2Version := "4.14.1",
+  parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.6.0",
   javacOptions ++= Seq(
     "-source",
