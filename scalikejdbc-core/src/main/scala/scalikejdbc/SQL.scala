@@ -744,7 +744,7 @@ class SQLBatch(
 }
 
 object SQLBatch {
-  def unapply(sqlObject: SQLBatch): Option[
+  def unapply(sqlObject: SQLBatch): Some[
     (
       String,
       scala.collection.Seq[scala.collection.Seq[Any]],
@@ -831,7 +831,7 @@ class SQLBatchWithGeneratedKey(
 }
 
 object SQLBatchWithGeneratedKey {
-  def unapply(sqlObject: SQLBatchWithGeneratedKey): Option[
+  def unapply(sqlObject: SQLBatchWithGeneratedKey): Some[
     (
       String,
       scala.collection.Seq[scala.collection.Seq[Any]],
@@ -881,7 +881,7 @@ class SQLExecution(
 }
 
 object SQLExecution {
-  def unapply(sqlObject: SQLExecution): Option[
+  def unapply(sqlObject: SQLExecution): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -956,7 +956,7 @@ class SQLUpdate(
 }
 
 object SQLUpdate {
-  def unapply(sqlObject: SQLUpdate): Option[
+  def unapply(sqlObject: SQLUpdate): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -1077,7 +1077,7 @@ class SQLUpdateWithGeneratedKey(
 }
 
 object SQLUpdateWithGeneratedKey {
-  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Option[
+  def unapply(sqlObject: SQLUpdateWithGeneratedKey): Some[
     (String, scala.collection.Seq[Any], scala.collection.Seq[String], Any)
   ] = {
     Some(
@@ -1169,7 +1169,7 @@ class SQLToIterableImpl[A, E <: WithExtractor](
 object SQLToIterableImpl {
   def unapply[A, E <: WithExtractor](
     sqlObject: SQLToIterableImpl[A, E]
-  ): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
+  ): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -1238,7 +1238,7 @@ class SQLToCollectionImpl[A, E <: WithExtractor](
 object SQLToCollectionImpl {
   def unapply[A, E <: WithExtractor](
     sqlObject: SQLToCollectionImpl[A, E]
-  ): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
+  ): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -1296,7 +1296,7 @@ class SQLToListImpl[A, E <: WithExtractor](
 object SQLToListImpl {
   def unapply[A, E <: WithExtractor](
     sqlObject: SQLToListImpl[A, E]
-  ): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
+  ): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.extractor))
   }
 }
@@ -1358,7 +1358,7 @@ class SQLToOptionImpl[A, E <: WithExtractor](
 }
 
 object SQLToOptionImpl {
-  def unapply[A, E <: WithExtractor](sqlObject: SQLToOptionImpl[A, E]): Option[
+  def unapply[A, E <: WithExtractor](sqlObject: SQLToOptionImpl[A, E]): Some[
     (String, scala.collection.Seq[Any], WrappedResultSet => A, Boolean)
   ] = {
     Some(

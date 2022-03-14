@@ -370,7 +370,7 @@ object SQLSyntax {
     parameters: collection.Seq[Any] = Nil
   ): SQLSyntax = apply(value, parameters)
 
-  def unapply(syntax: SQLSyntax): Option[(String, collection.Seq[Any])] = Some(
+  def unapply(syntax: SQLSyntax): Some[(String, collection.Seq[Any])] = Some(
     (syntax.value, syntax.rawParameters)
   )
 
