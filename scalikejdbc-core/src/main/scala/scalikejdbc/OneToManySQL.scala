@@ -130,7 +130,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
 object OneToManySQL {
   def unapply[A, B, E <: WithExtractor, Z](
     sqlObject: OneToManySQL[A, B, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -188,7 +188,7 @@ class OneToManySQLToList[A, B, E <: WithExtractor, Z](
 object OneToManySQLToList {
   def unapply[A, B, E <: WithExtractor, Z](
     sqlObject: OneToManySQLToList[A, B, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -246,7 +246,7 @@ class OneToManySQLToIterable[A, B, E <: WithExtractor, Z](
 object OneToManySQLToIterable {
   def unapply[A, B, E <: WithExtractor, Z](
     sqlObject: OneToManySQLToIterable[A, B, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -307,7 +307,7 @@ class OneToManySQLToCollection[A, B, E <: WithExtractor, Z](
 object OneToManySQLToCollection {
   def unapply[A, B, E <: WithExtractor, Z](
     sqlObject: OneToManySQLToCollection[A, B, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -365,7 +365,7 @@ class OneToManySQLToOption[A, B, E <: WithExtractor, Z](
 object OneToManySQLToOption {
   def unapply[A, B, E <: WithExtractor, Z](
     sqlObject: OneToManySQLToOption[A, B, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],

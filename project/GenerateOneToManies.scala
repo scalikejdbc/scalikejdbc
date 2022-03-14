@@ -132,7 +132,7 @@ class OneToManies${n}SQL[A, $bs, E <: WithExtractor, Z](
 }
 
 object OneToManies${n}SQL {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQL[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQL[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -157,7 +157,7 @@ $transform
 }
 
 object OneToManies${n}SQLToList {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToList[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToList[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -182,7 +182,7 @@ $transform
 }
 
 object OneToManies${n}SQLToCollection {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToCollection[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToCollection[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -207,7 +207,7 @@ $transform
 }
 
 object OneToManies${n}SQLToIterable {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToIterable[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToIterable[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -231,7 +231,7 @@ $transform
 }
 
 object OneToManies${n}SQLToOption {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToOption[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z, Boolean)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToOption[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z, Boolean)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor, sqlObject.isSingle))
   }
 }
