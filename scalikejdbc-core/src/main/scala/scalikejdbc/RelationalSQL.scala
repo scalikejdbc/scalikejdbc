@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import scala.collection.compat._
+
 //------------------------------------
 // One-to-one / One-to-many
 //------------------------------------
@@ -7,7 +9,7 @@ package scalikejdbc
 private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def toSingle(rows: Iterable[Z]): Option[Z] = {
-    if (rows.size > 1) throw new TooManyRowsException(1, rows.size)
+    if (rows.sizeIs > 1) throw new TooManyRowsException(1, rows.size)
     else rows.headOption
   }
 
