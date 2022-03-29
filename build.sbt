@@ -50,7 +50,7 @@ lazy val baseSettings = Def.settings(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.11",
-  specs2Version := "4.14.1",
+  specs2Version := "4.15.0",
   parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.7.0",
   javacOptions ++= Seq(
