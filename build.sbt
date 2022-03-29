@@ -333,7 +333,7 @@ lazy val scalikejdbcTest = Project(
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
       "org.scalatest" %% "scalatest-core" % scalatestVersion.value % "provided",
-      "org.specs2" %% "specs2-core" % specs2Version.value % "provided" cross CrossVersion.for3Use2_13
+      "org.specs2" %% "specs2-core" % specs2Version.value % "provided"
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
   },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")

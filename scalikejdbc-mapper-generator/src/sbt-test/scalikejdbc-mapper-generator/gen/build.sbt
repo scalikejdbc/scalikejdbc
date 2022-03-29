@@ -96,7 +96,7 @@ libraryDependencies ++= Seq(
   ) % "test",
   "org.specs2" %% "specs2-core" % System.getProperty(
     "specs2.version"
-  ) % "test" cross CrossVersion.for3Use2_13
+  ) % "test"
 )
 
 TaskKey[Unit]("generateCodeForIssue339") := {
