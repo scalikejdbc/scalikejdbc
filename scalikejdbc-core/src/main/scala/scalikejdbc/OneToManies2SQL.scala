@@ -128,7 +128,7 @@ class OneToManies2SQL[A, B1, B2, E <: WithExtractor, Z](
 object OneToManies2SQL {
   def unapply[A, B1, B2, E <: WithExtractor, Z](
     sqlObject: OneToManies2SQL[A, B1, B2, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -190,7 +190,7 @@ class OneToManies2SQLToList[A, B1, B2, E <: WithExtractor, Z](
 object OneToManies2SQLToList {
   def unapply[A, B1, B2, E <: WithExtractor, Z](
     sqlObject: OneToManies2SQLToList[A, B1, B2, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -261,7 +261,7 @@ final class OneToManies2SQLToCollection[
 object OneToManies2SQLToCollection {
   def unapply[A, B1, B2, E <: WithExtractor, Z](
     sqlObject: OneToManies2SQLToCollection[A, B1, B2, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -324,7 +324,7 @@ class OneToManies2SQLToIterable[A, B1, B2, E <: WithExtractor, Z](
 object OneToManies2SQLToIterable {
   def unapply[A, B1, B2, E <: WithExtractor, Z](
     sqlObject: OneToManies2SQLToIterable[A, B1, B2, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],
@@ -387,7 +387,7 @@ class OneToManies2SQLToOption[A, B1, B2, E <: WithExtractor, Z](
 object OneToManies2SQLToOption {
   def unapply[A, B1, B2, E <: WithExtractor, Z](
     sqlObject: OneToManies2SQLToOption[A, B1, B2, E, Z]
-  ): Option[
+  ): Some[
     (
       String,
       scala.collection.Seq[Any],

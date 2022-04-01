@@ -24,8 +24,8 @@ lazy val _logbackVersion = "1.2.11"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.3.3"
-lazy val _hibernateVersion = "6.0.0.CR2"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "6.0.0.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -50,9 +50,9 @@ lazy val baseSettings = Def.settings(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.11",
-  specs2Version := "4.14.1",
+  specs2Version := "4.15.0",
   parserCombinatorsVersion := "2.1.1",
-  collectionCompatVersion := "2.6.0",
+  collectionCompatVersion := "2.7.0",
   javacOptions ++= Seq(
     "-source",
     "1.8",
@@ -148,7 +148,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.10.13",
+    "joda-time" % "joda-time" % "2.10.14",
     "org.joda" % "joda-convert" % "2.2.2"
   ),
 ).dependsOn(
@@ -333,7 +333,7 @@ lazy val scalikejdbcTest = Project(
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
       "org.scalatest" %% "scalatest-core" % scalatestVersion.value % "provided",
-      "org.specs2" %% "specs2-core" % specs2Version.value % "provided" cross CrossVersion.for3Use2_13
+      "org.specs2" %% "specs2-core" % specs2Version.value % "provided"
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
   },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")

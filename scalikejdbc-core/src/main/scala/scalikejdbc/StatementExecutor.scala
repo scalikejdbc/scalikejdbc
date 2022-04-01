@@ -3,7 +3,7 @@ package scalikejdbc
 import java.sql.PreparedStatement
 
 import org.slf4j.LoggerFactory
-
+import scala.collection.compat._
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 import JavaUtilDateConverterImplicits._
@@ -134,7 +134,7 @@ object StatementExecutor {
                 target,
                 m => {
                   i += 1
-                  if (params.size >= i) {
+                  if (params.sizeIs >= i) {
                     toPrintable(params(i - 1))
                       .replace("\\", "\\\\")
                       .replace("$", "\\$")
@@ -329,7 +329,7 @@ case class StatementExecutor(
         .loggingSQLAndTime(GlobalSettings.loggingSQLAndTime)
         .maxBatchParamSize
         .collect {
-          case maxSize if batchParamsList.size > maxSize =>
+          case maxSize if batchParamsList.sizeIs > maxSize =>
             batchParamsList
               .take(maxSize)
               .map(params => singleSqlString(params))
