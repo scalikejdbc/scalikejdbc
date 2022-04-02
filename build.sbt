@@ -313,21 +313,6 @@ lazy val scalikejdbcTest = Project(
   baseSettings,
   mimaSettings,
   name := "scalikejdbc-test",
-  conflictWarning := {
-    if (scalaBinaryVersion.value == "3") {
-      // TODO
-      ConflictWarning("warn", Level.Warn, false)
-    } else {
-      conflictWarning.value
-    }
-  },
-  Test / scalacOptions ++= {
-    if (isScala3.value) {
-      Seq("-Xignore-scala2-macros")
-    } else {
-      Nil
-    }
-  },
   libraryDependencies ++= {
     Seq(
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
