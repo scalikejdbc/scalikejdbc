@@ -32,7 +32,7 @@ object SQLSyntaxSupportFactory {
           autoColumns.apply_impl[A](excludes)
         }
 
-        private def p(n: String): String = {
+        def p(n: String): String = {
           scalikejdbc.autoColumns.camelToSnake(
             n,
             nameConverters,
