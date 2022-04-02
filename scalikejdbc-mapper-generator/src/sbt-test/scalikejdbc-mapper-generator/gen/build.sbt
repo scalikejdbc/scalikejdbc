@@ -74,14 +74,6 @@ scalacOptions ++= Seq(
   "-unchecked"
 )
 
-scalacOptions ++= {
-  if (scalaBinaryVersion.value == "3") {
-    Seq("-Xignore-scala2-macros")
-  } else {
-    Nil
-  }
-}
-
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
   "org.scalikejdbc" %% "scalikejdbc-test" % scalikejdbcVersion % "test",
@@ -121,13 +113,3 @@ TaskKey[Unit]("generateCodeForIssue339") := {
 testResultLogger := TestResultLogger.Defaults.Main(
   printNoTests = TestResultLogger((_, _, _) => sys.error("invalid test name"))
 )
-
-testFrameworks --= {
-  if (scalaBinaryVersion.value == "3") {
-    // specs2 does not support Scala 3
-    // TODO remove this setting when specs2 for Scala 3 released
-    Seq(TestFrameworks.Specs2)
-  } else {
-    Nil
-  }
-}
