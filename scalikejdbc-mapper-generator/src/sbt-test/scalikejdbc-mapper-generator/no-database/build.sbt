@@ -13,14 +13,6 @@ scalacOptions ++= Seq(
   "-unchecked"
 )
 
-scalacOptions ++= {
-  if (scalaBinaryVersion.value == "3") {
-    Seq("-Xignore-scala2-macros")
-  } else {
-    Nil
-  }
-}
-
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
   "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikejdbcVersion,
@@ -49,14 +41,4 @@ Compile / scalikejdbcJDBCSettings := JDBCSettings(
     idColumn :: Nil
   )
   Seq(new scalikejdbc.mapper.CodeGenerator(table))
-}
-
-testFrameworks --= {
-  if (scalaBinaryVersion.value == "3") {
-    // specs2 does not support Scala 3
-    // TODO remove this setting when specs2 for Scala 3 released
-    Seq(TestFrameworks.Specs2)
-  } else {
-    Nil
-  }
 }
