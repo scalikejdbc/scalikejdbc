@@ -956,8 +956,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
           .find(rn => rn.namedColumns.exists(_.value.equalsIgnoreCase(name)))
           .map { rn =>
             SQLSyntax(s"${aliasName}.${rn.namedColumn(name).value} as ${rn
-              .namedColumn(name)
-              .value}${delimiterForResultName}${aliasName}")
+                .namedColumn(name)
+                .value}${delimiterForResultName}${aliasName}")
           }
           .getOrElse {
             val registeredNames = resultNames

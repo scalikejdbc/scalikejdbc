@@ -47,15 +47,15 @@ object OneToXSQL {
 
   private[this] def manies(n: Int): String = s"""  def toManies[${tparam(n)}](
     ${(1 to n)
-    .map(x => s"to${x}: WrappedResultSet => Option[B${x}]")
-    .mkString(", ")}
+      .map(x => s"to${x}: WrappedResultSet => Option[B${x}]")
+      .mkString(", ")}
   ): OneToManies${n}SQL[A, ${tparam(n)}, E, Z] = {
     val q: OneToManies${n}SQL[A, ${tparam(n)}, E, Z] = new OneToManies${n}SQL(
       statement, rawParameters)(one)(${(1 to n)
-    .map("to" + _)
-    .mkString(", ")})((a, ${List
-    .fill(n)("_")
-    .mkString(", ")}) => a.asInstanceOf[Z])
+      .map("to" + _)
+      .mkString(", ")})((a, ${List
+      .fill(n)("_")
+      .mkString(", ")}) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
     q.tags(tags.toSeq: _*)

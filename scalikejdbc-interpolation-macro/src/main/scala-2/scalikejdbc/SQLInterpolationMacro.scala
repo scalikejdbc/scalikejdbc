@@ -34,7 +34,7 @@ object SQLInterpolationMacro {
         c.error(
           c.enclosingPosition,
           s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames
-            .mkString("#", ", #", "")}."
+              .mkString("#", ", #", "")}."
         )
       }
     }
