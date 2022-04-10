@@ -26,11 +26,9 @@ lazy val _h2Version = "1.4.199"
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.0.0.Final"
-lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
-lazy val specs2Version = SettingKey[String]("specs2Version")
-lazy val parserCombinatorsVersion = settingKey[String]("")
+def scalatestVersion = "3.2.11"
 lazy val mockitoVersion = "4.4.0"
-lazy val collectionCompatVersion = settingKey[String]("")
+val specs2 = "org.specs2" %% "specs2-core" % "4.15.0" % "provided"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -49,10 +47,6 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.11",
-  specs2Version := "4.15.0",
-  parserCombinatorsVersion := "2.1.1",
-  collectionCompatVersion := "2.7.0",
   javacOptions ++= Seq(
     "-source",
     "1.8",
@@ -199,8 +193,8 @@ lazy val scalikejdbcCore = Project(
       // scope: compile
       "org.apache.commons" % "commons-dbcp2" % "2.9.0" % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % parserCombinatorsVersion.value % "compile",
-      "org.scala-lang.modules" %% "scala-collection-compat" % collectionCompatVersion.value,
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1" % "compile",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0",
       // scope: provided
       "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
       "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
@@ -293,8 +287,8 @@ lazy val scalikejdbcMapperGenerator = Project(
     "-Dmysql.version=" + _mysqlVersion,
     "-Dpostgresql.version=" + _postgresqlVersion,
     "-Dh2.version=" + _h2Version,
-    "-Dspecs2.version=" + specs2Version.value,
-    "-Dscalatest.version=" + scalatestVersion.value
+    "-Dspecs2.version=" + specs2.revision,
+    "-Dscalatest.version=" + scalatestVersion
   ),
   name := "scalikejdbc-mapper-generator",
   libraryDependencies ++= {
@@ -317,8 +311,8 @@ lazy val scalikejdbcTest = Project(
     Seq(
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatest" %% "scalatest-core" % scalatestVersion.value % "provided",
-      "org.specs2" %% "specs2-core" % specs2Version.value % "provided"
+      "org.scalatest" %% "scalatest-core" % scalatestVersion % "provided",
+      specs2,
     ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
   },
 ).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
@@ -381,7 +375,7 @@ val _resolvers = Seq(
   "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
-  Seq("org.scalatest" %% "scalatest" % scalatestVersion.value % "test")
+  Seq("org.scalatest" %% "scalatest" % scalatestVersion % "test")
 }
 
 val jdbcDriverDependenciesInTestScope = Seq(
