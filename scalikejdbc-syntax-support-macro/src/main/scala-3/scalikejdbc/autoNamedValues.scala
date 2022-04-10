@@ -28,7 +28,7 @@ object autoNamedValues {
                     Select.unique(entity.asTerm, name) :: Nil
                   ).asExprOf[ParameterBinder]
                 case _ =>
-                  report.throwError(
+                  report.errorAndAbort(
                     s"could not find ParameterBinderFactory[${typeTree.show}]"
                   )
               }

@@ -48,7 +48,7 @@ object SQLSyntaxSupportFactory {
                 ) match {
                   case result: ImplicitSearchSuccess => result.tree
                   case _ =>
-                    report.throwError(
+                    report.errorAndAbort(
                       s"could not find implicit of TypeBinder[${typeTree.show}]"
                     )
                 }

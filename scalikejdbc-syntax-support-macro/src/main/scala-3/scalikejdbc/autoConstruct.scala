@@ -26,7 +26,7 @@ object autoConstruct {
               typeTree.tpe
             )
           case _ =>
-            report.throwError(
+            report.errorAndAbort(
               s"could not find implicit of TypeBinder[${typeTree.show}]"
             )
         }

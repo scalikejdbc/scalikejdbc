@@ -13,13 +13,13 @@ object EntityUtil {
     val sym = TypeTree.of[T].symbol
     val primaryConstructor = sym.primaryConstructor
     if (primaryConstructor.isNoSymbol) {
-      report.throwError(
+      report.errorAndAbort(
         s"Could not find the primary constructor for ${sym.fullName}. type ${sym.fullName} must be a class, not trait or type parameter"
       )
     }
     val excludeNames: Set[String] = (excludes match {
       case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
-        report.throwError(
+        report.errorAndAbort(
           s"You must use String literal values for field names to exclude from case class ${sym.fullName}",
           excludes.asTerm.pos
         )
