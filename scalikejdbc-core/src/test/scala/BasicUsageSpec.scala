@@ -1,6 +1,5 @@
 import java.time.LocalDateTime
 import util.control.Exception._
-import java.sql.Connection
 import scalikejdbc._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
