@@ -34,7 +34,7 @@ package scalikejdbc.specs2
  *   }
  *
  *   case class db2AutoRollback() extends AutoRollback {
- *     override def db() = NamedDB('db2).toDB
+ *     override def db() = NamedDB("db2").toDB
  *     def create = this {
  *       LegacyAccount.create(2, "Bob")
  *       LegacyAccount.find(2).isDefined must beTrue

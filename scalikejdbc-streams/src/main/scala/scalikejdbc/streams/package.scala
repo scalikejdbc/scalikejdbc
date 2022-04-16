@@ -56,10 +56,10 @@ package object streams {
   }
 
   /**
-   * An implicit to enable the `NamedDB('name).readOnlyStream` method:
+   * An implicit to enable the `NamedDB("name").readOnlyStream` method:
    *
    * {{{
-   * val publisher = NamedDB('name).readOnlyStream {
+   * val publisher = NamedDB("name").readOnlyStream {
    *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
