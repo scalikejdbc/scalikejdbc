@@ -17,7 +17,7 @@ lazy val _organization = "org.scalikejdbc"
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.36"
 lazy val _typesafeConfigVersion = "1.4.2"
-lazy val _reactiveStreamsVersion = "1.0.3"
+lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
 lazy val _logbackVersion = "1.2.11"
