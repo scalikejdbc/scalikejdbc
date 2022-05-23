@@ -7,7 +7,7 @@ lazy val _organization = "org.scalikejdbc"
 // published dependency version
 lazy val _slf4jApiVersion = "1.7.36"
 lazy val _typesafeConfigVersion = "1.4.2"
-lazy val _reactiveStreamsVersion = "1.0.3"
+lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
 lazy val _logbackVersion = "1.2.11"
@@ -323,7 +323,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" %  "reactive-streams"          % _reactiveStreamsVersion % "compile",
       "org.slf4j"           %  "slf4j-api"                 % _slf4jApiVersion        % "compile",
       "ch.qos.logback"      %  "logback-classic"           % _logbackVersion         % "test",
-      "org.scalatestplus"   %% "testng-6-7"                % "3.2.10.0"               % "test",
+      "org.scalatestplus"   %% "testng-7-5"                % "3.2.12.0"              % "test",
       "org.reactivestreams" %  "reactive-streams-tck"      % _reactiveStreamsVersion % "test",
       "org.reactivestreams" %  "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
