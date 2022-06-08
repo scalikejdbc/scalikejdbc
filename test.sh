@@ -3,7 +3,7 @@
 set -eux
 
 sbt -v \
-  '++ 2.12.15! -v' \
+  '++ 2.12.16! -v' \
   "test" \
   mimaReportBinaryIssues \
   checkScalariform \
