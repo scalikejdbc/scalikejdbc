@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.1.2"
+def Scala3 = "3.1.3"
 def Scala212 = "2.12.16"
 def Scala213 = "2.13.8"
 
