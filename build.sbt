@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.1.2"
+def Scala3 = "3.1.3"
 def Scala212 = "2.12.16"
 def Scala213 = "2.13.8"
 
@@ -24,8 +24,8 @@ lazy val _logbackVersion = "1.2.11"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.4.0"
-lazy val _hibernateVersion = "6.1.0.Final"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "6.1.1.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -50,7 +50,7 @@ lazy val baseSettings = Def.settings(
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   scalatestVersion := "3.2.12",
-  specs2Version := "4.15.0",
+  specs2Version := "4.16.1",
   parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.7.0",
   javacOptions ++= Seq(
@@ -401,7 +401,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
-  "org.apache.derby" % "derby" % "10.15.2.0" % "test",
+  "org.apache.derby" % "derby" % "10.16.1.1" % "test",
   "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
