@@ -85,7 +85,9 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       )
       generator1.specAll()
       generator1.writeModel()
-      val generator2 = new CodeGenerator(table)(
+      val generator2 = new CodeGenerator(
+        table
+      )(
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -96,7 +98,9 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       generator2.specAll()
       generator2.writeModel()
 
-      val generator3 = new CodeGenerator(table)(
+      val generator3 = new CodeGenerator(
+        table
+      )(
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -107,7 +111,9 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       generator3.specAll()
       generator3.writeModel()
 
-      val generator4 = new CodeGenerator(table.copy(schema = Some("public")))(
+      val generator4 = new CodeGenerator(
+        table.copy(schema = Some("public"))
+      )(
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -118,7 +124,9 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       generator4.specAll()
       generator4.writeModel()
 
-      val generator5 = new CodeGenerator(table.copy(schema = Some("")))(
+      val generator5 = new CodeGenerator(
+        table.copy(schema = Some(""))
+      )(
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
