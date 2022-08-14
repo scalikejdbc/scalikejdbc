@@ -29,7 +29,7 @@ lazy val _hibernateVersion = "6.1.2.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "4.6.1"
+lazy val mockitoVersion = "4.7.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
