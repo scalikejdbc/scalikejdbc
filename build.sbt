@@ -2,8 +2,8 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.2.0"
-def Scala212 = "2.12.16"
+def Scala3 = "3.1.3"
+def Scala212 = "2.12.17"
 def Scala213 = "2.13.8"
 
 ThisBuild / version := "4.0.1-SNAPSHOT"
@@ -25,11 +25,11 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.2.Final"
+lazy val _hibernateVersion = "6.1.3.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
-lazy val mockitoVersion = "4.7.0"
+lazy val mockitoVersion = "4.8.0"
 lazy val collectionCompatVersion = settingKey[String]("")
 
 def gitHash: String = try {
@@ -402,7 +402,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.39.2.1" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.39.3.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
