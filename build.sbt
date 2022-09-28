@@ -28,7 +28,7 @@ lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.1.3.Final"
 def scalatestVersion = "3.2.13"
 lazy val mockitoVersion = "4.8.0"
-val specs2 = "org.specs2" %% "specs2-core" % "4.16.1" % "provided"
+val specs2 = "org.specs2" %% "specs2-core" % "4.17.0" % "provided"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
