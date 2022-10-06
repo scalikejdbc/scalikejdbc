@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.7.1/sbt-launch-1.7.1.jar
+wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.7.2/sbt-launch-1.7.2.jar
 
 mkdir -p ./db
 cd ./db
@@ -136,14 +136,14 @@ run_sbt "console"
 ' > ${DBCONSOLE_COMMAND}
 
 
-echo 'scalaVersion := "2.12.16"
+echo 'scalaVersion := "2.12.17"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc"    %% "scalikejdbc"         % "3.4.0",
   "org.slf4j"          % "slf4j-simple"         % "1.7.29",
   "com.h2database"     % "h2"                   % "1.4.200",
   "org.apache.derby"   % "derby"                % "10.14.2.0",
-  "org.xerial"         % "sqlite-jdbc"          % "3.39.2.1",
+  "org.xerial"         % "sqlite-jdbc"          % "3.39.3.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.2",
   "mysql"              % "mysql-connector-java" % "5.1.48",
   "org.postgresql"     % "postgresql"           % "42.2.21"

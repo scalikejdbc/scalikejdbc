@@ -2,9 +2,9 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.1.3"
-def Scala212 = "2.12.16"
-def Scala213 = "2.13.8"
+def Scala3 = "3.2.0"
+def Scala212 = "2.12.17"
+def Scala213 = "2.13.9"
 
 ThisBuild / version := "4.1.0-SNAPSHOT"
 
@@ -15,7 +15,7 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "2.0.0"
+lazy val _slf4jApiVersion = "2.0.3"
 lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
@@ -25,10 +25,10 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.3.Final"
-def scalatestVersion = "3.2.13"
+lazy val _hibernateVersion = "6.1.4.Final"
+def scalatestVersion = "3.2.14"
 lazy val mockitoVersion = "4.8.0"
-val specs2 = "org.specs2" %% "specs2-core" % "4.16.1" % "provided"
+val specs2 = "org.specs2" %% "specs2-core" % "4.17.0" % "provided"
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -142,7 +142,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.11.1",
+    "joda-time" % "joda-time" % "2.11.2",
     "org.joda" % "joda-convert" % "2.2.2"
   ),
 ).dependsOn(
@@ -347,7 +347,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-7-5" % "3.2.13.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.14.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
@@ -381,7 +381,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.39.2.1" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.39.3.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
