@@ -25,7 +25,7 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.3.Final"
+lazy val _hibernateVersion = "6.1.4.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -49,8 +49,8 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.13",
-  specs2Version := "4.17.0",
+  scalatestVersion := "3.2.14",
+  specs2Version := "4.16.1",
   parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.8.1",
   javacOptions ++= Seq(
@@ -368,7 +368,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-7-5" % "3.2.13.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.14.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
