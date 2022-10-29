@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 = "3.2.0"
 def Scala212 = "2.12.17"
-def Scala213 = "2.13.9"
+def Scala213 = "2.13.10"
 
 ThisBuild / version := "4.1.0-SNAPSHOT"
 
@@ -25,9 +25,9 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.4.Final"
+lazy val _hibernateVersion = "6.1.5.Final"
 def scalatestVersion = "3.2.14"
-lazy val mockitoVersion = "4.8.0"
+lazy val mockitoVersion = "4.8.1"
 val specs2 = "org.specs2" %% "specs2-core" % "4.17.0" % "provided"
 
 def gitHash: String = try {
