@@ -25,7 +25,7 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.5.Final"
+lazy val _hibernateVersion = "6.1.6.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
