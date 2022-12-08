@@ -24,8 +24,8 @@ lazy val _logbackVersion = "1.2.11"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
-lazy val _postgresqlVersion = "42.5.1"
-lazy val _hibernateVersion = "6.1.5.Final"
+lazy val _postgresqlVersion = "9.4.1212"
+lazy val _hibernateVersion = "6.1.6.Final"
 lazy val scalatestVersion = SettingKey[String]("scalatestVersion")
 lazy val specs2Version = SettingKey[String]("specs2Version")
 lazy val parserCombinatorsVersion = settingKey[String]("")
@@ -52,7 +52,7 @@ lazy val baseSettings = Def.settings(
   scalatestVersion := "3.2.14",
   specs2Version := "4.16.1",
   parserCombinatorsVersion := "2.1.1",
-  collectionCompatVersion := "2.8.1",
+  collectionCompatVersion := "2.9.0",
   javacOptions ++= Seq(
     "-source",
     "1.8",
@@ -402,7 +402,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.39.4.1" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.40.0.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
