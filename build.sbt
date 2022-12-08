@@ -15,7 +15,7 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "2.0.4"
+lazy val _slf4jApiVersion = "2.0.5"
 lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
@@ -25,7 +25,7 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.5.Final"
+lazy val _hibernateVersion = "6.1.6.Final"
 def scalatestVersion = "3.2.14"
 lazy val mockitoVersion = "4.9.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.19.0" % "provided"
@@ -142,7 +142,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.12.1",
+    "joda-time" % "joda-time" % "2.12.2",
     "org.joda" % "joda-convert" % "2.2.2"
   ),
 ).dependsOn(
@@ -194,7 +194,7 @@ lazy val scalikejdbcCore = Project(
       "org.apache.commons" % "commons-dbcp2" % "2.9.0" % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.1" % "compile",
-      "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.1",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.9.0",
       // scope: provided
       "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
       "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
