@@ -15,7 +15,7 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "2.0.5"
+lazy val _slf4jApiVersion = "2.0.6"
 lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
@@ -25,9 +25,9 @@ lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.1.6.Final"
+lazy val _hibernateVersion = "6.2.0.CR1"
 def scalatestVersion = "3.2.14"
-lazy val mockitoVersion = "4.9.0"
+lazy val mockitoVersion = "4.10.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.19.0" % "provided"
 
 def gitHash: String = try {
