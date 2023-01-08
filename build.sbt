@@ -375,7 +375,11 @@ val _resolvers = Seq(
   "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 lazy val scalaTestDependenciesInTestScope = Def.setting {
-  Seq("org.scalatest" %% "scalatest" % scalatestVersion % "test")
+  Seq(
+    "org.scalatest" %% "scalatest-flatspec" % scalatestVersion % "test",
+    "org.scalatest" %% "scalatest-funspec" % scalatestVersion % "test",
+    "org.scalatest" %% "scalatest-shouldmatchers" % scalatestVersion % "test"
+  )
 }
 
 val jdbcDriverDependenciesInTestScope = Seq(
