@@ -67,8 +67,6 @@ lazy val baseSettings = Def.settings(
     if (isScala3.value) {
       Seq(
         "-language:higherKinds,implicitConversions",
-        "-source",
-        "3.0-migration",
       )
     } else {
       Seq(
