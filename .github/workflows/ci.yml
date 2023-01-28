@@ -107,7 +107,7 @@ jobs:
             root213/publishLocal
             ;;
           "test")
-            sbt "+ scalafmtCheckAll" scalafmtSbtCheck && ./test.sh
+            ./test.sh
             ;;
           "scripted")
             ./scripted.sh
@@ -117,3 +117,35 @@ jobs:
             exit 1
         esac
     - run: rm -rf "$HOME/.ivy2/local" || true
+  format:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+    - run: |
+        sbt "+ scalafmtAll" scalafmtSbt
+        git diff --exit-code
+    - if: ${{ (github.event_name == 'pull_request') && failure() }}
+      run: |
+        REVIEWDOG_VERSION="0.14.1"
+        FILE_NAME="reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64"
+        wget -q https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/${FILE_NAME}.tar.gz &&
+        gunzip ${FILE_NAME}.tar.gz &&
+        tar -xf ${FILE_NAME}.tar &&
+        chmod +x ./reviewdog &&
+        ./reviewdog -version
+        export REVIEWDOG_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        TMPFILE=$(mktemp)
+        git diff > "${TMPFILE}"
+        ./reviewdog \
+          -name="scalafmt" \
+          -f=diff \
+          -f.diff.strip=1 \
+          -reporter="github-pr-review" \
+          -filter-mode="diff_context" \
+          -fail-on-error="false" \
+          -level="warning" <"${TMPFILE}"
