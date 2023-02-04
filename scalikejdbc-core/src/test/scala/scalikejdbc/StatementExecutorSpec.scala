@@ -204,6 +204,27 @@ class StatementExecutorSpec
     }
   }
 
+  it should "get stackTraceInformation" in {
+    val executor = StatementExecutor(
+      underlying = mock[PreparedStatement],
+      template = "",
+      connectionAttributes = DBConnectionAttributes(),
+      settingsProvider = SettingsProvider.default.copy(
+        loggingSQLAndTime = Function.const(LoggingSQLAndTimeSettings())
+      )
+    )
+    val Some(method) =
+      classOf[StatementExecutor].getMethods
+        .find { m =>
+          (m.getName contains "stackTraceInformation") &&
+          (m.getReturnType == classOf[String]) &&
+          (m.getParameterCount == 0) &&
+          !Modifier.isStatic(m.getModifiers)
+        }
+    val stackTraceInfo = method.invoke(executor).asInstanceOf[String]
+    assert(stackTraceInfo.contains("  [Stack Trace]"))
+  }
+
   object Foo {
     case object Bar
   }
