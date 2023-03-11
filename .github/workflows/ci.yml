@@ -86,6 +86,7 @@ jobs:
         java-version: ${{matrix.java}}
         distribution: temurin
     - uses: coursier/cache-action@v6
+      timeout-minutes: 5
     - name: copy jdbc settings
       run: |
         if [[ "${{ matrix.name }}" == "scripted" ]]; then
