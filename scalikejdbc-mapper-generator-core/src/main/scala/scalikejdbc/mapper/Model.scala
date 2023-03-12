@@ -76,7 +76,6 @@ case class Model(url: String, username: String, password: String)
         case allColumns =>
           Some(
             Table(
-              schema = Option(schema),
               name = tableName,
               allColumns = allColumns,
               autoIncrementColumns =
@@ -90,7 +89,8 @@ case class Model(url: String, username: String, password: String)
                   }
                   .toList
                   .distinct
-              }
+              },
+              schema = Option(schema)
             )
           )
       }
