@@ -143,7 +143,7 @@ libraryDependencies ++= Seq(
   "org.slf4j"          % "slf4j-simple"         % "1.7.29",
   "com.h2database"     % "h2"                   % "1.4.200",
   "org.apache.derby"   % "derby"                % "10.14.2.0",
-  "org.xerial"         % "sqlite-jdbc"          % "3.41.0.1",
+  "org.xerial"         % "sqlite-jdbc"          % "3.41.2.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.2",
   "mysql"              % "mysql-connector-java" % "5.1.48",
   "org.postgresql"     % "postgresql"           % "42.2.21"
