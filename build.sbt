@@ -20,12 +20,12 @@ lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
-lazy val _logbackVersion = "1.2.11"
+lazy val _logbackVersion = "1.2.12"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.2.0.CR4"
+lazy val _hibernateVersion = "6.2.0.Final"
 def scalatestVersion = "3.2.15"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.19.2" % "provided"
@@ -140,7 +140,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.12.2",
+    "joda-time" % "joda-time" % "2.12.5",
     "org.joda" % "joda-convert" % "2.2.3"
   ),
 ).dependsOn(
@@ -383,7 +383,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.41.0.0" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.41.2.1" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"

@@ -158,7 +158,7 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 
   it should "have instance for java.net.URL" in {
     val stmt = mock[PreparedStatement]
-    val value = new java.net.URL("http://www.example.com")
+    val value = new java.net.URI("http://www.example.com").toURL
     implicitly[ParameterBinderFactory[java.net.URL]].apply(value)(stmt, 1)
     implicitly[ParameterBinderFactory[java.net.URL]].apply(null)(stmt, 2)
     verify(stmt).setURL(1, value)
