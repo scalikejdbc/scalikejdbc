@@ -6,17 +6,21 @@ import java.sql.Connection
 /**
  * Commons DBCP Connection Pool
  *
- * @see [[http://commons.apache.org/proper/commons-dbcp/]]
+ * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 class CommonsConnectionPool(
   override val url: String,
   override val user: String,
   password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
-  extends ConnectionPool(url, user, password, settings) {
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
+) extends ConnectionPool(url, user, password, settings) {
 
   import org.apache.commons.pool.impl.GenericObjectPool
-  import org.apache.commons.dbcp.{ PoolingDataSource, PoolableConnectionFactory, DriverManagerConnectionFactory }
+  import org.apache.commons.dbcp.{
+    PoolingDataSource,
+    PoolableConnectionFactory,
+    DriverManagerConnectionFactory
+  }
 
   private[this] val _pool = new GenericObjectPool(null)
   _pool.setMinIdle(settings.initialSize)
@@ -34,7 +38,8 @@ class CommonsConnectionPool(
     null,
     settings.validationQuery,
     false,
-    true)
+    true
+  )
 
   private[this] val _dataSource: DataSource = new PoolingDataSource(_pool)
 
@@ -53,4 +58,3 @@ class CommonsConnectionPool(
   override def close(): Unit = _pool.close()
 
 }
-

@@ -1,6 +1,5 @@
 package scalikejdbc.metadata
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -18,7 +17,17 @@ class ColumnSpec extends AnyFlatSpec with Matchers {
     val isAutoIncrement: Boolean = false
     val description: String = ""
     val defaultValue: String = ""
-    val instance = new Column(name, typeCode, typeName, size, isRequired, isPrimaryKey, isAutoIncrement, description, defaultValue)
+    val instance = new Column(
+      name,
+      typeCode,
+      typeName,
+      size,
+      isRequired,
+      isPrimaryKey,
+      isAutoIncrement,
+      description,
+      defaultValue
+    )
     instance should not be null
   }
 

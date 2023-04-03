@@ -1,6 +1,9 @@
 import sbt._, Keys._
 import com.typesafe.tools.mima.plugin.MimaPlugin
-import com.typesafe.tools.mima.plugin.MimaKeys.{mimaPreviousArtifacts, mimaReportBinaryIssues}
+import com.typesafe.tools.mima.plugin.MimaKeys.{
+  mimaPreviousArtifacts,
+  mimaReportBinaryIssues
+}
 
 /*
  * MiMa settings of ScalikeJDBC libs.
@@ -20,20 +23,22 @@ object MimaSettings {
   //  - you're going to remove some of the methods in 3.0.2
   //  - in this case, the incompatibility won't be detected
   //
-  // val previousVersions = Set(0).map(patch => s"3.5.$patch")
+  // val previousVersions = Set(0).map(patch => s"4.0.$patch")
   val previousVersions = Set.empty[String]
 
   val mimaSettings = MimaPlugin.mimaDefaultSettings ++ Seq(
     mimaPreviousArtifacts := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, scalaMajor)) if scalaMajor <= 13 =>
-          previousVersions.map { organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _ }
+          previousVersions.map {
+            organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _
+          }
         case _ => Set.empty
       }
     },
-    test in Test := {
+    (Test / test) := {
       mimaReportBinaryIssues.value
-      (test in Test).value
+      (Test / test).value
     }
   )
 }

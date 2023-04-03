@@ -36,29 +36,34 @@ object ParameterBinder {
   /**
    * Factory method for ParameterBinder.
    */
-  def apply(value: Any, binder: (PreparedStatement, Int) => Unit): ParameterBinderWithValue = {
+  def apply(
+    value: Any,
+    binder: (PreparedStatement, Int) => Unit
+  ): ParameterBinderWithValue = {
     val _value = value
     new ParameterBinderWithValue {
       val value: Any = _value
-      override def apply(stmt: PreparedStatement, idx: Int): Unit = binder(stmt, idx)
+      override def apply(stmt: PreparedStatement, idx: Int): Unit =
+        binder(stmt, idx)
     }
   }
 
   def unapply(a: Any): Option[Any] = {
-    PartialFunction.condOpt(a) {
-      case x: ParameterBinderWithValue => nestedExtract(x.value)
+    PartialFunction.condOpt(a) { case x: ParameterBinderWithValue =>
+      nestedExtract(x.value)
     }
   }
 
   @annotation.tailrec
   private def nestedExtract(p: Any): Any = p match {
     case x: ParameterBinderWithValue => nestedExtract(x.value)
-    case _ => p
+    case _                           => p
   }
 
   object NullParameterBinder extends ParameterBinderWithValue {
     val value = null
-    def apply(stmt: PreparedStatement, idx: Int): Unit = stmt.setObject(idx, null)
+    def apply(stmt: PreparedStatement, idx: Int): Unit =
+      stmt.setObject(idx, null)
     override def toString: String = s"ParameterBinder(value=NULL)"
   }
 
@@ -78,7 +83,10 @@ trait ParameterBinderWithValue extends ParameterBinder { self =>
 
 }
 
-private[scalikejdbc] case class ContramappedParameterBinder(value: Any, underlying: ParameterBinder) extends ParameterBinderWithValue {
+private[scalikejdbc] case class ContramappedParameterBinder(
+  value: Any,
+  underlying: ParameterBinder
+) extends ParameterBinderWithValue {
   def apply(stmt: PreparedStatement, idx: Int): Unit = underlying(stmt, idx)
 }
 
@@ -103,10 +111,13 @@ private[scalikejdbc] case class SQLSyntaxParameterBinder(syntax: SQLSyntax)
 case class AsIsParameterBinder(value: Any) extends ParameterBinderWithValue {
 
   private[this] def unsupportedError(): Nothing = {
-    throw new UnsupportedOperationException("Apply method doesn't work because this is an AsIsParameterBinder")
+    throw new UnsupportedOperationException(
+      "Apply method doesn't work because this is an AsIsParameterBinder"
+    )
   }
 
-  override def apply(stmt: PreparedStatement, idx: Int): Unit = unsupportedError
+  override def apply(stmt: PreparedStatement, idx: Int): Unit =
+    unsupportedError()
 
   override def toString: String = s"AsIsParameterBinder(value=$value)"
 

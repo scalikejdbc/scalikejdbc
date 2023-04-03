@@ -8,7 +8,10 @@ import org.joda.time.DateTime
 import scalikejdbc.NamedDB
 import unit._
 
-object AutoRollbackSpec extends Specification with DBSettings with PreparingTables {
+class AutoRollbackSpec
+  extends Specification
+  with DBSettings
+  with PreparingTables {
 
   sequential
 
@@ -88,30 +91,45 @@ object AutoRollbackSpec extends Specification with DBSettings with PreparingTabl
 
 trait AutoRollbackWithFixture extends AutoRollback {
   override def fixture(implicit session: DBSession): Unit = {
-    SQL("insert into mutable_members values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into mutable_members values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    SQL("insert into mutable_members values (?, ?, ?)")
+      .bind(1, "Alice", DateTime.now)
+      .update
+      .apply()
+    SQL("insert into mutable_members values (?, ?, ?)")
+      .bind(2, "Bob", DateTime.now)
+      .update
+      .apply()
   }
 }
 
 trait AutoRollbackWithWrongFixture extends AutoRollback {
   override def fixture(implicit session: DBSession): Unit = {
     SQL("insert into mutable_members values (?, ?, ?)")
-      .bind(1, "Alice", DateTime.now).update().apply()
+      .bind(1, "Alice", DateTime.now)
+      .update
+      .apply()
     // Primary key conflict
     SQL("insert into mutable_members values (?, ?, ?)")
-      .bind(1, "Alice", DateTime.now).update().apply()
+      .bind(1, "Alice", DateTime.now)
+      .update
+      .apply()
   }
 }
 
 trait DB2AutoRollbackWithFixture extends AutoRollback {
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db() = NamedDB("db2").toDB()
   override def fixture(implicit session: DBSession): Unit = {
-    SQL("insert into mutable_members2 values (?, ?, ?)").bind(1, "Alice", DateTime.now).update.apply()
-    SQL("insert into mutable_members2 values (?, ?, ?)").bind(2, "Bob", DateTime.now).update.apply()
+    SQL("insert into mutable_members2 values (?, ?, ?)")
+      .bind(1, "Alice", DateTime.now)
+      .update
+      .apply()
+    SQL("insert into mutable_members2 values (?, ?, ?)")
+      .bind(2, "Bob", DateTime.now)
+      .update
+      .apply()
   }
 }
 
 trait DB2AutoRollback extends AutoRollback {
-  override def db = NamedDB(Symbol("db2")).toDB
+  override def db() = NamedDB("db2").toDB()
 }
-

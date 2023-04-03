@@ -1,10 +1,13 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with SQLInterpolation {
+class SQL_AttributesSpec
+  extends AnyFlatSpec
+  with Matchers
+  with DBSettings
+  with SQLInterpolation {
 
   behavior of "SQL"
 
@@ -13,7 +16,9 @@ class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with 
 
   object Company extends SQLSyntaxSupport[Company] {
     override val columns = Seq("id")
-    def apply(rs: WrappedResultSet, u: ResultName[Company]): Company = Company(rs.get(u.id))
+    def apply(rs: WrappedResultSet, u: ResultName[Company]): Company = Company(
+      rs.get(u.id)
+    )
   }
   object Member extends SQLSyntaxSupport[Member] {
     override val columns = Seq("id", "company_id", "name")
@@ -27,15 +32,20 @@ class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with 
 
     val query: OneToManySQLToOption[Company, Member, NoExtractor, Nothing] = {
       withSQL {
-        select.from[Company](Company as c)
-          .leftJoin(Member as m).on(c.id, m.companyId)
-          .where.eq(c.id, 123)
+        select
+          .from[Company](Company as c)
+          .leftJoin(Member as m)
+          .on(c.id, m.companyId)
+          .where
+          .eq(c.id, 123)
       }.queryTimeout(5)
         .fetchSize(10)
         .tags("foo", "bar")
         .one(rs => Company(rs, c.resultName))
-        .toMany(rs => rs.longOpt(m.resultName.id).map(_ => Member(rs, m.resultName)))
-        .single()
+        .toMany(rs =>
+          rs.longOpt(m.resultName.id).map(_ => Member(rs, m.resultName))
+        )
+        .single
     }
 
     query.queryTimeout should equal(Some(5))
@@ -44,4 +54,3 @@ class SQL_AttributesSpec extends AnyFlatSpec with Matchers with DBSettings with 
   }
 
 }
-

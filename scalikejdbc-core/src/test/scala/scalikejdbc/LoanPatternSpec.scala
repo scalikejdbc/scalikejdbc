@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.sql.DriverManager
 
 import org.mockito.Mockito.{ mock, verify }
@@ -13,20 +12,21 @@ import ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class LoanPatternSpec extends AnyFlatSpec with Matchers with Settings with LoanPattern with ScalaFutures {
+class LoanPatternSpec
+  extends AnyFlatSpec
+  with Matchers
+  with Settings
+  with LoanPattern
+  with ScalaFutures {
 
-  implicit val patienceTimeout = PatienceConfig(30.seconds)
+  implicit val patienceTimeout: PatienceConfig = PatienceConfig(30.seconds)
 
   behavior of "LoanPattern"
 
-  it should "be available" in {
-    LoanPattern.isInstanceOf[Singleton] should equal(true)
-  }
-
   "using" should "be available" in {
     val conn = DriverManager.getConnection(url, user, password)
-    using(conn) {
-      conn => println("do something with " + conn.toString)
+    using(conn) { conn =>
+      println("do something with " + conn.toString)
     }
   }
 
@@ -53,7 +53,9 @@ class LoanPatternSpec extends AnyFlatSpec with Matchers with Settings with LoanP
       override val loanPatternLogger: Logger = mockLogger
     }
     loadPattern.using(new ExceptionResource()) { _ => }
-    verify(mockLogger).warn("Failed to close a resource (resource: scalikejdbc.LoanPatternSpec$ExceptionResource error: test)")
+    verify(mockLogger).warn(
+      "Failed to close a resource (resource: scalikejdbc.LoanPatternSpec$ExceptionResource error: test)"
+    )
   }
 
 }

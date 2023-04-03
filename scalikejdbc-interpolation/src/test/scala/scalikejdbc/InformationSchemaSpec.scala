@@ -1,10 +1,13 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class InformationSchemaSpec extends AnyFlatSpec with Matchers with SQLInterpolation with DBSettings {
+class InformationSchemaSpec
+  extends AnyFlatSpec
+  with Matchers
+  with SQLInterpolation
+  with DBSettings {
 
   behavior of "SQLSyntaxSupport with information_schema"
 
@@ -12,8 +15,10 @@ class InformationSchemaSpec extends AnyFlatSpec with Matchers with SQLInterpolat
 
   object Roles extends SQLSyntaxSupport[Role] {
     override val tableName = "roles"
-    def apply(a: SyntaxProvider[Role])(rs: WrappedResultSet): Role = apply(a.resultName)(rs)
-    def apply(a: ResultName[Role])(rs: WrappedResultSet): Role = new Role(rs.get(a.id), rs.get(a.name))
+    def apply(a: SyntaxProvider[Role])(rs: WrappedResultSet): Role =
+      apply(a.resultName)(rs)
+    def apply(a: ResultName[Role])(rs: WrappedResultSet): Role =
+      new Role(rs.get(a.id), rs.get(a.name))
   }
 
   it should "work" in {
@@ -22,7 +27,8 @@ class InformationSchemaSpec extends AnyFlatSpec with Matchers with SQLInterpolat
         sql"drop table roles if exists".execute.apply()
       } catch { case e: Exception => }
       try {
-        sql"create table roles (id int not null, name varchar(256) not null)".execute.apply()
+        sql"create table roles (id int not null, name varchar(256) not null)".execute
+          .apply()
         sql"insert into roles (id, name) values (1, 'Alice')".update.apply()
       } catch { case e: Exception => }
 

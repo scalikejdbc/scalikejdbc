@@ -59,9 +59,10 @@ import scala.concurrent.{ ExecutionContext, Future }
  */
 case class DB(
   conn: Connection,
-  override val connectionAttributes: DBConnectionAttributes = DBConnectionAttributes(),
-  settingsProvider: SettingsProvider = SettingsProvider.default)
-  extends DBConnection
+  override val connectionAttributes: DBConnectionAttributes =
+    DBConnectionAttributes(),
+  settingsProvider: SettingsProvider = SettingsProvider.default
+) extends DBConnection
 
 /**
  * Basic Database Accessor
@@ -143,22 +144,32 @@ object DB extends LoanPattern {
 
   private[this] def ensureDBInstance(db: DB): Unit = {
     if (db == null) {
-      throw new IllegalStateException(ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED)
+      throw new IllegalStateException(
+        ErrorMessage.IMPLICIT_DB_INSTANCE_REQUIRED
+      )
     }
   }
 
-  private[this] def connectionPool(context: CPContext): ConnectionPool = Option(context match {
-    case NoCPContext => ConnectionPool()
-    case _: MultipleConnectionPoolContext => context.get(ConnectionPool.DEFAULT_NAME)
-    case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
-  }) getOrElse {
-    throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
-  }
+  private[this] def connectionPool(context: CPContext): ConnectionPool =
+    Option(context match {
+      case NoCPContext => ConnectionPool()
+      case _: MultipleConnectionPoolContext =>
+        context.get(ConnectionPool.DEFAULT_NAME)
+      case _ =>
+        throw new IllegalStateException(
+          ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT
+        )
+    }) getOrElse {
+      throw new IllegalStateException(
+        ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED
+      )
+    }
 
   /**
    * Provides default TxBoundary type class instance.
    */
-  private[this] def defaultTxBoundary[A]: TxBoundary[A] = TxBoundary.Exception.exceptionTxBoundary[A]
+  private[this] def defaultTxBoundary[A]: TxBoundary[A] =
+    TxBoundary.Exception.exceptionTxBoundary[A]
 
   /**
    * Begins a read-only block easily with ConnectionPool.
@@ -168,10 +179,15 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def readOnly[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def readOnly[A](execution: DBSession => A)(implicit
+    context: CPContext = NoCPContext,
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
-      DB(conn, cp.connectionAttributes, settings).autoClose(false).readOnly(execution)
+      DB(conn, cp.connectionAttributes, settings)
+        .autoClose(false)
+        .readOnly(execution)
     }
   }
 
@@ -184,10 +200,15 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def readOnlyWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def readOnlyWithConnection[A](execution: Connection => A)(implicit
+    context: CPContext = NoCPContext,
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
-      DB(conn, cp.connectionAttributes, settings).autoClose(false).readOnlyWithConnection(execution)
+      DB(conn, cp.connectionAttributes, settings)
+        .autoClose(false)
+        .readOnlyWithConnection(execution)
     }
   }
 
@@ -197,7 +218,9 @@ object DB extends LoanPattern {
    * @param context connection pool context
    * @return session
    */
-  def readOnlySession(settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): DBSession = {
+  def readOnlySession(
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): DBSession = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes, settings).readOnlySession()
   }
@@ -210,10 +233,15 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def autoCommit[A](execution: DBSession => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def autoCommit[A](execution: DBSession => A)(implicit
+    context: CPContext = NoCPContext,
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
-      DB(conn, cp.connectionAttributes, settings).autoClose(false).autoCommit(execution)
+      DB(conn, cp.connectionAttributes, settings)
+        .autoClose(false)
+        .autoCommit(execution)
     }
   }
 
@@ -226,10 +254,15 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def autoCommitWithConnection[A](execution: Connection => A)(implicit context: CPContext = NoCPContext, settings: SettingsProvider = SettingsProvider.default): A = {
+  def autoCommitWithConnection[A](execution: Connection => A)(implicit
+    context: CPContext = NoCPContext,
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
-      DB(conn, cp.connectionAttributes, settings).autoClose(false).autoCommitWithConnection(execution)
+      DB(conn, cp.connectionAttributes, settings)
+        .autoClose(false)
+        .autoCommitWithConnection(execution)
     }
   }
 
@@ -239,7 +272,9 @@ object DB extends LoanPattern {
    * @param context connection pool context
    * @return session
    */
-  def autoCommitSession(settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): DBSession = {
+  def autoCommitSession(
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): DBSession = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes, settings).autoCommitSession()
   }
@@ -252,13 +287,15 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def localTx[A](execution: DBSession => A)(
-    implicit
+  def localTx[A](execution: DBSession => A)(implicit
     context: CPContext = NoCPContext,
     boundary: TxBoundary[A] = defaultTxBoundary[A],
-    settings: SettingsProvider = SettingsProvider.default): A = {
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
-    DB(cp.borrow(), cp.connectionAttributes, settings).autoClose(true).localTx(execution)
+    DB(cp.borrow(), cp.connectionAttributes, settings)
+      .autoClose(true)
+      .localTx(execution)
   }
 
   /**
@@ -269,11 +306,11 @@ object DB extends LoanPattern {
    * @tparam A future result type
    * @return future result value
    */
-  def futureLocalTx[A](execution: DBSession => Future[A])(
-    implicit
+  def futureLocalTx[A](execution: DBSession => Future[A])(implicit
     context: CPContext = NoCPContext,
     ec: ExecutionContext,
-    settings: SettingsProvider = SettingsProvider.default): Future[A] = {
+    settings: SettingsProvider = SettingsProvider.default
+  ): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
     localTx(execution)(context, implicitly, settings)
@@ -288,14 +325,16 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def localTxWithConnection[A](execution: Connection => A)(
-    implicit
+  def localTxWithConnection[A](execution: Connection => A)(implicit
     context: CPContext = NoCPContext,
     boundary: TxBoundary[A] = defaultTxBoundary[A],
-    settings: SettingsProvider = SettingsProvider.default): A = {
+    settings: SettingsProvider = SettingsProvider.default
+  ): A = {
     val cp = connectionPool(context)
     using(cp.borrow()) { conn =>
-      DB(conn, cp.connectionAttributes, settings).autoClose(false).localTxWithConnection(execution)
+      DB(conn, cp.connectionAttributes, settings)
+        .autoClose(false)
+        .localTxWithConnection(execution)
     }
   }
 
@@ -321,7 +360,9 @@ object DB extends LoanPattern {
    * @tparam A return type
    * @return result value
    */
-  def withinTxWithConnection[A](execution: Connection => A)(implicit db: DB): A = {
+  def withinTxWithConnection[A](
+    execution: Connection => A
+  )(implicit db: DB): A = {
     ensureDBInstance(db: DB)
     db.withinTxWithConnection(execution)
   }
@@ -341,11 +382,13 @@ object DB extends LoanPattern {
    * @param context connection pool context as implicit parameter
    * @return table information
    */
-  def getTableNames(tableNamePattern: String, settings: SettingsProvider = SettingsProvider.default)(
-    implicit
-    context: CPContext = NoCPContext): List[String] = {
+  def getTableNames(
+    tableNamePattern: String,
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): List[String] = {
     val cp = connectionPool(context)
-    DB(cp.borrow(), cp.connectionAttributes, settings).getTableNames(tableNamePattern)
+    DB(cp.borrow(), cp.connectionAttributes, settings)
+      .getTableNames(tableNamePattern)
   }
 
   /**
@@ -354,7 +397,9 @@ object DB extends LoanPattern {
    * @param context connection pool context as implicit parameter
    * @return table information
    */
-  def getAllTableNames(settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): List[String] = {
+  def getAllTableNames(
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): List[String] = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes, settings).getTableNames("%")
   }
@@ -366,12 +411,18 @@ object DB extends LoanPattern {
    * @param context connection pool context as implicit parameter
    * @return table information
    */
-  def getTable(table: String, settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): Option[Table] = {
+  def getTable(
+    table: String,
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): Option[Table] = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes, settings).getTable(table)
   }
 
-  def getColumnNames(table: String, settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): List[String] = {
+  def getColumnNames(
+    table: String,
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): List[String] = {
     if (table != null) {
       val cp = connectionPool(context)
       DB(cp.borrow(), cp.connectionAttributes, settings).getColumnNames(table)
@@ -390,9 +441,11 @@ object DB extends LoanPattern {
   def showTables(
     tableNamePattern: String = "%",
     tableTypes: Array[String] = Array("TABLE", "VIEW"),
-    settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): String = {
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): String = {
     val cp = connectionPool(context)
-    DB(cp.borrow(), cp.connectionAttributes, settings).showTables(tableNamePattern, tableTypes)
+    DB(cp.borrow(), cp.connectionAttributes, settings)
+      .showTables(tableNamePattern, tableTypes)
   }
 
   /**
@@ -402,7 +455,10 @@ object DB extends LoanPattern {
    * @param context connection pool context as implicit parameter
    * @return described information
    */
-  def describe(table: String, settings: SettingsProvider = SettingsProvider.default)(implicit context: CPContext = NoCPContext): String = {
+  def describe(
+    table: String,
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): String = {
     val cp = connectionPool(context)
     DB(cp.borrow(), cp.connectionAttributes, settings).describe(table)
   }
@@ -415,7 +471,8 @@ object DB extends LoanPattern {
    */
   def connect(
     conn: Connection = ConnectionPool.borrow(),
-    settings: SettingsProvider = SettingsProvider.default): DB = DB(conn, DBConnectionAttributes(), settings)
+    settings: SettingsProvider = SettingsProvider.default
+  ): DB = DB(conn, DBConnectionAttributes(), settings)
 
   /**
    * Returns a DB instance by using an implicit Connection object.
@@ -425,5 +482,6 @@ object DB extends LoanPattern {
    */
   def connected(implicit
     conn: Connection,
-    settings: SettingsProvider = SettingsProvider.default): DB = DB(conn, DBConnectionAttributes(), settings)
+    settings: SettingsProvider = SettingsProvider.default
+  ): DB = DB(conn, DBConnectionAttributes(), settings)
 }

@@ -22,7 +22,8 @@ class DatabasePublisherSpec
 
   private lazy val log = LoggerFactory.getLogger(classOf[DatabasePublisherSpec])
 
-  private val tableName = "emp_DatabasePublisherSpec" + System.currentTimeMillis()
+  private val tableName =
+    "emp_DatabasePublisherSpec" + System.currentTimeMillis()
   private val totalRows = 100
 
   override protected def beforeAll(): Unit = {
@@ -42,7 +43,7 @@ class DatabasePublisherSpec
 
   it should "be subscribed by SyncSubscriber" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator()
     }
 
     val consumedCountPromise: Promise[Int] = Promise[Int]()
@@ -72,12 +73,15 @@ class DatabasePublisherSpec
 
   it should "emit elements in order" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-      SQL(s"select id from $tableName order by id").map(r => r.int("id")).iterator
+      SQL(s"select id from $tableName order by id")
+        .map(r => r.int("id"))
+        .iterator()
     }
 
     val expectedElements = (1 to totalRows)
     val actualElements = new ListBuffer[Int]
-    val consumedCountPromise: Promise[ListBuffer[Int]] = Promise[ListBuffer[Int]]()
+    val consumedCountPromise: Promise[ListBuffer[Int]] =
+      Promise[ListBuffer[Int]]()
     val subscriber: SyncSubscriber[Int] = new SyncSubscriber[Int] {
       override def whenNext(element: Int): Boolean = {
         actualElements += element
@@ -103,9 +107,12 @@ class DatabasePublisherSpec
   it should "be subscribed and use the modified DB session" in {
     val passedStreamReadySwitcher: AtomicBoolean = new AtomicBoolean(false)
     val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator.withDBSessionForceAdjuster(session => {
-        passedStreamReadySwitcher.set(true)
-      })
+      SQL(s"select id from $tableName")
+        .map(r => r.int("id"))
+        .iterator()
+        .withDBSessionForceAdjuster(session => {
+          passedStreamReadySwitcher.set(true)
+        })
     }
 
     val consumedCountPromise: Promise[Int] = Promise[Int]()
@@ -130,7 +137,9 @@ class DatabasePublisherSpec
     }
     publisher.subscribe(subscriber)
     consumedCountPromise.future
-      .map(count => assert(count == totalRows && passedStreamReadySwitcher.get() == true))
+      .map(count =>
+        assert(count == totalRows && passedStreamReadySwitcher.get())
+      )
   }
 
   // ------------------------------------------
@@ -139,7 +148,7 @@ class DatabasePublisherSpec
 
   it should "be subscribed by AsyncSubscriber" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator()
     }
 
     val consumedCountPromise: Promise[Int] = Promise[Int]()
@@ -180,7 +189,7 @@ class DatabasePublisherSpec
 
   it should "be subscribed and cancelled by AsyncSubscriber" in {
     val publisher: DatabasePublisher[Int] = DB readOnlyStream {
-      SQL(s"select id from $tableName").map(r => r.int("id")).iterator
+      SQL(s"select id from $tableName").map(r => r.int("id")).iterator()
     }
 
     val expectedCountOfElements = 20

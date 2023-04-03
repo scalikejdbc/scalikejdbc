@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -15,7 +14,9 @@ class JDBCSettingsSpec extends AnyFlatSpec with Matchers {
     val driverName: String = "myDriverName"
     val instance = new JDBCSettings(url, user, password, driverName)
     instance should not be null
-    instance.toString should be("JDBCSettings(myUrl,myUser,[REDACTED],myDriverName)")
+    instance.toString should be(
+      "JDBCSettings(myUrl,myUser,[REDACTED],myDriverName)"
+    )
   }
 
 }

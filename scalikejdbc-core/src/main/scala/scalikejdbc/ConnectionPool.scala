@@ -20,21 +20,29 @@ object ConnectionPool extends LogSupport {
    * The default execution context used by async workers for connection pools management.
    */
   private lazy val DEFAULT_EXECUTION_CONTEXT: ExecutionContextExecutor = {
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(3, new ThreadFactory {
-      private val i = new AtomicInteger(0)
-      override def newThread(r: Runnable): Thread = {
-        val thread = new Thread(r, s"scalikejdbc-connection-pool-default-ec-${i.incrementAndGet()}")
-        thread.setDaemon(true)
-        thread
-      }
-    }))
+    ExecutionContext.fromExecutor(
+      Executors.newFixedThreadPool(
+        3,
+        new ThreadFactory {
+          private val i = new AtomicInteger(0)
+          override def newThread(r: Runnable): Thread = {
+            val thread = new Thread(
+              r,
+              s"scalikejdbc-connection-pool-default-ec-${i.incrementAndGet()}"
+            )
+            thread.setDaemon(true)
+            thread
+          }
+        }
+      )
+    )
   }
 
   type MutableMap[A, B] = scala.collection.mutable.HashMap[A, B]
   type CPSettings = ConnectionPoolSettings
   type CPFactory = ConnectionPoolFactory
 
-  val DEFAULT_NAME: Symbol = Symbol("default")
+  val DEFAULT_NAME: String = "default"
   val DEFAULT_CONNECTION_POOL_FACTORY = Commons2ConnectionPoolFactory
 
   private[this] val pools = new MutableMap[Any, ConnectionPool]()
@@ -51,7 +59,8 @@ object ConnectionPool extends LogSupport {
 
   private def ensureInitialized(name: Any): Unit = {
     if (!isInitialized(name)) {
-      val message = ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
+      val message =
+        ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
       throw new IllegalStateException(message)
     }
   }
@@ -73,10 +82,13 @@ object ConnectionPool extends LogSupport {
    * @throws IllegalStateException if the specified Connection pool does not exist
    */
   def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
-    pools.getOrElse(name, {
-      val message = ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
-      throw new IllegalStateException(message)
-    })
+    pools.getOrElse(
+      name, {
+        val message =
+          ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED + "(name:" + name + ")"
+        throw new IllegalStateException(message)
+      }
+    )
   }
 
   /**
@@ -88,19 +100,31 @@ object ConnectionPool extends LogSupport {
    * @param password JDBC password
    * @param settings Settings
    */
-  def add(name: Any, url: String, user: String, password: String, settings: CPSettings = ConnectionPoolSettings())(
-    implicit
+  def add(
+    name: Any,
+    url: String,
+    user: String,
+    password: String,
+    settings: CPSettings = ConnectionPoolSettings()
+  )(implicit
     factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY,
-    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT): Unit = {
+    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
+  ): Unit = {
 
     import scalikejdbc.JDBCUrl._
 
-    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName).map { name =>
-      ConnectionPoolFactoryRepository.get(name).map(f => (f, name)).getOrElse {
-        val message = ErrorMessage.INVALID_CONNECTION_POOL_FACTORY_NAME + "(name:" + name + ")"
-        throw new IllegalArgumentException(message)
+    val (_factory, factoryName) = Option(settings.connectionPoolFactoryName)
+      .map { name =>
+        ConnectionPoolFactoryRepository
+          .get(name)
+          .map(f => (f, name))
+          .getOrElse {
+            val message =
+              ErrorMessage.INVALID_CONNECTION_POOL_FACTORY_NAME + "(name:" + name + ")"
+            throw new IllegalArgumentException(message)
+          }
       }
-    }.getOrElse((factory, "<default>"))
+      .getOrElse((factory, "<default>"))
 
     // register new pool or replace existing pool
     pools.synchronized {
@@ -112,9 +136,16 @@ object ConnectionPool extends LogSupport {
           val _url = "jdbc:postgresql://%s/%s".format(_host, _dbname)
           _factory.apply(_url, _user, _password, settings)
         case url @ HerokuMySQLRegexp(_user, _password, _host, _dbname) =>
-          val defaultProperties = """?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci"""
-          val addDefaultPropertiesIfNeeded = MysqlCustomProperties.findFirstMatchIn(url).map(_ => "").getOrElse(defaultProperties)
-          val _url = "jdbc:mysql://%s/%s".format(_host, _dbname + addDefaultPropertiesIfNeeded)
+          val defaultProperties =
+            """?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci"""
+          val addDefaultPropertiesIfNeeded = MysqlCustomProperties
+            .findFirstMatchIn(url)
+            .map(_ => "")
+            .getOrElse(defaultProperties)
+          val _url = "jdbc:mysql://%s/%s".format(
+            _host,
+            _dbname + addDefaultPropertiesIfNeeded
+          )
           _factory.apply(_url, _user, _password, settings)
         case _ =>
           _factory.apply(url, user, password, settings)
@@ -128,7 +159,9 @@ object ConnectionPool extends LogSupport {
       oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
     }
     if (GlobalSettings.loggingConnections) {
-      log.debug(s"Registered connection pool : ${get(name)} using factory : $factoryName")
+      log.debug(
+        s"Registered connection pool : ${get(name)} using factory : $factoryName"
+      )
     }
   }
 
@@ -158,7 +191,10 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    * @param dataSource DataSource based ConnectionPool
    */
-  def add(name: Any, dataSource: AuthenticatedDataSourceConnectionPool): Unit = {
+  def add(
+    name: Any,
+    dataSource: AuthenticatedDataSourceConnectionPool
+  ): Unit = {
     // NOTE: cannot pass ExecutionContext from outside due to overload issue
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
@@ -172,12 +208,15 @@ object ConnectionPool extends LogSupport {
     oldPoolOpt.foreach(pool => abandonOldPool(name, pool))
   }
 
-  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool)(
-    implicit
-    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT) = {
+  private[this] def abandonOldPool(name: Any, oldPool: ConnectionPool)(implicit
+    ec: ExecutionContext = DEFAULT_EXECUTION_CONTEXT
+  ) = {
     scala.concurrent.Future {
       if (GlobalSettings.loggingConnections) {
-        log.debug("The old pool destruction started. connection pool : " + get(name).toString())
+        log.debug(
+          "The old pool destruction started. connection pool : " + get(name)
+            .toString()
+        )
       }
       var millis = 0L
       while (millis < 60000L && oldPool.numActive > 0) {
@@ -186,7 +225,10 @@ object ConnectionPool extends LogSupport {
       }
       oldPool.close()
       if (GlobalSettings.loggingConnections) {
-        log.debug("The old pool is successfully closed. connection pool : " + get(name).toString())
+        log.debug(
+          "The old pool is successfully closed. connection pool : " + get(name)
+            .toString()
+        )
       }
     }
   }
@@ -199,8 +241,12 @@ object ConnectionPool extends LogSupport {
    * @param password JDBC password
    * @param settings Settings
    */
-  def singleton(url: String, user: String, password: String,
-    settings: CPSettings = ConnectionPoolSettings())(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY): Unit = {
+  def singleton(
+    url: String,
+    user: String,
+    password: String,
+    settings: CPSettings = ConnectionPoolSettings()
+  )(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY): Unit = {
     add(DEFAULT_NAME, url, user, password, settings)(factory)
     if (GlobalSettings.loggingConnections) {
       log.debug("Registered singleton connection pool : " + get().toString())
@@ -274,9 +320,8 @@ object ConnectionPool extends LogSupport {
    */
   def closeAll(): Unit = {
     pools.synchronized {
-      pools.foreach {
-        case (name, pool) =>
-          close(name)
+      pools.foreach { case (name, pool) =>
+        close(name)
       }
     }
   }
@@ -290,7 +335,8 @@ abstract class ConnectionPool(
   val url: String,
   val user: String,
   password: String,
-  val settings: ConnectionPoolSettings = ConnectionPoolSettings()) extends AutoCloseable {
+  val settings: ConnectionPoolSettings = ConnectionPoolSettings()
+) extends AutoCloseable {
 
   /**
    * Borrows java.sql.Connection from pool.
@@ -339,7 +385,8 @@ abstract class ConnectionPool(
    *
    * @return printable String value
    */
-  override def toString(): String = "ConnectionPool(url:" + url + ", user:" + user + ")"
+  override def toString(): String =
+    "ConnectionPool(url:" + url + ", user:" + user + ")"
 
   /**
    * Close this connection pool.
@@ -347,11 +394,14 @@ abstract class ConnectionPool(
   def close(): Unit = throw new UnsupportedOperationException
 
   def connectionAttributes: DBConnectionAttributes = {
-    val timeZoneSettings = Option(settings.timeZone).fold(TimeZoneSettings()) { timeZone =>
-      TimeZoneSettings(true, java.util.TimeZone.getTimeZone(timeZone))
+    val timeZoneSettings = Option(settings.timeZone).fold(TimeZoneSettings()) {
+      timeZone =>
+        TimeZoneSettings(true, java.util.TimeZone.getTimeZone(timeZone))
     }
-    DBConnectionAttributes(driverName = Option(settings.driverName), timeZoneSettings = timeZoneSettings)
+    DBConnectionAttributes(
+      driverName = Option(settings.driverName),
+      timeZoneSettings = timeZoneSettings
+    )
   }
 
 }
-

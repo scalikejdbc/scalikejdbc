@@ -1,7 +1,6 @@
 package scalikejdbc
 package jodatime
 
-import org.scalatest._
 import java.sql.ResultSet
 import java.time.ZoneId
 import org.joda.time._
@@ -28,7 +27,9 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val date = new java.util.Date(current)
     val rs: ResultSet = mock[ResultSet]
 
-    Mockito.when(rs.getTimestamp("time")).thenReturn(new java.sql.Timestamp(current))
+    Mockito
+      .when(rs.getTimestamp("time"))
+      .thenReturn(new java.sql.Timestamp(current))
     Mockito.when(rs.getDate("date")).thenReturn(new java.sql.Date(current))
     Mockito.when(rs.getTime("time")).thenReturn(new java.sql.Time(current))
 
@@ -46,7 +47,8 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       dateTime: DateTime,
       localDate: LocalDate,
       localTime: LocalTime,
-      localDateTime: LocalDateTime) {
+      localDateTime: LocalDateTime
+    ) {
       def notEqualAll(that: Values) = {
         this.dateTime should not be that.dateTime
         this.localTime should not be that.localTime
@@ -59,7 +61,8 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
         implicitly[TypeBinder[DateTime]].apply(rs, "time"),
         implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
         implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time")
+      )
 
       values.dateTime shouldBe date.toJodaDateTime
       values.localDate shouldBe date.toJodaLocalDate
@@ -70,18 +73,22 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     }
 
     val valuesAnother = locally {
-      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(anotherZone)
+      implicit val overwrittenZone: OverwrittenZoneId =
+        OverwrittenZoneId(anotherZone)
 
       val values = Values(
         implicitly[TypeBinder[DateTime]].apply(rs, "time"),
         implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
         implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time")
+      )
 
       values.dateTime shouldBe date.toJodaDateTimeWithZoneId(anotherZone)
       values.localDate shouldBe date.toJodaLocalDateWithZoneId(anotherZone)
       values.localTime shouldBe date.toJodaLocalTimeWithZoneId(anotherZone)
-      values.localDateTime shouldBe date.toJodaLocalDateTimeWithZoneId(anotherZone)
+      values.localDateTime shouldBe date.toJodaLocalDateTimeWithZoneId(
+        anotherZone
+      )
 
       values
     }
@@ -89,13 +96,15 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     valuesDefault notEqualAll valuesAnother
 
     val valuesExplicitDefault = locally {
-      implicit val overwrittenZone: OverwrittenZoneId = OverwrittenZoneId(ZoneId.systemDefault)
+      implicit val overwrittenZone: OverwrittenZoneId =
+        OverwrittenZoneId(ZoneId.systemDefault)
 
       Values(
         implicitly[TypeBinder[DateTime]].apply(rs, "time"),
         implicitly[TypeBinder[LocalDate]].apply(rs, "date"),
         implicitly[TypeBinder[LocalTime]].apply(rs, "time"),
-        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time"))
+        implicitly[TypeBinder[LocalDateTime]].apply(rs, "time")
+      )
     }
 
     valuesDefault shouldBe valuesExplicitDefault

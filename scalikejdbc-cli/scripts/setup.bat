@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.3.10/sbt-launch.jar
+  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.8.2/sbt-launch-1.8.2.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -117,17 +117,17 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo resolvers += "oracle driver repo" at "http://dist.codehaus.org/mule/dependencies/maven2"
 >>"%build_sbt%" echo.
->>"%build_sbt%" echo scalaVersion := "2.12.11"
+>>"%build_sbt%" echo scalaVersion := "2.12.17"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
 >>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.4.0",
 >>"%build_sbt%" echo   "org.slf4j"          %% "slf4j-simple"         %% "1.7.29",
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.200",
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.2.0",
->>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.30.1",
->>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.0",
+>>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.34.0",
+>>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.2",
 >>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.48",
->>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "9.4.1212"
+>>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "42.2.22"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._

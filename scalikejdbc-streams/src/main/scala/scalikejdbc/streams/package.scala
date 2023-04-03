@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext
 /**
  * Reactive Streams support.
  *
- * see also [[http://www.reactive-streams.org/]]
+ * see also [[https://www.reactive-streams.org/]]
  */
 package object streams {
 
@@ -18,13 +18,18 @@ package object streams {
    */
   private def createDatabasePublisher[A, E <: WithExtractor](
     sql: StreamReadySQL[A],
-    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME)(
-    implicit
+    connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
+  )(implicit
     executionContext: ExecutionContext,
     cpContext: DB.CPContext,
-    settings: SettingsProvider): DatabasePublisher[A] = {
+    settings: SettingsProvider
+  ): DatabasePublisher[A] = {
     val publisherSettings = DatabasePublisherSettings[A](connectionPoolName)
-    DatabasePublisherFactory.createNewPublisher[A](publisherSettings, AsyncExecutor(executionContext), sql)
+    DatabasePublisherFactory.createNewPublisher[A](
+      publisherSettings,
+      AsyncExecutor(executionContext),
+      sql
+    )
   }
 
   /**
@@ -36,33 +41,43 @@ package object streams {
    * }
    * }}}
    */
-  implicit class EnableDBCodeBlockToProvideDatabasePublisher(private val db: DB.type) extends AnyVal {
+  implicit class EnableDBCodeBlockToProvideDatabasePublisher(
+    private val db: DB.type
+  ) extends AnyVal {
 
     def readOnlyStream[A](sql: StreamReadySQL[A])(implicit
       executionContext: ExecutionContext,
       cpContext: DB.CPContext = DB.NoCPContext,
-      settings: SettingsProvider = SettingsProvider.default): DatabasePublisher[A] = {
+      settings: SettingsProvider = SettingsProvider.default
+    ): DatabasePublisher[A] = {
 
       createDatabasePublisher(sql)
     }
   }
 
   /**
-   * An implicit to enable the `NamedDB('name).readOnlyStream` method:
+   * An implicit to enable the `NamedDB("name").readOnlyStream` method:
    *
    * {{{
-   * val publisher = NamedDB('name).readOnlyStream {
+   * val publisher = NamedDB("name").readOnlyStream {
    *   sql"select id from users".map(_.long("id")).iterator
    * }
    * }}}
    */
-  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(private val db: NamedDB) extends AnyVal {
+  implicit class EnableNamedDBCodeBlockToProvideDatabasePublisher(
+    private val db: NamedDB
+  ) extends AnyVal {
 
     def readOnlyStream[A, E <: WithExtractor](sql: StreamReadySQL[A])(implicit
       executionContext: ExecutionContext,
-      cpContext: DB.CPContext = DB.NoCPContext): DatabasePublisher[A] = {
+      cpContext: DB.CPContext = DB.NoCPContext
+    ): DatabasePublisher[A] = {
 
-      createDatabasePublisher(sql, db.name)(executionContext, cpContext, db.settingsProvider)
+      createDatabasePublisher(sql, db.name)(
+        executionContext,
+        cpContext,
+        db.settingsProvider
+      )
     }
   }
 
@@ -75,11 +90,13 @@ package object streams {
    * }
    * }}}
    */
-  implicit class FromSQLToStreamSQLConverter[A, E <: WithExtractor](private val sql: SQL[A, E]) extends AnyVal {
+  implicit class FromSQLToStreamSQLConverter[A, E <: WithExtractor](
+    private val sql: SQL[A, E]
+  ) extends AnyVal {
 
-    def iterator()(
-      implicit
-      hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor): StreamReadySQL[A] = {
+    def iterator()(implicit
+      hasExtractor: SQL[A, E]#ThisSQL =:= SQL[A, E]#SQLWithExtractor
+    ): StreamReadySQL[A] = {
       StreamReadySQL[A, E](sql, sql.fetchSize.getOrElse(DefaultFetchSize))
     }
 

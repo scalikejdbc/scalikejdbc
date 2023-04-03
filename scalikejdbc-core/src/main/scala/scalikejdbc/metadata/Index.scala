@@ -11,7 +11,7 @@ package scalikejdbc.metadata
  * @param ordinalPosition column sequence number within index; zero when TYPE is tableIndexStatistic
  * @param ascOrDesc column sort sequence, "A" => ascending, "D" => descending, may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
  * @param cardinality When TYPE is tableIndexStatistic, then this is the number of rows in the table; otherwise, it is the number of unique values in the index.
- * @param pages When TYPE is tableIndexStatisic then this is the number of pages used for the table, otherwise it is the number of pages used for the current index.
+ * @param pages When TYPE is tableIndexStatistic then this is the number of pages used for the table, otherwise it is the number of pages used for the current index.
  * @param filterCondition Filter condition, if any. (may be null)
  */
 case class Index(
@@ -24,4 +24,5 @@ case class Index(
   ascOrDesc: Option[String],
   cardinality: Option[Long],
   pages: Option[Long],
-  filterCondition: Option[String])
+  filterCondition: Option[String]
+)

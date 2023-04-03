@@ -7,7 +7,9 @@ case class JDBCSettings(
   url: String,
   user: String,
   password: String,
-  driverName: String) {
+  driverName: String
+) {
 
-  override def toString(): String = s"JDBCSettings(${url},${user},[REDACTED],${driverName})"
+  override def toString(): String =
+    s"JDBCSettings(${url},${user},[REDACTED],${driverName})"
 }

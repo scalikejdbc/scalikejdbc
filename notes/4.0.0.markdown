@@ -1,0 +1,17 @@
+ScalikeJDBC 4.0.0 is now available for Scala 2.12, 2.13, and Scala 3 app development!
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+Thanks for all the contributors for this release :+1:
+
+* @xuwei-k worked on preparation for Scala 3 and did a substantial amount of work for keeping this library up-to-date with external dependeices!
+* @timzaak added Scala 3 compatible macros!
+* @myazinn added `getOpt` method to `WrappedResultSet` for more convenience!
+* @dieselmat improved the mapper-generator to support more table name patterns like `TABLE_1_2_3`!
+* @capacman pointed "Working with IO monads" document issue and @matil019 resolved the issue in both the document and code examples!
+* @osiire enabled non-ascii character support in SQL templates
+* @astiob improved the column name resolution for even more patterns with acronyms
+
+Refer to [this release's GitHub milestone](https://github.com/scalikejdbc/scalikejdbc/milestone/44?closed=1) for all the pull requests by awesome contributors!
+
+Enjoy writing mostly type-safe SQL and get things done!

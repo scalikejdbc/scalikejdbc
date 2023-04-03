@@ -7,8 +7,8 @@ import scalikejdbc._
  * AutoRollback for ScalaTest
  *
  * {{{
- * import org.scalatest.fixture.FlatSpec
- * class MemberSpec extends FlatSpec with AutoRollback {
+ * import org.scalatest.flatspec.FixtureAnyFlatSpec
+ * class MemberSpec extends FixtureAnyFlatSpec with AutoRollback {
  *   describe of "Member"
  *   it should "create a new record" in { implicit session =>
  *     Member.create(1, "Alice")
@@ -16,7 +16,7 @@ import scalikejdbc._
  *   }
  * }
  * class LegacyAccountSpec extends FlatSpec with AutoRollback {
- *   override def db = NamedDB('db2).toDB
+ *   override def db() = NamedDB("db2").toDB
  *   override def fixture(implicit session: DBSession) {
  *     SQL("insert into legacy_accounts values ...").update.apply()
  *   }

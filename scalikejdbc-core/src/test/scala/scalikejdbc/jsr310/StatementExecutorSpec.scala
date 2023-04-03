@@ -2,7 +2,6 @@ package scalikejdbc
 package jsr310
 
 import scalikejdbc.interpolation.Implicits._
-import org.scalatest._
 import java.time._
 import java.time.temporal.ChronoUnit
 import org.scalatest.funspec.AnyFunSpec
@@ -15,8 +14,13 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
       DB.autoCommit { s =>
         implicit val session: DBSession = {
           if (driverClassName == "org.h2.Driver") {
-            ConnectionPool.add(Symbol("jsr310"), "jdbc:h2:mem:jsr310;MODE=PostgreSQL", "", "")
-            NamedAutoSession(Symbol("jsr310"))
+            ConnectionPool.add(
+              "jsr310",
+              "jdbc:h2:mem:jsr310;MODE=PostgreSQL",
+              "",
+              ""
+            )
+            NamedAutoSession("jsr310")
           } else {
             s
           }
@@ -33,26 +37,48 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
                deleted_at       timestamp(6) not null default CURRENT_TIMESTAMP(6) on update CURRENT_TIMESTAMP(6)
             )""".execute.apply()
           } else {
-            sql"create table accounts (birthday date not null, alert_time time(6) not null, local_created_at timestamp(6) not null, created_at timestamp(6) not null, updated_at timestamp(6) not null, deleted_at timestamp(6) not null )"
-              .execute.apply()
+            sql"create table accounts (birthday date not null, alert_time time(6) not null, local_created_at timestamp(6) not null, created_at timestamp(6) not null, updated_at timestamp(6) not null, deleted_at timestamp(6) not null )".execute
+              .apply()
           }
 
           val birthday = LocalDate.now
-          val alertTime = if (Set("org.hsqldb.jdbc.JDBCDriver", "com.mysql.jdbc.Driver") contains driverClassName) {
-            LocalTime.now.truncatedTo(ChronoUnit.SECONDS)
-          } else {
-            LocalTime.now.truncatedTo(ChronoUnit.MILLIS)
-          }
-          val localCreatedAt = LocalDateTime.now.plusNanos(111000)
-          val createdAt = ZonedDateTime.now.plusNanos(222000)
-          val updatedAt = Instant.now.plusNanos(333000)
-          val deletedAt = OffsetDateTime.now.plusNanos(444000)
-          val query = sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at, deleted_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt}, ${deletedAt})"
+          val alertTime =
+            if (
+              Set(
+                "org.hsqldb.jdbc.JDBCDriver",
+                "com.mysql.jdbc.Driver"
+              ) contains driverClassName
+            ) {
+              LocalTime.now.truncatedTo(ChronoUnit.SECONDS)
+            } else {
+              LocalTime.now.truncatedTo(ChronoUnit.MILLIS)
+            }
+          val localCreatedAt =
+            LocalDateTime.now.plusNanos(111000).truncatedTo(ChronoUnit.MICROS)
+          val createdAt =
+            ZonedDateTime.now.plusNanos(222000).truncatedTo(ChronoUnit.MICROS)
+          val updatedAt =
+            Instant.now.plusNanos(333000).truncatedTo(ChronoUnit.MICROS)
+          val deletedAt =
+            OffsetDateTime.now.plusNanos(444000).truncatedTo(ChronoUnit.MICROS)
+          val query =
+            sql"insert into accounts (birthday, alert_time, local_created_at, created_at, updated_at, deleted_at) values (${birthday}, ${alertTime}, ${localCreatedAt}, ${createdAt}, ${updatedAt}, ${deletedAt})"
           query.execute.apply()
 
-          val account = sql"select birthday, alert_time, local_created_at, created_at, updated_at, deleted_at from accounts limit 1".map { rs =>
-            (rs.get[LocalDate]("birthday"), rs.get[LocalTime]("alert_time"), rs.get[LocalDateTime]("local_created_at"), rs.get[ZonedDateTime]("created_at"), rs.get[Instant]("updated_at"), rs.get[OffsetDateTime]("deleted_at"))
-          }.headOption.apply()
+          val account =
+            sql"select birthday, alert_time, local_created_at, created_at, updated_at, deleted_at from accounts limit 1"
+              .map { rs =>
+                (
+                  rs.get[LocalDate]("birthday"),
+                  rs.get[LocalTime]("alert_time"),
+                  rs.get[LocalDateTime]("local_created_at"),
+                  rs.get[ZonedDateTime]("created_at"),
+                  rs.get[Instant]("updated_at"),
+                  rs.get[OffsetDateTime]("deleted_at")
+                )
+              }
+              .headOption
+              .apply()
 
           account.isDefined should equal(true)
           account.get._1 should equal(birthday)

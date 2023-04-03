@@ -1,15 +1,12 @@
 package scalikejdbc.config
 
-import org.scalatest._
 import scalikejdbc._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class DBsSpec extends AnyFunSpec with Matchers {
 
-  def fixture = new {
-
-  }
+  def fixture = new {}
 
   describe("DBs") {
 
@@ -23,25 +20,25 @@ class DBsSpec extends AnyFunSpec with Matchers {
         DBs.close()
       }
       it("should setup a connection pool") {
-        DBs.setup(Symbol("foo"))
-        val res = NamedDB(Symbol("foo")) readOnly { implicit session =>
+        DBs.setup("foo")
+        val res = NamedDB("foo") readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res should be(Some(1))
-        DBs.close(Symbol("foo"))
+        DBs.close("foo")
       }
       it("should setup env & top level config") {
-        DBs.setup(Symbol("topLevelDefaults"))
-        val res = NamedDB(Symbol("topLevelDefaults")) readOnly { implicit session =>
+        DBs.setup("topLevelDefaults")
+        val res = NamedDB("topLevelDefaults") readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res should be(Some(1))
-        DBs.close(Symbol("topLevelDefaults"))
+        DBs.close("topLevelDefaults")
       }
       describe("When an unknown database name is passed") {
         it("throws Configuration Exception") {
           intercept[ConfigurationException] {
-            DBs.setup(Symbol("unknown"))
+            DBs.setup("unknown")
           }
         }
       }
@@ -50,11 +47,11 @@ class DBsSpec extends AnyFunSpec with Matchers {
     describe("#setupAll") {
       it("should read application.conf and setup all connection pool") {
         DBs.setupAll()
-        val res = NamedDB(Symbol("foo")) readOnly { implicit session =>
+        val res = NamedDB("foo") readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res should be(Some(1))
-        val res2 = NamedDB(Symbol("bar")) readOnly { implicit session =>
+        val res2 = NamedDB("bar") readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res2 should be(Some(1))
@@ -70,7 +67,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
       }
       it("should read application.conf with env (dev2)") {
         DBsWithEnv("dev2").setupAll()
-        val res = NamedDB(Symbol("hocon")) readOnly { implicit session =>
+        val res = NamedDB("hocon") readOnly { implicit session =>
           SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -82,26 +79,26 @@ class DBsSpec extends AnyFunSpec with Matchers {
       describe("When no argument is passed") {
         it("should close default connection pool") {
           DBs.setup()
-          DBs.setup(Symbol("foo"))
+          DBs.setup("foo")
           DBs.close()
           intercept[IllegalStateException] {
             DB readOnly { implicit session =>
               SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
             }
           }
-          val res = NamedDB(Symbol("foo")) readOnly { implicit session =>
+          val res = NamedDB("foo") readOnly { implicit session =>
             SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
           }
           res should be(Some(1))
-          DBs.close(Symbol("foo"))
+          DBs.close("foo")
         }
       }
 
       it("should close a connection pool") {
-        DBs.setup(Symbol("foo"))
-        DBs.close(Symbol("foo"))
+        DBs.setup("foo")
+        DBs.close("foo")
         intercept[IllegalStateException] {
-          NamedDB(Symbol("foo")) readOnly { implicit session =>
+          NamedDB("foo") readOnly { implicit session =>
             SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
           }
         }
@@ -110,16 +107,16 @@ class DBsSpec extends AnyFunSpec with Matchers {
 
     describe("#closeAll") {
       it("should close all connection pools") {
-        DBs.setup(Symbol("foo"))
-        DBs.setup(Symbol("bar"))
+        DBs.setup("foo")
+        DBs.setup("bar")
         DBs.closeAll()
         intercept[IllegalStateException] {
-          NamedDB(Symbol("foo")) readOnly { implicit session =>
+          NamedDB("foo") readOnly { implicit session =>
             SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
           }
         }
         intercept[IllegalStateException] {
-          NamedDB(Symbol("bar")) readOnly { implicit session =>
+          NamedDB("bar") readOnly { implicit session =>
             SQL("SELECT 1 as one").map(rs => rs.int("one")).single.apply()
           }
         }

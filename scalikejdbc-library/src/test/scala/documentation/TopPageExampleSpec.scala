@@ -8,14 +8,15 @@ class TopPageExampleSpec extends AnyFlatSpec with Matchers {
 
   behavior of "SQLInterpolation"
 
-  //import scalikejdbc._, SQLInterpolation._
+  // import scalikejdbc._, SQLInterpolation._
   import scalikejdbc._
 
   // defines entity object and extractor
   case class Member(id: Long, name: Option[String], createdAt: LocalDateTime)
   object Member extends SQLSyntaxSupport[Member] {
     override val tableName = "members"
-    def apply(rs: WrappedResultSet) = new Member(rs.get("id"), rs.get("name"), rs.get("created_at"))
+    def apply(rs: WrappedResultSet) =
+      new Member(rs.get("id"), rs.get("name"), rs.get("created_at"))
   }
 
   it should "work" in {
@@ -38,14 +39,17 @@ create table members (
 
     // insert initial data
     Seq("Alice", "Bob", "Chris") foreach { name =>
-      sql"insert into members (name, created_at) values (${name}, current_timestamp)".update.apply()
+      sql"insert into members (name, created_at) values (${name}, current_timestamp)".update
+        .apply()
     }
 
     // for now, retrieves all data as Map value
-    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
+    val entities: List[Map[String, Any]] =
+      sql"select * from members".map(_.toMap()).list.apply()
 
     // find all members
-    val members: List[Member] = sql"select * from members".map(rs => Member(rs)).list.apply()
+    val members: List[Member] =
+      sql"select * from members".map(rs => Member(rs)).list.apply()
 
     entities.size should equal(3)
     members.size should equal(3)

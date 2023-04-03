@@ -7,7 +7,9 @@ import scala.language.implicitConversions
  */
 trait ScalaBigDecimalConverterImplicits {
 
-  implicit def convertBigDecimal(bd: java.math.BigDecimal): ScalaBigDecimalConverter = {
+  implicit def convertBigDecimal(
+    bd: java.math.BigDecimal
+  ): ScalaBigDecimalConverter = {
     new ScalaBigDecimalConverter(bd)
   }
 

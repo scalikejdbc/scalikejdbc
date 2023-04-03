@@ -7,14 +7,15 @@ private[scalikejdbc] object ClassNameUtil {
    * @param clazz a given class object
    */
   def getClassName(clazz: Class[_]): String = {
-    val canonicalName: Option[String] = try {
-      Option(clazz.getCanonicalName)
-    } catch {
-      case e: InternalError if e.getMessage == "Malformed class name" => None
-    }
+    val canonicalName: Option[String] =
+      try {
+        Option(clazz.getCanonicalName)
+      } catch {
+        case e: InternalError if e.getMessage == "Malformed class name" => None
+      }
     canonicalName match {
       case Some(className) => className
-      case _ => clazz.getName
+      case _               => clazz.getName
     }
   }
 }

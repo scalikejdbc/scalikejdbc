@@ -7,9 +7,14 @@ import scalikejdbc.LoanPattern._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings {
+class DB_SessionOperationSpec
+  extends AnyFlatSpec
+  with Matchers
+  with BeforeAndAfter
+  with Settings {
 
-  val tableNamePrefix = "emp_DB_SesOp" + System.currentTimeMillis().toString.substring(8)
+  val tableNamePrefix =
+    "emp_DB_SesOp" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "DB(Session operation)"
 
@@ -36,7 +41,7 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
   }
 
   it should "be possible to call #beginIfNotYet several times" in {
-    using(ConnectionPool(Symbol("default")).borrow()) { conn =>
+    using(ConnectionPool("default").borrow()) { conn =>
       val db = DB(conn)
       db.begin()
       db.beginIfNotYet()
@@ -48,7 +53,7 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
   }
 
   "#tx" should "not be available before beginning tx" in {
-    using(ConnectionPool(Symbol("named")).borrow()) { conn =>
+    using(ConnectionPool("named").borrow()) { conn =>
       val db = DB(conn)
       intercept[IllegalStateException] {
         db.tx.begin()
@@ -66,9 +71,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db readOnly {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = db readOnly { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
         result.size should be > 0
       }
@@ -83,7 +89,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         val session = db.readOnlySession()
         try {
-          val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          val result = session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
           result.size should be > 0
         } finally { session.close() }
       }
@@ -97,8 +105,8 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[SQLException] {
-          db readOnly {
-            session => session.update("update " + tableName + " set name = ?", "xxx")
+          db readOnly { session =>
+            session.update("update " + tableName + " set name = ?", "xxx")
           }
         }
       }
@@ -114,9 +122,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db autoCommit {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = db autoCommit { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
         result.size should be > 0
       }
@@ -131,7 +140,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         val session = db.autoCommitSession()
         try {
-          val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
+          val list =
+            session.list("select id from " + tableName + " order by id")(rs =>
+              rs.int("id")
+            )
           list(0) should equal(1)
           list(1) should equal(2)
         } finally { session.close() }
@@ -146,7 +158,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         val result = db autoCommit {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
+          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+            rs.int("id")
+          )
         }
         result.get should equal(1)
       }
@@ -161,7 +175,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         intercept[TooManyRowsException] {
           db autoCommit {
-            _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
+            _.single("select id from " + tableName + "")(rs =>
+              Some(rs.int("id"))
+            )
           }
         }
       }
@@ -176,7 +192,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         val extractName = (rs: WrappedResultSet) => rs.string("name")
         val name: Option[String] = db readOnly {
-          _.single("select * from " + tableName + " where id = ?", 1)(extractName)
+          _.single("select * from " + tableName + " where id = ?", 1)(
+            extractName
+          )
         }
         name.get should equal("name1")
       }
@@ -204,7 +222,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db autoCommit {
-          _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
+          _.foreach("select id from " + tableName + "")(rs =>
+            println(rs.int("id"))
+          )
         }
       }
     }
@@ -219,7 +239,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       }
       count should equal(1)
       val name = (DB autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
       }).get
       name should equal("foo")
     }
@@ -230,7 +252,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val name = (DB readOnly {
-        _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
+        )
       }).get
       name should equal("name1")
       val count = DB autoCommit {
@@ -248,7 +272,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("id")
+        )
       }
       result.get should equal("1")
     }
@@ -274,7 +300,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       }
       count should equal(1)
       val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
       }).getOrElse("---")
       name should equal("foo")
     }
@@ -289,7 +317,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       }
       count should equal(1)
       val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
       }).getOrElse("---")
       name should equal("foo")
     }
@@ -305,9 +335,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[IllegalStateException] {
-          db withinTx {
-            session =>
-              session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          db withinTx { session =>
+            session.list("select * from " + tableName + "")(rs =>
+              Some(rs.string("name"))
+            )
           }
         }
       }
@@ -321,9 +352,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val result = db withinTx {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = db withinTx { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
         result.size should be > 0
         db.rollbackIfActive()
@@ -340,7 +372,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         db.begin()
         val session = db.withinTxSession()
         try {
-          val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+          val result = session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
           result.size should be > 0
           db.rollbackIfActive()
         } finally { session.close() }
@@ -356,7 +390,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         db.begin()
         val result = db withinTx {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("id")
+          )
         }
         result.get should equal("1")
         db.rollbackIfActive()
@@ -372,7 +408,9 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         db.begin()
         val result = db withinTx {
-          _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
+          _.list("select id from " + tableName + "")(rs =>
+            Some(rs.string("id"))
+          )
         }
         result.size should equal(2)
         db.rollbackIfActive()
@@ -388,11 +426,17 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         db.begin()
         val count = db withinTx {
-          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
         }
         count should equal(1)
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
         }).get
         name should equal("foo")
         db.rollback()
@@ -408,13 +452,19 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
         val db = DB(conn)
         db.begin()
         val count = db withinTx {
-          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
         }
         count should equal(1)
         db.rollback()
         db.begin()
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
         }).get
         name should equal("name1")
       }
@@ -435,9 +485,16 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
           db.begin()
           val session = db.withinTxSession()
           try {
-            session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+            session.update(
+              "update " + tableName + " set name = ? where id = ?",
+              "foo",
+              1
+            )
             Thread.sleep(1000L)
-            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            val name = session.single(
+              "select name from " + tableName + " where id = ?",
+              1
+            )(rs => rs.string("name"))
             assert(name.get == "foo")
             db.rollback()
           } finally { session.close() }
@@ -450,7 +507,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
           val session = db.withinTxSession()
           try {
             Thread.sleep(200L)
-            val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+            val name = session.single(
+              "select name from " + tableName + " where id = ?",
+              1
+            )(rs => rs.string("name"))
             assert(name.get == "name1")
             db.rollback()
           } finally { session.close() }
@@ -460,9 +520,10 @@ class DB_SessionOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAf
       Thread.sleep(2000L)
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = DB(conn) autoCommit {
-          session =>
-            session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        val name = DB(conn) autoCommit { session =>
+          session.single("select name from " + tableName + " where id = ?", 1)(
+            rs => rs.string("name")
+          )
         }
         assert(name.get == "name1")
       }

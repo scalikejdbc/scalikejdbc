@@ -13,7 +13,10 @@ import scalikejdbc.streams.StreamResultSetIterator._
 private[streams] class StreamResultSetIterator[+A](
   rs: ResultSet,
   extractor: WrappedResultSet => A,
-  autoClose: Boolean = true) extends BufferedIterator[A] with Closeable with LogSupport { self =>
+  autoClose: Boolean = true
+) extends BufferedIterator[A]
+  with Closeable
+  with LogSupport { self =>
 
   private[this] var internalState: InternalState = NeedToPrefetchNextValue
   private[this] var fetchedNextValue: Option[A] = None

@@ -8,8 +8,8 @@ import java.sql.Connection
  * It's easier to use named ConnectionPool with this class.
  *
  * {{{
- * ConnectionPool.add(Symbol("named"), "jdbc:...", "user", "password")
- * val users = NamedDB(Symbol("named")) readOnly { session =>
+ * ConnectionPool.add("named", "jdbc:...", "user", "password")
+ * val users = NamedDB("named") readOnly { session =>
  *   session.list("select * from user")
  * }
  * }}}
@@ -19,14 +19,21 @@ import java.sql.Connection
  */
 case class NamedDB(
   name: Any,
-  settingsProvider: SettingsProvider = SettingsProvider.default)(implicit context: ConnectionPoolContext = NoConnectionPoolContext) extends DBConnection {
+  settingsProvider: SettingsProvider = SettingsProvider.default
+)(implicit context: ConnectionPoolContext = NoConnectionPoolContext)
+  extends DBConnection {
 
   private[this] def connectionPool(): ConnectionPool = Option(context match {
-    case NoConnectionPoolContext => ConnectionPool(name)
+    case NoConnectionPoolContext          => ConnectionPool(name)
     case _: MultipleConnectionPoolContext => context.get(name)
-    case _ => throw new IllegalStateException(ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT)
+    case _ =>
+      throw new IllegalStateException(
+        ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT
+      )
   }) getOrElse {
-    throw new IllegalStateException(ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED)
+    throw new IllegalStateException(
+      ErrorMessage.CONNECTION_POOL_IS_NOT_YET_INITIALIZED
+    )
   }
 
   override def connectionAttributes: DBConnectionAttributes = {

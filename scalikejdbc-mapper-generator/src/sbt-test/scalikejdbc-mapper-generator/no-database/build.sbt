@@ -4,9 +4,14 @@ val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.1", "2.12.11")
+crossScalaVersions := List("2.13.10", "2.12.17", "3.2.2")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
+scalacOptions ++= Seq(
+  "-Xlint",
+  "-language:higherKinds,implicitConversions",
+  "-deprecation",
+  "-unchecked"
+)
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
@@ -14,7 +19,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version")
 )
 
-(scalikejdbcJDBCSettings in Compile) := JDBCSettings(
+Compile / scalikejdbcJDBCSettings := JDBCSettings(
   "dummy driver name",
   "dummy url",
   "dummy username",
@@ -22,7 +27,7 @@ libraryDependencies ++= Seq(
   "dummy schema"
 )
 
-(scalikejdbcCodeGeneratorAll in Compile) := { (_, generatorSettings) =>
+(Compile / scalikejdbcCodeGeneratorAll) := { (_, generatorSettings) =>
   val idColumn = Column("id", java.sql.JDBCType.INTEGER, true, true)
   val columns = List(
     idColumn,

@@ -1,6 +1,8 @@
 package scalikejdbc.mapper
 
-sealed abstract class GeneratorTemplate(val name: String) extends Product with Serializable
+sealed abstract class GeneratorTemplate(val name: String)
+  extends Product
+  with Serializable
 
 object GeneratorTemplate {
   case object interpolation extends GeneratorTemplate("interpolation")

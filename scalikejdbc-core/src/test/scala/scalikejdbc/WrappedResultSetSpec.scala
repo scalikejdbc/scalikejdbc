@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.util.Calendar
@@ -23,7 +22,16 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
 
   it should "have expected methods" in {
 
-    import java.sql.{ Array => sqlArray, Blob, Clob, NClob, Ref, SQLXML, Time, Timestamp }
+    import java.sql.{
+      Array => sqlArray,
+      Blob,
+      Clob,
+      NClob,
+      Ref,
+      SQLXML,
+      Time,
+      Timestamp
+    }
     import java.io.InputStream
     import java.io.Reader
     import java.math.{ BigDecimal, BigInteger }
@@ -31,12 +39,14 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     import java.net.URL
 
     val underlying: ResultSet = mock[ResultSet]
-    val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) = (1: Integer, 0: Integer, -1: Integer)
+    val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) =
+      (1: Integer, 0: Integer, -1: Integer)
     when(underlying.getObject("one")).thenReturn(one, Array[Object](): _*)
     // TODO this code doesn't work as expected, should I use ScalaMock?
     // when(underlying.getObject("zero")).thenReturn(zero, Array[Object](): _*)
     when(underlying.getObject("zero")).thenReturn("0", Array[Object](): _*)
-    when(underlying.getObject("minusOne")).thenReturn(minusOne, Array[Object](): _*)
+    when(underlying.getObject("minusOne"))
+      .thenReturn(minusOne, Array[Object](): _*)
     when(underlying.getObject("str")).thenReturn("abc", Array[Object](): _*)
 
     val cursor: ResultSetCursor = new ResultSetCursor(0)
@@ -78,19 +88,19 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     {
       val res1: BigInteger = Option(rs.bigDecimal("foo")) match {
         case Some(bd) => bd.toBigInteger
-        case None => null
+        case None     => null
       }
       val res2: BigInteger = Option(rs.bigDecimal(0)) match {
         case Some(bd) => bd.toBigInteger
-        case None => null
+        case None     => null
       }
       val res3: BigInteger = rs.bigDecimalOpt("foo") match {
         case Some(bd) => bd.toBigInteger
-        case None => null
+        case None     => null
       }
       val res4: BigInteger = rs.bigDecimalOpt(0) match {
         case Some(bd) => bd.toBigInteger
-        case None => null
+        case None     => null
       }
       res1 should be(null)
       res2 should be(null)
@@ -125,7 +135,8 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       val res2: java.lang.Boolean = rs.nullableBoolean(0)
       val res3: Option[scala.Boolean] = rs.booleanOpt("foo")
       val res4: Option[scala.Boolean] = rs.booleanOpt(0)
-      when(underlying.getObject("boolean")).thenReturn("true", Array[Object](): _*)
+      when(underlying.getObject("boolean"))
+        .thenReturn("true", Array[Object](): _*)
       when(underlying.getObject(1)).thenReturn("false", Array[Object](): _*)
       res1 should be(null)
       res2 should be(null)
@@ -158,8 +169,10 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     {
       val res1: scala.Array[scala.Byte] = rs.bytes("foo")
       val res2: scala.Array[scala.Byte] = rs.bytes(0)
-      val res3: scala.Array[scala.Byte] = rs.bytesOpt("foo").orNull[scala.Array[scala.Byte]]
-      val res4: scala.Array[scala.Byte] = rs.bytesOpt(0).orNull[scala.Array[scala.Byte]]
+      val res3: scala.Array[scala.Byte] =
+        rs.bytesOpt("foo").orNull[scala.Array[scala.Byte]]
+      val res4: scala.Array[scala.Byte] =
+        rs.bytesOpt(0).orNull[scala.Array[scala.Byte]]
       res1 should be(null)
       res2 should be(null)
       res3 should be(null)
@@ -388,8 +401,10 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       val res4: Timestamp = rs.timestamp(0, Calendar.getInstance())
       val res5: Timestamp = rs.timestampOpt("foo").orNull[Timestamp]
       val res6: Timestamp = rs.timestampOpt(0).orNull[Timestamp]
-      val res7: Timestamp = rs.timestampOpt("foo", Calendar.getInstance()).orNull[Timestamp]
-      val res8: Timestamp = rs.timestampOpt(0, Calendar.getInstance()).orNull[Timestamp]
+      val res7: Timestamp =
+        rs.timestampOpt("foo", Calendar.getInstance()).orNull[Timestamp]
+      val res8: Timestamp =
+        rs.timestampOpt(0, Calendar.getInstance()).orNull[Timestamp]
       res1 should be(null)
       res2 should be(null)
       res3 should be(null)

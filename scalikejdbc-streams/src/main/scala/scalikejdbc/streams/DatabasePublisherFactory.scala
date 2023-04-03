@@ -11,12 +11,10 @@ private[streams] object DatabasePublisherFactory {
   private[streams] def createNewPublisher[A](
     publisherSettings: DatabasePublisherSettings[A],
     asyncExecutor: AsyncExecutor,
-    sql: StreamReadySQL[A]): DatabasePublisher[A] = {
+    sql: StreamReadySQL[A]
+  ): DatabasePublisher[A] = {
 
-    new DatabasePublisher[A](
-      publisherSettings,
-      sql,
-      asyncExecutor)
+    new DatabasePublisher[A](publisherSettings, sql, asyncExecutor)
   }
 
 }

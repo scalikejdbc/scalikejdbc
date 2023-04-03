@@ -1,0 +1,20 @@
+ScalikeJDBC 3.5.0 is out for Scala 2.13 and 2.12.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [all] #1056 Drop Scala 2.11 support by @xuwei-k
+- [all] #1069 #1070 Modify the internal code to settle Scala 2.13 deprecations by @xuwei-k
+- [all] Huge continuous maintenance to keep dependencies up-to-date by @xuwei-k
+- [core] #1079 Improve the outputs of joda-time values in query logging by @takayahilton
+- [core] #1055 Remove deprecated methods/classes in jsr310 and mapper-generator modules by @xuwei-k
+- [core] Enhance the max number of "manies" in one-to-x API (from 9 to 21) by @xuwei-k
+- [test] Upgrade ScalaTest version from 3.0 to 3.2 by @xuwei-k
+- [test] Upgrade specs2 version from 4.8 to 4.10 by @xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!

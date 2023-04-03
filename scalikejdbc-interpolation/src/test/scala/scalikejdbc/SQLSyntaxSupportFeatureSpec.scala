@@ -1,10 +1,12 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class SQLSyntaxSupportFeatureSpec extends AnyFlatSpec with Matchers with SQLInterpolation {
+class SQLSyntaxSupportFeatureSpec
+  extends AnyFlatSpec
+  with Matchers
+  with SQLInterpolation {
 
   behavior of "SQLSyntaxSupportFeature"
 

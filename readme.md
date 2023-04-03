@@ -8,8 +8,7 @@ ScalikeJDBC is practical and production-ready. Use this library for your real pr
 
 http://scalikejdbc.org/
 
-[![Build Status](https://travis-ci.org/scalikejdbc/scalikejdbc.svg?branch=master)](https://travis-ci.org/scalikejdbc/scalikejdbc)
-[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.12)
+[![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.13)
 [![Stargazers over time](https://starchart.cc/scalikejdbc/scalikejdbc.svg)](https://starchart.cc/scalikejdbc/scalikejdbc)
 
 ## Gitter Chat for Casual Q&A
@@ -23,7 +22,7 @@ Just add ScalikeJDBC, a JDBC driver, and an slf4j implementation to your sbt bui
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"        % "3.4.+",
+  "org.scalikejdbc" %% "scalikejdbc"        % "4.0.+",
   "com.h2database"  %  "h2"                 % "1.4.+",
   "ch.qos.logback"  %  "logback-classic"    % "1.2.+"
 )
@@ -45,7 +44,7 @@ Class.forName("org.h2.Driver")
 ConnectionPool.singleton("jdbc:h2:mem:hello", "user", "pass")
 
 // ad-hoc session provider on the REPL
-implicit val session = AutoSession
+implicit val session: DBSession = AutoSession
 
 // table creation, you can run DDL by using #execute as same as JDBC
 sql"""

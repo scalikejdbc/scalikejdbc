@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -13,7 +12,12 @@ class ConnectionPoolSettingsSpec extends AnyFlatSpec with Matchers {
     val maxSize: Int = 0
     val connectionTimeoutMillis: Long = 2000L
     val validationQuery: String = ""
-    val instance = new ConnectionPoolSettings(initialSize, maxSize, connectionTimeoutMillis, validationQuery)
+    val instance = new ConnectionPoolSettings(
+      initialSize,
+      maxSize,
+      connectionTimeoutMillis,
+      validationQuery
+    )
     instance should not be null
   }
 

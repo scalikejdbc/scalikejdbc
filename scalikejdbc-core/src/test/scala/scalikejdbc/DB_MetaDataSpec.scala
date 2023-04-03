@@ -1,12 +1,15 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSupport {
+class DB_MetaDataSpec
+  extends AnyFlatSpec
+  with Matchers
+  with Settings
+  with LogSupport {
 
   behavior of "DB's metadata operations"
 
@@ -14,20 +17,24 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
 
     try {
       DB autoCommit { implicit s =>
-        execute("""
+        execute(
+          """
           create table meta_groups (
             id int generated always as identity,
             name varchar(30) default 'NO NAME' not null,
             primary key(id)
           );
-          """, """
+          """,
+          """
           create table meta_groups (
             id integer primary key,
             name varchar(30) default 'NO NAME' not null
           );
-          """)
+          """
+        )
 
-        execute("""
+        execute(
+          """
           create table meta_members (
             id int generated always as identity,
             name varchar(30) default 'foooooooo baaaaaar' not null,
@@ -37,7 +44,8 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
             created_at timestamp not null,
             primary key(id)
           );
-          """, """
+          """,
+          """
           create table meta_members (
             id integer primary key,
             name varchar(30) default 'foooooooo baaaaaar' not null,
@@ -46,20 +54,28 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
             birthday date,
             created_at timestamp not null
           );
-          """)
+          """
+        )
 
         execute(
           "comment on table meta_members is 'website members';",
-          "alter table meta_members comment 'website members';")
+          "alter table meta_members comment 'website members';"
+        )
         execute(
           "comment on column meta_members.name is 'Full name';",
-          "alter table meta_members change name name varchar(30) not null comment 'Full name';")
+          "alter table meta_members change name name varchar(30) not null comment 'Full name';"
+        )
         execute(
           "comment on column meta_members.description is 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';",
-          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';")
+          "alter table meta_members change description description varchar(1000) comment 'xxxxxxxxxxxxxxxxyyyyyyyyyyyyyyyzzzzzzzzzzz';"
+        )
 
-        execute("alter table meta_members add foreign key (group_id) references meta_groups(id);")
-        execute("create unique index meta_members_name_and_group on meta_members(name, group_id);")
+        execute(
+          "alter table meta_members add foreign key (group_id) references meta_groups(id);"
+        )
+        execute(
+          "create unique index meta_members_name_and_group on meta_members(name, group_id);"
+        )
         execute("create index meta_members_birthday on meta_members(birthday);")
       }
 
@@ -70,10 +86,11 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           DB.getTableNames("%"),
           DB.getTableNames("meta_%"),
           DB.getTableNames("META_%"),
-          NamedDB(Symbol("default")).getTableNames("*"),
-          NamedDB(Symbol("default")).getTableNames("%"),
-          NamedDB(Symbol("default")).getTableNames("meta_%"),
-          NamedDB(Symbol("default")).getTableNames("META_%")).zipWithIndex
+          NamedDB("default").getTableNames("*"),
+          NamedDB("default").getTableNames("%"),
+          NamedDB("default").getTableNames("meta_%"),
+          NamedDB("default").getTableNames("META_%")
+        ).zipWithIndex
       ) withClue(s"No. ${i}") {
         lower(act) should contain allOf ("meta_groups", "meta_members")
       }
@@ -81,13 +98,16 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
       for (
         act <- Seq(
           DB.getTableNames("%.%"),
-          NamedDB(Symbol("default")).getTableNames("%.%"))
+          NamedDB("default").getTableNames("%.%")
+        )
       ) {
         // mysql is not support schema
         if (driverClassName == "com.mysql.jdbc.Driver") {
           lower(act) should contain allOf ("meta_groups", "meta_members")
         } else {
-          lower(act) should contain allOf ("public.meta_groups", "public.meta_members")
+          lower(
+            act
+          ) should contain allOf ("public.meta_groups", "public.meta_members")
         }
       }
 
@@ -95,29 +115,37 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         (act, i) <- Seq(
           DB.getTableNames("%ta_me%"),
           DB.getTableNames("%TA_ME%"),
-          NamedDB(Symbol("default")).getTableNames("%ta_me%"),
-          NamedDB(Symbol("default")).getTableNames("%TA_ME%")).zipWithIndex
+          NamedDB("default").getTableNames("%ta_me%"),
+          NamedDB("default").getTableNames("%TA_ME%")
+        ).zipWithIndex
       ) withClue(s"No. ${i}") {
-        lower(act) should (contain("meta_members") and not contain ("meta_groups"))
+        lower(act) should (contain(
+          "meta_members"
+        ) and not contain ("meta_groups"))
       }
 
       DB.showTables("dummy") should be(empty)
-      NamedDB(Symbol("default")).showTables("dummy") should be(empty)
+      NamedDB("default").showTables("dummy") should be(empty)
 
       // showTables returns string value
-      lower(DB.showTables("%")) should (include("meta_groups") and include("meta_members"))
-      lower(NamedDB(Symbol("default")).showTables("%")) should (include("meta_groups") and include("meta_members"))
+      lower(DB.showTables("%")) should (include("meta_groups") and include(
+        "meta_members"
+      ))
+      lower(NamedDB("default").showTables("%")) should (include(
+        "meta_groups"
+      ) and include("meta_members"))
 
       DB.showTables("dummy") should be("")
-      NamedDB(Symbol("default")).showTables("dummy") should be("")
+      NamedDB("default").showTables("dummy") should be("")
 
       // describe table
       for (
         act <- Seq(
           DB.getTable("META_MEMBERS"),
           DB.getTable("meta_members"),
-          NamedDB(Symbol("default")).getTable("META_MEMBERS"),
-          NamedDB(Symbol("default")).getTable("meta_members"))
+          NamedDB("default").getTable("META_MEMBERS"),
+          NamedDB("default").getTable("meta_members")
+        )
       ) {
         if (driverClassName == "com.mysql.jdbc.Driver") {
           lower(act.value.schema) should equal(null)
@@ -137,22 +165,24 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
       }
 
       DB.getTable("dummy").isDefined should be(false)
-      NamedDB(Symbol("default")).getTable("dummy").isDefined should be(false)
+      NamedDB("default").getTable("dummy").isDefined should be(false)
 
       // describe returns string value
       lower(DB.describe("meta_members")) should include("meta_members")
-      lower(NamedDB(Symbol("default")).describe("meta_members")) should include("meta_members")
+      lower(NamedDB("default").describe("meta_members")) should include(
+        "meta_members"
+      )
 
       DB.describe("dummy") should be("Not found.")
-      NamedDB(Symbol("default")).describe("dummy") should be("Not found.")
+      NamedDB("default").describe("dummy") should be("Not found.")
 
       // get column names
-      val exp = List("id", "name", "group_id", "description", "birthday", "created_at")
-      for (
-        table <- List("meta_members", "Meta_Members", "META_MEMBERS")
-      ) withClue(s"table [${table}]") {
-        lower(DB.getColumnNames(table)) should equal(exp)
-      }
+      val exp =
+        List("id", "name", "group_id", "description", "birthday", "created_at")
+      for (table <- List("meta_members", "Meta_Members", "META_MEMBERS"))
+        withClue(s"table [${table}]") {
+          lower(DB.getColumnNames(table)) should equal(exp)
+        }
 
       DB.getColumnNames("dummy") should be(empty)
 
@@ -173,7 +203,8 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         DB autoCommit { implicit s =>
           execute("create schema other;")
 
-          execute("""
+          execute(
+            """
             create table public.meta_members (
               id int generated always as identity,
               title varchar(30)  not null,
@@ -181,16 +212,19 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
               updated_at timestamp not null,
               primary key(id)
             );
-            """, """
+            """,
+            """
             create table public.meta_members (
               id integer primary key,
               title varchar(30)  not null,
               special_day date,
               updated_at timestamp not null
             );
-            """)
+            """
+          )
 
-          execute("""
+          execute(
+            """
             create table other.meta_members (
               id int generated always as identity,
               name varchar(30) default 'foooooooo baaaaaar' not null,
@@ -200,7 +234,8 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
               created_at timestamp not null,
               primary key(id)
             );
-            """, """
+            """,
+            """
             create table other.meta_members (
               id integer primary key,
               name varchar(30) default 'foooooooo baaaaaar' not null,
@@ -209,20 +244,24 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
               birthday date,
               created_at timestamp not null
             );
-            """)
+            """
+          )
 
-          execute("""
+          execute(
+            """
             create table other.meta_groups (
               id int generated always as identity,
               name varchar(30) not null,
               primary key(id)
             );
-            """, """
+            """,
+            """
             create table other.meta_groups (
               id integer primary key,
               name varchar(30) not null
             );
-            """)
+            """
+          )
         }
 
         // find table names
@@ -233,10 +272,11 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
             DB.getTableNames("%"),
             DB.getTableNames("meta_%"),
             DB.getTableNames("META_%"),
-            NamedDB(Symbol("default")).getTableNames("*"),
-            NamedDB(Symbol("default")).getTableNames("%"),
-            NamedDB(Symbol("default")).getTableNames("meta_%"),
-            NamedDB(Symbol("default")).getTableNames("META_%")).zipWithIndex
+            NamedDB("default").getTableNames("*"),
+            NamedDB("default").getTableNames("%"),
+            NamedDB("default").getTableNames("meta_%"),
+            NamedDB("default").getTableNames("META_%")
+          ).zipWithIndex
         ) withClue(s"No. ${i}") {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
@@ -252,7 +292,8 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         for (
           act <- Seq(
             DB.getTableNames("%.%"),
-            NamedDB(Symbol("default")).getTableNames("%.%"))
+            NamedDB("default").getTableNames("%.%")
+          )
         ) {
           // public.meta_members, other.meta_members, other.meta_groups
           lower(act).count(_ == "public.meta_members") should be(1)
@@ -264,8 +305,9 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           act <- Seq(
             DB.getTableNames("%mem%"),
             DB.getTableNames("%MEM%"),
-            NamedDB(Symbol("default")).getTableNames("%mem%"),
-            NamedDB(Symbol("default")).getTableNames("%MEM%"))
+            NamedDB("default").getTableNames("%mem%"),
+            NamedDB("default").getTableNames("%MEM%")
+          )
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
@@ -284,12 +326,15 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
             DB.getTableNames("public.%"),
             DB.getTableNames("public.meta_%"),
             DB.getTableNames("PUBLIC.META_%"),
-            NamedDB(Symbol("default")).getTableNames("public.*"),
-            NamedDB(Symbol("default")).getTableNames("public.%"),
-            NamedDB(Symbol("default")).getTableNames("public.meta_%"),
-            NamedDB(Symbol("default")).getTableNames("PUBLIC.META_%")).zipWithIndex
+            NamedDB("default").getTableNames("public.*"),
+            NamedDB("default").getTableNames("public.%"),
+            NamedDB("default").getTableNames("public.meta_%"),
+            NamedDB("default").getTableNames("PUBLIC.META_%")
+          ).zipWithIndex
         ) withClue(s"No. ${i}") {
-          lower(act) should (contain("public.meta_members") and not contain ("other.meta_groups"))
+          lower(act) should (contain(
+            "public.meta_members"
+          ) and not contain ("other.meta_groups"))
         }
 
         for (
@@ -298,46 +343,57 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
             DB.getTableNames("other.%"),
             DB.getTableNames("other.meta_%"),
             DB.getTableNames("OTHER.META_%"),
-            NamedDB(Symbol("default")).getTableNames("other.*"),
-            NamedDB(Symbol("default")).getTableNames("other.%"),
-            NamedDB(Symbol("default")).getTableNames("other.meta_%"),
-            NamedDB(Symbol("default")).getTableNames("OTHER.META_%")).zipWithIndex
+            NamedDB("default").getTableNames("other.*"),
+            NamedDB("default").getTableNames("other.%"),
+            NamedDB("default").getTableNames("other.meta_%"),
+            NamedDB("default").getTableNames("OTHER.META_%")
+          ).zipWithIndex
         ) withClue(s"No. ${i}") {
-          lower(act) should (contain allOf ("other.meta_members", "other.meta_groups"))
+          lower(
+            act
+          ) should (contain allOf ("other.meta_members", "other.meta_groups"))
         }
 
         lower(DB.getTableNames("dummy.*")) should be(empty)
-        lower(NamedDB(Symbol("default")).getTableNames("dummy.*")) should be(empty)
+        lower(NamedDB("default").getTableNames("dummy.*")) should be(empty)
 
         // showTables returns string value
         for (
-          act <- Seq(
-            DB.showTables("%"),
-            NamedDB(Symbol("default")).showTables("%"))
+          act <- Seq(DB.showTables("%"), NamedDB("default").showTables("%"))
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
-            lower(act) should (include("meta_members") and not include ("meta_groups"))
+            lower(act) should (include(
+              "meta_members"
+            ) and not include ("meta_groups"))
           } else {
             // public.meta_members, other.meta_members, other.meta_groups
-            lower(act) should (include("meta_members") and include("meta_groups"))
+            lower(act) should (include("meta_members") and include(
+              "meta_groups"
+            ))
           }
         }
 
         for (
           act <- Seq(
             DB.showTables("public.%"),
-            NamedDB(Symbol("default")).showTables("public.%"))
+            NamedDB("default").showTables("public.%")
+          )
         ) {
-          lower(act) should (include("public.meta_members") and not include ("other.meta_members") and not include ("other.meta_groups"))
+          lower(act) should (include(
+            "public.meta_members"
+          ) and not include ("other.meta_members") and not include ("other.meta_groups"))
         }
 
         for (
           act <- Seq(
             DB.showTables("other.%"),
-            NamedDB(Symbol("default")).showTables("other.%"))
+            NamedDB("default").showTables("other.%")
+          )
         ) {
-          lower(act) should (not include ("public.meta_members") and include("other.meta_members") and include("other.meta_groups"))
+          lower(act) should (not include ("public.meta_members") and include(
+            "other.meta_members"
+          ) and include("other.meta_groups"))
         }
 
         // describe table
@@ -345,8 +401,9 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           (act, i) <- Seq(
             DB.getTable("public.meta_members"),
             DB.getTable("PUBLIC.META_MEMBERS"),
-            NamedDB(Symbol("default")).getTable("public.meta_members"),
-            NamedDB(Symbol("default")).getTable("PUBLIC.META_MEMBERS")).zipWithIndex
+            NamedDB("default").getTable("public.meta_members"),
+            NamedDB("default").getTable("PUBLIC.META_MEMBERS")
+          ).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("meta_members")
@@ -357,8 +414,9 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           (act, i) <- Seq(
             DB.getTable("other.meta_members"),
             DB.getTable("OTHER.META_MEMBERS"),
-            NamedDB(Symbol("default")).getTable("other.meta_members"),
-            NamedDB(Symbol("default")).getTable("OTHER.META_MEMBERS")).zipWithIndex
+            NamedDB("default").getTable("other.meta_members"),
+            NamedDB("default").getTable("OTHER.META_MEMBERS")
+          ).zipWithIndex
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("other")
           lower(act.value.name) should equal("meta_members")
@@ -366,30 +424,50 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         }
 
         DB.getTable("dummy.*") should be(empty)
-        NamedDB(Symbol("default")).getTable("dummy.*") should be(empty)
+        NamedDB("default").getTable("dummy.*") should be(empty)
 
         // describe returns string value
         for (
           act <- Seq(
             DB.describe("public.meta_members"),
-            NamedDB(Symbol("default")).describe("public.meta_members"))
+            NamedDB("default").describe("public.meta_members")
+          )
         ) {
-          lower(act) should (include("public.meta_members") and not include ("other.meta_members"))
+          lower(act) should (include(
+            "public.meta_members"
+          ) and not include ("other.meta_members"))
         }
 
         for (
           act <- Seq(
             DB.describe("other.meta_members"),
-            NamedDB(Symbol("default")).describe("other.meta_members"))
+            NamedDB("default").describe("other.meta_members")
+          )
         ) {
-          lower(act) should (not include ("public.meta_members") and include("other.meta_members"))
+          lower(act) should (not include ("public.meta_members") and include(
+            "other.meta_members"
+          ))
         }
 
         // get column names
         for (
           (schemas, exp) <- Seq(
-            (Seq("public", "Public", "PUBLIC"), List("id", "title", "special_day", "updated_at")),
-            (Seq("other", "Other", "OTHER"), List("id", "name", "group_id", "description", "birthday", "created_at")));
+            (
+              Seq("public", "Public", "PUBLIC"),
+              List("id", "title", "special_day", "updated_at")
+            ),
+            (
+              Seq("other", "Other", "OTHER"),
+              List(
+                "id",
+                "name",
+                "group_id",
+                "description",
+                "birthday",
+                "created_at"
+              )
+            )
+          );
           schema <- schemas;
           table <- Seq("meta_members", "Meta_Members", "META_MEMBERS")
         ) withClue(s"table [${schema}.${table}]") {
@@ -397,7 +475,9 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         }
 
         lower(DB.getColumnNames("dummy.meta_members")) should be(empty)
-        lower(NamedDB(Symbol("default")).getColumnNames("dummy.meta_members")) should be(empty)
+        lower(
+          NamedDB("default").getColumnNames("dummy.meta_members")
+        ) should be(empty)
 
       } finally {
         DB autoCommit { implicit s =>
@@ -424,19 +504,22 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
               title varchar(30)  not null,
               primary key(id)
             );
-            """, """
+            """,
+            """
             create table users (
               id integer primary key,
               title varchar(30)  not null
             );
-            """)
+            """
+          )
         }
 
         // find table names
         for (
           act <- Seq(
             DB.getTableNames("%"),
-            NamedDB(Symbol("default")).getTableNames("%"))
+            NamedDB("default").getTableNames("%")
+          )
         ) {
           lower(act) should contain("users")
         }
@@ -444,16 +527,15 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         for (
           act <- Seq(
             DB.getTableNames("public.%"),
-            NamedDB(Symbol("default")).getTableNames("public.%"))
+            NamedDB("default").getTableNames("public.%")
+          )
         ) {
           lower(act) should contain("public.users")
         }
 
         // describe table
         for (
-          act <- Seq(
-            DB.getTable("users"),
-            NamedDB(Symbol("default")).getTable("users"))
+          act <- Seq(DB.getTable("users"), NamedDB("default").getTable("users"))
         ) {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")
@@ -466,7 +548,8 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
         for (
           act <- Seq(
             DB.getTable("public.users"),
-            NamedDB(Symbol("default")).getTable("public.users"))
+            NamedDB("default").getTable("public.users")
+          )
         ) {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")
@@ -478,11 +561,10 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
 
         // get column names
         val exp = List("id", "title")
-        for (
-          table <- List("public.users", "users")
-        ) withClue(s"table [${table}]") {
-          lower(DB.getColumnNames(table)) should equal(exp)
-        }
+        for (table <- List("public.users", "users"))
+          withClue(s"table [${table}]") {
+            lower(DB.getColumnNames(table)) should equal(exp)
+          }
 
       } finally {
         DB autoCommit { implicit s =>
@@ -501,7 +583,10 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           execute("create database otherdb;")
           execute("create table otherdb.getcolumns(id2 integer,c2 integer);")
         }
-        DB.getTable("getcolumns").get.columns.map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+        DB.getTable("getcolumns")
+          .get
+          .columns
+          .map(_.name.toLowerCase) should contain allOf ("id1", "c1")
 
       } finally {
         DB autoCommit { implicit s =>
@@ -517,7 +602,10 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
           execute("create table getcolumns(id1 integer, c1 integer);")
         }
 
-        DB.getTable("getcolumns").get.columns.map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+        DB.getTable("getcolumns")
+          .get
+          .columns
+          .map(_.name.toLowerCase) should contain allOf ("id1", "c1")
 
       } finally {
         DB autoCommit { implicit s =>
@@ -529,20 +617,28 @@ class DB_MetaDataSpec extends AnyFlatSpec with Matchers with Settings with LogSu
   }
 
   private def execute(sqls: String*)(implicit session: DBSession): Unit = {
-    for (sql <- sqls) {
-      try {
-        SQL(sql).execute.apply()
-        return
-      } catch {
-        case e: Exception =>
-          log.debug(e.toString)
+    @annotation.tailrec
+    def loop(xs: List[String], errors: List[Throwable]): Unit = {
+      xs match {
+        case sql :: t =>
+          try {
+            SQL(sql).execute.apply()
+          } catch {
+            case e: Exception =>
+              loop(t, e :: errors)
+          }
+        case Nil =>
+          throw new RuntimeException(
+            "Failed to execute sqls :" + sqls + " " + errors
+          )
       }
     }
-
-    throw new RuntimeException("Failed to execute sqls :" + sqls)
+    loop(sqls.toList, Nil)
   }
 
-  private def lower(list: List[String]): List[String] = Option(list).map(_.map(_.toLowerCase(en))).orNull
-  private def lower(str: String): String = Option(str).map(_.toLowerCase(en)).orNull
+  private def lower(list: List[String]): List[String] =
+    Option(list).map(_.map(_.toLowerCase(en))).orNull
+  private def lower(str: String): String =
+    Option(str).map(_.toLowerCase(en)).orNull
 
 }

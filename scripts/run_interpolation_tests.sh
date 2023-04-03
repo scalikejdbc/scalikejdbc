@@ -7,9 +7,9 @@ cd `dirname $0`
 cd ..
 cp -p scalikejdbc-core/src/test/resources/jdbc_$1.properties scalikejdbc-core/src/test/resources/jdbc.properties
 
-sbt "++2.12.11! -v" clean                        > logs/test_stdout.log
-sbt "++2.12.11! -v" interpolation-macro/compile >> logs/test_stdout.log
-sbt "++2.12.11! -v" interpolation/test          >> logs/test_stdout.log
+sbt SetScala212 clean                        > logs/test_stdout.log
+sbt SetScala212 interpolation-macro/compile >> logs/test_stdout.log
+sbt SetScala212 interpolation/test          >> logs/test_stdout.log
 
 cp -p scalikejdbc-core/src/test/resources/jdbc_hsqldb.properties scalikejdbc-core/src/test/resources/jdbc.properties
 

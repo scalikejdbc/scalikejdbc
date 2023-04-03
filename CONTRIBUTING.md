@@ -10,17 +10,31 @@
 
 - Pull requests should be sent to the "master" branch
 - Source and binary compatibility must always be kept
-- scalariform must be applied to all Scala source code
+- scalafmt must be applied to all Scala source code
 - Prefer creating separate Scala source files for each class/object/trait (except, of course, for sealed traits)
 - The ScalikeJDBC build checks for binary compatibility using the [mima](https://github.com/lightbend/mima). After a 2.x.0 release, binary compatibility must be maintained for subsequent 2.x series releases.
 
 #### Branches
 
-##### master (will be 3.5.x, the default branch)
+##### master (will be 4.1.x, the default branch)
 
 - Latest stable version
 - Breaking source compatibility is not acceptable
 - Changes that bring binary incompatibility with reasonable reasons are **allowed**
+- Must build against Scala 2.12, 2.13 and 3
+- Requires Java 8 or higher
+
+##### 4.0.x
+
+- Version 4.0 series maintenance branch
+- Changes that bring binary/source incompatibility are not allowed
+- Must build against Scala 2.12, 2.13 and 3
+- Requires Java 8 or higher
+
+##### 3.5.x
+
+- Version 3.5 series maintenance branch
+- Changes that bring binary/source incompatibility are not allowed
 - Must build against Scala 2.12, and 2.13
 - Requires Java 8 or higher
 
@@ -110,9 +124,7 @@
 
 #### Testing your pull request
 
-All pull requests should pass the Travis CI jobs before they can be merged:
-
-https://travis-ci.org/scalikejdbc/scalikejdbc
+All pull requests should pass the CI jobs before they can be merged:
 
 Testing with default settings is required when pushing changes:
 

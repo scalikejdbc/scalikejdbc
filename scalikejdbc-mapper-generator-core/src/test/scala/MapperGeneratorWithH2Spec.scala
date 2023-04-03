@@ -1,5 +1,3 @@
-import org.scalatest._
-
 import scalikejdbc._
 import mapper._
 import mapper.CodeGenerator
@@ -31,19 +29,25 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
       {
-        val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = srcDir,
-          template = GeneratorTemplate.interpolation,
-          packageName = "com.example.interpolation"))
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(
+            srcDir = srcDir,
+            template = GeneratorTemplate.interpolation,
+            packageName = "com.example.interpolation"
+          )
+        )
         generator.modelAll()
         generator.writeModel()
       }
 
       {
-        val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = srcDir,
-          template = GeneratorTemplate.queryDsl,
-          packageName = "com.example.querydsl"))
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(
+            srcDir = srcDir,
+            template = GeneratorTemplate.queryDsl,
+            packageName = "com.example.querydsl"
+          )
+        )
         generator.modelAll()
         generator.writeModel()
       }
@@ -70,46 +74,68 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       """).execute.apply()
     }
 
-    Model(url, username, password).table(null, "MEMBER").map {
-      table =>
-        val generator1 = new CodeGenerator(table)(GeneratorConfig(
+    Model(url, username, password).table(null, "MEMBER").map { table =>
+      val generator1 = new CodeGenerator(table)(
+        GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2unit"),
-          packageName = "com.example"))
-        generator1.specAll()
-        generator1.writeModel()
-        val generator2 = new CodeGenerator(table)(GeneratorConfig(
+          packageName = "com.example"
+        )
+      )
+      generator1.specAll()
+      generator1.writeModel()
+      val generator2 = new CodeGenerator(
+        table
+      )(
+        GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("specs2acceptance"),
-          packageName = "com.example.placeholder"))
-        generator2.specAll()
-        generator2.writeModel()
+          packageName = "com.example.placeholder"
+        )
+      )
+      generator2.specAll()
+      generator2.writeModel()
 
-        val generator3 = new CodeGenerator(table)(GeneratorConfig(
+      val generator3 = new CodeGenerator(
+        table
+      )(
+        GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.anorm"))
-        generator3.specAll()
-        generator3.writeModel()
+          packageName = "com.example.anorm"
+        )
+      )
+      generator3.specAll()
+      generator3.writeModel()
 
-        val generator4 = new CodeGenerator(table.copy(schema = Some("public")))(GeneratorConfig(
+      val generator4 = new CodeGenerator(
+        table.copy(schema = Some("public"))
+      )(
+        GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.schema"))
-        generator4.specAll()
-        generator4.writeModel()
+          packageName = "com.example.schema"
+        )
+      )
+      generator4.specAll()
+      generator4.writeModel()
 
-        val generator5 = new CodeGenerator(table.copy(schema = Some("")))(GeneratorConfig(
+      val generator5 = new CodeGenerator(
+        table.copy(schema = Some(""))
+      )(
+        GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
           testTemplate = GeneratorTestTemplate("ScalaTestFlatSpec"),
-          packageName = "com.example.schema2"))
-        generator5.specAll()
-        generator5.writeModel()
+          packageName = "com.example.schema2"
+        )
+      )
+      generator5.specAll()
+      generator5.writeModel()
 
     } getOrElse {
       fail("The table is not found.")
@@ -153,13 +179,11 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       """).execute.apply()
     }
 
-    Model(url, username, password).table(null, "UN_NORMALIZED").map {
-      table =>
-        val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = srcDir,
-          //caseClassOnly = true,
-          packageName = "com.example"))
-        generator.writeModel()
+    Model(url, username, password).table(null, "UN_NORMALIZED").map { table =>
+      val generator = new CodeGenerator(table)(
+        GeneratorConfig(srcDir = srcDir, packageName = "com.example")
+      )
+      generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -178,12 +202,11 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       """).execute.apply()
     }
 
-    Model(url, username, password).table(null, "WITHOUT_PK").map {
-      table =>
-        val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = srcDir,
-          packageName = "com.example"))
-        generator.writeModel()
+    Model(url, username, password).table(null, "WITHOUT_PK").map { table =>
+      val generator = new CodeGenerator(table)(
+        GeneratorConfig(srcDir = srcDir, packageName = "com.example")
+      )
+      generator.writeModel()
     } getOrElse {
       fail("The table is not found.")
     }
@@ -210,13 +233,15 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       """).execute.apply()
     }
 
-    Model(url, username, password).table(null, "SCHEMA_VERSION").map {
-      table =>
-        val generator = new CodeGenerator(table)(GeneratorConfig(
+    Model(url, username, password).table(null, "SCHEMA_VERSION").map { table =>
+      val generator = new CodeGenerator(table)(
+        GeneratorConfig(
           srcDir = srcDir,
           packageName = "com.example",
-          tableNamesToSkip = List("schema_version")))
-        generator.writeModelIfNonexistentAndUnskippable() should be(false)
+          tableNamesToSkip = List("schema_version")
+        )
+      )
+      generator.writeModelIfNonexistentAndUnskippable() should be(false)
     } getOrElse {
       fail("The table is not found.")
     }
@@ -226,13 +251,39 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   it should "work fine for all tables defined above" in {
     val allTables = Model(url, username, password).allTables(null)
     allTables should have size 5
-    allTables.map {
-      table =>
-        val generator = new CodeGenerator(table)(GeneratorConfig(
-          srcDir = srcDir,
-          packageName = "com.example.alltables"))
-        generator.writeModel()
+    allTables.foreach { table =>
+      val generator = new CodeGenerator(table)(
+        GeneratorConfig(srcDir = srcDir, packageName = "com.example.alltables")
+      )
+      generator.writeModel()
     }
     Thread.sleep(500)
+  }
+
+  it should "retain underscores _[d] on table names with _[d]" in {
+    DB autoCommit { implicit session =>
+      SQL("""
+        create table table_with_digits_1_2 (
+          x_column_with_digits_3_4 varchar(30) not null,
+          y_column_with_digits int,
+          created_at timestamp not null
+        )
+      """).execute.apply()
+    }
+
+    Model(url, username, password).table(null, "TABLE_WITH_DIGITS_1_2").map {
+      table =>
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(
+            srcDir = srcDir,
+            packageName = "com.example",
+            tableNamesToSkip = List("schema_version")
+          )
+        )
+        generator.specAll()
+        generator.writeModel()
+    } getOrElse {
+      fail("The table is not found.")
+    }
   }
 }

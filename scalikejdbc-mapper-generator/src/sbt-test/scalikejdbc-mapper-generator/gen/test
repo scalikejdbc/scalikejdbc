@@ -27,7 +27,7 @@ $ exists src/test/scala/app/models/ProgrammersViewSpec.scala
 $ delete src/main/scala/app/models/ProgrammersView.scala
 $ delete src/test/scala/app/models/ProgrammersViewSpec.scala
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(view = true)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(view = true)}
 > scalikejdbcGenAll
 $ exists src/main/scala/app/models/ProgrammersView.scala
 $ exists src/test/scala/app/models/ProgrammersViewSpec.scala
@@ -36,84 +36,84 @@ $ sleep 2000
 > scalikejdbcGenForce programmers
 $ newer src/main/scala/app/models/Programmers.scala src/main/scala/app/models/Programmer.scala
 > + compile
-> + test:compile
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
 > + testOnly app.models.Issue810
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="interpolation")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(testTemplate ="specs2unit")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(testTemplate ="specs2unit")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="queryDsl")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="queryDsl")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
-> + testOnly app.models.ProgrammersTest
-
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(testTemplate ="specs2acceptance")}
-> scalikejdbcGenEcho programmers
-> scalikejdbcGenForce programmers
-> + test:compile
-> + testOnly app.models.ProgrammersTest
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="interpolation")}
-> scalikejdbcGenEcho programmers
-> scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
 
-
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(autoConstruct = true)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(testTemplate ="specs2acceptance")}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
+> + testOnly app.models.ProgrammersTest
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="interpolation")}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(defaultAutoSession = false)}
+
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(autoConstruct = true)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
+> + testOnly app.models.ProgrammersTest
+
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(defaultAutoSession = false)}
+> scalikejdbcGenEcho programmers
+> scalikejdbcGenForce programmers
+> + Test/compile
 > + testOnly app.models.ProgrammersTest
 
 $ delete src/test/scala/ProgrammersTest.scala
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.JodaDateTime)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.JodaDateTime)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.OffsetDateTime)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.OffsetDateTime)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.LocalDateTime)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(dateTimeClass = scalikejdbc.mapper.DateTimeClass.LocalDateTime)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Vector)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Vector)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Array)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Array)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Factory)}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(returnCollectionType = scalikejdbc.mapper.ReturnCollectionType.Factory)}
 > scalikejdbcGenEcho programmers
 > scalikejdbcGenForce programmers
-> + test:compile
+> + Test/compile
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {_.copy(template ="invalid template name")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {_.copy(template ="invalid template name")}
 -> scalikejdbcGenEcho programmers
 -> scalikejdbcGenForce programmers
 
@@ -121,7 +121,7 @@ $ delete src/test/scala/ProgrammersTest.scala
 > compile
 
 
-> set (scalikejdbcGeneratorSettings in Compile) ~= {c => c.copy(tableNameToClassName = c.tableNameToClassName.compose(_ * 2), template ="interpolation")}
+> set (Compile / scalikejdbcGeneratorSettings) ~= {c => c.copy(tableNameToClassName = c.tableNameToClassName.compose(_ * 2), template ="interpolation")}
 > scalikejdbcGenAll
 $ exists src/main/scala/app/models/Programmersprogrammers.scala
 $ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala

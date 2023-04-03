@@ -47,7 +47,8 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 
   it should "have instance for java.lang.Short" in {
     val stmt = mock[PreparedStatement]
-    implicitly[ParameterBinderFactory[java.lang.Short]].apply(42.toShort)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.lang.Short]]
+      .apply(42.toShort)(stmt, 1)
     implicitly[ParameterBinderFactory[java.lang.Short]].apply(null)(stmt, 2)
     verify(stmt).setShort(1, 42)
     verify(stmt).setObject(2, null)
@@ -128,8 +129,10 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
   it should "have instance for java.math.BigInteger" in {
     val stmt = mock[PreparedStatement]
     val value = java.math.BigInteger.valueOf(42)
-    implicitly[ParameterBinderFactory[java.math.BigInteger]].apply(value)(stmt, 1)
-    implicitly[ParameterBinderFactory[java.math.BigInteger]].apply(null)(stmt, 2)
+    implicitly[ParameterBinderFactory[java.math.BigInteger]]
+      .apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.math.BigInteger]]
+      .apply(null)(stmt, 2)
     verify(stmt).setBigDecimal(1, new java.math.BigDecimal(value))
     verify(stmt).setObject(2, null)
   }
@@ -145,15 +148,17 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
   it should "have instance for java.math.BigDecimal" in {
     val stmt = mock[PreparedStatement]
     val value = new java.math.BigDecimal(42d)
-    implicitly[ParameterBinderFactory[java.math.BigDecimal]].apply(value)(stmt, 1)
-    implicitly[ParameterBinderFactory[java.math.BigDecimal]].apply(null)(stmt, 2)
+    implicitly[ParameterBinderFactory[java.math.BigDecimal]]
+      .apply(value)(stmt, 1)
+    implicitly[ParameterBinderFactory[java.math.BigDecimal]]
+      .apply(null)(stmt, 2)
     verify(stmt).setBigDecimal(1, value)
     verify(stmt).setObject(2, null)
   }
 
   it should "have instance for java.net.URL" in {
     val stmt = mock[PreparedStatement]
-    val value = new java.net.URL("http://www.example.com")
+    val value = new java.net.URI("http://www.example.com").toURL
     implicitly[ParameterBinderFactory[java.net.URL]].apply(value)(stmt, 1)
     implicitly[ParameterBinderFactory[java.net.URL]].apply(null)(stmt, 2)
     verify(stmt).setURL(1, value)
@@ -270,7 +275,8 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 
   it should "have instance for Array[Byte]" in {
     val stmt = mock[PreparedStatement]
-    implicitly[ParameterBinderFactory[Array[Byte]]].apply(Array[Byte](42, 123))(stmt, 1)
+    implicitly[ParameterBinderFactory[Array[Byte]]]
+      .apply(Array[Byte](42, 123))(stmt, 1)
     implicitly[ParameterBinderFactory[Array[Byte]]].apply(null)(stmt, 2)
     verify(stmt).setBytes(1, Array[Byte](42, 123))
     verify(stmt).setObject(2, null)
@@ -303,21 +309,24 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
   it should "have instance for None.type" in {
     val stmt = mock[PreparedStatement]
     implicitly[ParameterBinderFactory[None.type]].apply(None)(stmt, 1)
-    implicitly[ParameterBinderFactory[None.type]].apply(null)(stmt, 2)
+    implicitly[ParameterBinderFactory[None.type]]
+      .apply(null.asInstanceOf[None.type])(stmt, 2)
     verify(stmt).setObject(1, null)
     verify(stmt).setObject(2, null)
   }
 
   it should "have instance for SQLSyntax" in {
     val stmt = mock[PreparedStatement]
-    implicitly[ParameterBinderFactory[SQLSyntax]].apply(SQLSyntax.empty)(stmt, 1)
+    implicitly[ParameterBinderFactory[SQLSyntax]]
+      .apply(SQLSyntax.empty)(stmt, 1)
     implicitly[ParameterBinderFactory[SQLSyntax]].apply(null)(stmt, 2)
     verifyNoMoreInteractions(stmt)
   }
 
   it should "have instance for Option[SQLSyntax]" in {
     val stmt = mock[PreparedStatement]
-    implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(Some(SQLSyntax.empty))(stmt, 1)
+    implicitly[ParameterBinderFactory[Option[SQLSyntax]]]
+      .apply(Some(SQLSyntax.empty))(stmt, 1)
     implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(None)(stmt, 2)
     implicitly[ParameterBinderFactory[Option[SQLSyntax]]].apply(null)(stmt, 3)
     verifyNoMoreInteractions(stmt)
@@ -341,7 +350,11 @@ class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
     verify(stmt).setString(1, "Foo")
     verify(stmt).setString(2, "Bar")
 
-    assert(SQLSyntax.eq(SQLSyntax.empty, EnumLike.Foo).parameters === Seq(EnumLike.Foo))
+    assert(
+      SQLSyntax.eq(SQLSyntax.empty, EnumLike.Foo).parameters === Seq(
+        EnumLike.Foo
+      )
+    )
   }
 }
 
@@ -351,7 +364,8 @@ object EnumLike {
   case object Foo extends EnumLike
   case object Bar extends EnumLike
 
-  implicit def FooEnumParameterBinderFactory[A <: EnumLike]: ParameterBinderFactory[A] = {
+  implicit def FooEnumParameterBinderFactory[A <: EnumLike]
+    : ParameterBinderFactory[A] = {
     ParameterBinderFactory.stringParameterBinderFactory.contramap(_.toString)
   }
 

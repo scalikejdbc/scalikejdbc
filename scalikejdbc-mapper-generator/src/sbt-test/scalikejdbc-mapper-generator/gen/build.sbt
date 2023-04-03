@@ -1,18 +1,29 @@
 val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
-scalikejdbcGeneratorSettings in Compile ~= { setting =>
+conflictWarning := {
+  if (scalaBinaryVersion.value == "3") {
+    // TODO
+    ConflictWarning("warn", Level.Warn, false)
+  } else {
+    conflictWarning.value
+  }
+}
+
+Compile / scalikejdbcGeneratorSettings ~= { setting =>
   setting.copy(tableNameToSyntaxName = { tableName =>
     setting.tableNameToSyntaxName(tableName) match {
-      case "as" => "as_"
+      case "as"       => "as_"
       case syntaxName => syntaxName
     }
   })
 }
 
-scalikejdbcJDBCSettings in Compile := {
+(Compile / scalikejdbcJDBCSettings) := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))
-  def loadProp(key: String): String = Option(props.get(key)).map(_.toString).getOrElse(throw new IllegalStateException("missing key " + key))
+  def loadProp(key: String): String = Option(props.get(key))
+    .map(_.toString)
+    .getOrElse(throw new IllegalStateException("missing key " + key))
   JDBCSettings(
     driver = loadProp("jdbc.driver"),
     url = loadProp("jdbc.url"),
@@ -24,46 +35,60 @@ scalikejdbcJDBCSettings in Compile := {
 
 TaskKey[Unit]("createTestDatabase") := {
   import scalikejdbc._
-  val setting = (scalikejdbcJDBCSettings in Compile).value
+  val setting = (Compile / scalikejdbcJDBCSettings).value
   Class.forName(setting.driver)
   ConnectionPool.singleton(setting.url, setting.username, setting.password)
   DB.autoCommit { implicit s =>
-    sql"create table if not exists programmers (id SERIAL PRIMARY KEY, name varchar(128), t1 timestamp not null, t2 date, t3 time, type int, to_string int, hash_code int, wait int, get_class int, notify int, notify_all int, product_arity int, product_iterator int, product_prefix int, copy int)"
-      .execute.apply()
-    sql"create view programmers_view as (select * from programmers)"
-      .execute.apply()
+    sql"create table if not exists programmers (id SERIAL PRIMARY KEY, name varchar(128), t1 timestamp not null, t2 date, t3 time, type int, to_string int, hash_code int, wait int, get_class int, notify int, notify_all int, product_arity int, product_iterator int, product_prefix int, copy int)".execute
+      .apply()
+    sql"create view programmers_view as (select * from programmers)".execute
+      .apply()
     // https://github.com/scalikejdbc/scalikejdbc/issues/810
-    sql"create table address_street (id int not null)"
-      .execute.apply()
+    sql"create table address_street (id int not null)".execute.apply()
   }
 }
 
-testOptions in Test += {
-  val setting = (scalikejdbcJDBCSettings in Compile).value
-  Tests.Setup{ loader =>
-    type Initializer = {def run(url: String, username: String, password: String): Unit}
-    val initializer = loader.loadClass("app.Initializer").getDeclaredConstructor().newInstance().asInstanceOf[Initializer]
+(Test / testOptions) += {
+  val setting = (Compile / scalikejdbcJDBCSettings).value
+  Tests.Setup { loader =>
+    type Initializer = {
+      def run(url: String, username: String, password: String): Unit
+    }
+    val initializer = loader
+      .loadClass("app.Initializer")
+      .getDeclaredConstructor()
+      .newInstance()
+      .asInstanceOf[Initializer]
     initializer.run(setting.url, setting.username, setting.password)
   }
 }
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.1", "2.12.11")
+crossScalaVersions := List("2.13.10", "2.12.17", "3.2.2")
 
-scalacOptions ++= Seq("-Xlint", "-language:_", "-deprecation", "-unchecked")
+scalacOptions ++= Seq(
+  "-Xlint",
+  "-language:higherKinds,implicitConversions",
+  "-deprecation",
+  "-unchecked"
+)
 
 libraryDependencies ++= Seq(
-  "org.scalikejdbc"     %% "scalikejdbc"                      % scalikejdbcVersion,
-  "org.scalikejdbc"     %% "scalikejdbc-test"                 % scalikejdbcVersion % "test",
-  "org.scalikejdbc"     %% "scalikejdbc-syntax-support-macro" % scalikejdbcVersion,
-  "org.scalikejdbc"     %% "scalikejdbc-joda-time"            % scalikejdbcVersion,
-  "org.slf4j"           %  "slf4j-simple"                     % System.getProperty("slf4j.version"),
-  "com.h2database"      %  "h2"                               % System.getProperty("h2.version"),
-  "mysql"               %  "mysql-connector-java"             % System.getProperty("mysql.version"),
-  "org.postgresql"      %  "postgresql"                       % System.getProperty("postgresql.version"),
-  "org.scalatest"       %% "scalatest"                        % System.getProperty("scalatest.version") % "test",
-  "org.specs2"          %% "specs2-core"                      % System.getProperty("specs2.version") % "test"
+  "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
+  "org.scalikejdbc" %% "scalikejdbc-test" % scalikejdbcVersion % "test",
+  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % scalikejdbcVersion,
+  "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikejdbcVersion,
+  "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version"),
+  "com.h2database" % "h2" % System.getProperty("h2.version"),
+  "mysql" % "mysql-connector-java" % System.getProperty("mysql.version"),
+  "org.postgresql" % "postgresql" % System.getProperty("postgresql.version"),
+  "org.scalatest" %% "scalatest" % System.getProperty(
+    "scalatest.version"
+  ) % "test",
+  "org.specs2" %% "specs2-core" % System.getProperty(
+    "specs2.version"
+  ) % "test"
 )
 
 TaskKey[Unit]("generateCodeForIssue339") := {
@@ -75,7 +100,8 @@ TaskKey[Unit]("generateCodeForIssue339") := {
     Column("column2", JDBCType.OTHER, false, false)
   )
   val all = key :: other
-  val table = Table("Issue339table", all, all.filter(_.isAutoIncrement), key :: Nil)
+  val table =
+    Table("Issue339table", all, all.filter(_.isAutoIncrement), key :: Nil)
   val generator = new CodeGenerator(table)
   val code = generator.modelAll()
   println(code)

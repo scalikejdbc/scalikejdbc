@@ -8,9 +8,10 @@ case class LoggingSQLAndTimeSettings(
   singleLineMode: Boolean = false,
   printUnprocessedStackTrace: Boolean = false,
   stackTraceDepth: Int = 15,
-  logLevel: Symbol = Symbol("debug"),
+  logLevel: String = "debug",
   warningEnabled: Boolean = false,
   warningThresholdMillis: Long = 3000L,
-  warningLogLevel: Symbol = Symbol("warn"),
+  warningLogLevel: String = "warn",
   maxColumnSize: Option[Int] = Some(100),
-  maxBatchParamSize: Option[Int] = Some(20))
+  maxBatchParamSize: Option[Int] = Some(20)
+)

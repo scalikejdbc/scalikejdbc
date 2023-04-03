@@ -3,7 +3,6 @@ package scalikejdbc
 import javax.sql.DataSource
 
 import org.mockito.Mockito.mock
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -19,20 +18,21 @@ class DataSourceConnectionPoolSpec extends AnyFlatSpec with Matchers {
   it should "be close" in {
     val dataSource: DataSource = mock(classOf[DataSource])
     val dataSourceCloser = DummyDataSourceCloser()
-    val instance = new DataSourceConnectionPool(dataSource, closer = dataSourceCloser)
-    ConnectionPool.add(Symbol("close"), instance)
+    val instance =
+      new DataSourceConnectionPool(dataSource, closer = dataSourceCloser)
+    ConnectionPool.add("close", instance)
     Thread.sleep(100L)
-    ConnectionPool.close(Symbol("close"))
+    ConnectionPool.close("close")
     dataSourceCloser.closed shouldBe true
   }
 
   it should "be impossible to close with DefaultDataSourceCloser" in {
     val dataSource: DataSource = mock(classOf[DataSource])
     val instance = new DataSourceConnectionPool(dataSource)
-    ConnectionPool.add(Symbol("close"), instance)
+    ConnectionPool.add("close", instance)
     Thread.sleep(100L)
     assertThrows[UnsupportedOperationException] {
-      ConnectionPool.close(Symbol("close"))
+      ConnectionPool.close("close")
     }
   }
 

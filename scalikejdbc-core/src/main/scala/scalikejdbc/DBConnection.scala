@@ -2,6 +2,8 @@ package scalikejdbc
 
 import java.sql.{ DatabaseMetaData, Connection, ResultSet }
 import scalikejdbc.metadata._
+import scala.collection.compat._
+import scala.collection.compat.immutable.LazyList
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.Exception._
 import scala.util.control.ControlThrowable
@@ -14,7 +16,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
 
   protected[this] val settingsProvider: SettingsProvider
   private[this] lazy val jtaDataSourceCompatible: Boolean =
-    settingsProvider.jtaDataSourceCompatible(GlobalSettings.jtaDataSourceCompatible)
+    settingsProvider.jtaDataSourceCompatible(
+      GlobalSettings.jtaDataSourceCompatible
+    )
 
   /**
    * Connection will be closed automatically by default.
@@ -29,7 +33,8 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   /**
    * Provides default TxBoundary type class instance.
    */
-  private[this] def defaultTxBoundary[A]: TxBoundary[A] = TxBoundary.Exception.exceptionTxBoundary[A]
+  private[this] def defaultTxBoundary[A]: TxBoundary[A] =
+    TxBoundary.Exception.exceptionTxBoundary[A]
 
   /**
    * Switches auto close mode.
@@ -104,10 +109,15 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     if (!jtaDataSourceCompatible) conn.setReadOnly(readOnly)
   }
 
-  private[this] def newTx(conn: Connection, isolationLevel: IsolationLevel): Tx = {
+  private[this] def newTx(
+    conn: Connection,
+    isolationLevel: IsolationLevel
+  ): Tx = {
     setReadOnly(conn, false)
     if (!jtaDataSourceCompatible && (isTxNotActive || isTxAlreadyStarted)) {
-      throw new IllegalStateException(ErrorMessage.CANNOT_START_A_NEW_TRANSACTION)
+      throw new IllegalStateException(
+        ErrorMessage.CANNOT_START_A_NEW_TRANSACTION
+      )
     }
     new Tx(conn, isolationLevel)
   }
@@ -138,7 +148,8 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   def tx: Tx = {
     handling(classOf[IllegalStateException]) by { e =>
       throw new IllegalStateException(
-        ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead.")
+        ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead."
+      )
     } apply currentTx
   }
 
@@ -149,7 +160,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     ignoring(classOf[Throwable]) {
       conn.close()
     }
-    if (settingsProvider.loggingConnections(GlobalSettings.loggingConnections)) {
+    if (
+      settingsProvider.loggingConnections(GlobalSettings.loggingConnections)
+    ) {
       log.debug("A Connection is closed.")
     }
   }
@@ -191,13 +204,16 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * Returns read-only session.
    * @return session
    */
-  def readOnlySession(settings: SettingsProvider = SettingsProvider.default): DBSession = {
+  def readOnlySession(
+    settings: SettingsProvider = SettingsProvider.default
+  ): DBSession = {
     setReadOnly(conn, true)
     DBSession(
       conn = conn,
       isReadOnly = true,
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings)
+      settings = this.settingsProvider merge settings
+    )
   }
 
   /**
@@ -225,10 +241,16 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * Returns auto-commit session.
    * @return session
    */
-  def autoCommitSession(settings: SettingsProvider = SettingsProvider.default): DBSession = {
+  def autoCommitSession(
+    settings: SettingsProvider = SettingsProvider.default
+  ): DBSession = {
     setReadOnly(conn, false)
     setAutoCommit(conn, true)
-    DBSession(conn, connectionAttributes = connectionAttributes, settings = this.settingsProvider merge settings)
+    DBSession(
+      conn,
+      connectionAttributes = connectionAttributes,
+      settings = this.settingsProvider merge settings
+    )
   }
 
   /**
@@ -256,15 +278,19 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * Returns within-tx session.
    * @return session
    */
-  def withinTxSession(tx: Tx = currentTx, settings: SettingsProvider = SettingsProvider.default): DBSession = {
-    if (!jtaDataSourceCompatible && !tx.isActive) {
+  def withinTxSession(
+    tx: Tx = currentTx,
+    settings: SettingsProvider = SettingsProvider.default
+  ): DBSession = {
+    if (!jtaDataSourceCompatible && !tx.isActive()) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
     DBSession(
       conn = conn,
       tx = Some(tx),
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings)
+      settings = this.settingsProvider merge settings
+    )
   }
 
   /**
@@ -291,7 +317,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     // Start the transaction
     tx.begin()
     // Check if transaction is actually active
-    if (!jtaDataSourceCompatible && !tx.isActive) {
+    if (!jtaDataSourceCompatible && !tx.isActive()) {
       throw new IllegalStateException(ErrorMessage.TRANSACTION_IS_NOT_ACTIVE)
     }
   }
@@ -308,7 +334,10 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
       } catch {
         case rollbackException: Throwable => {
           // log rollback exception for application operators
-          log.error("Could not successfully complete local transaction", rollbackException)
+          log.error(
+            "Could not successfully complete local transaction",
+            rollbackException
+          )
         }
       }
       // original exception is likely more valuable to calling code to act upon
@@ -321,23 +350,27 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def localTx[A](execution: DBSession => A)(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
+  def localTx[A](
+    execution: DBSession => A
+  )(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     val doClose = if (autoCloseEnabled) () => conn.close() else () => ()
-    val txResult: A = try {
-      val tx = newTx
-      begin(tx)
-      rollbackIfThrowable[A] {
-        val session = DBSession(
-          conn = conn,
-          tx = Option(tx),
-          connectionAttributes = connectionAttributes,
-          settings = this.settingsProvider)
-        val result: A = execution(session)
-        boundary.finishTx(result, tx)
+    val txResult: A =
+      try {
+        val tx = newTx
+        begin(tx)
+        rollbackIfThrowable[A] {
+          val session = DBSession(
+            conn = conn,
+            tx = Option(tx),
+            connectionAttributes = connectionAttributes,
+            settings = this.settingsProvider
+          )
+          val result: A = execution(session)
+          boundary.finishTx(result, tx)
+        }
+      } catch {
+        case e: Throwable => doClose(); throw e
       }
-    } catch {
-      case e: Throwable => doClose(); throw e
-    }
     boundary.closeConnection(txResult, doClose)
   }
 
@@ -348,7 +381,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A future result type
    * @return future result
    */
-  def futureLocalTx[A](execution: DBSession => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+  def futureLocalTx[A](
+    execution: DBSession => Future[A]
+  )(implicit ec: ExecutionContext): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
     localTx(execution)
@@ -360,7 +395,9 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @tparam A  return type
    * @return result value
    */
-  def localTxWithConnection[A](execution: Connection => A)(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
+  def localTxWithConnection[A](
+    execution: Connection => A
+  )(implicit boundary: TxBoundary[A] = defaultTxBoundary[A]): A = {
     localTx(s => execution(s.conn))
   }
 
@@ -385,20 +422,27 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableNamePattern table name pattern (with schema optionally)
    * @return table information
    */
-  def getTableNames(tableNamePattern: String = "%", tableTypes: Array[String] = DBConnection.tableTypes): List[String] = {
+  def getTableNames(
+    tableNamePattern: String = "%",
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): List[String] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
-      getSchemaAndTableName(meta, tableNamePattern.replaceAll("\\*", "%"), tableTypes).map {
-        case (schema, tableNamePattern) =>
-          new ResultSetIterator(meta.getTables(null, schema, tableNamePattern, tableTypes))
-            .map { rs =>
-              val schemaName = rs.string("TABLE_SCHEM")
-              if (schema != null && schema.nonEmpty && schemaName != null) {
-                schemaName + "." + rs.string("TABLE_NAME")
-              } else {
-                rs.string("TABLE_NAME")
-              }
-            }.toList
+      getSchemaAndTableName(
+        meta,
+        tableNamePattern.replaceAll("\\*", "%"),
+        tableTypes
+      ).map { case (schema, tableNamePattern) =>
+        new ResultSetIterator(
+          meta.getTables(null, schema, tableNamePattern, tableTypes)
+        ).map { rs =>
+          val schemaName = rs.string("TABLE_SCHEM")
+          if (schema != null && schema.nonEmpty && schemaName != null) {
+            schemaName + "." + rs.string("TABLE_NAME")
+          } else {
+            rs.string("TABLE_NAME")
+          }
+        }.toList
       }.getOrElse(List.empty[String])
     }
   }
@@ -411,7 +455,11 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param table table name
    * @return resultset related to columns
    */
-  def getAllColumns(meta: DatabaseMetaData, schema: String, table: String): ResultSet = {
+  def getAllColumns(
+    meta: DatabaseMetaData,
+    schema: String,
+    table: String
+  ): ResultSet = {
     meta.getDatabaseProductName match {
       case "MySQL" => {
         val catalog = if (schema == null || schema.isEmpty) {
@@ -430,12 +478,18 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   /**
    * Returns all the column names on the matched table name
    */
-  def getColumnNames(tableName: String, tableTypes: Array[String] = DBConnection.tableTypes): List[String] = {
+  def getColumnNames(
+    tableName: String,
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): List[String] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
       getSchemaAndTableName(meta, tableName, tableTypes).map {
         case (schema, tableName) =>
-          new ResultSetIterator(getAllColumns(meta, schema, tableName)).map(_.string("COLUMN_NAME")).toList.distinct
+          new ResultSetIterator(getAllColumns(meta, schema, tableName))
+            .map(_.string("COLUMN_NAME"))
+            .toList
+            .distinct
       }
     }.getOrElse(Nil)
   }
@@ -446,7 +500,10 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param table table name (with schema optionally)
    * @return table information
    */
-  def getTable(table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
+  def getTable(
+    table: String,
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): Option[Table] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
 
@@ -468,86 +525,131 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableTypes target table types
    * @return table information
    */
-  private[this] def _getTable(meta: DatabaseMetaData, schema: String, table: String, tableTypes: Array[String] = DBConnection.tableTypes): Option[Table] = {
-    val tableList = new ResultSetIterator(meta.getTables(null, schema, table, tableTypes)).map {
-      rs => (rs.string("TABLE_SCHEM"), rs.string("TABLE_NAME"), rs.string("REMARKS"))
-    }.toStream
+  private[this] def _getTable(
+    meta: DatabaseMetaData,
+    schema: String,
+    table: String,
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): Option[Table] = {
+    val tableList =
+      new ResultSetIterator(meta.getTables(null, schema, table, tableTypes))
+        .map { rs =>
+          (
+            rs.string("TABLE_SCHEM"),
+            rs.string("TABLE_NAME"),
+            rs.string("REMARKS")
+          )
+        }
+        .to(LazyList)
 
-    tableList.headOption.map {
-      case (schema, table, remarks) =>
-        val pkNames: List[String] = new ResultSetIterator(meta.getPrimaryKeys(null, schema, table)).map(rs => rs.string("COLUMN_NAME")).toList
+    tableList.headOption.map { case (schema, table, remarks) =>
+      val pkNames: List[String] = new ResultSetIterator(
+        meta.getPrimaryKeys(null, schema, table)
+      ).map(rs => rs.string("COLUMN_NAME")).toList
 
-        Table(
-          name = table,
-          schema = schema,
-          description = remarks,
-          columns = new ResultSetIterator(getAllColumns(meta, schema, table)).map { rs =>
+      Table(
+        name = table,
+        schema = schema,
+        description = remarks,
+        columns = new ResultSetIterator(getAllColumns(meta, schema, table))
+          .map { rs =>
             Column(
-              name = try rs.string("COLUMN_NAME") catch { case e: ResultSetExtractorException => null },
-              typeCode = try rs.int("DATA_TYPE") catch { case e: ResultSetExtractorException => -1 },
+              name =
+                try rs.string("COLUMN_NAME")
+                catch { case e: ResultSetExtractorException => null },
+              typeCode =
+                try rs.int("DATA_TYPE")
+                catch { case e: ResultSetExtractorException => -1 },
               typeName = rs.string("TYPE_NAME"),
-              size = try rs.int("COLUMN_SIZE") catch { case e: ResultSetExtractorException => -1 },
-              isRequired = try {
-                rs.string("IS_NULLABLE") != null && rs.string("IS_NULLABLE") == "NO"
-              } catch { case e: ResultSetExtractorException => false },
-              isPrimaryKey = try {
-                pkNames.exists(_ == rs.string("COLUMN_NAME"))
-              } catch { case e: ResultSetExtractorException => false },
-              isAutoIncrement = try {
-                // Oracle throws java.sql.SQLException: Invalid column name
-                rs.string("IS_AUTOINCREMENT") != null && rs.string("IS_AUTOINCREMENT") == "YES"
-              } catch { case e: ResultSetExtractorException => false },
-              description = try rs.string("REMARKS") catch { case e: ResultSetExtractorException => null },
-              defaultValue = try rs.string("COLUMN_DEF") catch { case e: ResultSetExtractorException => null })
-          }.toList.distinct,
-          foreignKeys = {
-            try {
-              new ResultSetIterator(meta.getImportedKeys(null, schema, table)).map { rs =>
+              size =
+                try rs.int("COLUMN_SIZE")
+                catch { case e: ResultSetExtractorException => -1 },
+              isRequired =
+                try {
+                  rs.string("IS_NULLABLE") != null && rs.string(
+                    "IS_NULLABLE"
+                  ) == "NO"
+                } catch { case e: ResultSetExtractorException => false },
+              isPrimaryKey =
+                try {
+                  pkNames.exists(_ == rs.string("COLUMN_NAME"))
+                } catch { case e: ResultSetExtractorException => false },
+              isAutoIncrement =
+                try {
+                  // Oracle throws java.sql.SQLException: Invalid column name
+                  rs.string("IS_AUTOINCREMENT") != null && rs.string(
+                    "IS_AUTOINCREMENT"
+                  ) == "YES"
+                } catch { case e: ResultSetExtractorException => false },
+              description =
+                try rs.string("REMARKS")
+                catch { case e: ResultSetExtractorException => null },
+              defaultValue =
+                try rs.string("COLUMN_DEF")
+                catch { case e: ResultSetExtractorException => null }
+            )
+          }
+          .toList
+          .distinct,
+        foreignKeys = {
+          try {
+            new ResultSetIterator(meta.getImportedKeys(null, schema, table))
+              .map { rs =>
                 ForeignKey(
                   name = rs.string("FKCOLUMN_NAME"),
                   foreignColumnName = rs.string("PKCOLUMN_NAME"),
-                  foreignTableName = rs.string("PKTABLE_NAME"))
-              }.toList.distinct
-            } catch { case e: ResultSetExtractorException => Nil }
-          },
-          indices = {
-            try {
-              new ResultSetIterator(meta.getIndexInfo(null, schema, table, false, true))
-                .foldLeft(Map[String, Index]()) {
-                  case (map, rs) =>
-                    val indexName: String = rs.string("INDEX_NAME")
-                    val index: Index = map.get(indexName) match {
-                      case Some(idx) =>
-                        rs.stringOpt("COLUMN_NAME") match {
-                          case Some(columnName) => idx.copy(columnNames = idx.columnNames :+ columnName)
-                          case _ => idx
-                        }
-                      case _ =>
-                        Index(
-                          name = indexName,
-                          columnNames = rs.stringOpt("COLUMN_NAME").toList,
-                          isUnique = !rs.boolean("NON_UNIQUE"),
-                          qualifier = rs.stringOpt("INDEX_QUALIFIER"),
-                          indexType = {
-                            rs.shortOpt("TYPE") match {
-                              case Some(t) => IndexType.from(t)
-                              case _ => IndexType.tableIndexOther
-                            }
-                          },
-                          ordinalPosition = rs.shortOpt("ORDINAL_POSITION"),
-                          ascOrDesc = rs.stringOpt("ASC_OR_DESC"),
-                          cardinality = rs.longOpt("CARDINALITY"),
-                          pages = rs.longOpt("PAGES"),
-                          filterCondition = rs.stringOpt("FILTER_CONDITION"))
+                  foreignTableName = rs.string("PKTABLE_NAME")
+                )
+              }
+              .toList
+              .distinct
+          } catch { case e: ResultSetExtractorException => Nil }
+        },
+        indices = {
+          try {
+            new ResultSetIterator(
+              meta.getIndexInfo(null, schema, table, false, true)
+            )
+              .foldLeft(Map[String, Index]()) { case (map, rs) =>
+                val indexName: String = rs.string("INDEX_NAME")
+                val index: Index = map.get(indexName) match {
+                  case Some(idx) =>
+                    rs.stringOpt("COLUMN_NAME") match {
+                      case Some(columnName) =>
+                        idx.copy(columnNames = idx.columnNames :+ columnName)
+                      case _ => idx
                     }
-                    map.updated(indexName, index)
-                }.map { case (k, v) => v }.toList.distinct
-            } catch {
-              case e: ResultSetExtractorException =>
-                log.error("Failed to fetch index information", e)
-                Nil
-            }
-          })
+                  case _ =>
+                    Index(
+                      name = indexName,
+                      columnNames = rs.stringOpt("COLUMN_NAME").toList,
+                      isUnique = !rs.boolean("NON_UNIQUE"),
+                      qualifier = rs.stringOpt("INDEX_QUALIFIER"),
+                      indexType = {
+                        rs.shortOpt("TYPE") match {
+                          case Some(t) => IndexType.from(t)
+                          case _       => IndexType.tableIndexOther
+                        }
+                      },
+                      ordinalPosition = rs.shortOpt("ORDINAL_POSITION"),
+                      ascOrDesc = rs.stringOpt("ASC_OR_DESC"),
+                      cardinality = rs.longOpt("CARDINALITY"),
+                      pages = rs.longOpt("PAGES"),
+                      filterCondition = rs.stringOpt("FILTER_CONDITION")
+                    )
+                }
+                map.updated(indexName, index)
+              }
+              .map { case (k, v) => v }
+              .toList
+              .distinct
+          } catch {
+            case e: ResultSetExtractorException =>
+              log.error("Failed to fetch index information", e)
+              Nil
+          }
+        }
+      )
     }
   }
 
@@ -558,7 +660,10 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableTypes table types
    * @return table name list
    */
-  def showTables(tableNamePattern: String = "%", tableTypes: Array[String] = DBConnection.tableTypes): String = {
+  def showTables(
+    tableNamePattern: String = "%",
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): String = {
     getTableNames(tableNamePattern, tableTypes).mkString("\n")
   }
 
@@ -580,8 +685,16 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @param tableTypes target table types
    * @return schema name and table name
    */
-  private[this] def getSchemaAndTableName(meta: DatabaseMetaData, tablePattern: String, tableTypes: Array[String]): Option[(String, String)] = {
-    def _getSchemaAndTableName(meta: DatabaseMetaData, tablePattern: String, tableTypes: Array[String]): Option[(String, String)] = {
+  private[this] def getSchemaAndTableName(
+    meta: DatabaseMetaData,
+    tablePattern: String,
+    tableTypes: Array[String]
+  ): Option[(String, String)] = {
+    def _getSchemaAndTableName(
+      meta: DatabaseMetaData,
+      tablePattern: String,
+      tableTypes: Array[String]
+    ): Option[(String, String)] = {
       val (_schema, table) = toSchemaAndTable(tablePattern)
       val schema = if (meta.getURL.startsWith("jdbc:h2")) {
         // H2 Database 1.4 cannot accept null for metadata retrieving columns
@@ -591,7 +704,11 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
         _schema
       }
 
-      if (new ResultSetIterator(meta.getTables(null, schema, table, tableTypes)).isEmpty) {
+      if (
+        new ResultSetIterator(
+          meta.getTables(null, schema, table, tableTypes)
+        ).isEmpty
+      ) {
         None
       } else {
         Some((schema, table))
@@ -599,8 +716,12 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     }
 
     _getSchemaAndTableName(meta, tablePattern, tableTypes)
-      .orElse(_getSchemaAndTableName(meta, tablePattern.toUpperCase(en), tableTypes))
-      .orElse(_getSchemaAndTableName(meta, tablePattern.toLowerCase(en), tableTypes))
+      .orElse(
+        _getSchemaAndTableName(meta, tablePattern.toUpperCase(en), tableTypes)
+      )
+      .orElse(
+        _getSchemaAndTableName(meta, tablePattern.toLowerCase(en), tableTypes)
+      )
   }
 
 }

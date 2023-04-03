@@ -7,4 +7,3 @@ trait SQLInterpolation
   extends SQLInterpolationFeature
   with SQLSyntaxSupportFeature
   with QueryDSLFeature
-

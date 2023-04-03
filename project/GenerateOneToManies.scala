@@ -7,17 +7,24 @@ object GenerateOneToManies {
     val bs = tparams.mkString(", ")
     val seq = tparams.map("scala.collection.Seq[" + _ + "]").mkString(", ")
     val extractTo = "extractTo"
-    val extractToN = (1 to n).map{ i =>
-      s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i] = to$i"
-    }.mkString("\n")
-    val extractOne = "  private[scalikejdbc] def extractOne: WrappedResultSet => A = one"
-    val transform = s"  private[scalikejdbc] def transform: (A, $seq) => Z = zExtractor"
-    val resultSetToOptions = (1 to n).map{i => s"val to$i: WrappedResultSet => Option[B$i]"}.mkString(", ")
+    val extractToN = (1 to n)
+      .map { i =>
+        s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i] = to$i"
+      }
+      .mkString("\n")
+    val extractOne =
+      "  private[scalikejdbc] def extractOne: WrappedResultSet => A = one"
+    val transform =
+      s"  private[scalikejdbc] def transform: (A, $seq) => Z = zExtractor"
+    val resultSetToOptions = (1 to n)
+      .map { i => s"val to$i: WrappedResultSet => Option[B$i]" }
+      .mkString(", ")
     val to = (1 to n).map("to" + _).mkString(", ")
-    val resultSetToOptionsType = tparams.map("WrappedResultSet => Option[" + _ + "]").mkString(", ")
+    val resultSetToOptionsType =
+      tparams.map("WrappedResultSet => Option[" + _ + "]").mkString(", ")
     val sqlTo = (1 to n).map("sqlObject.to" + _).mkString(", ")
 
-s"""/*
+    s"""/*
  * Copyright 2013 - 2015 scalikejdbc.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,39 +49,51 @@ private[scalikejdbc] trait OneToManies${n}Extractor[$A, $bs, E <: WithExtractor,
     with RelationalSQLResultSetOperations[Z] {
 
   private[scalikejdbc] def extractOne: WrappedResultSet => $A
-${(1 to n).map{ i =>
-s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
-  }.mkString("\n")}
+${(1 to n)
+        .map { i =>
+          s"  private[scalikejdbc] def $extractTo$i: WrappedResultSet => Option[B$i]"
+        }
+        .mkString("\n")}
   private[scalikejdbc] def transform: ($A, $seq) => Z
 
   private[scalikejdbc] def processResultSet(result: (LinkedHashMap[$A, ($seq)]),
     rs: WrappedResultSet): LinkedHashMap[A, ($seq)] = {
     val o = extractOne(rs)
-    val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n).map(extractTo + _ + "(rs)").mkString(", ")})
+    val (${(1 to n).map("to" + _).mkString(", ")}) = (${(1 to n)
+        .map(extractTo + _ + "(rs)")
+        .mkString(", ")})
     if (result.contains(o)) {
       ${(1 to n).map("to" + _).mkString("(", " orElse ", ")")}.map { _ =>
         val (${(1 to n).map("ts" + _).mkString(", ")}) = result.apply(o)
         result += (o -> ((
-${(1 to n).map{i =>
-s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
-          }.mkString(",\n")}
+${(1 to n)
+        .map { i =>
+          s"          to$i.map(t => if (ts$i.contains(t)) ts$i else ts$i :+ t).getOrElse(ts$i)"
+        }
+        .mkString(",\n")}
         )))
       }.getOrElse(result)
     } else {
       result += (
         o -> ((
-${(1 to n).map{i =>
-s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
-          }.mkString(",\n")}
+${(1 to n)
+        .map { i =>
+          s"          to$i.map(t => Vector(t)).getOrElse(Vector.empty)"
+        }
+        .mkString(",\n")}
         ))
       )
     }
   }
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[_], zExtractor: (A, $seq) => Z): Iterable[Z] = {
-    val attributesSwitcher = createDBSessionAttributesSwitcher()
+    val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq: _*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
-      case (one, (${(1 to n).map("t" + _).mkString(", ")})) => zExtractor(one, ${(1 to n).map("t" + _).mkString(", ")})
+      case (one, (${(1 to n)
+        .map("t" + _)
+        .mkString(", ")})) => zExtractor(one, ${(1 to n)
+        .map("t" + _)
+        .mkString(", ")})
     }
   }
 
@@ -89,31 +108,31 @@ class OneToManies${n}SQL[A, $bs, E <: WithExtractor, Z](
   def map(zExtractor: (A, $seq) => Z): OneToManies${n}SQL[A, $bs, HasExtractor, Z] = {
     new OneToManies${n}SQL(statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toIterable(): OneToManies${n}SQLToIterable[A, $bs, E, Z] = {
+  override def toIterable: OneToManies${n}SQLToIterable[A, $bs, E, Z] = {
     new OneToManies${n}SQLToIterable[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toList(): OneToManies${n}SQLToList[A, $bs, E, Z] = {
+  override def toList: OneToManies${n}SQLToList[A, $bs, E, Z] = {
     new OneToManies${n}SQLToList[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
-  override def toOption(): OneToManies${n}SQLToOption[A, $bs, E, Z] = {
+  override def toOption: OneToManies${n}SQLToOption[A, $bs, E, Z] = {
     new OneToManies${n}SQLToOption[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)(true)
   }
-  override def headOption(): OneToManies${n}SQLToOption[A, $bs, E, Z] = {
+  override def headOption: OneToManies${n}SQLToOption[A, $bs, E, Z] = {
     new OneToManies${n}SQLToOption[A, $bs, E, Z](statement, rawParameters)(one)($to)(zExtractor)(false)
   }
   override def toCollection: OneToManies${n}SQLToCollection[A, $bs, E, Z] = {
     new OneToManies${n}SQLToCollection[A, ${bs}, E, Z](statement, rawParameters)(one)($to)(zExtractor)
   }
 
-  override def single(): OneToManies${n}SQLToOption[A, $bs, E, Z] = toOption()
-  override def first(): OneToManies${n}SQLToOption[A, $bs, E, Z] = headOption()
-  override def list(): OneToManies${n}SQLToList[A, $bs, E, Z] = toList()
-  override def iterable(): OneToManies${n}SQLToIterable[A, $bs, E, Z] = toIterable()
+  override def single: OneToManies${n}SQLToOption[A, $bs, E, Z] = toOption
+  override def first: OneToManies${n}SQLToOption[A, $bs, E, Z] = headOption
+  override def list: OneToManies${n}SQLToList[A, $bs, E, Z] = toList
+  override def iterable: OneToManies${n}SQLToIterable[A, $bs, E, Z] = toIterable
   override def collection: OneToManies${n}SQLToCollection[A, $bs, E, Z] = toCollection
 }
 
 object OneToManies${n}SQL {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQL[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQL[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -138,7 +157,7 @@ $transform
 }
 
 object OneToManies${n}SQLToList {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToList[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToList[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -163,7 +182,7 @@ $transform
 }
 
 object OneToManies${n}SQLToCollection {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToCollection[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToCollection[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -188,7 +207,7 @@ $transform
 }
 
 object OneToManies${n}SQLToIterable {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToIterable[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToIterable[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor))
   }
 }
@@ -212,7 +231,7 @@ $transform
 }
 
 object OneToManies${n}SQLToOption {
-  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToOption[A, $bs, E, Z]): Option[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z, Boolean)] = {
+  def unapply[A, $bs, E <: WithExtractor, Z](sqlObject: OneToManies${n}SQLToOption[A, $bs, E, Z]): Some[(String, scala.collection.Seq[Any], WrappedResultSet => A, ($resultSetToOptionsType), (A, $seq) => Z, Boolean)] = {
     Some((sqlObject.statement, sqlObject.rawParameters, sqlObject.one, ($sqlTo), sqlObject.zExtractor, sqlObject.isSingle))
   }
 }

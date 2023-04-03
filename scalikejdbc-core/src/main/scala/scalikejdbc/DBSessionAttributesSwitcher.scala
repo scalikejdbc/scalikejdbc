@@ -12,7 +12,8 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
 
   private[this] val fetchSizeCameFromSQLObject: Option[Int] = sql.fetchSize
   private[this] val tagsCameFromSQLObject: collection.Seq[String] = sql.tags
-  private[this] val queryTimeoutCameFromSQLObject: Option[Int] = sql.queryTimeout
+  private[this] val queryTimeoutCameFromSQLObject: Option[Int] =
+    sql.queryTimeout
 
   private[this] var dbSession: Option[DBSession] = None
 
@@ -24,7 +25,7 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
   // public methods
   // -------------------------------------
 
-  def withSwitchedDBSession[A](session: DBSession)(op: (DBSession) => A): A = {
+  def withSwitchedDBSession[A](session: DBSession)(op: DBSession => A): A = {
     setDBSession(session)
     overwriteAttributes()
     try {
@@ -43,7 +44,9 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
     dbSession match {
       case Some(session) =>
         this.fetchSizeCameFromSQLObject.foreach(size => session.fetchSize(size))
-        this.queryTimeoutCameFromSQLObject.foreach(seconds => session.queryTimeout(seconds))
+        this.queryTimeoutCameFromSQLObject.foreach(seconds =>
+          session.queryTimeout(seconds)
+        )
         // Adding a tag to a session means session scope tagging.
         // So, concatenation of session.tags and this(SQL).tags would be equal to full tags.
         session.tags((session.tags ++ this.tagsCameFromSQLObject).toSeq: _*)
@@ -73,7 +76,8 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
 
   private[this] def setDBSession(session: DBSession): Unit = {
     dbSession match {
-      case Some(_) => throw new IllegalStateException(ErrorMessage.THIS_IS_A_BUG)
+      case Some(_) =>
+        throw new IllegalStateException(ErrorMessage.THIS_IS_A_BUG)
       case _ =>
         dbSession = Some(session)
         saveOriginalAttributes(session)

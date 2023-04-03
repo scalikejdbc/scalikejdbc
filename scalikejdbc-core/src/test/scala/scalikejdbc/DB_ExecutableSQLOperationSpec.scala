@@ -6,9 +6,14 @@ import scalikejdbc.LoanPattern._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings {
+class DB_ExecutableSQLOperationSpec
+  extends AnyFlatSpec
+  with Matchers
+  with BeforeAndAfter
+  with Settings {
 
-  val tableNamePrefix = "emp_DB_ExecSQLOp" + System.currentTimeMillis().toString.substring(8)
+  val tableNamePrefix =
+    "emp_DB_ExecSQLOp" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "DB(Executable SQL Operation)"
 
@@ -23,11 +28,12 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
-        val idOpt = db autoCommit {
-          implicit session =>
-            SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
+        val idOpt = db autoCommit { implicit session =>
+          SQL("select id from " + tableName + " where id = /*'id*/123")
+            .bindByName("id" -> 1)
+            .map(rs => rs.int("id"))
+            .toOption
+            .apply()
         }
         idOpt.get should equal(1)
       }
@@ -38,18 +44,23 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
     val tableName = tableNamePrefix + "_query"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB readOnly {
-        implicit session =>
-          intercept[Exception] {
-            SQL("select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'")
-              .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
-          }
-          intercept[Exception] {
-            SQL("select id from " + tableName + " where id = /*'id*/123")
-              .bindByName(Symbol("idd") -> 1)
-              .map(rs => rs.int("id")).toOption().apply()
-          }
+      DB readOnly { implicit session =>
+        intercept[Exception] {
+          SQL(
+            "select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'"
+          )
+            .bindByName("id" -> 1)
+            .map(rs => rs.int("id"))
+            .toOption
+            .apply()
+        }
+        intercept[Exception] {
+          SQL("select id from " + tableName + " where id = /*'id*/123")
+            .bindByName("idd" -> 1)
+            .map(rs => rs.int("id"))
+            .toOption
+            .apply()
+        }
       }
     }
   }
@@ -60,22 +71,24 @@ class DB_ExecutableSQLOperationSpec extends AnyFlatSpec with Matchers with Befor
       TestUtils.initialize(tableName)
 
       using(ConnectionPool.borrow()) { conn =>
-        val count = DB(conn) autoCommit {
-          implicit session =>
-            SQL("update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123")
-              .bindByName(
-                Symbol("name") -> "foo",
-                Symbol("id") -> 1).executeUpdate().apply()
+        val count = DB(conn) autoCommit { implicit session =>
+          SQL(
+            "update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123"
+          )
+            .bindByName("name" -> "foo", "id" -> 1)
+            .executeUpdate
+            .apply()
         }
         count should equal(1)
       }
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = (DB(conn) autoCommit {
-          implicit session =>
-            SQL("select name from " + tableName + " where id = /* 'id */123")
-              .bindByName(Symbol("id") -> 1)
-              .map(rs => rs.string("name")).single.apply()
+        val name = (DB(conn) autoCommit { implicit session =>
+          SQL("select name from " + tableName + " where id = /* 'id */123")
+            .bindByName("id" -> 1)
+            .map(rs => rs.string("name"))
+            .single
+            .apply()
         }).get
         name should equal("foo")
       }

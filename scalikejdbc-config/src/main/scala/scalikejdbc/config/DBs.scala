@@ -7,7 +7,7 @@ import scalikejdbc._
  */
 trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
 
-  def setup(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Unit = {
+  def setup(dbName: String = ConnectionPool.DEFAULT_NAME): Unit = {
     val JDBCSettings(url, user, password, driver) = readJDBCSettings(dbName)
     val cpSettings = readConnectionPoolSettings(dbName)
     if (driver != null && driver.trim.nonEmpty) {
@@ -18,15 +18,15 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
 
   def setupAll(): Unit = {
     loadGlobalSettings()
-    dbNames.foreach { dbName => setup(Symbol(dbName)) }
+    dbNames.foreach { dbName => setup(dbName) }
   }
 
-  def close(dbName: Symbol = ConnectionPool.DEFAULT_NAME): Unit = {
+  def close(dbName: String = ConnectionPool.DEFAULT_NAME): Unit = {
     ConnectionPool.close(dbName)
   }
 
   def closeAll(): Unit = {
-    ConnectionPool.closeAll
+    ConnectionPool.closeAll()
   }
 
 }
@@ -34,7 +34,8 @@ trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
 /**
  * Default DB setup executor
  */
-object DBs extends DBs
+object DBs
+  extends DBs
   with TypesafeConfigReader
   with StandardTypesafeConfig
   with NoEnvPrefix

@@ -1,14 +1,15 @@
 package scalikejdbc
 
-import org.scalatest._
-
 import scala.util.control.Exception.ultimately
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class DBSessionWrapperSpec extends AnyFlatSpec with Matchers {
 
-  val tableName = "emp_DBSessionWrapperSpec" + System.currentTimeMillis().toString.substring(8)
+  val tableName = "emp_DBSessionWrapperSpec" + System
+    .currentTimeMillis()
+    .toString
+    .substring(8)
 
   behavior of "DBSessionWrapper"
 
@@ -26,7 +27,9 @@ class DBSessionWrapperSpec extends AnyFlatSpec with Matchers {
             if (step == 1) step += 1
           }
         }
-        (new DBSessionWrapper(session, attributesSwitcher)).list("select * from " + tableName + "")(rs => rs.string("name"))
+        (new DBSessionWrapper(session, attributesSwitcher)).list(
+          "select * from " + tableName + ""
+        )(rs => rs.string("name"))
       }
       result.size should be > 0
       step shouldEqual 2

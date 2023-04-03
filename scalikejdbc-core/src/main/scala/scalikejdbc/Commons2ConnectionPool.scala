@@ -11,20 +11,23 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 /**
  * Commons DBCP Connection Pool
  *
- * @see [[http://commons.apache.org/proper/commons-dbcp/]]
+ * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 class Commons2ConnectionPool(
   override val url: String,
   override val user: String,
   password: String,
-  override val settings: ConnectionPoolSettings = ConnectionPoolSettings())
-  extends ConnectionPool(url, user, password, settings) {
+  override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
+) extends ConnectionPool(url, user, password, settings) {
 
   private[this] val _poolFactory = new PoolableConnectionFactory(
-    new DriverManagerConnectionFactory(url, user, password), null)
+    new DriverManagerConnectionFactory(url, user, password),
+    null
+  )
   _poolFactory.setValidationQuery(settings.validationQuery)
 
-  private[this] val _pool: GenericObjectPool[PoolableConnection] = new GenericObjectPool(_poolFactory)
+  private[this] val _pool: GenericObjectPool[PoolableConnection] =
+    new GenericObjectPool(_poolFactory)
   _poolFactory.setPool(_pool)
 
   _pool.setMinIdle(settings.initialSize)
@@ -56,4 +59,3 @@ class Commons2ConnectionPool(
   override def close(): Unit = _pool.close()
 
 }
-

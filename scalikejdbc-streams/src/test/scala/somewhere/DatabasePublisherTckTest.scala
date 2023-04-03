@@ -1,7 +1,6 @@
 package somewhere
 
 import org.reactivestreams.Publisher
-import org.reactivestreams.tck.PublisherVerification.PublisherTestRun
 import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
 import org.scalatestplus.testng.TestNGSuiteLike
 import org.testng.SkipException
@@ -12,8 +11,10 @@ import somewhere.DatabasePublisherTckTest.User
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: Long)
-  extends PublisherVerification[User](env, publisherShutdownTimeout)
+class DatabasePublisherTckTest(
+  env: TestEnvironment,
+  publisherShutdownTimeout: Long
+) extends PublisherVerification[User](env, publisherShutdownTimeout)
   with TestDBSettings
   with TestNGSuiteLike {
 
@@ -21,7 +22,8 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
     this(DatabasePublisherTckTest.environment, 1000)
   }
 
-  private val tableName = "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
+  private val tableName =
+    "emp_DatabasePublisherTckTest" + System.currentTimeMillis()
 
   @BeforeClass
   def setupTable(): Unit = {
@@ -35,16 +37,23 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   }
 
   override def createPublisher(elements: Long): Publisher[User] = {
-    if (elements == Long.MaxValue) throw new SkipException("DatabasePublisher doesn't support infinite streaming.")
+    if (elements == Long.MaxValue)
+      throw new SkipException(
+        "DatabasePublisher doesn't support infinite streaming."
+      )
 
     DB readOnlyStream {
-      SQL(s"select id from $tableName limit $elements").map(r => User(r.int("id"))).iterator
+      SQL(s"select id from $tableName limit $elements")
+        .map(r => User(r.int("id")))
+        .iterator()
     }
   }
 
   override def createFailedPublisher(): Publisher[User] = {
     DB readOnlyStream {
-      SQL(s"select id from $tableName").map[User](_ => throw new RuntimeException("this is failed publisher.")).iterator
+      SQL(s"select id from $tableName")
+        .map[User](_ => throw new RuntimeException("this is failed publisher."))
+        .iterator()
     }
   }
 
@@ -55,14 +64,17 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   // If there is 0 record at the first data fetch, complete the streaming and should not leave the DBConnection unnecessarily open.
   // test for https://github.com/scalikejdbc/scalikejdbc/pull/614/commits/0c1c120272fe49cde399a7e57a42f78701d5f830
   @Test
-  def optional_spec105_shouldSignalOnCompleteWithoutRequestWhenResultSetIsEmptyAtFirstFetch(): Unit = {
-    optionalActivePublisherTest(0, true, new PublisherTestRun[User] {
-      override def run(pub: Publisher[User]): Unit = {
+  def optional_spec105_shouldSignalOnCompleteWithoutRequestWhenResultSetIsEmptyAtFirstFetch()
+    : Unit = {
+    optionalActivePublisherTest(
+      0,
+      true,
+      (pub: Publisher[User]) => {
         val sub = env.newManualSubscriber(pub)
         sub.expectCompletion()
         sub.expectNone()
       }
-    })
+    )
   }
 
   /*
@@ -78,33 +90,57 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
   // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.1
   // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L195-L216
   @Test
-  override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(): Unit = {
-    activePublisherTest(5, false, new PublisherTestRun[User] {
-      @throws[InterruptedException]
-      def run(pub: Publisher[User]) = {
+  override def required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements()
+    : Unit = {
+    activePublisherTest(
+      5,
+      false,
+      (pub: Publisher[User]) => {
         val sub = env.newManualSubscriber(pub)
-        sub.expectNone(String.format("Publisher %s produced value before the first `request`: ", pub))
+        sub.expectNone(
+          String.format(
+            "Publisher %s produced value before the first `request`: ",
+            pub
+          )
+        )
         sub.request(1)
-        sub.nextElement(String.format("Publisher %s produced no element after first `request`", pub))
-        sub.expectNone(String.format("Publisher %s produced unrequested: ", pub))
+        sub.nextElement(
+          String.format(
+            "Publisher %s produced no element after first `request`",
+            pub
+          )
+        )
+        sub.expectNone(
+          String.format("Publisher %s produced unrequested: ", pub)
+        )
         sub.request(1)
         sub.request(2)
-        sub.nextElements(3, env.defaultTimeoutMillis, String.format("Publisher %s produced less than 3 elements after two respective `request` calls", pub))
-        sub.expectNone(String.format("Publisher %sproduced unrequested ", pub))
+        sub.nextElements(
+          3,
+          env.defaultTimeoutMillis,
+          String.format(
+            "Publisher %s produced less than 3 elements after two respective `request` calls",
+            pub
+          )
+        )
+        sub.expectNone(
+          String.format("Publisher %sproduced unrequested ", pub)
+        )
 
         // clean up for Connection release
         sub.cancel()
       }
-    })
+    )
   }
 
   // Verifies rule: https://github.com/reactive-streams/reactive-streams-jvm#1.11
   // see also: https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/tck/src/main/java/org/reactivestreams/tck/PublisherVerification.java#L540-L552
   @Test
   override def optional_spec111_maySupportMultiSubscribe(): Unit = {
-    optionalActivePublisherTest(1, false, new PublisherTestRun[User] {
-      @throws[Throwable]
-      override def run(pub: Publisher[User]): Unit = {
+    optionalActivePublisherTest(
+      1,
+      false,
+      (pub: Publisher[User]) => {
         val sub1 = env.newManualSubscriber(pub)
         val sub2 = env.newManualSubscriber(pub)
         env.verifyNoAsyncErrors()
@@ -113,7 +149,7 @@ class DatabasePublisherTckTest(env: TestEnvironment, publisherShutdownTimeout: L
         sub1.cancel()
         sub2.cancel()
       }
-    })
+    )
   }
 }
 

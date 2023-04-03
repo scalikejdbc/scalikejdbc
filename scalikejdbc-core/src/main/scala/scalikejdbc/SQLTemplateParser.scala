@@ -36,19 +36,13 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
    * @param input input SQL
    * @return extracted parameter names
    */
-  def extractAllParameters(input: String): List[Symbol] = {
-    extractAllParametersString(input).map(Symbol(_))
-  }
-
-  /**
-   * Extracts binding names from the SQL template.
-   *
-   * @param input input SQL
-   * @return extracted parameter names
-   */
-  def extractAllParametersString(input: String): List[String] = {
+  def extractAllParameters(input: String): List[String] = {
     parse(mainParser, convertExecutableToAnorm(input)).getOrElse(Nil)
   }
+
+  /** alias for [[extractAllParameters]] */
+  def extractAllParametersString(input: String): List[String] =
+    extractAllParameters(input)
 
   /**
    * Converts the SQL template to SQL template with place holders.
@@ -66,58 +60,69 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
    * @param input SQL template
    * @return SQL template without comments
    */
-  def trimComments(input: String): String = ExecutableToAnormConverter(input).trimComments()
+  def trimComments(input: String): String =
+    ExecutableToAnormConverter(input).trimComments()
 
   /**
    * Converts Executable SQL template to Anorm SQL template.
    */
   private case class ExecutableToAnormConverter(str: String) extends AnyVal {
 
-    implicit def toStringWithMethodsInternally(sql: String): ExecutableToAnormConverter = ExecutableToAnormConverter(sql)
+    implicit def toStringWithMethodsInternally(
+      sql: String
+    ): ExecutableToAnormConverter = ExecutableToAnormConverter(sql)
 
-    def standardizeLineBreaks(): String = str.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
+    def standardizeLineBreaks(): String =
+      str.replaceAll("\r\n", "\n").replaceAll("\r", "\n")
 
-    def trimSpaces(): String = str.replaceAll(" +", " ").replaceAll("\\s+;", ";").trim()
+    def trimSpaces(): String =
+      str.replaceAll(" +", " ").replaceAll("\\s+;", ";").trim()
 
-    def removeLineComments(): String = str.split("\n").map(_.replaceFirst("--.+$", "")).mkString(" ")
+    def removeLineComments(): String =
+      str.split("\n").map(_.replaceFirst("--.+$", "")).mkString(" ")
 
-    def removeMultipleLineComments(): String = str.replaceAll("/\\*\\s*.+?\\s*\\*/", "")
+    def removeMultipleLineComments(): String =
+      str.replaceAll("/\\*\\s*.+?\\s*\\*/", "")
 
-    def simplifyParameters(): String = str.replaceAll("/\\*\\s*'(\\w+)\\s*\\*/[^\\s,\\)]+", "{$1}")
+    def simplifyParameters(): String =
+      str.replaceAll("/\\*\\s*'(\\w+)\\s*\\*/[^\\s,\\)]+", "{$1}")
 
     def trimParameterDummyValues(): String = {
       // because literals might have whitespace
       val paramComment = "(/\\*\\s*'.+?\\s*\\*/\\s*)"
-      str.replaceAll(paramComment + "'[^']+'", "$1''")
+      str
+        .replaceAll(paramComment + "'[^']+'", "$1''")
         .replaceAll(paramComment + "\"[^\"]+\"", "$1\"\"")
     }
 
-    def convert(): String = str.standardizeLineBreaks()
+    def convert(): String = str
+      .standardizeLineBreaks()
       .removeLineComments()
       .trimParameterDummyValues()
       .simplifyParameters()
       .removeMultipleLineComments()
       .trimSpaces()
 
-    def trimComments(): String = str.standardizeLineBreaks()
+    def trimComments(): String = str
+      .standardizeLineBreaks()
       .removeLineComments()
       .removeMultipleLineComments()
       .trimSpaces()
 
   }
 
-  private def convertExecutableToAnorm(input: String): String = ExecutableToAnormConverter(input).convert()
+  private def convertExecutableToAnorm(input: String): String =
+    ExecutableToAnormConverter(input).convert()
 
   // ----
   // Parser
 
-  private def mainParser: Parser[List[String]] = rep(name | other) ^^ {
-    names => names.collect { case name if name != "" => name }
+  private def mainParser: Parser[List[String]] = rep(name | other) ^^ { names =>
+    names.collect { case name if name != "" => name }
   }
 
-  private def name: Parser[String] = "\\{\\w+\\}".r <~ opt(",") ^^ {
-    name =>
-      name.replaceFirst("\\{", "").replaceFirst("\\}", "").trim()
+  private def name: Parser[String] = "\\{\\w+\\}".r <~ opt(",") ^^ { name =>
+    name.replaceFirst("\\{", "").replaceFirst("\\}", "").trim()
   }
 
   private def other: Parser[String] = literal | token ^^ (_ => "")
@@ -131,6 +136,7 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
 
   // square brackets are allowed in T-SQL
   // colon are allowed for postgres type cast
-  private def token: Parser[String] = "[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
+  private def token: Parser[String] =
+    "(?U)[\\w\\(\\)\\.\\-\\+\\*&|!/=,<>%;`\\[\\]:]+".r ^^ (_ => "")
 
 }

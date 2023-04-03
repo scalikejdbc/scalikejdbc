@@ -1,7 +1,6 @@
 package scalikejdbc
 package interpolation
 
-import org.scalatest._
 import java.time.LocalDateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -45,8 +44,13 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   it should "have #join for delimiter with parameters" in {
     val (id1, id2, id3) = (1, 2, 3)
     val (name1, name2) = ("Alice", "Bob")
-    val s = SQLSyntax.join(Seq(sqls"id=${id1} or", sqls"id=${id2} or", sqls"id=${id3}"), sqls"name=${name1} or name=${name2} or")
-    s.value should equal("id=? or name=? or name=? or id=? or name=? or name=? or id=?")
+    val s = SQLSyntax.join(
+      Seq(sqls"id=${id1} or", sqls"id=${id2} or", sqls"id=${id3}"),
+      sqls"name=${name1} or name=${name2} or"
+    )
+    s.value should equal(
+      "id=? or name=? or name=? or id=? or name=? or name=? or id=?"
+    )
     s.parameters should equal(Seq(1, "Alice", "Bob", 2, "Alice", "Bob", 3))
   }
 
@@ -154,34 +158,56 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "have #in for 3 columns" in {
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
+    val s = SQLSyntax.in(
+      (sqls"id", sqls"name", sqls"age"),
+      Seq((1, "Alice", 20), (2, "Bob", 23))
+    )
     s.value should equal(" (id, name, age) in ((?, ?, ?), (?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
   }
   it should "have #in for 3 columns with empty" in {
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq[(Int, String, Int)]())
+    val s =
+      SQLSyntax.in((sqls"id", sqls"name", sqls"age"), Seq[(Int, String, Int)]())
     s.value should equal(" FALSE")
     s.parameters should equal(Seq())
   }
   it should "have #in for 4 columns" in {
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
-    s.value should equal(" (id, name, age, foo) in ((?, ?, ?, ?), (?, ?, ?, ?))")
+    val s = SQLSyntax.in(
+      (sqls"id", sqls"name", sqls"age", sqls"foo"),
+      Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz"))
+    )
+    s.value should equal(
+      " (id, name, age, foo) in ((?, ?, ?, ?), (?, ?, ?, ?))"
+    )
     s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
   }
   it should "have #in for 4 columns with empty" in {
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq[(Int, String, Int, String)]())
+    val s = SQLSyntax.in(
+      (sqls"id", sqls"name", sqls"age", sqls"foo"),
+      Seq[(Int, String, Int, String)]()
+    )
     s.value should equal(" FALSE")
     s.parameters should equal(Seq())
   }
   it should "have #in for 5 columns" in {
     val time = LocalDateTime.now
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
-    s.value should equal(" (id, name, age, foo, created_at) in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
-    s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
+    val s = SQLSyntax.in(
+      (sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"),
+      Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time))
+    )
+    s.value should equal(
+      " (id, name, age, foo, created_at) in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))"
+    )
+    s.parameters should equal(
+      Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time)
+    )
   }
   it should "have #in for 5 columns with empty" in {
     val time = LocalDateTime.now
-    val s = SQLSyntax.in((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, LocalDateTime)]())
+    val s = SQLSyntax.in(
+      (sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"),
+      Seq[(Int, String, Int, String, LocalDateTime)]()
+    )
     s.value should equal(" FALSE")
     s.parameters should equal(Seq())
   }
@@ -198,7 +224,8 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "have #notIn for 2 columns" in {
-    val s = SQLSyntax.notIn((sqls"id", sqls"name"), Seq((1, "Alice"), (2, "Bob")))
+    val s =
+      SQLSyntax.notIn((sqls"id", sqls"name"), Seq((1, "Alice"), (2, "Bob")))
     s.value should equal(" (id, name) not in ((?, ?), (?, ?))")
     s.parameters should equal(Seq(1, "Alice", 2, "Bob"))
   }
@@ -208,46 +235,76 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
     s.parameters should equal(Seq())
   }
   it should "have #notIn for 3 columns" in {
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age"), Seq((1, "Alice", 20), (2, "Bob", 23)))
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age"),
+      Seq((1, "Alice", 20), (2, "Bob", 23))
+    )
     s.value should equal(" (id, name, age) not in ((?, ?, ?), (?, ?, ?))")
     s.parameters should equal(Seq(1, "Alice", 20, 2, "Bob", 23))
   }
   it should "have #notIn for 3 columns with empty" in {
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age"), Seq[(Int, String, Int)]())
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age"),
+      Seq[(Int, String, Int)]()
+    )
     s.value should equal(" TRUE")
     s.parameters should equal(Seq())
   }
   it should "have #notIn for 4 columns" in {
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz")))
-    s.value should equal(" (id, name, age, foo) not in ((?, ?, ?, ?), (?, ?, ?, ?))")
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age", sqls"foo"),
+      Seq((1, "Alice", 20, "bar"), (2, "Bob", 23, "baz"))
+    )
+    s.value should equal(
+      " (id, name, age, foo) not in ((?, ?, ?, ?), (?, ?, ?, ?))"
+    )
     s.parameters should equal(Seq(1, "Alice", 20, "bar", 2, "Bob", 23, "baz"))
   }
   it should "have #notIn for 4 columns with empty" in {
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo"), Seq[(Int, String, Int, String)]())
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age", sqls"foo"),
+      Seq[(Int, String, Int, String)]()
+    )
     s.value should equal(" TRUE")
     s.parameters should equal(Seq())
   }
   it should "have #notIn for 5 columns" in {
     val time = LocalDateTime.now
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time)))
-    s.value should equal(" (id, name, age, foo, created_at) not in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))")
-    s.parameters should equal(Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time))
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"),
+      Seq((1, "Alice", 20, "bar", null), (2, "Bob", 23, "baz", time))
+    )
+    s.value should equal(
+      " (id, name, age, foo, created_at) not in ((?, ?, ?, ?, ?), (?, ?, ?, ?, ?))"
+    )
+    s.parameters should equal(
+      Seq(1, "Alice", 20, "bar", null, 2, "Bob", 23, "baz", time)
+    )
   }
   it should "have #notIn for 5 columns with empty" in {
     val time = LocalDateTime.now
-    val s = SQLSyntax.notIn((sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"), Seq[(Int, String, Int, String, LocalDateTime)]())
+    val s = SQLSyntax.notIn(
+      (sqls"id", sqls"name", sqls"age", sqls"foo", sqls"created_at"),
+      Seq[(Int, String, Int, String, LocalDateTime)]()
+    )
     s.value should equal(" TRUE")
     s.parameters should equal(Seq())
   }
 
   it should "have #in with subQuery" in {
-    val s = SQLSyntax.in(sqls"id", sqls"select id from users where deleted = ${false}")
+    val s = SQLSyntax.in(
+      sqls"id",
+      sqls"select id from users where deleted = ${false}"
+    )
     s.value should equal(" id in (select id from users where deleted = ?)")
     s.parameters should equal(Seq(false))
   }
 
   it should "have #notIn with subQuery" in {
-    val s = SQLSyntax.notIn(sqls"id", sqls"select id from users where deleted = ${false}")
+    val s = SQLSyntax.notIn(
+      sqls"id",
+      sqls"select id from users where deleted = ${false}"
+    )
     s.value should equal(" id not in (select id from users where deleted = ?)")
     s.parameters should equal(Seq(false))
   }
@@ -275,13 +332,15 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "have #exists with subQuery" in {
-    val s = SQLSyntax.exists(sqls"select id from users where deleted = ${false}")
+    val s =
+      SQLSyntax.exists(sqls"select id from users where deleted = ${false}")
     s.value should equal(" exists (select id from users where deleted = ?)")
     s.parameters should equal(Seq(false))
   }
 
   it should "have #notExists with subQuery" in {
-    val s = SQLSyntax.notExists(sqls"select id from users where deleted = ${false}")
+    val s =
+      SQLSyntax.notExists(sqls"select id from users where deleted = ${false}")
     s.value should equal(" not exists (select id from users where deleted = ?)")
     s.parameters should equal(Seq(false))
   }
@@ -377,7 +436,8 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   it should "have #and(Option[SQLSyntax])" in {
     {
       val (id, name) = (123, "Alice")
-      val s = SQLSyntax.eq(sqls"id", id).and(Some(SQLSyntax.eq(sqls"name", name)))
+      val s =
+        SQLSyntax.eq(sqls"id", id).and(Some(SQLSyntax.eq(sqls"name", name)))
       s.value should equal(" id = ? and ( name = ?)")
       s.parameters should equal(Seq(123, "Alice"))
     }
@@ -404,7 +464,8 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   it should "have #or(Option[SQLSyntax])" in {
     {
       val (id, name) = (123, "Alice")
-      val s = SQLSyntax.eq(sqls"id", id).or(Some(SQLSyntax.eq(sqls"name", name)))
+      val s =
+        SQLSyntax.eq(sqls"id", id).or(Some(SQLSyntax.eq(sqls"name", name)))
       s.value should equal(" id = ? or ( name = ?)")
       s.parameters should equal(Seq(123, "Alice"))
     }
@@ -418,8 +479,10 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
 
   it should "have #roundBracket" in {
     val (id, name, age) = (123, "Alice", 12)
-    val s = SQLSyntax.eq(sqls"id", id).and.roundBracket(
-      SQLSyntax.eq(sqls"name", name).or.eq(sqls"age", age))
+    val s = SQLSyntax
+      .eq(sqls"id", id)
+      .and
+      .roundBracket(SQLSyntax.eq(sqls"name", name).or.eq(sqls"age", age))
     s.value should equal(" id = ? and ( name = ? or age = ?)")
     s.parameters should equal(Seq(123, "Alice", 12))
 
@@ -430,7 +493,12 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
 
   it should "have #toAndConditionOpt (Some)" in {
     val (id, name) = (123, "Alice")
-    val s = SQLSyntax.toAndConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name} or name is null")).get
+    val s = SQLSyntax
+      .toAndConditionOpt(
+        Some(sqls"id = ${id}"),
+        Some(sqls"name = ${name} or name is null")
+      )
+      .get
     s.value should equal("id = ? and (name = ? or name is null)")
     s.parameters should equal(Seq(123, "Alice"))
   }
@@ -443,7 +511,12 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
 
   it should "have #toOrConditionOpt (Some)" in {
     val (id, name) = (123, "Alice")
-    val s = SQLSyntax.toOrConditionOpt(Some(sqls"id = ${id}"), Some(sqls"name = ${name} or name is null")).get
+    val s = SQLSyntax
+      .toOrConditionOpt(
+        Some(sqls"id = ${id}"),
+        Some(sqls"name = ${name} or name is null")
+      )
+      .get
     s.value should equal("id = ? or (name = ? or name is null)")
     s.parameters should equal(Seq(123, "Alice"))
   }
@@ -470,8 +543,15 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
     s1.value should equal("a = ? and b is not null")
     s1.parameters should equal(Seq(123))
 
-    val s2 = SQLSyntax.joinWithAnd(sqls"a = ${123}", sqls"b = ${234} or c = ${345}", sqls"d is not null", sqls"E IS NULL OR F IS NOT NULL")
-    s2.value should equal("a = ? and (b = ? or c = ?) and d is not null and (E IS NULL OR F IS NOT NULL)")
+    val s2 = SQLSyntax.joinWithAnd(
+      sqls"a = ${123}",
+      sqls"b = ${234} or c = ${345}",
+      sqls"d is not null",
+      sqls"E IS NULL OR F IS NOT NULL"
+    )
+    s2.value should equal(
+      "a = ? and (b = ? or c = ?) and d is not null and (E IS NULL OR F IS NOT NULL)"
+    )
     s2.parameters should equal(Seq(123, 234, 345))
   }
 
@@ -480,8 +560,15 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
     s1.value should equal("a = ? or b is not null")
     s1.parameters should equal(Seq(123))
 
-    val s2 = SQLSyntax.joinWithOr(sqls"a = ${123}", sqls"b = ${234} or c = ${345}", sqls"d is not null", sqls"E IS NULL OR F IS NOT NULL")
-    s2.value should equal("a = ? or (b = ? or c = ?) or d is not null or (E IS NULL OR F IS NOT NULL)")
+    val s2 = SQLSyntax.joinWithOr(
+      sqls"a = ${123}",
+      sqls"b = ${234} or c = ${345}",
+      sqls"d is not null",
+      sqls"E IS NULL OR F IS NOT NULL"
+    )
+    s2.value should equal(
+      "a = ? or (b = ? or c = ?) or d is not null or (E IS NULL OR F IS NOT NULL)"
+    )
     s2.parameters should equal(Seq(123, 234, 345))
   }
 
@@ -494,13 +581,18 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   it should "strip margin by stripMargin" in {
     sqls"""a =
          |${123}
-         |""".stripMargin.value.replaceAll("""\\r\\n""", """\n""") should equal("a =\n?\n")
+         |""".stripMargin.value.replaceAll("""\\r\\n""", """\n""") should equal(
+      "a =\n?\n"
+    )
   }
 
   it should "strip margin specifying marginChar by stripMargin" in {
     sql"""a =
          /${123}
-         /""".stripMargin('/').statement.replaceAll("""\\r\\n""", """\n""") should equal("a =\n?\n")
+         /"""
+      .stripMargin('/')
+      .statement
+      .replaceAll("""\\r\\n""", """\n""") should equal("a =\n?\n")
   }
 
 }

@@ -10,15 +10,34 @@ import java.util.{ Date => utilDate }
  */
 trait JodaUnixTimeInMillisConverterImplicits {
 
-  implicit def convertJavaUtilDateToJodaConverter(t: utilDate): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(t.getTime)
+  implicit def convertJavaUtilDateToJodaConverter(
+    t: utilDate
+  ): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(
+    t.getTime
+  )
 
-  implicit def convertJavaSqlDateToJodaConverter(t: sqlDate): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(t.getTime)
+  implicit def convertJavaSqlDateToJodaConverter(
+    t: sqlDate
+  ): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(
+    t.getTime
+  )
 
-  implicit def convertJavaSqlTimeToJodaConverter(t: sqlTime): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(t.getTime)
+  implicit def convertJavaSqlTimeToJodaConverter(
+    t: sqlTime
+  ): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(
+    t.getTime
+  )
 
-  implicit def convertJavaSqlTimestampToJodaConverter(t: sqlTimestamp): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(t.getTime)
+  implicit def convertJavaSqlTimestampToJodaConverter(
+    t: sqlTimestamp
+  ): JodaUnixTimeInMillisConverter = new JodaUnixTimeInMillisConverter(
+    t.getTime
+  )
 
-  implicit def convertLocalTimeToJodaConverter(t: org.joda.time.LocalTime): scalikejdbc.jodatime.LocalTimeConverter = new LocalTimeConverter(t)
+  implicit def convertLocalTimeToJodaConverter(
+    t: org.joda.time.LocalTime
+  ): scalikejdbc.jodatime.LocalTimeConverter = new LocalTimeConverter(t)
 }
 
-object JodaUnixTimeInMillisConverterImplicits extends JodaUnixTimeInMillisConverterImplicits
+object JodaUnixTimeInMillisConverterImplicits
+  extends JodaUnixTimeInMillisConverterImplicits

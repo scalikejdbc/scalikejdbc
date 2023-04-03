@@ -1,12 +1,14 @@
 package scalikejdbc
 package jodatime
 
-import org.scalatest._
 import org.joda.time._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with JodaUnixTimeInMillisConverterImplicits {
+class JodaUnixTimeInMillisConverterSpec
+  extends AnyFlatSpec
+  with Matchers
+  with JodaUnixTimeInMillisConverterImplicits {
 
   behavior of "JodaUnixTimeInMillisConverter"
 
@@ -16,7 +18,8 @@ class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with J
   }
 
   it should "have #toJodaDateTimeWithTimeZone" in {
-    val d: DateTime = new java.util.Date().toJodaDateTimeWithTimeZone(DateTimeZone.UTC)
+    val d: DateTime =
+      new java.util.Date().toJodaDateTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
@@ -26,7 +29,8 @@ class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with J
   }
 
   it should "have #toJodaLocalDateTimeWithTimeZone" in {
-    val d: LocalDateTime = new java.util.Date().toJodaLocalDateTimeWithTimeZone(DateTimeZone.UTC)
+    val d: LocalDateTime =
+      new java.util.Date().toJodaLocalDateTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
@@ -36,7 +40,8 @@ class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with J
   }
 
   it should "have #toJodaLocalDateWithTimeZone" in {
-    val d: LocalDate = new java.util.Date().toJodaLocalDateWithTimeZone(DateTimeZone.UTC)
+    val d: LocalDate =
+      new java.util.Date().toJodaLocalDateWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 
@@ -46,7 +51,8 @@ class JodaUnixTimeInMillisConverterSpec extends AnyFlatSpec with Matchers with J
   }
 
   it should "have #toJodaLocalTimeWithTimeZone" in {
-    val d: LocalTime = new java.util.Date().toJodaLocalTimeWithTimeZone(DateTimeZone.UTC)
+    val d: LocalTime =
+      new java.util.Date().toJodaLocalTimeWithTimeZone(DateTimeZone.UTC)
     d should not be null
   }
 

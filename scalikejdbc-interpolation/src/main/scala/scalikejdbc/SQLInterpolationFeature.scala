@@ -6,4 +6,3 @@ package scalikejdbc
 trait SQLInterpolationFeature
   extends scalikejdbc.interpolation.Implicits
   with SQLInterpolationCoreTypeAlias
-

@@ -6,8 +6,8 @@
 
 - major: Change only when the supported Scala major version changes:
   - Version 1 supports Scala 2.9 & 2.10
-  - Version 2 supports Scala 2.10, Scala 2.11 and Scala 2.12
-  - Version 3 supports Scala 2.10, Scala 2.11 and Scala 2.12
+  - Version 2 supports Scala 2.10, 2.11, and 2.12
+  - Version 3 supports Scala 2.11, 2.12, and 2.13
 - minor: Change to indicate functionality and API compatibility changes, the same minor version must provide the same functionality and APIs
 - fix: For releasing smaller improvements, bug fixes and new features
 
@@ -16,7 +16,7 @@
 - Push "feature/xxx" branch first
 - Create a "feature/xxx" branch and create a pull request when you need code review
 - Compatibility always must be kept as far back as possible
-- scalariform must be applied to all Scala source code
+- scalafmt must be applied to all Scala source code
 - Prefer creating separate Scala source files for each class/object/trait (except, of course, for sealed traits)
 
 ### Testing

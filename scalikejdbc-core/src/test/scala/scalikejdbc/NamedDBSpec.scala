@@ -13,14 +13,21 @@ import ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Settings with LoanPattern with ScalaFutures {
+class NamedDBSpec
+  extends AnyFlatSpec
+  with Matchers
+  with BeforeAndAfter
+  with Settings
+  with LoanPattern
+  with ScalaFutures {
 
-  val tableNamePrefix = "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
+  val tableNamePrefix =
+    "emp_NamedDBSpec" + System.currentTimeMillis().toString.substring(8)
 
   behavior of "NamedDB"
 
   it should "be available" in {
-    using(ConnectionPool.borrow(Symbol("named"))) { conn =>
+    using(ConnectionPool.borrow("named")) { conn =>
       using(new DB(conn)) { db =>
         db should not be null
       }
@@ -31,10 +38,11 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_trait"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val db: DBConnection = NamedDB(Symbol("named"))
-      val result = db readOnly {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      val db: DBConnection = NamedDB("named")
+      val result = db readOnly { session =>
+        session.list("select * from " + tableName + "")(rs =>
+          Some(rs.string("name"))
+        )
       }
       result.size should be > 0
     }
@@ -44,7 +52,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
   // tx
 
   "#tx" should "not be available before beginning tx" in {
-    using(NamedDB(Symbol("named"))) { db =>
+    using(NamedDB("named")) { db =>
       intercept[IllegalStateException] {
         db.tx.begin()
       }
@@ -59,10 +67,11 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
-        val result = db readOnly {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      using(NamedDB("named")) { db =>
+        val result = db readOnly { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
         result.size should be > 0
       }
@@ -73,9 +82,11 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInReadOnlySession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = NamedDB(Symbol("named")).readOnlySession()
+      val session = NamedDB("named").readOnlySession()
       try {
-        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = session.list("select * from " + tableName + "")(rs =>
+          Some(rs.string("name"))
+        )
         result.size should be > 0
       } finally { session.close() }
     }
@@ -86,8 +97,8 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        NamedDB(Symbol("named")) readOnly {
-          session => session.update("update " + tableName + " set name = ?", "xxx")
+        NamedDB("named") readOnly { session =>
+          session.update("update " + tableName + " set name = ?", "xxx")
         }
       }
     }
@@ -100,9 +111,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = NamedDB(Symbol("named")) autoCommit {
-        session =>
-          session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+      val result = NamedDB("named") autoCommit { session =>
+        session.list("select * from " + tableName + "")(rs =>
+          Some(rs.string("name"))
+        )
       }
       result.size should be > 0
     }
@@ -112,9 +124,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInAutoCommitSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val session = NamedDB(Symbol("named")).autoCommitSession()
+      val session = NamedDB("named").autoCommitSession()
       try {
-        val list = session.list("select id from " + tableName + " order by id")(rs => rs.int("id"))
+        val list =
+          session.list("select id from " + tableName + " order by id")(rs =>
+            rs.int("id")
+          )
         list(0) should equal(1)
         list(1) should equal(2)
       } finally { session.close() }
@@ -125,8 +140,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = NamedDB(Symbol("named")) autoCommit {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.int("id"))
+      val result = NamedDB("named") autoCommit {
+        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+          rs.int("id")
+        )
       }
       result.get should equal(1)
     }
@@ -137,7 +154,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[TooManyRowsException] {
-        NamedDB(Symbol("named")) autoCommit {
+        NamedDB("named") autoCommit {
           _.single("select id from " + tableName + "")(rs => Some(rs.int("id")))
         }
       }
@@ -149,7 +166,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = NamedDB(Symbol("named")) readOnly {
+      val name: Option[String] = NamedDB("named") readOnly {
         _.single("select * from " + tableName + " where id = ?", 1)(extractName)
       }
       name.get should equal("name1")
@@ -160,7 +177,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = NamedDB(Symbol("named")) autoCommit {
+      val result = NamedDB("named") autoCommit {
         _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
       }
       result.size should equal(2)
@@ -171,8 +188,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      NamedDB(Symbol("named")) autoCommit {
-        _.foreach("select id from " + tableName + "")(rs => println(rs.int("id")))
+      NamedDB("named") autoCommit {
+        _.foreach("select id from " + tableName + "")(rs =>
+          println(rs.int("id"))
+        )
       }
     }
   }
@@ -181,13 +200,19 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
-        val count = NamedDB(Symbol("named")) autoCommit {
-          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+      using(NamedDB("named")) { db =>
+        val count = NamedDB("named") autoCommit {
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
         }
         count should equal(1)
         val name = (db autoCommit {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
         }).get
         name should equal("foo")
       }
@@ -195,14 +220,16 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
   }
 
   it should "execute update in autoCommit block after readOnly" in {
-    val tableName = tableNamePrefix + "_updatInAutoCommitAfterReadOnly"
+    val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = (NamedDB(Symbol("named")) readOnly {
-        _.single("select name from " + tableName + " where id = ?", 1)(_.string("name"))
+      val name = (NamedDB("named") readOnly {
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
+        )
       }).get
       name should equal("name1")
-      val count = NamedDB(Symbol("named")) autoCommit {
+      val count = NamedDB("named") autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -216,8 +243,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = NamedDB(Symbol("named")) localTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+      val result = NamedDB("named") localTx {
+        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("id")
+        )
       }
       result.get should equal("1")
     }
@@ -227,7 +256,7 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = NamedDB(Symbol("named")) localTx {
+      val result = NamedDB("named") localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
       result.size should equal(2)
@@ -238,12 +267,14 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = NamedDB(Symbol("named")) localTx {
+      val count = NamedDB("named") localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (NamedDB(Symbol("named")) localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      val name = (NamedDB("named") localTx {
+        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
       }).getOrElse("---")
       name should equal("foo")
     }
@@ -253,14 +284,20 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         val count = db localTx {
-          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
         }
         count should equal(1)
         db.rollbackIfActive()
-        val name = (NamedDB(Symbol("named")) localTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+        val name = (NamedDB("named") localTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
         }).getOrElse("---")
         name should equal("foo")
       }
@@ -270,14 +307,18 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
   // --------------------
   // futureLocalTx
 
-  implicit val patienceTimeout = PatienceConfig(10.seconds)
+  implicit val patienceTimeout: PatienceConfig = PatienceConfig(10.seconds)
 
   it should "execute single in futureLocalTx block" in {
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fResult = NamedDB(Symbol("named")) futureLocalTx { s =>
-        Future(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      val fResult = NamedDB("named") futureLocalTx { s =>
+        Future(
+          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("id")
+          )
+        )
       }
       whenReady(fResult) { _ should equal(Some("1")) }
     }
@@ -287,8 +328,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fResult = NamedDB(Symbol("named")) futureLocalTx { s =>
-        Future(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      val fResult = NamedDB("named") futureLocalTx { s =>
+        Future(
+          s.list("select id from " + tableName + "")(rs =>
+            Some(rs.string("id"))
+          )
+        )
       }
       whenReady(fResult) { _.size should equal(2) }
     }
@@ -298,14 +343,26 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fCount = NamedDB(Symbol("named")) futureLocalTx { s =>
-        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      val fCount = NamedDB("named") futureLocalTx { s =>
+        Future(
+          s.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
+        )
       }
       whenReady(fCount) {
         _ should equal(1)
       }
       val fName = fCount.flatMap { _ =>
-        DB futureLocalTx (s => Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))
+        DB futureLocalTx (s =>
+          Future(
+            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+              rs.string("name")
+            )
+          )
+        )
       }
       whenReady(fName) { _ should be(Some("foo")) }
     }
@@ -315,16 +372,26 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      futureUsing(DB(ConnectionPool(Symbol("named")).borrow())) { db =>
-        val fCount = NamedDB(Symbol("named")) futureLocalTx { s =>
-          Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      futureUsing(DB(ConnectionPool("named").borrow())) { db =>
+        val fCount = NamedDB("named") futureLocalTx { s =>
+          Future(
+            s.update(
+              "update " + tableName + " set name = ? where id = ?",
+              "foo",
+              1
+            )
+          )
         }
         whenReady(fCount) {
           _ should equal(1)
         }
         db.rollbackIfActive()
-        val fName = NamedDB(Symbol("named")) futureLocalTx { s =>
-          Future(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        val fName = NamedDB("named") futureLocalTx { s =>
+          Future(
+            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+              rs.string("name")
+            )
+          )
         }
         whenReady(fName) { _ should equal(Some("foo")) }
         fName
@@ -336,14 +403,24 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_rollback"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val failure = NamedDB(Symbol("named")) futureLocalTx { implicit s =>
-        Future(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      val failure = NamedDB("named") futureLocalTx { implicit s =>
+        Future(
+          s.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
+        )
           .map(_ => s.update("update foo should be rolled back"))
       }
       intercept[Exception] {
         Await.result(failure, 10.seconds)
       }
-      val res = NamedDB(Symbol("named")) readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = NamedDB("named") readOnly (s =>
+        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
+      )
       res.get should not be (Some("foo"))
     }
   }
@@ -355,8 +432,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInIOLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val myIOResult = NamedDB(Symbol("named")).localTx[MyIO[Option[String]]]{ s =>
-        MyIO(s.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id")))
+      val myIOResult = NamedDB("named").localTx[MyIO[Option[String]]] { s =>
+        MyIO(
+          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("id")
+          )
+        )
       }(MyIO.myIOTxBoundary)
       myIOResult.run() should equal(Some("1"))
     }
@@ -366,8 +447,13 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInIOLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val myIOResult = NamedDB(Symbol("named")).localTx[MyIO[List[Option[String]]]] { s =>
-        MyIO(s.list("select id from " + tableName + "")(rs => Some(rs.string("id"))))
+      val myIOResult = NamedDB("named").localTx[MyIO[List[Option[String]]]] {
+        s =>
+          MyIO(
+            s.list("select id from " + tableName + "")(rs =>
+              Some(rs.string("id"))
+            )
+          )
       }(boundary = MyIO.myIOTxBoundary)
       myIOResult.run().size should equal(2)
     }
@@ -377,15 +463,27 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInIOLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val myIOCount = NamedDB(Symbol("named")).localTx[MyIO[Int]] { s =>
-        MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      val myIOCount = NamedDB("named").localTx[MyIO[Int]] { s =>
+        MyIO(
+          s.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
+        )
       }(boundary = MyIO.myIOTxBoundary)
       val result1 = myIOCount.run()
 
       result1 should equal(1)
 
       val myIOName = MyIO(result1).flatMap { _ =>
-        DB.localTx[MyIO[Option[String]]](s => MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))))(boundary = MyIO.myIOTxBoundary)
+        DB.localTx[MyIO[Option[String]]](s =>
+          MyIO(
+            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+              rs.string("name")
+            )
+          )
+        )(boundary = MyIO.myIOTxBoundary)
       }
       myIOName.run() should be(Some("foo"))
     }
@@ -395,15 +493,25 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInIOLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      futureUsing(DB(ConnectionPool(Symbol("named")).borrow())) { db =>
-        val myIOCount = NamedDB(Symbol("named"))localTx[MyIO[Int]] { s =>
-          MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      futureUsing(DB(ConnectionPool("named").borrow())) { db =>
+        val myIOCount = NamedDB("named").localTx[MyIO[Int]] { s =>
+          MyIO(
+            s.update(
+              "update " + tableName + " set name = ? where id = ?",
+              "foo",
+              1
+            )
+          )
         }
         myIOCount.run() should equal(1)
 
         db.rollbackIfActive()
-        val myIOName = NamedDB(Symbol("named")).localTx[MyIO[Option[String]]] { s =>
-          MyIO(s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+        val myIOName = NamedDB("named").localTx[MyIO[Option[String]]] { s =>
+          MyIO(
+            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+              rs.string("name")
+            )
+          )
         }
         myIOName.run() should equal(Some("foo"))
         Future(myIOName.run())
@@ -415,14 +523,24 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_rollback"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val failure = NamedDB(Symbol("named")).localTx[MyIO[Int]] { implicit s =>
-        MyIO(s.update("update " + tableName + " set name = ? where id = ?", "foo", 1))
+      val failure = NamedDB("named").localTx[MyIO[Int]] { implicit s =>
+        MyIO(
+          s.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
+        )
           .map(_ => s.update("update foo should be rolled back"))
       }(MyIO.myIOTxBoundary)
       intercept[Exception] {
         failure.run()
       }
-      val res = NamedDB(Symbol("named")) readOnly (s => s.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name")))
+      val res = NamedDB("named") readOnly (s =>
+        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
+          rs.string("name")
+        )
+      )
       res.get should not be (Some("foo"))
     }
   }
@@ -435,9 +553,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
-        NamedDB(Symbol("named")) withinTx {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        NamedDB("named") withinTx { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
       }
     }
@@ -447,11 +566,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         db.begin()
-        val result = db withinTx {
-          session =>
-            session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = db withinTx { session =>
+          session.list("select * from " + tableName + "")(rs =>
+            Some(rs.string("name"))
+          )
         }
         result.size should be > 0
         db.rollbackIfActive()
@@ -463,10 +583,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_queryInWithinTxSession"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         db.begin()
         val session = db.withinTxSession()
-        val result = session.list("select * from " + tableName + "")(rs => Some(rs.string("name")))
+        val result = session.list("select * from " + tableName + "")(rs =>
+          Some(rs.string("name"))
+        )
         result.size should be > 0
         db.rollbackIfActive()
       }
@@ -477,10 +599,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_singleInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         db.begin()
         val result = db withinTx {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs => rs.string("id"))
+          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("id")
+          )
         }
         result.get should equal("1")
         db.rollbackIfActive()
@@ -492,10 +616,12 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_listInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         db.begin()
         val result = db withinTx {
-          _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
+          _.list("select id from " + tableName + "")(rs =>
+            Some(rs.string("id"))
+          )
         }
         result.size should equal(2)
         db.rollbackIfActive()
@@ -507,14 +633,20 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_updateInWithinTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      using(NamedDB(Symbol("named"))) { db =>
+      using(NamedDB("named")) { db =>
         db.begin()
         val count = db withinTx {
-          _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
         }
         count should equal(1)
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
         }).get
         name should equal("foo")
         db.rollback()
@@ -526,42 +658,67 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_rollbackInWithinTxBlock"
     ultimately({
       ignoring(classOf[Throwable]) {
-        DB(ConnectionPool.borrow(Symbol("named"))) autoCommit { _.execute("drop table " + tableName) }
+        DB(ConnectionPool.borrow("named")) autoCommit {
+          _.execute("drop table " + tableName)
+        }
       }
     }) {
-      NamedDB(Symbol("named")) autoCommit {
-        session =>
-          handling(classOf[Throwable]) by {
-            t =>
-              try {
-                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
-              } catch {
-                case e: Exception =>
-                  session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
-              }
-              session.update("delete from " + tableName)
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
-          } apply {
-            session.single("select count(1) from " + tableName)(rs => rs.int(1))
-            session.update("delete from " + tableName)
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
+      NamedDB("named") autoCommit { session =>
+        handling(classOf[Throwable]) by { t =>
+          try {
+            session.execute(
+              "create table " + tableName + " (id integer primary key, name varchar(30))"
+            )
+          } catch {
+            case e: Exception =>
+              session.execute(
+                "create table " + tableName + " (id integer primary key, name varchar(30))"
+              )
           }
+          session.update("delete from " + tableName)
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            1,
+            "name1"
+          )
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            2,
+            "name2"
+          )
+        } apply {
+          session.single("select count(1) from " + tableName)(rs => rs.int(1))
+          session.update("delete from " + tableName)
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            1,
+            "name1"
+          )
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            2,
+            "name2"
+          )
+        }
       }
-      using(NamedDB(Symbol("named"))) {
-        db =>
-          db.begin()
-          val count = db withinTx {
-            _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
-          }
-          count should equal(1)
-          db.rollback()
-          db.begin()
-          val name = (db withinTx {
-            _.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
-          }).get
-          name should equal("name1")
+      using(NamedDB("named")) { db =>
+        db.begin()
+        val count = db withinTx {
+          _.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
+        }
+        count should equal(1)
+        db.rollback()
+        db.begin()
+        val name = (db withinTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
+            rs.string("name")
+          )
+        }).get
+        name should equal("name1")
       }
     }
   }
@@ -573,51 +730,81 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
     val tableName = tableNamePrefix + "_testingWithMultiThreads"
     ultimately({
       ignoring(classOf[Throwable]) {
-        DB(ConnectionPool.borrow(Symbol("named"))) autoCommit { _.execute("drop table " + tableName) }
+        DB(ConnectionPool.borrow("named")) autoCommit {
+          _.execute("drop table " + tableName)
+        }
       }
     }) {
-      NamedDB(Symbol("named")) autoCommit {
-        session =>
-          handling(classOf[Throwable]) by {
-            t =>
+      NamedDB("named") autoCommit { session =>
+        handling(classOf[Throwable]) by { t =>
+          try {
+            session.execute(
+              "create table " + tableName + " (id integer primary key, name varchar(30))"
+            )
+          } catch {
+            case e: Exception =>
               try {
-                session.execute("create table " + tableName + " (id integer primary key, name varchar(30))")
+                session.execute(
+                  "create table " + tableName + " (id int primary key, name varchar(30))"
+                )
               } catch {
                 case e: Exception =>
-                  try {
-                    session.execute("create table " + tableName + " (id int primary key, name varchar(30))")
-                  } catch {
-                    case e: Exception =>
-                  }
               }
-              session.update("delete from " + tableName)
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-              session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
-          } apply {
-            session.single("select count(1) from " + tableName)(rs => rs.int(1))
-            session.update("delete from " + tableName)
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 1, "name1")
-            session.update("insert into " + tableName + " (id, name) values (?, ?)", 2, "name2")
           }
+          session.update("delete from " + tableName)
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            1,
+            "name1"
+          )
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            2,
+            "name2"
+          )
+        } apply {
+          session.single("select count(1) from " + tableName)(rs => rs.int(1))
+          session.update("delete from " + tableName)
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            1,
+            "name1"
+          )
+          session.update(
+            "insert into " + tableName + " (id, name) values (?, ?)",
+            2,
+            "name2"
+          )
+        }
       }
       import scala.concurrent.ExecutionContext.Implicits.global
       scala.concurrent.Future {
-        using(NamedDB(Symbol("named"))) { db =>
+        using(NamedDB("named")) { db =>
           db.begin()
           val session = db.withinTxSession()
-          session.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
+          session.update(
+            "update " + tableName + " set name = ? where id = ?",
+            "foo",
+            1
+          )
           Thread.sleep(1000L)
-          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          val name = session.single(
+            "select name from " + tableName + " where id = ?",
+            1
+          )(rs => rs.string("name"))
           assert(name.get == "foo")
           db.rollback()
         }
       }
       scala.concurrent.Future {
-        using(NamedDB(Symbol("named"))) { db =>
+        using(NamedDB("named")) { db =>
           db.begin()
           val session = db.withinTxSession()
           Thread.sleep(200L)
-          val name = session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+          val name = session.single(
+            "select name from " + tableName + " where id = ?",
+            1
+          )(rs => rs.string("name"))
           assert(name.get == "name1")
           db.rollback()
         }
@@ -625,9 +812,10 @@ class NamedDBSpec extends AnyFlatSpec with Matchers with BeforeAndAfter with Set
 
       Thread.sleep(2000L)
 
-      val name = NamedDB(Symbol("named")) autoCommit {
-        session =>
-          session.single("select name from " + tableName + " where id = ?", 1)(rs => rs.string("name"))
+      val name = NamedDB("named") autoCommit { session =>
+        session.single("select name from " + tableName + " where id = ?", 1)(
+          rs => rs.string("name")
+        )
       }
       assert(name.get == "name1")
     }

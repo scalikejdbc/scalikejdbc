@@ -25,7 +25,7 @@ import scalikejdbc.specs2.AutoRollbackLike
  * import scalikejdbc.specs2.mutable.AutoRollback
  *
  * trait DB2AutoRollback extends AutoRollback {
- *   override def db = NamedDB('db2).toDB
+ *   override def db() = NamedDB("db2").toDB
  * }
  *
  * object MemberSpec extends Specification {

@@ -1,1 +1,1 @@
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")

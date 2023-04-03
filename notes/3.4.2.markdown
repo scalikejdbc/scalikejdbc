@@ -1,0 +1,19 @@
+ScalikeJDBC 3.4.2 is out for Scala 2.13, 2.12, and 2.11.
+
+http://scalikejdbc.org/
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+### Changes
+
+- [core] 96939229 use sourceGenerators for OneToXSQL.scala by xuwei-k
+- [core] 6d6e8f6b scala-collection-compat 2.1.6 by xuwei-k
+- [core] c00bd692 Scala 2.13.2 by xuwei-k
+- [core] 42f5d63b HikariCP 3.4.5 by xuwei-k
+- [core] ba8a4cf2 Update joda-time to 2.10.6 by xuwei-k
+- [core] ec3a0a30 specs2 4.9.4 by xuwei-k
+- [core] 7b2f4708 Scala 2.12.11 by xuwei-k
+
+---
+
+Enjoy writing type-safe SQL and get things done!

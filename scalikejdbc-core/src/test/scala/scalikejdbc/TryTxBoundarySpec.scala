@@ -36,7 +36,8 @@ class TryTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
 
   it should "returns Failure when onClose() throws an exception" in {
     val exception = new RuntimeException
-    val result = tryTxBoundary[Int].closeConnection(Success(1), () => throw exception)
+    val result =
+      tryTxBoundary[Int].closeConnection(Success(1), () => throw exception)
     result should be(Failure(exception))
   }
 }

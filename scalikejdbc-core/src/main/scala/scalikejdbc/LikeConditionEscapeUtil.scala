@@ -7,9 +7,9 @@ case class LikeConditionEscapeUtil(escapeChar: String) {
 
   def escape(condition: String): String = {
     condition
-      .replaceAllLiterally(escapeChar, escapeChar + escapeChar)
-      .replaceAllLiterally("%", escapeChar + "%")
-      .replaceAllLiterally("_", escapeChar + "_")
+      .replace(escapeChar, escapeChar + escapeChar)
+      .replace("%", escapeChar + "%")
+      .replace("_", escapeChar + "_")
   }
 
   def beginsWith(value: String): String = escape(value) + "%"
@@ -20,8 +20,7 @@ case class LikeConditionEscapeUtil(escapeChar: String) {
 
 }
 
-object LikeConditionEscapeUtil
-  extends LikeConditionEscapeUtil("\\") {
+object LikeConditionEscapeUtil extends LikeConditionEscapeUtil("\\") {
 
   val DEFAULT_ESCAPE_CHAR = "\\"
 }

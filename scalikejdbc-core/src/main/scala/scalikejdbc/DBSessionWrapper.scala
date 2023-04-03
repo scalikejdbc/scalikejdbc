@@ -9,65 +9,98 @@ import scala.collection.compat._
  */
 private[scalikejdbc] final class DBSessionWrapper(
   session: DBSession,
-  attributesSwitcher: DBSessionAttributesSwitcher) extends DBSession {
+  attributesSwitcher: DBSessionAttributesSwitcher
+) extends DBSession {
 
   override protected[scalikejdbc] val settings = session.settings
   override private[scalikejdbc] val conn = session.conn
-  override private[scalikejdbc] val connectionAttributes = session.connectionAttributes
+  override private[scalikejdbc] val connectionAttributes =
+    session.connectionAttributes
   override val isReadOnly: Boolean = session.isReadOnly
   override def tx: Option[Tx] = session.tx
 
   override def fetchSize(fetchSize: Int): this.type = unexpectedInvocation
-  override def fetchSize(fetchSize: Option[Int]): this.type = unexpectedInvocation
+  override def fetchSize(fetchSize: Option[Int]): this.type =
+    unexpectedInvocation
   override def fetchSize: Option[Int] = session.fetchSize
 
   override def tags(tags: String*): this.type = unexpectedInvocation
   override def tags: scala.collection.Seq[String] = session.tags
 
   override def queryTimeout(seconds: Int): this.type = unexpectedInvocation
-  override def queryTimeout(seconds: Option[Int]): this.type = unexpectedInvocation
+  override def queryTimeout(seconds: Option[Int]): this.type =
+    unexpectedInvocation
   override def queryTimeout: Option[Int] = session.queryTimeout
 
-  private[this] def withAttributesSwitchedDBSession[T](delegate: DBSession => T): T = {
+  private[this] def withAttributesSwitchedDBSession[T](
+    delegate: DBSession => T
+  ): T = {
     attributesSwitcher.withSwitchedDBSession(session) { session =>
       delegate(session)
     }
   }
 
-  override def toStatementExecutor(template: String, params: scala.collection.Seq[Any], returnGeneratedKeys: Boolean): StatementExecutor = {
-    withAttributesSwitchedDBSession(_.toStatementExecutor(template, params, returnGeneratedKeys))
+  override def toStatementExecutor(
+    template: String,
+    params: scala.collection.Seq[Any],
+    returnGeneratedKeys: Boolean
+  ): StatementExecutor = {
+    withAttributesSwitchedDBSession(
+      _.toStatementExecutor(template, params, returnGeneratedKeys)
+    )
   }
   override def toBatchStatementExecutor(template: String): StatementExecutor = {
     withAttributesSwitchedDBSession(_.toBatchStatementExecutor(template))
   }
 
-  override def single[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): Option[A] = {
+  override def single[A](template: String, params: Any*)(
+    extract: WrappedResultSet => A
+  ): Option[A] = {
     withAttributesSwitchedDBSession(_.single(template, params: _*)(extract))
   }
-  override def first[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): Option[A] = {
+  override def first[A](template: String, params: Any*)(
+    extract: WrappedResultSet => A
+  ): Option[A] = {
     withAttributesSwitchedDBSession(_.first(template, params: _*)(extract))
   }
-  override def list[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): List[A] = {
+  override def list[A](template: String, params: Any*)(
+    extract: WrappedResultSet => A
+  ): List[A] = {
     withAttributesSwitchedDBSession(_.list(template, params: _*)(extract))
   }
-  override def collection[A, C[_]](template: String, params: Any*)(extract: (WrappedResultSet) => A)(implicit f: Factory[A, C[A]]): C[A] = {
+  override def collection[A, C[_]](template: String, params: Any*)(
+    extract: WrappedResultSet => A
+  )(implicit f: Factory[A, C[A]]): C[A] = {
     withAttributesSwitchedDBSession(_.collection(template, params: _*)(extract))
   }
-  override def foreach(template: String, params: Any*)(f: (WrappedResultSet) => Unit): Unit = {
+  override def foreach(template: String, params: Any*)(
+    f: WrappedResultSet => Unit
+  ): Unit = {
     withAttributesSwitchedDBSession(_.foreach(template, params: _*)(f))
   }
-  override def foldLeft[A](template: String, params: Any*)(z: A)(op: (A, WrappedResultSet) => A): A = {
+  override def foldLeft[A](template: String, params: Any*)(
+    z: A
+  )(op: (A, WrappedResultSet) => A): A = {
     withAttributesSwitchedDBSession(_.foldLeft(template, params: _*)(z)(op))
   }
-  override def iterable[A](template: String, params: Any*)(extract: (WrappedResultSet) => A): Iterable[A] = {
+  override def iterable[A](template: String, params: Any*)(
+    extract: WrappedResultSet => A
+  ): Iterable[A] = {
     withAttributesSwitchedDBSession(_.iterable(template, params: _*)(extract))
   }
 
   override def execute(template: String, params: Any*): Boolean = {
     withAttributesSwitchedDBSession(_.execute(template, params: _*))
   }
-  override def executeWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit, template: String, params: Any*): Boolean = {
-    withAttributesSwitchedDBSession(_.executeWithFilters(before, after, template, params: _*))
+  override def executeWithFilters(
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit,
+    template: String,
+    params: Any*
+  ): Boolean = {
+    withAttributesSwitchedDBSession(
+      _.executeWithFilters(before, after, template, params: _*)
+    )
   }
   override def executeUpdate(template: String, params: Any*): Int = {
     withAttributesSwitchedDBSession(_.executeUpdate(template, params: _*))
@@ -75,29 +108,90 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def update(template: String, params: Any*): Int = {
     withAttributesSwitchedDBSession(_.update(template, params: _*))
   }
-  override def updateWithFilters(before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit, template: String, params: Any*): Int = {
-    withAttributesSwitchedDBSession(_.updateWithFilters(before, after, template, params: _*))
+  override def updateWithFilters(
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit,
+    template: String,
+    params: Any*
+  ): Int = {
+    withAttributesSwitchedDBSession(
+      _.updateWithFilters(before, after, template, params: _*)
+    )
   }
-  override def updateWithFilters(returnGeneratedKeys: Boolean, before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit, template: String, params: Any*): Int = {
-    withAttributesSwitchedDBSession(_.updateWithFilters(returnGeneratedKeys, before, after, template, params: _*))
+  override def updateWithFilters(
+    returnGeneratedKeys: Boolean,
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit,
+    template: String,
+    params: Any*
+  ): Int = {
+    withAttributesSwitchedDBSession(
+      _.updateWithFilters(
+        returnGeneratedKeys,
+        before,
+        after,
+        template,
+        params: _*
+      )
+    )
   }
-  override def updateWithAutoGeneratedKeyNameAndFilters(returnGeneratedKeys: Boolean, generatedKeyName: String, before: (PreparedStatement) => Unit, after: (PreparedStatement) => Unit, template: String, params: Any*): Int = {
-    withAttributesSwitchedDBSession(_.updateWithAutoGeneratedKeyNameAndFilters(returnGeneratedKeys, generatedKeyName, before, after, template, params: _*))
+  override def updateWithAutoGeneratedKeyNameAndFilters(
+    returnGeneratedKeys: Boolean,
+    generatedKeyName: String,
+    before: PreparedStatement => Unit,
+    after: PreparedStatement => Unit,
+    template: String,
+    params: Any*
+  ): Int = {
+    withAttributesSwitchedDBSession(
+      _.updateWithAutoGeneratedKeyNameAndFilters(
+        returnGeneratedKeys,
+        generatedKeyName,
+        before,
+        after,
+        template,
+        params: _*
+      )
+    )
   }
-  override def updateAndReturnGeneratedKey(template: String, params: Any*): Long = {
-    withAttributesSwitchedDBSession(_.updateAndReturnGeneratedKey(template, params: _*))
+  override def updateAndReturnGeneratedKey(
+    template: String,
+    params: Any*
+  ): Long = {
+    withAttributesSwitchedDBSession(
+      _.updateAndReturnGeneratedKey(template, params: _*)
+    )
   }
-  override def updateAndReturnSpecifiedGeneratedKey(template: String, params: Any*)(key: Any): Long = {
-    withAttributesSwitchedDBSession(_.updateAndReturnSpecifiedGeneratedKey(template, params: _*)(key))
+  override def updateAndReturnSpecifiedGeneratedKey(
+    template: String,
+    params: Any*
+  )(key: Any): Long = {
+    withAttributesSwitchedDBSession(
+      _.updateAndReturnSpecifiedGeneratedKey(template, params: _*)(key)
+    )
   }
-  override def batch[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Int, C[Int]]): C[Int] = {
+  override def batch[C[_]](
+    template: String,
+    paramsList: scala.collection.Seq[Any]*
+  )(implicit f: Factory[Int, C[Int]]): C[Int] = {
     withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
   }
-  override def batchAndReturnGeneratedKey[C[_]](template: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Long, C[Long]]): C[Long] = {
-    withAttributesSwitchedDBSession(_.batchAndReturnGeneratedKey(template, paramsList: _*))
+  override def batchAndReturnGeneratedKey[C[_]](
+    template: String,
+    paramsList: scala.collection.Seq[Any]*
+  )(implicit f: Factory[Long, C[Long]]): C[Long] = {
+    withAttributesSwitchedDBSession(
+      _.batchAndReturnGeneratedKey(template, paramsList: _*)
+    )
   }
-  override def batchAndReturnSpecifiedGeneratedKey[C[_]](template: String, key: String, paramsList: scala.collection.Seq[Any]*)(implicit f: Factory[Long, C[Long]]): C[Long] = {
-    withAttributesSwitchedDBSession(_.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*))
+  override def batchAndReturnSpecifiedGeneratedKey[C[_]](
+    template: String,
+    key: String,
+    paramsList: scala.collection.Seq[Any]*
+  )(implicit f: Factory[Long, C[Long]]): C[Long] = {
+    withAttributesSwitchedDBSession(
+      _.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*)
+    )
   }
 
   override def close(): Unit = session.close()
@@ -105,7 +199,10 @@ private[scalikejdbc] final class DBSessionWrapper(
 
 object DBSessionWrapper {
 
-  def apply(session: DBSession, attributesSwitcher: DBSessionAttributesSwitcher): DBSessionWrapper = {
+  def apply(
+    session: DBSession,
+    attributesSwitcher: DBSessionAttributesSwitcher
+  ): DBSessionWrapper = {
     new DBSessionWrapper(session, attributesSwitcher)
   }
 

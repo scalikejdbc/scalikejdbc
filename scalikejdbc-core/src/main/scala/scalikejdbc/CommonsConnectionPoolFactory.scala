@@ -3,7 +3,7 @@ package scalikejdbc
 /**
  * Connection Pool Factory
  *
- * @see [[http://commons.apache.org/proper/commons-dbcp/]]
+ * @see [[https://commons.apache.org/proper/commons-dbcp/]]
  */
 object CommonsConnectionPoolFactory extends ConnectionPoolFactory {
 
@@ -11,7 +11,8 @@ object CommonsConnectionPoolFactory extends ConnectionPoolFactory {
     url: String,
     user: String,
     password: String,
-    settings: ConnectionPoolSettings = ConnectionPoolSettings()): CommonsConnectionPool = {
+    settings: ConnectionPoolSettings = ConnectionPoolSettings()
+  ): CommonsConnectionPool = {
     new CommonsConnectionPool(url, user, password, settings)
   }
 

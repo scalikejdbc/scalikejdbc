@@ -6,13 +6,15 @@ object DateTimeClass {
   case object OffsetDateTime extends DateTimeClass("java.time.OffsetDateTime")
   case object LocalDateTime extends DateTimeClass("java.time.LocalDateTime")
 
-  private[scalikejdbc] val all = Set(
-    JodaDateTime, ZonedDateTime, OffsetDateTime, LocalDateTime)
+  private[scalikejdbc] val all =
+    Set(JodaDateTime, ZonedDateTime, OffsetDateTime, LocalDateTime)
 
   private[scalikejdbc] val map: Map[String, DateTimeClass] =
     all.map(clazz => clazz.name -> clazz).toMap
 }
 
-sealed abstract class DateTimeClass(private[scalikejdbc] val name: String) extends Product with Serializable {
+sealed abstract class DateTimeClass(private[scalikejdbc] val name: String)
+  extends Product
+  with Serializable {
   private[scalikejdbc] val simpleName = name.split('.').last
 }

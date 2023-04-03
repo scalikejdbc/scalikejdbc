@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
 import org.scalatest.flatspec.AnyFlatSpec

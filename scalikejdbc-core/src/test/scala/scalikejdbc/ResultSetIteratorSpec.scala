@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import util.control.Exception._
-import org.scalatest._
 import java.sql.ResultSet
 import java.util.NoSuchElementException
 import scalikejdbc.LoanPattern._
@@ -19,17 +18,21 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
-        val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
+        val rs: ResultSet = conn
+          .prepareStatement(
+            "select * from " + tableName + " where id = 9999999999"
+          )
+          .executeQuery()
         val i = new ResultSetIterator(rs)
         assert(i.hasNext === false)
         assert(i.hasNext === false)
         assert(i.hasNext === false)
         assert(i.size === 0)
         intercept[NoSuchElementException] {
-          i.next
+          i.next()
         }
         intercept[NoSuchElementException] {
-          i.next
+          i.next()
         }
       }
 
@@ -37,10 +40,18 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
         using(ConnectionPool.borrow()) { conn =>
           val rs: ResultSet = {
             try {
-              conn.prepareStatement(s"select * from $tableName order by id limit $count").executeQuery()
+              conn
+                .prepareStatement(
+                  s"select * from $tableName order by id limit $count"
+                )
+                .executeQuery()
             } catch {
               case e: Exception =>
-                conn.prepareStatement(s"select * from $tableName order by id fetch first $count rows only").executeQuery()
+                conn
+                  .prepareStatement(
+                    s"select * from $tableName order by id fetch first $count rows only"
+                  )
+                  .executeQuery()
             }
           }
 
@@ -53,10 +64,10 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
           assert(i.hasNext === false)
           assert(i.hasNext === false)
           intercept[NoSuchElementException] {
-            i.next
+            i.next()
           }
           intercept[NoSuchElementException] {
-            i.next
+            i.next()
           }
         }
       }
@@ -68,8 +79,14 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
-        val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-        new ResultSetIterator(rs).foreach(rs => rs.int("id") should not equal (null))
+        val rs: ResultSet = conn
+          .prepareStatement(
+            "select * from " + tableName + " where id = 9999999999"
+          )
+          .executeQuery()
+        new ResultSetIterator(rs).foreach(rs =>
+          rs.int("id") should not equal (null)
+        )
       }
     }
   }
@@ -81,10 +98,18 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
       using(ConnectionPool.borrow()) { conn =>
         val rs: ResultSet = {
           try {
-            conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+            conn
+              .prepareStatement(
+                "select * from " + tableName + " order by id limit 1"
+              )
+              .executeQuery()
           } catch {
             case e: Exception =>
-              conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+              conn
+                .prepareStatement(
+                  "select * from " + tableName + " order by id fetch first 1 rows only"
+                )
+                .executeQuery()
           }
         }
         new ResultSetIterator(rs).foreach(_.int("id") should not equal (null))
@@ -99,10 +124,18 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
       using(ConnectionPool.borrow()) { conn =>
         val rs: ResultSet = {
           try {
-            conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+            conn
+              .prepareStatement(
+                "select * from " + tableName + " order by id limit 2"
+              )
+              .executeQuery()
           } catch {
             case e: Exception =>
-              conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+              conn
+                .prepareStatement(
+                  "select * from " + tableName + " order by id fetch first 2 rows only"
+                )
+                .executeQuery()
           }
         }
         new ResultSetIterator(rs).foreach(_.int("id") should not equal (null))
@@ -115,8 +148,14 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
-        val rs: ResultSet = conn.prepareStatement("select * from " + tableName + " where id = 9999999999").executeQuery()
-        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
+        val rs: ResultSet = conn
+          .prepareStatement(
+            "select * from " + tableName + " where id = 9999999999"
+          )
+          .executeQuery()
+        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) =>
+          rs.int("id") :: r
+        } should not be null
       }
     }
   }
@@ -128,13 +167,23 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
       using(ConnectionPool.borrow()) { conn =>
         val rs: ResultSet = {
           try {
-            conn.prepareStatement("select * from " + tableName + " order by id limit 1").executeQuery()
+            conn
+              .prepareStatement(
+                "select * from " + tableName + " order by id limit 1"
+              )
+              .executeQuery()
           } catch {
             case e: Exception =>
-              conn.prepareStatement("select * from " + tableName + " order by id fetch first 1 rows only").executeQuery()
+              conn
+                .prepareStatement(
+                  "select * from " + tableName + " order by id fetch first 1 rows only"
+                )
+                .executeQuery()
           }
         }
-        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
+        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) =>
+          rs.int("id") :: r
+        } should not be null
       }
     }
   }
@@ -146,13 +195,23 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
       using(ConnectionPool.borrow()) { conn =>
         val rs: ResultSet = {
           try {
-            conn.prepareStatement("select * from " + tableName + " order by id limit 2").executeQuery()
+            conn
+              .prepareStatement(
+                "select * from " + tableName + " order by id limit 2"
+              )
+              .executeQuery()
           } catch {
             case e: Exception =>
-              conn.prepareStatement("select * from " + tableName + " order by id fetch first 2 rows only").executeQuery()
+              conn
+                .prepareStatement(
+                  "select * from " + tableName + " order by id fetch first 2 rows only"
+                )
+                .executeQuery()
           }
         }
-        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) => rs.int("id") :: r } should not be null
+        new ResultSetIterator(rs).foldLeft[List[Int]](Nil) { case (r, rs) =>
+          rs.int("id") :: r
+        } should not be null
       }
     }
   }

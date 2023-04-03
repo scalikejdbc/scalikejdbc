@@ -1,6 +1,5 @@
 package scalikejdbc
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -15,4 +14,3 @@ class IllegalRelationshipExceptionSpec extends AnyFlatSpec with Matchers {
   }
 
 }
-

@@ -1,11 +1,13 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.time.temporal.ChronoUnit
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class JavaUtilDateConverterSpec extends AnyFlatSpec with Matchers with JavaUtilDateConverterImplicits {
+class JavaUtilDateConverterSpec
+  extends AnyFlatSpec
+  with Matchers
+  with JavaUtilDateConverterImplicits {
 
   behavior of "JavaUtilDateConverter"
 
@@ -31,7 +33,9 @@ class JavaUtilDateConverterSpec extends AnyFlatSpec with Matchers with JavaUtilD
 
   it should "not drop nano seconds" in {
     val nano = 123456789
-    val t1 = java.time.ZonedDateTime.now.truncatedTo(ChronoUnit.SECONDS).plusNanos(nano)
+    val t1 = java.time.ZonedDateTime.now
+      .truncatedTo(ChronoUnit.SECONDS)
+      .plusNanos(nano)
     val t2 = java.sql.Timestamp.from(t1.toInstant)
     assert(t2.toLocalDateTime.getNano === nano)
     assert(t2.toZonedDateTime.getNano === nano)

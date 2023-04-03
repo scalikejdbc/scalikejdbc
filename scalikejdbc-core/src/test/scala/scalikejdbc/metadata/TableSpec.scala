@@ -1,6 +1,5 @@
 package scalikejdbc.metadata
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -15,7 +14,8 @@ class TableSpec extends AnyFlatSpec with Matchers {
     val columns: List[Column] = Nil
     val foreignKeys: List[ForeignKey] = Nil
     val indices: List[Index] = Nil
-    val instance = new Table(name, schema, description, columns, foreignKeys, indices)
+    val instance =
+      new Table(name, schema, description, columns, foreignKeys, indices)
     instance should not be null
   }
 
