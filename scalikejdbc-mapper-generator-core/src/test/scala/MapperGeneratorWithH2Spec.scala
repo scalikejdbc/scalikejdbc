@@ -286,4 +286,32 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       fail("The table is not found.")
     }
   }
+
+  it should "ok if specific Instant as time class" in {
+    DB autoCommit { implicit session =>
+      SQL("""
+        create table table_with_instant (
+          x_column_with_digits_3_4 varchar(30) not null,
+          y_column_with_digits int,
+          created_at timestamp not null
+        )
+      """).execute.apply()
+    }
+
+    Model(url, username, password).table(null, "TABLE_WITH_INSTANT").map {
+      table =>
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(
+            srcDir = srcDir,
+            packageName = "com.example",
+            tableNamesToSkip = List("schema_version"),
+            dateTimeClass = DateTimeClass.Instant
+          )
+        )
+        generator.specAll()
+        generator.writeModel()
+    } getOrElse {
+      fail("The table is not found.")
+    }
+  }
 }
