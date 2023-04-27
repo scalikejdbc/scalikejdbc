@@ -192,7 +192,7 @@ lazy val scalikejdbcCore = Project(
       "org.apache.commons" % "commons-dbcp2" % "2.9.0" % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "2.2.0" % "compile",
-      "org.scala-lang.modules" %% "scala-collection-compat" % "2.9.0",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.10.0",
       // scope: provided
       "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
       "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
