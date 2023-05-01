@@ -16,7 +16,7 @@ package object streams {
   /**
    * Creates a new DatabasePublisher.
    */
-  private def createDatabasePublisher[A, E <: WithExtractor](
+  private def createDatabasePublisher[A](
     sql: StreamReadySQL[A],
     connectionPoolName: Any = ConnectionPool.DEFAULT_NAME
   )(implicit
@@ -68,7 +68,7 @@ package object streams {
     private val db: NamedDB
   ) extends AnyVal {
 
-    def readOnlyStream[A, E <: WithExtractor](sql: StreamReadySQL[A])(implicit
+    def readOnlyStream[A](sql: StreamReadySQL[A])(implicit
       executionContext: ExecutionContext,
       cpContext: DB.CPContext = DB.NoCPContext
     ): DatabasePublisher[A] = {
