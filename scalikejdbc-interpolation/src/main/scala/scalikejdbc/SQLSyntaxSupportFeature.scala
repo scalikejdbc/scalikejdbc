@@ -897,15 +897,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
             SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
           }
       }
-      foundResultName match {
-        case Some(resultName) => resultName
-        case _ =>
-          val registeredNames = resultNames
-            .map { rn => rn.namedColumns.map(_.value).mkString(",") }
-            .mkString(",")
-          throw new InvalidColumnNameException(
-            ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})"
-          )
+      foundResultName.getOrElse {
+        val registeredNames = resultNames
+          .map { rn => rn.namedColumns.map(_.value).mkString(",") }
+          .mkString(",")
+        throw new InvalidColumnNameException(
+          ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})"
+        )
       }
     }
 

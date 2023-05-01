@@ -13,9 +13,6 @@ private[scalikejdbc] object ClassNameUtil {
       } catch {
         case e: InternalError if e.getMessage == "Malformed class name" => None
       }
-    canonicalName match {
-      case Some(className) => className
-      case _               => clazz.getName
-    }
+    canonicalName.getOrElse(clazz.getName)
   }
 }
