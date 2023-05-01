@@ -64,7 +64,7 @@ object ParameterBinder {
     val value = null
     def apply(stmt: PreparedStatement, idx: Int): Unit =
       stmt.setObject(idx, null)
-    override def toString: String = s"ParameterBinder(value=NULL)"
+    override def toString: String = "ParameterBinder(value=NULL)"
   }
 
 }

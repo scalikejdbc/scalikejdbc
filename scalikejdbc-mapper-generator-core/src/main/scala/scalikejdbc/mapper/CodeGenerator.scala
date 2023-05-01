@@ -344,7 +344,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       }
 
       // def create(
-      1.indent + s"def create(" + eol +
+      1.indent + "def create(" + eol +
         // id: Long, name: Option[String] = None)(implicit session DBSession = autoSession): ClassName = {
         createColumns
           .map { c =>
