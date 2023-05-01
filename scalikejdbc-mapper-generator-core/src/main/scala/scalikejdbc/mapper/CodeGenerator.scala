@@ -845,12 +845,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
   def modelAll(): String = {
     val javaSqlImport = table.allColumns.flatMap { c =>
-      c.rawTypeInScala match {
-        case TypeName.Blob   => Some("Blob")
-        case TypeName.Clob   => Some("Clob")
-        case TypeName.Ref    => Some("Ref")
-        case TypeName.Struct => Some("Struct")
-        case _               => None
+      PartialFunction.condOpt(c.rawTypeInScala) {
+        case TypeName.Blob   => "Blob"
+        case TypeName.Clob   => "Clob"
+        case TypeName.Ref    => "Ref"
+        case TypeName.Struct => "Struct"
       }
     } match {
       case classes if classes.nonEmpty =>
