@@ -1155,7 +1155,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       .replace(
         "%createFields%",
         table.allColumns
-          .filter { c =>
+          .withFilter { c =>
             c.isNotNull && table.autoIncrementColumns.forall(_.name != c.name)
           }
           .map { c =>
