@@ -185,7 +185,7 @@ class DB_SQLOperationSpec
           .map(_.int("id"))
           .toIterable
           .apply()
-          .foreach { case (id) =>
+          .foreach { id =>
             println(id)
           }
       }
