@@ -417,9 +417,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    */
   def execute(template: String, params: Any*): Boolean = {
     ensureNotReadOnlySession(template)
-    using(createStatementExecutor(conn, template, params)) { executor =>
-      executor.execute()
-    }
+    using(createStatementExecutor(conn, template, params)) { _.execute() }
   }
 
   /**
@@ -465,9 +463,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    */
   def update(template: String, params: Any*): Int = {
     ensureNotReadOnlySession(template)
-    using(createStatementExecutor(conn, template, params)) { executor =>
-      executor.executeUpdate()
-    }
+    using(createStatementExecutor(conn, template, params)) { _.executeUpdate() }
   }
 
   /**

@@ -130,10 +130,10 @@ class DBSessionSpec
         val session = db.autoCommitSession()
         val singleResult =
           session.single("select id from " + tableName + " where id = ?", 1)(
-            rs => rs.string("id")
+            _.string("id")
           )
         val firstResult =
-          session.first("select id from " + tableName)(rs => rs.string("id"))
+          session.first("select id from " + tableName)(_.string("id"))
         singleResult.get should equal("1")
         firstResult.get should equal("1")
       }
@@ -147,8 +147,8 @@ class DBSessionSpec
 
       using(new DB(ConnectionPool.borrow())) { db =>
         val session = db.autoCommitSession()
-        val result = session.list("select id from " + tableName) { rs =>
-          rs.string("id")
+        val result = session.list("select id from " + tableName) {
+          _.string("id")
         }
         result.size should equal(2)
       }
@@ -164,7 +164,7 @@ class DBSessionSpec
         val session = db.autoCommitSession()
         val result =
           session.collection[String, Vector]("select id from " + tableName) {
-            rs => rs.string("id")
+            _.string("id")
           }
         result.size should equal(2)
       }
@@ -193,9 +193,7 @@ class DBSessionSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          ) { rs =>
-            rs.string("name")
-          } getOrElse "---"
+          ) { _.string("name") } getOrElse "---"
           name should equal("foo")
         } finally {
           session.close()
@@ -222,9 +220,7 @@ class DBSessionSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          ) { rs =>
-            rs.string("name")
-          } getOrElse "---"
+          ) { _.string("name") } getOrElse "---"
           name should equal("foo")
         } finally {
           session.close()
@@ -249,7 +245,7 @@ class DBSessionSpec
           TestUtils.initializeEmpRecords(session, tableName)
           val result =
             session.single("select id from " + tableName + " where id = ?", 1) {
-              rs => rs.string("id")
+              _.string("id")
             }
           result.get should equal("1")
           db.rollbackIfActive()
@@ -270,8 +266,8 @@ class DBSessionSpec
         val session = db.withinTxSession()
         try {
           TestUtils.initializeEmpRecords(session, tableName)
-          val result = session.list("select id from " + tableName + "") { rs =>
-            rs.string("id")
+          val result = session.list("select id from " + tableName + "") {
+            _.string("id")
           }
           result.size should equal(2)
           db.rollbackIfActive()
@@ -294,9 +290,7 @@ class DBSessionSpec
           TestUtils.initializeEmpRecords(session, tableName)
           val result = session.collection[String, Vector](
             "select id from " + tableName + ""
-          ) { rs =>
-            rs.string("id")
-          }
+          ) { _.string("id") }
           result.size should equal(2)
           db.rollbackIfActive()
         } finally {
@@ -374,8 +368,8 @@ class DBSessionSpec
         val session = db.withinTxSession()
         TestUtils.initializeEmpRecords(session, tableName)
         val nameBefore = session
-          .single("select name from " + tableName + " where id = ?", 1) { rs =>
-            rs.string("name")
+          .single("select name from " + tableName + " where id = ?", 1) {
+            _.string("name")
           }
           .get
         nameBefore should equal("name1")
@@ -387,8 +381,8 @@ class DBSessionSpec
         count should equal(1)
         db.rollbackIfActive()
         val name = session
-          .single("select name from " + tableName + " where id = ?", 1) { rs =>
-            rs.string("name")
+          .single("select name from " + tableName + " where id = ?", 1) {
+            _.string("name")
           }
           .get
         name should equal("name1")
@@ -1181,7 +1175,7 @@ class DBSessionSpec
             }
         }
         SQL("select * from image_data;")
-          .map(rs => rs.binaryStream("data"))
+          .map(_.binaryStream("data"))
           .single
           .apply()
           .map { bs =>
@@ -1235,7 +1229,7 @@ class DBSessionSpec
             }
         }
         SQL("select * from image_data2")
-          .map(rs => rs.binaryStream("data"))
+          .map(_.binaryStream("data"))
           .single
           .apply()
           .map { bs =>

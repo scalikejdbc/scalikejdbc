@@ -49,7 +49,7 @@ object MyIO {
       ): MyIO[A] = {
         for {
           x <- result.attempt
-          _ <- MyIO(doClose).map(x => x.apply())
+          _ <- MyIO(doClose).map(_.apply())
           a <- MyIO(x.fold(throw _, identity))
         } yield a
       }

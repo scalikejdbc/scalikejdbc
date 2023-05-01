@@ -39,9 +39,7 @@ class DBSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         val result = db readOnly { session =>
-          session.list("select * from " + tableName + "")(rs =>
-            rs.string("name")
-          )
+          session.list("select * from " + tableName + "")(_.string("name"))
         }
         result.size should be > 0
       }
@@ -56,7 +54,7 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB.readOnly { session =>
-        session.list("select * from " + tableName + "")(rs => rs.string("name"))
+        session.list("select * from " + tableName + "")(_.string("name"))
       }
       result.size should be > 0
     }
@@ -68,9 +66,8 @@ class DBSpec
       TestUtils.initialize(tableName)
       val session = DB.readOnlySession()
       try {
-        val result = session.list("select * from " + tableName + "")(rs =>
-          rs.string("name")
-        )
+        val result =
+          session.list("select * from " + tableName + "")(_.string("name"))
         result.size should be > 0
       } finally { session.close() }
     }
@@ -81,9 +78,7 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        DB.readOnly { session =>
-          session.update("update " + tableName + " set name = ?", "xxx")
-        }
+        DB.readOnly { _.update("update " + tableName + " set name = ?", "xxx") }
       }
     }
   }
@@ -111,8 +106,8 @@ class DBSpec
       val session = DB.autoCommitSession()
       try {
         val list =
-          session.list("select id from " + tableName + " order by id")(rs =>
-            rs.int("id")
+          session.list("select id from " + tableName + " order by id")(
+            _.int("id")
           )
         list(0) should equal(1)
         list(1) should equal(2)
@@ -125,8 +120,8 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB.autoCommit {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-          rs.int("id")
+        _.single("select id from " + tableName + " where id = ?", 1)(
+          _.int("id")
         )
       }
       result.get should equal(1)
@@ -189,8 +184,8 @@ class DBSpec
       }
       count should equal(1)
       val name = (DB.autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).get
       name should equal("foo")
@@ -222,8 +217,8 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB.localTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("id")
+        _.single("select id from " + tableName + " where id = ?", 1)(
+          _.string("id")
         )
       }
       result.get should equal("1")
@@ -250,8 +245,8 @@ class DBSpec
       }
       count should equal(1)
       val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).getOrElse("---")
       name should equal("foo")
@@ -273,8 +268,8 @@ class DBSpec
         count should equal(1)
         db.rollbackIfActive()
         val name = (DB localTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).getOrElse("---")
         name should equal("foo")
@@ -293,8 +288,8 @@ class DBSpec
       TestUtils.initialize(tableName)
       val fResult = DB futureLocalTx { s =>
         Future(
-          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          s.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         )
       }
@@ -336,8 +331,8 @@ class DBSpec
       val fName = fCount.flatMap { _ =>
         DB futureLocalTx (s =>
           Future(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         )
@@ -366,8 +361,8 @@ class DBSpec
         db.rollbackIfActive()
         val fName = DB futureLocalTx { s =>
           Future(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         }
@@ -395,8 +390,8 @@ class DBSpec
         Await.result(failure, 10.seconds)
       }
       val res = DB.readOnly(s =>
-        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        s.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       )
       res.get should not be (Some("foo"))
@@ -413,8 +408,8 @@ class DBSpec
 
       val myIOResult = DB.localTx[MyIO[Option[String]]] { s =>
         MyIO(
-          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          s.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         )
       }
@@ -456,8 +451,8 @@ class DBSpec
       val myIOName = MyIO(firstResult).flatMap { _ =>
         DB.localTx[MyIO[Option[String]]](s =>
           MyIO(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         )(boundary = MyIO.myIOTxBoundary)
@@ -486,8 +481,8 @@ class DBSpec
         db.rollbackIfActive()
         val myIOName = DB.localTx[MyIO[Option[String]]] { s =>
           MyIO(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         }
@@ -515,8 +510,8 @@ class DBSpec
         failure.run()
       }
       val res = DB.readOnly(s =>
-        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        s.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       )
       res.get should not be (Some("foo"))
@@ -535,8 +530,8 @@ class DBSpec
         TestUtils.initialize(tableName)
         val result = DB.localTx { s =>
           allCatch.withTry {
-            s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("id")
+            s.single("select id from " + tableName + " where id = ?", 1)(
+              _.string("id")
             )
           }
         }
@@ -555,8 +550,8 @@ class DBSpec
         TestUtils.initialize(tableName)
         val result = DB.localTx { s =>
           allCatch.either {
-            s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("id")
+            s.single("select id from " + tableName + " where id = ?", 1)(
+              _.string("id")
             )
           }
         }
@@ -597,7 +592,7 @@ class DBSpec
           DB.localTx(s =>
             allCatch.either(
               s.single("select name from " + tableName + " where id = ?", 1)(
-                rs => rs.string("name")
+                _.string("name")
               )
             )
           )
@@ -625,7 +620,7 @@ class DBSpec
           val name = DB.localTx { s =>
             allCatch.either(
               s.single("select name from " + tableName + " where id = ?", 1)(
-                rs => rs.string("name")
+                _.string("name")
               )
             )
           }
@@ -654,8 +649,8 @@ class DBSpec
         }
         assert(failure.isLeft)
         val res = DB.readOnly(s =>
-          s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          s.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         )
         res.get should not be (Some("foo"))
@@ -723,8 +718,8 @@ class DBSpec
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
         val result = db withinTx {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          _.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         }
         result.get should equal("1")
@@ -765,8 +760,8 @@ class DBSpec
         }
         count should equal(1)
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("foo")
@@ -792,8 +787,8 @@ class DBSpec
         db.rollback()
         db.begin()
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("name1")
@@ -822,7 +817,7 @@ class DBSpec
           "select * from " + tableName + " where name =  /* why? */ 'so what?' and id = ? /* really? */ -- line?"
         )
           .bind(3)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .list
           .apply()
         res1.size should equal(1)
@@ -830,7 +825,7 @@ class DBSpec
           "select * from " + tableName + " where name = /* why? */ 'so what?' and id = /*'id*/123 /* really? */ -- line?"
         )
           .bindByName("id" -> 3)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .list
           .apply()
         res2.size should equal(1)
@@ -887,7 +882,7 @@ class DBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "foo")
           db.rollback()
         }
@@ -900,7 +895,7 @@ class DBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "name1")
           db.rollback()
         }
@@ -911,7 +906,7 @@ class DBSpec
       using(ConnectionPool.borrow()) { conn =>
         val name = DB(conn) autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
-            rs => rs.string("name")
+            _.string("name")
           )
         }
         assert(name.get == "name1")
@@ -972,8 +967,8 @@ class DBSpec
         // java.sql.SQLException: Connection is closed.
         intercept[java.sql.SQLException] {
           db.readOnly {
-            _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            _.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           }
         }
@@ -990,8 +985,8 @@ class DBSpec
           )
         }
         val name1 = db.readOnly {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }.get
         name1 should equal("foo")
@@ -1004,8 +999,8 @@ class DBSpec
           )
         }
         val name2 = db.readOnly {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }.get
         name2 should equal("bar")
@@ -1023,9 +1018,7 @@ class DBSpec
       {
         val result: collection.Seq[String] = DB.readOnly { session =>
           session.fetchSize(111)
-          session.list("select * from " + tableName + "")(rs =>
-            rs.string("name")
-          )
+          session.list("select * from " + tableName + "")(_.string("name"))
         }
         result.size should be > 0
       }
@@ -1034,7 +1027,7 @@ class DBSpec
         val result: collection.Seq[String] = DB.readOnly { implicit session =>
           SQL("select * from " + tableName + "")
             .fetchSize(222)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
         }
@@ -1050,9 +1043,8 @@ class DBSpec
 
       DB.readOnly { session =>
         session.fetchSize(111).queryTimeout(11)
-        val result = session.list("select * from " + tableName + "")(rs =>
-          rs.string("name")
-        )
+        val result =
+          session.list("select * from " + tableName + "")(_.string("name"))
         result.size should be > 0
         session.fetchSize should equal(Some(111))
         session.queryTimeout should equal(Some(11))
@@ -1062,7 +1054,7 @@ class DBSpec
         session.fetchSize(111).queryTimeout(11)
         val result = {
           SQL("select * from " + tableName + "")
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .fetchSize(222)
             .queryTimeout(22)
@@ -1085,9 +1077,7 @@ class DBSpec
       {
         val result: collection.Seq[String] = DB.readOnly { session =>
           session.queryTimeout(111)
-          session.list("select * from " + tableName + "")(rs =>
-            rs.string("name")
-          )
+          session.list("select * from " + tableName + "")(_.string("name"))
         }
         result.size should be > 0
       }
@@ -1096,7 +1086,7 @@ class DBSpec
         val result: collection.Seq[String] = DB.readOnly { implicit session =>
           SQL("select * from " + tableName + "")
             .queryTimeout(222)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
         }
@@ -1109,7 +1099,7 @@ class DBSpec
           DB.readOnly { implicit session =>
             SQL("select * from " + tableName + "")
               .queryTimeout(-1)
-              .map(rs => rs.string("name"))
+              .map(_.string("name"))
               .list
               .apply()
           }

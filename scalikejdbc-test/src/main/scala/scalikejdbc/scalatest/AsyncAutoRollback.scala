@@ -64,9 +64,7 @@ trait AsyncAutoRollback extends LoanPattern { self: FixtureAsyncTestSuite =>
     }
     withFixture(test.toNoArgAsyncTest(database.withinTxSession()))
       .onCompletedThen { _ =>
-        using(database) { d =>
-          d.rollbackIfActive()
-        }
+        using(database) { _.rollbackIfActive() }
       }
   }
 

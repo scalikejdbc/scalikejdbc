@@ -38,7 +38,7 @@ class ThreadLocalDBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "foo")
           db.rollback()
         }
@@ -53,7 +53,7 @@ class ThreadLocalDBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "name1")
           db.rollback()
         }
@@ -65,7 +65,7 @@ class ThreadLocalDBSpec
       using(ThreadLocalDB.load()) { db =>
         val name = db autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
-            rs => rs.string("name")
+            _.string("name")
           )
         }
         assert(name.get == "name1")

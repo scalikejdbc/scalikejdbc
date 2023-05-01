@@ -575,7 +575,7 @@ class SQLInterpolationSpec
             )
           }
 
-          issue.map(i => i.id) should equal(Some(1))
+          issue.map(_.id) should equal(Some(1))
         }
         {
           val (i, it, t) =
@@ -602,7 +602,7 @@ class SQLInterpolationSpec
               )
             )
           }
-          issue.map(i => i.id) should equal(Some(1))
+          issue.map(_.id) should equal(Some(1))
         }
 
         {
@@ -630,7 +630,7 @@ class SQLInterpolationSpec
             .single
             .apply()
 
-          issue.map(i => i.id) should equal(Some(1))
+          issue.map(_.id) should equal(Some(1))
         }
 
         {
@@ -827,7 +827,7 @@ class SQLInterpolationSpec
             .iterable
             .apply()
 
-          customers.map(u => u.id) should equal(Seq(4, 5))
+          customers.map(_.id) should equal(Seq(4, 5))
           customers.head.id should equal(4)
           customers.tail.head.id should equal(5)
         }

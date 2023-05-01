@@ -386,7 +386,7 @@ class QueryInterfaceSpec
         val productId: Option[Int] = withSQL {
           select(sqls"${sp(p).id} id")
             .from(select.from(Product as p).where.eq(p.price, Price(80)).as(sp))
-        }.map(rs => rs.int("id")).single.apply()
+        }.map(_.int("id")).single.apply()
 
         productId should equal(Option(2))
 

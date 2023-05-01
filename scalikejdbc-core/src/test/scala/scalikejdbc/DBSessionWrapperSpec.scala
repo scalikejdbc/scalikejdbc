@@ -29,7 +29,7 @@ class DBSessionWrapperSpec extends AnyFlatSpec with Matchers {
         }
         (new DBSessionWrapper(session, attributesSwitcher)).list(
           "select * from " + tableName + ""
-        )(rs => rs.string("name"))
+        )(_.string("name"))
       }
       result.size should be > 0
       step shouldEqual 2

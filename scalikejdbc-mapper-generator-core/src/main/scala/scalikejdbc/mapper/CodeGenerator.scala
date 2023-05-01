@@ -790,7 +790,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +
       1.indent + "override val columns = Seq(" + allColumns
-        .map(c => c.name)
+        .map(_.name)
         .mkString("\"", "\", \"", "\"") + ")" + eol +
       eol +
       interpolationMapper +
@@ -1129,9 +1129,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       .replace(
         "%primaryKeys%",
         pkColumns
-          .map { c =>
-            c.defaultValueInScala
-          }
+          .map { _.defaultValueInScala }
           .mkString(", ")
       )
       .replace(

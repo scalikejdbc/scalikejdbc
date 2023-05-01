@@ -31,7 +31,7 @@ class DB_ExecutableSQLOperationSpec
         val idOpt = db autoCommit { implicit session =>
           SQL("select id from " + tableName + " where id = /*'id*/123")
             .bindByName("id" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
@@ -50,14 +50,14 @@ class DB_ExecutableSQLOperationSpec
             "select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'"
           )
             .bindByName("id" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
         intercept[Exception] {
           SQL("select id from " + tableName + " where id = /*'id*/123")
             .bindByName("idd" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
@@ -86,7 +86,7 @@ class DB_ExecutableSQLOperationSpec
         val name = (DB(conn) autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = /* 'id */123")
             .bindByName("id" -> 1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
         }).get

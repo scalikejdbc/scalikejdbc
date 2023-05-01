@@ -132,9 +132,7 @@ class RelationalSQLSpec
             .apply()
 
           users.size should equal(1)
-          users.foreach { user =>
-            user.group should be(None)
-          }
+          users.foreach { _.group should be(None) }
         }
 
         {
@@ -157,9 +155,7 @@ class RelationalSQLSpec
             .collection[Vector]()
 
           users.size should equal(1)
-          users.foreach { user =>
-            user.group should be(None)
-          }
+          users.foreach { _.group should be(None) }
         }
 
       }

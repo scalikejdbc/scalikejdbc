@@ -117,8 +117,8 @@ object SQLTemplateParser extends JavaTokenParsers with LogSupport {
   // ----
   // Parser
 
-  private def mainParser: Parser[List[String]] = rep(name | other) ^^ { names =>
-    names.collect { case name if name != "" => name }
+  private def mainParser: Parser[List[String]] = rep(name | other) ^^ {
+    _.collect({ case name if name != "" => name })
   }
 
   private def name: Parser[String] = "\\{\\w+\\}".r <~ opt(",") ^^ { name =>

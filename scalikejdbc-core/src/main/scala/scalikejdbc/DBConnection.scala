@@ -545,7 +545,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     tableList.headOption.map { case (schema, table, remarks) =>
       val pkNames: List[String] = new ResultSetIterator(
         meta.getPrimaryKeys(null, schema, table)
-      ).map(rs => rs.string("COLUMN_NAME")).toList
+      ).map(_.string("COLUMN_NAME")).toList
 
       Table(
         name = table,
@@ -674,7 +674,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
    * @return described information
    */
   def describe(table: String): String = {
-    getTable(table).map(t => t.toDescribeStyleString).getOrElse("Not found.")
+    getTable(table).map(_.toDescribeStyleString).getOrElse("Not found.")
   }
 
   /**

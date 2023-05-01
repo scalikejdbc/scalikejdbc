@@ -311,7 +311,7 @@ object ConnectionPool extends LogSupport {
   def close(name: Any = DEFAULT_NAME): Unit = {
     pools.synchronized {
       val removed = pools.remove(name)
-      removed.foreach { pool => pool.close() }
+      removed.foreach { _.close() }
     }
   }
 
