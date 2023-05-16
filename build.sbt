@@ -20,7 +20,7 @@ lazy val _typesafeConfigVersion = "1.4.2"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
-lazy val _logbackVersion = "1.2.11"
+lazy val _logbackVersion = "1.2.12"
 lazy val _h2Version = "1.4.199"
 // TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
 lazy val _mysqlVersion = "5.1.49"
@@ -49,7 +49,7 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
-  scalatestVersion := "3.2.15",
+  scalatestVersion := "3.2.16",
   specs2Version := "4.16.1",
   parserCombinatorsVersion := "2.1.1",
   collectionCompatVersion := "2.9.0",
@@ -368,7 +368,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-7-5" % "3.2.15.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.16.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
@@ -402,7 +402,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.41.0.0" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.41.2.1" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
