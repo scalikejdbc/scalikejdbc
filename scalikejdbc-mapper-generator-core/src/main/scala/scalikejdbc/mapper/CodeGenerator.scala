@@ -344,7 +344,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       }
 
       // def create(
-      1.indent + s"def create(" + eol +
+      1.indent + "def create(" + eol +
         // id: Long, name: Option[String] = None)(implicit session DBSession = autoSession): ClassName = {
         createColumns
           .map { c =>
@@ -790,7 +790,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +
       1.indent + "override val columns = Seq(" + allColumns
-        .map(c => c.name)
+        .map(_.name)
         .mkString("\"", "\", \"", "\"") + ")" + eol +
       eol +
       interpolationMapper +
@@ -845,12 +845,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
   def modelAll(): String = {
     val javaSqlImport = table.allColumns.flatMap { c =>
-      c.rawTypeInScala match {
-        case TypeName.Blob   => Some("Blob")
-        case TypeName.Clob   => Some("Clob")
-        case TypeName.Ref    => Some("Ref")
-        case TypeName.Struct => Some("Struct")
-        case _               => None
+      PartialFunction.condOpt(c.rawTypeInScala) {
+        case TypeName.Blob   => "Blob"
+        case TypeName.Clob   => "Clob"
+        case TypeName.Ref    => "Ref"
+        case TypeName.Struct => "Struct"
       }
     } match {
       case classes if classes.nonEmpty =>
@@ -1129,9 +1128,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       .replace(
         "%primaryKeys%",
         pkColumns
-          .map { c =>
-            c.defaultValueInScala
-          }
+          .map { _.defaultValueInScala }
           .mkString(", ")
       )
       .replace(
@@ -1158,7 +1155,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       .replace(
         "%createFields%",
         table.allColumns
-          .filter { c =>
+          .withFilter { c =>
             c.isNotNull && table.autoIncrementColumns.forall(_.name != c.name)
           }
           .map { c =>

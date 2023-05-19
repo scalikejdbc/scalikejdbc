@@ -75,13 +75,13 @@ class SQLSpec
 
         val singleResult = SQL("select id from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .toOption
           .apply()
         singleResult.get should equal("1")
 
         val firstResult = SQL("select id from " + tableName)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .headOption
           .apply()
         firstResult.get should equal("1")
@@ -96,7 +96,7 @@ class SQLSpec
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
         val result = SQL("select id from " + tableName)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .toList
           .apply()
         result.size should equal(2)
@@ -111,7 +111,7 @@ class SQLSpec
       using(DB(ConnectionPool.borrow())) { db =>
         implicit val session = db.autoCommitSession()
         val result = SQL("select id from " + tableName)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .toCollection[Vector]()
         result.size should equal(2)
       }
@@ -158,7 +158,7 @@ class SQLSpec
         // should be updated
         val name = SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .toOption
           .apply()
           .getOrElse("---")
@@ -192,7 +192,7 @@ class SQLSpec
         // should be updated
         val name = SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .toOption
           .apply()
           .getOrElse("---")
@@ -215,7 +215,7 @@ class SQLSpec
         TestUtils.initializeEmpRecords(session, tableName)
         val result = SQL("select id from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .toOption
           .apply()
         result.get should equal("1")
@@ -233,9 +233,7 @@ class SQLSpec
         implicit val session = db.withinTxSession()
         TestUtils.initializeEmpRecords(session, tableName)
         val result = SQL("select id from " + tableName + "")
-          .map { rs =>
-            rs.string("id")
-          }
+          .map { _.string("id") }
           .toList
           .apply()
         result.size should equal(2)
@@ -253,9 +251,7 @@ class SQLSpec
         implicit val session = db.withinTxSession()
         TestUtils.initializeEmpRecords(session, tableName)
         val result = SQL("select id from " + tableName + "")
-          .map { rs =>
-            rs.string("id")
-          }
+          .map { _.string("id") }
           .toCollection[Vector]()
         result.size should equal(2)
         db.rollbackIfActive()
@@ -291,9 +287,7 @@ class SQLSpec
         TestUtils.initializeEmpRecords(session, tableName)
         val nameBefore = SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map { rs =>
-            rs.string("name")
-          }
+          .map { _.string("name") }
           .toOption
           .apply()
         nameBefore.get should equal("name1")
@@ -307,9 +301,7 @@ class SQLSpec
       DB readOnly { implicit session =>
         val name = SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map { rs =>
-            rs.string("name")
-          }
+          .map { _.string("name") }
           .toOption
           .apply()
         name.get should equal("name1")

@@ -7,7 +7,7 @@ import java.sql.DatabaseMetaData
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/sql/DatabaseMetaData.html#getIndexInfo-java.lang.String-java.lang.String-java.lang.String-boolean-boolean-]]
  */
-sealed trait IndexType {
+sealed trait IndexType extends Product with Serializable {
   val typeValue: Short
 }
 

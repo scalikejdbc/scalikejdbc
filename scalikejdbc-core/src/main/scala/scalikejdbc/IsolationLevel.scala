@@ -1,6 +1,6 @@
 package scalikejdbc
 
-sealed trait IsolationLevel
+sealed trait IsolationLevel extends Product with Serializable
 
 object IsolationLevel {
 

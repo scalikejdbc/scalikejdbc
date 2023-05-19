@@ -32,7 +32,7 @@ class DB_AnormSQLOperationSpec
         val idOpt = db autoCommit { implicit session =>
           SQL("select id from " + tableName + " where id = {id}")
             .bindByName("id" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
@@ -51,14 +51,14 @@ class DB_AnormSQLOperationSpec
             "select id from " + tableName + " where id = {id} and name = {name}"
           )
             .bindByName("id" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
         intercept[IllegalStateException] {
           SQL("select id from " + tableName + " where id = {id}")
             .bindByName("idd" -> 1)
-            .map(rs => rs.int("id"))
+            .map(_.int("id"))
             .toOption
             .apply()
         }
@@ -85,7 +85,7 @@ class DB_AnormSQLOperationSpec
         val name = (DB(conn) autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = {id}")
             .bindByName("id" -> 1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
         }).get

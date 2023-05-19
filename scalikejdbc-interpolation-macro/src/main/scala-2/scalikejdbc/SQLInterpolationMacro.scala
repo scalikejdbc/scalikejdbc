@@ -10,9 +10,8 @@ object SQLInterpolationMacro {
   def selectDynamic[E: c.WeakTypeTag](c: Context)(name: c.Tree): c.Tree = {
     import c.universe._
 
-    val nameOpt: Option[String] = name match {
-      case Literal(Constant(value: String)) => Some(value)
-      case _                                => None
+    val nameOpt: Option[String] = PartialFunction.condOpt(name) {
+      case Literal(Constant(value: String)) => value
     }
 
     // primary constructor args of type E

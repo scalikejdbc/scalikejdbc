@@ -88,10 +88,10 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       cachedColumns.keys
         .withFilter { case (cp, _) => cp == connectionPoolName }
         .foreach { case (cp, table) =>
-          cachedColumns.get((cp, table)).foreach { caches =>
-            caches.foreach { case (_, cache: TrieMap[String, SQLSyntax]) =>
+          cachedColumns.get((cp, table)).foreach {
+            _.foreach({ case (_, cache: TrieMap[String, SQLSyntax]) =>
               cache.clear()
-            }
+            })
           }
         }
     }
@@ -437,7 +437,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       columns: collection.Seq[String]
     ): String = {
       def shorten(s: String): String =
-        s.split("_").map(word => word.take(1)).mkString
+        s.split("_").map(_.take(1)).mkString
 
       val shortenedName = shorten(toAlphabetOnly(name))
       val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))
@@ -897,15 +897,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
             SQLSyntax(s"${aliasName}.${rn.namedColumn(name.value).value}")
           }
       }
-      foundResultName match {
-        case Some(resultName) => resultName
-        case _ =>
-          val registeredNames = resultNames
-            .map { rn => rn.namedColumns.map(_.value).mkString(",") }
-            .mkString(",")
-          throw new InvalidColumnNameException(
-            ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})"
-          )
+      foundResultName.getOrElse {
+        val registeredNames = resultNames
+          .map { rn => rn.namedColumns.map(_.value).mkString(",") }
+          .mkString(",")
+        throw new InvalidColumnNameException(
+          ErrorMessage.INVALID_COLUMN_NAME + s" (name: ${name.value}, registered names: ${registeredNames})"
+        )
       }
     }
 

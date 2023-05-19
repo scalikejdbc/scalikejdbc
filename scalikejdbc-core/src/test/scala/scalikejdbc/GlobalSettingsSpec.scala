@@ -35,7 +35,7 @@ class GlobalSettingsSpec
           warningThresholdMillis = 10L
         )
         SQL("select  * from settings_example")
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .list
           .apply()
       } finally {
@@ -321,7 +321,7 @@ class GlobalSettingsSpec
           stackTraceDepth = 500
         )
         SQL("select  * from logging_stacktrace")
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .list
           .apply()
 

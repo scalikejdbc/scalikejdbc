@@ -97,8 +97,8 @@ class NamedDBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        NamedDB("named") readOnly { session =>
-          session.update("update " + tableName + " set name = ?", "xxx")
+        NamedDB("named") readOnly {
+          _.update("update " + tableName + " set name = ?", "xxx")
         }
       }
     }
@@ -127,8 +127,8 @@ class NamedDBSpec
       val session = NamedDB("named").autoCommitSession()
       try {
         val list =
-          session.list("select id from " + tableName + " order by id")(rs =>
-            rs.int("id")
+          session.list("select id from " + tableName + " order by id")(
+            _.int("id")
           )
         list(0) should equal(1)
         list(1) should equal(2)
@@ -141,8 +141,8 @@ class NamedDBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = NamedDB("named") autoCommit {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-          rs.int("id")
+        _.single("select id from " + tableName + " where id = ?", 1)(
+          _.int("id")
         )
       }
       result.get should equal(1)
@@ -210,8 +210,8 @@ class NamedDBSpec
         }
         count should equal(1)
         val name = (db autoCommit {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("foo")
@@ -244,8 +244,8 @@ class NamedDBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = NamedDB("named") localTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("id")
+        _.single("select id from " + tableName + " where id = ?", 1)(
+          _.string("id")
         )
       }
       result.get should equal("1")
@@ -272,8 +272,8 @@ class NamedDBSpec
       }
       count should equal(1)
       val name = (NamedDB("named") localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).getOrElse("---")
       name should equal("foo")
@@ -295,8 +295,8 @@ class NamedDBSpec
         count should equal(1)
         db.rollbackIfActive()
         val name = (NamedDB("named") localTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).getOrElse("---")
         name should equal("foo")
@@ -315,8 +315,8 @@ class NamedDBSpec
       TestUtils.initialize(tableName)
       val fResult = NamedDB("named") futureLocalTx { s =>
         Future(
-          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          s.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         )
       }
@@ -358,8 +358,8 @@ class NamedDBSpec
       val fName = fCount.flatMap { _ =>
         DB futureLocalTx (s =>
           Future(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         )
@@ -388,8 +388,8 @@ class NamedDBSpec
         db.rollbackIfActive()
         val fName = NamedDB("named") futureLocalTx { s =>
           Future(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         }
@@ -417,8 +417,8 @@ class NamedDBSpec
         Await.result(failure, 10.seconds)
       }
       val res = NamedDB("named") readOnly (s =>
-        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        s.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       )
       res.get should not be (Some("foo"))
@@ -434,8 +434,8 @@ class NamedDBSpec
       TestUtils.initialize(tableName)
       val myIOResult = NamedDB("named").localTx[MyIO[Option[String]]] { s =>
         MyIO(
-          s.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          s.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         )
       }(MyIO.myIOTxBoundary)
@@ -479,8 +479,8 @@ class NamedDBSpec
       val myIOName = MyIO(result1).flatMap { _ =>
         DB.localTx[MyIO[Option[String]]](s =>
           MyIO(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         )(boundary = MyIO.myIOTxBoundary)
@@ -508,8 +508,8 @@ class NamedDBSpec
         db.rollbackIfActive()
         val myIOName = NamedDB("named").localTx[MyIO[Option[String]]] { s =>
           MyIO(
-            s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-              rs.string("name")
+            s.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
             )
           )
         }
@@ -537,8 +537,8 @@ class NamedDBSpec
         failure.run()
       }
       val res = NamedDB("named") readOnly (s =>
-        s.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        s.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       )
       res.get should not be (Some("foo"))
@@ -602,8 +602,8 @@ class NamedDBSpec
       using(NamedDB("named")) { db =>
         db.begin()
         val result = db withinTx {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          _.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         }
         result.get should equal("1")
@@ -644,8 +644,8 @@ class NamedDBSpec
         }
         count should equal(1)
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("foo")
@@ -687,7 +687,7 @@ class NamedDBSpec
             "name2"
           )
         } apply {
-          session.single("select count(1) from " + tableName)(rs => rs.int(1))
+          session.single("select count(1) from " + tableName)(_.int(1))
           session.update("delete from " + tableName)
           session.update(
             "insert into " + tableName + " (id, name) values (?, ?)",
@@ -714,8 +714,8 @@ class NamedDBSpec
         db.rollback()
         db.begin()
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("name1")
@@ -763,7 +763,7 @@ class NamedDBSpec
             "name2"
           )
         } apply {
-          session.single("select count(1) from " + tableName)(rs => rs.int(1))
+          session.single("select count(1) from " + tableName)(_.int(1))
           session.update("delete from " + tableName)
           session.update(
             "insert into " + tableName + " (id, name) values (?, ?)",
@@ -791,7 +791,7 @@ class NamedDBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "foo")
           db.rollback()
         }
@@ -804,7 +804,7 @@ class NamedDBSpec
           val name = session.single(
             "select name from " + tableName + " where id = ?",
             1
-          )(rs => rs.string("name"))
+          )(_.string("name"))
           assert(name.get == "name1")
           db.rollback()
         }
@@ -814,7 +814,7 @@ class NamedDBSpec
 
       val name = NamedDB("named") autoCommit { session =>
         session.single("select name from " + tableName + " where id = ?", 1)(
-          rs => rs.string("name")
+          _.string("name")
         )
       }
       assert(name.get == "name1")

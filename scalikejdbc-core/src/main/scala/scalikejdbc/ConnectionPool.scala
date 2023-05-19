@@ -133,7 +133,7 @@ object ConnectionPool extends LogSupport {
       // Heroku support
       val pool = url match {
         case HerokuPostgresRegexp(_user, _password, _host, _dbname) =>
-          val _url = "jdbc:postgresql://%s/%s".format(_host, _dbname)
+          val _url = s"jdbc:postgresql://${_host}/${_dbname}"
           _factory.apply(_url, _user, _password, settings)
         case url @ HerokuMySQLRegexp(_user, _password, _host, _dbname) =>
           val defaultProperties =
@@ -142,10 +142,8 @@ object ConnectionPool extends LogSupport {
             .findFirstMatchIn(url)
             .map(_ => "")
             .getOrElse(defaultProperties)
-          val _url = "jdbc:mysql://%s/%s".format(
-            _host,
-            _dbname + addDefaultPropertiesIfNeeded
-          )
+          val _url =
+            s"jdbc:mysql://${_host}/${_dbname + addDefaultPropertiesIfNeeded}"
           _factory.apply(_url, _user, _password, settings)
         case _ =>
           _factory.apply(url, user, password, settings)
@@ -311,7 +309,7 @@ object ConnectionPool extends LogSupport {
   def close(name: Any = DEFAULT_NAME): Unit = {
     pools.synchronized {
       val removed = pools.remove(name)
-      removed.foreach { pool => pool.close() }
+      removed.foreach { _.close() }
     }
   }
 

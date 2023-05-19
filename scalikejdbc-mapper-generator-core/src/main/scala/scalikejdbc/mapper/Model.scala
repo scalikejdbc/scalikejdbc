@@ -51,7 +51,7 @@ case class Model(url: String, username: String, password: String)
       }
       new ResultSetIterator(
         meta.getTables(catalog, _schema, "%", types.toArray)
-      ).map { rs => rs.string("TABLE_NAME") }.toList
+      ).map { _.string("TABLE_NAME") }.toList
     }
   }
 
@@ -79,13 +79,13 @@ case class Model(url: String, username: String, password: String)
               name = tableName,
               allColumns = allColumns,
               autoIncrementColumns =
-                allColumns.filter(c => c.isAutoIncrement).distinct,
+                allColumns.filter(_.isAutoIncrement).distinct,
               primaryKeyColumns = {
                 new ResultSetIterator(
                   meta.getPrimaryKeys(catalog, _schema, tableName)
                 )
                   .flatMap { implicit rs =>
-                    allColumns.find(column => column.name == columnName)
+                    allColumns.find(_.name == columnName)
                   }
                   .toList
                   .distinct

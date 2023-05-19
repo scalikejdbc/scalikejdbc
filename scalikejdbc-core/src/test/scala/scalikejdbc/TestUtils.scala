@@ -33,7 +33,7 @@ object TestUtils {
         }
         initializeEmpRecords(session, tableName)
       } apply {
-        session.single("select count(1) from " + tableName)(rs => rs.int(1))
+        session.single("select count(1) from " + tableName)(_.int(1))
         initializeEmpRecords(session, tableName)
       }
     }

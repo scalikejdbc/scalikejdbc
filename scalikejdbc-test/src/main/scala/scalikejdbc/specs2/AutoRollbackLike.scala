@@ -45,9 +45,7 @@ trait AutoRollbackLike extends After with LoanPattern {
   // ------------------------------
   // after execution
   // ------------------------------
-  override def after: Any = using(_db) { _db =>
-    _db.rollbackIfActive()
-  }
+  override def after: Any = using(_db) { _.rollbackIfActive() }
 
   /*
    * Passes implicit DBSession instance to the block

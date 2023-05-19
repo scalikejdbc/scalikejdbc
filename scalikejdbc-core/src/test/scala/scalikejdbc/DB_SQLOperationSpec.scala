@@ -105,7 +105,7 @@ class DB_SQLOperationSpec
       implicit val session: DBSession = DB.autoCommitSession()
       try {
         val list = SQL("select id from " + tableName + " order by id")
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .toList
           .apply()
         list(0) should equal(1)
@@ -123,7 +123,7 @@ class DB_SQLOperationSpec
       val result = DB autoCommit { implicit session =>
         SQL("select id from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .toOption
           .apply()
       }
@@ -182,10 +182,10 @@ class DB_SQLOperationSpec
       TestUtils.initialize(tableName)
       DB autoCommit { implicit session =>
         SQL("select id from " + tableName + "")
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .toIterable
           .apply()
-          .foreach { case (id) =>
+          .foreach { id =>
             println(id)
           }
       }
@@ -206,7 +206,7 @@ class DB_SQLOperationSpec
       val name = DB autoCommit { implicit session =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .toOption
           .apply()
           .get
@@ -275,7 +275,7 @@ class DB_SQLOperationSpec
       val result = DB localTx { implicit s =>
         SQL("select id from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("id"))
+          .map(_.string("id"))
           .toOption
           .apply()
       }
@@ -311,7 +311,7 @@ class DB_SQLOperationSpec
       val name = DB localTx { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .toOption
           .apply()
           .get
@@ -340,7 +340,7 @@ class DB_SQLOperationSpec
       val name = DB localTx { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .single
           .apply()
           .get
@@ -447,7 +447,7 @@ class DB_SQLOperationSpec
         val result = db withinTx { implicit s =>
           SQL("select id from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("id"))
+            .map(_.string("id"))
             .single
             .apply()
         }
@@ -493,7 +493,7 @@ class DB_SQLOperationSpec
         val name = (db withinTx { implicit s =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
         }).get
@@ -521,7 +521,7 @@ class DB_SQLOperationSpec
         val name = (db withinTx { implicit s =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
         }).get
@@ -624,7 +624,7 @@ class DB_SQLOperationSpec
           Thread.sleep(1000L)
           val name = SQL("select name from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
           name.get should equal("foo")
@@ -638,7 +638,7 @@ class DB_SQLOperationSpec
           Thread.sleep(200L)
           val name = SQL("select name from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
           name.get should equal("name1")
@@ -652,7 +652,7 @@ class DB_SQLOperationSpec
         val name = DB(conn) autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .single
             .apply()
         }
@@ -703,7 +703,7 @@ class DB_SQLOperationSpec
           .apply()
         SQL("select id, name from " + tableName + " where id = ?")
           .bind(4)
-          .map(rs => rs.toMap())
+          .map(_.toMap())
           .single
           .apply()
       }
@@ -730,7 +730,7 @@ class DB_SQLOperationSpec
           .apply()
         SQL("select id, name from " + tableName + " where id = ?")
           .bind(4)
-          .map(rs => rs.toSymbolMap())
+          .map(_.toSymbolMap())
           .single
           .apply()
       }

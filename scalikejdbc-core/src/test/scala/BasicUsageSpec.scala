@@ -113,7 +113,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 
     // named datasources
     NamedDB("named") autoCommit { session =>
-      session.list("select * from " + tableName)(rs => rs.int("id"))
+      session.list("select * from " + tableName)(_.int("id"))
     }
 
     // creating a session instance without a block (be careful to close resources)
@@ -397,7 +397,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         )
         // this query will spend more than 10 millis
         SQL("select  *  from logging_sql_and_timing")
-          .map(rs => rs.int("id"))
+          .map(_.int("id"))
           .list
           .apply()
 

@@ -103,7 +103,7 @@ private[streams] class StreamResultSetIterator[+A](
 
 private[streams] object StreamResultSetIterator {
 
-  private sealed trait InternalState
+  private sealed trait InternalState extends Product with Serializable
   private case object NeedToPrefetchNextValue extends InternalState
   private case object NextInvocationReady extends InternalState
   private case object AlreadyConsumed extends InternalState

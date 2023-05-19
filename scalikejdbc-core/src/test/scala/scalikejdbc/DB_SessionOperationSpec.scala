@@ -105,8 +105,8 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[SQLException] {
-          db readOnly { session =>
-            session.update("update " + tableName + " set name = ?", "xxx")
+          db readOnly {
+            _.update("update " + tableName + " set name = ?", "xxx")
           }
         }
       }
@@ -141,8 +141,8 @@ class DB_SessionOperationSpec
         val session = db.autoCommitSession()
         try {
           val list =
-            session.list("select id from " + tableName + " order by id")(rs =>
-              rs.int("id")
+            session.list("select id from " + tableName + " order by id")(
+              _.int("id")
             )
           list(0) should equal(1)
           list(1) should equal(2)
@@ -158,8 +158,8 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         val result = db autoCommit {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.int("id")
+          _.single("select id from " + tableName + " where id = ?", 1)(
+            _.int("id")
           )
         }
         result.get should equal(1)
@@ -239,8 +239,8 @@ class DB_SessionOperationSpec
       }
       count should equal(1)
       val name = (DB autoCommit {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).get
       name should equal("foo")
@@ -272,8 +272,8 @@ class DB_SessionOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val result = DB localTx {
-        _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("id")
+        _.single("select id from " + tableName + " where id = ?", 1)(
+          _.string("id")
         )
       }
       result.get should equal("1")
@@ -300,8 +300,8 @@ class DB_SessionOperationSpec
       }
       count should equal(1)
       val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).getOrElse("---")
       name should equal("foo")
@@ -317,8 +317,8 @@ class DB_SessionOperationSpec
       }
       count should equal(1)
       val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-          rs.string("name")
+        _.single("select name from " + tableName + " where id = ?", 1)(
+          _.string("name")
         )
       }).getOrElse("---")
       name should equal("foo")
@@ -390,8 +390,8 @@ class DB_SessionOperationSpec
         val db = DB(conn)
         db.begin()
         val result = db withinTx {
-          _.single("select id from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("id")
+          _.single("select id from " + tableName + " where id = ?", 1)(
+            _.string("id")
           )
         }
         result.get should equal("1")
@@ -434,8 +434,8 @@ class DB_SessionOperationSpec
         }
         count should equal(1)
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("foo")
@@ -462,8 +462,8 @@ class DB_SessionOperationSpec
         db.rollback()
         db.begin()
         val name = (db withinTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(rs =>
-            rs.string("name")
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
           )
         }).get
         name should equal("name1")
@@ -494,7 +494,7 @@ class DB_SessionOperationSpec
             val name = session.single(
               "select name from " + tableName + " where id = ?",
               1
-            )(rs => rs.string("name"))
+            )(_.string("name"))
             assert(name.get == "foo")
             db.rollback()
           } finally { session.close() }
@@ -510,7 +510,7 @@ class DB_SessionOperationSpec
             val name = session.single(
               "select name from " + tableName + " where id = ?",
               1
-            )(rs => rs.string("name"))
+            )(_.string("name"))
             assert(name.get == "name1")
             db.rollback()
           } finally { session.close() }
@@ -522,7 +522,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val name = DB(conn) autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
-            rs => rs.string("name")
+            _.string("name")
           )
         }
         assert(name.get == "name1")

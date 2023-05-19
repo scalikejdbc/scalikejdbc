@@ -36,9 +36,8 @@ trait TestDBSettings {
     tableName: String,
     numberOfRecords: Int
   ): Unit = {
-    implicit val settings = SettingsProvider.default.copy(loggingSQLAndTime =
-      s => s.copy(enabled = false)
-    )
+    implicit val settings =
+      SettingsProvider.default.copy(loggingSQLAndTime = _.copy(enabled = false))
     DB.localTx { implicit session =>
       session.execute(
         s"create table $tableName (id integer primary key, name varchar(30))"

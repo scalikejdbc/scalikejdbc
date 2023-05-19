@@ -26,7 +26,7 @@ class ConnectionPoolContextSpec
 
       val result1 = DB readOnly { implicit s =>
         SQL("select * from " + tableName)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .list
           .apply()
       }
@@ -36,7 +36,7 @@ class ConnectionPoolContextSpec
         NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly {
           implicit s =>
             SQL("select * from " + tableName)
-              .map(rs => rs.string("name"))
+              .map(_.string("name"))
               .list
               .apply()
         }
@@ -47,7 +47,7 @@ class ConnectionPoolContextSpec
         NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly {
           implicit s =>
             SQL("select * from " + tableName)
-              .map(rs => rs.string("name"))
+              .map(_.string("name"))
               .list
               .apply()
         }
@@ -74,7 +74,7 @@ class ConnectionPoolContextSpec
 
       val result1 = DB readOnly { implicit s =>
         SQL("select * from " + tableName)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .list
           .apply()
       }
@@ -83,7 +83,7 @@ class ConnectionPoolContextSpec
       val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly {
         implicit s =>
           SQL("select * from " + tableName)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
       }
@@ -93,7 +93,7 @@ class ConnectionPoolContextSpec
       val result2 = NamedDB("ConnectionPoolContextSpec") readOnly {
         implicit s =>
           SQL("select * from " + tableName)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
       }
@@ -180,7 +180,7 @@ class ConnectionPoolContextMixinSpec
 
       val result1 = DB readOnly { implicit s =>
         SQL("select * from " + tableName)
-          .map(rs => rs.string("name"))
+          .map(_.string("name"))
           .list
           .apply()
       }
@@ -189,7 +189,7 @@ class ConnectionPoolContextMixinSpec
       val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly {
         implicit s =>
           SQL("select * from " + tableName)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
       }
@@ -199,7 +199,7 @@ class ConnectionPoolContextMixinSpec
       val result2 = NamedDB("ConnectionPoolContextSpec") readOnly {
         implicit s =>
           SQL("select * from " + tableName)
-            .map(rs => rs.string("name"))
+            .map(_.string("name"))
             .list
             .apply()
       }
@@ -254,7 +254,7 @@ object Sample {
     context: ConnectionPoolContext = NoConnectionPoolContext
   ): Long = {
     SQL("select count(1) c from users")
-      .map(rs => rs.long("c"))
+      .map(_.long("c"))
       .single
       .apply()
       .get
@@ -265,7 +265,7 @@ object Sample {
   ): Long = {
     NamedDB("CPContextWithAutoSessionSpec") readOnly { implicit s =>
       SQL("select count(1) c from users")
-        .map(rs => rs.long("c"))
+        .map(_.long("c"))
         .single
         .apply()
         .get

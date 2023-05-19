@@ -61,7 +61,7 @@ object Member extends JavaUtilDateConverterImplicits {
 
   def countAll()(implicit session: DBSession = AutoSession): Long = {
     SQL("""SELECT COUNT(1) FROM MEMBER""")
-      .map(rs => rs.long(1))
+      .map(_.long(1))
       .single
       .apply()
       .get
@@ -82,7 +82,7 @@ object Member extends JavaUtilDateConverterImplicits {
   ): Long = {
     SQL("""SELECT count(1) FROM MEMBER WHERE """ + where)
       .bindByName(params: _*)
-      .map(rs => rs.long(1))
+      .map(_.long(1))
       .single
       .apply()
       .get
@@ -222,7 +222,7 @@ object NamedMember {
     session: DBSession = NamedAutoSession("named")
   ): Long = {
     SQL("""SELECT COUNT(1) FROM NAMED_MEMBER""")
-      .map(rs => rs.long(1))
+      .map(_.long(1))
       .single
       .apply()
       .get
@@ -243,7 +243,7 @@ object NamedMember {
   ): Long = {
     SQL("""SELECT count(1) FROM NAMED_MEMBER WHERE """ + where)
       .bindByName(params: _*)
-      .map(rs => rs.long(1))
+      .map(_.long(1))
       .single
       .apply()
       .get
@@ -350,7 +350,7 @@ object MemberSQLTemplate {
   def countAll(): Long = {
     DB readOnly { implicit session =>
       SQL("""SELECT COUNT(1) FROM MEMBER""")
-        .map(rs => rs.long(1))
+        .map(_.long(1))
         .single
         .apply()
         .get

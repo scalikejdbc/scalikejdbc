@@ -427,11 +427,9 @@ private[streams] class DatabaseSubscription[A](
 
                   // create a new iterator if it absent.
                   val iterator: StreamResultSetIterator[A] = {
-                    maybeRemainingIterator match {
-                      case Some(iterator) => iterator
-                      case _ =>
-                        currentSubscription.issueQueryAndCreateNewIterator()
-                    }
+                    maybeRemainingIterator.getOrElse(
+                      currentSubscription.issueQueryAndCreateNewIterator()
+                    )
                   }
                   maybeRemainingIterator =
                     emitElementsAndReturnRemainingIterator(realDemand, iterator)
