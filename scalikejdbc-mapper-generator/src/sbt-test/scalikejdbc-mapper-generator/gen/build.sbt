@@ -65,7 +65,7 @@ TaskKey[Unit]("createTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.10", "2.12.17", "3.3.0")
+crossScalaVersions := List("2.13.11", "2.12.18", "3.3.0")
 
 scalacOptions ++= Seq(
   "-Xlint",

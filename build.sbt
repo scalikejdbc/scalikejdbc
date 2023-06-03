@@ -3,8 +3,8 @@ import MimaSettings.mimaSettings
 publish / skip := true
 
 def Scala3 = "3.3.0"
-def Scala212 = "2.12.17"
-def Scala213 = "2.13.10"
+def Scala212 = "2.12.18"
+def Scala213 = "2.13.11"
 
 ThisBuild / version := "4.1.0-SNAPSHOT"
 
