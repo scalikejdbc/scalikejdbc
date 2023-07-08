@@ -101,7 +101,7 @@ class SQLInterpolationSpec
   )
 
   object Group extends SQLSyntaxSupport[Group] {
-    override val tableName = "groups"
+    override val tableName = "my_groups"
     override val columns = Seq("id", "website_url")
     def apply(rs: WrappedResultSet, g: ResultName[Group]): Group =
       Group(id = rs.int(g.id), websiteUrl = rs.stringOpt(g.field("websiteUrl")))
@@ -156,9 +156,9 @@ class SQLInterpolationSpec
         sql"create table users (id int not null, first_name varchar(256), group_id int)".execute
           .apply()
 
-        try sql"drop table groups".execute.apply()
+        try sql"drop table my_groups".execute.apply()
         catch { case e: Exception => }
-        sql"create table groups (id int not null, website_url varchar(256))".execute
+        sql"create table my_groups (id int not null, website_url varchar(256))".execute
           .apply()
 
         try sql"drop table group_members".execute.apply()
@@ -179,9 +179,9 @@ class SQLInterpolationSpec
               .values(id, name, groupId)
           }
         }
-        sql"insert into groups values (1, ${"http://jp.scala-users.org/"})".update
+        sql"insert into my_groups values (1, ${"http://jp.scala-users.org/"})".update
           .apply()
-        sql"insert into groups values (2, ${"https://www.java-users.jp/"})".update
+        sql"insert into my_groups values (2, ${"https://www.java-users.jp/"})".update
           .apply()
         sql"insert into group_members values (1, 1)".update.apply()
         sql"insert into group_members values (2, 1)".update.apply()
