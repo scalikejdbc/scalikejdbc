@@ -102,7 +102,7 @@ class DB_MetaDataSpec
         )
       ) {
         // mysql is not support schema
-        if (driverClassName == "com.mysql.jdbc.Driver") {
+        if (isMySQLDriverName) {
           lower(act) should contain allOf ("meta_groups", "meta_members")
         } else {
           lower(
@@ -147,7 +147,7 @@ class DB_MetaDataSpec
           NamedDB("default").getTable("meta_members")
         )
       ) {
-        if (driverClassName == "com.mysql.jdbc.Driver") {
+        if (isMySQLDriverName) {
           lower(act.value.schema) should equal(null)
         } else {
           lower(act.value.schema) should equal("public")
@@ -196,7 +196,7 @@ class DB_MetaDataSpec
 
   it should "retrieve metadata with schemas" in {
     // mysql is not support schema
-    if (driverClassName != "com.mysql.jdbc.Driver") {
+    if (isMySQLDriverName == false) {
 
       try {
 
@@ -575,7 +575,7 @@ class DB_MetaDataSpec
   }
   it should "get all columns" in {
 
-    if (driverClassName == "com.mysql.jdbc.Driver") {
+    if (isMySQLDriverName) {
       try {
         // There was a bug that MySQL returns all columns of same name tables.
         DB autoCommit { implicit s =>

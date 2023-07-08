@@ -926,7 +926,7 @@ class DBSpec
 
   // https://github.com/scalikejdbc/scalikejdbc/issues/245
   it should "work with no pk table with MySQL" in {
-    if (driverClassName == "com.mysql.jdbc.Driver") {
+    if (isMySQLDriverName) {
       val tableName = s"issue245_${System.currentTimeMillis}"
       try {
         DB.autoCommit { implicit s =>
@@ -1112,7 +1112,7 @@ class DBSpec
 
   /*
   it should "work with TimeZone" in {
-    if (driverClassName != "com.mysql.jdbc.Driver") {
+    if (isMySQLDriverName == false) {
 
       val now = new Date
       val currentTimeZone = TimeZone.getDefault

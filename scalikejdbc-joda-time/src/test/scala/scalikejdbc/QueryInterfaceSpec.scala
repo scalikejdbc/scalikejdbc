@@ -16,9 +16,12 @@ class QueryInterfaceSpec
     .get("SCALIKEJDBC_DATABASE")
     .exists(_ == "h2")
 
-  def isMySQL: Boolean = driverClassName == "com.mysql.jdbc.Driver" || sys.env
-    .get("SCALIKEJDBC_DATABASE")
-    .exists(_ == "mysql")
+  def isMySQL: Boolean =
+    Set("com.mysql.jdbc.Driver", "com.mysql.cj.jdbc.Driver").apply(
+      driverClassName
+    ) || sys.env
+      .get("SCALIKEJDBC_DATABASE")
+      .exists(_ == "mysql")
 
   behavior of "QueryInterface"
 

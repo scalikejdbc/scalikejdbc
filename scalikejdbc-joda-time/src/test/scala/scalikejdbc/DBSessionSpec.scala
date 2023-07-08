@@ -433,9 +433,8 @@ class DBSessionSpec
           val rs = stmt.getGeneratedKeys
           while (rs.next()) {
             id =
-              if (
-                driverClassName == "org.h2.Driver" || driverClassName == "com.mysql.jdbc.Driver"
-              ) rs.getLong(1)
+              if (driverClassName == "org.h2.Driver" || isMySQLDriverName)
+                rs.getLong(1)
               else rs.getLong("id")
           }
         }
@@ -540,9 +539,7 @@ class DBSessionSpec
             }
         }
 
-        if (
-          driverClassName == "org.h2.Driver" || driverClassName == "com.mysql.jdbc.Driver"
-        ) {
+        if (driverClassName == "org.h2.Driver" || isMySQLDriverName) {
           val id1 = SQL(
             "insert into dbsessionspec_update_genkey2 (name) values (?)"
           ).bind("xxx").updateAndReturnGeneratedKey.apply()
