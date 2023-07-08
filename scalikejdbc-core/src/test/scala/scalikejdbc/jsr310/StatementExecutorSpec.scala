@@ -27,7 +27,7 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
         }
 
         try {
-          if (driverClassName == "com.mysql.jdbc.Driver") {
+          if (isMySQLDriverName) {
             sql"""create table accounts (
                birthday         date         not null,
                alert_time       time(6)      not null,
@@ -44,10 +44,7 @@ class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
           val birthday = LocalDate.now
           val alertTime =
             if (
-              Set(
-                "org.hsqldb.jdbc.JDBCDriver",
-                "com.mysql.jdbc.Driver"
-              ) contains driverClassName
+              ("org.hsqldb.jdbc.JDBCDriver" == driverClassName) || isMySQLDriverName
             ) {
               LocalTime.now.truncatedTo(ChronoUnit.SECONDS)
             } else {

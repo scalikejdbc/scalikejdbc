@@ -10,6 +10,9 @@ trait Settings extends BeforeAndAfter { self: Suite =>
     classOf[Settings].getClassLoader.getResourceAsStream("jdbc.properties")
   )
   val driverClassName: String = props.getProperty("driverClassName")
+  protected def isMySQLDriverName: Boolean = {
+    driverClassName == "com.mysql.jdbc.Driver" || driverClassName == "com.mysql.cj.jdbc.Driver"
+  }
   val url: String = props.getProperty("url")
   val user: String = props.getProperty("user")
   val password: String = props.getProperty("password")
