@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 50
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8
         ports:
           - 3306:3306
         env:
@@ -68,7 +68,7 @@ jobs:
     steps:
     - name: setup database
       run: |
-        while ! mysqladmin ping -h"127.0.0.1" ; do
+        while ! mysqladmin ping --user=root --password=root -h"127.0.0.1" ; do
           echo "await mysql start"
           sleep 1
         done
