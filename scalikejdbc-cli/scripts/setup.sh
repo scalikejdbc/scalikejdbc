@@ -145,7 +145,7 @@ libraryDependencies ++= Seq(
   "org.apache.derby"   % "derby"                % "10.14.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.42.0.0",
   "org.hsqldb"         % "hsqldb"               % "2.5.2",
-  "mysql"              % "mysql-connector-java" % "5.1.48",
+  "com.mysql"          % "mysql-connector-j"    % "8.0.33",
   "org.postgresql"     % "postgresql"           % "42.2.21"
 )
 
@@ -169,7 +169,7 @@ def initialize() {
   Option(props.get(profile + ".jdbc.url")).map { obj =>
     val url = obj.toString
     if (url.startsWith("jdbc:postgresql")) { Class.forName("org.postgresql.Driver")
-    } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.jdbc.Driver")
+    } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.cj.jdbc.Driver")
     } else if (url.startsWith("jdbc:h2")) { Class.forName("org.h2.Driver")
     } else if (url.startsWith("jdbc:hsqldb")) { Class.forName("org.hsqldb.jdbc.JDBCDriver")
     } else if (url.startsWith("jdbc:derby")) { Class.forName("org.apache.derby.jdbc.EmbeddedDriver")

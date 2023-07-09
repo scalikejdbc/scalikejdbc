@@ -126,7 +126,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.2.0",
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.34.0",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.2",
->>"%build_sbt%" echo   "mysql"              %% "mysql-connector-java" %% "5.1.48",
+>>"%build_sbt%" echo   "com.mysql"          %% "mysql-connector-j"    %% "8.0.33",
 >>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "42.2.22"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.
@@ -139,7 +139,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo   Option(props.get(profile + ".jdbc.url")).map { obj =^>
 >>"%build_sbt%" echo     val url = obj.toString
 >>"%build_sbt%" echo     if (url.startsWith("jdbc:postgresql")) { Class.forName("org.postgresql.Driver")
->>"%build_sbt%" echo     } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.jdbc.Driver")
+>>"%build_sbt%" echo     } else if (url.startsWith("jdbc:mysql")) { Class.forName("com.mysql.cj.jdbc.Driver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:h2")) { Class.forName("org.h2.Driver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:hsqldb")) { Class.forName("org.hsqldb.jdbc.JDBCDriver")
 >>"%build_sbt%" echo     } else if (url.startsWith("jdbc:derby")) { Class.forName("org.apache.derby.jdbc.EmbeddedDriver")
