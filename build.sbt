@@ -22,13 +22,13 @@ lazy val _reactiveStreamsVersion = "1.0.4"
 // internal only
 lazy val _logbackVersion = "1.2.12"
 lazy val _h2Version = "1.4.199"
-// TODO update to 8.x? https://github.com/scalikejdbc/scalikejdbc/issues/742
-lazy val _mysqlVersion = "5.1.49"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.2.6.Final"
 def scalatestVersion = "3.2.16"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.20.0" % "provided"
+
+val mysqlConnectorJ = "com.mysql" % "mysql-connector-j" % "8.0.33" % Test
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
@@ -282,7 +282,8 @@ lazy val scalikejdbcMapperGenerator = Project(
   scriptedLaunchOpts ++= Seq(
     "-Dplugin.version=" + version.value,
     "-Dslf4j.version=" + _slf4jApiVersion,
-    "-Dmysql.version=" + _mysqlVersion,
+    // TODO https://github.com/scalikejdbc/scalikejdbc/issues/742
+    "-Dmysql.version=" + "5.1.49", // mysqlConnectorJ.revision
     "-Dpostgresql.version=" + _postgresqlVersion,
     "-Dh2.version=" + _h2Version,
     "-Dspecs2.version=" + specs2.revision,
@@ -385,7 +386,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "org.apache.derby" % "derby" % "10.16.1.1" % "test",
   "org.xerial" % "sqlite-jdbc" % "3.42.0.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
-  "mysql" % "mysql-connector-java" % _mysqlVersion % "test",
+  mysqlConnectorJ,
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
 )
 
