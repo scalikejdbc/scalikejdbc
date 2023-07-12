@@ -132,7 +132,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo initialCommands := """import scalikejdbc._
 >>"%build_sbt%" echo import scalikejdbc.StringSQLRunner._
->>"%build_sbt%" echo def initialize() {
+>>"%build_sbt%" echo def initialize() = {
 >>"%build_sbt%" echo   val props = new java.util.Properties
 >>"%build_sbt%" echo   using(new java.io.FileInputStream("config.properties")) { is =^> props.load(is) }
 >>"%build_sbt%" echo   val profile = Option(System.getProperty("scalikejdbc-cli.config.profile")).getOrElse("default")

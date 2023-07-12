@@ -162,7 +162,7 @@ mkdir ${INIT_DIR} 2> /dev/null
 
 echo 'import scalikejdbc._
 import scalikejdbc.StringSQLRunner._
-def initialize() {
+def initialize() = {
   val props = new java.util.Properties
   using(new java.io.FileInputStream("config.properties")) { is => props.load(is) }
   val profile = Option(System.getProperty("scalikejdbc-cli.config.profile")).getOrElse("default")
