@@ -1092,8 +1092,6 @@ trait SQLToResult[A, E <: WithExtractor, C[_]]
   import GeneralizedTypeConstraintsForWithExtractor._
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): C[AA]
-  val statement: String
-  private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply()(implicit
     session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
@@ -1184,8 +1182,6 @@ trait SQLToCollection[A, E <: WithExtractor]
   extends SQL[A, E]
   with Extractor[A] {
   import GeneralizedTypeConstraintsForWithExtractor._
-  val statement: String
-  private[scalikejdbc] val rawParameters: scala.collection.Seq[Any]
   def apply[C[_]]()(implicit
     session: DBSession,
     context: ConnectionPoolContext = NoConnectionPoolContext,
