@@ -3,7 +3,7 @@ package scalikejdbc
 import java.time._
 import java.sql.ResultSet
 import java.util.Calendar
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * java.sql.ResultSet wrapper.

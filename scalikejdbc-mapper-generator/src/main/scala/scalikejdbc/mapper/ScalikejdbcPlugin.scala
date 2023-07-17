@@ -128,7 +128,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
   private[this] def printWarningIfTypo(props: Properties): Unit = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     props.keySet().asScala.map(_.toString).filterNot(allKeys).foreach {
       typoKey =>
         val correctKeys = allKeys.toList

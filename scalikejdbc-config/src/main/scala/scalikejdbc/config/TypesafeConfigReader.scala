@@ -3,7 +3,7 @@ package scalikejdbc.config
 import scalikejdbc._
 import com.typesafe.config.{ Config, ConfigException }
 import scala.collection.mutable.{ Map => MutableMap }
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * TypesafeConfig reader
