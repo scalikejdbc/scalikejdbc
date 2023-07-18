@@ -71,6 +71,9 @@ private[streams] object StreamReadySQL {
     new StreamReadySQL(underlying)
   }
 
+  private def isMySQLDriverName(driverClassName: String) =
+    driverClassName == "com.mysql.jdbc.Driver" || driverClassName == "com.mysql.cj.jdbc.Driver"
+
   /**
    * Forcibly changes the database session to be cursor query ready.
    */
@@ -79,7 +82,7 @@ private[streams] object StreamReadySQL {
     // setup required settings to enable cursor operations
     session.connectionAttributes.driverName match {
       case Some(driver)
-        if driver == "com.mysql.jdbc.Driver" && session.fetchSize.exists(
+        if isMySQLDriverName(driver) && session.fetchSize.exists(
           _ > 0
         ) =>
         /*
