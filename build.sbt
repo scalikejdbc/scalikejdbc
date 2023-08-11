@@ -26,7 +26,7 @@ lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.2.7.Final"
 def scalatestVersion = "3.2.16"
 lazy val mockitoVersion = "4.11.0"
-val specs2 = "org.specs2" %% "specs2-core" % "4.20.1" % "provided"
+val specs2 = "org.specs2" %% "specs2-core" % "4.20.2" % "provided"
 
 val mysqlConnectorJ = "com.mysql" % "mysql-connector-j" % "8.1.0" % Test
 
