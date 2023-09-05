@@ -80,7 +80,7 @@ jobs:
           export PGPASSWORD="postgres"
           psql -h 127.0.0.1 -p 5432 -c "CREATE ROLE sa WITH SUPERUSER LOGIN PASSWORD 'sa';" -U postgres
         fi
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-java@v3
       with:
         java-version: ${{matrix.java}}
@@ -122,7 +122,7 @@ jobs:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-java@v3
       with:
         java-version: 11
