@@ -24,7 +24,7 @@ lazy val _logbackVersion = "1.2.12"
 lazy val _h2Version = "1.4.199"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.3.0.Final"
-def scalatestVersion = "3.2.16"
+def scalatestVersion = "3.2.17"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.20.2" % "provided"
 
@@ -346,7 +346,7 @@ lazy val scalikejdbcStreams = Project(
       "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-7-5" % "3.2.16.0" % "test",
+      "org.scalatestplus" %% "testng-7-5" % "3.2.17.0" % "test",
       "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
       "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
     ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
