@@ -91,7 +91,7 @@ class QueryInterfaceSpec
       rs.intOpt(a.resultName.id).map(_ => apply(a)(rs))
   }
   object SchemaExample extends SQLSyntaxSupport[SchemaExample] {
-    override val schemaName = Some("public")
+    override val schemaName: Option[String] = Some("public")
     override val tableName = "qi_schema_example"
   }
   object TimeHolder extends SQLSyntaxSupport[TimeHolder] {

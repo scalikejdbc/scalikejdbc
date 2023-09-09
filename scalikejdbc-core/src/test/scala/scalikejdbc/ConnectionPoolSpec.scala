@@ -120,7 +120,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
         user: String,
         password: String,
         settings: ConnectionPoolSettings
-      ) = {
+      ): ConnectionPool = {
         new MyConnectionPool(url, user, password)
       }
     }

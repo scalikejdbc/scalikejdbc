@@ -61,7 +61,7 @@ object ParameterBinder {
   }
 
   object NullParameterBinder extends ParameterBinderWithValue {
-    val value = null
+    val value: Any = null
     def apply(stmt: PreparedStatement, idx: Int): Unit =
       stmt.setObject(idx, null)
     override def toString: String = "ParameterBinder(value=NULL)"
