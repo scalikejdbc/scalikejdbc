@@ -95,13 +95,13 @@ class OneToManies7SQLSpec
         )
 
         class Owner(val id: Int) extends EntityEquality {
-          override val entityIdentity = id
+          override val entityIdentity: Any = id
         }
         class News(val id: Int, val groupId: Int) extends EntityEquality {
-          override val entityIdentity = (id, groupId)
+          override val entityIdentity: Any = (id, groupId)
         }
         class Event(val id: Int, val groupId: Int) extends EntityEquality {
-          override val entityIdentity = id
+          override val entityIdentity: Any = id
         }
         case class Member(id: Int, groupId: Int)
         case class Sponsor(id: Int, groupId: Int)

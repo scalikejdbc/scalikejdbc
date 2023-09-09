@@ -10,10 +10,10 @@ class EntityEqualitySpec extends AnyFlatSpec with Matchers {
   case class Hoge(id: Long, name: String)
 
   class Foo(id: Long, name: String) extends EntityEquality {
-    override val entityIdentity = (id, name)
+    override val entityIdentity: Any = (id, name)
   }
   class Bar(id: Long, name: String) extends EntityEquality {
-    override val entityIdentity = id
+    override val entityIdentity: Any = id
   }
 
   it should "be available with case classes" in {
@@ -84,7 +84,7 @@ class EntityEqualitySpec extends AnyFlatSpec with Matchers {
   }
 
   class Person(val id: Long) extends EntityEquality {
-    override val entityIdentity = id
+    override val entityIdentity: Any = id
   }
   class Member(override val id: Long) extends Person(id)
 

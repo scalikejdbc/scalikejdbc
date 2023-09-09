@@ -10,7 +10,7 @@ class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
 
   case class Account(id: Int, name: String)
   object Account extends SQLSyntaxSupport[Account] {
-    override lazy val connectionPoolName = "SubQuerySpec"
+    override lazy val connectionPoolName: Any = "SubQuerySpec"
   }
 
   it should "work" in {
@@ -38,7 +38,7 @@ class SubQuerySpec extends AnyFlatSpec with Matchers with SQLInterpolation {
 
   case class Member(id: Long, groupId: Long)
   object Member extends SQLSyntaxSupport[Member] {
-    override val columnNames = Seq("id", "group_id")
+    override val columnNames: Seq[String] = Seq("id", "group_id")
   }
 
   it should "work with #989" in {

@@ -15,13 +15,13 @@ class SQL_AttributesSpec
   case class Member(id: Long, companyId: Long, name: Option[String])
 
   object Company extends SQLSyntaxSupport[Company] {
-    override val columns = Seq("id")
+    override val columns: Seq[String] = Seq("id")
     def apply(rs: WrappedResultSet, u: ResultName[Company]): Company = Company(
       rs.get(u.id)
     )
   }
   object Member extends SQLSyntaxSupport[Member] {
-    override val columns = Seq("id", "company_id", "name")
+    override val columns: Seq[String] = Seq("id", "company_id", "name")
     def apply(rs: WrappedResultSet, u: ResultName[Member]): Member = {
       Member(rs.get(u.id), rs.get(u.companyId), rs.get(u.name))
     }
