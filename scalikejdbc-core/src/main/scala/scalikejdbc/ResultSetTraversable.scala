@@ -1,12 +1,13 @@
 package scalikejdbc
 
 import java.sql.ResultSet
+import scala.Iterable
 
 /**
  * scala.collection.Traversable object which wraps java.sql.ResultSet.
  */
 @deprecated(message = "use ResultSetIterator instead", since = "3.3.0")
-class ResultSetTraversable(rs: ResultSet) extends Traversable[WrappedResultSet] with LoanPattern {
+class ResultSetTraversable(rs: ResultSet) extends Iterable[WrappedResultSet] with LoanPattern {
 
   private[this] val cursor: ResultSetCursor = new ResultSetCursor(0)
 
