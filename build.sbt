@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 = "3.3.1"
 def Scala212 = "2.12.18"
-def Scala213 = "2.13.11"
+def Scala213 = "2.13.12"
 
 ThisBuild / version := "4.1.0-SNAPSHOT"
 
@@ -63,6 +63,15 @@ lazy val baseSettings = Def.settings(
   addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
   addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+  scalacOptions ++= {
+    if (scalaBinaryVersion.value == "2.13") {
+      Seq(
+        "-Wconf:msg=constructor modifiers are assumed by synthetic:silent",
+      )
+    } else {
+      Nil
+    }
+  },
   scalacOptions ++= {
     if (isScala3.value) {
       Seq(
@@ -157,6 +166,15 @@ lazy val scalikejdbcLibrary = Project(
   baseSettings,
   mimaSettings,
   name := "scalikejdbc",
+  Compile / scalacOptions ++= {
+    if (scalaBinaryVersion.value == "2.13") {
+      Seq(
+        "-Wconf:msg=package object inheritance is deprecated:warning", // TODO
+      )
+    } else {
+      Nil
+    }
+  },
   libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
     Seq("com.h2database" % "h2" % _h2Version % "test"),
 ).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
