@@ -55,7 +55,7 @@ jobs:
             java: 11
           - name: test
             db: mysql
-            java: 17
+            java: 21
 
           - name: scala_3
             db: mysql
