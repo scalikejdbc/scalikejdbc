@@ -23,4 +23,4 @@ jobs:
         github-token: ${{ steps.generate_token.outputs.token }}
         author-email: "74833019+scalikejdbc-bot[bot]@users.noreply.github.com"
         author-name: scalikejdbc-bot[bot]
-        branches: "master,4.0.x,3.5.x"
+        branches: "master,4.0.x"
