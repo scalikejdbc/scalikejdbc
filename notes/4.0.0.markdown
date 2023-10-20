@@ -4,7 +4,7 @@ ScalikeJDBC 4.0.0 is now available for Scala 2.12, 2.13, and Scala 3 app develop
 
 Thanks for all the contributors for this release :+1:
 
-* @xuwei-k worked on preparation for Scala 3 and did a substantial amount of work for keeping this library up-to-date with external dependeices!
+* @xuwei-k worked on preparation for Scala 3 and did a substantial amount of work for keeping this library up-to-date with external dependencies!
 * @timzaak added Scala 3 compatible macros!
 * @myazinn added `getOpt` method to `WrappedResultSet` for more convenience!
 * @dieselmat improved the mapper-generator to support more table name patterns like `TABLE_1_2_3`!

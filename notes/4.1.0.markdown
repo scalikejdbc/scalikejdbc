@@ -1,0 +1,14 @@
+ScalikeJDBC 4.1.0 is now available for Scala 2.12, 2.13, and Scala 3 application development!
+
+![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+
+Thank you to all the contributors for this release! :+1:
+
+* @xuwei-k did a substantial amount of work for refactoring and dependency management
+* @keyno63 improved the outputs by the code generator (#1364)
+* @keyno63 resolved #1391 Improve QueryDSL's union query compatibility with PostgreSQL (#1398)
+* @jxnu-liguobin added `java.time.Instant` support in the code generator (#1923)
+
+Please review [this release's GitHub milestone](https://github.com/scalikejdbc/scalikejdbc/milestone/45?closed=1) for a list of PRs and contributors!
+
+Take pleasure in crafting type-safe SQL to accomplish tasks efficiently!
