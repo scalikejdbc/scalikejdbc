@@ -43,7 +43,6 @@ lazy val baseSettings = Def.settings(
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   crossScalaVersions := Seq(Scala212, Scala213, Scala3),
-  resolvers ++= _resolvers,
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
@@ -386,11 +385,6 @@ lazy val scalikejdbcSyntaxSupportMacro = Project(
   },
 ).dependsOn(scalikejdbcLibrary)
 
-val _resolvers = Seq(
-  "typesafe repo" at "https://repo.typesafe.com/typesafe/releases",
-  "sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",
-  "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-)
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq(
     "org.scalatest" %% "scalatest-flatspec" % scalatestVersion % "test",
