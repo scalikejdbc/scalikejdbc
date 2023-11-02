@@ -6,8 +6,8 @@ mapper-generator started supporting interpolation-style code. And scalikejdbc-te
 
 Newly released! Testing support for ScalaTest and specs2.
 
-* Automatic rollback support with ScalaTest and specs2 [(GH-57)](https://github.com/seratch/scalikejdbc/issues/57)
-* Fixture support with ScalaTest and specs2 [(GH-58)](https://github.com/seratch/scalikejdbc/issues/58)
+* Automatic rollback support with ScalaTest and specs2 [(GH-57)](https://github.com/scalikejdbc/scalikejdbc/issues/57)
+* Fixture support with ScalaTest and specs2 [(GH-58)](https://github.com/scalikejdbc/scalikejdbc/issues/58)
 
 Here is an example with specs2:
 
@@ -25,7 +25,7 @@ Here is an example with specs2:
 
 See in detail: 
 
-[https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test](https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-test)
+[https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-test](https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-test)
 
 
 ## library
@@ -37,7 +37,7 @@ See in detail:
 
     addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
 
-* SQLInterpolation support [(GH-56)](https://github.com/seratch/scalikejdbc/issues/56)
+* SQLInterpolation support [(GH-56)](https://github.com/scalikejdbc/scalikejdbc/issues/56)
 * Refactored generator.template values (but still backward compatible)
 
 ## interpolation

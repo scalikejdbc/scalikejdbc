@@ -1,6 +1,6 @@
 ScalikeJDBC 1.5.2 has been released. play-fixture-plugin by tototoshi is newly released. mapper-generator is divided into core library and sbt plugin.
 
-http://git.io/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## mapper-generator
 
@@ -13,7 +13,7 @@ Enabled using CodeGenerator from not only sbt.
 
 Great job by @tototoshi
 
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-play-fixture-plugin
+https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-play-fixture-plugin
 
 ### conf/application.conf
 

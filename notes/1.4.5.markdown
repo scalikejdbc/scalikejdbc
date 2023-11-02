@@ -2,7 +2,7 @@ ScalikeJDBC 1.4.5 has been released.
 
 Added scalikejdbc-config and improved SQLInterpolation.
 
-https://github.com/seratch/scalikejdbc/issues?milestone=19&page=1&state=closed
+https://github.com/scalikejdbc/scalikejdbc/issues?milestone=19&page=1&state=closed
 
 
 ## library
@@ -11,7 +11,7 @@ for Scala 2.10.0, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc" % "1.4.5"
 
-* Added #foldLeft operation [(GH-71)](https://github.com/seratch/scalikejdbc/issues/71) by @gakuzzzz
+* Added #foldLeft operation [(GH-71)](https://github.com/scalikejdbc/scalikejdbc/issues/71) by @gakuzzzz
 
 ## interpolation
 
@@ -19,7 +19,7 @@ for Scala 2.10.0:
 
     "com.github.seratch" %% "scalikejdbc-interpolation" % "1.4.5"
 
-* Multiple params for in clause and SQLSyntax support [(GH-66)](https://github.com/seratch/scalikejdbc/issues/66) by @gakuzzzz
+* Multiple params for in clause and SQLSyntax support [(GH-66)](https://github.com/scalikejdbc/scalikejdbc/issues/66) by @gakuzzzz
 
 ## config
 
@@ -27,7 +27,7 @@ Newly released for Scala 2.10.0, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc-config" % "1.4.5"
 
-Mainly created by @tototoshi. [(GH-68)](https://github.com/seratch/scalikejdbc/issues/68)
+Mainly created by @tototoshi. [(GH-68)](https://github.com/scalikejdbc/scalikejdbc/issues/68)
 
 ## test
 
@@ -49,7 +49,7 @@ for Play 2.1.x and 2.0.x:
 
     "com.github.seratch" %% "scalikejdbc-play-plugin" % "1.4.4"
 
-* Enabled to choose closing pools or not at onStop [(GH-65)](https://github.com/seratch/scalikejdbc/issues/65)
+* Enabled to choose closing pools or not at onStop [(GH-65)](https://github.com/scalikejdbc/scalikejdbc/issues/65)
 
 Enjoy writing SQL!
 

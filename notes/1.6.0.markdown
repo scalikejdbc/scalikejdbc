@@ -1,8 +1,8 @@
 ScalikeJDBC 1.6.0 has been released. New query DSL for SQLSyntaxSupport users is added!
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/scalikejdbc/scalikejdbc/master/logo.png)
 
-http://git.io/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## library
 
@@ -37,7 +37,7 @@ Quite readable and typesafe DSL for SyntaxSupport users.
 
 Also check more examples!
 
-https://github.com/seratch/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
+https://github.com/scalikejdbc/scalikejdbc/blob/master/scalikejdbc-interpolation/src/test/scala/scalikejdbc/QueryInterfaceSpec.scala
 
 Enjoy writing typesafe SQL and get things done!
 

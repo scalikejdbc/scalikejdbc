@@ -1,12 +1,12 @@
 ## library
 
-* LoggingSQLAndTime raises IndexOutOfBoundsException when '?' is included in SQL templates [(GH-41)](https://github.com/seratch/scalikejdbc/issues/41)
+* LoggingSQLAndTime raises IndexOutOfBoundsException when '?' is included in SQL templates [(GH-41)](https://github.com/scalikejdbc/scalikejdbc/issues/41)
 
 A potential bug for executable SQL template is also fixed.
 
 ## mapper-generator
 
-* Specifying class name when generating source code [(GH-38)](https://github.com/seratch/scalikejdbc/issues/38)
+* Specifying class name when generating source code [(GH-38)](https://github.com/scalikejdbc/scalikejdbc/issues/38)
 
 ## play-plugin
 

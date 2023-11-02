@@ -2,7 +2,7 @@ ScalikeJDBC 1.4.4 has been released.
 
 Fixed two mapper-generator bug and improved connection management.
 
-https://github.com/seratch/scalikejdbc/issues?milestone=18&state=closed
+https://github.com/scalikejdbc/scalikejdbc/issues?milestone=18&state=closed
 
 
 ## library
@@ -31,9 +31,9 @@ for xsbt 0.12:
 
     addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "1.4.4")
 
-* Invalid code for ScalaTest [(GH-61)](https://github.com/seratch/scalikejdbc/issues/61), thanks to @xuwei_k
+* Invalid code for ScalaTest [(GH-61)](https://github.com/scalikejdbc/scalikejdbc/issues/61), thanks to @xuwei_k
 
-* Invalid code generation for BigDecimal [(GH-64)](https://github.com/seratch/scalikejdbc/issues/64), thanks to @malsmith 
+* Invalid code generation for BigDecimal [(GH-64)](https://github.com/scalikejdbc/scalikejdbc/issues/64), thanks to @malsmith 
 
 ## play-plugin
 

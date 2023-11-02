@@ -2,11 +2,11 @@ ScalikeJDBC 1.6.7 & ScalikeJDBC-Async 0.2.1 have been released. Thanks to @xuwei
 
 ![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
 
-https://github.com/seratch/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## scalikejdbc-async 
 
-https://github.com/seratch/scalikejdbc-async
+https://github.com/scalikejdbc/scalikejdbc-async
 
 - Removed type parameter from #future for select queries
 - Refactored SQL builder using value class

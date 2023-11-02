@@ -16,7 +16,7 @@ Join queries and sub-queries are also supported. Please check the test code.
 
 Here is the fixed issues in this version.
 
-https://github.com/seratch/scalikejdbc/issues?milestone=21&state=closed
+https://github.com/scalikejdbc/scalikejdbc/issues?milestone=21&state=closed
 
 
 ## library
@@ -25,7 +25,7 @@ for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc" % "1.4.7"
 
-* Fixed [(GH-74)](https://github.com/seratch/scalikejdbc/issues/74) updateAndReturnGeneratedKey error on postgres?
+* Fixed [(GH-74)](https://github.com/scalikejdbc/scalikejdbc/issues/74) updateAndReturnGeneratedKey error on postgres?
 * Enabled getting all column names for single table via meta data
 * [Experimental Feature] Newly added one.toOne, one.toOptionalOne, one.toMany, one.toManies APIs
 
@@ -45,7 +45,7 @@ Released for Scala 2.10.0, 2.9.3, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc-config" % "1.4.7"
 
-* Fixed [(GH-75)](https://github.com/seratch/scalikejdbc/issues/75) Fixed error when application.conf includes no settings for scalikejdbc.global by @tototoshi
+* Fixed [(GH-75)](https://github.com/scalikejdbc/scalikejdbc/issues/75) Fixed error when application.conf includes no settings for scalikejdbc.global by @tototoshi
 
 
 ## test

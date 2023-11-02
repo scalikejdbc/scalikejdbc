@@ -4,7 +4,7 @@ No changes.
 
 ## mapper-generator
 
-* Generated model is inconvenient for join queries [(GH-42)](https://github.com/seratch/scalikejdbc/issues/42)
+* Generated model is inconvenient for join queries [(GH-42)](https://github.com/scalikejdbc/scalikejdbc/issues/42)
 
 ## play-plugin
 

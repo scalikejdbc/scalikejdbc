@@ -2,13 +2,13 @@ ScalikeJDBC 1.6.6 & ScalikeJDBC-Async 0.2.0 have been released. Now ScalikeJDBC 
 
 ![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
 
-https://github.com/seratch/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## scalikejdbc-async (extension, still alpha version)
 
 ScalikeJDBC-Async provides non-blocking APIs to talk with PostgreSQL and MySQL in the JDBC way. This library is built with postgrsql-async and mysql-async,incredible works by @mauricio.
 
-https://github.com/seratch/scalikejdbc-async
+https://github.com/scalikejdbc/scalikejdbc-async
 
 0.2.0 is the first release version. Major versioning policy follows postgresql-async/mysql-async project because scalikejdbc-async heavily depend on them.
 
@@ -18,7 +18,7 @@ https://github.com/seratch/scalikejdbc-async
 
 Yes, it's possible. See this example spec:
 
-[sample/PostgreSQLSampleSpec.scala](https://github.com/seratch/scalikejdbc-async/blob/master/src/test/scala/sample/PostgreSQLSampleSpec.scala)
+[sample/PostgreSQLSampleSpec.scala](https://github.com/scalikejdbc/scalikejdbc-async/blob/master/src/test/scala/sample/PostgreSQLSampleSpec.scala)
 
 #### Why isn't it a part of scalikejdbc project now?
 

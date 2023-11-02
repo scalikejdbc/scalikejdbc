@@ -6,7 +6,7 @@ Updated mapper-generator for scalikejdbc-test support.
 
     addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
 
-* Generated tests should use AutoRollback [(GH-60)](https://github.com/seratch/scalikejdbc/issues/60)
+* Generated tests should use AutoRollback [(GH-60)](https://github.com/scalikejdbc/scalikejdbc/issues/60)
 
 ## test
 

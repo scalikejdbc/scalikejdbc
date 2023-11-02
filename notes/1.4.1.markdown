@@ -8,7 +8,7 @@ Also dbconsole is newly added.
 
     libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.4,)"
 
-* ConnectionPoolContext doesn't work with AutoSession [(GH-51)](https://github.com/seratch/scalikejdbc/issues/51)
+* ConnectionPoolContext doesn't work with AutoSession [(GH-51)](https://github.com/scalikejdbc/scalikejdbc/issues/51)
 * Added new APIs to retrieve meta data
 * Added #as[A], #asList[A] and #asOption[A] to StringSQLRunner
 
@@ -38,7 +38,7 @@ No changes. Released for Play 2.0.4 and 2.1-RC1.
 
 ## CLI
 
-https://github.com/seratch/scalikejdbc/tree/master/scalikejdbc-cli
+https://github.com/scalikejdbc/scalikejdbc/tree/master/scalikejdbc-cli
 
 Newly released. Try it now!
 

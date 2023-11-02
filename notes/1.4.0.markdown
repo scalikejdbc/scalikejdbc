@@ -6,9 +6,9 @@ This version includes some important changes in core-library.
 
     libraryDependencies += "com.github.seratch" %% "scalikejdbc" % "[1.4,)"
 
-* More xxxOpt methods that return Option values [(GH-43)](https://github.com/seratch/scalikejdbc/issues/43)
-* Handy way to convert ResultSet to Map object [(GH-46)](https://github.com/seratch/scalikejdbc/issues/46)
-* WrappedResultSet#long should return not java.lang.Lang but scala.Long [(GH-47)](https://github.com/seratch/scalikejdbc/issues/47)
+* More xxxOpt methods that return Option values [(GH-43)](https://github.com/scalikejdbc/scalikejdbc/issues/43)
+* Handy way to convert ResultSet to Map object [(GH-46)](https://github.com/scalikejdbc/scalikejdbc/issues/46)
+* WrappedResultSet#long should return not java.lang.Lang but scala.Long [(GH-47)](https://github.com/scalikejdbc/scalikejdbc/issues/47)
 * Version bump of library dependencies
 
 ## interpolation
@@ -24,7 +24,7 @@ This version includes some important changes in core-library.
 
     addSbtPlugin("com.github.seratch" %% "scalikejdbc-mapper-generator" % "[1.4,)")
 
-* Generating also specs for models [(GH-32)](https://github.com/seratch/scalikejdbc/issues/32)
+* Generating also specs for models [(GH-32)](https://github.com/scalikejdbc/scalikejdbc/issues/32)
 
 ## play-plugin
 

@@ -2,7 +2,7 @@ ScalikeJDBC 1.6.2 has been released. Several fixes for Query DSL.
 
 ![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
 
-http://git.io/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## interpolation
 

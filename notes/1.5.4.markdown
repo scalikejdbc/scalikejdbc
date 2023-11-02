@@ -1,8 +1,8 @@
 ScalikeJDBC 1.5.4 has been released. In this release, core-library, interpolation and play-plugin are changed.
 
-![ScalikeJDBC Logo](https://raw.github.com/seratch/scalikejdbc/master/logo.png)
+![ScalikeJDBC Logo](https://raw.github.com/scalikejdbc/scalikejdbc/master/logo.png)
 
-http://git.io/scalikejdbc
+https://github.com/scalikejdbc/scalikejdbc
 
 ## library
 

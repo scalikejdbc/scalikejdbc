@@ -2,7 +2,7 @@ ScalikeJDBC 1.4.6 has been released.
 
 Fixed the issue that DBSession#foldLeft is not a function1. Sorry for incompatible API change since it was impossible to add @deprecated to the old tuple2 method.
 
-https://github.com/seratch/scalikejdbc/issues?milestone=20&page=1&state=closed
+https://github.com/scalikejdbc/scalikejdbc/issues?milestone=20&page=1&state=closed
 
 
 ## library
@@ -11,7 +11,7 @@ for Scala 2.10.0, 2.9.2 and 2.9.1:
 
     "com.github.seratch" %% "scalikejdbc" % "1.4.6"
 
-* [(GH-72)](https://github.com/seratch/scalikejdbc/issues/72) foldLeft should not be a function2 but a function1
+* [(GH-72)](https://github.com/scalikejdbc/scalikejdbc/issues/72) foldLeft should not be a function2 but a function1
 
 ## interpolation
 
