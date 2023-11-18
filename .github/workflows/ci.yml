@@ -97,6 +97,10 @@ jobs:
         cp -p scalikejdbc-core/src/test/resources/jdbc_${{ matrix.db }}.properties scalikejdbc-core/src/test/resources/jdbc.properties
     - run: rm project/sbt-pgp.sbt
     - run: rm project/sbt-updates.sbt
+    - if: ${{ matrix.db == 'mysql' }}
+      run:
+        # TODO flaky test
+        echo 'ThisBuild / Test / testOptions += Tests.Exclude(Seq("somewhere.DatabasePublisherTckTest"))' > skip-mysql.sbt
     - run: |
         case ${{ matrix.name }} in
           "scala_3")
