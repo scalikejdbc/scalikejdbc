@@ -22,7 +22,7 @@ lazy val _reactiveStreamsVersion = "1.0.4"
 // internal only
 lazy val _logbackVersion = "1.2.12"
 lazy val _h2Version = "1.4.199"
-lazy val _postgresqlVersion = "9.4.1212"
+lazy val _postgresqlVersion = "42.7.0"
 lazy val _hibernateVersion = "6.3.2.Final"
 def scalatestVersion = "3.2.17"
 lazy val mockitoVersion = "4.11.0"
