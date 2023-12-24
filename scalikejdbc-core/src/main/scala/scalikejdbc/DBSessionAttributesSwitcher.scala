@@ -4,7 +4,7 @@ package scalikejdbc
  * DBSessionAttributesSwitcher holds extra attributes came from SQL object.
  * This object can set them to the given DBSession and recover the original ones.
  */
-private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[_, _]) {
+private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[?, ?]) {
 
   // -------------------------------------
   // private attributes

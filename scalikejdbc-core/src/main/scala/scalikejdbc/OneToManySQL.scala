@@ -30,7 +30,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
   private[scalikejdbc] def toIterable(
     session: DBSession,
     sql: String,
-    params: scala.collection.Seq[_],
+    params: scala.collection.Seq[?],
     zExtractor: (A, scala.collection.Seq[B]) => Z
   ): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher

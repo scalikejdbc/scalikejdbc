@@ -21,8 +21,8 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
     // mutation from another thread, which might cause a mismatch of
     // the number of placeholders ("?") and parameters.
     val fixedParams = params.map {
-      case t: Traversable[_]          => t.toList
-      case c: java.util.Collection[_] => c.asScala.toList
+      case t: Traversable[?]          => t.toList
+      case c: java.util.Collection[?] => c.asScala.toList
       case other                      => other
     }
 
@@ -41,7 +41,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder =
     param match {
       case _: String => sb += '?'
-      case traversable: Traversable[_] => {
+      case traversable: Traversable[?] => {
         // e.g. in clause
         traversable
           .map {
@@ -61,7 +61,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
     params
       .foldLeft(Seq.newBuilder[Any]) {
         case (builder, strParam: String) => builder += strParam
-        case (builder, traversable: Traversable[_]) =>
+        case (builder, traversable: Traversable[?]) =>
           traversable.foldLeft(builder) {
             case (builder, SQLSyntax(_, params)) => builder ++= params
             case (builder, SQLSyntaxParameterBinder(SQLSyntax(_, params))) =>

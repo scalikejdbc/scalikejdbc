@@ -327,7 +327,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     .map(GenTaskParameter.tupled)
     .!!!("Usage: " + keyName + " [table-name (class-name)]")
 
-  override val projectSettings: collection.Seq[Def.Setting[_]] =
+  override val projectSettings: collection.Seq[Def.Setting[?]] =
     inConfig(Compile)(
       Seq(
         scalikejdbcCodeGeneratorSingle := {

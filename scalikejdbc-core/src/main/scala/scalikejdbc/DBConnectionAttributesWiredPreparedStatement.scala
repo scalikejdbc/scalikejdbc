@@ -238,5 +238,5 @@ private[scalikejdbc] class DBConnectionAttributesWiredPreparedStatement(
   def getMaxFieldSize: Int = underlying.getMaxFieldSize
   def isCloseOnCompletion: Boolean = underlying.isCloseOnCompletion
   def unwrap[T](iface: Class[T]): T = underlying.unwrap(iface)
-  def isWrapperFor(iface: Class[_]): Boolean = underlying.isWrapperFor(iface)
+  def isWrapperFor(iface: Class[?]): Boolean = underlying.isWrapperFor(iface)
 }
