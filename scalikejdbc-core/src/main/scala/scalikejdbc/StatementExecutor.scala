@@ -209,7 +209,7 @@ case class StatementExecutor(
    */
   def bindParams(params: collection.Seq[Any]): Unit = {
     val paramsWithIndices = params.map {
-      case option: Option[_] => option.orNull[Any]
+      case option: Option[?] => option.orNull[Any]
       case other             => other
     }.zipWithIndex
 

@@ -56,9 +56,9 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
   def getObject(columnLabel: String): AnyRef = convertTimeZoneIfNeeded(
     underlying.getObject(columnLabel)
   )
-  def getObject(columnIndex: Int, map: util.Map[String, Class[_]]): AnyRef =
+  def getObject(columnIndex: Int, map: util.Map[String, Class[?]]): AnyRef =
     convertTimeZoneIfNeeded(underlying.getObject(columnIndex, map))
-  def getObject(columnLabel: String, map: util.Map[String, Class[_]]): AnyRef =
+  def getObject(columnLabel: String, map: util.Map[String, Class[?]]): AnyRef =
     convertTimeZoneIfNeeded(underlying.getObject(columnLabel, map))
   def getObject[T](columnIndex: Int, `type`: Class[T]): T =
     convertTimeZoneIfNeeded(underlying.getObject(columnIndex, `type`))
@@ -406,6 +406,6 @@ private[scalikejdbc] class DBConnectionAttributesWiredResultSet(
   def getString(columnIndex: Int): String = underlying.getString(columnIndex)
   def getString(columnLabel: String): String = underlying.getString(columnLabel)
   def unwrap[T](iface: Class[T]): T = underlying.unwrap(iface)
-  def isWrapperFor(iface: Class[_]): Boolean = underlying.isWrapperFor(iface)
+  def isWrapperFor(iface: Class[?]): Boolean = underlying.isWrapperFor(iface)
 
 }

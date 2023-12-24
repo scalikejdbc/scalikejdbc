@@ -340,7 +340,7 @@ case class WrappedResultSet(
 
   def any(columnLabel: String): Any = get[Any](columnLabel)(TypeBinder.any)
 
-  def any(columnIndex: Int, map: Map[String, Class[_]]): Any = {
+  def any(columnIndex: Int, map: Map[String, Class[?]]): Any = {
     implicit val binder: TypeBinder[Any] =
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)
@@ -348,7 +348,7 @@ case class WrappedResultSet(
     get[Any](columnIndex)
   }
 
-  def any(columnLabel: String, map: Map[String, Class[_]]): Any = {
+  def any(columnLabel: String, map: Map[String, Class[?]]): Any = {
     implicit val binder: TypeBinder[Any] =
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)
@@ -366,7 +366,7 @@ case class WrappedResultSet(
     getOpt[Any](columnLabel)(binder)
   }
 
-  def anyOpt(columnIndex: Int, map: Map[String, Class[_]]): Option[Any] = {
+  def anyOpt(columnIndex: Int, map: Map[String, Class[?]]): Option[Any] = {
     implicit val binder: TypeBinder[Any] =
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)
@@ -374,7 +374,7 @@ case class WrappedResultSet(
     getOpt[Any](columnIndex)(binder)
   }
 
-  def anyOpt(columnLabel: String, map: Map[String, Class[_]]): Option[Any] = {
+  def anyOpt(columnLabel: String, map: Map[String, Class[?]]): Option[Any] = {
     implicit val binder: TypeBinder[Any] =
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)

@@ -66,12 +66,12 @@ trait QueryDSLFeature {
      * }}}
      */
     object insert {
-      def into(support: SQLSyntaxSupport[_]): InsertSQLBuilder =
+      def into(support: SQLSyntaxSupport[?]): InsertSQLBuilder =
         InsertSQLBuilder(sqls"insert into ${support.table}")
     }
 
     object insertInto {
-      def apply(support: SQLSyntaxSupport[_]): InsertSQLBuilder =
+      def apply(support: SQLSyntaxSupport[?]): InsertSQLBuilder =
         insert.into(support)
     }
 
@@ -87,14 +87,14 @@ trait QueryDSLFeature {
     object delete {
       def from(table: TableAsAliasSQLSyntax): DeleteSQLBuilder =
         DeleteSQLBuilder(sqls"delete from ${table}")
-      def from(support: SQLSyntaxSupport[_]): DeleteSQLBuilder =
+      def from(support: SQLSyntaxSupport[?]): DeleteSQLBuilder =
         DeleteSQLBuilder(sqls"delete from ${support.table}")
     }
 
     object deleteFrom {
       def apply(table: TableAsAliasSQLSyntax): DeleteSQLBuilder =
         delete.from(table)
-      def apply(support: SQLSyntaxSupport[_]): DeleteSQLBuilder =
+      def apply(support: SQLSyntaxSupport[?]): DeleteSQLBuilder =
         delete.from(support)
     }
 
@@ -110,7 +110,7 @@ trait QueryDSLFeature {
     object update {
       def apply(table: TableAsAliasSQLSyntax): UpdateSQLBuilder =
         UpdateSQLBuilder(sqls"update ${table}")
-      def apply(support: SQLSyntaxSupport[_]): UpdateSQLBuilder =
+      def apply(support: SQLSyntaxSupport[?]): UpdateSQLBuilder =
         UpdateSQLBuilder(sqls"update ${support.table}")
     }
 
@@ -309,7 +309,7 @@ trait QueryDSLFeature {
     ): ConditionSQLBuilder[A] =
       ConditionSQLBuilder[A](sqls"${sql} ${sqls.in(column, values)}")
 
-    def in(column: SQLSyntax, subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] =
+    def in(column: SQLSyntax, subQuery: SQLBuilder[?]): ConditionSQLBuilder[A] =
       ConditionSQLBuilder[A](
         sqls"${sql} ${column} in (${subQuery.toSQLSyntax})"
       )
@@ -362,7 +362,7 @@ trait QueryDSLFeature {
 
     def notIn(
       column: SQLSyntax,
-      subQuery: SQLBuilder[_]
+      subQuery: SQLBuilder[?]
     ): ConditionSQLBuilder[A] = ConditionSQLBuilder[A](
       sqls"${sql} ${column} not in (${subQuery.toSQLSyntax})"
     )
@@ -414,13 +414,13 @@ trait QueryDSLFeature {
 
     def exists(subQuery: SQLSyntax): ConditionSQLBuilder[A] =
       ConditionSQLBuilder[A](sqls"${sql} exists (${subQuery})")
-    def exists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] = exists(
+    def exists(subQuery: SQLBuilder[?]): ConditionSQLBuilder[A] = exists(
       subQuery.toSQLSyntax
     )
 
     def notExists(subQuery: SQLSyntax): ConditionSQLBuilder[A] =
       not.exists(subQuery)
-    def notExists(subQuery: SQLBuilder[_]): ConditionSQLBuilder[A] =
+    def notExists(subQuery: SQLBuilder[?]): ConditionSQLBuilder[A] =
       not.exists(subQuery)
 
     /**
@@ -428,7 +428,7 @@ trait QueryDSLFeature {
      * e.g. select.from(User as u).where.withRoundBracket { _.eq(u.id, 123).and.eq(u.groupId, 234) }.or.eq(u.groupId, 345)
      */
     def withRoundBracket[A](
-      insidePart: ConditionSQLBuilder[_] => ConditionSQLBuilder[_]
+      insidePart: ConditionSQLBuilder[?] => ConditionSQLBuilder[?]
     ): ConditionSQLBuilder[A] = {
       val emptyBuilder = ConditionSQLBuilder[A](SQLSyntax.empty)
       ConditionSQLBuilder[A](
@@ -497,10 +497,10 @@ trait QueryDSLFeature {
         sqls"${withRoundBracket(sql)} union all ${withRoundBracket(anotherQuery)}"
       )
 
-    def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
+    def union(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = union(
       anotherQuery.toSQLSyntax
     )
-    def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(
+    def unionAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = unionAll(
       anotherQuery.toSQLSyntax
     )
 
@@ -520,10 +520,10 @@ trait QueryDSLFeature {
       PagingSQLBuilder[A](sqls"${sql} except ${anotherQuery}")
     def exceptAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${sql} except all ${anotherQuery}")
-    def except(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = except(
+    def except(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = except(
       anotherQuery.toSQLSyntax
     )
-    def exceptAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = exceptAll(
+    def exceptAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = exceptAll(
       anotherQuery.toSQLSyntax
     )
   }
@@ -536,10 +536,10 @@ trait QueryDSLFeature {
       PagingSQLBuilder[A](sqls"${sql} intersect ${anotherQuery}")
     def intersectAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${sql} intersect all ${anotherQuery}")
-    def intersect(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersect(
+    def intersect(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = intersect(
       anotherQuery.toSQLSyntax
     )
-    def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] =
+    def intersectAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] =
       intersectAll(anotherQuery.toSQLSyntax)
   }
 
@@ -667,10 +667,10 @@ trait QueryDSLFeature {
         sqls"${withRoundBracket(toSQLSyntax)} union all ${withRoundBracket(anotherQuery)}"
       )
 
-    def union(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = union(
+    def union(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = union(
       anotherQuery.toSQLSyntax
     )
-    def unionAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = unionAll(
+    def unionAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = unionAll(
       anotherQuery.toSQLSyntax
     )
 
@@ -678,10 +678,10 @@ trait QueryDSLFeature {
       PagingSQLBuilder[A](sqls"${toSQLSyntax} except ${anotherQuery}")
     def exceptAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${toSQLSyntax} except all ${anotherQuery}")
-    def except(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = except(
+    def except(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = except(
       anotherQuery.toSQLSyntax
     )
-    def exceptAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = exceptAll(
+    def exceptAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = exceptAll(
       anotherQuery.toSQLSyntax
     )
 
@@ -689,10 +689,10 @@ trait QueryDSLFeature {
       PagingSQLBuilder[A](sqls"${toSQLSyntax} intersect ${anotherQuery}")
     def intersectAll(anotherQuery: SQLSyntax): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${toSQLSyntax} intersect all ${anotherQuery}")
-    def intersect(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] = intersect(
+    def intersect(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] = intersect(
       anotherQuery.toSQLSyntax
     )
-    def intersectAll(anotherQuery: SQLBuilder[_]): PagingSQLBuilder[A] =
+    def intersectAll(anotherQuery: SQLBuilder[?]): PagingSQLBuilder[A] =
       intersectAll(anotherQuery.toSQLSyntax)
 
     // ---

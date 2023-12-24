@@ -470,7 +470,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      */
     def toAliasName(
       originalName: String,
-      support: SQLSyntaxSupport[_]
+      support: SQLSyntaxSupport[?]
     ): String = {
       if (support.useShortenedResultName)
         toShortenedName(originalName, support.columns)
@@ -804,7 +804,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
 
     def syntax(
       name: String,
-      resultNames: BasicResultNameSQLSyntaxProvider[_, _]*
+      resultNames: BasicResultNameSQLSyntaxProvider[?, ?]*
     ): SubQuerySQLSyntaxProvider = {
       SubQuerySQLSyntaxProvider(
         name,
@@ -816,7 +816,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     def syntax(
       name: String,
       delimiterForResultName: String,
-      resultNames: BasicResultNameSQLSyntaxProvider[_, _]*
+      resultNames: BasicResultNameSQLSyntaxProvider[?, ?]*
     ): SubQuerySQLSyntaxProvider = {
       SubQuerySQLSyntaxProvider(name, delimiterForResultName, resultNames)
     }
@@ -836,7 +836,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       delimiterForResultName: Option[String] = None
     ) {
       def include(
-        syntaxProviders: QuerySQLSyntaxProvider[_, _]*
+        syntaxProviders: QuerySQLSyntaxProvider[?, ?]*
       ): SubQuerySQLSyntaxProvider = {
         SubQuery.syntax(
           name,
@@ -859,7 +859,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQuerySQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[?, ?]]
   ) extends ResultAllProvider
     with AsteriskProvider {
 
@@ -922,7 +922,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQueryResultSQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[?, ?]]
   ) {
 
     private[scalikejdbc] val nameProvider: SubQueryResultNameSQLSyntaxProvider =
@@ -972,7 +972,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
   case class SubQueryResultNameSQLSyntaxProvider(
     aliasName: String,
     delimiterForResultName: String,
-    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[_, _]]
+    resultNames: collection.Seq[BasicResultNameSQLSyntaxProvider[?, ?]]
   ) {
 
     lazy val * : SQLSyntax = SQLSyntax(

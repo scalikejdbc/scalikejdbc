@@ -20,7 +20,7 @@ class DatabasePublisher[A] private[streams] (
   /**
    * Requests Publisher to start streaming data.
    */
-  override def subscribe(subscriber: Subscriber[_ >: A]): Unit = {
+  override def subscribe(subscriber: Subscriber[? >: A]): Unit = {
     // 1. Publisher - 9
     // https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.0/README.md#1-publisher-code
     //

@@ -23,7 +23,7 @@ private[streams] class DatabaseSubscription[A](
   /**
    * Subscriber in the fashion of Reactive Streams.
    */
-  private[streams] val subscriber: Subscriber[_ >: A]
+  private[streams] val subscriber: Subscriber[? >: A]
 ) extends Subscription
   with LogSupport {
 
