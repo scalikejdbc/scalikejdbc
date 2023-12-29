@@ -421,21 +421,21 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         }
         session.batch(
           "insert into " + tableName + " (id, name) values (?, ?)",
-          params1: _*
+          params1*
         )
 
         val params2: Seq[Seq[Any]] = (2001 to 3000).map { i =>
           Seq(i, "name" + i)
         }
         SQL("insert into " + tableName + " (id, name) values (?, ?)")
-          .batch(params2: _*)
+          .batch(params2*)
           .apply()
 
         val params3: Seq[Seq[(String, Any)]] = (3001 to 4000).map { i =>
           Seq("id" -> i, "name" -> ("name" + i))
         }
         SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
-          .batchByName(params3: _*)
+          .batchByName(params3*)
           .apply()
 
       }
@@ -458,7 +458,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
       TestUtils.initialize(tableName)
       DB localTx { implicit session =>
         SQL("insert into " + tableName + " (id, name) values (999, 'Alice')")
-          .batchByName(Seq.empty[Seq[(String, Any)]]: _*)
+          .batchByName(Seq.empty[Seq[(String, Any)]]*)
           .apply()
       }
     } finally { TestUtils.deleteTable(tableName) }

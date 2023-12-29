@@ -299,7 +299,7 @@ abstract class SQL[A, E <: WithExtractor](
       new OneToXSQL[A, E, Z](statement, rawParameters)(f)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -312,7 +312,7 @@ abstract class SQL[A, E <: WithExtractor](
   def bind(parameters: Any*): SQL[A, E] = {
     withParameters(parameters)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -330,7 +330,7 @@ abstract class SQL[A, E <: WithExtractor](
     )
     withStatementAndParameters(_statement, _parameters)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -425,7 +425,7 @@ abstract class SQL[A, E <: WithExtractor](
     val f: DBSession => Unit =
       DBSessionWrapper(_, attributesSwitcher).foreach(
         statement,
-        rawParameters.toSeq: _*
+        rawParameters.toSeq*
       )(op)
     // format: OFF
     session match {
@@ -451,7 +451,7 @@ abstract class SQL[A, E <: WithExtractor](
     val f: DBSession => A =
       DBSessionWrapper(_, attributesSwitcher).foldLeft(
         statement,
-        rawParameters.toSeq: _*
+        rawParameters.toSeq*
       )(z)(op)
     // format: OFF
     session match {
@@ -474,7 +474,7 @@ abstract class SQL[A, E <: WithExtractor](
   def map[A](f: WrappedResultSet => A): SQL[A, HasExtractor] = {
     withExtractor[A](f)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -495,7 +495,7 @@ abstract class SQL[A, E <: WithExtractor](
       isSingle = true
     )
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -516,7 +516,7 @@ abstract class SQL[A, E <: WithExtractor](
       isSingle = false
     )
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -535,7 +535,7 @@ abstract class SQL[A, E <: WithExtractor](
   def toList: SQLToList[A, E] = {
     new SQLToListImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -554,7 +554,7 @@ abstract class SQL[A, E <: WithExtractor](
   def toCollection: SQLToCollection[A, E] = {
     new SQLToCollectionImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -573,7 +573,7 @@ abstract class SQL[A, E <: WithExtractor](
   def toIterable: SQLToIterable[A, E] = {
     new SQLToIterableImpl[A, E](statement, rawParameters)(extractor)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
   }
 
@@ -696,13 +696,13 @@ abstract class SQL[A, E <: WithExtractor](
   def stripMargin(marginChar: Char): SQL[A, E] =
     withStatementAndParameters(statement.stripMargin(marginChar), rawParameters)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
 
   def stripMargin: SQL[A, E] =
     withStatementAndParameters(statement.stripMargin, rawParameters)
       .fetchSize(fetchSize)
-      .tags(tags.toSeq: _*)
+      .tags(tags.toSeq*)
       .queryTimeout(queryTimeout)
 
 }
@@ -724,11 +724,11 @@ class SQLBatch(
     factory: Factory[Int, C[Int]]
   ): C[Int] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     val f: DBSession => C[Int] = DBSessionWrapper(_, attributesSwitcher).batch(
       statement,
-      parameters.toSeq: _*
+      parameters.toSeq*
     )
     // format: OFF
     session match {
@@ -771,10 +771,10 @@ class SQLLargeBatch private[scalikejdbc] (
     factory: Factory[Long, C[Long]]
   ): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     val f: DBSession => C[Long] = DBSessionWrapper(_, attributesSwitcher)
-      .largeBatch(statement, parameters.toSeq: _*)
+      .largeBatch(statement, parameters.toSeq*)
     session match {
       case AutoSession =>
         DB.autoCommit(f)
@@ -801,7 +801,7 @@ class SQLBatchWithGeneratedKey(
     factory: Factory[Long, C[Long]]
   ): C[Long] = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     val f: DBSession => C[Long] = session => {
       key match {
@@ -810,11 +810,11 @@ class SQLBatchWithGeneratedKey(
             .batchAndReturnSpecifiedGeneratedKey(
               statement,
               k,
-              parameters.toSeq: _*
+              parameters.toSeq*
             )
         case _ =>
           DBSessionWrapper(session, attributesSwitcher)
-            .batchAndReturnGeneratedKey(statement, parameters.toSeq: _*)
+            .batchAndReturnGeneratedKey(statement, parameters.toSeq*)
       }
     }
     // format: OFF
@@ -863,10 +863,10 @@ class SQLExecution(
 
   def apply()(implicit session: DBSession): Boolean = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     val f: DBSession => Boolean = DBSessionWrapper(_, attributesSwitcher)
-      .executeWithFilters(before, after, statement, parameters.toSeq: _*)
+      .executeWithFilters(before, after, statement, parameters.toSeq*)
     // format: OFF
     session match {
       case AutoSession                       => DB.autoCommit(f)
@@ -920,35 +920,35 @@ class SQLUpdate(
 
   def apply()(implicit session: DBSession): Int = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     session match {
       case AutoSession =>
         DB.autoCommit(
           DBSessionWrapper(_, attributesSwitcher)
-            .updateWithFilters(before, after, statement, parameters.toSeq: _*)
+            .updateWithFilters(before, after, statement, parameters.toSeq*)
         )
       case NamedAutoSession(name, _) =>
         NamedDB(name, session.settings).autoCommit(
           DBSessionWrapper(_, attributesSwitcher)
-            .updateWithFilters(before, after, statement, parameters.toSeq: _*)
+            .updateWithFilters(before, after, statement, parameters.toSeq*)
         )
       case ReadOnlyAutoSession =>
         DB.readOnly(
           DBSessionWrapper(_, attributesSwitcher)
-            .updateWithFilters(before, after, statement, parameters.toSeq: _*)
+            .updateWithFilters(before, after, statement, parameters.toSeq*)
         )
       case ReadOnlyNamedAutoSession(name, _) =>
         NamedDB(name, session.settings).readOnly(
           DBSessionWrapper(_, attributesSwitcher)
-            .updateWithFilters(before, after, statement, parameters.toSeq: _*)
+            .updateWithFilters(before, after, statement, parameters.toSeq*)
         )
       case _ =>
         DBSessionWrapper(session, attributesSwitcher).updateWithFilters(
           before,
           after,
           statement,
-          parameters.toSeq: _*
+          parameters.toSeq*
         )
     }
   }
@@ -993,7 +993,7 @@ class SQLLargeUpdate private[scalikejdbc] (
 
   def apply()(implicit session: DBSession): Long = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     session match {
       case AutoSession =>
@@ -1002,7 +1002,7 @@ class SQLLargeUpdate private[scalikejdbc] (
             before,
             after,
             statement,
-            parameters.toSeq: _*
+            parameters.toSeq*
           )
         )
       case NamedAutoSession(name, _) =>
@@ -1011,7 +1011,7 @@ class SQLLargeUpdate private[scalikejdbc] (
             before,
             after,
             statement,
-            parameters.toSeq: _*
+            parameters.toSeq*
           )
         )
       case ReadOnlyAutoSession =>
@@ -1020,7 +1020,7 @@ class SQLLargeUpdate private[scalikejdbc] (
             before,
             after,
             statement,
-            parameters.toSeq: _*
+            parameters.toSeq*
           )
         )
       case ReadOnlyNamedAutoSession(name, _) =>
@@ -1029,7 +1029,7 @@ class SQLLargeUpdate private[scalikejdbc] (
             before,
             after,
             statement,
-            parameters.toSeq: _*
+            parameters.toSeq*
           )
         )
       case _ =>
@@ -1037,7 +1037,7 @@ class SQLLargeUpdate private[scalikejdbc] (
           before,
           after,
           statement,
-          parameters.toSeq: _*
+          parameters.toSeq*
         )
     }
   }
@@ -1057,10 +1057,10 @@ class SQLUpdateWithGeneratedKey(
 
   def apply()(implicit session: DBSession): Long = {
     val attributesSwitcher = new DBSessionAttributesSwitcher(
-      SQL("").tags(tags.toSeq: _*)
+      SQL("").tags(tags.toSeq*)
     )
     val f: DBSession => Long = DBSessionWrapper(_, attributesSwitcher)
-      .updateAndReturnSpecifiedGeneratedKey(statement, parameters.toSeq: _*)(
+      .updateAndReturnSpecifiedGeneratedKey(statement, parameters.toSeq*)(
         key
       )
     // format: OFF
@@ -1123,7 +1123,7 @@ trait SQLToIterable[A, E <: WithExtractor] extends SQLToResult[A, E, Iterable] {
     f: WrappedResultSet => AA,
     session: DBSession
   ): Iterable[AA] = {
-    session.iterable[AA](statement, rawParameters.toSeq: _*)(f)
+    session.iterable[AA](statement, rawParameters.toSeq*)(f)
   }
 
 }
@@ -1190,7 +1190,7 @@ trait SQLToCollection[A, E <: WithExtractor]
   ): C[A] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
     val f: DBSession => C[A] = DBSessionWrapper(_, attributesSwitcher)
-      .collection[A, C](statement, rawParameters.toSeq: _*)(extractor)
+      .collection[A, C](statement, rawParameters.toSeq*)(extractor)
     // format: OFF
     session match {
       case AutoSession | ReadOnlyAutoSession => DB.readOnly(f)
@@ -1248,7 +1248,7 @@ object SQLToCollectionImpl {
 trait SQLToList[A, E <: WithExtractor] extends SQLToResult[A, E, List] {
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): List[AA] = {
-    session.list[AA](statement, rawParameters.toSeq: _*)(f)
+    session.list[AA](statement, rawParameters.toSeq*)(f)
   }
 
 }
@@ -1309,9 +1309,9 @@ trait SQLToOption[A, E <: WithExtractor] extends SQLToResult[A, E, Option] {
 
   def result[AA](f: WrappedResultSet => AA, session: DBSession): Option[AA] = {
     if (isSingle) {
-      session.single[AA](statement, rawParameters.toSeq: _*)(f)
+      session.single[AA](statement, rawParameters.toSeq*)(f)
     } else {
-      session.first[AA](statement, rawParameters.toSeq: _*)(f)
+      session.first[AA](statement, rawParameters.toSeq*)(f)
     }
   }
 

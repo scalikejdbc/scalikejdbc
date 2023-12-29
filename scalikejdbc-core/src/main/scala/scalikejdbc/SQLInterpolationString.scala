@@ -12,8 +12,8 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
   import scalikejdbc.interpolation.SQLSyntax
 
   def sql[A](params: Any*): SQL[A, NoExtractor] = {
-    val syntax = sqls(params: _*)
-    SQL[A](syntax.value).bind(syntax.rawParameters.toSeq: _*)
+    val syntax = sqls(params*)
+    SQL[A](syntax.value).bind(syntax.rawParameters.toSeq*)
   }
 
   def sqls(params: Any*): SQLSyntax = {

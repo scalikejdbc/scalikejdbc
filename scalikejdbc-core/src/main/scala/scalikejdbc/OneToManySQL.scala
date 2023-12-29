@@ -35,7 +35,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
   ): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
-      .foldLeft(statement, rawParameters.toSeq: _*)(
+      .foldLeft(statement, rawParameters.toSeq*)(
         LinkedHashMap[A, scala.collection.Seq[B]]()
       )(processResultSet)
       .map { case (one, (to)) =>
@@ -65,7 +65,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -75,7 +75,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -85,7 +85,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -95,7 +95,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(zExtractor)(true)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -105,7 +105,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(zExtractor)(false)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -115,7 +115,7 @@ class OneToManySQL[A, B, E <: WithExtractor, Z](
     )(toMany)(zExtractor)
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 

@@ -542,7 +542,7 @@ class DB_SQLOperationSpec
             Seq(i, "name" + i.toString)
           }
           SQL("insert into " + tableName + " (id, name) values (?, ?)")
-            .batch(params: _*)
+            .batch(params*)
             .apply()
         }
         count1.size should equal(1000)
@@ -550,14 +550,14 @@ class DB_SQLOperationSpec
         val count2 = db withinTx { implicit s =>
           // https://github.com/scalikejdbc/scalikejdbc/issues/481
           SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
-            .batchByName(Seq.empty[Seq[(String, Any)]]: _*)
+            .batchByName(Seq.empty[Seq[(String, Any)]]*)
             .apply()
 
           val params: Seq[Seq[(String, Any)]] = (2001 to 3000).map { i =>
             Seq[(String, Any)]("id" -> i, "name" -> ("name" + i.toString))
           }
           SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
-            .batchByName(params: _*)
+            .batchByName(params*)
             .apply()
         }
         count2.size should equal(1000)
@@ -581,7 +581,7 @@ class DB_SQLOperationSpec
         }
         val count1 = SQL(
           "insert into " + tableName + " (id, name) values (?, ?)"
-        ).batch(params1: _*).apply()
+        ).batch(params1*).apply()
         count1.size should equal(1000)
 
         val params2: Seq[Seq[(String, Any)]] = (2001 to 2003).map { i =>
@@ -590,7 +590,7 @@ class DB_SQLOperationSpec
         try {
           val count2 = SQL(
             "insert into " + tableName + " (id, name) values (?, {name})"
-          ).batchByName(params2: _*).apply()
+          ).batchByName(params2*).apply()
           count2.size should equal(1000)
         } catch {
           case e: Exception =>
@@ -598,7 +598,7 @@ class DB_SQLOperationSpec
         }
         // https://github.com/scalikejdbc/scalikejdbc/issues/481
         SQL("insert into " + tableName + " (id, name) values (?, {name})")
-          .batchByName(Seq.empty[Seq[(String, Any)]]: _*)
+          .batchByName(Seq.empty[Seq[(String, Any)]]*)
           .apply()
 
         db.rollback()

@@ -141,9 +141,9 @@ class TypeBinderSpec
   it should "handle result values of type java.math.BigDecimal" in {
     val rs: ResultSet = mock[ResultSet]
     when(rs.getObject("zero"))
-      .thenReturn(java.math.BigDecimal.ZERO, Array[Object](): _*)
+      .thenReturn(java.math.BigDecimal.ZERO, Array[Object]()*)
     when(rs.getObject("nonzero"))
-      .thenReturn(java.math.BigDecimal.ONE, Array[Object](): _*)
+      .thenReturn(java.math.BigDecimal.ONE, Array[Object]()*)
 
     val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
     wrapped.boolean("zero") should be(false)
@@ -167,9 +167,9 @@ class TypeBinderSpec
   it should "handle result values of type java.math.BigInt" in {
     val rs: ResultSet = mock[ResultSet]
     when(rs.getObject("zero"))
-      .thenReturn(java.math.BigInteger.ZERO, Array[Object](): _*)
+      .thenReturn(java.math.BigInteger.ZERO, Array[Object]()*)
     when(rs.getObject("nonzero"))
-      .thenReturn(java.math.BigInteger.ONE, Array[Object](): _*)
+      .thenReturn(java.math.BigInteger.ONE, Array[Object]()*)
 
     val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
     wrapped.boolean("zero") should be(false)
@@ -192,7 +192,7 @@ class TypeBinderSpec
 
   it should "fix issue #170" in {
     val rs: ResultSet = mock[ResultSet]
-    when(rs.getObject("none")).thenReturn(null, Array[Object](): _*)
+    when(rs.getObject("none")).thenReturn(null, Array[Object]()*)
 
     // WrappedResultSet works fine
     val wrapped = WrappedResultSet(rs, new ResultSetCursor(0), 0)
@@ -260,8 +260,8 @@ class TypeBinderSpec
 
   it should "handle result values of type java.lang.Boolean" in {
     val rs: ResultSet = mock[ResultSet]
-    when(rs.getObject("boolean")).thenReturn("true", Array[Object](): _*)
-    when(rs.getObject(1)).thenReturn("false", Array[Object](): _*)
+    when(rs.getObject("boolean")).thenReturn("true", Array[Object]()*)
+    when(rs.getObject(1)).thenReturn("false", Array[Object]()*)
     implicitly[TypeBinder[Boolean]].apply(rs, "boolean") should be(true)
     implicitly[TypeBinder[Boolean]].apply(rs, 1) should be(false)
   }

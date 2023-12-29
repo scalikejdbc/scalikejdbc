@@ -312,7 +312,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   def first[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): Option[A] = {
-    iterable(template, params: _*)(extract).headOption
+    iterable(template, params*)(extract).headOption
   }
 
   /**
@@ -327,7 +327,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   def list[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): List[A] = {
-    collection[A, List](template, params: _*)(extract)
+    collection[A, List](template, params*)(extract)
   }
 
   /**
@@ -405,7 +405,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
   def iterable[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): Iterable[A] = {
-    collection[A, Iterable](template, params: _*)(extract)
+    collection[A, Iterable](template, params*)(extract)
   }
 
   /**
@@ -452,7 +452,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @return result count
    */
   def executeUpdate(template: String, params: Any*): Int =
-    update(template, params: _*)
+    update(template, params*)
 
   /**
    * Executes java.sql.PreparedStatement#executeUpdate().
@@ -494,7 +494,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     after: PreparedStatement => Unit,
     template: String,
     params: Any*
-  ): Int = updateWithFilters(false, before, after, template, params: _*)
+  ): Int = updateWithFilters(false, before, after, template, params*)
 
   /**
    * Executes java.sql.PreparedStatement#executeUpdate().
@@ -540,7 +540,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     before = before,
     after = after,
     template = template,
-    params = params: _*
+    params = params*
   )
 
   /**
@@ -682,7 +682,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
    * @return generated key as a long value
    */
   def updateAndReturnGeneratedKey(template: String, params: Any*): Long =
-    updateAndReturnSpecifiedGeneratedKey(template, params: _*)(1)
+    updateAndReturnSpecifiedGeneratedKey(template, params*)(1)
 
   /**
    * Executes java.sql.PreparedStatement#executeUpdate() and returns the generated key.
@@ -738,9 +738,9 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
           before,
           after,
           template,
-          params: _*
+          params*
         )
-      case _ => updateWithFilters(true, before, after, template, params: _*)
+      case _ => updateWithFilters(true, before, after, template, params*)
     }
     if (!generatedKeyFound) {
       throw new IllegalStateException(

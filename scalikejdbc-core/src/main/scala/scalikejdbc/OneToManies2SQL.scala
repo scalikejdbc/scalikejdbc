@@ -59,7 +59,7 @@ private[scalikejdbc] trait OneToManies2Extractor[
   ): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
-      .foldLeft(statement, rawParameters.toSeq: _*)(
+      .foldLeft(statement, rawParameters.toSeq*)(
         LinkedHashMap[A, (Seq[B1], scala.collection.Seq[B2])]()
       )(processResultSet)
       .map { case (one, (t1, t2)) =>

@@ -456,20 +456,20 @@ class SQLSpec
 
           val ids1: collection.Seq[Long] = SQL(
             "insert into sqlspec_genkey (name) values (?)"
-          ).batchAndReturnGeneratedKey(paramss: _*).apply[collection.Seq]()
+          ).batchAndReturnGeneratedKey(paramss*).apply[collection.Seq]()
           ids1.size should equal(3)
           ids1.last should be <= 3L
 
           val ids2: collection.Seq[Long] = SQL(
             "insert into sqlspec_genkey (name) values (?)"
-          ).batchAndReturnGeneratedKey(paramss: _*).apply[collection.Seq]()
+          ).batchAndReturnGeneratedKey(paramss*).apply[collection.Seq]()
           ids2.size should equal(3)
           ids2.last should be <= 6L
 
           // for Oracle DB
           // just check compilation
           SQL("insert into sqlspec_genkey (name) values (?)")
-            .batchAndReturnGeneratedKey("id", paramss: _*)
+            .batchAndReturnGeneratedKey("id", paramss*)
           //  val ids3: collection.Seq[Long] = SQL("insert into sqlspec_genkey (name) values (?)").batchAndReturnGeneratedKey("id", paramss: _*).apply()
           //  ids3.size should equal(3)
           //  ids3.last should be <= 9L

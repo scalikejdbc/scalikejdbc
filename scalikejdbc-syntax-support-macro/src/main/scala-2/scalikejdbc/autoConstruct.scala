@@ -12,7 +12,7 @@ object autoConstruct {
   ): c.Expr[A] = {
     import c.universe._
     val constParams =
-      EntityUtil.constructorParams[A](c)("autoConstruct", excludes: _*).map {
+      EntityUtil.constructorParams[A](c)("autoConstruct", excludes*).map {
         field =>
           val fieldType = field.typeSignature
           val name = field.name.decodedName.toString
@@ -30,7 +30,7 @@ object autoConstruct {
     applyResultName_impl(c)(
       rs,
       c.Expr[ResultName[A]](q"${sp}.resultName"),
-      excludes: _*
+      excludes*
     )
   }
 
@@ -39,7 +39,7 @@ object autoConstruct {
     rn: c.Expr[ResultName[A]],
     excludes: c.Expr[String]*
   ): c.Expr[A] = {
-    val expr = applyResultName_impl[A](c)(rs, rn, excludes: _*)
+    val expr = applyResultName_impl[A](c)(rs, rn, excludes*)
     println(expr.tree)
     expr
   }
@@ -49,7 +49,7 @@ object autoConstruct {
     sp: c.Expr[SyntaxProvider[A]],
     excludes: c.Expr[String]*
   ): c.Expr[A] = {
-    val expr = applySyntaxProvider_impl[A](c)(rs, sp, excludes: _*)
+    val expr = applySyntaxProvider_impl[A](c)(rs, sp, excludes*)
     println(expr.tree)
     expr
   }

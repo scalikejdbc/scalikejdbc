@@ -1071,7 +1071,7 @@ class QueryInterfaceSpec
         .into(Account)
         .namedValues(params.map { case (k, v) =>
           k -> AsIsParameterBinder(v)
-        }: _*)
+        }*)
         .toSQL
       query.statement should equal(
         "insert into qi_accounts (id, name) values (?, ?)"

@@ -10,7 +10,7 @@ object autoColumns {
   )(excludes: c.Expr[String]*): c.Expr[Seq[String]] = {
     import c.universe._
     val columns =
-      EntityUtil.constructorParams[A](c)("autoColumns", excludes: _*).map {
+      EntityUtil.constructorParams[A](c)("autoColumns", excludes*).map {
         field =>
           q"scalikejdbc.autoColumns.camelToSnake(${field.name.decodedName.toString}, nameConverters, useSnakeCaseColumnName)"
       }
@@ -28,7 +28,7 @@ object autoColumns {
   def debug_impl[A: c.WeakTypeTag](
     c: Context
   )(excludes: c.Expr[String]*): c.Expr[Seq[String]] = {
-    val expr = apply_impl[A](c)(excludes: _*)
+    val expr = apply_impl[A](c)(excludes*)
     println(expr.tree)
     expr
   }
