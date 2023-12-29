@@ -56,41 +56,41 @@ private[scalikejdbc] final class DBSessionWrapper(
   override def single[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): Option[A] = {
-    withAttributesSwitchedDBSession(_.single(template, params: _*)(extract))
+    withAttributesSwitchedDBSession(_.single(template, params*)(extract))
   }
   override def first[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): Option[A] = {
-    withAttributesSwitchedDBSession(_.first(template, params: _*)(extract))
+    withAttributesSwitchedDBSession(_.first(template, params*)(extract))
   }
   override def list[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): List[A] = {
-    withAttributesSwitchedDBSession(_.list(template, params: _*)(extract))
+    withAttributesSwitchedDBSession(_.list(template, params*)(extract))
   }
   override def collection[A, C[_]](template: String, params: Any*)(
     extract: WrappedResultSet => A
   )(implicit f: Factory[A, C[A]]): C[A] = {
-    withAttributesSwitchedDBSession(_.collection(template, params: _*)(extract))
+    withAttributesSwitchedDBSession(_.collection(template, params*)(extract))
   }
   override def foreach(template: String, params: Any*)(
     f: WrappedResultSet => Unit
   ): Unit = {
-    withAttributesSwitchedDBSession(_.foreach(template, params: _*)(f))
+    withAttributesSwitchedDBSession(_.foreach(template, params*)(f))
   }
   override def foldLeft[A](template: String, params: Any*)(
     z: A
   )(op: (A, WrappedResultSet) => A): A = {
-    withAttributesSwitchedDBSession(_.foldLeft(template, params: _*)(z)(op))
+    withAttributesSwitchedDBSession(_.foldLeft(template, params*)(z)(op))
   }
   override def iterable[A](template: String, params: Any*)(
     extract: WrappedResultSet => A
   ): Iterable[A] = {
-    withAttributesSwitchedDBSession(_.iterable(template, params: _*)(extract))
+    withAttributesSwitchedDBSession(_.iterable(template, params*)(extract))
   }
 
   override def execute(template: String, params: Any*): Boolean = {
-    withAttributesSwitchedDBSession(_.execute(template, params: _*))
+    withAttributesSwitchedDBSession(_.execute(template, params*))
   }
   override def executeWithFilters(
     before: PreparedStatement => Unit,
@@ -99,14 +99,14 @@ private[scalikejdbc] final class DBSessionWrapper(
     params: Any*
   ): Boolean = {
     withAttributesSwitchedDBSession(
-      _.executeWithFilters(before, after, template, params: _*)
+      _.executeWithFilters(before, after, template, params*)
     )
   }
   override def executeUpdate(template: String, params: Any*): Int = {
-    withAttributesSwitchedDBSession(_.executeUpdate(template, params: _*))
+    withAttributesSwitchedDBSession(_.executeUpdate(template, params*))
   }
   override def update(template: String, params: Any*): Int = {
-    withAttributesSwitchedDBSession(_.update(template, params: _*))
+    withAttributesSwitchedDBSession(_.update(template, params*))
   }
   override def updateWithFilters(
     before: PreparedStatement => Unit,
@@ -115,7 +115,7 @@ private[scalikejdbc] final class DBSessionWrapper(
     params: Any*
   ): Int = {
     withAttributesSwitchedDBSession(
-      _.updateWithFilters(before, after, template, params: _*)
+      _.updateWithFilters(before, after, template, params*)
     )
   }
   override def updateWithFilters(
@@ -131,7 +131,7 @@ private[scalikejdbc] final class DBSessionWrapper(
         before,
         after,
         template,
-        params: _*
+        params*
       )
     )
   }
@@ -150,7 +150,7 @@ private[scalikejdbc] final class DBSessionWrapper(
         before,
         after,
         template,
-        params: _*
+        params*
       )
     )
   }
@@ -159,7 +159,7 @@ private[scalikejdbc] final class DBSessionWrapper(
     params: Any*
   ): Long = {
     withAttributesSwitchedDBSession(
-      _.updateAndReturnGeneratedKey(template, params: _*)
+      _.updateAndReturnGeneratedKey(template, params*)
     )
   }
   override def updateAndReturnSpecifiedGeneratedKey(
@@ -167,21 +167,21 @@ private[scalikejdbc] final class DBSessionWrapper(
     params: Any*
   )(key: Any): Long = {
     withAttributesSwitchedDBSession(
-      _.updateAndReturnSpecifiedGeneratedKey(template, params: _*)(key)
+      _.updateAndReturnSpecifiedGeneratedKey(template, params*)(key)
     )
   }
   override def batch[C[_]](
     template: String,
     paramsList: scala.collection.Seq[Any]*
   )(implicit f: Factory[Int, C[Int]]): C[Int] = {
-    withAttributesSwitchedDBSession(_.batch(template, paramsList: _*))
+    withAttributesSwitchedDBSession(_.batch(template, paramsList*))
   }
   override def batchAndReturnGeneratedKey[C[_]](
     template: String,
     paramsList: scala.collection.Seq[Any]*
   )(implicit f: Factory[Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(
-      _.batchAndReturnGeneratedKey(template, paramsList: _*)
+      _.batchAndReturnGeneratedKey(template, paramsList*)
     )
   }
   override def batchAndReturnSpecifiedGeneratedKey[C[_]](
@@ -190,7 +190,7 @@ private[scalikejdbc] final class DBSessionWrapper(
     paramsList: scala.collection.Seq[Any]*
   )(implicit f: Factory[Long, C[Long]]): C[Long] = {
     withAttributesSwitchedDBSession(
-      _.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList: _*)
+      _.batchAndReturnSpecifiedGeneratedKey(template, key, paramsList*)
     )
   }
 

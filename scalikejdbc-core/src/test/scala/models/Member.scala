@@ -71,7 +71,7 @@ object Member extends JavaUtilDateConverterImplicits {
     session: DBSession = AutoSession
   ): List[Member] = {
     SQL("""SELECT * FROM MEMBER WHERE """ + where)
-      .bindByName(params: _*)
+      .bindByName(params*)
       .map(*)
       .list
       .apply()
@@ -81,7 +81,7 @@ object Member extends JavaUtilDateConverterImplicits {
     session: DBSession = AutoSession
   ): Long = {
     SQL("""SELECT count(1) FROM MEMBER WHERE """ + where)
-      .bindByName(params: _*)
+      .bindByName(params*)
       .map(_.long(1))
       .single
       .apply()
@@ -232,7 +232,7 @@ object NamedMember {
     session: DBSession = NamedAutoSession("named")
   ): List[NamedMember] = {
     SQL("""SELECT * FROM NAMED_MEMBER WHERE """ + where)
-      .bindByName(params: _*)
+      .bindByName(params*)
       .map(*)
       .list
       .apply()
@@ -242,7 +242,7 @@ object NamedMember {
     session: DBSession = NamedAutoSession("named")
   ): Long = {
     SQL("""SELECT count(1) FROM NAMED_MEMBER WHERE """ + where)
-      .bindByName(params: _*)
+      .bindByName(params*)
       .map(_.long(1))
       .single
       .apply()

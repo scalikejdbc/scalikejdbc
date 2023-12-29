@@ -51,7 +51,7 @@ trait TestDBSettings {
           if ((s + delta) > numberOfRecords) numberOfRecords else s + delta
         val batchParams: Seq[Seq[Any]] = ((s + 1) to e).map(i => Seq(i))
         SQL(s"insert into $tableName (id) values (?)")
-          .batch(batchParams: _*)
+          .batch(batchParams*)
           .apply()
         i += 1
       }

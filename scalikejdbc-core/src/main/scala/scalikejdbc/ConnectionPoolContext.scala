@@ -20,7 +20,7 @@ case class MultipleConnectionPoolContext(contexts: (Any, ConnectionPool)*)
   extends ConnectionPoolContext {
 
   def this() = {
-    this(Nil: _*)
+    this(Nil*)
   }
 
   private lazy val pools = new mutable.HashMap[Any, ConnectionPool]

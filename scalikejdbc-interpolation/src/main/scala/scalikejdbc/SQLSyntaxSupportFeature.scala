@@ -846,7 +846,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
                 .map(_.resultName.delimiterForResultName)
             )
             .getOrElse("_on_"),
-          syntaxProviders.map(_.resultName): _*
+          syntaxProviders.map(_.resultName)*
         )
       }
     }

@@ -41,13 +41,13 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
     val underlying: ResultSet = mock[ResultSet]
     val (one: AnyRef, zero: AnyRef, minusOne: AnyRef) =
       (1: Integer, 0: Integer, -1: Integer)
-    when(underlying.getObject("one")).thenReturn(one, Array[Object](): _*)
+    when(underlying.getObject("one")).thenReturn(one, Array[Object]()*)
     // TODO this code doesn't work as expected, should I use ScalaMock?
     // when(underlying.getObject("zero")).thenReturn(zero, Array[Object](): _*)
-    when(underlying.getObject("zero")).thenReturn("0", Array[Object](): _*)
+    when(underlying.getObject("zero")).thenReturn("0", Array[Object]()*)
     when(underlying.getObject("minusOne"))
-      .thenReturn(minusOne, Array[Object](): _*)
-    when(underlying.getObject("str")).thenReturn("abc", Array[Object](): _*)
+      .thenReturn(minusOne, Array[Object]()*)
+    when(underlying.getObject("str")).thenReturn("abc", Array[Object]()*)
 
     val cursor: ResultSetCursor = new ResultSetCursor(0)
     val rs = new WrappedResultSet(underlying, cursor, cursor.position)
@@ -136,8 +136,8 @@ class WrappedResultSetSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       val res3: Option[scala.Boolean] = rs.booleanOpt("foo")
       val res4: Option[scala.Boolean] = rs.booleanOpt(0)
       when(underlying.getObject("boolean"))
-        .thenReturn("true", Array[Object](): _*)
-      when(underlying.getObject(1)).thenReturn("false", Array[Object](): _*)
+        .thenReturn("true", Array[Object]()*)
+      when(underlying.getObject(1)).thenReturn("false", Array[Object]()*)
       res1 should be(null)
       res2 should be(null)
       res3.isDefined should be(false)

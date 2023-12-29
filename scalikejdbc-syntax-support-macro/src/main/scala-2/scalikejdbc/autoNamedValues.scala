@@ -12,7 +12,7 @@ object autoNamedValues {
     import c.universe._
 
     val toMapParams: List[c.universe.Tree] =
-      EntityUtil.constructorParams[E](c)("autoNamedValues", excludes: _*).map {
+      EntityUtil.constructorParams[E](c)("autoNamedValues", excludes*).map {
         field =>
           val fieldName = field.name.toTermName
 
@@ -29,7 +29,7 @@ object autoNamedValues {
     column: c.Expr[ColumnName[E]],
     excludes: c.Expr[String]*
   ): c.Expr[Map[SQLSyntax, ParameterBinder]] = {
-    val expr = apply_impl[E](c)(entity, column, excludes: _*)
+    val expr = apply_impl[E](c)(entity, column, excludes*)
     println(expr.tree)
     expr
   }

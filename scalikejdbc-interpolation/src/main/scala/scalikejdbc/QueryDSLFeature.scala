@@ -48,7 +48,7 @@ trait QueryDSLFeature {
         new SelectSQLBuilder[A](sqls"select ${columns}")
       }
       def apply[A](columns: SQLSyntax*): SelectSQLBuilder[A] =
-        new SelectSQLBuilder[A](sqls"select ${sqls.csv(columns: _*)}")
+        new SelectSQLBuilder[A](sqls"select ${sqls.csv(columns*)}")
     }
 
     object selectFrom {
@@ -195,7 +195,7 @@ trait QueryDSLFeature {
 
   trait GroupBySQLBuilder[A] extends SQLBuilder[A] with PagingSQLBuilder[A] {
     def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] =
-      GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns: _*)}")
+      GroupBySQLBuilder[A](sqls"${sql} ${sqls.groupBy(columns*)}")
     def having(condition: SQLSyntax): GroupBySQLBuilder[A] =
       GroupBySQLBuilder[A](sqls"${sql} ${sqls.having(condition)}")
 
@@ -217,7 +217,7 @@ trait QueryDSLFeature {
     with ForUpdateQuerySQLBuilder[A]
     with SubQuerySQLBuilder[A] {
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns: _*)}")
+      PagingSQLBuilder[A](sqls"${sql} ${sqls.orderBy(columns*)}")
     def asc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} asc")
     def desc: PagingSQLBuilder[A] = PagingSQLBuilder[A](sqls"${sql} desc")
     def limit(n: Int): PagingSQLBuilder[A] =
@@ -641,7 +641,7 @@ trait QueryDSLFeature {
     // sort, paging
 
     def orderBy(columns: SQLSyntax*): PagingSQLBuilder[A] =
-      PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.orderBy(columns: _*)}")
+      PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.orderBy(columns*)}")
     def limit(n: Int): PagingSQLBuilder[A] =
       PagingSQLBuilder[A](sqls"${toSQLSyntax} ${sqls.limit(n)}")
     def offset(n: Int): PagingSQLBuilder[A] =
@@ -651,7 +651,7 @@ trait QueryDSLFeature {
     // group by, having
 
     def groupBy(columns: SQLSyntax*): GroupBySQLBuilder[A] =
-      GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.groupBy(columns: _*)}")
+      GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.groupBy(columns*)}")
     def having(condition: SQLSyntax): GroupBySQLBuilder[A] =
       GroupBySQLBuilder[A](sqls"${toSQLSyntax} ${sqls.having(condition)}")
 
@@ -741,9 +741,9 @@ trait QueryDSLFeature {
     extends SQLBuilder[UpdateOperation] {
 
     def columns(columns: SQLSyntax*): InsertSQLBuilder =
-      this.copy(sql = sqls"${sql} (${sqls.csv(columns: _*)})")
+      this.copy(sql = sqls"${sql} (${sqls.csv(columns*)})")
     def values(values: Any*): InsertSQLBuilder = {
-      val vs = sqls.csv(values.map(v => sqls"${v}"): _*)
+      val vs = sqls.csv(values.map(v => sqls"${v}")*)
       this.copy(sql = sqls"${sql} values (${vs})")
     }
     def multipleValues(
@@ -760,7 +760,7 @@ trait QueryDSLFeature {
       columnsAndValues: (SQLSyntax, ParameterBinder)*
     ): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.unzip
-      columns(cs: _*).values(vs: _*)
+      columns(cs*).values(vs*)
     }
 
     /**
@@ -772,21 +772,21 @@ trait QueryDSLFeature {
       columnsAndValues: Map[SQLSyntax, ParameterBinder]
     ): InsertSQLBuilder = {
       val (cs, vs) = columnsAndValues.toSeq.unzip
-      columns(cs: _*).values(vs: _*)
+      columns(cs*).values(vs*)
     }
 
     def select(columns: SQLSyntax*)(
       query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]
     ): InsertSQLBuilder = {
       val builder: SelectSQLBuilder[Nothing] =
-        QueryDSL.select[Nothing](columns: _*)
+        QueryDSL.select[Nothing](columns*)
       this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
     }
     def selectAll(providers: ResultAllProvider*)(
       query: SelectSQLBuilder[Nothing] => SQLBuilder[Nothing]
     ): InsertSQLBuilder = {
       val builder: SelectSQLBuilder[Nothing] =
-        QueryDSL.select.all[Nothing](providers: _*)
+        QueryDSL.select.all[Nothing](providers*)
       this.copy(sql = sqls"${sql} ${query.apply(builder).toSQLSyntax}")
     }
     def select(
@@ -806,7 +806,7 @@ trait QueryDSLFeature {
      *  `returning` for PostgreSQL
      */
     def returning(columns: SQLSyntax*): InsertSQLBuilder = append(
-      sqls"returning ${sqls.csv(columns: _*)}"
+      sqls"returning ${sqls.csv(columns*)}"
     )
 
     override def append(part: SQLSyntax): InsertSQLBuilder =
@@ -824,7 +824,7 @@ trait QueryDSLFeature {
       this.copy(sql = sqls"${sql} set ${sqlPart}")
 
     def set(tuples: (SQLSyntax, ParameterBinder)*): UpdateSQLBuilder = set(
-      sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}"): _*)
+      sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}")*)
     )
 
     /**
@@ -833,14 +833,14 @@ trait QueryDSLFeature {
      * @see [[https://github.com/scalikejdbc/scalikejdbc/pull/507]]
      */
     def set(tuples: Map[SQLSyntax, ParameterBinder]): UpdateSQLBuilder = set(
-      sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}").toSeq: _*)
+      sqls.csv(tuples.map(each => sqls"${each._1} = ${each._2}").toSeq*)
     )
 
     /**
      *  `returning` for PostgreSQL
      */
     def returning(columns: SQLSyntax*): UpdateSQLBuilder = append(
-      sqls"returning ${sqls.csv(columns: _*)}"
+      sqls"returning ${sqls.csv(columns*)}"
     )
 
     override def append(part: SQLSyntax): UpdateSQLBuilder =

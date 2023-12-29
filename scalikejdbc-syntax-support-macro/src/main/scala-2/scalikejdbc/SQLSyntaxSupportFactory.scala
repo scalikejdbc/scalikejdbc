@@ -10,7 +10,7 @@ object SQLSyntaxSupportFactory {
   )(excludes: c.Expr[String]*): c.Expr[SQLSyntaxSupportImpl[A]] = {
     import c.universe._
     val constParams = EntityUtil
-      .constructorParams[A](c)("SQLSyntaxSupportFactory", excludes: _*)
+      .constructorParams[A](c)("SQLSyntaxSupportFactory", excludes*)
       .map { field =>
         val fieldType = field.typeSignature
         val name = field.name.decodedName.toString
@@ -22,7 +22,7 @@ object SQLSyntaxSupportFactory {
         A
       ].toString})
         override lazy val columns: collection.Seq[String] = ${autoColumns
-        .apply_impl(c)(excludes: _*)}
+        .apply_impl(c)(excludes*)}
         def apply(rn: scalikejdbc.ResultName[${weakTypeTag[
         A
       ].tpe}])(rs: scalikejdbc.WrappedResultSet): ${weakTypeTag[
@@ -43,7 +43,7 @@ object SQLSyntaxSupportFactory {
   def debug_impl[A: c.WeakTypeTag](
     c: Context
   )(excludes: c.Expr[String]*): c.Expr[SQLSyntaxSupportImpl[A]] = {
-    val expr = apply_impl[A](c)(excludes: _*)
+    val expr = apply_impl[A](c)(excludes*)
     println(expr.tree)
     expr
   }

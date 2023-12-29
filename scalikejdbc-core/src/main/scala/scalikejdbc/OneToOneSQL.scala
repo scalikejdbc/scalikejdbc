@@ -33,7 +33,7 @@ private[scalikejdbc] trait OneToOneExtractor[A, B, E <: WithExtractor, Z]
   ): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
     DBSessionWrapper(session, attributesSwitcher)
-      .foldLeft(statement, rawParameters.toSeq: _*)(
+      .foldLeft(statement, rawParameters.toSeq*)(
         LinkedHashMap[A, Option[B]]()
       )(processResultSet)
       .map {

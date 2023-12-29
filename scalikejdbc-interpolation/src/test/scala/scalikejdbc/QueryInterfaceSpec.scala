@@ -242,8 +242,8 @@ class QueryInterfaceSpec
             }
           }
           withSQL {
-            insert.into(Product).namedValues(params.columnsAndPlaceholders: _*)
-          }.batch(params.batchParams: _*).apply()
+            insert.into(Product).namedValues(params.columnsAndPlaceholders*)
+          }.batch(params.batchParams*).apply()
 
           withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update
             .apply()
@@ -1112,7 +1112,7 @@ class QueryInterfaceSpec
         .into(Account)
         .namedValues(params.map { case (k, v) =>
           k -> AsIsParameterBinder(v)
-        }: _*)
+        }*)
         .toSQL
       query.statement should equal(
         "insert into qi_accounts (id, name) values (?, ?)"

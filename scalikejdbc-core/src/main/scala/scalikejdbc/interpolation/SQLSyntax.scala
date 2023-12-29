@@ -414,12 +414,12 @@ object SQLSyntax {
     join(parts.map(p => if (hasAndOr(p)) sqls"(${p})" else p), sqls"or")
 
   def groupBy(columns: SQLSyntax*): SQLSyntax =
-    SQLSyntax.empty.groupBy(columns.filterNot(_.value.trim.isEmpty): _*)
+    SQLSyntax.empty.groupBy(columns.filterNot(_.value.trim.isEmpty)*)
   def having(condition: SQLSyntax): SQLSyntax =
     SQLSyntax.empty.having(condition)
 
   def orderBy(columns: SQLSyntax*): SQLSyntax =
-    SQLSyntax.empty.orderBy(columns.filterNot(_.value.trim.isEmpty): _*)
+    SQLSyntax.empty.orderBy(columns.filterNot(_.value.trim.isEmpty)*)
   val asc: SQLSyntax = SQLSyntax.empty.asc
   val desc: SQLSyntax = SQLSyntax.empty.desc
 
@@ -594,7 +594,7 @@ object SQLSyntax {
    */
   def toAndConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
     val cs: Seq[SQLSyntax] = conditions.flatten
-    if (cs.isEmpty) None else Some(joinWithAnd(cs: _*))
+    if (cs.isEmpty) None else Some(joinWithAnd(cs*))
   }
 
   /**
@@ -609,7 +609,7 @@ object SQLSyntax {
    */
   def toOrConditionOpt(conditions: Option[SQLSyntax]*): Option[SQLSyntax] = {
     val cs: Seq[SQLSyntax] = conditions.flatten
-    if (cs.isEmpty) None else Some(joinWithOr(cs: _*))
+    if (cs.isEmpty) None else Some(joinWithOr(cs*))
   }
 
   def roundBracket(inner: SQLSyntax): SQLSyntax = sqls"($inner)"

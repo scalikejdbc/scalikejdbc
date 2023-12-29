@@ -311,7 +311,7 @@ class DBSessionSpec
         val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
         session.batch(
           "insert into " + tableName + " (id, name) values (?, ?)",
-          paramsList: _*
+          paramsList*
         )
         System.currentTimeMillis() - before
       }
@@ -341,7 +341,7 @@ class DBSessionSpec
           val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i))
           session.batch(
             "insert into " + tableName + " (id, name) values (?, ?)",
-            paramsList: _*
+            paramsList*
           )
           throw new RuntimeException
         }
@@ -458,7 +458,7 @@ class DBSessionSpec
         val ids: collection.Seq[Long] =
           session.batchAndReturnGeneratedKey[collection.Seq](
             "insert into dbsessionspec_genkey (name) values (?)",
-            Seq(Seq("XXX"), Seq("XXX"), Seq("XXX")): _*
+            Seq(Seq("XXX"), Seq("XXX"), Seq("XXX"))*
           )
         ids.size should equal(3)
         ids.last should be <= 5L

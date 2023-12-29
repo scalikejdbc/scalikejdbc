@@ -370,7 +370,7 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
       s.parameters should equal(Nil)
     }
     {
-      val s = SQLSyntax.orderBy(Nil: _*)
+      val s = SQLSyntax.orderBy(Nil*)
       s.value should equal("")
       s.parameters should equal(Nil)
     }

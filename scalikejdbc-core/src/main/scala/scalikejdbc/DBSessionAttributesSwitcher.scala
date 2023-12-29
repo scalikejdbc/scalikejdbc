@@ -49,7 +49,7 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[?, ?]) {
         )
         // Adding a tag to a session means session scope tagging.
         // So, concatenation of session.tags and this(SQL).tags would be equal to full tags.
-        session.tags((session.tags ++ this.tagsCameFromSQLObject).toSeq: _*)
+        session.tags((session.tags ++ this.tagsCameFromSQLObject).toSeq*)
       case _ =>
         throw new IllegalStateException(ErrorMessage.THIS_IS_A_BUG)
     }
@@ -64,7 +64,7 @@ private[scalikejdbc] class DBSessionAttributesSwitcher(sql: SQL[?, ?]) {
         case Some(session) =>
           session
             .fetchSize(this.originalFetchSize)
-            .tags(this.originalTags.toSeq: _*)
+            .tags(this.originalTags.toSeq*)
             .queryTimeout(this.originalQueryTimeout)
         case _ =>
           throw new IllegalStateException(ErrorMessage.THIS_IS_A_BUG)
