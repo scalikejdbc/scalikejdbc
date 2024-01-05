@@ -1,6 +1,6 @@
 ScalikeJDBC 4.0.0 is now available for Scala 2.12, 2.13, and Scala 3 app development!
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 Thanks for all the contributors for this release :+1:
 

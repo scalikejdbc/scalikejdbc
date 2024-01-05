@@ -2,9 +2,9 @@ ScalikeJDBC 1.7.4 is out. Thanks to @analytically, @Arakaki, @kxbmap and @kalini
 
 Official website:
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 

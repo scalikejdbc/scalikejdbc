@@ -1,6 +1,6 @@
 ScalikeJDBC 1.6.4 has been released. Several improvement to library, play-plugin mapper-generator and interpolation.
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/img/logo.png)
 
 https://github.com/scalikejdbc/scalikejdbc
 

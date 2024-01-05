@@ -2,9 +2,9 @@ ScalikeJDBC 1.7.3 is out. EntityEquality and IN clause with multiple columns in 
 
 Official website:
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 Special thanks to @daimatz and all the ScalikeJDBC users!
 

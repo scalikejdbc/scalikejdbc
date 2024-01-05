@@ -1,8 +1,8 @@
 ScalikeJDBC 1.8.1 is out. Version 1.8.x supports only Scala 2.10.x.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 

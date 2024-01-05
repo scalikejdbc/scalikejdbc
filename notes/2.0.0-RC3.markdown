@@ -1,8 +1,8 @@
 ScalikeJDBC 2.0.0-RC3 is out. We hope this version will be the last RC version for 2.0.0 final.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Changes
 

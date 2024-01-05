@@ -11,7 +11,7 @@ import scalikejdbc._
 import scalikejdbc.streams._
 
 // Prepare a connection pool in advance.
-// http://scalikejdbc.org/documentation/configuration.html#scalikejdbc-config
+// https://scalikejdbc.org/documentation/configuration.html#scalikejdbc-config
 
 // Prepare an ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global

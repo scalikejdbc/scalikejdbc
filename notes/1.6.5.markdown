@@ -1,6 +1,6 @@
 ScalikeJDBC 1.6.5 has been released. Newly [IntelliJ IDEA Live Templates for ScalikeJDBC users](https://github.com/scalikejdbc/scalikejdbc/blob/master/tools-support/intellij/templates/scalikejdbc.xml) is created by @tototoshi.
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/img/logo.png)
 
 https://github.com/scalikejdbc/scalikejdbc
 

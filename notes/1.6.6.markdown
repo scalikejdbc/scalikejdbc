@@ -1,6 +1,6 @@
 ScalikeJDBC 1.6.6 & ScalikeJDBC-Async 0.2.0 have been released. Now ScalikeJDBC became a reactive JDBC library!
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/img/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/img/logo.png)
 
 https://github.com/scalikejdbc/scalikejdbc
 

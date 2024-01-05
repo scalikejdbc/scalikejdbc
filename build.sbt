@@ -402,7 +402,7 @@ val jdbcDriverDependenciesInTestScope = Seq(
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
 )
 
-val _pomExtra = <url>http://scalikejdbc.org/</url>
+val _pomExtra = <url>https://scalikejdbc.org/</url>
     <licenses>
       <license>
         <name>Apache License, Version 2.0</name>

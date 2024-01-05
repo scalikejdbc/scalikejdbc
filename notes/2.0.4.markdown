@@ -1,8 +1,8 @@
 ScalikeJDBC 2.0.4 is out. 2.0.3 for Scala 2.10 seems to be invalid built. Please use 2.0.4 or higher.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 

@@ -1,8 +1,8 @@
 ScalikeJDBC 1.7.1 has been released. Previously, SQLSyntaxSupport with NamedDB doesn't support column names auto-loading. Since this version, that's enabled by just specifying connectionPoolName.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 
