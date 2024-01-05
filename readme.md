@@ -6,7 +6,7 @@ ScalikeJDBC is a tidy SQL-based DB access library for Scala that naturally wraps
 
 ScalikeJDBC is practical and production-ready. Use this library for your real projects.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.13)
 [![Stargazers over time](https://starchart.cc/scalikejdbc/scalikejdbc.svg)](https://starchart.cc/scalikejdbc/scalikejdbc)
@@ -85,7 +85,7 @@ val alice: Option[Member] = withSQL {
 
 How did it go? If you'd like to know more details or see more practical examples, see the full documentation at:
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
 
 ## License
@@ -95,6 +95,6 @@ Published source code and binary files have the following copyright:
 ```
 Copyright scalikejdbc.org
 Apache License, Version 2.0
-http://www.apache.org/licenses/LICENSE-2.0.html
+https://www.apache.org/licenses/LICENSE-2.0.html
 ```
 
