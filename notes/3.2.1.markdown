@@ -1,8 +1,8 @@
 ScalikeJDBC 3.2.1 is out for Scala 2.12, 2.11 and 2.10.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Changes
 

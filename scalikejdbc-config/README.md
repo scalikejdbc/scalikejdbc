@@ -2,5 +2,5 @@
 
 See the website.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 

@@ -1,8 +1,8 @@
 ScalikeJDBC 1.7.7 is out. @todesking sped up the compilation time. 
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 

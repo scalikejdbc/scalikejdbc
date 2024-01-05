@@ -1,8 +1,8 @@
 ScalikeJDBC 2.4.3 is out for Scala 2.10.x and 2.11.x. The mapper-generator sbt plugin for sbt 0.13.x is available as well.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Changes
 

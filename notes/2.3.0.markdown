@@ -4,9 +4,9 @@ Since this version, we will keep binary compatibility during 2.3.x series.
 
 When we'll bring bin-incompatible changes, they will be carried over into 2.4.x series.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Changes
 

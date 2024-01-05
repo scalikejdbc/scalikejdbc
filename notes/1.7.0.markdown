@@ -1,6 +1,6 @@
 ScalikeJDBC 1.7.0 has been released. Since this version, groupId is changed to "org.scalikejdbc" and GitHub repository has been moved to https://github.com/scalikejdbc/scalikejdbc.
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 https://github.com/scalikejdbc/scalikejdbc
 

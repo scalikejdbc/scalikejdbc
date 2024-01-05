@@ -1,8 +1,8 @@
 ScalikeJDBC 3.4.0 is out for Scala 2.13, 2.12, and 2.11.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Changes
 

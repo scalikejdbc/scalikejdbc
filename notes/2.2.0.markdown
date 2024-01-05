@@ -1,8 +1,8 @@
 ScalikeJDBC 2.2.0 is out. This version is source compatible with version 2.1.x.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Topics
 

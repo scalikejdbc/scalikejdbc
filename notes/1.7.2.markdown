@@ -1,8 +1,8 @@
 ScalikeJDBC 1.7.2 has been released. Several bugs are fixed and SQLInterpolation is improved.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 Special thanks to @lvicentesanchez, @hagikuratakeshi, @k4200, @itoasuka, @kihn and all the ScalikeJDBC users!
 

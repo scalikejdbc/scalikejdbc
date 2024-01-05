@@ -4,9 +4,9 @@ ScalikeJDBC 1.8.x doesn't support Scala 2.9. The reason is backporting Scala 2.9
 
 Don't worry. We'll keep maintaining ScalikeJDBC 1.7.x for Scala 2.9 users.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ## library
 

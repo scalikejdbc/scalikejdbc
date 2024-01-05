@@ -2,9 +2,9 @@ ScalikeJDBC 2.0.0 is out for Scala 2.10 & 2.11 users with new useful features.
 
 Though some points are incompatible for improvement, libraries are basically source code compatible with ScalikeJDBC 1.7.
 
-http://scalikejdbc.org/
+https://scalikejdbc.org/
 
-![ScalikeJDBC Logo](http://scalikejdbc.org/images/logo.png)
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
 
 ### Topics
 
