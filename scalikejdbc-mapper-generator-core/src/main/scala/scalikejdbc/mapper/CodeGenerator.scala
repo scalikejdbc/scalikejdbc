@@ -1,6 +1,6 @@
 package scalikejdbc.mapper
 
-import scalikejdbc.*
+import scalikejdbc._
 import scala.language.implicitConversions
 
 /**
@@ -11,8 +11,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 ) extends Generator
   with LoanPattern {
 
-  import java.sql.JDBCType as JavaSqlTypes
-  import java.io.{File, FileOutputStream, OutputStreamWriter}
+  import java.sql.{ JDBCType => JavaSqlTypes }
+  import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
   private val packageName = config.packageName
   private val className =
@@ -830,7 +830,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
     table.allColumns.map(_.rawTypeInScala).filter(timeClasses) match {
       case classes if classes.nonEmpty =>
-        val (l,r)= if(classes.size==1) ("","") else ("{","}")
+        val (l,r)= if(classes.size==1) ("", "") else ("{", "}")
         if (config.dateTimeClass == DateTimeClass.JodaDateTime) {
           "import org.joda.time." + classes.distinct.mkString(l, ", ", r) + eol +
             "import scalikejdbc.jodatime.JodaParameterBinderFactory._" + eol +
