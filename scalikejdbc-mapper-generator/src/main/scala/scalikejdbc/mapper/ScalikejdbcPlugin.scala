@@ -41,6 +41,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       url: String,
       username: String,
       password: String,
+      catalog: String,
       schema: String
     )
 
@@ -88,6 +89,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] final val JDBC_URL = JDBC + "url"
   private[this] final val JDBC_USER_NAME = JDBC + "username"
   private[this] final val JDBC_PASSWORD = JDBC + "password"
+  private[this] final val JDBC_CATALOG = JDBC + "catalog"
   private[this] final val JDBC_SCHEMA = JDBC + "schema"
 
   private[this] final val GENERATOR = "generator."
@@ -154,6 +156,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       ),
       username = getString(props, JDBC_USER_NAME).getOrElse(""),
       password = getString(props, JDBC_PASSWORD).getOrElse(""),
+      catalog = getString(props, JDBC_CATALOG).getOrElse(""),
       schema = getString(props, JDBC_SCHEMA).orNull[String]
     )
   }
@@ -279,9 +282,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
     model
-      .table(jdbc.schema, tableName)
-      .orElse(model.table(jdbc.schema, tableName.toUpperCase(en)))
-      .orElse(model.table(jdbc.schema, tableName.toLowerCase(en)))
+      .table(jdbc.schema, tableName, jdbc.catalog)
+      .orElse(model.table(jdbc.schema, tableName.toUpperCase(en), jdbc.catalog))
+      .orElse(model.table(jdbc.schema, tableName.toLowerCase(en), jdbc.catalog))
       .map { table =>
         Option(new CodeGenerator(table, className)(config))
       } getOrElse {
@@ -301,9 +304,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
     Class.forName(jdbc.driver) // load specified jdbc driver
     val model = Model(jdbc.url, jdbc.username, jdbc.password)
     val tableAndViews = if (generatorSettings.view) {
-      model.allTables(jdbc.schema) ++ model.allViews(jdbc.schema)
+      model.allTables(jdbc.schema, jdbc.catalog) ++ model.allViews(jdbc.schema, jdbc.catalog)
     } else {
-      model.allTables(jdbc.schema)
+      model.allTables(jdbc.schema, jdbc.catalog)
     }
 
     tableAndViews.map { table =>
@@ -316,7 +319,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     clazz: Option[String]
   )
 
-  import complete.DefaultParsers._
+  import complete.DefaultParsers.*
 
   private def genTaskParser(
     keyName: String

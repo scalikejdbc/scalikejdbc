@@ -55,14 +55,13 @@ case class Model(url: String, username: String, password: String)
     }
   }
 
-  def allTables(schema: String = null): collection.Seq[Table] =
-    listAllTables(schema, List("TABLE")).flatMap(table(schema, _))
+  def allTables(schema: String = null, catalog: String = null): collection.Seq[Table] =
+    listAllTables(schema, List("TABLE")).flatMap(table(schema, _, catalog))
 
-  def allViews(schema: String = null): collection.Seq[Table] =
-    listAllTables(schema, List("VIEW")).flatMap(table(schema, _))
+  def allViews(schema: String = null, catalog: String = null): collection.Seq[Table] =
+    listAllTables(schema, List("VIEW")).flatMap(table(schema, _, catalog))
 
-  def table(schema: String = null, tableName: String): Option[Table] = {
-    val catalog = null
+  def table(schema: String = null, tableName: String, catalog: String = null): Option[Table] = {
     val _schema = if (schema == null || schema.isEmpty) null else schema
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
