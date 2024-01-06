@@ -319,7 +319,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     clazz: Option[String]
   )
 
-  import complete.DefaultParsers.*
+  import complete.DefaultParsers._
 
   private def genTaskParser(
     keyName: String
