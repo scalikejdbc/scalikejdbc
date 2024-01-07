@@ -21,7 +21,7 @@ class OneToXSQL[A, E <: WithExtractor, Z](
     val q: OneToManySQL[A, B, E, Z] = new OneToManySQL(statement, rawParameters)(one)(to)((a, bs) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
     q
   }
 
@@ -58,7 +58,7 @@ object OneToXSQL {
       .mkString(", ")}) => a.asInstanceOf[Z])
     q.queryTimeout(queryTimeout)
     q.fetchSize(fetchSize)
-    q.tags(tags.toSeq: _*)
+    q.tags(tags.toSeq*)
   }
 """
 }
