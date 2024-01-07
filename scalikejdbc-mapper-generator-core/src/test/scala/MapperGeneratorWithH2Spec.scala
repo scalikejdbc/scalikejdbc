@@ -314,4 +314,42 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       fail("The table is not found.")
     }
   }
+
+  it should "work fine with tableName_same_to_metatable" in {
+    DB autoCommit { implicit session =>
+      SQL("""
+        create table "TABLES" (
+          SCALIKEJDBC varchar(30) not null
+        )
+      """).execute.apply()
+    }
+    Model(url, username, password)
+      .table("INFORMATION_SCHEMA", "TABLES", "MAPPER_GENERATOR_H2")
+      .map { table =>
+        if (table.allColumns.map(_.name).contains("SCALIKEJDBC")) {
+          fail("the table generate extra column")
+        }
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(srcDir = srcDir, packageName = "com.example")
+        )
+        generator.writeModel()
+      } getOrElse {
+      fail("The table is not found.")
+    }
+
+    Model(url, username, password)
+      .table("PUBLIC", "TABLES", "MAPPER_GENERATOR_H2")
+      .map { table =>
+        if (!table.allColumns.map(_.name).contains("SCALIKEJDBC")) {
+          fail("the table does not generate specify column")
+        }
+        val generator = new CodeGenerator(table)(
+          GeneratorConfig(srcDir = srcDir, packageName = "com.example")
+        )
+        generator.writeModel()
+      } getOrElse {
+      fail("The table is not found.")
+    }
+    Thread.sleep(500)
+  }
 }

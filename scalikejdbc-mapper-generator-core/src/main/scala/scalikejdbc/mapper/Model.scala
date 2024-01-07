@@ -38,7 +38,7 @@ case class Model(url: String, username: String, password: String)
   private[this] def listAllTables(
     schema: String,
     types: List[String]
-  ): collection.Seq[String] = {
+  ): collection.Seq[(String, String)] = {
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
       val (catalog, _schema) = {
@@ -51,18 +51,21 @@ case class Model(url: String, username: String, password: String)
       }
       new ResultSetIterator(
         meta.getTables(catalog, _schema, "%", types.toArray)
-      ).map { _.string("TABLE_NAME") }.toList
+      ).map(rs => (rs.string("TABLE_CAT"), rs.string("TABLE_NAME"))).toList
     }
   }
 
   def allTables(schema: String = null): collection.Seq[Table] =
-    listAllTables(schema, List("TABLE")).flatMap(table(schema, _))
+    listAllTables(schema, List("TABLE")).flatMap(t => table(schema, t._2, t._1))
 
   def allViews(schema: String = null): collection.Seq[Table] =
-    listAllTables(schema, List("VIEW")).flatMap(table(schema, _))
+    listAllTables(schema, List("VIEW")).flatMap(t => table(schema, t._2, t._1))
 
-  def table(schema: String = null, tableName: String): Option[Table] = {
-    val catalog = null
+  def table(
+    schema: String = null,
+    tableName: String,
+    catalog: String = null
+  ): Option[Table] = {
     val _schema = if (schema == null || schema.isEmpty) null else schema
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
