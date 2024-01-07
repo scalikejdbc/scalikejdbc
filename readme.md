@@ -9,12 +9,6 @@ ScalikeJDBC is practical and production-ready. Use this library for your real pr
 https://scalikejdbc.org/
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.13)
-[![Stargazers over time](https://starchart.cc/scalikejdbc/scalikejdbc.svg)](https://starchart.cc/scalikejdbc/scalikejdbc)
-
-## Gitter Chat for Casual Q&A
-
-- English: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scalikejdbc/en?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-- 日本語 (Japanese): [![Gitter](https://badges.gitter.im/_チャットへ.svg)](https://gitter.im/scalikejdbc/ja?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Getting Started
 
@@ -86,7 +80,6 @@ val alice: Option[Member] = withSQL {
 How did it go? If you'd like to know more details or see more practical examples, see the full documentation at:
 
 https://scalikejdbc.org/
-
 
 ## License
 

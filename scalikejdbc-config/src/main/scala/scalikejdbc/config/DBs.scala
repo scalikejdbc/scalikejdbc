@@ -5,7 +5,7 @@ import scalikejdbc._
 /**
  * DB configurator
  */
-trait DBs { self: TypesafeConfigReader with TypesafeConfig with EnvPrefix =>
+trait DBs { self: TypesafeConfigReader & TypesafeConfig & EnvPrefix =>
 
   def setup(dbName: String = ConnectionPool.DEFAULT_NAME): Unit = {
     val JDBCSettings(url, user, password, driver) = readJDBCSettings(dbName)
