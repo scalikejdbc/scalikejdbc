@@ -61,7 +61,11 @@ case class Model(url: String, username: String, password: String)
   def allViews(schema: String = null): collection.Seq[Table] =
     listAllTables(schema, List("VIEW")).flatMap(t => table(schema, t._2, t._1))
 
-  def table(schema: String = null, tableName: String, catalog: String = null): Option[Table] = {
+  def table(
+    schema: String = null,
+    tableName: String,
+    catalog: String = null
+  ): Option[Table] = {
     val _schema = if (schema == null || schema.isEmpty) null else schema
     using(ConnectionPool.get(poolName).borrow()) { conn =>
       val meta = conn.getMetaData
