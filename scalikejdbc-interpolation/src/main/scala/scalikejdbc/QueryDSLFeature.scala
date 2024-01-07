@@ -4,7 +4,7 @@ package scalikejdbc
  * Query DSL
  */
 trait QueryDSLFeature {
-  self: SQLInterpolationFeature with SQLSyntaxSupportFeature =>
+  self: SQLInterpolationFeature & SQLSyntaxSupportFeature =>
 
   /**
    * Represents UpdateOperation (used as SQLBuilder[UpdateOperation]).
@@ -189,7 +189,7 @@ trait QueryDSLFeature {
 
   // factory
   private[scalikejdbc] object GroupBySQLBuilder {
-    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with GroupBySQLBuilder[A] =
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] & GroupBySQLBuilder[A] =
       new RawSQLBuilder[A](sql) with GroupBySQLBuilder[A]
   }
 
@@ -205,7 +205,7 @@ trait QueryDSLFeature {
 
   // factory
   private[scalikejdbc] object PagingSQLBuilder {
-    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with PagingSQLBuilder[A] =
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] & PagingSQLBuilder[A] =
       new RawSQLBuilder[A](sql) with PagingSQLBuilder[A]
   }
 
@@ -231,7 +231,7 @@ trait QueryDSLFeature {
 
   // factory
   private[scalikejdbc] object ConditionSQLBuilder {
-    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] with ConditionSQLBuilder[A] =
+    def apply[A](sql: SQLSyntax): RawSQLBuilder[A] & ConditionSQLBuilder[A] =
       new RawSQLBuilder[A](sql) with ConditionSQLBuilder[A]
   }
 
