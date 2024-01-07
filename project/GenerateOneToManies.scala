@@ -88,7 +88,7 @@ ${(1 to n)
 
   private[scalikejdbc] def toIterable(session: DBSession, sql: String, params: scala.collection.Seq[?], zExtractor: (A, $seq) => Z): Iterable[Z] = {
     val attributesSwitcher = createDBSessionAttributesSwitcher
-    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq*)(LinkedHashMap[A, ($seq)]())(processResultSet _).map {
+    DBSessionWrapper(session, attributesSwitcher).foldLeft(statement, rawParameters.toSeq*)(LinkedHashMap[A, ($seq)]())(processResultSet).map {
       case (one, (${(1 to n)
         .map("t" + _)
         .mkString(", ")})) => zExtractor(one, ${(1 to n)
