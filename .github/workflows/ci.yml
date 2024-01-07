@@ -136,7 +136,7 @@ jobs:
         git diff --exit-code
     - if: ${{ (github.event_name == 'pull_request') && failure() }}
       run: |
-        REVIEWDOG_VERSION="0.14.1"
+        REVIEWDOG_VERSION="0.16.0"
         FILE_NAME="reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64"
         wget -q https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/${FILE_NAME}.tar.gz &&
         gunzip ${FILE_NAME}.tar.gz &&
