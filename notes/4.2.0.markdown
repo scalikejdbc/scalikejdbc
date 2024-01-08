@@ -1,0 +1,12 @@
+ScalikeJDBC 4.2.0 is now available for Scala 2.12, 2.13, and Scala 3 application development!
+
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
+
+Thank you to all the contributors for this release! :+1:
+
+* @xuwei-k did a substantial amount of work for refactoring and dependency management
+* @laglangyue improved mapper-generator-core's MySQL compatibility (#2128)
+
+Please review [this release's GitHub milestone](https://github.com/scalikejdbc/scalikejdbc/milestone/47?closed=1) for a list of PRs and contributors!
+
+Take pleasure in crafting type-safe SQL to accomplish tasks efficiently!
