@@ -1,0 +1,11 @@
+ScalikeJDBC 4.2.1 is now available for Scala 2.12, 2.13, and Scala 3 application development!
+
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
+
+Thank you to all the contributors for this release! :+1:
+
+* @kardapoltsev resolved a bug on tags in one-to-x queries (#2156 via #2163)
+
+Please review [this release's GitHub milestone](https://github.com/scalikejdbc/scalikejdbc/milestone/47?closed=1) for a list of PRs and contributors!
+
+Take pleasure in crafting type-safe SQL to accomplish tasks efficiently!
