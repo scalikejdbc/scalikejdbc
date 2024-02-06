@@ -86,35 +86,71 @@ class OneToManies2SQL[A, B1, B2, E <: WithExtractor, Z](
   def map(
     zExtractor: (A, scala.collection.Seq[B1], scala.collection.Seq[B2]) => Z
   ): OneToManies2SQL[A, B1, B2, HasExtractor, Z] = {
-    new OneToManies2SQL(statement, rawParameters)(one)(to1, to2)(zExtractor)
+    val q: OneToManies2SQL[A, B1, B2, HasExtractor, Z] =
+      new OneToManies2SQL(statement, rawParameters)(one)(to1, to2)(zExtractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def toIterable: OneToManies2SQLToIterable[A, B1, B2, E, Z] = {
-    new OneToManies2SQLToIterable[A, B1, B2, E, Z](statement, rawParameters)(
-      one
-    )(to1, to2)(zExtractor)
+    val q: OneToManies2SQLToIterable[A, B1, B2, E, Z] =
+      new OneToManies2SQLToIterable[A, B1, B2, E, Z](statement, rawParameters)(
+        one
+      )(to1, to2)(zExtractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def toList: OneToManies2SQLToList[A, B1, B2, E, Z] = {
-    new OneToManies2SQLToList[A, B1, B2, E, Z](statement, rawParameters)(one)(
-      to1,
-      to2
-    )(zExtractor)
+    val q: OneToManies2SQLToList[A, B1, B2, E, Z] =
+      new OneToManies2SQLToList[A, B1, B2, E, Z](statement, rawParameters)(one)(
+        to1,
+        to2
+      )(zExtractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def toOption: OneToManies2SQLToOption[A, B1, B2, E, Z] = {
-    new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(one)(
-      to1,
-      to2
-    )(zExtractor)(true)
+    val q: OneToManies2SQLToOption[A, B1, B2, E, Z] =
+      new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(
+        one
+      )(
+        to1,
+        to2
+      )(zExtractor)(true)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def toCollection: OneToManies2SQLToCollection[A, B1, B2, E, Z] = {
-    new OneToManies2SQLToCollection[A, B1, B2, E, Z](statement, rawParameters)(
+    val q = new OneToManies2SQLToCollection[A, B1, B2, E, Z](
+      statement,
+      rawParameters
+    )(
       one
     )(to1, to2)(zExtractor)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def headOption: OneToManies2SQLToOption[A, B1, B2, E, Z] = {
-    new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(one)(
-      to1,
-      to2
-    )(zExtractor)(false)
+    val q: OneToManies2SQLToOption[A, B1, B2, E, Z] =
+      new OneToManies2SQLToOption[A, B1, B2, E, Z](statement, rawParameters)(
+        one
+      )(
+        to1,
+        to2
+      )(zExtractor)(false)
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
   override def single: OneToManies2SQLToOption[A, B1, B2, E, Z] = toOption
   override def first: OneToManies2SQLToOption[A, B1, B2, E, Z] = headOption
