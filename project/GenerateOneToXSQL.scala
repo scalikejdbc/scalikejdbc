@@ -10,11 +10,19 @@ class OneToXSQL[A, E <: WithExtractor, Z](
   with AllOutputDecisionsUnsupported[Z, E] {
 
   def toOne[B](to: WrappedResultSet => B): OneToOneSQL[A, B, E, Z] = {
-    new OneToOneSQL(statement, rawParameters)(one)(to.andThen((b: B) => Option(b)))((a, b) => a.asInstanceOf[Z])
+    val q: OneToOneSQL[A, B, E, Z] = new OneToOneSQL(statement, rawParameters)(one)(to.andThen((b: B) => Option(b)))((a, b) => a.asInstanceOf[Z])
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
 
   def toOptionalOne[B](to: WrappedResultSet => Option[B]): OneToOneSQL[A, Option[B], E, Z] = {
-    new OneToOneSQL(statement, rawParameters)(one)(to.andThen((maybeB: Option[B]) => Option(maybeB)))((a, maybeB) => a.asInstanceOf[Z])
+    val q: OneToOneSQL[A, Option[B], E, Z] = new OneToOneSQL(statement, rawParameters)(one)(to.andThen((maybeB: Option[B]) => Option(maybeB)))((a, maybeB) => a.asInstanceOf[Z])
+    q.queryTimeout(queryTimeout)
+    q.fetchSize(fetchSize)
+    q.tags(tags.toSeq*)
+    q
   }
 
   def toMany[B](to: WrappedResultSet => Option[B]): OneToManySQL[A, B, E, Z] = {
