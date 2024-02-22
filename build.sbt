@@ -2,9 +2,9 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.3.1"
-def Scala212 = "2.12.18"
-def Scala213 = "2.13.12"
+def Scala3 = "3.3.2"
+def Scala212 = "2.12.19"
+def Scala213 = "2.13.13"
 
 ThisBuild / version := "4.3.0-SNAPSHOT"
 
@@ -65,7 +65,7 @@ lazy val baseSettings = Def.settings(
   scalacOptions ++= {
     if (scalaBinaryVersion.value == "2.13") {
       Seq(
-        "-Wconf:msg=constructor modifiers are assumed by synthetic:silent",
+        "-Wconf:msg=method are copied from the case class constructor:silent",
       )
     } else {
       Nil

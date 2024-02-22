@@ -116,7 +116,7 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 
 if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo.
->>"%build_sbt%" echo scalaVersion := "2.12.18"
+>>"%build_sbt%" echo scalaVersion := "2.12.19"
 >>"%build_sbt%" echo.
 >>"%build_sbt%" echo libraryDependencies ++= Seq(
 >>"%build_sbt%" echo   "org.scalikejdbc"    %%%% "scalikejdbc"        %% "3.4.0",
