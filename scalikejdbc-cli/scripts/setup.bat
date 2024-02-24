@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.9.8/sbt-launch-1.9.8.jar
+  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.9.9/sbt-launch-1.9.9.jar
 popd
 
 set db_dir=%root_dir%\db
