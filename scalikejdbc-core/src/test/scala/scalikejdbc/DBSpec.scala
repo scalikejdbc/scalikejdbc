@@ -398,6 +398,19 @@ class DBSpec
     }
   }
 
+  it should "return failed future on connection failure" in {
+    implicit val failingPool: ConnectionPoolContext = {
+      new ConnectionPoolContext {
+        override def set(name: Any, pool: ConnectionPool): Unit =
+          throw new RuntimeException
+        override def get(name: Any): ConnectionPool = null
+      }
+    }
+    val fallback = 2
+    val fResult = DB futureLocalTx { _ => Future.successful(1) } recover { case _: IllegalStateException => fallback }
+    whenReady(fResult) { _ should equal(fallback) }
+  }
+
   // --------------------
   // localTx with an IO monad example
 
