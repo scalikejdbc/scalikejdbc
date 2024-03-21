@@ -407,7 +407,9 @@ class DBSpec
       }
     }
     val fallback = 2
-    val fResult = DB futureLocalTx { _ => Future.successful(1) } recover { case _: IllegalStateException => fallback }
+    val fResult = DB futureLocalTx { _ => Future.successful(1) } recover {
+      case _: IllegalStateException => fallback
+    }
     whenReady(fResult) { _ should equal(fallback) }
   }
 
