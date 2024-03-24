@@ -3,6 +3,7 @@ package scalikejdbc
 import java.sql.Connection
 import scalikejdbc.metadata._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 /**
  * Basic Database Accessor
@@ -313,7 +314,8 @@ object DB extends LoanPattern {
   ): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
-    localTx(execution)(context, implicitly, settings)
+    Try(localTx(execution)(context, implicitly, settings))
+      .fold(err => Future.failed(err), a => a)
   }
 
   /**
