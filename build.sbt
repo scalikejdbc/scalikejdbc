@@ -135,7 +135,7 @@ lazy val root213 = Project(
     scala213projects.map(_.id + "/test").sorted ::: _
   }
 ).aggregate(
-  scala213projects.map(p => p: ProjectReference)*
+  scala213projects.map(p => p: ProjectReference) *
 )
 
 lazy val scalikejdbcJodaTime = Project(
