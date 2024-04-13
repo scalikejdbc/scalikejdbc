@@ -15,7 +15,7 @@ val isScala3 = Def.setting(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "2.0.12"
+lazy val _slf4jApiVersion = "2.0.13"
 lazy val _typesafeConfigVersion = "1.4.3"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
