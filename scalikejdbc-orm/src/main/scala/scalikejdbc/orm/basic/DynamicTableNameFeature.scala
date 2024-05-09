@@ -49,7 +49,7 @@ trait DynamicTableNameFeatureWithId[Id, Entity] {
       override def primaryKeyFieldName = _self.primaryKeyFieldName
 
       override def rawValueToId(value: Any) = _self.rawValueToId(value)
-      override def idToRawValue(id: Id) = _self.idToRawValue(id)
+      override def idToRawValue(id: Id): Any = _self.idToRawValue(id)
 
       override def defaultScope(alias: Alias[Entity]) =
         _self.defaultScope(alias)

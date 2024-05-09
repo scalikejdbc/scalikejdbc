@@ -18,7 +18,7 @@ class Test003Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test003")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test003")
 
   addSeedSQL(
     sql"""
@@ -58,21 +58,21 @@ create table employee (
 
   // mappers
   object Person extends CRUDMapper[Person] {
-    override val connectionPoolName = "test003"
+    override val connectionPoolName: Any = "test003"
     override lazy val defaultAlias = createAlias("p")
     override def extract(rs: WrappedResultSet, rn: ResultName[Person]) =
       autoConstruct(rs, rn)
   }
 
   object Company extends CRUDMapper[Company] {
-    override val connectionPoolName = "test003"
+    override val connectionPoolName: Any = "test003"
     override lazy val defaultAlias = createAlias("c")
     override def extract(rs: WrappedResultSet, rn: ResultName[Company]) =
       autoConstruct(rs, rn)
   }
 
   object Employee extends NoIdCRUDMapper[Employee] {
-    override val connectionPoolName = "test003"
+    override val connectionPoolName: Any = "test003"
     override lazy val defaultAlias = createAlias("e")
     override def extract(rs: WrappedResultSet, rn: ResultName[Employee]) =
       autoConstruct(rs, rn, "company", "person")

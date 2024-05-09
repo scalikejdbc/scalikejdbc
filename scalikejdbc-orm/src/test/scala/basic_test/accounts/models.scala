@@ -49,7 +49,7 @@ object Member extends CRUDMapper[Member] {
   innerJoinWithDefaults(
     Country,
     (m, c) => sqls.eq(m.countryId, c.id)
-  ).byDefaultEvenIfAssociated
+  ).byDefaultEvenIfAssociated()
 
   // one-to-one
   val companyOpt = belongsTo[Company](Company, (m, c) => m.copy(company = c))

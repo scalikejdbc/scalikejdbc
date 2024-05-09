@@ -39,7 +39,7 @@ trait NoIdJoinsFeature[Entity]
     new NoIdJoinsFeature[Entity]
       with NoIdFinderFeature[Entity]
       with NoIdQueryingFeature[Entity] {
-      override protected val underlying = _self
+      override protected val underlying: SQLSyntaxSupportBase[Entity] = _self
 
       override def defaultAlias = _self.defaultAlias
 
@@ -60,7 +60,7 @@ trait NoIdJoinsFeature[Entity]
 
       override def autoSession = underlying.autoSession
 
-      override def connectionPoolName = underlying.connectionPoolName
+      override def connectionPoolName: Any = underlying.connectionPoolName
 
       override def connectionPool = underlying.connectionPool
 

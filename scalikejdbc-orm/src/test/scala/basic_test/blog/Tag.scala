@@ -13,7 +13,7 @@ case class Tag(
 )
 
 object Tag extends CRUDMapper[Tag] with TimestampsFeature[Tag] {
-  override val connectionPoolName = "blog"
+  override val connectionPoolName: Any = "blog"
   override val tableName = "tags"
   override val defaultAlias = createAlias("t")
 

@@ -45,7 +45,8 @@ trait JoinsFeature[Entity]
       with IdFeature[Id]
       with FinderFeatureWithId[Id, Entity]
       with QueryingFeatureWithId[Id, Entity] {
-      override protected val underlying = _self
+      override protected val underlying
+        : scalikejdbc.orm.basic.SQLSyntaxSupportBase[Entity] = _self
 
       override def defaultAlias = _self.defaultAlias
 
@@ -60,7 +61,7 @@ trait JoinsFeature[Entity]
       override def rawValueToId(value: Any) =
         _self.rawValueToId(value).asInstanceOf[Id]
 
-      override def idToRawValue(id: Id) = id
+      override def idToRawValue(id: Id): Any = id
 
       override val associations = _self.associations ++ _associations
 
@@ -71,7 +72,7 @@ trait JoinsFeature[Entity]
 
       override def autoSession = underlying.autoSession
 
-      override def connectionPoolName = underlying.connectionPoolName
+      override def connectionPoolName: Any = underlying.connectionPoolName
 
       override def connectionPool = underlying.connectionPool
 

@@ -20,7 +20,7 @@ class Test004Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test004")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test004")
 
   addSeedSQL(
     sql"""
@@ -58,7 +58,7 @@ create table ability (
 
   // mappers
   object Ability extends CRUDMapper[Ability] with TimestampsFeature[Ability] {
-    override val connectionPoolName = "test004"
+    override val connectionPoolName: Any = "test004"
     override lazy val defaultAlias = createAlias("a")
     lazy val abilityTypeRef =
       belongsTo[AbilityType](AbilityType, (a, at) => a.copy(abilityType = at))
@@ -67,7 +67,7 @@ create table ability (
   }
 
   object AbilityType extends CRUDMapper[AbilityType] {
-    override val connectionPoolName = "test004"
+    override val connectionPoolName: Any = "test004"
     override lazy val defaultAlias = createAlias("at")
     override def extract(rs: WrappedResultSet, rn: ResultName[AbilityType]) =
       autoConstruct(rs, rn)

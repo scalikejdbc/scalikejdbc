@@ -17,7 +17,7 @@ class Test005Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test005")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test005")
 
   addSeedSQL(
     sql"create table summary (id bigserial not null, name varchar(100) not null)"
@@ -122,7 +122,7 @@ class Test005Spec extends AnyFunSpec with Matchers with DBSeeds {
   )
 
   object Summary extends CRUDMapper[Summary] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("s")
     override def extract(rs: WrappedResultSet, rn: ResultName[Summary]) = {
       autoConstruct(
@@ -194,61 +194,61 @@ class Test005Spec extends AnyFunSpec with Matchers with DBSeeds {
     def withAssociations = joins(d1, d2, d3, d4, d5, d6, d7, d8, d9)
   }
   object Data1 extends CRUDMapper[Data1] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d1")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data1]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data2 extends CRUDMapper[Data2] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d2")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data2]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data3 extends CRUDMapper[Data3] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d3")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data3]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data4 extends CRUDMapper[Data4] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d4")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data4]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data5 extends CRUDMapper[Data5] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d5")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data5]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data6 extends CRUDMapper[Data6] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d6")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data6]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data7 extends CRUDMapper[Data7] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d7")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data7]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data8 extends CRUDMapper[Data8] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d8")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data8]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data9 extends CRUDMapper[Data9] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d9")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data9]) =
       autoConstruct(rs, rn, "summary")
   }
   object Data10 extends CRUDMapper[Data10] {
-    override val connectionPoolName = "test005"
+    override val connectionPoolName: Any = "test005"
     override def defaultAlias = createAlias("d10")
     override def extract(rs: WrappedResultSet, rn: ResultName[Data10]) =
       autoConstruct(rs, rn, "summary")

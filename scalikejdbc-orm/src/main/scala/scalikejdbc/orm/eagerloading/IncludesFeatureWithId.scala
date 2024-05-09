@@ -55,7 +55,7 @@ trait IncludesFeatureWithId[Id, Entity]
     new IncludesFeatureWithId[Id, Entity]
       with FinderFeatureWithId[Id, Entity]
       with QueryingFeatureWithId[Id, Entity] {
-      override protected val underlying = _self
+      override protected val underlying: SQLSyntaxSupportBase[Entity] = _self
       override def defaultAlias = _self.defaultAlias
 
       override def tableName = _self.tableName
@@ -65,7 +65,7 @@ trait IncludesFeatureWithId[Id, Entity]
       override def primaryKeyFieldName = _self.primaryKeyFieldName
 
       override def rawValueToId(value: Any) = _self.rawValueToId(value)
-      override def idToRawValue(id: Id) = _self.idToRawValue(id)
+      override def idToRawValue(id: Id): Any = _self.idToRawValue(id)
 
       override private[scalikejdbc] val belongsToAssociations =
         _self.belongsToAssociations ++ _belongsTo
@@ -88,7 +88,7 @@ trait IncludesFeatureWithId[Id, Entity]
       override val defaultOneToManyExtractors = _self.defaultOneToManyExtractors
 
       override def autoSession = underlying.autoSession
-      override def connectionPoolName = underlying.connectionPoolName
+      override def connectionPoolName: Any = underlying.connectionPoolName
       override def connectionPool = underlying.connectionPool
 
       override def defaultScope(alias: Alias[Entity]) =

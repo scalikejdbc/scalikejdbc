@@ -6,5 +6,5 @@ package scalikejdbc.orm.querying
 trait QueryingFeature[Entity] extends QueryingFeatureWithId[Long, Entity] {
 
   override def rawValueToId(value: Any) = value.toString.toLong
-  override def idToRawValue(id: Long) = id
+  override def idToRawValue(id: Long): Any = id
 }

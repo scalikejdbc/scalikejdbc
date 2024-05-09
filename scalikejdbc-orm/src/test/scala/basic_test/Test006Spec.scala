@@ -17,7 +17,7 @@ class Test006Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test006")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test006")
 
   addSeedSQL(
     sql"create table summary (id bigserial not null, name varchar(100) not null)"
@@ -37,7 +37,7 @@ class Test006Spec extends AnyFunSpec with Matchers with DBSeeds {
 
   case class Summary(id: Long, name: String)
   object Summary extends CRUDMapper[Summary] {
-    override val connectionPoolName = "test006"
+    override val connectionPoolName: Any = "test006"
     override def defaultAlias = createAlias("s")
 
     beforeCreate((session: DBSession, namedValues: Seq[(SQLSyntax, Any)]) => {

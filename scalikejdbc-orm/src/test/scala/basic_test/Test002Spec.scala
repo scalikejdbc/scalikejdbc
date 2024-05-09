@@ -17,7 +17,7 @@ class Test002Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test002")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test002")
 
   addSeedSQL(
     sql"""
@@ -30,7 +30,7 @@ create table account (
   case class Account(name: String)
 
   object Account extends NoIdCRUDMapper[Account] {
-    override def connectionPoolName = "test002"
+    override def connectionPoolName: Any = "test002"
 
     override def tableName = "account"
     override def defaultAlias: Alias[Account] = createAlias("a")

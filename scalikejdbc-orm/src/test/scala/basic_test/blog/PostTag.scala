@@ -12,7 +12,7 @@ case class PostTag(
 )
 
 object PostTag extends JoinTable[PostTag] {
-  override val connectionPoolName = "blog"
+  override val connectionPoolName: Any = "blog"
   override val tableName = "posts_tags"
   override val defaultAlias = createAlias("pt")
 

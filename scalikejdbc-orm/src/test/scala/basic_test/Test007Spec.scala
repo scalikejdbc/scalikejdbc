@@ -18,7 +18,7 @@ class Test007Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("test007")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("test007")
 
   addSeedSQL(
     sql"create table blog (id bigserial not null, name varchar(100) not null)"
@@ -36,7 +36,7 @@ class Test007Spec extends AnyFunSpec with Matchers with DBSeeds {
   // entities
   case class Blog(id: Long, name: String, articles: Seq[Article] = Seq.empty)
   object Blog extends CRUDMapper[Blog] {
-    override val connectionPoolName = "test007"
+    override val connectionPoolName: Any = "test007"
     override def defaultAlias = createAlias("b")
     override def extract(rs: WrappedResultSet, rn: ResultName[Blog]) =
       autoConstruct(rs, rn, "articles")
@@ -56,7 +56,7 @@ class Test007Spec extends AnyFunSpec with Matchers with DBSeeds {
     blog: Option[Blog] = None
   )
   object Article extends CRUDMapper[Article] {
-    override val connectionPoolName = "test007"
+    override val connectionPoolName: Any = "test007"
     override def defaultAlias = createAlias("a")
     override def extract(rs: WrappedResultSet, rn: ResultName[Article]) =
       autoConstruct(rs, rn, "blog")

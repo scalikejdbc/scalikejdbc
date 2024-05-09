@@ -16,7 +16,7 @@ class Issue219Spec extends AnyFunSpec with Matchers with DBSeeds {
     "sa"
   )
 
-  override val dbSeedsAutoSession = NamedAutoSession("issue219")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("issue219")
 
   addSeedSQL(
     sql"""
@@ -59,14 +59,14 @@ create table tag (
   )
 
   object User extends CRUDMapper[User] {
-    override val connectionPoolName = "issue219"
+    override val connectionPoolName: Any = "issue219"
     override def defaultAlias = createAlias("u")
 
     override def extract(rs: WrappedResultSet, rn: ResultName[User]) =
       autoConstruct(rs, rn)
   }
   object Article extends CRUDMapper[Article] {
-    override val connectionPoolName = "issue219"
+    override val connectionPoolName: Any = "issue219"
     override def defaultAlias = createAlias("a")
     override def extract(rs: WrappedResultSet, rn: ResultName[Article]) =
       autoConstruct(rs, rn, "user", "tags")
@@ -95,7 +95,7 @@ create table tag (
     )
   }
   object Tag extends CRUDMapper[Tag] {
-    override val connectionPoolName = "issue219"
+    override val connectionPoolName: Any = "issue219"
     override def defaultAlias = createAlias("t")
     override def extract(rs: WrappedResultSet, rn: ResultName[Tag]) =
       autoConstruct(rs, rn, "article")

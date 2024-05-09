@@ -12,7 +12,7 @@ class BlogDatabaseSpec extends AnyFunSpec with Matchers with DBSeeds {
   Class.forName("org.h2.Driver")
   ConnectionPool.add("blog", "jdbc:h2:mem:blog", "sa", "sa")
 
-  override val dbSeedsAutoSession = NamedAutoSession("blog")
+  override val dbSeedsAutoSession: DBSession = NamedAutoSession("blog")
 
   addSeedSQL(
     sql"""

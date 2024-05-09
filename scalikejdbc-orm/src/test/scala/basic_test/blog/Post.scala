@@ -16,7 +16,7 @@ case class Post(
 )
 
 object Post extends CRUDMapper[Post] with TimestampsFeature[Post] {
-  override val connectionPoolName = "blog"
+  override val connectionPoolName: Any = "blog"
   override val tableName = "posts"
   override val defaultAlias = createAlias("p")
 
