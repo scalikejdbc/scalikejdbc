@@ -124,7 +124,7 @@ case class LightFactoryGirl[Id, Entity](
       .toSeq
 
     val id =
-      try mapper.createWithNamedValues(mergedAttributes: _*)
+      try mapper.createWithNamedValues(mergedAttributes*)
       catch {
         case e: Exception =>
           val message = s"Failed to create an entity because ${e.getMessage}"

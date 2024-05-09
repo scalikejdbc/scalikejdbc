@@ -87,7 +87,7 @@ object Member extends CRUDMapper[Member] {
     (member, gs) => member.copy(groups = gs)
   ).byDefault
   // if GroupMapper is "Group", this code will work
-  //hasManyThrough[Group](GroupMember, Group, (member, groups) => member.copy(groups = groups)).byDefault
+  // hasManyThrough[Group](GroupMember, Group, (member, groups) => member.copy(groups = groups)).byDefault
 
   // skills
   val skillsSimpleRef = hasManyThrough[Skill](
@@ -312,7 +312,7 @@ object Product extends CRUDMapperWithId[ProductId, Product] {
   override def tableName = "products"
   override def defaultAlias = createAlias("prd")
 
-  override def idToRawValue(id: ProductId) = id.value
+  override def idToRawValue(id: ProductId): Long = id.value
   override def rawValueToId(value: Any) = ProductId(value.toString.toLong)
 
   override def extract(rs: WrappedResultSet, p: ResultName[Product]) =

@@ -82,6 +82,7 @@ create table ability (
 
         val id = Ability.createWithAttributes("name" -> "SCALA")
         val before: Ability = Ability.findById(id).get
+        Thread.sleep(50L)
         Ability.updateById(id).withAttributes("name" -> "Scala")
         val after = Ability.findById(id).get
         after.createdAt should equal(before.createdAt)

@@ -36,7 +36,7 @@ trait DBSeeds {
     * @return self
     */
   def addSeedSQL(
-    seedSQLs: SQL[_, _]*
+    seedSQLs: SQL[?, ?]*
   )(implicit session: DBSession = dbSeedsAutoSession): DBSeeds = {
     registeredSeedOperations ++= seedSQLs.map(s => () => s.execute.apply())
     this
@@ -80,7 +80,7 @@ trait DBSeeds {
     * @return nothing
     */
   def runIfFailed(
-    sql: SQL[_, _]
+    sql: SQL[?, ?]
   )(implicit session: DBSession = dbSeedsAutoSession): Unit = {
     ConnectionPool.synchronized {
       try sql.execute.apply()
