@@ -63,6 +63,9 @@ jobs:
           - name: scala_3
             db: postgresql
             java: 8
+          - name: scala_3
+            db: postgresql
+            java: 21
 
     runs-on: ubuntu-latest
     steps:
