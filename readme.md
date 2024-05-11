@@ -2,15 +2,9 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.scalikejdbc/scalikejdbc_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.scalikejdbc%20AND%20a:scalikejdbc_2.13)
 
-## Just write SQL and get things done!
+## Just Write SQL And Get Things Done 💪
 
-[**ScalikeJDBC**](https://scalikejdbc.org/) is a concise and powerful SQL-based database access library designed specifically for Scala. By wrapping JDBC in a more intuitive way, it simplifies database interactions without sacrificing control or functionality.
-
-### Features
-
-* **Ease of Use**: Offers a fluent, intuitive API that makes it simpler to compose and execute SQL queries
-* **Production-Ready**: Battle-tested in real-world applications, ensuring reliability and performance
-* **Scalable**: Designed to scale effortlessly with your applications, from startup prototypes to large-scale enterprise systems
+[**ScalikeJDBC**](https://scalikejdbc.org/) seamlessly wraps JDBC APIs, offering intuitive and highly flexible functionalities. With QueryDSL, your code becomes inherently type-safe and reusable. This library is not just practical; it’s production-ready. Utilize this library confidently in your real-world projects.
 
 ## Getting Started
 
@@ -24,15 +18,13 @@ To get started with ScalikeJDBC, add the following dependency to your `build.sbt
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"     % "4.2.+",
+  "org.scalikejdbc" %% "scalikejdbc"     % "4.3.+",
   "com.h2database"  %  "h2"              % "2.2.+",
   "ch.qos.logback"  %  "logback-classic" % "1.5.+"
 )
 ```
 
-If you're a Play Framework user, take a look at play-support project, too:
-
-https://github.com/scalikejdbc/scalikejdbc-play-support
+If you're a Play Framework user, take a look at play-support project, too: https://github.com/scalikejdbc/scalikejdbc-play-support
 
 #### Quick Example
 
