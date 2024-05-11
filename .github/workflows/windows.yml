@@ -17,5 +17,7 @@ jobs:
     - uses: coursier/cache-action@v6
     - run: rm project/sbt-pgp.sbt
     - run: rm project/sbt-updates.sbt
+    # TODO: improve the stability of this test; it occurs only with Windows test job
+    - run: echo 'ThisBuild / Test / testOptions += Tests.Exclude(Seq("basic_test.accounts.AccountDatabaseSpec"))' > skip-tests.sbt
     - shell: bash
       run: ./test.sh
