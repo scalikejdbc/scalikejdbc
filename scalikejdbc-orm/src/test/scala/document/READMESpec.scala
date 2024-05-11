@@ -42,7 +42,11 @@ class READMESpec extends AnyFunSpec with Matchers {
       // Start: Document code
       // ### Database connection ###
       Class.forName("org.h2.Driver")
-      ConnectionPool.singleton("jdbc:h2:mem:hello;MODE=PostgreSQL", "user", "pass")
+      ConnectionPool.singleton(
+        "jdbc:h2:mem:hello;MODE=PostgreSQL",
+        "user",
+        "pass"
+      )
       implicit val session = AutoSession
 
       // ### Create tables ###
