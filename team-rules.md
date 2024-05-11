@@ -8,6 +8,7 @@
   - Version 1 supports Scala 2.9 & 2.10
   - Version 2 supports Scala 2.10, 2.11, and 2.12
   - Version 3 supports Scala 2.11, 2.12, and 2.13
+  - Version 4 supports Scala 2.12, 2.13, and 3
 - minor: Change to indicate functionality and API compatibility changes, the same minor version must provide the same functionality and APIs
 - fix: For releasing smaller improvements, bug fixes and new features
 

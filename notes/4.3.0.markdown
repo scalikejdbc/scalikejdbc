@@ -1,0 +1,21 @@
+ScalikeJDBC 4.3.0 is now available for Scala 2.12, 2.13, and Scala 3 application development!
+
+![ScalikeJDBC Logo](https://scalikejdbc.org/images/logo.png)
+
+The notable feature enhancement is scalikejdbc-orm module addition! This extension is an O/R mapper built on top of the ScalikeJDBC core library, drawing significant inspiration from Ruby on Rails' ActiveRecord library. For instance, you can run the following query just with simple CRUDMapper class/object definition:
+
+```scala
+Member.joins(Member.email).where(sqls.eq(m.name, "Alice")).apply()
+```
+
+Refer to the latest README and document website for more details.
+
+Thank you to all the contributors for this release! :+1:
+
+* @jchyb helped @seratch resolve Scala 3 compilation errors for scalikejdbc-orm module (#1249)
+* @kardapoltsev resolved missing tags in one-to-x queries (#2163)
+* @xuwei-k did a substantial amount of work for refactoring and dependency management
+
+Please review [https://github.com/scalikejdbc/scalikejdbc/milestone/48?closed=1) for a list of PRs and contributors!
+
+Take pleasure in crafting type-safe SQL to accomplish tasks efficiently!
