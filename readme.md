@@ -136,11 +136,11 @@ object Member extends CRUDMapper[Member] with TimestampsFeature[Member] {
   val email = hasOne[Email](Email, (m, e) => m.copy(email = e))
 }
 
-class Example extends App {
+object Example extends App {
   // ### Database connection ###
   Class.forName("org.h2.Driver")
   ConnectionPool.singleton("jdbc:h2:mem:hello;MODE=PostgreSQL", "user", "pass")
-  implicit val session = AutoSession
+  implicit val session: DBSession = AutoSession
 
   // ### Create tables ###
   sql"""create table member (
