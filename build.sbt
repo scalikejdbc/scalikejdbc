@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def Scala3 = "3.3.3"
+def Scala3 = "3.4.1"
 def Scala212 = "2.12.19"
 def Scala213 = "2.13.14"
 
@@ -21,7 +21,7 @@ lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
 lazy val _logbackVersion = "1.2.13"
-lazy val _h2Version = "1.4.199"
+lazy val _h2Version = "1.4.199" // TODO: Upgrade to 2.x
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.5.0.Final"
 def scalatestVersion = "3.2.18"
