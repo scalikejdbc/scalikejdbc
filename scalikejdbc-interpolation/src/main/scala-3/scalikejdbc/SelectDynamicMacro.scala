@@ -25,7 +25,7 @@ object SelectDynamicMacroImpl {
     val typeSymbol = TypeRepr.of[E].typeSymbol
     val expectedNames = typeSymbol.caseFields.map(_.name)
     name.value.foreach { _name =>
-      if (expectedNames.nonEmpty && !expectedNames.contains(_name)) {
+      if expectedNames.nonEmpty && !expectedNames.contains(_name) then {
         report.error(
           s"${typeSymbol.fullName}#${_name} not found. Expected fields are ${expectedNames
               .mkString("#", ", #", "")}",

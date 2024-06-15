@@ -19,7 +19,7 @@ object autoColumns {
     import quotes.reflect._
 
     // SQLSyntaxSupportImpl
-    val thi = if (Symbol.spliceOwner.owner.isClassDef) {
+    val thi = if Symbol.spliceOwner.owner.isClassDef then {
       This(Symbol.spliceOwner.owner) // use in SQLSyntaxSupportFactory
     } else {
       This(Symbol.spliceOwner.owner.owner)
