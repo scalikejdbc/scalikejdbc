@@ -24,7 +24,7 @@ lazy val _logbackVersion = "1.2.13"
 lazy val _h2Version = "1.4.199"
 lazy val _postgresqlVersion = "9.4.1212"
 lazy val _hibernateVersion = "6.5.2.Final"
-def scalatestVersion = "3.2.18"
+def scalatestVersion = "3.2.19"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.20.5" % "provided"
 
