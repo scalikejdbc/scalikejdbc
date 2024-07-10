@@ -421,6 +421,21 @@ object DB extends LoanPattern {
     DB(cp.borrow(), cp.connectionAttributes, settings).getTable(table)
   }
 
+  /**
+   * Returns all table informations
+   *
+   * @param table table name (with schema optionally)
+   * @param context connection pool context as implicit parameter
+   * @return table informations
+   */
+  def getTables(
+    table: String,
+    settings: SettingsProvider = SettingsProvider.default
+  )(implicit context: CPContext = NoCPContext): Seq[Table] = {
+    val cp = connectionPool(context)
+    DB(cp.borrow(), cp.connectionAttributes, settings).getTables(table)
+  }
+
   def getColumnNames(
     table: String,
     settings: SettingsProvider = SettingsProvider.default
