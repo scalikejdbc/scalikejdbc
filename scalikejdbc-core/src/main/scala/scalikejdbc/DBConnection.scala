@@ -503,11 +503,23 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   def getTable(
     table: String,
     tableTypes: Array[String] = DBConnection.tableTypes
-  ): Option[Table] = {
+  ): Option[Table] =
+    getTables(table = table, tableTypes = tableTypes).headOption
+
+  /**
+   * Returns all table informations
+   *
+   * @param table table name (with schema optionally)
+   * @return table informations
+   */
+  def getTables(
+    table: String,
+    tableTypes: Array[String] = DBConnection.tableTypes
+  ): Seq[Table] = {
     readOnlyWithConnection { conn =>
       val meta = conn.getMetaData
 
-      getSchemaAndTableName(meta, table, tableTypes).flatMap {
+      getSchemaAndTableName(meta, table, tableTypes).toSeq.flatMap {
         case (schema, tableName) =>
           _getTable(meta, schema, tableName, tableTypes)
       }
@@ -530,11 +542,12 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
     schema: String,
     table: String,
     tableTypes: Array[String] = DBConnection.tableTypes
-  ): Option[Table] = {
+  ): Seq[Table] = {
     val tableList =
       new ResultSetIterator(meta.getTables(null, schema, table, tableTypes))
         .map { rs =>
           (
+            rs.string("TABLE_CAT"),
             rs.string("TABLE_SCHEM"),
             rs.string("TABLE_NAME"),
             rs.string("REMARKS")
@@ -542,13 +555,14 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
         }
         .to(LazyList)
 
-    tableList.headOption.map { case (schema, table, remarks) =>
+    tableList.map { case (catalog, schema, table, remarks) =>
       val pkNames: List[String] = new ResultSetIterator(
         meta.getPrimaryKeys(null, schema, table)
       ).map(_.string("COLUMN_NAME")).toList
 
       Table(
         name = table,
+        catalog = catalog,
         schema = schema,
         description = remarks,
         columns = new ResultSetIterator(getAllColumns(meta, schema, table))

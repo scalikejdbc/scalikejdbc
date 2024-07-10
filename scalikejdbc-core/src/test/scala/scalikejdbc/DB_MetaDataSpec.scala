@@ -4,6 +4,7 @@ import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.metadata.Table
 
 class DB_MetaDataSpec
   extends AnyFlatSpec
@@ -569,6 +570,42 @@ class DB_MetaDataSpec
       } finally {
         DB autoCommit { implicit s =>
           execute("drop table if exists users")
+        }
+      }
+    }
+  }
+  it should "get all table names" in {
+    if (isMySQLDriverName) {
+      val databaseNames = Seq("other_db_1", "other_db_2")
+      try {
+        DB.autoCommit { implicit s =>
+          databaseNames.foreach { dbName =>
+            execute(s"create database ${dbName};")
+            execute(
+              s"create table ${dbName}.same_name_table_test(id integer);"
+            )
+          }
+        }
+        val tables = DB.getTables("same_name_table_test")
+        tables.toSet should be(
+          Set(
+            Table(
+              name = "same_name_table_test",
+              catalog = "other_db_1",
+              description = "",
+            ),
+            Table(
+              name = "same_name_table_test",
+              catalog = "other_db_2",
+              description = "",
+            ),
+          )
+        )
+      } finally {
+        DB.autoCommit { implicit s =>
+          databaseNames.foreach { dbName =>
+            execute(s"drop database ${dbName}")
+          }
         }
       }
     }

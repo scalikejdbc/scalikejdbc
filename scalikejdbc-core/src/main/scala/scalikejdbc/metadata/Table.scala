@@ -12,6 +12,7 @@ package scalikejdbc.metadata
  */
 case class Table(
   name: String,
+  catalog: String = null,
   schema: String = null,
   description: String = null,
   columns: List[Column] = Nil,
