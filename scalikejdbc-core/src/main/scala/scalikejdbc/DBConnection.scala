@@ -557,7 +557,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
 
     tableList.map { case (catalog, schema, table, remarks) =>
       val pkNames: List[String] = new ResultSetIterator(
-        meta.getPrimaryKeys(null, schema, table)
+        meta.getPrimaryKeys(catalog, schema, table)
       ).map(_.string("COLUMN_NAME")).toList
 
       Table(
@@ -607,7 +607,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
           .distinct,
         foreignKeys = {
           try {
-            new ResultSetIterator(meta.getImportedKeys(null, schema, table))
+            new ResultSetIterator(meta.getImportedKeys(catalog, schema, table))
               .map { rs =>
                 ForeignKey(
                   name = rs.string("FKCOLUMN_NAME"),
@@ -622,7 +622,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
         indices = {
           try {
             new ResultSetIterator(
-              meta.getIndexInfo(null, schema, table, false, true)
+              meta.getIndexInfo(catalog, schema, table, false, true)
             )
               .foldLeft(Map[String, Index]()) { case (map, rs) =>
                 val indexName: String = rs.string("INDEX_NAME")
