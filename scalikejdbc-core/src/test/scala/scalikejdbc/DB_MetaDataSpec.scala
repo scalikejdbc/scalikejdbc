@@ -4,7 +4,7 @@ import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import scalikejdbc.metadata.Table
+import scalikejdbc.metadata.{ Index, IndexType, Table }
 
 class DB_MetaDataSpec
   extends AnyFlatSpec
@@ -576,29 +576,84 @@ class DB_MetaDataSpec
   }
   it should "get all table names" in {
     if (isMySQLDriverName) {
-      val databaseNames = Seq("other_db_1", "other_db_2")
+      val db1 = "other_db_1"
+      val db2 = "other_db_2"
+      val databaseNames = Seq(db1, db2)
       try {
+        val tableName = "same_name_table_test"
         DB.autoCommit { implicit s =>
           databaseNames.foreach { dbName =>
             execute(s"create database ${dbName};")
-            execute(
-              s"create table ${dbName}.same_name_table_test(id integer);"
-            )
           }
+
+          execute(
+            s"""|create table ${db1}.${tableName}(
+                |  id integer primary key,
+                |  name varchar(10)
+                |);""".stripMargin
+          )
+          execute(
+            s"""|create table ${db2}.${tableName}(
+                |  id varchar(20) primary key
+                |);""".stripMargin
+          )
+          execute(
+            s"CREATE UNIQUE index index_1 ON ${db1}.${tableName}(id, name);"
+          )
         }
-        val tables = DB.getTables("same_name_table_test")
+        val tables = DB.getTables(tableName)
         tables.toSet should be(
           Set(
             Table(
               name = "same_name_table_test",
               catalog = "other_db_1",
               description = "",
+              indices = List(
+                Index(
+                  "index_1",
+                  List("id", "name"),
+                  true,
+                  None,
+                  IndexType.tableIndexOther,
+                  Some(1),
+                  Some("A"),
+                  Some(0),
+                  Some(0),
+                  None
+                ),
+                Index(
+                  "PRIMARY",
+                  List("id"),
+                  true,
+                  None,
+                  IndexType.tableIndexOther,
+                  Some(1),
+                  Some("A"),
+                  Some(0),
+                  Some(0),
+                  None
+                )
+              )
             ),
             Table(
               name = "same_name_table_test",
               catalog = "other_db_2",
               description = "",
-            ),
+              indices = List(
+                Index(
+                  "PRIMARY",
+                  List("id"),
+                  true,
+                  None,
+                  IndexType.tableIndexOther,
+                  Some(1),
+                  Some("A"),
+                  Some(0),
+                  Some(0),
+                  None
+                )
+              )
+            )
           )
         )
       } finally {
