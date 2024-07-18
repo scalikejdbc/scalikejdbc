@@ -5,6 +5,7 @@ rm -rf */target
 
 sbt \
   clean \
+  "set sonatypeProfileName := \"org.scalikejdbc\"" \
   "project mapper-generator" \
   "^publishSigned" \
   'project root213' \
