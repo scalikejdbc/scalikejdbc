@@ -12,7 +12,7 @@ object EntityUtil {
     import quotes.reflect._
     val sym = TypeTree.of[T].symbol
     val primaryConstructor = sym.primaryConstructor
-    if (primaryConstructor.isNoSymbol) {
+    if primaryConstructor.isNoSymbol then {
       report.errorAndAbort(
         s"Could not find the primary constructor for ${sym.fullName}. type ${sym.fullName} must be a class, not trait or type parameter"
       )
