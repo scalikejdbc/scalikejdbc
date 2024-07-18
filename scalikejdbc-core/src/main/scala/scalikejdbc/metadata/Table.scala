@@ -19,6 +19,9 @@ case class Table(
   indices: List[Index] = Nil
 ) {
 
+  // could not use case class field for binary compatibility
+  def catalog: String = null
+
   /**
    * Returns name with schema(if exists)
    *
