@@ -67,15 +67,6 @@ lazy val baseSettings = Def.settings(
   addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
-    if (scalaBinaryVersion.value == "2.13") {
-      Seq(
-        "-Wconf:msg=method are copied from the case class constructor:silent",
-      )
-    } else {
-      Nil
-    }
-  },
-  scalacOptions ++= {
     if (isScala3.value) {
       Seq(
         "-language:higherKinds,implicitConversions",
