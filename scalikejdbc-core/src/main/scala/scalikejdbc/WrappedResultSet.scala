@@ -49,10 +49,10 @@ case class WrappedResultSet(
     getOpt[java.sql.Array](columnLabel)
 
   def asciiStream(columnIndex: Int): java.io.InputStream =
-    get[java.io.InputStream](columnIndex)(TypeBinder.asciiStream)
+    get[java.io.InputStream](columnIndex)(using TypeBinder.asciiStream)
 
   def asciiStream(columnLabel: String): java.io.InputStream =
-    get[java.io.InputStream](columnLabel)(TypeBinder.asciiStream)
+    get[java.io.InputStream](columnLabel)(using TypeBinder.asciiStream)
 
   def asciiStreamOpt(columnIndex: Int): Option[java.io.InputStream] = {
     implicit val binder = TypeBinder.asciiStream
@@ -294,10 +294,10 @@ case class WrappedResultSet(
   }
 
   def nCharacterStream(columnIndex: Int): java.io.Reader =
-    get[java.io.Reader](columnIndex)(TypeBinder.nCharacterStream)
+    get[java.io.Reader](columnIndex)(using TypeBinder.nCharacterStream)
 
   def nCharacterStream(columnLabel: String): java.io.Reader =
-    get[java.io.Reader](columnLabel)(TypeBinder.nCharacterStream)
+    get[java.io.Reader](columnLabel)(using TypeBinder.nCharacterStream)
 
   def nCharacterStreamOpt(columnIndex: Int): Option[java.io.Reader] = {
     implicit val binder = TypeBinder.nCharacterStream
@@ -321,10 +321,10 @@ case class WrappedResultSet(
     getOpt[java.sql.NClob](columnLabel)
 
   def nString(columnIndex: Int): String =
-    get[String](columnIndex)(TypeBinder.nString)
+    get[String](columnIndex)(using TypeBinder.nString)
 
   def nString(columnLabel: String): String =
-    get[String](columnLabel)(TypeBinder.nString)
+    get[String](columnLabel)(using TypeBinder.nString)
 
   def nStringOpt(columnIndex: Int): Option[String] = {
     implicit val binder = TypeBinder.nString
@@ -336,9 +336,10 @@ case class WrappedResultSet(
     getOpt[String](columnLabel)
   }
 
-  def any(columnIndex: Int): Any = get[Any](columnIndex)(TypeBinder.any)
+  def any(columnIndex: Int): Any = get[Any](columnIndex)(using TypeBinder.any)
 
-  def any(columnLabel: String): Any = get[Any](columnLabel)(TypeBinder.any)
+  def any(columnLabel: String): Any =
+    get[Any](columnLabel)(using TypeBinder.any)
 
   def any(columnIndex: Int, map: Map[String, Class[?]]): Any = {
     implicit val binder: TypeBinder[Any] =
@@ -358,12 +359,12 @@ case class WrappedResultSet(
 
   def anyOpt(columnIndex: Int): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    getOpt[Any](columnIndex)(binder)
+    getOpt[Any](columnIndex)(using binder)
   }
 
   def anyOpt(columnLabel: String): Option[Any] = {
     implicit val binder: TypeBinder[Any] = TypeBinder.any
-    getOpt[Any](columnLabel)(binder)
+    getOpt[Any](columnLabel)(using binder)
   }
 
   def anyOpt(columnIndex: Int, map: Map[String, Class[?]]): Option[Any] = {
@@ -371,7 +372,7 @@ case class WrappedResultSet(
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)
       )
-    getOpt[Any](columnIndex)(binder)
+    getOpt[Any](columnIndex)(using binder)
   }
 
   def anyOpt(columnLabel: String, map: Map[String, Class[?]]): Option[Any] = {
@@ -379,7 +380,7 @@ case class WrappedResultSet(
       TypeBinder((rs, i) => rs.getObject(i, map.asJava))((rs, l) =>
         rs.getObject(l, map.asJava)
       )
-    getOpt[Any](columnLabel)(binder)
+    getOpt[Any](columnLabel)(using binder)
   }
 
   def ref(columnIndex: Int): java.sql.Ref = get[java.sql.Ref](columnIndex)
