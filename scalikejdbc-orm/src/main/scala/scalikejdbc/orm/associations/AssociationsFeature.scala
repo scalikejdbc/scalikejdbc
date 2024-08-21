@@ -70,24 +70,21 @@ trait AssociationsFeature[Entity]
 
   private[scalikejdbc] def belongsToAssociations
     : Seq[BelongsToAssociation[Entity]] = {
-    associations
-      .withFilter(_.isInstanceOf[BelongsToAssociation[Entity]])
-      .map(_.asInstanceOf[BelongsToAssociation[Entity]])
-      .toSeq
+    associations.collect { case x: BelongsToAssociation[Entity] @unchecked =>
+      x
+    }.toSeq
   }
   private[scalikejdbc] def hasOneAssociations
     : Seq[HasOneAssociation[Entity]] = {
-    associations
-      .withFilter(_.isInstanceOf[HasOneAssociation[Entity]])
-      .map(_.asInstanceOf[HasOneAssociation[Entity]])
-      .toSeq
+    associations.collect { case x: HasOneAssociation[Entity] @unchecked =>
+      x
+    }.toSeq
   }
   private[scalikejdbc] def hasManyAssociations
     : Seq[HasManyAssociation[Entity]] = {
-    associations
-      .withFilter(_.isInstanceOf[HasManyAssociation[Entity]])
-      .map(_.asInstanceOf[HasManyAssociation[Entity]])
-      .toSeq
+    associations.collect { case x: HasManyAssociation[Entity] @unchecked =>
+      x
+    }.toSeq
   }
 
   /**

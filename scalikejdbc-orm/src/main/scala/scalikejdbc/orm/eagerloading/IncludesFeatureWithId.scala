@@ -40,16 +40,13 @@ trait IncludesFeatureWithId[Id, Entity]
     val _self = this
     val _associations = associations
     val _belongsTo = associations
-      .filter(_.isInstanceOf[BelongsToAssociation[Entity]])
-      .map(_.asInstanceOf[BelongsToAssociation[Entity]])
+      .collect { case x: BelongsToAssociation[Entity] @unchecked => x }
     val _hasOne =
       associations
-        .filter(_.isInstanceOf[HasOneAssociation[Entity]])
-        .map(_.asInstanceOf[HasOneAssociation[Entity]])
+        .collect { case x: HasOneAssociation[Entity] @unchecked => x }
     val _hasMany =
       associations
-        .filter(_.isInstanceOf[HasManyAssociation[Entity]])
-        .map(_.asInstanceOf[HasManyAssociation[Entity]])
+        .collect { case x: HasManyAssociation[Entity] @unchecked => x }
 
     // creates new instance but ideally this should be more DRY & safe implementation
     new IncludesFeatureWithId[Id, Entity]
