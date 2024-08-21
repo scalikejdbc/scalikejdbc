@@ -4,7 +4,7 @@ import com.typesafe.config.impl.ConfigImpl
 import com.typesafe.config._
 
 import java.io.File
-import java.net.URL
+import java.net.URI
 import scala.util.Try
 import scala.collection.JavaConverters._
 
@@ -124,7 +124,7 @@ object ORMTypesafeConfigReader {
         ConfigFactory.parseFile(new File(f))
       ),
       findEnv("SCALIKEJDBC_CONFIG_URL", "config.url").map(u =>
-        ConfigFactory.parseURL(new URL(u))
+        ConfigFactory.parseURL(new URI(u).toURL)
       )
     ).flatten.foldLeft(ConfigFactory.load()) { case (config, each) =>
       config.withFallback(each)
