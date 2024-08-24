@@ -51,7 +51,7 @@ trait OptimisticLockWithVersionFeatureWithId[Id, Entity]
       )
     }
   }
-  afterUpdateBy(updateByHandler _)
+  afterUpdateBy(updateByHandler)
 
   override def updateBy(where: SQLSyntax): UpdateOperationBuilder =
     new UpdateOperationBuilderWithVersion(this, where)

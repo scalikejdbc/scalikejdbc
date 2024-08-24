@@ -31,13 +31,13 @@ trait JoinsFeature[Entity]
    */
   def joins[Id](
     associations: Association[?]*
-  ): JoinsFeature[Entity]
-    with IdFeature[Id]
-    with FinderFeatureWithId[Id, Entity]
-    with QueryingFeatureWithId[
-      Id,
-      Entity
-    ] = {
+  ): JoinsFeature[Entity] & IdFeature[Id] & FinderFeatureWithId[
+    Id,
+    Entity
+  ] & QueryingFeatureWithId[
+    Id,
+    Entity
+  ] = {
     val _self = this
     val _associations = associations
 

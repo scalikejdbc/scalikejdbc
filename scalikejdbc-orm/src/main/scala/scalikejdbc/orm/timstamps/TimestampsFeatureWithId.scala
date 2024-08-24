@@ -29,7 +29,7 @@ trait TimestampsFeatureWithId[Id, Entity]
   )(implicit s: DBSession = autoSession): Id = {
     val additionalValues =
       timestampValues(name => namedValues.exists(_._1 == column.field(name)))
-    super.createWithNamedValues(namedValues ++ additionalValues: _*)
+    super.createWithNamedValues((namedValues ++ additionalValues)*)
   }
 
   override def updateBy(where: SQLSyntax): UpdateOperationBuilder = {

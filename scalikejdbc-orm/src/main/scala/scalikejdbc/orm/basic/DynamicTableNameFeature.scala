@@ -12,12 +12,12 @@ import scalikejdbc.orm.querying.QueryingFeatureWithId
   */
 trait DynamicTableNameFeature[Entity]
   extends DynamicTableNameFeatureWithId[Long, Entity] {
-  self: SQLSyntaxSupportBase[Entity] with IdFeature[Long] =>
+  self: SQLSyntaxSupportBase[Entity] & IdFeature[Long] =>
 
 }
 
 trait DynamicTableNameFeatureWithId[Id, Entity] {
-  self: SQLSyntaxSupportBase[Entity] with IdFeature[Id] =>
+  self: SQLSyntaxSupportBase[Entity] & IdFeature[Id] =>
 
   /**
     * Appends join definition on runtime.
@@ -27,12 +27,13 @@ trait DynamicTableNameFeatureWithId[Id, Entity] {
     */
   def withTableName(
     tableName: String
-  ): DynamicTableNameFeatureWithId[Id, Entity]
-    with FinderFeatureWithId[Id, Entity]
-    with QueryingFeatureWithId[
-      Id,
-      Entity
-    ] = {
+  ): DynamicTableNameFeatureWithId[Id, Entity] & FinderFeatureWithId[
+    Id,
+    Entity
+  ] & QueryingFeatureWithId[
+    Id,
+    Entity
+  ] = {
     val _self = this
     val dynamicTableName = tableName
 

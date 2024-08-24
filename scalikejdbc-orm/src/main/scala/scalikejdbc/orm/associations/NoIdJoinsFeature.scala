@@ -30,9 +30,9 @@ trait NoIdJoinsFeature[Entity]
    */
   def joins(
     associations: Association[?]*
-  ): NoIdJoinsFeature[Entity]
-    with NoIdFinderFeature[Entity]
-    with NoIdQueryingFeature[Entity] = {
+  ): NoIdJoinsFeature[Entity] & NoIdFinderFeature[Entity] & NoIdQueryingFeature[
+    Entity
+  ] = {
     val _self = this
     val _associations = associations
 

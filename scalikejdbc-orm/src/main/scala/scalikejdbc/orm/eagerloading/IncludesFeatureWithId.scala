@@ -34,9 +34,10 @@ trait IncludesFeatureWithId[Id, Entity]
     */
   def includes(
     associations: Association[?]*
-  ): IncludesFeatureWithId[Id, Entity]
-    with FinderFeatureWithId[Id, Entity]
-    with QueryingFeatureWithId[Id, Entity] = {
+  ): IncludesFeatureWithId[Id, Entity] & FinderFeatureWithId[
+    Id,
+    Entity
+  ] & QueryingFeatureWithId[Id, Entity] = {
     val _self = this
     val _associations = associations
     val _belongsTo = associations

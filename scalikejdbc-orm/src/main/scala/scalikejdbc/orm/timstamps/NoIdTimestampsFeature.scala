@@ -21,7 +21,7 @@ trait NoIdTimestampsFeature[Entity]
   )(implicit s: DBSession = autoSession): Any = {
     val additionalValues =
       timestampValues(name => namedValues.exists(_._1 == column.field(name)))
-    super.createWithNamedValues(namedValues ++ additionalValues: _*)
+    super.createWithNamedValues((namedValues ++ additionalValues)*)
   }
 
   override def updateBy(where: SQLSyntax): UpdateOperationBuilder = {
