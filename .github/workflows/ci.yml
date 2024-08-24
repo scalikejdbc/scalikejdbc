@@ -125,6 +125,20 @@ jobs:
             exit 1
         esac
     - run: rm -rf "$HOME/.ivy2/local" || true
+  latest:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - run: sbt -v
+           "project root213"
+           '++ 3.5.1-RC2!'
+           Test/compile
+           test
   format:
     timeout-minutes: 20
     runs-on: ubuntu-latest
