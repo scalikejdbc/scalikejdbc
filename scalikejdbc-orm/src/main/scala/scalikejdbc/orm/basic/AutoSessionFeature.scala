@@ -7,7 +7,7 @@ import scalikejdbc._
  * Provides AutoSession for this mapper.
  */
 trait AutoSessionFeature {
-  self: SQLSyntaxSupport[?] with ConnectionPoolFeature =>
+  self: SQLSyntaxSupport[?] & ConnectionPoolFeature =>
 
   /**
    * AutoSession definition.

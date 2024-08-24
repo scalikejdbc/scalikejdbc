@@ -17,7 +17,7 @@ trait SelectDynamicMacro[A] {
 
 object SelectDynamicMacroImpl {
   def selectImpl[E: Type](
-    ref: Expr[SQLSyntaxSupportFeature#SQLSyntaxProvider[_]],
+    ref: Expr[SQLSyntaxSupportFeature#SQLSyntaxProvider[?]],
     name: Expr[String]
   )(using quotes: Quotes): Expr[SQLSyntax] = {
     import quotes.reflect.*
