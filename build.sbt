@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 =
   "3.3.3" // TODO: upgrading to 3.4.1+ may cause scripted test failures
-def Scala212 = "2.12.19"
+def Scala212 = "2.12.20"
 def Scala213 = "2.13.14"
 
 ThisBuild / version := "4.3.2-SNAPSHOT"
