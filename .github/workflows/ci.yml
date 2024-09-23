@@ -136,7 +136,7 @@ jobs:
         distribution: temurin
     - run: sbt -v
            "project root213"
-           '++ 3.5.1-RC2!'
+           '++ 3.5.2-RC1!'
            Test/compile
            test
   format:
