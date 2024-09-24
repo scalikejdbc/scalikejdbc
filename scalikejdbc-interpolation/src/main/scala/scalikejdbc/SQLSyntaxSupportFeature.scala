@@ -11,6 +11,9 @@ import scala.language.dynamics
  */
 object SQLSyntaxSupportFeature extends LogSupport {
 
+  private val whiteSpaceRegExp = ".*\\s+.*".r
+  private val semicolonRegExp = ".*;.*".r
+
   /**
    * Loaded columns for tables.
    */
@@ -41,8 +44,8 @@ object SQLSyntaxSupportFeature extends LogSupport {
     tableNameWithSchema != null
   ) {
     val name = tableNameWithSchema.trim
-    val hasWhiteSpace = name.matches(".*\\s+.*")
-    val hasSemicolon = name.matches(".*;.*")
+    val hasWhiteSpace = whiteSpaceRegExp.pattern.matcher(name).matches
+    val hasSemicolon = semicolonRegExp.pattern.matcher(name).matches
     if (hasWhiteSpace || hasSemicolon) {
       log.warn(
         s"The table name (${name}) might bring you SQL injection vulnerability."
@@ -106,6 +109,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    * }}}
    */
   trait SQLSyntaxSupport[A] {
+
+    private val dotRegExp = "\\.".r
 
     protected[this] def settings: SettingsProvider =
       SettingsProvider.default
@@ -267,7 +272,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A] = {
-      val _tableName = tableNameWithSchema.replaceAll("\\.", "_")
+      val _tableName = dotRegExp.replaceAllIn(tableNameWithSchema, "_")
       val _name = if (forceUpperCase) _tableName.toUpperCase(en) else _tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
@@ -385,6 +390,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
     private val acronymRegExp = acronymRegExpStr.r
     private val endsWithAcronymRegExp = "[A-Z]{2,}$".r
     private val singleUpperCaseRegExp = """[A-Z]""".r
+    private val danglingUnderscoreRegExp = "^_|_$".r
+    private val underscoreRegExp = "_".r
 
     /**
      * Returns the snake_case name after applying nameConverters.
@@ -412,13 +419,13 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
               .toLowerCase(en)
           }
         )
-        val result = singleUpperCaseRegExp
+        val mergedAcronyms = singleUpperCaseRegExp
           .replaceAllIn(
             acronymsFiltered,
             { m => "_" + m.matched.toLowerCase(en) }
           )
-          .replaceFirst("^_", "")
-          .replaceFirst("_$", "")
+
+        val result = danglingUnderscoreRegExp.replaceAllIn(mergedAcronyms, "")
 
         if (str.startsWith("_")) "_" + result
         else if (str.endsWith("_")) result + "_"
@@ -437,7 +444,7 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
       columns: collection.Seq[String]
     ): String = {
       def shorten(s: String): String =
-        s.split("_").map(_.take(1)).mkString
+        underscoreRegExp.split(s).map(_.take(1)).mkString
 
       val shortenedName = shorten(toAlphabetOnly(name))
       val shortenedNames = columns.map(c => shorten(toAlphabetOnly(c)))

@@ -11,6 +11,22 @@ import scala.util.Try
  */
 object DateTimeUtil {
 
+  private val slashRegExp = "/".r
+  private val baseRegExp = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}".r
+
+  private val timeZone1RegExp =
+    "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}".r
+  private val timeZone2RegExp =
+    "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d+[+-]\\d{2}:\\d{2}".r
+
+  private val dateTimeRegExp =
+    "\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}".r
+
+  private val timeZoneRegExp = "([+-]\\d{2}:\\d{2})".r
+
+  private val whitespaceRegExp = "\\s+".r
+  private val whitespaceSplitRegExp = "[-:\\s/]".r
+
   /**
    * The ISO8601 standard date format.
    */
@@ -69,29 +85,22 @@ object DateTimeUtil {
    * @return ISO8601 data format string value
    */
   def toISODateTimeFormat(s: String, paramType: ParamType): String = {
-    val str = s.replaceAll("/", "-")
-    if (str.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}")) {
-      val timeZone =
-        "([+-]\\d{2}:\\d{2})".r.findFirstIn(s).getOrElse(currentTimeZone)
+    val str = slashRegExp.replaceAllIn(s, "-")
+    if (baseRegExp.pattern.matcher(str).matches()) {
+      val timeZone = timeZoneRegExp.findFirstIn(s).getOrElse(currentTimeZone)
       str + timeZone
     } else if (
-      str.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}")
-      || str.matches(
-        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d+[+-]\\d{2}:\\d{2}"
-      )
+      timeZone1RegExp.pattern.matcher(str).matches()
+      || timeZone2RegExp.pattern.matcher(str).matches()
     ) {
       str
-    } else if (
-      str.matches(
-        "\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}"
-      )
-    ) {
-      str.replaceFirst("\\s+", "T")
+    } else if (dateTimeRegExp.pattern.matcher(str).matches()) {
+      whitespaceRegExp.replaceFirstIn(str, "T")
     } else {
-      str.split("[-:\\s/]").toList match {
+      whitespaceSplitRegExp.split(str).toList match {
         case year :: month :: day :: hour :: minute :: second :: zoneHour :: zoneMinute :: _ =>
           val timeZone =
-            "([+-]\\d{2}:\\d{2})".r.findFirstIn(str).getOrElse(currentTimeZone)
+            timeZoneRegExp.findFirstIn(str).getOrElse(currentTimeZone)
           ISO_DATE_TIME_FORMAT.format(
             year.to04d,
             month.to02d,
