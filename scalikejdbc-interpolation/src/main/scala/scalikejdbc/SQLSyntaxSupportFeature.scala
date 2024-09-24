@@ -13,6 +13,7 @@ object SQLSyntaxSupportFeature extends LogSupport {
 
   private val whiteSpaceRegExp = ".*\\s+.*".r
   private val semicolonRegExp = ".*;.*".r
+  private val dotRegExp = "\\.".r
 
   /**
    * Loaded columns for tables.
@@ -270,7 +271,8 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * }}}
      */
     def syntax: QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A] = {
-      val _tableName = tableNameWithSchema.replaceAll("\\.", "_")
+      val _tableName =
+        SQLSyntaxSupportFeature.dotRegExp.replaceAllIn(tableNameWithSchema, "_")
       val _name = if (forceUpperCase) _tableName.toUpperCase(en) else _tableName
       QuerySQLSyntaxProvider[SQLSyntaxSupport[A], A](this, _name)
     }
