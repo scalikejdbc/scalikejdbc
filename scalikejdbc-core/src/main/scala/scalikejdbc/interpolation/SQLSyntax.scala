@@ -351,6 +351,9 @@ trait AsteriskProvider {
  */
 object SQLSyntax {
 
+  private val andRegExp = ".+\\s+and\\s+.+".r
+  private val orRegExp = ".+\\s+or\\s+.+".r
+
   import Implicits._
 
   val empty: SQLSyntax = sqls""
@@ -404,8 +407,8 @@ object SQLSyntax {
 
   private[this] def hasAndOr(s: SQLSyntax): Boolean = {
     val statement = s.value.toLowerCase(ENGLISH)
-    statement.matches(".+\\s+and\\s+.+") ||
-    statement.matches(".+\\s+or\\s+.+")
+    andRegExp.pattern.matcher(statement).matches ||
+    orRegExp.pattern.matcher(statement).matches
   }
 
   def joinWithAnd(parts: SQLSyntax*): SQLSyntax =
