@@ -110,6 +110,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    */
   trait SQLSyntaxSupport[A] {
 
+    // This regex removes trailing $, as well as anything until the first $ or .
+    private val classNameRegExp = "\\$$|^.*[.$](?=.+)".r
+
     private val dotRegExp = "\\.".r
 
     protected[this] def settings: SettingsProvider =
@@ -134,12 +137,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
+
       val className = getClassSimpleName(this)
-        .replaceFirst("\\$$", "")
-        .replaceFirst("^.+\\.", "")
-        .replaceFirst("^.+\\$", "")
+      val formattedName = classNameRegExp.replaceAllIn(className, "")
+
       SQLSyntaxProvider.toColumnName(
-        className,
+        formattedName,
         nameConverters,
         useSnakeCaseColumnName
       )

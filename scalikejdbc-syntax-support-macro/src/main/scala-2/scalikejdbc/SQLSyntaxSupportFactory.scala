@@ -5,6 +5,9 @@ import scala.reflect.macros.blackbox.Context
 
 object SQLSyntaxSupportFactory {
 
+  // This regex removes trailing $, as well as anything until the first $ or .
+  private val classNameRegExp = "\\$$|^.*[.$](?=.+)".r
+
   def apply_impl[A: c.WeakTypeTag](
     c: Context
   )(excludes: c.Expr[String]*): c.Expr[SQLSyntaxSupportImpl[A]] = {
@@ -33,10 +36,7 @@ object SQLSyntaxSupportFactory {
   }
 
   def camelToSnake(className: String): String = {
-    val clazz = className
-      .replaceFirst("\\$$", "")
-      .replaceFirst("^.+\\.", "")
-      .replaceFirst("^.+\\$", "")
+    val clazz = classNameRegExp.replaceAllIn(className, "")
     SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
   }
 

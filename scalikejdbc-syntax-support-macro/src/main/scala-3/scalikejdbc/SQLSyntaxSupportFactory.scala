@@ -6,11 +6,11 @@ import language.`3.0`
 
 object SQLSyntaxSupportFactory {
 
+  // This regex removes trailing $, as well as anything until the first $ or .
+  private val classNameRegExp = "\\$$|^.*[.$](?=.+)".r
+
   def camelToSnake(className: String): String = {
-    val clazz = className
-      .replaceFirst("\\$$", "")
-      .replaceFirst("^.+\\.", "")
-      .replaceFirst("^.+\\$", "")
+    val clazz = classNameRegExp.replaceAllIn(className, "")
     SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
   }
 
