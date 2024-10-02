@@ -35,6 +35,8 @@ class ClassNameCamelToSnakeSpec extends AnyFlatSpec with Matchers {
       "className$postfix",
       "prefix.className$postfix",
       "prefix$className$postfix",
+      "prefix..className$$postfix",
+      "prefix$$className$$postfix",
       "additional.prefix.className$postfix",
       "additional$prefix$className$postfix",
       "additional.prefix.className$postfix$superfluous",
