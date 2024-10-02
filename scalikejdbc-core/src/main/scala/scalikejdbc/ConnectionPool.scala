@@ -5,6 +5,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import javax.sql.DataSource
 import java.sql.Connection
+import java.util.concurrent.locks.ReentrantLock
 import scala.concurrent.{ ExecutionContextExecutor, ExecutionContext }
 
 /**
@@ -47,13 +48,24 @@ object ConnectionPool extends LogSupport {
 
   private[this] val pools = new MutableMap[Any, ConnectionPool]()
 
+  private[this] val poolsLock = new ReentrantLock()
+
+  private def withLock[A](f: => A): A = {
+    poolsLock.lock()
+    try {
+      f
+    } finally {
+      poolsLock.unlock()
+    }
+  }
+
   /**
    * Returns true when the specified Connection pool is already initialized.
    *
    * @param name pool name
    * @return is initialized
    */
-  def isInitialized(name: Any = DEFAULT_NAME): Boolean = pools.synchronized {
+  def isInitialized(name: Any = DEFAULT_NAME): Boolean = withLock {
     pools.get(name).isDefined
   }
 
@@ -81,7 +93,7 @@ object ConnectionPool extends LogSupport {
    * @return connection pool
    * @throws IllegalStateException if the specified Connection pool does not exist
    */
-  def get(name: Any = DEFAULT_NAME): ConnectionPool = pools.synchronized {
+  def get(name: Any = DEFAULT_NAME): ConnectionPool = withLock {
     pools.getOrElse(
       name, {
         val message =
@@ -127,7 +139,7 @@ object ConnectionPool extends LogSupport {
       .getOrElse((factory, "<default>"))
 
     // register new pool or replace existing pool
-    pools.synchronized {
+    withLock {
       val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
 
       // Heroku support
@@ -174,7 +186,7 @@ object ConnectionPool extends LogSupport {
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
     // register new pool or replace existing pool
-    pools.synchronized {
+    withLock {
       pools.update(name, dataSource)
       // wait a little because rarely NPE occurs when immediately accessed.
       Thread.sleep(100L)
@@ -197,7 +209,7 @@ object ConnectionPool extends LogSupport {
     // (multiple overloaded alternatives of method add define default arguments.)
     val oldPoolOpt: Option[ConnectionPool] = pools.get(name)
     // register new pool or replace existing pool
-    pools.synchronized {
+    withLock {
       pools.update(name, dataSource)
       // wait a little because rarely NPE occurs when immediately accessed.
       Thread.sleep(100L)
@@ -307,7 +319,7 @@ object ConnectionPool extends LogSupport {
    * @param name pool name
    */
   def close(name: Any = DEFAULT_NAME): Unit = {
-    pools.synchronized {
+    withLock {
       val removed = pools.remove(name)
       removed.foreach { _.close() }
     }
@@ -317,7 +329,7 @@ object ConnectionPool extends LogSupport {
    * Close all connection pools
    */
   def closeAll(): Unit = {
-    pools.synchronized {
+    withLock {
       pools.foreach { case (name, pool) =>
         close(name)
       }
