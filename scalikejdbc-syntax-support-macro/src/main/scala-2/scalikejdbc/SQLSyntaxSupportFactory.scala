@@ -1,12 +1,11 @@
 package scalikejdbc
 
+import scalikejdbc.RegExpConstants.classNameRegExp
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
 object SQLSyntaxSupportFactory {
-
-  // This regex removes trailing $, as well as anything until the first $ or .
-  private val classNameRegExp = "\\$$|^.*[.$](?=.+)".r
 
   def apply_impl[A: c.WeakTypeTag](
     c: Context

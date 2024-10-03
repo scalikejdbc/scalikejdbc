@@ -1,15 +1,12 @@
-package foo
+package unit
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.RegExpConstants.classNameRegExp
 
 import scala.language.postfixOps
-import scala.util.matching.Regex
 
 class ClassNameCamelToSnakeSpec extends AnyFlatSpec with Matchers {
-
-  // This regex removes trailing $, as well as anything until the first $ or .
-  val classNameRegExp: Regex = "\\$$|^.*[.$](?=.+)".r
 
   def newImplementation(className: String): String = {
     classNameRegExp.replaceAllIn(className, "")

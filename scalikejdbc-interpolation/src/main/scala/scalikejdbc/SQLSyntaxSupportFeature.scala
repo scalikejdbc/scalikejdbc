@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.util.Locale.{ ENGLISH => en }
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.RegExpConstants.classNameRegExp
 
 import scala.collection.concurrent.TrieMap
 import scala.language.dynamics
@@ -109,9 +110,6 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
    * }}}
    */
   trait SQLSyntaxSupport[A] {
-
-    // This regex removes trailing $, as well as anything until the first $ or .
-    private val classNameRegExp = "\\$$|^.*[.$](?=.+)".r
 
     private val dotRegExp = "\\.".r
 
