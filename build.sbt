@@ -319,14 +319,14 @@ lazy val scalikejdbcMapperGenerator = Project(
   // Don't update to sbt 1.3.x
   // https://github.com/sbt/sbt/issues/5049
   crossSbtVersions := "1.2.8" :: Nil,
-  crossScalaVersions := Seq(Scala212, Scala3),
+  crossScalaVersions := Seq(Scala212, "3.6.2"),
   scriptedBufferLog := false,
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
       case "2.12" =>
         sbtVersion.value
       case _ =>
-        "2.0.0-M2"
+        "2.0.0-M3"
     }
   },
   scriptedLaunchOpts ++= {

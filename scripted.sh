@@ -5,10 +5,13 @@ set -eux
 sbt -v \
   SetScala212 \
   publishLocal \
+  "project root213" \
   SetScala3 \
   publishLocal \
   SetScala213 \
-  "project root213" \
+  publishLocal \
+  "project mapper-generator" \
+  "++ 3.6.2!" \
   publishLocal
 
 sbt -v \
