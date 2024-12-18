@@ -8,9 +8,12 @@ sbt \
   "set sonatypeProfileName := \"org.scalikejdbc\"" \
   SetScala212 \
   publishSigned \
+  'project root213' \
   SetScala3 \
   publishSigned \
-  'project root213' \
   SetScala213 \
+  publishSigned \
+  "project mapper-generator" \
+  "++ 3.6.2!" \
   publishSigned \
   sonatypeBundleRelease
