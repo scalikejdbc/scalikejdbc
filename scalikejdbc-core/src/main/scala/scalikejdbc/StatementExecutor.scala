@@ -80,9 +80,8 @@ object StatementExecutor {
                   case "org.joda.time.LocalTime" =>
                     val millis = param
                       .asInstanceOf[{
-                          def toDateTimeToday: { def getMillis: Long }
-                        }
-                      ]
+                        def toDateTimeToday: { def getMillis: Long }
+                      }]
                       .toDateTimeToday
                       .getMillis
                     new java.sql.Time(millis).toSqlTime.toString
