@@ -687,9 +687,8 @@ trait AssociationsFeature[Entity]
         .filterNot { df =>
           val currentName = df.rightAlias.tableAliasName
           val sameAsThis = this.defaultAlias.tableAliasName == currentName
-          val foundInDefaults = defaultJoinDefinitions.exists(d =>
-            d.rightAlias.tableAliasName == currentName
-          )
+          val foundInDefaults = defaultJoinDefinitions
+            .exists(d => d.rightAlias.tableAliasName == currentName)
           foundInDefaults || sameAsThis
         }
         .foldLeft(mutable.LinkedHashSet[JoinDefinition[?]]()) { (dfs, df) =>
