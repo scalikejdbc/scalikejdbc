@@ -6,7 +6,11 @@ object EntityUtil {
 
   def constructorParams[T](
     excludes: Expr[Seq[String]]
-  )(using quotes: Quotes)(using Type[T]): List[
+  )(using
+    quotes: Quotes
+  )(using
+    Type[T]
+  ): List[
     (String, quotes.reflect.TypeTree, Boolean, Option[quotes.reflect.Ref])
   ] = {
     import quotes.reflect._
