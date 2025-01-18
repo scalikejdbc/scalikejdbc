@@ -11,7 +11,7 @@ sbt -v \
   SetScala213 \
   publishLocal \
   "project mapper-generator" \
-  "++ 3.6.2!" \
+  "++ 3.6.3!" \
   publishLocal
 
 sbt -v \

@@ -14,6 +14,6 @@ sbt \
   SetScala213 \
   publishSigned \
   "project mapper-generator" \
-  "++ 3.6.2!" \
+  "++ 3.6.3!" \
   publishSigned \
   sonatypeBundleRelease
