@@ -4,7 +4,7 @@ publish / skip := true
 
 def Scala3 = "3.3.4"
 def Scala212 = "2.12.20"
-def Scala213 = "2.13.15"
+def Scala213 = "2.13.16"
 
 ThisBuild / version := "4.4.0-SNAPSHOT"
 
@@ -23,13 +23,13 @@ lazy val _reactiveStreamsVersion = "1.0.4"
 lazy val _logbackVersion = "1.2.13"
 lazy val _h2Version = "1.4.199" // TODO: Upgrade to 2.x
 lazy val _postgresqlVersion = "9.4.1212"
-lazy val _hibernateVersion = "6.6.0.CR1"
+lazy val _hibernateVersion = "6.6.5.Final"
 def scalatestVersion = "3.2.19"
 lazy val mockitoVersion = "4.11.0"
-val specs2 = "org.specs2" %% "specs2-core" % "4.20.8" % "provided"
+val specs2 = "org.specs2" %% "specs2-core" % "4.20.9" % "provided"
 
 val mysqlConnectorJ =
-  "com.mysql" % "mysql-connector-j" % "9.0.0" % Test exclude (
+  "com.mysql" % "mysql-connector-j" % "9.2.0" % Test exclude (
     "com.google.protobuf",
     "protobuf-java"
   )
@@ -158,7 +158,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
     "joda-time" % "joda-time" % "2.13.0",
-    "org.joda" % "joda-convert" % "2.2.3"
+    "org.joda" % "joda-convert" % "3.0.1"
   ),
 ).dependsOn(
   scalikejdbcLibrary,
@@ -215,10 +215,10 @@ lazy val scalikejdbcCore = Project(
   libraryDependencies ++= {
     Seq(
       // scope: compile
-      "org.apache.commons" % "commons-dbcp2" % "2.11.0" % "compile",
+      "org.apache.commons" % "commons-dbcp2" % "2.13.0" % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0" % "compile",
-      "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0",
+      "org.scala-lang.modules" %% "scala-collection-compat" % "2.13.0",
       // scope: provided
       "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
       "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
@@ -319,8 +319,16 @@ lazy val scalikejdbcMapperGenerator = Project(
   // Don't update to sbt 1.3.x
   // https://github.com/sbt/sbt/issues/5049
   crossSbtVersions := "1.2.8" :: Nil,
-  crossScalaVersions := Seq(Scala212),
+  crossScalaVersions := Seq(Scala212, "3.6.3"),
   scriptedBufferLog := false,
+  pluginCrossBuild / sbtVersion := {
+    scalaBinaryVersion.value match {
+      case "2.12" =>
+        sbtVersion.value
+      case _ =>
+        "2.0.0-M3"
+    }
+  },
   scriptedLaunchOpts ++= {
     val javaVmArgs = {
       import scala.collection.JavaConverters._
@@ -430,7 +438,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.17.1.0" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.46.1.3" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.48.0.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   mysqlConnectorJ,
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"

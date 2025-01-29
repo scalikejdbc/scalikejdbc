@@ -11,7 +11,7 @@ set self_path=%~f0
 
 pushd "%root_dir%"
   if exist "sbt-launch.jar*" ( del /f /q "sbt-launch.jar*" )
-  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.10.2/sbt-launch-1.10.2.jar
+  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.10.7/sbt-launch-1.10.7.jar
 popd
 
 set db_dir=%root_dir%\db
@@ -125,7 +125,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.2.0",
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.34.0",
 >>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.2",
->>"%build_sbt%" echo   "com.mysql"          %% "mysql-connector-j"    %% "9.0.0",
+>>"%build_sbt%" echo   "com.mysql"          %% "mysql-connector-j"    %% "9.2.0",
 >>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "42.2.22"
 >>"%build_sbt%" echo )
 >>"%build_sbt%" echo.

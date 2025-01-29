@@ -1,6 +1,6 @@
 package scalikejdbc.mapper
 
-import sbt._
+import sbt.{ given, _ }
 import sbt.Keys._
 import sbt.complete.EditDistance
 import scala.language.reflectiveCalls
@@ -260,8 +260,9 @@ object ScalikejdbcPlugin extends AutoPlugin {
       returnCollectionType = generatorSettings.returnCollectionType,
       view = generatorSettings.view,
       tableNamesToSkip = generatorSettings.tableNamesToSkip,
-      tableNameToBaseTypes = _ => generatorSettings.baseTypes,
-      tableNameToCompanionBaseTypes = _ => generatorSettings.companionBaseTypes,
+      tableNameToBaseTypes = _ => generatorSettings.baseTypes.toSeq,
+      tableNameToCompanionBaseTypes =
+        _ => generatorSettings.companionBaseTypes.toSeq,
       tableNameToSyntaxName = generatorSettings.tableNameToSyntaxName,
       tableNameToSyntaxVariableName =
         generatorSettings.tableNameToSyntaxVariableName
@@ -316,6 +317,13 @@ object ScalikejdbcPlugin extends AutoPlugin {
     clazz: Option[String]
   )
 
+  private object GenTaskParameter
+    extends scala.runtime.AbstractFunction2[
+      String,
+      Option[String],
+      GenTaskParameter
+    ]
+
   import complete.DefaultParsers._
 
   private def genTaskParser(
@@ -327,7 +335,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     .map(GenTaskParameter.tupled)
     .!!!("Usage: " + keyName + " [table-name (class-name)]")
 
-  override val projectSettings: collection.Seq[Def.Setting[?]] =
+  override val projectSettings: Seq[Def.Setting[?]] =
     inConfig(Compile)(
       Seq(
         scalikejdbcCodeGeneratorSingle := {
@@ -353,7 +361,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
               testDir = testDir,
               jdbc = jdbc,
               generatorSettings = generatorSettings
-            )
+            ).toSeq
           }
         },
         scalikejdbcGen := {
