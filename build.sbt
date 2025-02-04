@@ -157,7 +157,7 @@ lazy val scalikejdbcJodaTime = Project(
   libraryDependencies ++= scalaTestDependenciesInTestScope.value,
   libraryDependencies ++= Seq(
     "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.13.0",
+    "joda-time" % "joda-time" % "2.13.1",
     "org.joda" % "joda-convert" % "3.0.1"
   ),
 ).dependsOn(
