@@ -438,7 +438,7 @@ lazy val scalaTestDependenciesInTestScope = Def.setting {
 val jdbcDriverDependenciesInTestScope = Seq(
   "com.h2database" % "h2" % _h2Version % "test",
   "org.apache.derby" % "derby" % "10.17.1.0" % "test",
-  "org.xerial" % "sqlite-jdbc" % "3.48.0.0" % "test",
+  "org.xerial" % "sqlite-jdbc" % "3.49.0.0" % "test",
   "org.hsqldb" % "hsqldb" % "2.5.2" % "test",
   mysqlConnectorJ,
   "org.postgresql" % "postgresql" % _postgresqlVersion % "test"
