@@ -326,7 +326,7 @@ lazy val scalikejdbcMapperGenerator = Project(
       case "2.12" =>
         sbtVersion.value
       case _ =>
-        "2.0.0-M3"
+        "2.0.0-M4"
     }
   },
   scriptedLaunchOpts ++= {
