@@ -2,6 +2,7 @@ package scalikejdbc
 
 import java.util.Locale.{ ENGLISH => en }
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.RegExpConstants.classNameRegExp
 
 import scala.collection.concurrent.TrieMap
 import scala.language.dynamics
@@ -134,12 +135,12 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
      * Table name (default: the snake_case name from this companion object's name).
      */
     def tableName: String = {
+
       val className = getClassSimpleName(this)
-        .replaceFirst("\\$$", "")
-        .replaceFirst("^.+\\.", "")
-        .replaceFirst("^.+\\$", "")
+      val formattedName = classNameRegExp.replaceAllIn(className, "")
+
       SQLSyntaxProvider.toColumnName(
-        className,
+        formattedName,
         nameConverters,
         useSnakeCaseColumnName
       )
