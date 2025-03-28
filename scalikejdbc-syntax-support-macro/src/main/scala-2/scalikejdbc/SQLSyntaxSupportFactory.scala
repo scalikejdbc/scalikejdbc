@@ -1,5 +1,7 @@
 package scalikejdbc
 
+import scalikejdbc.RegExpConstants.classNameRegExp
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
@@ -33,10 +35,7 @@ object SQLSyntaxSupportFactory {
   }
 
   def camelToSnake(className: String): String = {
-    val clazz = className
-      .replaceFirst("\\$$", "")
-      .replaceFirst("^.+\\.", "")
-      .replaceFirst("^.+\\$", "")
+    val clazz = classNameRegExp.replaceAllIn(className, "")
     SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
   }
 
