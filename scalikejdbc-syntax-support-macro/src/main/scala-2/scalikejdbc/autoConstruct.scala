@@ -16,7 +16,7 @@ object autoConstruct {
         field =>
           val fieldType = field.typeSignature
           val name = field.name.decodedName.toString
-          q"${field.name.toTermName} = $rs.get[$fieldType]($rn.field($name))"
+          q"${field.name.toTermName} = $rs.get[$fieldType]($rn.field($name).value)"
       }
     c.Expr[A](q"new ${weakTypeTag[A].tpe}(..$constParams)")
   }
