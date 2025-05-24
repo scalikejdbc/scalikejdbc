@@ -11,7 +11,8 @@ ThisBuild / version := "4.3.4-SNAPSHOT"
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 ThisBuild / sonatypeProfileName := _organization
 ThisBuild / publishTo := {
-  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  val centralSnapshots =
+    "https://central.sonatype.com/repository/maven-snapshots/"
   if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
   else localStaging.value
 }
