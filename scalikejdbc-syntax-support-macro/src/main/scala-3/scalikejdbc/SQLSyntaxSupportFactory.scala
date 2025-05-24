@@ -1,16 +1,14 @@
 package scalikejdbc
 
 import scalikejdbc.{ SQLSyntaxSupportImpl, TypeBinder }
+import scalikejdbc.RegExpConstants.classNameRegExp
 import scala.quoted._
 import language.`3.0`
 
 object SQLSyntaxSupportFactory {
 
   def camelToSnake(className: String): String = {
-    val clazz = className
-      .replaceFirst("\\$$", "")
-      .replaceFirst("^.+\\.", "")
-      .replaceFirst("^.+\\$", "")
+    val clazz = classNameRegExp.replaceAllIn(className, "")
     SQLSyntaxProvider.toColumnName(clazz, Map.empty, true)
   }
 
