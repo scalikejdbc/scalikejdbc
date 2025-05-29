@@ -1,5 +1,4 @@
 import MimaSettings.mimaSettings
-import xerial.sbt.Sonatype.sonatypeCentralHost
 
 publish / skip := true
 
@@ -8,8 +7,6 @@ def Scala212 = "2.12.20"
 def Scala213 = "2.13.16"
 
 ThisBuild / version := "4.4.0-SNAPSHOT"
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
-ThisBuild / sonatypeProfileName := _organization
 ThisBuild / publishTo := {
   val centralSnapshots =
     "https://central.sonatype.com/repository/maven-snapshots/"
@@ -54,8 +51,6 @@ def gitHash: String = try {
 lazy val baseSettings = Def.settings(
   organization := _organization,
   publishMavenStyle := true,
-  // See https://github.com/xerial/sbt-sonatype
-  publishTo := sonatypePublishToBundle.value,
   // Note: if you are publishing an sbt plugin you will also need to configure sbtPluginPublishLegacyMavenStyle := false for that project. Context: sbt publishes plugins with file names that do not conform to the maven specification. Sonatype OSSRH didn't validate this, but Sonatype Central does: File name 'sbt-my-plugin-0.0.1.jar' is not valid. See also: sbt/sbt#3410
   sbtPluginPublishLegacyMavenStyle := false,
   crossScalaVersions := Seq(Scala212, Scala213, Scala3),

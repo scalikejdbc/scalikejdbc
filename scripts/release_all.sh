@@ -5,7 +5,6 @@ rm -rf */target
 
 sbt \
   clean \
-  "set sonatypeProfileName := \"org.scalikejdbc\"" \
   SetScala212 \
   publishSigned \
   'project root213' \
@@ -16,4 +15,4 @@ sbt \
   "project mapper-generator" \
   "++ 3.6.3!" \
   publishSigned \
-  sonatypeBundleRelease
+  sonaRelease
