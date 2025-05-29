@@ -79,20 +79,12 @@ lazy val baseSettings = Def.settings(
   addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
-    if (isScala3.value) {
-      Seq(
-        "-language:higherKinds,implicitConversions",
-      )
-    } else {
-      Seq(
-        "-language:higherKinds",
-      )
-    }
-  },
-  scalacOptions ++= {
     scalaBinaryVersion.value match {
       case "2.12" =>
         Seq(
+          "-Yno-adapted-args",
+          "-Xfuture",
+          "-language:higherKinds",
           "-Xsource:3",
         )
       case "2.13" =>
@@ -103,16 +95,6 @@ lazy val baseSettings = Def.settings(
         Nil
     }
   },
-  scalacOptions ++= PartialFunction
-    .condOpt(CrossVersion.partialVersion(scalaVersion.value)) {
-      case Some((2, v)) if v <= 12 =>
-        Seq(
-          "-Yno-adapted-args",
-          "-Xfuture"
-        )
-    }
-    .toList
-    .flatten,
   (Compile / doc / scalacOptions) ++= Seq(
     "-sourcepath",
     (LocalRootProject / baseDirectory).value.getAbsolutePath,
