@@ -56,7 +56,7 @@ If you're already allowed to release ScalikeJDBC libs, use your own Sonatype acc
 - $HOME/.sbt/1.0/sonatype.sbt
 
 ``` scala
-credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", "xxx", "yyy")
+credentials += Credentials("Sonatype Central", "central.sonatype.com", "xxx", "yyy")
 ```
 
 #### Operations
