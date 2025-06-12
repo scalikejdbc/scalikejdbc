@@ -32,6 +32,23 @@ package object streams {
     )
   }
 
+  implicit class EnableConnectionPoolCodeBlockToProvideDatabasePublisher(
+    private val pool: ConnectionPool
+  ) extends AnyVal {
+
+    def readOnlyStream[A](sql: StreamReadySQL[A])(implicit
+      executionContext: ExecutionContext,
+      settings: SettingsProvider = SettingsProvider.default
+    ): DatabasePublisher[A] = {
+
+      createDatabasePublisher(sql, ConnectionPool.DEFAULT_NAME)(
+        executionContext,
+        MultipleConnectionPoolContext(ConnectionPool.DEFAULT_NAME -> pool),
+        settings
+      )
+    }
+  }
+
   /**
    * An implicit to enable the `DB.readOnlyStream` method:
    *
