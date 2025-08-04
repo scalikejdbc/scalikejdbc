@@ -110,6 +110,8 @@ object StatementExecutor {
             .replaceAll("\n", "\\\\n")
         }
 
+        // Cache params size to avoid repeated sizeIs calls in Scala 2.13
+        val paramsSize = params.size
         var i = 0
         @annotation.tailrec
         def trimSpaces(s: String, i: Int = 0): String = i match {
@@ -133,7 +135,7 @@ object StatementExecutor {
                 target,
                 m => {
                   i += 1
-                  if (params.sizeIs >= i) {
+                  if (paramsSize >= i) {
                     toPrintable(params(i - 1))
                       .replace("\\", "\\\\")
                       .replace("$", "\\$")
