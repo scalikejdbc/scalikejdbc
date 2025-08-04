@@ -225,6 +225,24 @@ class StatementExecutorSpec
     assert(stackTraceInfo.contains("  [Stack Trace]"))
   }
 
+  it should "handle large bind values efficiently (issue #2453)" in {
+    val bindValues = (1 to 50000).toSeq
+    val placeholders = bindValues.map(_ => "?").mkString(", ")
+    val template = s"INSERT INTO table (column1) VALUES ($placeholders)"
+
+    val startTime = System.currentTimeMillis()
+    val sql = StatementExecutor.PrintableQueryBuilder.build(
+      template = template,
+      settingsProvider = SettingsProvider.default,
+      params = bindValues
+    )
+    val endTime = System.currentTimeMillis()
+    val duration = endTime - startTime
+
+    // Before the fix, it takes ~633ms for 50k values.
+    duration should be < 500L
+  }
+
   object Foo {
     case object Bar
   }
