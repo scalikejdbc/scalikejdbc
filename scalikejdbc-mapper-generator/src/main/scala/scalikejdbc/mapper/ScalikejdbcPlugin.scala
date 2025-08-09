@@ -1,5 +1,6 @@
 package scalikejdbc.mapper
 
+import scalikejdbc.mapper.ScalikejdbcPluginCompat._
 import sbt.{ given, _ }
 import sbt.Keys._
 import sbt.complete.EditDistance
@@ -338,7 +339,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   override val projectSettings: Seq[Def.Setting[?]] =
     inConfig(Compile)(
       Seq(
-        scalikejdbcCodeGeneratorSingle := {
+        scalikejdbcCodeGeneratorSingle := Def.uncached {
           val srcDir = (Compile / scalaSource).value
           val testDir = (Test / scalaSource).value
           (table, clazz, jdbc, generatorSettings) => {
@@ -352,7 +353,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
             )
           }
         },
-        scalikejdbcCodeGeneratorAll := {
+        scalikejdbcCodeGeneratorAll := Def.uncached {
           val srcDir = (Compile / scalaSource).value
           val testDir = (Test / scalaSource).value
           (jdbc, generatorSettings) => {
@@ -423,9 +424,11 @@ object ScalikejdbcPlugin extends AutoPlugin {
           gen.foreach(g => println(g.modelAll()))
           gen.foreach(g => g.specAll().foreach(spec => println(spec)))
         },
-        scalikejdbcJDBCSettings := loadPropertiesFromFile()
-          .fold(throw _, loadJDBCSettings),
-        scalikejdbcGeneratorSettings := {
+        scalikejdbcJDBCSettings := Def.uncached(
+          loadPropertiesFromFile()
+            .fold(throw _, loadJDBCSettings)
+        ),
+        scalikejdbcGeneratorSettings := Def.uncached {
           loadPropertiesFromFile() match {
             case Left(e) =>
               throw e
