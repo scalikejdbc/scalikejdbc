@@ -12,7 +12,11 @@ import java.util.Locale.{ ENGLISH => en }
 /**
  * Basic Database Accessor which holds a JDBC connection.
  */
-trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
+trait DBConnection
+  extends LogSupport
+  with LoanPattern
+  with AutoCloseable
+  with DBConnectionMethods {
 
   protected[this] val settingsProvider: SettingsProvider
   private[this] lazy val jtaDataSourceCompatible: Boolean =
@@ -33,7 +37,7 @@ trait DBConnection extends LogSupport with LoanPattern with AutoCloseable {
   /**
    * Provides default TxBoundary type class instance.
    */
-  private[this] def defaultTxBoundary[A]: TxBoundary[A] =
+  private[scalikejdbc] def defaultTxBoundary[A]: TxBoundary[A] =
     TxBoundary.Exception.exceptionTxBoundary[A]
 
   /**
