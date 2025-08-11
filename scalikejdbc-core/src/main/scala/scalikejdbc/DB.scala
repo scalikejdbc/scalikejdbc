@@ -138,7 +138,7 @@ case class DB(
  *   }
  * }}}
  */
-object DB extends LoanPattern {
+object DB extends LoanPattern with DBMethods {
 
   type CPContext = ConnectionPoolContext
   val NoCPContext = NoConnectionPoolContext
@@ -169,7 +169,7 @@ object DB extends LoanPattern {
   /**
    * Provides default TxBoundary type class instance.
    */
-  private[this] def defaultTxBoundary[A]: TxBoundary[A] =
+  private[scalikejdbc] def defaultTxBoundary[A]: TxBoundary[A] =
     TxBoundary.Exception.exceptionTxBoundary[A]
 
   /**
