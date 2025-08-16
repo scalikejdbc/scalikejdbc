@@ -7,7 +7,7 @@ def Scala3 = "3.3.6"
 def Scala212 = "2.12.20"
 def Scala213 = "2.13.16"
 
-ThisBuild / version := "4.3.5-SNAPSHOT"
+ThisBuild / version := "4.3.5"
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 ThisBuild / sonatypeProfileName := _organization
 ThisBuild / publishTo := {
