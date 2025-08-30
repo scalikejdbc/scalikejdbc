@@ -81,7 +81,7 @@ libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc-joda-time" % scalikejdbcVersion,
   "org.slf4j" % "slf4j-simple" % System.getProperty("slf4j.version"),
   "com.h2database" % "h2" % System.getProperty("h2.version"),
-  "mysql" % "mysql-connector-java" % System.getProperty("mysql.version"),
+  "com.mysql" % "mysql-connector-j" % System.getProperty("mysql.version"),
   "org.postgresql" % "postgresql" % System.getProperty("postgresql.version"),
   "org.scalatest" %% "scalatest" % System.getProperty(
     "scalatest.version"

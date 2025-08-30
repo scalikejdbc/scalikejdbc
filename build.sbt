@@ -349,8 +349,7 @@ lazy val scalikejdbcMapperGenerator = Project(
   scriptedLaunchOpts ++= Seq(
     "-Dplugin.version=" + version.value,
     "-Dslf4j.version=" + _slf4jApiVersion,
-    // TODO https://github.com/scalikejdbc/scalikejdbc/issues/742
-    "-Dmysql.version=" + "5.1.49", // mysqlConnectorJ.revision
+    "-Dmysql.version=" + mysqlConnectorJ.revision,
     "-Dpostgresql.version=" + _postgresqlVersion,
     "-Dh2.version=" + _h2Version,
     "-Dspecs2.version=" + specs2.revision,
