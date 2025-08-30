@@ -11,7 +11,7 @@ sbt -v \
   SetScala213 \
   publishLocal \
   "project mapper-generator" \
-  "++ 3.7.2!" \
+  "++ 3.x" \
   publishLocal
 
 sbt -v \
@@ -19,4 +19,6 @@ sbt -v \
   -J-Xmx512M \
   -J-Xms512M \
   "project mapper-generator" \
-  scripted
+  scripted \
+  "++ 3.x" \
+  scriptedTestSbt2
