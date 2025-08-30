@@ -1,6 +1,6 @@
 libraryDependencies ++= Seq(
   "com.h2database" % "h2" % System.getProperty("h2.version"),
-  "mysql" % "mysql-connector-java" % System.getProperty("mysql.version"),
+  "com.mysql" % "mysql-connector-j" % System.getProperty("mysql.version"),
   "org.postgresql" % "postgresql" % System.getProperty("postgresql.version"),
 )
 
