@@ -33,23 +33,25 @@ class ConnectionPoolContextSpec
       result1.size should equal(4)
 
       val result11 =
-        NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly {
-          implicit s =>
-            SQL("select * from " + tableName)
-              .map(_.string("name"))
-              .list
-              .apply()
+        NamedDB(ConnectionPool.DEFAULT_NAME)(using
+          NoConnectionPoolContext
+        ) readOnly { implicit s =>
+          SQL("select * from " + tableName)
+            .map(_.string("name"))
+            .list
+            .apply()
         }
       result11.size should equal(4)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
       val result2 =
-        NamedDB(ConnectionPool.DEFAULT_NAME)(NoConnectionPoolContext) readOnly {
-          implicit s =>
-            SQL("select * from " + tableName)
-              .map(_.string("name"))
-              .list
-              .apply()
+        NamedDB(ConnectionPool.DEFAULT_NAME)(using
+          NoConnectionPoolContext
+        ) readOnly { implicit s =>
+          SQL("select * from " + tableName)
+            .map(_.string("name"))
+            .list
+            .apply()
         }
       result2.size should equal(4)
       result1.zip(result2).foreach { case (a, b) => a should equal(b) }
@@ -119,7 +121,7 @@ object ConnectionPoolContextSpecUtils {
   )
 
   def createTable(tableName: String)(name: Any) = {
-    NamedDB(name)(NoConnectionPoolContext) autoCommit { implicit s =>
+    NamedDB(name)(using NoConnectionPoolContext) autoCommit { implicit s =>
       try {
         SQL("drop table " + tableName).execute.apply()
       } catch { case e: Throwable => }
@@ -130,7 +132,7 @@ object ConnectionPoolContextSpecUtils {
   }
 
   def insertData(tableName: String, num: Int)(name: Any) = {
-    NamedDB(name)(NoConnectionPoolContext) localTx { implicit s =>
+    NamedDB(name)(using NoConnectionPoolContext) localTx { implicit s =>
       (1 to num).foreach { n =>
         SQL("insert into " + tableName + " (id, name) values (?, ?)")
           .bind(n, "name" + n)
@@ -142,7 +144,7 @@ object ConnectionPoolContextSpecUtils {
 
   def dropTable(tableName: String)(name: Any) = {
     try {
-      NamedDB(name)(NoConnectionPoolContext) autoCommit { implicit s =>
+      NamedDB(name)(using NoConnectionPoolContext) autoCommit { implicit s =>
         SQL("drop table " + tableName).execute.apply()
       }
     } catch { case e: Throwable => }

@@ -29,7 +29,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
     Model(url, username, password).table(null, "MEMBER_GROUP").map { table =>
       {
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(
             srcDir = srcDir,
             template = GeneratorTemplate.interpolation,
@@ -41,7 +41,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       }
 
       {
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(
             srcDir = srcDir,
             template = GeneratorTemplate.queryDsl,
@@ -75,7 +75,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
 
     Model(url, username, password).table(null, "MEMBER").map { table =>
-      val generator1 = new CodeGenerator(table)(
+      val generator1 = new CodeGenerator(table)(using
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -87,7 +87,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
       generator1.writeModel()
       val generator2 = new CodeGenerator(
         table
-      )(
+      )(using
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -100,7 +100,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
       val generator3 = new CodeGenerator(
         table
-      )(
+      )(using
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -113,7 +113,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
       val generator4 = new CodeGenerator(
         table.copy(schema = Some("public"))
-      )(
+      )(using
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -126,7 +126,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
       val generator5 = new CodeGenerator(
         table.copy(schema = Some(""))
-      )(
+      )(using
         GeneratorConfig(
           srcDir = srcDir,
           template = GeneratorTemplate.queryDsl,
@@ -180,7 +180,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
 
     Model(url, username, password).table(null, "UN_NORMALIZED").map { table =>
-      val generator = new CodeGenerator(table)(
+      val generator = new CodeGenerator(table)(using
         GeneratorConfig(srcDir = srcDir, packageName = "com.example")
       )
       generator.writeModel()
@@ -203,7 +203,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
 
     Model(url, username, password).table(null, "WITHOUT_PK").map { table =>
-      val generator = new CodeGenerator(table)(
+      val generator = new CodeGenerator(table)(using
         GeneratorConfig(srcDir = srcDir, packageName = "com.example")
       )
       generator.writeModel()
@@ -234,7 +234,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     }
 
     Model(url, username, password).table(null, "SCHEMA_VERSION").map { table =>
-      val generator = new CodeGenerator(table)(
+      val generator = new CodeGenerator(table)(using
         GeneratorConfig(
           srcDir = srcDir,
           packageName = "com.example",
@@ -252,7 +252,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
     val allTables = Model(url, username, password).allTables(null)
     allTables should have size 5
     allTables.foreach { table =>
-      val generator = new CodeGenerator(table)(
+      val generator = new CodeGenerator(table)(using
         GeneratorConfig(srcDir = srcDir, packageName = "com.example.alltables")
       )
       generator.writeModel()
@@ -273,7 +273,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
     Model(url, username, password).table(null, "TABLE_WITH_DIGITS_1_2").map {
       table =>
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(
             srcDir = srcDir,
             packageName = "com.example",
@@ -300,7 +300,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
     Model(url, username, password).table(null, "TABLE_WITH_INSTANT").map {
       table =>
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(
             srcDir = srcDir,
             packageName = "com.example",
@@ -329,7 +329,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
         if (table.allColumns.map(_.name).contains("SCALIKEJDBC")) {
           fail("the table generate extra column")
         }
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(srcDir = srcDir, packageName = "com.example")
         )
         generator.writeModel()
@@ -343,7 +343,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
         if (!table.allColumns.map(_.name).contains("SCALIKEJDBC")) {
           fail("the table does not generate specify column")
         }
-        val generator = new CodeGenerator(table)(
+        val generator = new CodeGenerator(table)(using
           GeneratorConfig(srcDir = srcDir, packageName = "com.example")
         )
         generator.writeModel()

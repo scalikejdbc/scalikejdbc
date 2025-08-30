@@ -69,7 +69,7 @@ class Test007Spec extends AnyFunSpec with Matchers with DBSeeds {
   describe("The test") {
     it("should work as expected") {
       NamedDB("test007").localTx { implicit session =>
-        fixture(session)
+        fixture(using session)
 
         val blogId1 = Blog.createWithAttributes("name" -> "Apply in Tokyo")
         val blogId2 = Blog.createWithAttributes("name" -> "Apply in NY")

@@ -145,7 +145,7 @@ trait OptimisticLockWithTimestampFeatureWithId[Id, Entity]
   override def deleteBy(
     where: SQLSyntax
   )(implicit s: DBSession = autoSession): Int = {
-    val count = super.deleteBy(where)(s)
+    val count = super.deleteBy(where)(using s)
     if (count == 0) {
       throw new OptimisticLockException(
         s"Conflict ${lockTimestampFieldName} is detected (condition: '${where.value}', ${where.parameters

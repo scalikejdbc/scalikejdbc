@@ -54,18 +54,20 @@ object Binders {
     }
 
   private[scalikejdbc] def option[A](t: Binders[A]): Binders[Option[A]] =
-    option(t, t)
+    option(using t, t)
 
   def option[A](implicit
     b: TypeBinder[A],
     p: ParameterBinderFactory[A]
   ): Binders[Option[A]] = new Binders[Option[A]] {
     def apply(rs: ResultSet, columnIndex: Int): Option[A] =
-      TypeBinder.option(b).apply(rs, columnIndex)
+      TypeBinder.option(using b).apply(rs, columnIndex)
     def apply(rs: ResultSet, columnLabel: String): Option[A] =
-      TypeBinder.option(b).apply(rs, columnLabel)
+      TypeBinder.option(using b).apply(rs, columnLabel)
     def apply(value: Option[A]): ParameterBinderWithValue =
-      ParameterBinderFactory.optionalParameterBinderFactory(p).apply(value)
+      ParameterBinderFactory
+        .optionalParameterBinderFactory(using p)
+        .apply(value)
   }
 
   // ----------------------------------------------------

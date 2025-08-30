@@ -286,7 +286,7 @@ class Test005Spec extends AnyFunSpec with Matchers with DBSeeds {
   describe("The test") {
     it("should work as expected") {
       NamedDB("test005").localTx { implicit session =>
-        fixture(session)
+        fixture(using session)
 
         {
           Summary.count() should equal(1)

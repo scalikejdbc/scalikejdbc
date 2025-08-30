@@ -314,7 +314,7 @@ object DB extends LoanPattern with DBMethods {
   ): Future[A] = {
     // Enable TxBoundary implicits
     import scalikejdbc.TxBoundary.Future._
-    Try(localTx(execution)(context, implicitly, settings))
+    Try(localTx(execution)(using context, implicitly, settings))
       .fold(err => Future.failed(err), a => a)
   }
 

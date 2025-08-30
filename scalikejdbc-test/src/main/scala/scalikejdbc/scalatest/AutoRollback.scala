@@ -57,7 +57,7 @@ trait AutoRollback extends LoanPattern { self: FixtureTestSuite =>
       try {
         db.begin()
         db.withinTx { implicit session =>
-          fixture(session)
+          fixture(using session)
         }
         withFixture(test.toNoArgTest(db.withinTxSession()))
       } finally {

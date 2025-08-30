@@ -257,7 +257,7 @@ object ConnectionPool extends LogSupport {
     password: String,
     settings: CPSettings = ConnectionPoolSettings()
   )(implicit factory: CPFactory = DEFAULT_CONNECTION_POOL_FACTORY): Unit = {
-    add(DEFAULT_NAME, url, user, password, settings)(factory)
+    add(DEFAULT_NAME, url, user, password, settings)(using factory)
     if (GlobalSettings.loggingConnections) {
       log.debug("Registered singleton connection pool : " + get().toString())
     }

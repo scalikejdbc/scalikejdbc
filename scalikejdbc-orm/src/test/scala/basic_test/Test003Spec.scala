@@ -103,7 +103,7 @@ create table employee (
   describe("The test") {
     it("should work as expected") {
       NamedDB("test003").localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
 
         {
           // should have finder APIs
