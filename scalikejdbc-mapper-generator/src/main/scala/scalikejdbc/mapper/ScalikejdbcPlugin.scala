@@ -23,9 +23,12 @@ object ScalikejdbcPlugin extends AutoPlugin {
     val scalikejdbcGenEcho =
       inputKey[Unit]("Prints a model for a specified table")
 
+    @transient
     val scalikejdbcJDBCSettings = taskKey[JDBCSettings]("")
+    @transient
     val scalikejdbcGeneratorSettings = taskKey[GeneratorSettings]("")
 
+    @transient
     val scalikejdbcCodeGeneratorSingle = taskKey[
       (
         String,
@@ -34,6 +37,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
         GeneratorSettings
       ) => Option[Generator]
     ]("")
+    @transient
     val scalikejdbcCodeGeneratorAll =
       taskKey[(JDBCSettings, GeneratorSettings) => Seq[Generator]]("")
 
