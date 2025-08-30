@@ -41,7 +41,7 @@ package object streams {
       settings: SettingsProvider = SettingsProvider.default
     ): DatabasePublisher[A] = {
 
-      createDatabasePublisher(sql, ConnectionPool.DEFAULT_NAME)(
+      createDatabasePublisher(sql, ConnectionPool.DEFAULT_NAME)(using
         executionContext,
         MultipleConnectionPoolContext(ConnectionPool.DEFAULT_NAME -> pool),
         settings
@@ -90,7 +90,7 @@ package object streams {
       cpContext: DB.CPContext = DB.NoCPContext
     ): DatabasePublisher[A] = {
 
-      createDatabasePublisher(sql, db.name)(
+      createDatabasePublisher(sql, db.name)(using
         executionContext,
         cpContext,
         db.settingsProvider

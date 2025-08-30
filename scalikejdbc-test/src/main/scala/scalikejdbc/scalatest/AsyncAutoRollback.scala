@@ -60,7 +60,7 @@ trait AsyncAutoRollback extends LoanPattern { self: FixtureAsyncTestSuite =>
     val database = db()
     database.begin()
     database.withinTx { implicit session =>
-      fixture(session)
+      fixture(using session)
     }
     withFixture(test.toNoArgAsyncTest(database.withinTxSession()))
       .onCompletedThen { _ =>

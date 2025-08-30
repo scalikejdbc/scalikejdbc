@@ -87,7 +87,9 @@ lazy val baseSettings = Def.settings(
           "-Xsource:3-cross",
         )
       case _ =>
-        Nil
+        Seq(
+          "-Wconf:msg=Implicit parameters should be provided with a:error"
+        )
     }
   },
   (Compile / doc / scalacOptions) ++= Seq(

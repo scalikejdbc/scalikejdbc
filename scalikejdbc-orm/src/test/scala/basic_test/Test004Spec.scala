@@ -78,7 +78,7 @@ create table ability (
   describe("The test") {
     it("should work as expected") {
       NamedDB("test004").localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
 
         val id = Ability.createWithAttributes("name" -> "SCALA")
         val before: Ability = Ability.findById(id).get

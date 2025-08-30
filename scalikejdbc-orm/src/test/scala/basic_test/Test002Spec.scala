@@ -48,7 +48,7 @@ create table account (
   describe("The test") {
     it("should work as expected") {
       NamedDB("test002").localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
 
         val a = Account.defaultAlias
 

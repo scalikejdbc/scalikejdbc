@@ -34,7 +34,7 @@ trait AutoRollbackLike extends After with LoanPattern {
 
   try {
     _db.withinTx { implicit session =>
-      fixture(session)
+      fixture(using session)
     }
   } catch {
     case NonFatal(e) =>

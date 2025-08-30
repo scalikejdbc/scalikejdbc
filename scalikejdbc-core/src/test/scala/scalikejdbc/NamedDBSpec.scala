@@ -438,7 +438,7 @@ class NamedDBSpec
             _.string("id")
           )
         )
-      }(MyIO.myIOTxBoundary)
+      }(using MyIO.myIOTxBoundary)
       myIOResult.run() should equal(Some("1"))
     }
   }
@@ -454,7 +454,7 @@ class NamedDBSpec
               Some(rs.string("id"))
             )
           )
-      }(boundary = MyIO.myIOTxBoundary)
+      }(using boundary = MyIO.myIOTxBoundary)
       myIOResult.run().size should equal(2)
     }
   }
@@ -471,7 +471,7 @@ class NamedDBSpec
             1
           )
         )
-      }(boundary = MyIO.myIOTxBoundary)
+      }(using boundary = MyIO.myIOTxBoundary)
       val result1 = myIOCount.run()
 
       result1 should equal(1)
@@ -483,7 +483,7 @@ class NamedDBSpec
               _.string("name")
             )
           )
-        )(boundary = MyIO.myIOTxBoundary)
+        )(using boundary = MyIO.myIOTxBoundary)
       }
       myIOName.run() should be(Some("foo"))
     }
@@ -532,7 +532,7 @@ class NamedDBSpec
           )
         )
           .map(_ => s.update("update foo should be rolled back"))
-      }(MyIO.myIOTxBoundary)
+      }(using MyIO.myIOTxBoundary)
       intercept[Exception] {
         failure.run()
       }

@@ -442,7 +442,7 @@ class DBSpec
             Some(rs.string("id"))
           )
         )
-      }(boundary = MyIO.myIOTxBoundary)
+      }(using boundary = MyIO.myIOTxBoundary)
       myIOResult.run().size should equal(2)
     }
   }
@@ -459,7 +459,7 @@ class DBSpec
             1
           )
         )
-      }(boundary = MyIO.myIOTxBoundary)
+      }(using boundary = MyIO.myIOTxBoundary)
       val firstResult = myIOCount.run()
       firstResult should equal(1)
 
@@ -470,7 +470,7 @@ class DBSpec
               _.string("name")
             )
           )
-        )(boundary = MyIO.myIOTxBoundary)
+        )(using boundary = MyIO.myIOTxBoundary)
       }
       myIOName.run() should be(Some("foo"))
 

@@ -148,7 +148,7 @@ create table tag (
   describe("find methods") {
     it("should work") {
       db.localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
 
         {
           // find without associations

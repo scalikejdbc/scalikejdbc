@@ -94,7 +94,7 @@ create table article (
   describe("find empty with empty ids") {
     it("should return no results") {
       db.localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
         Article.where("id" -> Nil).apply().size should equal(0)
       }
     }

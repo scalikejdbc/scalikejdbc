@@ -12,10 +12,10 @@ case class Member(
 ) {
 
   def save()(implicit session: DBSession = AutoSession): Member =
-    Member.save(this)(session)
+    Member.save(this)(using session)
 
   def destroy()(implicit session: DBSession = AutoSession): Unit =
-    Member.delete(this)(session)
+    Member.delete(this)(using session)
 
 }
 

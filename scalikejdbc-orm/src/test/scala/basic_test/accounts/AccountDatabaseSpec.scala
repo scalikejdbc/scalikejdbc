@@ -237,7 +237,7 @@ create table table2 (
   describe("The features") {
     it("should work") {
       DB.localTx { implicit s =>
-        fixture(s)
+        fixture(using s)
 
         Member.connectionPool should not be (null)
         Member.connectionPoolName should equal(ConnectionPool.DEFAULT_NAME)

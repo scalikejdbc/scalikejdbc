@@ -289,7 +289,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       .orElse(model.table(jdbc.schema, tableName.toUpperCase(en)))
       .orElse(model.table(jdbc.schema, tableName.toLowerCase(en)))
       .map { table =>
-        Option(new CodeGenerator(table, className)(config))
+        Option(new CodeGenerator(table, className)(using config))
       } getOrElse {
       println("The table is not found.")
       None
@@ -313,7 +313,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
     }
 
     tableAndViews.map { table =>
-      new CodeGenerator(table, className)(config)
+      new CodeGenerator(table, className)(using config)
     }
   }
 

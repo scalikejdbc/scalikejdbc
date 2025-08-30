@@ -1360,7 +1360,7 @@ class DBSessionSpec
         SQL("insert into zone_test values (?, ?)")
           .bind(1, time)
           .execute
-          .apply()(jstSession)
+          .apply()(using jstSession)
         val jstString = SQL(
           s"select $castToString as s from zone_test where id = 1"
         ).map(_.string("s")).single.apply().get
