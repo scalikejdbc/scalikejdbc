@@ -1,14 +1,5 @@
 val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
-conflictWarning := {
-  if (scalaBinaryVersion.value == "3") {
-    // TODO
-    ConflictWarning("warn", Level.Warn, false)
-  } else {
-    conflictWarning.value
-  }
-}
-
 Compile / scalikejdbcGeneratorSettings ~= { setting =>
   setting.copy(tableNameToSyntaxName = { tableName =>
     setting.tableNameToSyntaxName(tableName) match {
