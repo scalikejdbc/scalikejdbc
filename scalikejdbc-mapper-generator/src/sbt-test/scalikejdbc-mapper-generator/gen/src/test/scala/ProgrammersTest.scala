@@ -15,6 +15,8 @@ class ProgrammersTest
 
   behavior of "Programmer"
 
+  app.Initializer.run()
+
   private[this] def driverClassName(): String = {
     val props = new java.util.Properties()
     val inputStream = new java.io.FileInputStream("test.properties")
