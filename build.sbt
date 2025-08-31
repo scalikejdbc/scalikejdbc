@@ -312,25 +312,6 @@ lazy val scalikejdbcMapperGenerator = Project(
   crossSbtVersions := "1.2.8" :: Nil,
   crossScalaVersions := Seq(Scala212, "3.7.2"),
   scriptedBufferLog := false,
-  TaskKey[Unit]("scriptedTestSbt2") := Def.taskDyn {
-    val values = sbtTestDirectory.value
-      .listFiles(_.isDirectory)
-      .flatMap { dir1 =>
-        dir1.listFiles(_.isDirectory).map { dir2 =>
-          dir1.getName -> dir2.getName
-        }
-      }
-      .toList
-    val log = streams.value.log
-    // TODO enable all tests
-    val exclude: Set[(String, String)] = Set(
-      "gen",
-    ).map("scalikejdbc-mapper-generator" -> _)
-    val args = values.filterNot(exclude).map { case (x1, x2) => s"${x1}/${x2}" }
-    val arg = args.mkString(" ", " ", "")
-    log.info("scripted" + arg)
-    scripted.toTask(arg)
-  }.value,
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
       case "2.12" =>

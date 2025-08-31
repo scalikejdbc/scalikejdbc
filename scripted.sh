@@ -21,4 +21,4 @@ sbt -v \
   "project mapper-generator" \
   scripted \
   "++ 3.x" \
-  scriptedTestSbt2
+  scripted
