@@ -24,7 +24,7 @@ Compile / scalikejdbcGeneratorSettings ~= { setting =>
   )
 }
 
-TaskKey[Unit]("createTestDatabase") := {
+InputKey[Unit]("createTestDatabase") := {
   import scalikejdbc._
   val setting = (Compile / scalikejdbcJDBCSettings).value
   Class.forName(setting.driver)
@@ -36,6 +36,18 @@ TaskKey[Unit]("createTestDatabase") := {
       .apply()
     // https://github.com/scalikejdbc/scalikejdbc/issues/810
     sql"create table address_street (id int not null)".execute.apply()
+  }
+}
+
+InputKey[Unit]("deleteTestDatabase") := {
+  import scalikejdbc._
+  val setting = (Compile / scalikejdbcJDBCSettings).value
+  Class.forName(setting.driver)
+  ConnectionPool.singleton(setting.url, setting.username, setting.password)
+  DB.autoCommit { implicit s =>
+    sql"drop view programmers_view".execute.apply()
+    sql"drop table programmers".execute.apply()
+    sql"drop table address_street".execute.apply()
   }
 }
 
@@ -67,7 +79,7 @@ libraryDependencies ++= Seq(
   ) % "test"
 )
 
-TaskKey[Unit]("generateCodeForIssue339") := {
+InputKey[Unit]("generateCodeForIssue339") := {
   import java.sql.JDBCType
   import scalikejdbc.mapper._
   val key = Column("key", JDBCType.INTEGER, true, true)

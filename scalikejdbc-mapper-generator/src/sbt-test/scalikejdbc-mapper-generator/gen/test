@@ -134,3 +134,5 @@ $ delete src/test/scala/app/models/ProgrammersprogrammersSpec.scala
 > scalikejdbcGen programmers
 $ exists src/main/scala/app/models/Programmersprogrammers.scala
 $ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala
+
+> deleteTestDatabase
