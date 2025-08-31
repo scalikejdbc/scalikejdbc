@@ -1,7 +1,13 @@
 package app
 
-final class Initializer {
-  def run(url: String, user: String, password: String): Unit = {
-    scalikejdbc.ConnectionPool.singleton(url, user, password)
+object Initializer {
+  def run(): Unit = synchronized {
+    val props = new java.util.Properties()
+    props.load(new java.io.FileInputStream("test.properties"))
+    scalikejdbc.ConnectionPool.singleton(
+      url = props.get("jdbc.url").toString,
+      user = "sa",
+      password = "sa",
+    )
   }
 }

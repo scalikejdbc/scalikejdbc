@@ -48,21 +48,6 @@ TaskKey[Unit]("createTestDatabase") := {
   }
 }
 
-(Test / testOptions) += {
-  val setting = (Compile / scalikejdbcJDBCSettings).value
-  Tests.Setup { loader =>
-    type Initializer = {
-      def run(url: String, username: String, password: String): Unit
-    }
-    val initializer = loader
-      .loadClass("app.Initializer")
-      .getDeclaredConstructor()
-      .newInstance()
-      .asInstanceOf[Initializer]
-    initializer.run(setting.url, setting.username, setting.password)
-  }
-}
-
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
 crossScalaVersions := List("2.13.16", "2.12.20", "3.3.6")
