@@ -98,11 +98,6 @@ lazy val baseSettings = Def.settings(
     "-doc-source-url",
     s"https://github.com/scalikejdbc/scalikejdbc/tree/${gitHash}€{FILE_PATH}.scala"
   ),
-  (Compile / packageSrc / mappings) ++= (Compile / managedSources).value.map {
-    f =>
-      // to merge generated sources into sources.jar as well
-      (f, f.relativeTo((Compile / sourceManaged).value).get.getPath)
-  },
   publishMavenStyle := true,
   Test / publishArtifact := false,
   pomIncludeRepository := { x => false },
