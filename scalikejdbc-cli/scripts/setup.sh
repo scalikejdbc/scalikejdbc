@@ -10,7 +10,7 @@ INIT_DIR=${ROOT_DIR}/init
 INIT_SCRIPT=${INIT_DIR}/init.scala
 cd ${ROOT_DIR}
 rm -f sbt-launch.jar*
-wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.11.5/sbt-launch-1.11.5.jar
+wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/1.11.6/sbt-launch-1.11.6.jar
 
 mkdir -p ./db
 cd ./db
