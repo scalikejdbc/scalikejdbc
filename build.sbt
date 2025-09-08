@@ -478,3 +478,25 @@ val _pomExtra = <url>https://scalikejdbc.org/</url>
         <url>https://github.com/yoskhdia</url>
       </developer>
     </developers>
+
+TaskKey[Unit]("updateScalikejdbcCliSetupScriptSbt") := {
+  val launcherLine = "https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/"
+  Seq[(String, String => String)](
+    "scalikejdbc-cli/scripts/setup.bat" -> (v =>
+      s"""  call cscript "%self_path%" //E:JScript //Nologo https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/${v}/sbt-launch-${v}.jar"""
+    ),
+    "scalikejdbc-cli/scripts/setup.sh" -> (v =>
+      s"""wget https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/${v}/sbt-launch-${v}.jar"""
+    ),
+  ).map { case (path, func) =>
+    IO.writeLines(
+      file(path),
+      IO.readLines(file(path)).map {
+        case line if line.contains(launcherLine) =>
+          func(sbtVersion.value)
+        case line =>
+          line
+      }
+    )
+  }
+}
