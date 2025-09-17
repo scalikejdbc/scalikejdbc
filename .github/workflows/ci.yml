@@ -55,7 +55,7 @@ jobs:
             java: 11
           - name: test
             db: mysql
-            java: 21
+            java: 25
 
           - name: scala_3
             db: mysql
@@ -65,7 +65,7 @@ jobs:
             java: 8
           - name: scala_3
             db: postgresql
-            java: 21
+            java: 25
 
     runs-on: ubuntu-latest
     steps:
@@ -87,7 +87,7 @@ jobs:
     - uses: actions/setup-java@v5
       with:
         java-version: ${{matrix.java}}
-        distribution: temurin
+        distribution: zulu
     - uses: sbt/setup-sbt@v1
     - uses: coursier/cache-action@v6
       timeout-minutes: 5
@@ -133,8 +133,8 @@ jobs:
     - uses: actions/checkout@v5
     - uses: actions/setup-java@v5
       with:
-        java-version: 21
-        distribution: temurin
+        java-version: 25
+        distribution: zulu
     - uses: sbt/setup-sbt@v1
     - run: sbt -v
            "project root213"
