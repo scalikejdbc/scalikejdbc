@@ -57,7 +57,7 @@ object StatementExecutor {
               case Some(p)            => normalize(p)
               case p: String          => p
               case p: java.util.Date  => p.toSqlTimestamp.toString
-              case p =>
+              case p                  =>
                 ClassNameUtil.getClassName(param.getClass) match {
                   case "org.joda.time.DateTime" =>
                     param
@@ -91,7 +91,7 @@ object StatementExecutor {
           }
 
           (normalize(param) match {
-            case null => "null"
+            case null           => "null"
             case result: String =>
               settingsProvider
                 .loggingSQLAndTime(GlobalSettings.loggingSQLAndTime)
@@ -232,7 +232,7 @@ case class StatementExecutor(
       case binder: ParameterBinder          => binder(underlying, i)
       case p: java.sql.Array                => underlying.setArray(i, p)
       case p: BigDecimal => underlying.setBigDecimal(i, p.bigDecimal)
-      case p: BigInt =>
+      case p: BigInt     =>
         underlying.setBigDecimal(i, new java.math.BigDecimal(p.bigInteger))
       case p: Boolean            => underlying.setBoolean(i, p)
       case p: Byte               => underlying.setByte(i, p)
@@ -267,7 +267,7 @@ case class StatementExecutor(
         val time = new java.sql.Time(millis)
         underlying.setTime(i, time)
       case p: java.io.InputStream => underlying.setBinaryStream(i, p)
-      case p =>
+      case p                      =>
         ClassNameUtil.getClassName(param.getClass) match {
           case "org.joda.time.DateTime" =>
             val t = p

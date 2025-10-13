@@ -110,7 +110,7 @@ object ParamType {
     def unapply(v: Any): Option[Any] = v match {
       case null                        => None
       case v: String if v.trim.isEmpty => Some(null)
-      case v: String =>
+      case v: String                   =>
         Some(
           JDateTime.parse(
             DateTimeUtil.toISODateTimeFormat(v, ParamType.DateTime)
@@ -124,7 +124,7 @@ object ParamType {
     def unapply(v: Any): Option[Any] = v match {
       case null                        => None
       case v: String if v.trim.isEmpty => Some(null)
-      case v: String =>
+      case v: String                   =>
         Some(
           JDateTime
             .parse(DateTimeUtil.toISODateTimeFormat(v, ParamType.LocalDate))
@@ -137,7 +137,7 @@ object ParamType {
     def unapply(v: Any): Option[Any] = v match {
       case null                        => None
       case v: String if v.trim.isEmpty => Some(null)
-      case v: String =>
+      case v: String                   =>
         Some(
           JDateTime
             .parse(DateTimeUtil.toISODateTimeFormat(v, ParamType.LocalTime))

@@ -30,7 +30,7 @@ trait StrongParametersFeature {
       case ParamTypeExtractor(v) => v
       case v: String if v == ""  => null
       case v: String             => v
-      case v =>
+      case v                     =>
         throw new IllegalArgumentException(
           s"Cannot convert '${v}' to ${paramType} value."
         )

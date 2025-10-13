@@ -75,7 +75,7 @@ case class Model(url: String, username: String, password: String)
         }
         .toList
         .distinct match {
-        case Nil => None
+        case Nil        => None
         case allColumns =>
           Some(
             Table(

@@ -84,11 +84,11 @@ private[scalikejdbc] object validateAndConvertToNormalStatement
       .nameBindingSQLValidator(GlobalSettings.nameBindingSQLValidator)
       .ignoredParams match {
       case NoCheckForIgnoredParams => // no op
-      case validation =>
+      case validation              =>
         parameters.foreach { param =>
           if (!names.contains(param._1)) {
             validation match {
-              case NoCheckForIgnoredParams => // no op
+              case NoCheckForIgnoredParams     => // no op
               case InfoLoggingForIgnoredParams =>
                 log.info(
                   ErrorMessage.BINDING_IS_IGNORED + " (" + param._1 + ")"
@@ -111,7 +111,7 @@ private[scalikejdbc] object validateAndConvertToNormalStatement
       names.map { name =>
         parameters match {
           case Nil => Nil
-          case _ =>
+          case _   =>
             parameters
               .find(_._1 == name)
               .orElse {

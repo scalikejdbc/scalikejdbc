@@ -26,7 +26,7 @@ case class NamedDB(
   private[this] def connectionPool(): ConnectionPool = Option(context match {
     case NoConnectionPoolContext          => ConnectionPool(name)
     case _: MultipleConnectionPoolContext => context.get(name)
-    case _ =>
+    case _                                =>
       throw new IllegalStateException(
         ErrorMessage.UNKNOWN_CONNECTION_POOL_CONTEXT
       )
