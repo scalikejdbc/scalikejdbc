@@ -153,7 +153,7 @@ object DB extends LoanPattern with DBMethods {
 
   private[this] def connectionPool(context: CPContext): ConnectionPool =
     Option(context match {
-      case NoCPContext => ConnectionPool()
+      case NoCPContext                      => ConnectionPool()
       case _: MultipleConnectionPoolContext =>
         context.get(ConnectionPool.DEFAULT_NAME)
       case _ =>
