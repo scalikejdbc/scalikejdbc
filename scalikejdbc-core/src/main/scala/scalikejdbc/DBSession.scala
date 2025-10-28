@@ -790,7 +790,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     ensureNotReadOnlySession(template)
     paramsList match {
       case Nil => f.fromSpecific(Seq.empty[A])
-      case _ =>
+      case _   =>
         using(
           createBatchStatementExecutor(
             conn = conn,
@@ -822,7 +822,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     ensureNotReadOnlySession(template)
     paramsList match {
       case Nil => f.fromSpecific(Seq.empty[Long])
-      case _ =>
+      case _   =>
         using(
           createBatchStatementExecutor(
             conn = conn,
@@ -860,7 +860,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
     ensureNotReadOnlySession(template)
     paramsList match {
       case Nil => f.fromSpecific(Seq.empty[Long])
-      case _ =>
+      case _   =>
         using(
           createBatchStatementExecutor(
             conn = conn,
@@ -949,7 +949,7 @@ case class ActiveSession(
 
   tx match {
     case Some(tx) if tx.isActive() => // nothing to do
-    case None =>
+    case None                      =>
       if (
         !settings.jtaDataSourceCompatible(
           GlobalSettings.jtaDataSourceCompatible

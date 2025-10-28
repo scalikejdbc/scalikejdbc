@@ -19,7 +19,7 @@ private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
   ): R[Z] = try {
     session match {
       case AutoSession | ReadOnlyAutoSession => DB readOnly op
-      case NamedAutoSession(name, _) =>
+      case NamedAutoSession(name, _)         =>
         NamedDB(name, session.settings) readOnly op
       case ReadOnlyNamedAutoSession(name, _) =>
         NamedDB(name, session.settings) readOnly op

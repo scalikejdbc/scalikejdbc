@@ -40,7 +40,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
 
   private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder =
     param match {
-      case _: String => sb += '?'
+      case _: String                   => sb += '?'
       case traversable: Traversable[?] => {
         // e.g. in clause
         traversable
@@ -60,7 +60,7 @@ class SQLInterpolationString(private val s: StringContext) extends AnyVal {
   private def buildParams(params: collection.Seq[Any]): collection.Seq[Any] =
     params
       .foldLeft(Seq.newBuilder[Any]) {
-        case (builder, strParam: String) => builder += strParam
+        case (builder, strParam: String)            => builder += strParam
         case (builder, traversable: Traversable[?]) =>
           traversable.foldLeft(builder) {
             case (builder, SQLSyntax(_, params)) => builder ++= params

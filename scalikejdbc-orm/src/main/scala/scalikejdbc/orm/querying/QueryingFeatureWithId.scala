@@ -40,7 +40,7 @@ trait QueryingFeatureWithId[Id, Entity]
           ParameterBinderFactory.asisParameterBinderFactory
         value match {
           case None => Some(sqls.isNull(defaultAlias.field(key)))
-          case Nil =>
+          case Nil  =>
             Some(sqls" FALSE") // for scalikejdbc 2.0.0 - 2.0.6 compatibility
           case values: Seq[?] =>
             Some(
@@ -141,7 +141,7 @@ trait QueryingFeatureWithId[Id, Entity]
             implicit val enableAsIs =
               ParameterBinderFactory.asisParameterBinderFactory
             value match {
-              case Nil => None
+              case Nil            => None
               case values: Seq[?] =>
                 Some(
                   sqls.in(
@@ -247,7 +247,7 @@ trait QueryingFeatureWithId[Id, Entity]
         val q: SelectSQLBuilder[Entity] = select(sql).from(as(defaultAlias))
         conditions match {
           case Nil => q.where(defaultScopeWithDefaultAlias)
-          case _ =>
+          case _   =>
             conditions.tail
               .foldLeft(q.where(conditions.head)) { case (query, condition) =>
                 query.and.append(condition)
@@ -416,7 +416,7 @@ trait QueryingFeatureWithId[Id, Entity]
             }
             val query = (conditions match {
               case Nil => baseQuery.where(defaultScopeWithDefaultAlias)
-              case _ =>
+              case _   =>
                 conditions.tail
                   .foldLeft(baseQuery.where(conditions.head)) {
                     case (query, condition) => query.and.append(condition)

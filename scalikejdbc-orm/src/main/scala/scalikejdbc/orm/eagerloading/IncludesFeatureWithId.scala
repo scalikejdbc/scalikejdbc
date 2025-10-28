@@ -113,8 +113,8 @@ trait IncludesFeatureWithId[Id, Entity]
   ): Seq[Id] = {
     entities.flatMap { e =>
       JavaReflectionUtil.getter(e, primaryKeyFieldName) match {
-        case null => None
-        case None => None
+        case null    => None
+        case None    => None
         case Some(v) =>
           try Some(v.asInstanceOf[Id])
           catch {
