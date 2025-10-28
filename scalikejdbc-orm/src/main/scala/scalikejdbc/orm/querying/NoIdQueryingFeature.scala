@@ -34,8 +34,8 @@ trait NoIdQueryingFeature[Entity]
         implicit val enableAsIs =
           ParameterBinderFactory.asisParameterBinderFactory
         value match {
-          case None => Some(sqls.isNull(defaultAlias.field(key)))
-          case Nil  => None
+          case None           => Some(sqls.isNull(defaultAlias.field(key)))
+          case Nil            => None
           case values: Seq[?] =>
             Some(
               sqls.in(
@@ -125,7 +125,7 @@ trait NoIdQueryingFeature[Entity]
             implicit val enableAsIs =
               ParameterBinderFactory.asisParameterBinderFactory
             value match {
-              case Nil => None
+              case Nil            => None
               case values: Seq[?] =>
                 Some(
                   sqls.in(
@@ -205,7 +205,7 @@ trait NoIdQueryingFeature[Entity]
         val q: SelectSQLBuilder[Entity] = select(sql).from(as(defaultAlias))
         conditions match {
           case Nil => q.where(defaultScopeWithDefaultAlias)
-          case _ =>
+          case _   =>
             conditions.tail
               .foldLeft(q.where(conditions.head)) { case (query, condition) =>
                 query.and.append(condition)
@@ -302,7 +302,7 @@ trait NoIdQueryingFeature[Entity]
             // find ids for pagination
             val queryForIds = (conditions match {
               case Nil => singleSelectQuery.where(defaultScopeWithDefaultAlias)
-              case _ =>
+              case _   =>
                 conditions.tail
                   .foldLeft(singleSelectQuery.where(conditions.head)) {
                     case (query, condition) => query.and.append(condition)

@@ -61,7 +61,7 @@ object TxBoundary {
         _ => result,
         finishError =>
           Failure(result match {
-            case Success(_) => finishError
+            case Success(_)           => finishError
             case Failure(resultError) =>
               resultError.addSuppressed(finishError)
               resultError

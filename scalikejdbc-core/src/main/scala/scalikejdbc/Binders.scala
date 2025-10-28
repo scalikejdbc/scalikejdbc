@@ -124,7 +124,7 @@ object Binders {
     case b: java.lang.Boolean => b
     case b: Boolean           => b.asInstanceOf[java.lang.Boolean]
     case s: String if s == "false" || s == "true" => s.toBoolean
-    case s: String =>
+    case s: String                                =>
       {
         try s.toInt != 0
         catch { case e: NumberFormatException => s.nonEmpty }

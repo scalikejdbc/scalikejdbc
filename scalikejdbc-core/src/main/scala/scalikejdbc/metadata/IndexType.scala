@@ -19,7 +19,7 @@ object IndexType {
       case DatabaseMetaData.tableIndexClustered => tableIndexClustered
       case DatabaseMetaData.tableIndexHashed    => tableIndexHashed
       case DatabaseMetaData.tableIndexOther     => tableIndexOther
-      case _ =>
+      case _                                    =>
         tableIndexOther // if some JDBC driver doesn't support metadata API correctly
     }
   }

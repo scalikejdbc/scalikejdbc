@@ -47,7 +47,7 @@ object SQLSyntaxSupportFactory {
                   TypeRepr.of[TypeBinder].appliedTo(typeTree.tpe)
                 ) match {
                   case result: ImplicitSearchSuccess => result.tree
-                  case _ =>
+                  case _                             =>
                     report.errorAndAbort(
                       s"could not find implicit of TypeBinder[${typeTree.show}]"
                     )
