@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 8
         distribution: temurin
-    - uses: coursier/cache-action@v6
+    - uses: coursier/cache-action@v7
     - run: rm project/sbt-pgp.sbt
     - run: rm project/sbt-updates.sbt
     # TODO: improve the stability of this test; it occurs only with Windows test job
