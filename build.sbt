@@ -37,7 +37,7 @@ def scalatestVersion = "3.2.19"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.21.0" % "provided"
 
-val mysqlConnectorJ = "com.mysql" % "mysql-connector-j" % "9.4.0" % Test
+val mysqlConnectorJ = "com.mysql" % "mysql-connector-j" % "9.5.0" % Test
 
 def gitHash: String = try {
   sys.process.Process("git rev-parse HEAD").lineStream_!.head
