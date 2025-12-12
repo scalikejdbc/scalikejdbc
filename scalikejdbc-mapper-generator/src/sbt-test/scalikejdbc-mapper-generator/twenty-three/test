@@ -4,7 +4,7 @@
 > scalikejdbcGenEcho twenty_three
 > scalikejdbcGenForce twenty_three
 
-> set scalaVersion :="2.12.20"
+> set scalaVersion :="2.12.21"
 > compile
 > Test/compile
 
