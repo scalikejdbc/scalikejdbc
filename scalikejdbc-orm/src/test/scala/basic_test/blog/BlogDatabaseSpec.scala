@@ -124,7 +124,7 @@ create table posts_tags (
         val tagIds = (1 to 10).map { i =>
           Tag.createWithAttributes("name" -> s"tag$i")
         }
-        (1 to 10).map { i =>
+        (1 to 10).foreach { i =>
           val id = Post.createWithAttributes(
             "title" -> s"entry $i",
             "body" -> "foo bar baz"
@@ -137,7 +137,7 @@ create table posts_tags (
             }.update.apply()
           }
         }
-        (11 to 20).map { i =>
+        (11 to 20).foreach { i =>
           val id = Post.createWithAttributes(
             "title" -> s"entry $i",
             "body" -> "bulah bulah..."
