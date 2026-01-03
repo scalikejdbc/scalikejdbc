@@ -935,7 +935,7 @@ class DBSpec
     val tableName = tableNamePrefix + "_metadata"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB.getAllTableNames().size should be > (0)
+      DB.getAllTableNames().size should be > 0
     }
   }
 

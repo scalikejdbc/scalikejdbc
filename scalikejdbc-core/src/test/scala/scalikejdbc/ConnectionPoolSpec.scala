@@ -29,7 +29,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     ConnectionPool.singleton(url, user, password, poolSettings)
 
     using(ConnectionPool.borrow()) { conn =>
-      conn should not be (null)
+      conn should not be null
     }
 
     Thread.sleep(100L)
@@ -42,7 +42,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
     ConnectionPool.add("secondary", url, user, password, poolSettings)
 
     using(ConnectionPool.borrow("secondary")) { conn =>
-      conn should not be (null)
+      conn should not be null
     }
 
     Thread.sleep(100L)

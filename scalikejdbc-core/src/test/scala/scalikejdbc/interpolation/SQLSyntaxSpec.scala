@@ -12,7 +12,7 @@ class SQLSyntaxSpec extends AnyFlatSpec with Matchers {
   behavior of "SQLSyntax"
 
   it should "be available" in {
-    SQLSyntax("where") should not be (null)
+    SQLSyntax("where") should not be null
   }
 
   it should "have #append" in {

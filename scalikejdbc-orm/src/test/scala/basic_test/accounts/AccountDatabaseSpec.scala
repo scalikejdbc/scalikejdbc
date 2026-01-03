@@ -239,7 +239,7 @@ create table table2 (
       DB.localTx { implicit s =>
         fixture(using s)
 
-        Member.connectionPool should not be (null)
+        Member.connectionPool should not be null
         Member.connectionPoolName should equal(ConnectionPool.DEFAULT_NAME)
 
         {
@@ -273,7 +273,7 @@ create table table2 (
 
         {
           // count
-          Member.count() should be > (0L)
+          Member.count() should be > 0L
         }
 
         {
@@ -306,7 +306,7 @@ create table table2 (
             .apply(0)
             .id
 
-          Member.countBy(sqls.eq(mn.id, aliceId)) should be > (0L)
+          Member.countBy(sqls.eq(mn.id, aliceId)) should be > 0L
         }
 
         // TODO
@@ -323,7 +323,7 @@ create table table2 (
           // #belongsTo, #hasOne
           Member.withAlias { m =>
             val members = Member.findAll()
-            members.size should be > (0)
+            members.size should be > 0
 
             val alice = members.filter(_.name.get.first == "Alice").head
             alice.mentor.isDefined should be(false)
@@ -494,7 +494,7 @@ create table table2 (
 
         {
           // joins
-          Member.joins(Member.companyOpt).connectionPool should not be (null)
+          Member.joins(Member.companyOpt).connectionPool should not be null
           Member.joins(Member.companyOpt).connectionPoolName should equal(
             ConnectionPool.DEFAULT_NAME
           )
@@ -508,7 +508,7 @@ create table table2 (
 
         {
           // dynamic table
-          Member.withTableName("legacy_members") should not be (null)
+          Member.withTableName("legacy_members") should not be null
           Member
             .joins(Member.companyOpt)
             .withTableName("legacy_members") shouldNot be(null)
@@ -670,8 +670,8 @@ create table table2 (
           val id2 = Skill.createWithNamedValues(Skill.column.name -> "Java")
 
           Skill.where("id" -> Seq(id1, id2)).apply().foreach { skill =>
-            skill.createdAt should not be (null)
-            skill.updatedAt should not be (null)
+            skill.createdAt should not be null
+            skill.updatedAt should not be null
           }
 
           Thread.sleep(100L)
@@ -707,11 +707,11 @@ create table table2 (
 
         {
           // findAll
-          Member.findAll().size should be > (0)
+          Member.findAll().size should be > 0
           val m = Member.defaultAlias
           Member
             .findAll(orderings = Seq(sqls"${m.id}, ${m.createdAt} desc"))
-            .size should be > (0)
+            .size should be > 0
         }
 
         // http://api.rubyonrails.org/classes/ActiveRecord/Calculations.html
@@ -780,7 +780,7 @@ create table table2 (
           Member.withAlias { m =>
             Member
               .findAllBy(sqls.eq(m.countryId, countryId))
-              .size should be > (0)
+              .size should be > 0
             Member
               .findAllByWithLimitOffset(sqls.eq(m.countryId, countryId), 1, 0)
               .size should equal(1)
@@ -794,7 +794,7 @@ create table table2 (
             val ordering = sqls"${m.id}, ${m.createdAt} desc"
             Member
               .findAllBy(sqls.eq(m.countryId, countryId), Seq(ordering))
-              .size should be > (0)
+              .size should be > 0
             Member
               .findAllByWithLimitOffset(
                 sqls.eq(m.countryId, countryId),

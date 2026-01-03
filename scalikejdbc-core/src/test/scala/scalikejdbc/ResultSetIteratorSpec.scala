@@ -85,7 +85,7 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
           )
           .executeQuery()
         new ResultSetIterator(rs).foreach(rs =>
-          rs.int("id") should not equal (null)
+          rs.int("id") should not equal null
         )
       }
     }
@@ -112,7 +112,7 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
                 .executeQuery()
           }
         }
-        new ResultSetIterator(rs).foreach(_.int("id") should not equal (null))
+        new ResultSetIterator(rs).foreach(_.int("id") should not equal null)
       }
     }
   }
@@ -138,7 +138,7 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
                 .executeQuery()
           }
         }
-        new ResultSetIterator(rs).foreach(_.int("id") should not equal (null))
+        new ResultSetIterator(rs).foreach(_.int("id") should not equal null)
       }
     }
   }

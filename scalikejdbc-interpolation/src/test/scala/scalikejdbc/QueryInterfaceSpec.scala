@@ -1014,7 +1014,7 @@ class QueryInterfaceSpec
         val orders = withSQL {
           QueryDSL.select.from(Order as o).where.isNotNull(o.accountId)
         }.map(Order(o)).list.apply()
-        orders.size should be > (0)
+        orders.size should be > 0
 
         QueryDSL.insert.into(Account).columns(ac.id, ac.name).values(1, "Alice")
 
