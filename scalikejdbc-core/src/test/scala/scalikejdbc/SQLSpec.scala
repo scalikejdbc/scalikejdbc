@@ -366,7 +366,7 @@ class SQLSpec
       val results: List[Map[String, Any]] = DB readOnly { implicit s =>
         SQL("select 1 from " + tableName).toMap.list.apply()
       }
-      results.size should be > (0)
+      results.size should be > 0
     }
   }
 

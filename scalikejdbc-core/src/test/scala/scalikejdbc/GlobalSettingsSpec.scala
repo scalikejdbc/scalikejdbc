@@ -155,7 +155,7 @@ class GlobalSettingsSpec
           .map(_.toMap())
           .list
           .apply()
-        result.size should be > (0)
+        result.size should be > 0
 
         var errorResult: String = ""
         GlobalSettings.queryFailureListener =
@@ -168,7 +168,7 @@ class GlobalSettingsSpec
             .list
             .apply()
         } catch { case e: Exception => }
-        errorResult.size should be > (0)
+        errorResult.size should be > 0
 
       } finally {
         GlobalSettings.queryCompletionListener =

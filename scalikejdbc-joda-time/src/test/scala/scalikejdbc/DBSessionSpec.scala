@@ -30,8 +30,8 @@ class DBSessionSpec
 
   it should "be available" in {
     using(DBSession(ConnectionPool.borrow())) { session =>
-      session.conn should not be (null)
-      session.connection should not be (null)
+      session.conn should not be null
+      session.connection should not be null
       session should not be null
     }
   }
@@ -355,7 +355,7 @@ class DBSessionSpec
           .toOption
           .apply()
       }
-      result.isDefined should not be (true)
+      result.isDefined should not be true
     }
   }
 

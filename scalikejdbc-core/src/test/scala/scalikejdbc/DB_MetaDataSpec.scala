@@ -122,7 +122,7 @@ class DB_MetaDataSpec
       ) withClue(s"No. ${i}") {
         lower(act) should (contain(
           "meta_members"
-        ) and not contain ("meta_groups"))
+        ) and not contain "meta_groups")
       }
 
       DB.showTables("dummy") should be(empty)
@@ -155,13 +155,13 @@ class DB_MetaDataSpec
         }
         lower(act.value.name) should equal("meta_members")
 
-        act.value.columns should have size (6)
-        act.value.foreignKeys should have size (1)
+        act.value.columns should have size 6
+        act.value.foreignKeys should have size 1
 
         if (url.startsWith("jdbc:postgresql")) {
-          act.value.indices should have size (3)
+          act.value.indices should have size 3
         } else {
-          act.value.indices should have size (4) // contain foreign key
+          act.value.indices should have size 4 // contain foreign key
         }
       }
 
@@ -282,7 +282,7 @@ class DB_MetaDataSpec
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
             lower(act).count(_ == "meta_members") should be(1)
-            lower(act) should not contain ("meta_groups")
+            lower(act) should not contain "meta_groups"
           } else {
             // public.meta_members, other.meta_members, other.meta_groups
             lower(act).count(_ == "meta_members") should be(2)
@@ -313,11 +313,11 @@ class DB_MetaDataSpec
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
             lower(act).count(_ == "meta_members") should be(1)
-            lower(act) should not contain ("meta_groups")
+            lower(act) should not contain "meta_groups"
           } else {
             // public.meta_members, other.meta_members
             lower(act).count(_ == "meta_members") should be(2)
-            lower(act) should not contain ("meta_groups")
+            lower(act) should not contain "meta_groups"
           }
         }
 
@@ -335,7 +335,7 @@ class DB_MetaDataSpec
         ) withClue(s"No. ${i}") {
           lower(act) should (contain(
             "public.meta_members"
-          ) and not contain ("other.meta_groups"))
+          ) and not contain "other.meta_groups")
         }
 
         for (
@@ -366,7 +366,7 @@ class DB_MetaDataSpec
             // public.meta_members
             lower(act) should (include(
               "meta_members"
-            ) and not include ("meta_groups"))
+            ) and not include "meta_groups")
           } else {
             // public.meta_members, other.meta_members, other.meta_groups
             lower(act) should (include("meta_members") and include(
@@ -383,7 +383,7 @@ class DB_MetaDataSpec
         ) {
           lower(act) should (include(
             "public.meta_members"
-          ) and not include ("other.meta_members") and not include ("other.meta_groups"))
+          ) and not include "other.meta_members" and not include "other.meta_groups")
         }
 
         for (
@@ -392,7 +392,7 @@ class DB_MetaDataSpec
             NamedDB("default").showTables("other.%")
           )
         ) {
-          lower(act) should (not include ("public.meta_members") and include(
+          lower(act) should (not include "public.meta_members" and include(
             "other.meta_members"
           ) and include("other.meta_groups"))
         }
@@ -408,7 +408,7 @@ class DB_MetaDataSpec
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("meta_members")
-          act.value.columns should have size (4)
+          act.value.columns should have size 4
         }
 
         for (
@@ -421,7 +421,7 @@ class DB_MetaDataSpec
         ) withClue(s"No. ${i}") {
           lower(act.value.schema) should equal("other")
           lower(act.value.name) should equal("meta_members")
-          act.value.columns should have size (6)
+          act.value.columns should have size 6
         }
 
         DB.getTable("dummy.*") should be(empty)
@@ -436,7 +436,7 @@ class DB_MetaDataSpec
         ) {
           lower(act) should (include(
             "public.meta_members"
-          ) and not include ("other.meta_members"))
+          ) and not include "other.meta_members")
         }
 
         for (
@@ -445,7 +445,7 @@ class DB_MetaDataSpec
             NamedDB("default").describe("other.meta_members")
           )
         ) {
-          lower(act) should (not include ("public.meta_members") and include(
+          lower(act) should (not include "public.meta_members" and include(
             "other.meta_members"
           ))
         }
@@ -541,9 +541,9 @@ class DB_MetaDataSpec
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")
 
-          act.value.columns should have size (2)
-          act.value.foreignKeys should have size (0)
-          act.value.indices should have size (1)
+          act.value.columns should have size 2
+          act.value.foreignKeys should have size 0
+          act.value.indices should have size 1
         }
 
         for (
@@ -555,9 +555,9 @@ class DB_MetaDataSpec
           lower(act.value.schema) should equal("public")
           lower(act.value.name) should equal("users")
 
-          act.value.columns should have size (2)
-          act.value.foreignKeys should have size (0)
-          act.value.indices should have size (1)
+          act.value.columns should have size 2
+          act.value.foreignKeys should have size 0
+          act.value.indices should have size 1
         }
 
         // get column names

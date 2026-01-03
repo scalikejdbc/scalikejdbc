@@ -296,7 +296,7 @@ class SQLInterpolationSpec
             }
             .list
             .apply()
-        users should have size (0)
+        users should have size 0
       } finally {
         sql"""drop table interpolation_users""".execute.apply()
       }
@@ -323,7 +323,7 @@ class SQLInterpolationSpec
             }
             .list
             .apply()
-        users should have size (0)
+        users should have size 0
       } finally {
         sql"""drop table interpolation_users""".execute.apply()
       }

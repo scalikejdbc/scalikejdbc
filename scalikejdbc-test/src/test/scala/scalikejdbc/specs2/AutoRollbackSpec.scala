@@ -24,24 +24,24 @@ class AutoRollbackSpec
       "members2 table must be empty after a test" ! db2AutoRollback().afterTest ^ end
 
   def withoutAutoRollback = {
-    Member.count() must_== (0)
+    Member.count() must_== 0
     Member.create(0, "Dummy")
-    Member.count() must_== (1)
+    Member.count() must_== 1
   }
 
   def shouldBeCommittedWithoutAutoRollback = {
-    Member.count() must_== (1)
+    Member.count() must_== 1
     Member.delete(0)
-    Member.count() must_== (0)
+    Member.count() must_== 0
   }
 
   case class autoRollback() extends AutoRollback {
     def beforeTest = this {
-      Member.count() must_== (0)
+      Member.count() must_== 0
     }
     def afterTest = this {
       // all insertions should be rolled back
-      Member.count() must_== (0)
+      Member.count() must_== 0
     }
   }
 
@@ -59,36 +59,36 @@ class AutoRollbackSpec
 
     def shouldBeRolledBack = this {
       // MemberAutoRollbackWithFixture insert 2 records
-      Member.count() must_== (2)
+      Member.count() must_== 2
       Member.create(3, "Chris")
-      Member.count() must_== (3)
+      Member.count() must_== 3
     }
   }
 
   // NamedDB
 
   def db2WithoutAutoRollback = {
-    Member2.count() must_== (0)
+    Member2.count() must_== 0
     Member2.create(0, "Dummy")
-    Member2.count() must_== (1)
+    Member2.count() must_== 1
   }
 
   def db2ShouldBeCommittedWithoutAutoRollback = {
-    Member2.count() must_== (1)
+    Member2.count() must_== 1
     Member2.delete(0)
-    Member2.count() must_== (0)
+    Member2.count() must_== 0
   }
 
   case class db2AutoRollback() extends AutoRollback {
     override def db() = NamedDB("db2").toDB()
 
     def beforeTest = this {
-      Member2.count() must_== (0)
+      Member2.count() must_== 0
     }
 
     def afterTest = this {
       // all insertions should be rolled back
-      Member2.count() must_== (0)
+      Member2.count() must_== 0
     }
   }
 
@@ -108,9 +108,9 @@ class AutoRollbackSpec
 
     def test = this {
       // db2AutoRollbackWithFixture insert 2 records
-      Member2.count() must_== (2)
+      Member2.count() must_== 2
       Member2.create(3, "Chris")
-      Member2.count() must_== (3)
+      Member2.count() must_== 3
     }
   }
 
