@@ -12,8 +12,6 @@ object ThreadLocalDB {
 
   /**
    * Creates a new DB instance for the current thread.
-   * @param conn
-   * @return
    */
   def create(conn: Connection): DB = {
     _db.value = DB(conn, DBConnectionAttributes(), SettingsProvider.default)
