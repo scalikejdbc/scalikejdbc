@@ -226,7 +226,7 @@ class StatementExecutorSpec
   }
 
   it should "handle large bind values efficiently (issue #2453)" in {
-    val bindValues = (1 to 50000).toSeq
+    val bindValues = (1 to 50000)
     val placeholders = bindValues.map(_ => "?").mkString(", ")
     val template = s"INSERT INTO table (column1) VALUES ($placeholders)"
 
