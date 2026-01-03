@@ -676,10 +676,10 @@ class DB_SQLOperationSpec
           data2 varchar(255) not null
         );""").execute.apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""")
-          .batch((101 to 121) map { i => Seq(i, "a", "b") }: _*)
+          .batch((101 to 121).map { i => Seq(i, "a", "b") }*)
           .apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""")
-          .batch((201 to 205) map { i => Seq(i, "a", "b") }: _*)
+          .batch((201 to 205).map { i => Seq(i, "a", "b") }*)
           .apply()
       }
     } finally {
