@@ -4,6 +4,7 @@ import scala.language.implicitConversions
 import org.joda.time.{ DateTime, LocalDate, LocalTime }
 import scalikejdbc.orm.strongparameters.ParamType
 
+import scala.collection.compat.*
 import scala.util.Try
 
 /**
@@ -187,9 +188,9 @@ object DateTimeUtil {
         params.get(month).filterNot(_.toString.isEmpty) orElse
         params.get(day).filterNot(_.toString.isEmpty)).map { _ =>
         "%04d-%02d-%02d".format(
-          params.get(year).map(_.toString.toInt).orNull,
-          params.get(month).map(_.toString.toInt).orNull,
-          params.get(day).map(_.toString.toInt).orNull
+          params.get(year).flatMap(_.toString.toIntOption).orNull,
+          params.get(month).flatMap(_.toString.toIntOption).orNull,
+          params.get(day).flatMap(_.toString.toIntOption).orNull
         )
       }
     } catch {
@@ -227,9 +228,9 @@ object DateTimeUtil {
         params.get(minute).filterNot(_.toString.isEmpty) orElse
         params.get(second).filterNot(_.toString.isEmpty)).map { _ =>
         "1970-01-01 %02d:%02d:%02d".format(
-          params.get(hour).map(_.toString.toInt).orNull,
-          params.get(minute).map(_.toString.toInt).orNull,
-          params.get(second).map(_.toString.toInt).orNull
+          params.get(hour).flatMap(_.toString.toIntOption).orNull,
+          params.get(minute).flatMap(_.toString.toIntOption).orNull,
+          params.get(second).flatMap(_.toString.toIntOption).orNull
         )
       }
     } catch {
@@ -273,12 +274,12 @@ object DateTimeUtil {
         params.get(minute).filterNot(_.toString.isEmpty) orElse
         params.get(second).filterNot(_.toString.isEmpty)).map { _ =>
         "%04d-%02d-%02d %02d:%02d:%02d".format(
-          params.get(year).map(_.toString.toInt).orNull,
-          params.get(month).map(_.toString.toInt).orNull,
-          params.get(day).map(_.toString.toInt).orNull,
-          params.get(hour).map(_.toString.toInt).orNull,
-          params.get(minute).map(_.toString.toInt).orNull,
-          params.get(second).map(_.toString.toInt).orNull
+          params.get(year).flatMap(_.toString.toIntOption).orNull,
+          params.get(month).flatMap(_.toString.toIntOption).orNull,
+          params.get(day).flatMap(_.toString.toIntOption).orNull,
+          params.get(hour).flatMap(_.toString.toIntOption).orNull,
+          params.get(minute).flatMap(_.toString.toIntOption).orNull,
+          params.get(second).flatMap(_.toString.toIntOption).orNull
         )
       }
     } catch {
