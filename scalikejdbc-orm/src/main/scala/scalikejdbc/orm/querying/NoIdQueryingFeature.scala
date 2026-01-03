@@ -24,7 +24,6 @@ trait NoIdQueryingFeature[Entity]
   /**
    * Appends where conditions.
    *
-   * @param conditions
    * @return query builder
    */
   def where(conditions: (String, Any)*): EntitiesSelectOperationBuilder =
@@ -51,7 +50,6 @@ trait NoIdQueryingFeature[Entity]
   /**
    * Appends a raw where condition.
    *
-   * @param condition
    * @return query builder
    */
   def where(condition: SQLSyntax): EntitiesSelectOperationBuilder =
@@ -144,7 +142,6 @@ trait NoIdQueryingFeature[Entity]
     /**
      * Appends a raw where condition.
      *
-     * @param condition
      * @return query builder
      */
     def where(condition: SQLSyntax): EntitiesSelectOperationBuilder =

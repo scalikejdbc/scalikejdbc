@@ -75,8 +75,6 @@ trait DBSeeds {
 
   /**
     * Runs if SQL execution failed.
-    * @param sql
-    * @param session
     * @return nothing
     */
   def runIfFailed(

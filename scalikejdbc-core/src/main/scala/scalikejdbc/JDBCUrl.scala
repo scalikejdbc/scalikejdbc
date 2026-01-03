@@ -39,8 +39,5 @@ object JDBCUrl {
 /**
  * JDBC URL which contains host, port and database name
  *
- * @param host
- * @param port
- * @param database
  */
 case class JDBCUrl(host: String, port: Int, database: String)

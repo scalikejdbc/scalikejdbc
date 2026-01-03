@@ -198,7 +198,6 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
 
   /**
    * Ensures the current session is not in read-only mode.
-   * @param template
    */
   private def ensureNotReadOnlySession(template: String): Unit = {
     if (isReadOnly) {
