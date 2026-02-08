@@ -66,7 +66,7 @@ object ConnectionPool extends LogSupport {
    * @return is initialized
    */
   def isInitialized(name: Any = DEFAULT_NAME): Boolean = withLock {
-    pools.get(name).isDefined
+    pools.contains(name)
   }
 
   private def ensureInitialized(name: Any): Unit = {
