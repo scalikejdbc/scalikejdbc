@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import scala.quoted._
-import language.`3.0`
 
 object autoColumns {
 
