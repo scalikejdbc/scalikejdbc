@@ -2,6 +2,7 @@ package scalikejdbc
 
 import javax.sql.DataSource
 import java.sql.Connection
+import java.time.Duration
 import org.apache.commons.dbcp2.PoolingDataSource
 import org.apache.commons.dbcp2.PoolableConnection
 import org.apache.commons.dbcp2.PoolableConnectionFactory
@@ -34,7 +35,7 @@ class Commons2ConnectionPool(
   _pool.setMaxIdle(settings.maxSize)
   _pool.setBlockWhenExhausted(true)
   _pool.setMaxTotal(settings.maxSize)
-  _pool.setMaxWaitMillis(settings.connectionTimeoutMillis)
+  _pool.setMaxWait(Duration.ofMillis(settings.connectionTimeoutMillis))
 
   // To fix MS SQLServer jtds driver issue
   // https://github.com/scalikejdbc/scalikejdbc/issues/461
