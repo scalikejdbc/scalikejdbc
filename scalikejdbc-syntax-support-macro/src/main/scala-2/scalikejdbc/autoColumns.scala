@@ -12,9 +12,9 @@ object autoColumns {
     val columns =
       EntityUtil.constructorParams[A](c)("autoColumns", excludes*).map {
         field =>
-          q"scalikejdbc.autoColumns.camelToSnake(${field.name.decodedName.toString}, nameConverters, useSnakeCaseColumnName)"
+          q"_root_.scalikejdbc.autoColumns.camelToSnake(${field.name.decodedName.toString}, nameConverters, useSnakeCaseColumnName)"
       }
-    c.Expr[Seq[String]](q"Seq(..$columns)")
+    c.Expr[Seq[String]](q"_root_.scala.Seq(..$columns)")
   }
 
   def camelToSnake(
