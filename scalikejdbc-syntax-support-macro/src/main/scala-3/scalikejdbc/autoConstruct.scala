@@ -2,7 +2,6 @@ package scalikejdbc
 
 import scala.quoted._
 import java.sql.ResultSet
-import language.`3.0`
 
 object autoConstruct {
   def applyResultName_impl[A](

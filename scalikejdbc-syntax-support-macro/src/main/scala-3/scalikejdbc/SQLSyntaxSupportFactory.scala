@@ -2,7 +2,6 @@ package scalikejdbc
 
 import scalikejdbc.{ SQLSyntaxSupportImpl, TypeBinder }
 import scala.quoted._
-import language.`3.0`
 
 object SQLSyntaxSupportFactory {
 
