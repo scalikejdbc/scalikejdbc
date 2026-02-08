@@ -708,7 +708,7 @@ class DB_SQLOperationSpec
           .apply()
       }
       result.isDefined should equal(true)
-      if (result.get.get("ID").isDefined) {
+      if (result.get.contains("ID")) {
         result.get.get("ID") should equal(Some(4))
         result.get.keys should equal(Set("ID"))
       } else {
@@ -735,7 +735,7 @@ class DB_SQLOperationSpec
           .apply()
       }
       result.isDefined should equal(true)
-      if (result.get.get(Symbol("ID")).isDefined) {
+      if (result.get.contains(Symbol("ID"))) {
         result.get.get(Symbol("ID")) should equal(Some(4))
         result.get.keys should equal(Set(Symbol("ID")))
       } else {

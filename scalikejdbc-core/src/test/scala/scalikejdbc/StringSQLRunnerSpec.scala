@@ -25,7 +25,7 @@ class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
 
       // run select SQL
       val result = ("select id,name from " + tableName + " where id = 3").run()
-      if (result.head.get("ID").isDefined) {
+      if (result.head.contains("ID")) {
         result.head.apply("ID") should equal(3)
         result.head.apply("NAME") should equal("Ben")
       } else {
