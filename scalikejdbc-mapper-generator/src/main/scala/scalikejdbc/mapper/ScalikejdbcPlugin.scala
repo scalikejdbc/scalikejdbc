@@ -4,7 +4,6 @@ import scalikejdbc.mapper.ScalikejdbcPluginCompat._
 import sbt.{ given, _ }
 import sbt.Keys._
 import sbt.complete.EditDistance
-import scala.language.reflectiveCalls
 import scala.util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
@@ -443,7 +442,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
       )
     )
 
-  def using[R <: { def close(): Unit }, A](resource: R)(f: R => A): A =
+  def using[R <: AutoCloseable, A](resource: R)(f: R => A): A =
     ultimately {
       ignoring(classOf[Throwable]) apply resource.close()
     } apply f(resource)
