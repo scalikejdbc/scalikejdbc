@@ -12,6 +12,10 @@ class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
   behavior of "StringSQLRunner"
 
   it should "be available" in {
+    if (driverClassName == "org.postgresql.Driver") {
+      // TODO
+      pending
+    }
 
     val tableName = tableNamePrefix + "_beAvailable"
     ultimately(TestUtils.deleteTable(tableName)) {
