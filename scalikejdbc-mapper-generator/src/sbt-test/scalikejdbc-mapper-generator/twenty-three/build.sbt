@@ -1,5 +1,7 @@
 val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
+evictionErrorLevel := Level.Warn
+
 (Compile / scalikejdbcJDBCSettings) := {
   val props = new java.util.Properties()
   IO.load(props, file("test.properties"))

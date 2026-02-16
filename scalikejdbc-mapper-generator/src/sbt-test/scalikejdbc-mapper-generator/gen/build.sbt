@@ -1,5 +1,7 @@
 val root = project.in(file(".")).enablePlugins(ScalikejdbcPlugin)
 
+evictionErrorLevel := Level.Warn
+
 Compile / scalikejdbcGeneratorSettings ~= { setting =>
   setting.copy(tableNameToSyntaxName = { tableName =>
     setting.tableNameToSyntaxName(tableName) match {

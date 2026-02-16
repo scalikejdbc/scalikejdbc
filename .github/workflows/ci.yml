@@ -32,10 +32,10 @@ jobs:
         include:
           - name: scripted
             db: mysql
-            java: 8
+            java: 17
           - name: scripted
             db: postgresql
-            java: 8
+            java: 17
 
           - name: test
             db: hsqldb
