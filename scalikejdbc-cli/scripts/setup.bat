@@ -107,7 +107,7 @@ if exist "%dbconsole_command%" ( del /f /q "%dbconsole_command%" )
 >>"%dbconsole_command%" echo exit /b 0
 >>"%dbconsole_command%" echo.
 >>"%dbconsole_command%" echo :run_sbt
->>"%dbconsole_command%" echo   call java -Xms256M -Xmx512M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxMetaspaceSize=386M ^^
+>>"%dbconsole_command%" echo   call java -Xms256M -Xmx512M -Xss1M -XX:MaxMetaspaceSize=386M ^^
 >>"%dbconsole_command%" echo     -jar "%%~dp0\sbt-launch.jar" ^^
 >>"%dbconsole_command%" echo     -Dscalikejdbc-cli.config.profile=%%_profile%% ^^
 >>"%dbconsole_command%" echo     %%1
