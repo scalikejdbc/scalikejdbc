@@ -138,7 +138,7 @@ jobs:
     - uses: sbt/setup-sbt@v1
     - run: sbt -v
            "project root213"
-           '++ 3.7.3!'
+           '++ 3.8.2-RC3!'
            Test/compile
            test
   format:
