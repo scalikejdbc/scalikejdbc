@@ -15,7 +15,6 @@ sbt -v \
   publishLocal
 
 sbt -v \
-  -J-XX:+CMSClassUnloadingEnabled \
   -J-Xmx512M \
   -J-Xms512M \
   "project mapper-generator" \

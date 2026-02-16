@@ -50,7 +50,7 @@ function show_help() {
 }
 
 function run_sbt() {
-  java -Xms256M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled -XX:MaxMetaspaceSize=386M \
+  java -Xms256M -Xmx1024M -Xss1M -XX:MaxMetaspaceSize=386M \
     -Dfile.encoding=UTF-8 \
     -jar `dirname $0`/sbt-launch.jar \
     -Dscalikejdbc-cli.config.profile=${PROFILE} \
