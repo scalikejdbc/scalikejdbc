@@ -219,7 +219,7 @@ lazy val scalikejdbcCore = Project(
   libraryDependencies ++= {
     Seq(
       // scope: compile
-      "org.apache.commons" % "commons-dbcp2" % "2.13.0" % "compile",
+      "org.apache.commons" % "commons-dbcp2" % "2.14.0" % "compile",
       "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0" % "compile",
       "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0",
