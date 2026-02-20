@@ -1,6 +1,8 @@
 import MimaSettings.mimaSettings
 
-publish / skip := true
+lazy val root = rootProject.autoAggregate.settings(
+  publish / skip := true
+)
 
 def Scala3 = "3.3.7"
 def Scala212 = "2.12.21"
@@ -41,7 +43,7 @@ val mysqlConnectorJ =
   )
 
 def gitHash: String = try {
-  sys.process.Process("git rev-parse HEAD").lineStream_!.head
+  sys.process.Process("git rev-parse HEAD").lazyLines_!.head
 } catch {
   case e: Exception =>
     println(e)
@@ -58,6 +60,7 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
+  exportJars := false,
   javacOptions ++= Seq(
     "-source",
     "1.8",
@@ -311,14 +314,14 @@ lazy val scalikejdbcMapperGenerator = Project(
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
       case "2.12" =>
-        sbtVersion.value
+        "1.12.3"
       case _ =>
-        "2.0.0-RC9"
+        sbtVersion.value
     }
   },
   scriptedLaunchOpts ++= {
     val javaVmArgs = {
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
     }
     javaVmArgs.filter(a => Seq("-XX", "-Xss").exists(a.startsWith)) ++ Seq(

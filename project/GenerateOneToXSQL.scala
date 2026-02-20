@@ -51,9 +51,9 @@ object OneToXSQL {
 }
 """
 
-  private[this] def tparam(n: Int) = (1 to n).map("B" + _).mkString(", ")
+  private def tparam(n: Int) = (1 to n).map("B" + _).mkString(", ")
 
-  private[this] def manies(n: Int): String = s"""  def toManies[${tparam(n)}](
+  private def manies(n: Int): String = s"""  def toManies[${tparam(n)}](
     ${(1 to n)
       .map(x => s"to${x}: WrappedResultSet => Option[B${x}]")
       .mkString(", ")}

@@ -2,7 +2,7 @@
 
 set -eux
 
-sbt -v \
+sbt -v --server \
   SetScala212 \
   "test" \
   SetScala213 \
