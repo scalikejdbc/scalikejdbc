@@ -2,9 +2,9 @@
 
 set -eux
 
-sbt -v publishLocal
+sbt -v --server publishLocal
 
-sbt -v \
+sbt -v --server \
   -J-Xmx512M \
   -J-Xms512M \
   mapper-generator2_12/scripted \
