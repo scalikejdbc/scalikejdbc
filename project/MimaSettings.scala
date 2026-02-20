@@ -30,9 +30,9 @@ object MimaSettings {
     mimaPreviousArtifacts := previousVersions.map {
       organization.value % s"${name.value}_${scalaBinaryVersion.value}" % _
     },
-    (Test / test) := {
+    (Test / testFull) := Def.uncached {
       mimaReportBinaryIssues.value
-      (Test / test).value
+      (Test / testFull).value
     }
   )
 }
