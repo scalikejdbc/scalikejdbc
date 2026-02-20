@@ -1,6 +1,8 @@
 import MimaSettings.mimaSettings
 
-publish / skip := true
+lazy val root = rootProject.autoAggregate.settings(
+  publish / skip := true
+)
 
 def sbt2 = "2.0.0"
 val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.8")
@@ -49,13 +51,13 @@ lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.23.0" % "provided"
 
 val mysqlConnectorJ =
-  "com.mysql" % "mysql-connector-j" % "9.7.0" % Test exclude (
+  ("com.mysql" % "mysql-connector-j" % "9.7.0" % Test).exclude(
     "com.google.protobuf",
     "protobuf-java"
   )
 
 def gitHash: String = try {
-  sys.process.Process("git rev-parse HEAD").lineStream_!.head
+  sys.process.Process("git rev-parse HEAD").lazyLines_!.head
 } catch {
   case e: Exception =>
     println(e)
@@ -99,13 +101,16 @@ lazy val baseSettings = Def.settings(
   },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
-    if (scalaVersion.value.startsWith("3.3.")) {
-      Seq(
-        "-Yfuture-lazy-vals",
-        "-release:11",
-      )
-    } else {
-      Nil
+    scalaBinaryVersion.value match {
+      case "2.12" | "2.13" =>
+        Seq("-release:11")
+      case _ if scalaVersion.value.startsWith("3.3.") =>
+        Seq(
+          "-Yfuture-lazy-vals",
+          "-release:11",
+        )
+      case _ =>
+        Nil
     }
   },
   scalacOptions ++= {
@@ -331,14 +336,10 @@ lazy val scalikejdbcMapperGenerator = projectMatrix
   .withId("mapper-generator")
   .in(file("scalikejdbc-mapper-generator"))
   .jvmPlatform(
-    if (scala.util.Properties.isJavaAtLeast("17")) {
-      Seq(
-        Scala212,
-        scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
-      )
-    } else {
-      Seq(Scala212)
-    }
+    Seq(
+      Scala212,
+      scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
+    )
   )
   .settings(
     baseSettings,
@@ -346,14 +347,14 @@ lazy val scalikejdbcMapperGenerator = projectMatrix
     pluginCrossBuild / sbtVersion := {
       scalaBinaryVersion.value match {
         case "2.12" =>
-          sbtVersion.value
+          "1.12.12"
         case _ =>
           sbt2
       }
     },
     scriptedLaunchOpts ++= {
       val javaVmArgs = {
-        import scala.collection.JavaConverters._
+        import scala.jdk.CollectionConverters._
         java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
       }
       javaVmArgs.filter(a => Seq("-XX", "-Xss").exists(a.startsWith)) ++ Seq(
@@ -535,7 +536,11 @@ val _pomExtra = <url>https://scalikejdbc.org/</url>
       </developer>
     </developers>
 
-TaskKey[Unit]("updateScalikejdbcCliSetupScriptSbt") := {
+@transient
+val updateScalikejdbcCliSetupScriptSbt =
+  taskKey[Unit]("updateScalikejdbcCliSetupScriptSbt")
+
+LocalRootProject / updateScalikejdbcCliSetupScriptSbt := {
   val launcherLine = "https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/"
   Seq[(String, String => String)](
     "scalikejdbc-cli/scripts/setup.bat" -> (v =>
