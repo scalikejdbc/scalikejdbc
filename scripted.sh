@@ -2,7 +2,7 @@
 
 set -eux
 
-sbt -v \
+sbt -v --server \
   SetScala212 \
   publishLocal \
   "project root213" \
@@ -14,7 +14,7 @@ sbt -v \
   "++ 3.x" \
   publishLocal
 
-sbt -v \
+sbt -v --server \
   -J-Xmx512M \
   -J-Xms512M \
   "project mapper-generator" \

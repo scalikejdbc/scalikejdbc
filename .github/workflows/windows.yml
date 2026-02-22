@@ -12,11 +12,10 @@ jobs:
     - uses: actions/checkout@v6
     - uses: actions/setup-java@v5
       with:
-        java-version: 8
+        java-version: 17
         distribution: temurin
     - uses: coursier/cache-action@v8
     - run: rm project/sbt-pgp.sbt
-    - run: rm project/sbt-updates.sbt
     # TODO: improve the stability of this test; it occurs only with Windows test job
     - run: echo 'ThisBuild / Test / testOptions += Tests.Exclude(Seq("basic_test.accounts.AccountDatabaseSpec"))' > skip-tests.sbt
     - shell: bash
