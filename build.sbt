@@ -24,14 +24,14 @@ lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
 lazy val _slf4jApiVersion = "2.0.17"
-lazy val _typesafeConfigVersion = "1.4.5"
+lazy val _typesafeConfigVersion = "1.4.6"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
 lazy val _logbackVersion = "1.2.13"
 lazy val _h2Version = "1.4.199" // TODO: Upgrade to 2.x
 lazy val _postgresqlVersion = "42.7.10"
-lazy val _hibernateVersion = "7.2.4.Final"
+lazy val _hibernateVersion = "7.2.5.Final"
 def scalatestVersion = "3.2.19"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.23.0" % "provided"
@@ -309,7 +309,7 @@ lazy val scalikejdbcMapperGenerator = Project(
   // Don't update to sbt 1.3.x
   // https://github.com/sbt/sbt/issues/5049
   crossSbtVersions := "1.2.8" :: Nil,
-  crossScalaVersions := Seq(Scala212, "3.8.2-RC3"),
+  crossScalaVersions := Seq(Scala212, "3.8.1"),
   scriptedBufferLog := false,
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
