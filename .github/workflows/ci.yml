@@ -39,30 +39,30 @@ jobs:
 
           - name: test
             db: hsqldb
-            java: 8
+            java: 17
           - name: test
             db: mysql
-            java: 8
+            java: 17
           - name: test
             db: postgresql
-            java: 8
+            java: 17
           - name: test
             db: h2
-            java: 8
+            java: 17
 
           - name: test
             db: mysql
-            java: 11
+            java: 17
           - name: test
             db: mysql
             java: 25
 
           - name: scala_3
             db: mysql
-            java: 8
+            java: 17
           - name: scala_3
             db: postgresql
-            java: 8
+            java: 17
           - name: scala_3
             db: postgresql
             java: 25
@@ -100,7 +100,6 @@ jobs:
         rm scalikejdbc-core/src/test/resources/jdbc.properties &&
         cp -p scalikejdbc-core/src/test/resources/jdbc_${{ matrix.db }}.properties scalikejdbc-core/src/test/resources/jdbc.properties
     - run: rm project/sbt-pgp.sbt
-    - run: rm project/sbt-updates.sbt
     - if: ${{ matrix.db == 'mysql' }}
       run:
         # TODO flaky test
@@ -108,7 +107,7 @@ jobs:
     - run: |
         case ${{ matrix.name }} in
           "scala_3")
-            sbt -v \
+            sbt -v --server \
             "+ scalafmtCheckAll" \
             scalafmtSbtCheck \
             SetScala3 \
@@ -136,7 +135,7 @@ jobs:
         java-version: 25
         distribution: zulu
     - uses: sbt/setup-sbt@v1
-    - run: sbt -v
+    - run: sbt -v --server
            "project root213"
            '++ 3.8.3-RC1!'
            Test/compile
@@ -148,11 +147,11 @@ jobs:
     - uses: actions/checkout@v6
     - uses: actions/setup-java@v5
       with:
-        java-version: 11
+        java-version: 17
         distribution: temurin
     - uses: sbt/setup-sbt@v1
     - run: |
-        sbt "+ scalafmtAll" scalafmtSbt
+        sbt --server "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
     - if: ${{ (github.event_name == 'pull_request') && failure() }}
       run: |
