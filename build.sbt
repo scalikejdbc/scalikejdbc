@@ -2,6 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
+def sbt2 = "2.0.0-RC11"
 def Scala3 = "3.3.7"
 def Scala212 = "2.12.21"
 def Scala213 = "2.13.18"
@@ -306,14 +307,17 @@ lazy val scalikejdbcMapperGenerator = Project(
   // Don't update to sbt 1.3.x
   // https://github.com/sbt/sbt/issues/5049
   crossSbtVersions := "1.2.8" :: Nil,
-  crossScalaVersions := Seq(Scala212, "3.8.2"),
+  crossScalaVersions := Seq(
+    Scala212,
+    scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
+  ),
   scriptedBufferLog := false,
   pluginCrossBuild / sbtVersion := {
     scalaBinaryVersion.value match {
       case "2.12" =>
         sbtVersion.value
       case _ =>
-        "2.0.0-RC11"
+        sbt2
     }
   },
   scriptedLaunchOpts ++= {
