@@ -2,22 +2,10 @@
 
 set -eux
 
-sbt -v \
-  SetScala212 \
-  publishLocal \
-  "project root213" \
-  SetScala3 \
-  publishLocal \
-  SetScala213 \
-  publishLocal \
-  "project mapper-generator" \
-  "++ 3.x" \
-  publishLocal
+sbt -v publishLocal
 
 sbt -v \
   -J-Xmx512M \
   -J-Xms512M \
-  "project mapper-generator" \
-  scripted \
-  "++ 3.x" \
-  scripted
+  mapper-generator2_12/scripted \
+  mapper-generator3/scripted
