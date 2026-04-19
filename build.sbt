@@ -70,6 +70,7 @@ lazy val baseSettings = Def.settings(
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
+  exportJars := false,
   javacOptions ++= Seq(
     "-source",
     "1.8",
