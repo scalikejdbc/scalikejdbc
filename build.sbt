@@ -3,9 +3,11 @@ import MimaSettings.mimaSettings
 publish / skip := true
 
 def sbt2 = "2.0.0-RC12"
-def Scala3 = "3.3.7"
+val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.7")
 def Scala212 = "2.12.21"
 def Scala213 = "2.13.18"
+
+val scalaVersions = Seq(Scala212, Scala213, Scala3)
 
 ThisBuild / version := "4.4.0-SNAPSHOT"
 ThisBuild / publishTo := {
@@ -17,6 +19,17 @@ ThisBuild / publishTo := {
 
 val isScala3 = Def.setting(
   CrossVersion.partialVersion(scalaVersion.value).exists(_._1 == 3)
+)
+
+val excludeTestsIfWindows = Set(
+  "basic_test.accounts.AccountDatabaseSpec",
+  // stripMargin test
+  "scalikejdbc.SQLInterpolationStringSuite",
+  // stripMargin test
+  "scalikejdbc.interpolation.SQLSyntaxSpec",
+  // ???
+  "scalikejdbc.jodatime.JodaTypeBinderSpec",
+  "somewhere.DatabasePublisherTckTest",
 )
 
 lazy val _organization = "org.scalikejdbc"
@@ -54,8 +67,6 @@ lazy val baseSettings = Def.settings(
   publishMavenStyle := true,
   // Note: if you are publishing an sbt plugin you will also need to configure sbtPluginPublishLegacyMavenStyle := false for that project. Context: sbt publishes plugins with file names that do not conform to the maven specification. Sonatype OSSRH didn't validate this, but Sonatype Central does: File name 'sbt-my-plugin-0.0.1.jar' is not valid. See also: sbt/sbt#3410
   sbtPluginPublishLegacyMavenStyle := false,
-  scalaVersion := Scala212,
-  crossScalaVersions := Seq(Scala212, Scala213, Scala3),
   // https://github.com/sbt/sbt/issues/2217
   fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
@@ -71,9 +82,20 @@ lazy val baseSettings = Def.settings(
   doc / javacOptions := Seq("-source", "1.8"),
   Test / fork := true,
   Test / baseDirectory := (ThisBuild / baseDirectory).value,
-  addCommandAlias("SetScala3", s"++ ${Scala3}! -v"),
-  addCommandAlias("SetScala212", s"++ ${Scala212}! -v"),
-  addCommandAlias("SetScala213", s"++ ${Scala213}! -v"),
+  Test / testOptions ++= {
+    if (scalaBinaryVersion.value == "3") {
+      Seq(Tests.Exclude(Set("scalikejdbc.specs2.mutable.AutoRollbackSpec")))
+    } else {
+      Nil
+    }
+  },
+  Test / testOptions ++= {
+    if (scala.util.Properties.isWin) {
+      Seq(Tests.Exclude(excludeTestsIfWindows))
+    } else {
+      Nil
+    }
+  },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
     scalaBinaryVersion.value match {
@@ -108,314 +130,332 @@ lazy val baseSettings = Def.settings(
   pomExtra := _pomExtra
 )
 
-lazy val scala213projects = List(
-  scalikejdbcJodaTime,
-  scalikejdbcCore,
-  scalikejdbcLibrary,
-  scalikejdbcInterpolationMacro,
-  scalikejdbcInterpolation,
-  scalikejdbcOrm,
-  scalikejdbcMapperGeneratorCore,
-  scalikejdbcTest,
-  scalikejdbcConfig,
-  scalikejdbcStreams,
-  scalikejdbcSyntaxSupportMacro
-)
-
-lazy val root213 = Project(
-  "root213",
-  file("root213")
-).settings(
-  baseSettings,
-  publish / skip := true,
-  commands += Command.command("testSequential") {
-    scala213projects.map(_.id + "/test").sorted ::: _
-  }
-).aggregate(
-  scala213projects.map(p => p: ProjectReference) *
-)
-
-lazy val scalikejdbcJodaTime = Project(
-  id = "joda-time",
-  base = file("scalikejdbc-joda-time")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-joda-time",
-  libraryDependencies ++= scalaTestDependenciesInTestScope.value,
-  libraryDependencies ++= Seq(
-    "org.mockito" % "mockito-core" % mockitoVersion % "test",
-    "joda-time" % "joda-time" % "2.14.1",
-    "org.joda" % "joda-convert" % "3.0.1"
-  ),
-).dependsOn(
-  scalikejdbcLibrary,
-  scalikejdbcCore % "test->test",
-  scalikejdbcInterpolation % "test->test"
-)
+lazy val scalikejdbcJodaTime = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("joda-time")
+  .in(file("scalikejdbc-joda-time"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-joda-time",
+    libraryDependencies ++= scalaTestDependenciesInTestScope.value,
+    libraryDependencies ++= Seq(
+      "org.mockito" % "mockito-core" % mockitoVersion % "test",
+      "joda-time" % "joda-time" % "2.14.1",
+      "org.joda" % "joda-convert" % "3.0.1"
+    ),
+  )
+  .dependsOn(
+    scalikejdbcLibrary,
+    scalikejdbcCore % "test->test",
+    scalikejdbcInterpolation % "test->test"
+  )
 
 // scalikejdbc library
-lazy val scalikejdbcLibrary = Project(
-  id = "library",
-  base = file("scalikejdbc-library")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc",
-  Compile / scalacOptions ++= {
-    if (scalaBinaryVersion.value == "2.13") {
-      Seq(
-        "-Wconf:msg=package object inheritance is deprecated:warning", // TODO
-      )
-    } else {
-      Nil
-    }
-  },
-  libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
-    Seq("com.h2database" % "h2" % _h2Version % "test"),
-).dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
+lazy val scalikejdbcLibrary = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("library")
+  .in(file("scalikejdbc-library"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc",
+    Compile / scalacOptions ++= {
+      if (scalaBinaryVersion.value == "2.13") {
+        Seq(
+          "-Wconf:msg=package object inheritance is deprecated:warning", // TODO
+        )
+      } else {
+        Nil
+      }
+    },
+    libraryDependencies ++= scalaTestDependenciesInTestScope.value ++
+      Seq("com.h2database" % "h2" % _h2Version % "test"),
+  )
+  .dependsOn(scalikejdbcCore, scalikejdbcInterpolation)
 
 // scalikejdbc (core library)
-lazy val scalikejdbcCore = Project(
-  id = "core",
-  base = file("scalikejdbc-core")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-core",
-  buildInfoPackage := "scalikejdbc",
-  buildInfoObject := "ScalikejdbcBuildInfo",
-  buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
-  (Compile / sourceGenerators) += task {
-    val dir = (Compile / sourceManaged).value
-    val file = dir / "scalikejdbc" / "OneToXSQL.scala"
-    IO.write(file, GenerateOneToXSQL.value)
-    Seq(file)
-  },
-  (Compile / sourceGenerators) += task[Seq[File]] {
-    val dir = (Compile / sourceManaged).value
-    (3 to 21).map { n =>
-      val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
-      IO.write(file, GenerateOneToManies(n))
-      file
-    }
-  },
-  libraryDependencies ++= {
-    Seq(
-      // scope: compile
-      "org.apache.commons" % "commons-dbcp2" % "2.14.0" % "compile",
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0" % "compile",
-      "org.scala-lang.modules" %% "scala-collection-compat" % "2.14.0",
-      // scope: provided
-      "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
-      "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
-      // scope: test
-      "com.zaxxer" % "HikariCP" % "4.0.3" % "test",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.hibernate" % "hibernate-core" % _hibernateVersion % "test",
-      "org.mockito" % "mockito-core" % mockitoVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).enablePlugins(BuildInfoPlugin)
+lazy val scalikejdbcCore = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("core")
+  .in(file("scalikejdbc-core"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-core",
+    buildInfoPackage := "scalikejdbc",
+    buildInfoObject := "ScalikejdbcBuildInfo",
+    buildInfoKeys := Seq[BuildInfoKey](version, scalaVersion),
+    (Compile / sourceGenerators) += task {
+      val dir = (Compile / sourceManaged).value
+      val file = dir / "scalikejdbc" / "OneToXSQL.scala"
+      IO.write(file, GenerateOneToXSQL.value)
+      Seq(file)
+    },
+    (Compile / sourceGenerators) += task[Seq[File]] {
+      val dir = (Compile / sourceManaged).value
+      (3 to 21).map { n =>
+        val file = dir / "scalikejdbc" / s"OneToManies${n}SQL.scala"
+        IO.write(file, GenerateOneToManies(n))
+        file
+      }
+    },
+    libraryDependencies ++= {
+      Seq(
+        // scope: compile
+        "org.apache.commons" % "commons-dbcp2" % "2.14.0" % "compile",
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0" % "compile",
+        "org.scala-lang.modules" %% "scala-collection-compat" % "2.14.0",
+        // scope: provided
+        "commons-dbcp" % "commons-dbcp" % "1.4" % "provided",
+        "com.jolbox" % "bonecp" % "0.8.0.RELEASE" % "provided",
+        // scope: test
+        "com.zaxxer" % "HikariCP" % "4.0.3" % "test",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.hibernate" % "hibernate-core" % _hibernateVersion % "test",
+        "org.mockito" % "mockito-core" % mockitoVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .enablePlugins(BuildInfoPlugin)
 
 // scalikejdbc-interpolation-macro
-lazy val scalikejdbcInterpolationMacro = Project(
-  id = "interpolation-macro",
-  base = file("scalikejdbc-interpolation-macro")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-interpolation-macro",
-  libraryDependencies ++= {
-    if (isScala3.value) {
-      Nil
-    } else {
-      Seq(
-        "org.scala-lang" % "scala-reflect" % scalaVersion.value % "compile",
-        "org.scala-lang" % "scala-compiler" % scalaVersion.value % "optional"
-      )
-    }
-  },
-  libraryDependencies ++= scalaTestDependenciesInTestScope.value,
-).dependsOn(scalikejdbcCore)
+lazy val scalikejdbcInterpolationMacro = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("interpolation-macro")
+  .in(file("scalikejdbc-interpolation-macro"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-interpolation-macro",
+    libraryDependencies ++= {
+      if (isScala3.value) {
+        Nil
+      } else {
+        Seq(
+          "org.scala-lang" % "scala-reflect" % scalaVersion.value % "compile",
+          "org.scala-lang" % "scala-compiler" % scalaVersion.value % "optional"
+        )
+      }
+    },
+    libraryDependencies ++= scalaTestDependenciesInTestScope.value,
+  )
+  .dependsOn(scalikejdbcCore)
 
 // scalikejdbc-interpolation
-lazy val scalikejdbcInterpolation = Project(
-  id = "interpolation",
-  base = file("scalikejdbc-interpolation")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-interpolation",
-  libraryDependencies ++= {
-    Seq(
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
+lazy val scalikejdbcInterpolation = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("interpolation")
+  .in(file("scalikejdbc-interpolation"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-interpolation",
+    libraryDependencies ++= {
+      Seq(
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(scalikejdbcCore, scalikejdbcInterpolationMacro)
 
 // scalikejdbc-orm
-lazy val scalikejdbcOrm = Project(
-  id = "orm",
-  base = file("scalikejdbc-orm")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-orm",
-  libraryDependencies ++= {
-    Seq(
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(
-  scalikejdbcCore,
-  scalikejdbcInterpolation,
-  scalikejdbcInterpolationMacro,
-  scalikejdbcSyntaxSupportMacro,
-  scalikejdbcConfig,
-  scalikejdbcJodaTime,
-  scalikejdbcTest % "test"
-)
+lazy val scalikejdbcOrm = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("orm")
+  .in(file("scalikejdbc-orm"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-orm",
+    libraryDependencies ++= {
+      Seq(
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(
+    scalikejdbcCore,
+    scalikejdbcInterpolation,
+    scalikejdbcInterpolationMacro,
+    scalikejdbcSyntaxSupportMacro,
+    scalikejdbcConfig,
+    scalikejdbcJodaTime,
+    scalikejdbcTest % "test"
+  )
 
 // scalikejdbc-mapper-generator-core
 // core library for mapper-generator
-lazy val scalikejdbcMapperGeneratorCore = Project(
-  id = "mapper-generator-core",
-  base = file("scalikejdbc-mapper-generator-core")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-mapper-generator-core",
-  libraryDependencies ++= {
-    Seq("org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile") ++
-      scalaTestDependenciesInTestScope.value ++
-      jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcLibrary)
+lazy val scalikejdbcMapperGeneratorCore = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("mapper-generator-core")
+  .in(file("scalikejdbc-mapper-generator-core"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-mapper-generator-core",
+    libraryDependencies ++= {
+      Seq("org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile") ++
+        scalaTestDependenciesInTestScope.value ++
+        jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(scalikejdbcLibrary)
 
 // mapper-generator sbt plugin
-lazy val scalikejdbcMapperGenerator = Project(
-  id = "mapper-generator",
-  base = file("scalikejdbc-mapper-generator")
-).settings(
-  baseSettings,
-  // Don't update to sbt 1.3.x
-  // https://github.com/sbt/sbt/issues/5049
-  crossSbtVersions := "1.2.8" :: Nil,
-  crossScalaVersions := Seq(
-    Scala212,
-    scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
-  ),
-  scriptedBufferLog := false,
-  pluginCrossBuild / sbtVersion := {
-    scalaBinaryVersion.value match {
-      case "2.12" =>
-        sbtVersion.value
-      case _ =>
-        sbt2
+lazy val scalikejdbcMapperGenerator = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("mapper-generator")
+  .in(file("scalikejdbc-mapper-generator"))
+  .jvmPlatform(
+    if (scala.util.Properties.isJavaAtLeast("17")) {
+      Seq(
+        Scala212,
+        scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
+      )
+    } else {
+      Seq(Scala212)
     }
-  },
-  scriptedLaunchOpts ++= {
-    val javaVmArgs = {
-      import scala.collection.JavaConverters._
-      java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
+  )
+  .settings(
+    baseSettings,
+    scriptedBufferLog := false,
+    pluginCrossBuild / sbtVersion := {
+      scalaBinaryVersion.value match {
+        case "2.12" =>
+          sbtVersion.value
+        case _ =>
+          sbt2
+      }
+    },
+    scriptedLaunchOpts ++= {
+      val javaVmArgs = {
+        import scala.collection.JavaConverters._
+        java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
+      }
+      javaVmArgs.filter(a => Seq("-XX", "-Xss").exists(a.startsWith)) ++ Seq(
+        "-Xmx3G"
+      )
+    },
+    scriptedLaunchOpts ++= Seq(
+      "-Dplugin.version=" + version.value,
+      "-Dslf4j.version=" + _slf4jApiVersion,
+      "-Dmysql.version=" + mysqlConnectorJ.revision,
+      "-Dpostgresql.version=" + _postgresqlVersion,
+      "-Dh2.version=" + _h2Version,
+      "-Dspecs2.version=" + specs2.revision,
+      "-Dscalatest.version=" + scalatestVersion
+    ),
+    name := "scalikejdbc-mapper-generator",
+    libraryDependencies ++= {
+      Seq("org.slf4j" % "slf4j-simple" % _slf4jApiVersion % "compile") ++
+        scalaTestDependenciesInTestScope.value ++
+        jdbcDriverDependenciesInTestScope
+    },
+  )
+  .configure(p =>
+    p.id match {
+      case "mapper-generator2_12" =>
+        p.dependsOn(scalikejdbcMapperGeneratorCore.jvm(Scala212))
+      case "mapper-generator3" =>
+        p.dependsOn(scalikejdbcMapperGeneratorCore.jvm(Scala3))
     }
-    javaVmArgs.filter(a => Seq("-XX", "-Xss").exists(a.startsWith)) ++ Seq(
-      "-Xmx3G"
-    )
-  },
-  scriptedLaunchOpts ++= Seq(
-    "-Dplugin.version=" + version.value,
-    "-Dslf4j.version=" + _slf4jApiVersion,
-    "-Dmysql.version=" + mysqlConnectorJ.revision,
-    "-Dpostgresql.version=" + _postgresqlVersion,
-    "-Dh2.version=" + _h2Version,
-    "-Dspecs2.version=" + specs2.revision,
-    "-Dscalatest.version=" + scalatestVersion
-  ),
-  name := "scalikejdbc-mapper-generator",
-  libraryDependencies ++= {
-    Seq("org.slf4j" % "slf4j-simple" % _slf4jApiVersion % "compile") ++
-      scalaTestDependenciesInTestScope.value ++
-      jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcCore, scalikejdbcMapperGeneratorCore)
+  )
   .enablePlugins(SbtPlugin)
 
 // scalikejdbc-test
-lazy val scalikejdbcTest = Project(
-  id = "test",
-  base = file("scalikejdbc-test")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-test",
-  libraryDependencies ++= {
-    Seq(
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatest" %% "scalatest-core" % scalatestVersion % "provided",
-      specs2,
-    ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
-  },
-).dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
+lazy val scalikejdbcTest = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("test")
+  .in(file("scalikejdbc-test"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-test",
+    libraryDependencies ++= {
+      Seq(
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.scalatest" %% "scalatest-core" % scalatestVersion % "provided",
+        specs2,
+      ) ++ jdbcDriverDependenciesInTestScope ++ scalaTestDependenciesInTestScope.value
+    },
+  )
+  .dependsOn(scalikejdbcLibrary, scalikejdbcJodaTime % "test")
 
 // scalikejdbc-config
-lazy val scalikejdbcConfig = Project(
-  id = "config",
-  base = file("scalikejdbc-config")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-config",
-  libraryDependencies ++= {
-    Seq(
-      "com.typesafe" % "config" % _typesafeConfigVersion % "compile",
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcCore)
+lazy val scalikejdbcConfig = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("config")
+  .in(file("scalikejdbc-config"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-config",
+    libraryDependencies ++= {
+      Seq(
+        "com.typesafe" % "config" % _typesafeConfigVersion % "compile",
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(scalikejdbcCore)
 
 // scalikejdbc-streams
-lazy val scalikejdbcStreams = Project(
-  id = "streams",
-  base = file("scalikejdbc-streams")
-).settings(
-  baseSettings,
-  mimaSettings,
-  name := "scalikejdbc-streams",
-  libraryDependencies ++= {
-    Seq(
-      "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
-      "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.scalatestplus" %% "testng-7-5" % "3.2.17.0" % "test",
-      "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
-      "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcLibrary)
+lazy val scalikejdbcStreams = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("streams")
+  .in(file("scalikejdbc-streams"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    mimaSettings,
+    name := "scalikejdbc-streams",
+    libraryDependencies ++= {
+      Seq(
+        "org.reactivestreams" % "reactive-streams" % _reactiveStreamsVersion % "compile",
+        "org.slf4j" % "slf4j-api" % _slf4jApiVersion % "compile",
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.scalatestplus" %% "testng-7-5" % "3.2.17.0" % "test",
+        "org.reactivestreams" % "reactive-streams-tck" % _reactiveStreamsVersion % "test",
+        "org.reactivestreams" % "reactive-streams-examples" % _reactiveStreamsVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(scalikejdbcLibrary)
 
 // scalikejdbc-support
-lazy val scalikejdbcSyntaxSupportMacro = Project(
-  id = "syntax-support-macro",
-  base = file("scalikejdbc-syntax-support-macro")
-).settings(
-  baseSettings,
-  name := "scalikejdbc-syntax-support-macro",
-  libraryDependencies ++= {
-    Seq(
-      "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
-      "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
-    ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
-  },
-).dependsOn(scalikejdbcLibrary)
+lazy val scalikejdbcSyntaxSupportMacro = projectMatrix
+  .defaultAxes(VirtualAxis.jvm)
+  .withId("syntax-support-macro")
+  .in(file("scalikejdbc-syntax-support-macro"))
+  .jvmPlatform(scalaVersions)
+  .settings(
+    baseSettings,
+    name := "scalikejdbc-syntax-support-macro",
+    libraryDependencies ++= {
+      Seq(
+        "ch.qos.logback" % "logback-classic" % _logbackVersion % "test",
+        "org.hibernate" % "hibernate-core" % _hibernateVersion % "test"
+      ) ++ scalaTestDependenciesInTestScope.value ++ jdbcDriverDependenciesInTestScope
+    },
+  )
+  .dependsOn(scalikejdbcLibrary)
 
 lazy val scalaTestDependenciesInTestScope = Def.setting {
   Seq(

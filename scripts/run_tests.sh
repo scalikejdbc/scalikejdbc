@@ -11,13 +11,13 @@ mkdir -p logs
 
 sbt \
   clean \
-  core/test \
-  joda-time/test \
-  interpolation/test \
-  syntax-support-macro/test \
-  config/test \
-  streams/test \
-  test/test > logs/test_stdout.log
+  core3/test \
+  joda-time3/test \
+  interpolation3/test \
+  syntax-support-macro3/test \
+  config3/test \
+  streams3/test \
+  test3/test > logs/test_stdout.log
 
 cp -p scalikejdbc-core/src/test/resources/jdbc_hsqldb.properties scalikejdbc-core/src/test/resources/jdbc.properties
 
