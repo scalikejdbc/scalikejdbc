@@ -1,6 +1,8 @@
 import MimaSettings.mimaSettings
 
-publish / skip := true
+lazy val root = rootProject.autoAggregate.settings(
+  publish / skip := true
+)
 
 def sbt2 = "2.0.0-RC12"
 val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.7")
@@ -55,7 +57,7 @@ val mysqlConnectorJ =
   )
 
 def gitHash: String = try {
-  sys.process.Process("git rev-parse HEAD").lineStream_!.head
+  sys.process.Process("git rev-parse HEAD").lazyLines_!.head
 } catch {
   case e: Exception =>
     println(e)
@@ -321,14 +323,10 @@ lazy val scalikejdbcMapperGenerator = projectMatrix
   .withId("mapper-generator")
   .in(file("scalikejdbc-mapper-generator"))
   .jvmPlatform(
-    if (scala.util.Properties.isJavaAtLeast("17")) {
-      Seq(
-        Scala212,
-        scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
-      )
-    } else {
-      Seq(Scala212)
-    }
+    Seq(
+      Scala212,
+      scala_version_from_sbt_version.ScalaVersionFromSbtVersion(sbt2)
+    )
   )
   .settings(
     baseSettings,
@@ -336,14 +334,14 @@ lazy val scalikejdbcMapperGenerator = projectMatrix
     pluginCrossBuild / sbtVersion := {
       scalaBinaryVersion.value match {
         case "2.12" =>
-          sbtVersion.value
+          "1.12.9"
         case _ =>
           sbt2
       }
     },
     scriptedLaunchOpts ++= {
       val javaVmArgs = {
-        import scala.collection.JavaConverters._
+        import scala.jdk.CollectionConverters._
         java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
       }
       javaVmArgs.filter(a => Seq("-XX", "-Xss").exists(a.startsWith)) ++ Seq(
