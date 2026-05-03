@@ -6,6 +6,15 @@ val scalikejdbcVersion = System.getProperty("plugin.version")
 
 crossScalaVersions := List("2.13.18", "2.12.21", "3.3.7")
 
+scalacOptions ++= {
+  scalaBinaryVersion.value match {
+    case "3" =>
+      Nil
+    case _ =>
+      Seq("-Xsource:3")
+  }
+}
+
 scalacOptions ++= Seq(
   "-Xlint",
   "-language:higherKinds,implicitConversions",

@@ -32,6 +32,15 @@ TaskKey[Unit]("createTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
+scalacOptions ++= {
+  scalaBinaryVersion.value match {
+    case "3" =>
+      Nil
+    case _ =>
+      Seq("-Xsource:3")
+  }
+}
+
 scalacOptions ++= Seq(
   "-Xlint",
   "-language:higherKinds,implicitConversions",
