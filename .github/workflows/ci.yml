@@ -120,7 +120,7 @@ jobs:
         java-version: 25
         distribution: zulu
     - uses: sbt/setup-sbt@v1
-    - run: sbt -v
+    - run: sbt -v --server
            -Dscalikejdbc_scala_3_version=3.8.3
            Test/compile
   format:
@@ -134,7 +134,7 @@ jobs:
         distribution: temurin
     - uses: sbt/setup-sbt@v1
     - run: |
-        sbt "+ scalafmtAll" scalafmtSbt
+        sbt --server "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
     - if: ${{ (github.event_name == 'pull_request') && failure() }}
       run: |
