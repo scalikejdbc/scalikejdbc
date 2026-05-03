@@ -25,7 +25,8 @@ case class GeneratorConfig(
   tableNameToSyntaxName: String => String =
     GeneratorConfig.tableNameToSyntaxNameDefault,
   tableNameToSyntaxVariableName: String => String =
-    GeneratorConfig.tableNameToSyntaxNameDefault
+    GeneratorConfig.tableNameToSyntaxNameDefault,
+  scalaSyntax: ScalaSyntax = ScalaSyntax.New
 )
 
 object GeneratorConfig {

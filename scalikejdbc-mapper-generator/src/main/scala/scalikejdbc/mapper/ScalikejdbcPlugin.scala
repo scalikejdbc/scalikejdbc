@@ -65,7 +65,8 @@ object ScalikejdbcPlugin extends AutoPlugin {
       baseTypes: collection.Seq[String],
       companionBaseTypes: collection.Seq[String],
       tableNameToSyntaxName: String => String,
-      tableNameToSyntaxVariableName: String => String
+      tableNameToSyntaxVariableName: String => String,
+      scalaSyntax: ScalaSyntax,
     )
   }
 
@@ -111,6 +112,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   private[this] final val BASE_TYPES = GENERATOR + "baseTypes"
   private[this] final val COMPANION_BASE_TYPES =
     GENERATOR + "companionBaseTypes"
+  private[this] final val SCALA_SYNTAX = GENERATOR + "scalaSyntax"
 
   private[this] val jdbcKeys =
     Set(JDBC_DRIVER, JDBC_URL, JDBC_USER_NAME, JDBC_PASSWORD, JDBC_SCHEMA)
@@ -127,7 +129,8 @@ object ScalikejdbcPlugin extends AutoPlugin {
     VIEW,
     TABLE_NAMES_TO_SKIP,
     BASE_TYPES,
-    COMPANION_BASE_TYPES
+    COMPANION_BASE_TYPES,
+    SCALA_SYNTAX
   )
   private[this] val allKeys = jdbcKeys ++ generatorKeys
 
@@ -210,7 +213,10 @@ object ScalikejdbcPlugin extends AutoPlugin {
         companionBaseTypes = commaSeparated(props, COMPANION_BASE_TYPES),
         tableNameToSyntaxName = defaultConfig.tableNameToSyntaxName,
         tableNameToSyntaxVariableName =
-          defaultConfig.tableNameToSyntaxVariableName
+          defaultConfig.tableNameToSyntaxVariableName,
+        scalaSyntax = getString(props, SCALA_SYNTAX)
+          .flatMap(ScalaSyntax.of)
+          .getOrElse(defaultConfig.scalaSyntax),
       )
   }
 
@@ -269,7 +275,8 @@ object ScalikejdbcPlugin extends AutoPlugin {
         _ => generatorSettings.companionBaseTypes.toSeq,
       tableNameToSyntaxName = generatorSettings.tableNameToSyntaxName,
       tableNameToSyntaxVariableName =
-        generatorSettings.tableNameToSyntaxVariableName
+        generatorSettings.tableNameToSyntaxVariableName,
+      scalaSyntax = generatorSettings.scalaSyntax
     )
 
   private def generator(

@@ -236,12 +236,19 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       else types.mkString("extends ", " with ", " ")
     }
 
+    val usingClause = config.scalaSyntax match {
+      case ScalaSyntax.New =>
+        "using "
+      case ScalaSyntax.Old =>
+        ""
+    }
+
     s"""case class ${className}(
       |${constructorArgs}) ${baseTypes}{
       |
-      |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(session)
+      |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(${usingClause}session)
       |
-      |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(session)
+      |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(${usingClause}session)
       |
       |}""".stripMargin + eol
   }
@@ -287,7 +294,8 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
      * val autoSession = AutoSession
      * }}}
      */
-    val autoSession = "  override val autoSession = AutoSession" + eol
+    val autoSession =
+      "  override val autoSession: DBSession = AutoSession" + eol
 
     val defaultAutoSession =
       if (config.defaultAutoSession) " = autoSession" else ""
@@ -711,7 +719,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
      *     {id},
      *     {name},
      *     {birthday}
-     *   )""").batchByName(params.toSeq: _*).apply()
+     *   )""").batchByName(params.toSeq*).apply()
      * }
      * }}}
      */
@@ -730,6 +738,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           s", $C: Factory[Int, $C[Int]]"
         else
           ""
+      }
+
+      val varargsSplice = config.scalaSyntax match {
+        case ScalaSyntax.New =>
+          // https://docs.scala-lang.org/scala3/reference/changed-features/vararg-splices.html
+          "*"
+        case ScalaSyntax.Old =>
+          ": _*"
       }
 
       // def batchInsert=(
@@ -751,7 +767,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
         batchInsertColumns
           .map(c => 3.indent + "{" + c.nameInScala.replace("`", "") + "}")
           .mkString(comma + eol) + eol +
-        2.indent + ")\"\"\").batchByName(params.toSeq: _*).apply[" + returnType + "]()" + eol +
+        2.indent + ")\"\"\").batchByName(params.toSeq" + varargsSplice + ").apply[" + returnType + "]()" + eol +
         1.indent + "}" + eol
     }
 
@@ -791,7 +807,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       eol +
       1.indent + "override val tableName = \"" + table.name + "\"" + eol +
       eol +
-      1.indent + "override val columns = Seq(" + allColumns
+      1.indent + "override val columns: Seq[String] = Seq(" + allColumns
         .map(_.name)
         .mkString("\"", "\", \"", "\"") + ")" + eol +
       eol +
