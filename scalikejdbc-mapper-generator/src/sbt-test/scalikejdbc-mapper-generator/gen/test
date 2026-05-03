@@ -135,4 +135,13 @@ $ delete src/test/scala/app/models/ProgrammersprogrammersSpec.scala
 $ exists src/main/scala/app/models/Programmersprogrammers.scala
 $ exists src/test/scala/app/models/ProgrammersprogrammersSpec.scala
 
+> reload
+$ delete src/main/scala/app/models
+> set (Compile / scalikejdbcGeneratorSettings) ~= (_.copy(scalaSyntax = scalikejdbc.mapper.ScalaSyntax.Scala3))
+> scalikejdbcGenAll
+> ++ 2.13.x
+-> compile
+> ++ 3.x
+> compile
+
 > deleteTestDatabase

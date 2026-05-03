@@ -11,6 +11,13 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 ) extends Generator
   with LoanPattern {
 
+  private val implicitOrUsing = config.scalaSyntax match {
+    case ScalaSyntax.Scala3 =>
+      "using"
+    case ScalaSyntax.New | ScalaSyntax.Old =>
+      "implicit"
+  }
+
   import java.sql.{ JDBCType => JavaSqlTypes }
   import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
@@ -237,7 +244,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     }
 
     val usingClause = config.scalaSyntax match {
-      case ScalaSyntax.New =>
+      case ScalaSyntax.New | ScalaSyntax.Scala3 =>
         "using "
       case ScalaSyntax.Old =>
         ""
@@ -246,9 +253,9 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     s"""case class ${className}(
       |${constructorArgs}) ${baseTypes}{
       |
-      |  def save()(implicit session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(${usingClause}session)
+      |  def save()(${implicitOrUsing} session: DBSession$defaultAutoSession): ${className} = ${className}.save(this)(${usingClause}session)
       |
-      |  def destroy()(implicit session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(${usingClause}session)
+      |  def destroy()(${implicitOrUsing} session: DBSession$defaultAutoSession): Int = ${className}.destroy(this)(${usingClause}session)
       |
       |}""".stripMargin + eol
   }
@@ -361,7 +368,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
                                                                else " = None")
           }
           .mkString(comma + eol) +
-        ")(implicit session: DBSession" + defaultAutoSession + "): " + className + " = {" + eol +
+        s")(${implicitOrUsing} session: DBSession" + defaultAutoSession + "): " + className + " = {" + eol +
         // val generatedKey =
         2.indent + table.autoIncrementColumns.headOption
           .map(_ => "val generatedKey = ")
@@ -481,7 +488,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def save(entity: ${className})(implicit session: DBSession$defaultAutoSession): ${className} = {
+          s"""  def save(entity: ${className})(${implicitOrUsing} session: DBSession$defaultAutoSession): ${className} = {
           |    sql\"\"\"
           |      update
           |        $${${className}.table}
@@ -493,7 +500,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
           |    entity
           |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def save(entity: ${className})(implicit session: DBSession$defaultAutoSession): ${className} = {
+          s"""  def save(entity: ${className})(${implicitOrUsing} session: DBSession$defaultAutoSession): ${className} = {
           |    withSQL {
           |      update(${className}).set(
           |${placeHolderPart}
@@ -534,11 +541,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
+          s"""  def destroy(entity: ${className})(${implicitOrUsing} session: DBSession$defaultAutoSession): Int = {
           |    sql\"\"\"delete from $${${className}.table} where ${wherePart}\"\"\".update.apply()
           |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def destroy(entity: ${className})(implicit session: DBSession$defaultAutoSession): Int = {
+          s"""  def destroy(entity: ${className})(${implicitOrUsing} session: DBSession$defaultAutoSession): Int = {
           |    withSQL { delete.from(${className}).where${wherePart} }.update.apply()
           |  }"""
       }).stripMargin + eol
@@ -575,12 +582,12 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
 
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def find(${argsPart})(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+          s"""  def find(${argsPart})(${implicitOrUsing} session: DBSession$defaultAutoSession): Option[${className}] = {
             |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where ${wherePart}\"\"\"
             |      .map(${className}(${syntaxName}.resultName)).single.apply()
             |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def find(${argsPart})(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+          s"""  def find(${argsPart})(${implicitOrUsing} session: DBSession$defaultAutoSession): Option[${className}] = {
             |    withSQL {
             |      select.from(${className} as ${syntaxName}).where${wherePart}
             |    }.map(${className}(${syntaxName}.resultName)).single.apply()
@@ -589,14 +596,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     }
 
     val interpolationFindByMethod = {
-      s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+      s"""  def findBy(where: SQLSyntax)(${implicitOrUsing} session: DBSession$defaultAutoSession): Option[${className}] = {
         |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
         |      .map(${className}(${syntaxName}.resultName)).single.apply()
         |  }""".stripMargin + eol
     }
 
     val queryDslFindByMethod = {
-      s"""  def findBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Option[${className}] = {
+      s"""  def findBy(where: SQLSyntax)(${implicitOrUsing} session: DBSession$defaultAutoSession): Option[${className}] = {
         |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(where)
         |    }.map(${className}(${syntaxName}.resultName)).single.apply()
@@ -616,11 +623,11 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     val countAllMethod =
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def countAll()(implicit session: DBSession$defaultAutoSession): Long = {
+          s"""  def countAll()(${implicitOrUsing} session: DBSession$defaultAutoSession): Long = {
             |    sql\"\"\"select count(1) from $${${className}.table}\"\"\".map(rs => rs.long(1)).single.apply().get
             |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def countAll()(implicit session: DBSession$defaultAutoSession): Long = {
+          s"""  def countAll()(${implicitOrUsing} session: DBSession$defaultAutoSession): Long = {
             |    withSQL(select(sqls.count).from(${className} as ${syntaxName})).map(rs => rs.long(1)).single.apply().get
             |  }"""
       }).stripMargin + eol
@@ -664,24 +671,24 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     val findAllMethod =
       (config.template match {
         case GeneratorTemplate.interpolation =>
-          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
+          s"""  def findAll${typeParam}()(${implicitOrUsing} session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
             |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}}\"\"\".map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
         case GeneratorTemplate.queryDsl =>
-          s"""  def findAll${typeParam}()(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
+          s"""  def findAll${typeParam}()(${implicitOrUsing} session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
             |    withSQL(select.from(${className} as ${syntaxName})).map(${className}(${syntaxName}.resultName)).${toResult}
             |  }"""
       }).stripMargin + eol
 
     val interpolationFindAllByMethod = {
-      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(${implicitOrUsing} session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
         |    sql\"\"\"select $${${syntaxName}.result.*} from $${${className} as ${syntaxName}} where $${where}\"\"\"
         |      .map(${className}(${syntaxName}.resultName)).${toResult}
         |  }""".stripMargin + eol
     }
 
     val queryDslFindAllByMethod = {
-      s"""  def findAllBy${typeParam}(where: SQLSyntax)(implicit session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
+      s"""  def findAllBy${typeParam}(where: SQLSyntax)(${implicitOrUsing} session: DBSession${defaultAutoSession}${factoryParam}): $returnType[${className}] = {
         |    withSQL {
         |      select.from(${className} as ${syntaxName}).where.append(where)
         |    }.map(${className}(${syntaxName}.resultName)).${toResult}
@@ -689,14 +696,14 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
     }
 
     val interpolationCountByMethod = {
-      s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
+      s"""  def countBy(where: SQLSyntax)(${implicitOrUsing} session: DBSession$defaultAutoSession): Long = {
         |    sql\"\"\"select count(1) from $${${className} as ${syntaxName}} where $${where}\"\"\"
         |      .map(_.long(1)).single.apply().get
         |  }""".stripMargin + eol
     }
 
     val queryDslCountByMethod = {
-      s"""  def countBy(where: SQLSyntax)(implicit session: DBSession$defaultAutoSession): Long = {
+      s"""  def countBy(where: SQLSyntax)(${implicitOrUsing} session: DBSession$defaultAutoSession): Long = {
         |    withSQL {
         |      select(sqls.count).from(${className} as ${syntaxName}).where.append(where)
         |    }.map(_.long(1)).single.apply().get
@@ -741,7 +748,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       }
 
       val varargsSplice = config.scalaSyntax match {
-        case ScalaSyntax.New =>
+        case ScalaSyntax.New | ScalaSyntax.Scala3 =>
           // https://docs.scala-lang.org/scala3/reference/changed-features/vararg-splices.html
           "*"
         case ScalaSyntax.Old =>
@@ -749,7 +756,7 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       }
 
       // def batchInsert=(
-      1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + "])(implicit session: DBSession" + defaultAutoSession + factory + s"): $returnType[Int] = {" + eol +
+      1.indent + s"def batchInsert${typeParam}(entities: collection.Seq[" + className + s"])(${implicitOrUsing} session: DBSession" + defaultAutoSession + factory + s"): $returnType[Int] = {" + eol +
         2.indent + "val params: collection.Seq[Seq[(String, Any)]] = entities.map(entity =>" + eol +
         3.indent + "Seq(" + eol +
         batchInsertColumns
