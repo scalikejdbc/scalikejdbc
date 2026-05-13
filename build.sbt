@@ -35,7 +35,7 @@ val excludeTestsIfWindows = Set(
 lazy val _organization = "org.scalikejdbc"
 
 // published dependency version
-lazy val _slf4jApiVersion = "2.0.17"
+lazy val _slf4jApiVersion = "2.0.18"
 lazy val _typesafeConfigVersion = "1.4.8"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
