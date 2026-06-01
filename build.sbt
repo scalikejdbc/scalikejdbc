@@ -2,7 +2,7 @@ import MimaSettings.mimaSettings
 
 publish / skip := true
 
-def sbt2 = "2.0.0-RC13"
+def sbt2 = "2.0.0-RC14"
 val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.7")
 def Scala212 = "2.12.21"
 def Scala213 = "2.13.18"
