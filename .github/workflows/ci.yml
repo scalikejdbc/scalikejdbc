@@ -41,20 +41,17 @@ jobs:
 
           - name: test
             db: hsqldb
-            java: 8
-          - name: test
-            db: mysql
-            java: 8
-          - name: test
-            db: postgresql
-            java: 8
-          - name: test
-            db: h2
-            java: 8
-
+            java: 11
           - name: test
             db: mysql
             java: 11
+          - name: test
+            db: postgresql
+            java: 11
+          - name: test
+            db: h2
+            java: 11
+
           - name: test
             db: mysql
             java: 25
