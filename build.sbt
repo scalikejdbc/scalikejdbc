@@ -99,6 +99,16 @@ lazy val baseSettings = Def.settings(
   },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
   scalacOptions ++= {
+    if (scalaVersion.value.startsWith("3.3.")) {
+      Seq(
+        "-Yfuture-lazy-vals",
+        "-release:11",
+      )
+    } else {
+      Nil
+    }
+  },
+  scalacOptions ++= {
     scalaBinaryVersion.value match {
       case "2.12" =>
         Seq(
