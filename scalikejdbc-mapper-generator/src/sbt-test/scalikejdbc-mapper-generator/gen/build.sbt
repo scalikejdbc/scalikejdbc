@@ -55,7 +55,7 @@ InputKey[Unit]("deleteTestDatabase") := {
 
 val scalikejdbcVersion = System.getProperty("plugin.version")
 
-crossScalaVersions := List("2.13.18", "2.12.21", "3.3.7")
+crossScalaVersions := List("2.13.18", "2.12.21", "3.3.8")
 
 scalacOptions ++= {
   scalaBinaryVersion.value match {
