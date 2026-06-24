@@ -42,7 +42,7 @@ lazy val _typesafeConfigVersion = "1.4.9"
 lazy val _reactiveStreamsVersion = "1.0.4"
 
 // internal only
-lazy val _logbackVersion = "1.5.34"
+lazy val _logbackVersion = "1.5.35"
 lazy val _h2Version = "1.4.199" // TODO: Upgrade to 2.x
 lazy val _postgresqlVersion = "42.7.11"
 lazy val _hibernateVersion = "7.4.2.Final"
