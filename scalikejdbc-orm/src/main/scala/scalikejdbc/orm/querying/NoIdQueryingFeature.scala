@@ -297,15 +297,17 @@ trait NoIdQueryingFeature[Entity]
             hasManyAssociations.size > 0 && (limit.isDefined || offset.isDefined)
           ) {
             // find ids for pagination
-            val queryForIds = (conditions match {
-              case Nil => singleSelectQuery.where(defaultScopeWithDefaultAlias)
-              case _   =>
-                conditions.tail
-                  .foldLeft(singleSelectQuery.where(conditions.head)) {
-                    case (query, condition) => query.and.append(condition)
-                  }
-                  .and(defaultScopeWithDefaultAlias)
-            })
+            val queryForIds =
+              (conditions match {
+                case Nil =>
+                  singleSelectQuery.where(defaultScopeWithDefaultAlias)
+                case _ =>
+                  conditions.tail
+                    .foldLeft(singleSelectQuery.where(conditions.head)) {
+                      case (query, condition) => query.and.append(condition)
+                    }
+                    .and(defaultScopeWithDefaultAlias)
+              })
             val ids: List[Any] = withSQL {
               queryForIds
                 .orderBy(orderings.headOption.getOrElse(primaryKeyField))
