@@ -55,10 +55,13 @@ trait NoIdFinderFeature[Entity]
   def findAll(
     orderings: Seq[SQLSyntax] = defaultOrderings
   )(implicit s: DBSession = autoSession): List[Entity] = {
-    extract(withSQL {
-      val sql = selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
-      if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
-    }).list.apply()
+    extract(
+      withSQL {
+        val sql =
+          selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
+        if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
+      }
+    ).list.apply()
   }
 
   /**
@@ -83,11 +86,14 @@ trait NoIdFinderFeature[Entity]
   )(implicit
     s: DBSession = autoSession
   ): List[Entity] = {
-    extract(withSQL {
-      val sql = selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
-      if (orderings.isEmpty) sql.limit(limit).offset(offset)
-      else sql.orderBy(sqls.csv(orderings*)).limit(limit).offset(offset)
-    }).list.apply()
+    extract(
+      withSQL {
+        val sql =
+          selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
+        if (orderings.isEmpty) sql.limit(limit).offset(offset)
+        else sql.orderBy(sqls.csv(orderings*)).limit(limit).offset(offset)
+      }
+    ).list.apply()
   }
 
   /**
@@ -109,12 +115,14 @@ trait NoIdFinderFeature[Entity]
   def findAllBy(where: SQLSyntax, orderings: Seq[SQLSyntax] = defaultOrderings)(
     implicit s: DBSession = autoSession
   ): List[Entity] = {
-    extract(withSQL {
-      val sql = selectQueryWithAssociations.where(
-        sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
-      )
-      if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
-    }).list.apply()
+    extract(
+      withSQL {
+        val sql = selectQueryWithAssociations.where(
+          sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
+        )
+        if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
+      }
+    ).list.apply()
   }
 
   /**
@@ -128,15 +136,17 @@ trait NoIdFinderFeature[Entity]
   )(implicit
     s: DBSession = autoSession
   ): List[Entity] = {
-    extract(withSQL {
-      val sql = selectQueryWithAssociations
-        .where(
-          sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
-        )
-      (if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*)))
-        .limit(limit)
-        .offset(offset)
-    }).list.apply()
+    extract(
+      withSQL {
+        val sql = selectQueryWithAssociations
+          .where(
+            sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
+          )
+        (if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*)))
+          .limit(limit)
+          .offset(offset)
+      }
+    ).list.apply()
   }
 
   /**
