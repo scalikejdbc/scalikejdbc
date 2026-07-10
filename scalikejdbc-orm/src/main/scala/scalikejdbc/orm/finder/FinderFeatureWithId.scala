@@ -66,10 +66,15 @@ trait FinderFeatureWithId[Id, Entity]
     orderings: Seq[SQLSyntax] = defaultOrderings
   )(implicit s: DBSession = autoSession): List[Entity] = {
     implicit val repository = IncludesQueryRepository[Entity]()
-    appendIncludedAttributes(extract(withSQL {
-      val sql = selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
-      if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
-    }).list.apply())
+    appendIncludedAttributes(
+      extract(
+        withSQL {
+          val sql =
+            selectQueryWithAssociations.where(defaultScopeWithDefaultAlias)
+          if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
+        }
+      ).list.apply()
+    )
   }
 
   override def findAllWithPagination(
@@ -174,13 +179,17 @@ trait FinderFeatureWithId[Id, Entity]
   ): List[Entity] = {
 
     implicit val repository = IncludesQueryRepository[Entity]()
-    appendIncludedAttributes(extract(withSQL {
-      val sql = selectQueryWithAssociations
-        .where(
-          sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
-        )
-      if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
-    }).list.apply())
+    appendIncludedAttributes(
+      extract(
+        withSQL {
+          val sql = selectQueryWithAssociations
+            .where(
+              sqls.toAndConditionOpt(Some(where), defaultScopeWithDefaultAlias)
+            )
+          if (orderings.isEmpty) sql else sql.orderBy(sqls.csv(orderings*))
+        }
+      ).list.apply()
+    )
   }
 
   override def findAllByWithLimitOffset(
