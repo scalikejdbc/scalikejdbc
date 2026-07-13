@@ -4,7 +4,11 @@ lazy val root = rootProject.autoAggregate.settings(
   publish / skip := true
 )
 
-def sbt2 = "2.0.1"
+val sbt2 = {
+  val p = new java.util.Properties
+  p.load(new java.io.FileInputStream("project/build.properties"))
+  p.getProperty("sbt.version").trim
+}
 val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.8")
 def Scala212 = "2.12.21"
 def Scala213 = "2.13.18"
