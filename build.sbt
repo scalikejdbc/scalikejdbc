@@ -162,7 +162,7 @@ lazy val scalikejdbcJodaTime = projectMatrix
     libraryDependencies ++= scalaTestDependenciesInTestScope.value,
     libraryDependencies ++= Seq(
       "org.mockito" % "mockito-core" % mockitoVersion % "test",
-      "joda-time" % "joda-time" % "2.14.2",
+      "joda-time" % "joda-time" % "2.14.3",
       "org.joda" % "joda-convert" % "3.0.1"
     ),
   )
