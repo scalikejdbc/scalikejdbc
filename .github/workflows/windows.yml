@@ -15,7 +15,7 @@ jobs:
         java-version: 17
         distribution: temurin
     - uses: coursier/cache-action@v8
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - run: rm project/sbt-pgp.sbt
     - shell: bash
       run: sbt -v testFull

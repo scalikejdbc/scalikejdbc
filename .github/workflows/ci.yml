@@ -77,7 +77,7 @@ jobs:
       with:
         java-version: ${{matrix.java}}
         distribution: zulu
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - uses: coursier/cache-action@v8
       timeout-minutes: 5
     - name: copy jdbc settings
@@ -118,7 +118,7 @@ jobs:
       with:
         java-version: 25
         distribution: zulu
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - run: sbt -v --server
            -Dscalikejdbc_scala_3_version=3.8.4
            Test/compile
@@ -131,7 +131,7 @@ jobs:
       with:
         java-version: 17
         distribution: temurin
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - run: |
         sbt --server "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
