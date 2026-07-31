@@ -88,7 +88,7 @@ jobs:
       with:
         java-version: ${{matrix.java}}
         distribution: temurin
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - uses: coursier/cache-action@v8
       timeout-minutes: 5
     - name: copy jdbc settings
@@ -135,7 +135,7 @@ jobs:
       with:
         java-version: 11
         distribution: temurin
-    - uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1.5.5
     - run: |
         sbt "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
