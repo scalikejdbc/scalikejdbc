@@ -18,7 +18,7 @@ jobs:
         client-id: 89631
         private-key: ${{ secrets.SCALIKEJDBC_BOT_KEY }}
     - name: Launch Scala Steward
-      uses: scala-steward-org/scala-steward-action@41bd88543dcf5e5455689f04d041b095eb901660 # v2.93.0
+      uses: scala-steward-org/scala-steward-action@3e385b8d413cf0315a939eebf555628120f5e74c # v2.95.0
       with:
         github-token: ${{ steps.generate_token.outputs.token }}
         author-email: "74833019+scalikejdbc-bot[bot]@users.noreply.github.com"
