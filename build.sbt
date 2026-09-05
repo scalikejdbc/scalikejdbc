@@ -11,7 +11,7 @@ val sbt2 = {
 }
 val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.8")
 def Scala212 = "2.12.21"
-def Scala213 = "2.13.18"
+def Scala213 = "3.9.0"
 
 val scalaVersions = Seq(Scala212, Scala213, Scala3)
 
