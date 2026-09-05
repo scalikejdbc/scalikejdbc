@@ -341,8 +341,8 @@ class QueryInterfaceSpec
         findByOptionalAccountName(Option.empty).size should be(11)
 
         {
-          val (productId, accountId): (Option[Int], Option[Int]) =
-            (Some(1), None)
+          val productId: Option[Int] = Some(1)
+          val accountId: Option[Int] = None
           val ids = withSQL {
             select(o.result.id)
               .from(Order as o)
@@ -373,7 +373,8 @@ class QueryInterfaceSpec
         }
 
         {
-          val (id1, id2): (Option[Int], Option[Int]) = (Some(1), None)
+          val id1: Option[Int] = Some(1)
+          val id2: Option[Int] = None
           val ids = withSQL {
             select(o.result.id)
               .from(Order as o)
