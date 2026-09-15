@@ -221,7 +221,7 @@ class QueryInterfaceSpec
         }
         batchInsertQuery
           .batch(Seq(3, "Coffee", 90), Seq(4, "Chocolate", 200))
-          .apply()
+          .apply[List]()
 
         withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update
           .apply()
@@ -243,7 +243,7 @@ class QueryInterfaceSpec
           }
           withSQL {
             insert.into(Product).namedValues(params.columnsAndPlaceholders*)
-          }.batch(params.batchParams*).apply()
+          }.batch(params.batchParams*).apply[List]()
 
           withSQL { delete.from(Product).where.in(pc.id, Seq(3, 4)) }.update
             .apply()
