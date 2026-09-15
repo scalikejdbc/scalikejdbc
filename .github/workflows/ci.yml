@@ -120,7 +120,7 @@ jobs:
         distribution: zulu
     - uses: sbt/setup-sbt@v1
     - run: sbt -v --server
-           -Dscalikejdbc_scala_3_version=3.9.0
+           -Dscalikejdbc_scala_3_version=3.10.0-RC2
            "all config3/test core3/test interpolation-macro3/test interpolation3/test joda-time3/test library3/test mapper-generator-core3/test orm3/test streams3/test syntax-support-macro3/test test3/test"
   format:
     timeout-minutes: 20
