@@ -9,7 +9,7 @@ val sbt2 = {
   p.load(new java.io.FileInputStream("project/build.properties"))
   p.getProperty("sbt.version").trim
 }
-val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.3.8")
+val Scala3: String = sys.props.getOrElse("scalikejdbc_scala_3_version", "3.9.0")
 def Scala212 = "2.12.21"
 def Scala213 = "2.13.18"
 
@@ -56,8 +56,7 @@ val specs2 = "org.specs2" %% "specs2-core" % "4.23.0" % "provided"
 
 val mysqlConnectorJ =
   ("com.mysql" % "mysql-connector-j" % "26.7.0" % Test).exclude(
-    "com.google.protobuf",
-    "protobuf-java"
+    "com.google.protobuf" % "protobuf-java"
   )
 
 def gitHash: String = try {
@@ -108,11 +107,6 @@ lazy val baseSettings = Def.settings(
     scalaBinaryVersion.value match {
       case "2.12" | "2.13" =>
         Seq("-release:11")
-      case _ if scalaVersion.value.startsWith("3.3.") =>
-        Seq(
-          "-Yfuture-lazy-vals",
-          "-release:11",
-        )
       case _ =>
         Nil
     }
@@ -147,6 +141,7 @@ lazy val baseSettings = Def.settings(
   pomIncludeRepository := { x => false },
   Test / logBuffered := false,
   Test / parallelExecution := false,
+  Test / testTopology := TestTopology.subprojectExclusive,
   pomExtra := _pomExtra
 )
 
