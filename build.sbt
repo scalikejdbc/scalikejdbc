@@ -351,7 +351,7 @@ lazy val scalikejdbcMapperGenerator = projectMatrix
     pluginCrossBuild / sbtVersion := {
       scalaBinaryVersion.value match {
         case "2.12" =>
-          "1.12.13"
+          "1.13.0"
         case _ =>
           sbt2
       }
