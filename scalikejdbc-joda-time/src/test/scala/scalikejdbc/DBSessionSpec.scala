@@ -309,7 +309,7 @@ class DBSessionSpec
       val batchTime: Long = DB localTx { session =>
         val before = System.currentTimeMillis()
         val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
-        session.batch(
+        session.batch[List](
           "insert into " + tableName + " (id, name) values (?, ?)",
           paramsList*
         )
@@ -339,7 +339,7 @@ class DBSessionSpec
       try {
         DB localTx { session =>
           val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i))
-          session.batch(
+          session.batch[List](
             "insert into " + tableName + " (id, name) values (?, ?)",
             paramsList*
           )
