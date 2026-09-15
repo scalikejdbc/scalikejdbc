@@ -52,7 +52,7 @@ trait TestDBSettings {
         val batchParams: Seq[Seq[Any]] = ((s + 1) to e).map(i => Seq(i))
         SQL(s"insert into $tableName (id) values (?)")
           .batch(batchParams*)
-          .apply()
+          .apply[List]()
         i += 1
       }
     }
