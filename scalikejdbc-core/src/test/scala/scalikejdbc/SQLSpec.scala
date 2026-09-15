@@ -400,7 +400,7 @@ class SQLSpec
       intercept[SQLException] {
         SQL("update " + tableName + " set name = ?")
           .batch(Seq("Anonymous"))
-          .apply()
+          .apply[List]()
       }
     }
   }
@@ -422,7 +422,7 @@ class SQLSpec
       intercept[SQLException] {
         SQL("update " + tableName + " set name = ?")
           .batch(Seq("Anonymous"))
-          .apply()
+          .apply[List]()
       }
     }
   }

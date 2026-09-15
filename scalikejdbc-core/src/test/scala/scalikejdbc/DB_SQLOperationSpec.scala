@@ -543,7 +543,7 @@ class DB_SQLOperationSpec
           }
           SQL("insert into " + tableName + " (id, name) values (?, ?)")
             .batch(params*)
-            .apply()
+            .apply[List]()
         }
         count1.size should equal(1000)
 
@@ -551,14 +551,14 @@ class DB_SQLOperationSpec
           // https://github.com/scalikejdbc/scalikejdbc/issues/481
           SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
             .batchByName(Seq.empty[Seq[(String, Any)]]*)
-            .apply()
+            .apply[List]()
 
           val params: Seq[Seq[(String, Any)]] = (2001 to 3000).map { i =>
             Seq[(String, Any)]("id" -> i, "name" -> ("name" + i.toString))
           }
           SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
             .batchByName(params*)
-            .apply()
+            .apply[List]()
         }
         count2.size should equal(1000)
         db.rollback()
@@ -581,7 +581,7 @@ class DB_SQLOperationSpec
         }
         val count1 = SQL(
           "insert into " + tableName + " (id, name) values (?, ?)"
-        ).batch(params1*).apply()
+        ).batch(params1*).apply[List]()
         count1.size should equal(1000)
 
         val params2: Seq[Seq[(String, Any)]] = (2001 to 2003).map { i =>
@@ -590,7 +590,7 @@ class DB_SQLOperationSpec
         try {
           val count2 = SQL(
             "insert into " + tableName + " (id, name) values (?, {name})"
-          ).batchByName(params2*).apply()
+          ).batchByName(params2*).apply[List]()
           count2.size should equal(1000)
         } catch {
           case e: Exception =>
@@ -599,7 +599,7 @@ class DB_SQLOperationSpec
         // https://github.com/scalikejdbc/scalikejdbc/issues/481
         SQL("insert into " + tableName + " (id, name) values (?, {name})")
           .batchByName(Seq.empty[Seq[(String, Any)]]*)
-          .apply()
+          .apply[List]()
 
         db.rollback()
       }
@@ -677,10 +677,10 @@ class DB_SQLOperationSpec
         );""").execute.apply()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""")
           .batch((101 to 121).map { i => Seq(i, "a", "b") }*)
-          .apply()
+          .apply[List]()
         SQL("""insert into issue30 (id, data1, data2) values(?, ?, ?)""")
           .batch((201 to 205).map { i => Seq(i, "a", "b") }*)
-          .apply()
+          .apply[List]()
       }
     } finally {
       try {
