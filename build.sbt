@@ -49,7 +49,7 @@ lazy val _reactiveStreamsVersion = "1.0.4"
 lazy val _logbackVersion = "1.6.3"
 lazy val _h2Version = "1.4.199" // TODO: Upgrade to 2.x
 lazy val _postgresqlVersion = "42.7.13"
-lazy val _hibernateVersion = "7.4.8.Final"
+lazy val _hibernateVersion = "7.4.10.Final"
 def scalatestVersion = "3.2.20"
 lazy val mockitoVersion = "4.11.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.23.0" % "provided"
@@ -157,7 +157,7 @@ lazy val scalikejdbcJodaTime = projectMatrix
     libraryDependencies ++= scalaTestDependenciesInTestScope.value,
     libraryDependencies ++= Seq(
       "org.mockito" % "mockito-core" % mockitoVersion % "test",
-      "joda-time" % "joda-time" % "2.14.3",
+      "joda-time" % "joda-time" % "2.14.4",
       "org.joda" % "joda-convert" % "3.0.1"
     ),
   )
