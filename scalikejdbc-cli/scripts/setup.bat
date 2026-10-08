@@ -124,7 +124,7 @@ if exist "%build_sbt%" ( del /f /q "%build_sbt%" )
 >>"%build_sbt%" echo   "com.h2database"     %% "h2"                   %% "1.4.200",
 >>"%build_sbt%" echo   "org.apache.derby"   %% "derby"                %% "10.14.2.0",
 >>"%build_sbt%" echo   "org.xerial"         %% "sqlite-jdbc"          %% "3.34.0",
->>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.5.2",
+>>"%build_sbt%" echo   "org.hsqldb"         %% "hsqldb"               %% "2.7.4",
 >>"%build_sbt%" echo   "com.mysql"          %% "mysql-connector-j"    %% "26.7.0",
 >>"%build_sbt%" echo   "org.postgresql"     %% "postgresql"           %% "42.2.22"
 >>"%build_sbt%" echo )

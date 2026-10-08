@@ -144,7 +144,7 @@ libraryDependencies ++= Seq(
   "com.h2database"     % "h2"                   % "1.4.200",
   "org.apache.derby"   % "derby"                % "10.14.2.0",
   "org.xerial"         % "sqlite-jdbc"          % "3.53.4.0",
-  "org.hsqldb"         % "hsqldb"               % "2.5.2",
+  "org.hsqldb"         % "hsqldb"               % "2.7.4",
   "com.mysql"          % "mysql-connector-j"    % "26.7.0",
   "org.postgresql"     % "postgresql"           % "42.2.21"
 )
