@@ -72,8 +72,6 @@ lazy val baseSettings = Def.settings(
   publishMavenStyle := true,
   // Note: if you are publishing an sbt plugin you will also need to configure sbtPluginPublishLegacyMavenStyle := false for that project. Context: sbt publishes plugins with file names that do not conform to the maven specification. Sonatype OSSRH didn't validate this, but Sonatype Central does: File name 'sbt-my-plugin-0.0.1.jar' is not valid. See also: sbt/sbt#3410
   sbtPluginPublishLegacyMavenStyle := false,
-  // https://github.com/sbt/sbt/issues/2217
-  fullResolvers ~= { _.filterNot(_.name == "jcenter") },
   Global / transitiveClassifiers := Seq(Artifact.SourceClassifier),
   exportJars := false,
   javacOptions ++= Seq(
