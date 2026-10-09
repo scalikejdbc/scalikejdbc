@@ -121,7 +121,7 @@ jobs:
     - uses: sbt/setup-sbt@v1
     - run: sbt -v --server
            -Dscalikejdbc_scala_3_version=3.10.0
-           "all config3/test core3/test interpolation-macro3/test interpolation3/test joda-time3/test library3/test mapper-generator-core3/test orm3/test streams3/test syntax-support-macro3/test test3/test"
+           "all config3/testFull core3/testFull interpolation-macro3/testFull interpolation3/testFull joda-time3/testFull library3/testFull mapper-generator-core3/testFull orm3/testFull streams3/testFull syntax-support-macro3/testFull test3/testFull"
   format:
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -135,19 +135,14 @@ jobs:
     - run: |
         sbt --server "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
+    - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+    - run: reviewdog -version
     - if: ${{ (github.event_name == 'pull_request') && failure() }}
       run: |
-        REVIEWDOG_VERSION="0.20.1"
-        FILE_NAME="reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64"
-        wget -q https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/${FILE_NAME}.tar.gz &&
-        gunzip ${FILE_NAME}.tar.gz &&
-        tar -xf ${FILE_NAME}.tar &&
-        chmod +x ./reviewdog &&
-        ./reviewdog -version
         export REVIEWDOG_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
         TMPFILE=$(mktemp)
         git diff > "${TMPFILE}"
-        ./reviewdog \
+        reviewdog \
           -name="scalafmt" \
           -f=diff \
           -f.diff.strip=1 \
