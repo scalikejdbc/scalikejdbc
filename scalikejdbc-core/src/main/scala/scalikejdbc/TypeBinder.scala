@@ -45,7 +45,7 @@ object TypeBinder extends LowPriorityTypeBinderImplicits {
     a.map(f)
 
   private[scalikejdbc] val any: TypeBinder[Any] =
-    TypeBinder(_ getObject _)(_ getObject _)
+    TypeBinder(_.getObject(_))(_.getObject(_))
   implicit val array: TypeBinder[java.sql.Array] = Binders.sqlArray
 
   implicit val bigDecimal: TypeBinder[java.math.BigDecimal] =

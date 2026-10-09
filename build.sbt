@@ -124,6 +124,7 @@ lazy val baseSettings = Def.settings(
         )
       case _ =>
         Seq(
+          "-Wconf:msg=it should not be used as infix operator:error",
           "-Wconf:msg=Implicit parameters should be provided with a:error"
         )
     }
