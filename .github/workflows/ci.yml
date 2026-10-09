@@ -135,19 +135,14 @@ jobs:
     - run: |
         sbt --server "+ scalafmtAll" scalafmtSbt
         git diff --exit-code
+    - uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+    - run: reviewdog -version
     - if: ${{ (github.event_name == 'pull_request') && failure() }}
       run: |
-        REVIEWDOG_VERSION="0.20.1"
-        FILE_NAME="reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64"
-        wget -q https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/${FILE_NAME}.tar.gz &&
-        gunzip ${FILE_NAME}.tar.gz &&
-        tar -xf ${FILE_NAME}.tar &&
-        chmod +x ./reviewdog &&
-        ./reviewdog -version
         export REVIEWDOG_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
         TMPFILE=$(mktemp)
         git diff > "${TMPFILE}"
-        ./reviewdog \
+        reviewdog \
           -name="scalafmt" \
           -f=diff \
           -f.diff.strip=1 \
