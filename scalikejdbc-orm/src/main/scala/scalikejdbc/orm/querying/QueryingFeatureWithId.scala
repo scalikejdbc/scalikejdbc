@@ -411,7 +411,7 @@ trait QueryingFeatureWithId[Id, Entity]
                 hasManyAssociations ++ includedHasManyAssociations.toSet
               )
             }
-            val query = (conditions match {
+            val query = conditions match {
               case Nil => baseQuery.where(defaultScopeWithDefaultAlias)
               case _   =>
                 conditions.tail
@@ -419,7 +419,7 @@ trait QueryingFeatureWithId[Id, Entity]
                     case (query, condition) => query.and.append(condition)
                   }
                   .and(defaultScopeWithDefaultAlias)
-            })
+            }
 
             if (orderings.isEmpty) {
               query.append(pagination)

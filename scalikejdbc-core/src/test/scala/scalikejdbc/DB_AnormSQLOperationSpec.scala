@@ -29,7 +29,7 @@ class DB_AnormSQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
-        val idOpt = db autoCommit { implicit session =>
+        val idOpt = db.autoCommit { implicit session =>
           SQL("select id from " + tableName + " where id = {id}")
             .bindByName("id" -> 1)
             .map(_.int("id"))
@@ -45,7 +45,7 @@ class DB_AnormSQLOperationSpec
     val tableName = tableNamePrefix + "_query"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB readOnly { implicit session =>
+      DB.readOnly { implicit session =>
         intercept[IllegalArgumentException] {
           SQL(
             "select id from " + tableName + " where id = {id} and name = {name}"
@@ -72,7 +72,7 @@ class DB_AnormSQLOperationSpec
       TestUtils.initialize(tableName)
 
       using(ConnectionPool.borrow()) { conn =>
-        val count = DB(conn) autoCommit { implicit session =>
+        val count = DB(conn).autoCommit { implicit session =>
           SQL("update " + tableName + " set name = {name} where id = {id}")
             .bindByName("name" -> "foo", "id" -> 1)
             .executeUpdate
@@ -82,13 +82,13 @@ class DB_AnormSQLOperationSpec
       }
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = (DB(conn) autoCommit { implicit session =>
+        val name = DB(conn).autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = {id}")
             .bindByName("id" -> 1)
             .map(_.string("name"))
             .single
             .apply()
-        }).get
+        }.get
         name should equal("foo")
       }
     }

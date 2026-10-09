@@ -60,7 +60,7 @@ trait TestDBSettings {
 
   protected def dropTable(tableName: String): Unit = {
     ignoring(classOf[Throwable]) {
-      DB autoCommit { _.execute(s"drop table $tableName") }
+      DB.autoCommit { _.execute(s"drop table $tableName") }
     }
   }
 

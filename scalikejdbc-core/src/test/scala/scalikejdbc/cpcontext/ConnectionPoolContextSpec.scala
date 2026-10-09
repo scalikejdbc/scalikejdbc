@@ -24,7 +24,7 @@ class ConnectionPoolContextSpec
       createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 4)(ConnectionPool.DEFAULT_NAME)
 
-      val result1 = DB readOnly { implicit s =>
+      val result1 = DB.readOnly { implicit s =>
         SQL("select * from " + tableName)
           .map(_.string("name"))
           .list
@@ -33,26 +33,24 @@ class ConnectionPoolContextSpec
       result1.size should equal(4)
 
       val result11 =
-        NamedDB(ConnectionPool.DEFAULT_NAME)(using
-          NoConnectionPoolContext
-        ) readOnly { implicit s =>
-          SQL("select * from " + tableName)
-            .map(_.string("name"))
-            .list
-            .apply()
-        }
+        NamedDB(ConnectionPool.DEFAULT_NAME)(using NoConnectionPoolContext)
+          .readOnly { implicit s =>
+            SQL("select * from " + tableName)
+              .map(_.string("name"))
+              .list
+              .apply()
+          }
       result11.size should equal(4)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
       val result2 =
-        NamedDB(ConnectionPool.DEFAULT_NAME)(using
-          NoConnectionPoolContext
-        ) readOnly { implicit s =>
-          SQL("select * from " + tableName)
-            .map(_.string("name"))
-            .list
-            .apply()
-        }
+        NamedDB(ConnectionPool.DEFAULT_NAME)(using NoConnectionPoolContext)
+          .readOnly { implicit s =>
+            SQL("select * from " + tableName)
+              .map(_.string("name"))
+              .list
+              .apply()
+          }
       result2.size should equal(4)
       result1.zip(result2).foreach { case (a, b) => a should equal(b) }
 
@@ -74,7 +72,7 @@ class ConnectionPoolContextSpec
       createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 6)(ConnectionPool.DEFAULT_NAME)
 
-      val result1 = DB readOnly { implicit s =>
+      val result1 = DB.readOnly { implicit s =>
         SQL("select * from " + tableName)
           .map(_.string("name"))
           .list
@@ -82,7 +80,7 @@ class ConnectionPoolContextSpec
       }
       result1.size should equal(6)
 
-      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly {
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME).readOnly {
         implicit s =>
           SQL("select * from " + tableName)
             .map(_.string("name"))
@@ -92,7 +90,7 @@ class ConnectionPoolContextSpec
       result11.size should equal(6)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
-      val result2 = NamedDB("ConnectionPoolContextSpec") readOnly {
+      val result2 = NamedDB("ConnectionPoolContextSpec").readOnly {
         implicit s =>
           SQL("select * from " + tableName)
             .map(_.string("name"))
@@ -121,7 +119,7 @@ object ConnectionPoolContextSpecUtils {
   )
 
   def createTable(tableName: String)(name: Any) = {
-    NamedDB(name)(using NoConnectionPoolContext) autoCommit { implicit s =>
+    NamedDB(name)(using NoConnectionPoolContext).autoCommit { implicit s =>
       try {
         SQL("drop table " + tableName).execute.apply()
       } catch { case e: Throwable => }
@@ -132,7 +130,7 @@ object ConnectionPoolContextSpecUtils {
   }
 
   def insertData(tableName: String, num: Int)(name: Any) = {
-    NamedDB(name)(using NoConnectionPoolContext) localTx { implicit s =>
+    NamedDB(name)(using NoConnectionPoolContext).localTx { implicit s =>
       (1 to num).foreach { n =>
         SQL("insert into " + tableName + " (id, name) values (?, ?)")
           .bind(n, "name" + n)
@@ -144,7 +142,7 @@ object ConnectionPoolContextSpecUtils {
 
   def dropTable(tableName: String)(name: Any) = {
     try {
-      NamedDB(name)(using NoConnectionPoolContext) autoCommit { implicit s =>
+      NamedDB(name)(using NoConnectionPoolContext).autoCommit { implicit s =>
         SQL("drop table " + tableName).execute.apply()
       }
     } catch { case e: Throwable => }
@@ -180,7 +178,7 @@ class ConnectionPoolContextMixinSpec
       createTable(tableName)("ConnectionPoolContextSpec")
       insertData(tableName, 6)(ConnectionPool.DEFAULT_NAME)
 
-      val result1 = DB readOnly { implicit s =>
+      val result1 = DB.readOnly { implicit s =>
         SQL("select * from " + tableName)
           .map(_.string("name"))
           .list
@@ -188,7 +186,7 @@ class ConnectionPoolContextMixinSpec
       }
       result1.size should equal(6)
 
-      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME) readOnly {
+      val result11 = NamedDB(ConnectionPool.DEFAULT_NAME).readOnly {
         implicit s =>
           SQL("select * from " + tableName)
             .map(_.string("name"))
@@ -198,7 +196,7 @@ class ConnectionPoolContextMixinSpec
       result11.size should equal(6)
       result1.zip(result11).foreach { case (a, b) => a should equal(b) }
 
-      val result2 = NamedDB("ConnectionPoolContextSpec") readOnly {
+      val result2 = NamedDB("ConnectionPoolContextSpec").readOnly {
         implicit s =>
           SQL("select * from " + tableName)
             .map(_.string("name"))
@@ -236,7 +234,7 @@ trait InMemoryDB {
         ""
       )
     )
-  NamedDB("CPContextWithAutoSessionSpec") localTx { implicit session =>
+  NamedDB("CPContextWithAutoSessionSpec").localTx { implicit session =>
     SQL(
       "create table users (id bigint primary key, name varchar(256), created_at timestamp not null);"
     ).execute.apply()
@@ -265,7 +263,7 @@ object Sample {
   def countAll2()(implicit
     context: ConnectionPoolContext = NoConnectionPoolContext
   ): Long = {
-    NamedDB("CPContextWithAutoSessionSpec") readOnly { implicit s =>
+    NamedDB("CPContextWithAutoSessionSpec").readOnly { implicit s =>
       SQL("select count(1) c from users")
         .map(_.long("c"))
         .single

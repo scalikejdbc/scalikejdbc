@@ -40,8 +40,8 @@ object DateTimeUtil {
   def currentTimeZone: String = {
     val minutes = java.util.TimeZone.getDefault.getRawOffset / 1000 / 60
     (if (minutes >= 0) "+" else "-") + "%02d:%02d".format(
-      (math.abs(minutes) / 60),
-      (math.abs(minutes) % 60)
+      math.abs(minutes) / 60,
+      math.abs(minutes) % 60
     )
   }
 

@@ -17,7 +17,7 @@ class DBSessionWrapperSpec extends AnyFlatSpec with Matchers {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       var step = 0
-      val result = DB readOnly { session =>
+      val result = DB.readOnly { session =>
         val sql = SQL("")
         val attributesSwitcher = new DBSessionAttributesSwitcher(sql) {
           override protected def overwriteAttributes(): Unit = {

@@ -341,7 +341,7 @@ class TypeBinderSpec
       values
     }
 
-    valuesDefault notEqualAll valuesAnother
+    valuesDefault.notEqualAll(valuesAnother)
 
     val valuesExplicitDefault = locally {
       implicit val overwrittenZone: OverwrittenZoneId =

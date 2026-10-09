@@ -44,7 +44,7 @@ class TimeZoneConverterSpec extends AnyFlatSpec with Matchers {
     val converter1 = TimeZoneConverter.from(jst).to(ast)
     val converter2 = TimeZoneConverter.from(jst).to(ast)
 
-    converter1 should be theSameInstanceAs converter2
+    (converter1 should be).theSameInstanceAs(converter2)
   }
 
   it should "keep nano seconds" in {

@@ -72,7 +72,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
   it should "accept javax.sql.DataSource" in {
     ConnectionPool.add("sample", url, user, password)
     try {
-      NamedDB("sample") autoCommit { implicit s =>
+      NamedDB("sample").autoCommit { implicit s =>
         try
           SQL("create table data_source_test(id bigint not null)").execute
             .apply()
@@ -85,7 +85,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
       ds.setPassword(password)
       ConnectionPool.add("ds", new DataSourceConnectionPool(ds))
 
-      NamedDB("ds") readOnly { implicit s =>
+      NamedDB("ds").readOnly { implicit s =>
         val count = SQL("select count(1) from data_source_test")
           .map(_.long(1))
           .single
@@ -95,7 +95,7 @@ class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
       }
 
     } finally {
-      NamedDB("sample") autoCommit { implicit s =>
+      NamedDB("sample").autoCommit { implicit s =>
         try SQL("drop table data_source_test").execute.apply()
         catch { case e: Exception => e.printStackTrace }
       }

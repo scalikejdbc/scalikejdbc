@@ -13,7 +13,7 @@ class GlobalSettingsSpec
   behavior of "GlobalSettings"
 
   it should "be available" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("drop table settings_example").execute.apply()
@@ -48,7 +48,7 @@ class GlobalSettingsSpec
   }
 
   it should "fix the issue 22" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("drop table issue22").execute.apply()
@@ -94,7 +94,7 @@ class GlobalSettingsSpec
       logLevel = "ERROR"
     )
 
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("drop table issue118").execute.apply()
@@ -118,7 +118,7 @@ class GlobalSettingsSpec
   it should "disable logging SQL errors" in {
     try {
       GlobalSettings.loggingSQLErrors = false
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table should_not_be_logged").execute.apply()
       }
     } catch { case e: Exception => }
@@ -126,14 +126,14 @@ class GlobalSettingsSpec
       GlobalSettings.loggingSQLErrors = true
     }
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table should_be_logged").execute.apply()
       }
     } catch { case e: Exception => }
   }
 
   it should "have queryCompletionListener" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("drop table query_completion_listener").execute.apply()
@@ -183,7 +183,7 @@ class GlobalSettingsSpec
   }
 
   it should "have taggedQueryCompletionListener" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("drop table tagged_query_completion_listener")
@@ -298,7 +298,7 @@ class GlobalSettingsSpec
   }
 
   it should "have stacktrace logging configuration" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try SQL("drop table logging_stacktrace").execute.apply()
         catch { case e: Exception => }

@@ -33,8 +33,8 @@ class SQL_AttributesSpec
     val query: OneToManySQLToOption[Company, Member, NoExtractor, Nothing] = {
       withSQL {
         select
-          .from[Company](Company as c)
-          .leftJoin(Member as m)
+          .from[Company](Company.as(c))
+          .leftJoin(Member.as(m))
           .on(c.id, m.companyId)
           .where
           .eq(c.id, 123)

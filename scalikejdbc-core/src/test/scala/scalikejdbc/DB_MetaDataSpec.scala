@@ -17,7 +17,7 @@ class DB_MetaDataSpec
   it should "retrieve metadata" in {
 
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         execute(
           """
           create table meta_groups (
@@ -93,7 +93,7 @@ class DB_MetaDataSpec
           NamedDB("default").getTableNames("META_%")
         ).zipWithIndex
       ) withClue(s"No. ${i}") {
-        lower(act) should contain allOf ("meta_groups", "meta_members")
+        (lower(act) should contain).allOf("meta_groups", "meta_members")
       }
 
       for (
@@ -104,11 +104,11 @@ class DB_MetaDataSpec
       ) {
         // mysql is not support schema
         if (isMySQLDriverName) {
-          lower(act) should contain allOf ("meta_groups", "meta_members")
+          (lower(act) should contain).allOf("meta_groups", "meta_members")
         } else {
-          lower(
+          (lower(
             act
-          ) should contain allOf ("public.meta_groups", "public.meta_members")
+          ) should contain).allOf("public.meta_groups", "public.meta_members")
         }
       }
 
@@ -188,7 +188,7 @@ class DB_MetaDataSpec
       DB.getColumnNames("dummy") should be(empty)
 
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         execute("drop table meta_members")
         execute("drop table meta_groups")
       }
@@ -201,7 +201,7 @@ class DB_MetaDataSpec
 
       try {
 
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("create schema other;")
 
           execute(
@@ -352,7 +352,7 @@ class DB_MetaDataSpec
         ) withClue(s"No. ${i}") {
           lower(
             act
-          ) should (contain allOf ("other.meta_members", "other.meta_groups"))
+          ) should (contain.allOf("other.meta_members", "other.meta_groups"))
         }
 
         lower(DB.getTableNames("dummy.*")) should be(empty)
@@ -364,9 +364,9 @@ class DB_MetaDataSpec
         ) {
           if (driverClassName == "org.h2.Driver") {
             // public.meta_members
-            lower(act) should (include(
+            lower(act) should ((include(
               "meta_members"
-            ) and not include "meta_groups")
+            ) and not).include("meta_groups"))
           } else {
             // public.meta_members, other.meta_members, other.meta_groups
             lower(act) should (include("meta_members") and include(
@@ -381,9 +381,10 @@ class DB_MetaDataSpec
             NamedDB("default").showTables("public.%")
           )
         ) {
-          lower(act) should (include(
+          lower(act) should (((include(
             "public.meta_members"
-          ) and not include "other.meta_members" and not include "other.meta_groups")
+          ) and not).include("other.meta_members") and not)
+            .include("other.meta_groups"))
         }
 
         for (
@@ -392,7 +393,7 @@ class DB_MetaDataSpec
             NamedDB("default").showTables("other.%")
           )
         ) {
-          lower(act) should (not include "public.meta_members" and include(
+          lower(act) should (not.include("public.meta_members") and include(
             "other.meta_members"
           ) and include("other.meta_groups"))
         }
@@ -434,9 +435,9 @@ class DB_MetaDataSpec
             NamedDB("default").describe("public.meta_members")
           )
         ) {
-          lower(act) should (include(
+          lower(act) should ((include(
             "public.meta_members"
-          ) and not include "other.meta_members")
+          ) and not).include("other.meta_members"))
         }
 
         for (
@@ -445,7 +446,7 @@ class DB_MetaDataSpec
             NamedDB("default").describe("other.meta_members")
           )
         ) {
-          lower(act) should (not include "public.meta_members" and include(
+          lower(act) should (not.include("public.meta_members") and include(
             "other.meta_members"
           ))
         }
@@ -481,7 +482,7 @@ class DB_MetaDataSpec
         ) should be(empty)
 
       } finally {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("drop table if exists public.meta_members")
           execute("drop table if exists other.meta_members")
           execute("drop table if exists other.meta_groups")
@@ -496,7 +497,7 @@ class DB_MetaDataSpec
 
       try {
 
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           // "user" is same as information schema
           execute(
             """
@@ -568,7 +569,7 @@ class DB_MetaDataSpec
           }
 
       } finally {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("drop table if exists users")
         }
       }
@@ -670,18 +671,19 @@ class DB_MetaDataSpec
     if (isMySQLDriverName) {
       try {
         // There was a bug that MySQL returns all columns of same name tables.
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("create table getcolumns(id1 integer,c1 integer);")
           execute("create database otherdb;")
           execute("create table otherdb.getcolumns(id2 integer,c2 integer);")
         }
-        DB.getTable("getcolumns")
+        (DB
+          .getTable("getcolumns")
           .get
           .columns
-          .map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+          .map(_.name.toLowerCase) should contain).allOf("id1", "c1")
 
       } finally {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("drop database otherdb")
           execute("drop table if exists getcolumns")
         }
@@ -690,17 +692,18 @@ class DB_MetaDataSpec
 
       try {
 
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("create table getcolumns(id1 integer, c1 integer);")
         }
 
-        DB.getTable("getcolumns")
+        (DB
+          .getTable("getcolumns")
           .get
           .columns
-          .map(_.name.toLowerCase) should contain allOf ("id1", "c1")
+          .map(_.name.toLowerCase) should contain).allOf("id1", "c1")
 
       } finally {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           execute("drop table if exists getcolumns")
         }
       }

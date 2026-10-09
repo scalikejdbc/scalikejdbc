@@ -38,7 +38,7 @@ class DBSpec
       TestUtils.initialize(tableName)
 
       using(DB(ConnectionPool.borrow())) { db =>
-        val result = db readOnly { session =>
+        val result = db.readOnly { session =>
           session.list("select * from " + tableName + "")(_.string("name"))
         }
         result.size should be > 0
@@ -183,11 +183,11 @@ class DBSpec
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB.autoCommit {
+      val name = DB.autoCommit {
         _.single("select name from " + tableName + " where id = ?", 1)(
           _.string("name")
         )
-      }).get
+      }.get
       name should equal("foo")
     }
   }
@@ -196,11 +196,11 @@ class DBSpec
     val tableName = tableNamePrefix + "_updateInAutoCommitAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = (DB.readOnly {
+      val name = DB.readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(
           _.string("name")
         )
-      }).get
+      }.get
       name should equal("name1")
       val count = DB.autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
@@ -244,11 +244,13 @@ class DBSpec
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(
-          _.string("name")
-        )
-      }).getOrElse("---")
+      val name = DB
+        .localTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
+          )
+        }
+        .getOrElse("---")
       name should equal("foo")
     }
   }
@@ -258,7 +260,7 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
-        val count = db localTx {
+        val count = db.localTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",
             "foo",
@@ -267,11 +269,13 @@ class DBSpec
         }
         count should equal(1)
         db.rollbackIfActive()
-        val name = (DB localTx {
-          _.single("select name from " + tableName + " where id = ?", 1)(
-            _.string("name")
-          )
-        }).getOrElse("---")
+        val name = DB
+          .localTx {
+            _.single("select name from " + tableName + " where id = ?", 1)(
+              _.string("name")
+            )
+          }
+          .getOrElse("---")
         name should equal("foo")
       }
     }
@@ -286,7 +290,7 @@ class DBSpec
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fResult = DB futureLocalTx { s =>
+      val fResult = DB.futureLocalTx { s =>
         Future(
           s.single("select id from " + tableName + " where id = ?", 1)(
             _.string("id")
@@ -301,7 +305,7 @@ class DBSpec
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fResult = DB futureLocalTx { s =>
+      val fResult = DB.futureLocalTx { s =>
         Future(
           s.list("select id from " + tableName + "")(rs =>
             Some(rs.string("id"))
@@ -316,7 +320,7 @@ class DBSpec
     val tableName = tableNamePrefix + "_singleInFutureLocalTx"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val fCount = DB futureLocalTx { s =>
+      val fCount = DB.futureLocalTx { s =>
         Future(
           s.update(
             "update " + tableName + " set name = ? where id = ?",
@@ -329,7 +333,7 @@ class DBSpec
         _ should equal(1)
       }
       val fName = fCount.flatMap { _ =>
-        DB futureLocalTx (s =>
+        DB.futureLocalTx(s =>
           Future(
             s.single("select name from " + tableName + " where id = ?", 1)(
               _.string("name")
@@ -346,7 +350,7 @@ class DBSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       futureUsing(DB(ConnectionPool.borrow())) { db =>
-        val fCount = DB futureLocalTx { s =>
+        val fCount = DB.futureLocalTx { s =>
           Future(
             s.update(
               "update " + tableName + " set name = ? where id = ?",
@@ -359,7 +363,7 @@ class DBSpec
           _ should equal(1)
         }
         db.rollbackIfActive()
-        val fName = DB futureLocalTx { s =>
+        val fName = DB.futureLocalTx { s =>
           Future(
             s.single("select name from " + tableName + " where id = ?", 1)(
               _.string("name")
@@ -376,7 +380,7 @@ class DBSpec
     val tableName = tableNamePrefix + "_rollback"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val failure = DB futureLocalTx { implicit s =>
+      val failure = DB.futureLocalTx { implicit s =>
         Future(
           s.update(
             "update " + tableName + " set name = ? where id = ?",
@@ -407,7 +411,7 @@ class DBSpec
       }
     }
     val fallback = 2
-    val fResult = DB futureLocalTx { _ => Future.successful(1) } recover {
+    val fResult = DB.futureLocalTx { _ => Future.successful(1) }.recover {
       case _: IllegalStateException => fallback
     }
     whenReady(fResult) { _ should equal(fallback) }
@@ -683,7 +687,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
         using(DB(ConnectionPool.borrow())) { db =>
-          db withinTx { session =>
+          db.withinTx { session =>
             session.list("select * from " + tableName + "")(rs =>
               Some(rs.string("name"))
             )
@@ -699,7 +703,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx { session =>
+        val result = db.withinTx { session =>
           session.list("select * from " + tableName + "")(rs =>
             Some(rs.string("name"))
           )
@@ -732,7 +736,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx {
+        val result = db.withinTx {
           _.single("select id from " + tableName + " where id = ?", 1)(
             _.string("id")
           )
@@ -749,7 +753,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx {
+        val result = db.withinTx {
           _.list("select id from " + tableName + "")(rs =>
             Some(rs.string("id"))
           )
@@ -766,7 +770,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val count = db withinTx {
+        val count = db.withinTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",
             "foo",
@@ -774,11 +778,11 @@ class DBSpec
           )
         }
         count should equal(1)
-        val name = (db withinTx {
+        val name = db.withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )
-        }).get
+        }.get
         name should equal("foo")
         db.rollback()
       }
@@ -791,7 +795,7 @@ class DBSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val count = db withinTx {
+        val count = db.withinTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",
             "foo",
@@ -801,11 +805,11 @@ class DBSpec
         count should equal(1)
         db.rollback()
         db.begin()
-        val name = (db withinTx {
+        val name = db.withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )
-        }).get
+        }.get
         name should equal("name1")
       }
     }
@@ -813,11 +817,11 @@ class DBSpec
 
   it should "fix issue #41 [library] LoggingSQLAndTime raises IndexOutOfBoundsException when '?' is included in SQL templates" in {
     val tableName = tableNamePrefix + "_issue41"
-    ultimately({
+    ultimately {
       GlobalSettings.loggingSQLAndTime =
         LoggingSQLAndTimeSettings(enabled = false)
       TestUtils.deleteTable(tableName)
-    }) {
+    } {
       TestUtils.initialize(tableName)
       DB.localTx { implicit s =>
         SQL("insert into " + tableName + " values (?,?)")
@@ -867,7 +871,7 @@ class DBSpec
         DB(ConnectionPool.borrow())
           .isolationLevel(IsolationLevel.RepeatableRead)
       ) { db =>
-        db localTx { session =>
+        db.localTx { session =>
           assert(
             session.connection.getTransactionIsolation === expectedTransactionIsolation
           )
@@ -919,7 +923,7 @@ class DBSpec
       Thread.sleep(2000L)
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = DB(conn) autoCommit { session =>
+        val name = DB(conn).autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )

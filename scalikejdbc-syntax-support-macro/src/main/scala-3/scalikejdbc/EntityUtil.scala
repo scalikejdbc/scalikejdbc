@@ -22,7 +22,7 @@ object EntityUtil {
       )
     }
     val excludeNames: Set[String] = (excludes match {
-      case Varargs(expr) if (expr.exists(_.value.isEmpty)) =>
+      case Varargs(expr) if expr.exists(_.value.isEmpty) =>
         report.errorAndAbort(
           s"You must use String literal values for field names to exclude from case class ${sym.fullName}",
           excludes.asTerm.pos

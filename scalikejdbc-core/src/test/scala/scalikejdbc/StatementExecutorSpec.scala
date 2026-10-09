@@ -37,8 +37,8 @@ class StatementExecutorSpec
       params
     )
     val methods = classOf[StatementExecutor].getDeclaredMethods.filter { m =>
-      (m.getName contains "sqlString") &&
-      (Modifier isPublic m.getModifiers) &&
+      m.getName.contains("sqlString") &&
+      Modifier.isPublic(m.getModifiers) &&
       (m.getReturnType == classOf[String]) &&
       (m.getParameterCount == 0)
     }.toList
@@ -216,7 +216,7 @@ class StatementExecutorSpec
     val Some(method) =
       classOf[StatementExecutor].getMethods
         .find { m =>
-          (m.getName contains "stackTraceInformation") &&
+          m.getName.contains("stackTraceInformation") &&
           (m.getReturnType == classOf[String]) &&
           (m.getParameterCount == 0) &&
           !Modifier.isStatic(m.getModifiers)
@@ -227,7 +227,7 @@ class StatementExecutorSpec
 
   it should "handle large bind values efficiently (issue #2453)" in {
     pending
-    val bindValues = (1 to 50000)
+    val bindValues = 1 to 50000
     val placeholders = bindValues.map(_ => "?").mkString(", ")
     val template = s"INSERT INTO table (column1) VALUES ($placeholders)"
 

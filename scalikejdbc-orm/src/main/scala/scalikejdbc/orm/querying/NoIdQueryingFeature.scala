@@ -298,7 +298,7 @@ trait NoIdQueryingFeature[Entity]
           ) {
             // find ids for pagination
             val queryForIds =
-              (conditions match {
+              conditions match {
                 case Nil =>
                   singleSelectQuery.where(defaultScopeWithDefaultAlias)
                 case _ =>
@@ -307,7 +307,7 @@ trait NoIdQueryingFeature[Entity]
                       case (query, condition) => query.and.append(condition)
                     }
                     .and(defaultScopeWithDefaultAlias)
-              })
+              }
             val ids: List[Any] = withSQL {
               queryForIds
                 .orderBy(orderings.headOption.getOrElse(primaryKeyField))

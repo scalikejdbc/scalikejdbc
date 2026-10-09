@@ -39,11 +39,11 @@ class EntityEqualitySpec extends AnyFlatSpec with Matchers {
     (f1b == f2a) should be(false)
     (f1b == n) should be(false)
 
-    (f1a equals f1a_) should be(true)
-    (f1a equals f1b) should be(false)
-    (f1a equals f2a) should be(false)
-    (f1b equals f2a) should be(false)
-    (f1b equals n) should be(false)
+    (f1a.equals(f1a_)) should be(true)
+    (f1a.equals(f1b)) should be(false)
+    (f1a.equals(f2a)) should be(false)
+    (f1b.equals(f2a)) should be(false)
+    (f1b.equals(n)) should be(false)
   }
 
   it should "be available with Bar example" in {
@@ -59,11 +59,11 @@ class EntityEqualitySpec extends AnyFlatSpec with Matchers {
     (b1b == b2a) should be(false)
     (b1b == n) should be(false)
 
-    (b1a equals b1a_) should be(true)
-    (b1a equals b1b) should be(true)
-    (b1a equals b2a) should be(false)
-    (b1b equals b2a) should be(false)
-    (b1b equals n) should be(false)
+    (b1a.equals(b1a_)) should be(true)
+    (b1a.equals(b1b)) should be(true)
+    (b1a.equals(b2a)) should be(false)
+    (b1b.equals(b2a)) should be(false)
+    (b1b.equals(n)) should be(false)
 
     val f1a = new Foo(1, "Alice")
     (b1a == f1a) should be(false)

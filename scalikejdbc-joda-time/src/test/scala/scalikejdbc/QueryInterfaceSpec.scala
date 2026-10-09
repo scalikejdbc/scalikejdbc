@@ -60,14 +60,14 @@ class QueryInterfaceSpec
     def apply(o: SyntaxProvider[Order], p: SyntaxProvider[Product])(
       rs: WrappedResultSet
     ): Order = {
-      (apply(o)(rs)).copy(product = Some(Product(p)(rs)))
+      apply(o)(rs).copy(product = Some(Product(p)(rs)))
     }
     def apply(
       o: SyntaxProvider[Order],
       p: SyntaxProvider[Product],
       a: SyntaxProvider[Account]
     )(rs: WrappedResultSet): Order = {
-      (apply(o)(rs))
+      apply(o)(rs)
         .copy(product = Some(Product(p)(rs)), account = Account.opt(a)(rs))
     }
   }
@@ -105,7 +105,7 @@ class QueryInterfaceSpec
   it should "support schemaName" in {
     if (!isMySQL) {
       try {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           try sql"drop table ${SchemaExample.table}".execute.apply()
           catch { case e: Exception => }
           sql"create table ${SchemaExample.table} (id int not null)".execute
@@ -113,13 +113,13 @@ class QueryInterfaceSpec
           withSQL { insert.into(SchemaExample).values(1) }.update.apply()
           val se = SchemaExample.syntax("se")
           select(sqls.count)
-            .from(SchemaExample as se)
+            .from(SchemaExample.as(se))
             .toSQL
             .statement should equal(
             "select count(1) from public.qi_schema_example se"
           )
 
-          val count = withSQL { select(sqls.count).from(SchemaExample as se) }
+          val count = withSQL { select(sqls.count).from(SchemaExample.as(se)) }
             .map(_.long(1))
             .single
             .apply()
@@ -127,7 +127,7 @@ class QueryInterfaceSpec
           count should equal(1L)
         }
       } finally {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           sql"drop table ${SchemaExample.table}".execute.apply()
         }
       }
@@ -136,7 +136,7 @@ class QueryInterfaceSpec
 
   it should "be available with Query Interface" in {
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         try sql"drop table ${Order.table}".execute.apply()
         catch { case e: Exception => }
         sql"create table ${Order.table} (id int not null, product_id int not null, account_id int, created_at timestamp not null)".execute
@@ -158,7 +158,7 @@ class QueryInterfaceSpec
           .apply()
       }
 
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         // insert test data
         val (oc, pc, ac) = (Order.column, Product.column, Account.column)
         val lp = LegacyProduct.syntax("lp")
@@ -176,15 +176,15 @@ class QueryInterfaceSpec
             .namedValues(pc.id -> 2, pc.name -> "Tea", pc.price -> Price(80)),
           insert
             .into(Product)
-            .select(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
+            .select(_.from(LegacyProduct.as(lp)).where.isNotNull(lp.id)),
           insert
             .into(Product)
             .select(lp.id, lp.name, lp.price)(
-              _.from(LegacyProduct as lp).where.isNotNull(lp.id)
+              _.from(LegacyProduct.as(lp)).where.isNotNull(lp.id)
             ),
           insert
             .into(Product)
-            .selectAll(lp)(_.from(LegacyProduct as lp).where.isNotNull(lp.id)),
+            .selectAll(lp)(_.from(LegacyProduct.as(lp)).where.isNotNull(lp.id)),
           delete.from(Product).where.in(pc.id, Seq(100, 200)),
           insert.into(Order).values(11, 1, Some(1), DateTime.now),
           insert.into(Order).values(12, 1, Some(2), DateTime.now),
@@ -202,7 +202,7 @@ class QueryInterfaceSpec
         {
           val p = Product.syntax("p")
           val products = withSQL {
-            select.from(Product as p).orderBy(p.id)
+            select.from(Product.as(p)).orderBy(p.id)
           }.map(Product(p)).list.apply()
           assert(
             products === List(
@@ -231,15 +231,15 @@ class QueryInterfaceSpec
 
         // simple query
         val alice: Account = withSQL(
-          select.from(Account as a).where.eq(a.name, "Alice")
+          select.from(Account.as(a)).where.eq(a.name, "Alice")
         ).map(Account(a)).single.apply().get
         val ordersByAlice = withSQL {
-          select.from(Order as o).where.eq(o.accountId, alice.id)
+          select.from(Order.as(o)).where.eq(o.accountId, alice.id)
         }.map(Order(o)).list.apply()
 
         ordersByAlice.size should equal(4)
 
-        val allAccounts = withSQL { select.from(Account as a).orderBy(a.id) }
+        val allAccounts = withSQL { select.from(Account.as(a)).orderBy(a.id) }
           .map(Account(a))
           .list
           .apply()
@@ -248,10 +248,10 @@ class QueryInterfaceSpec
         // join query
         val cookieOrders = withSQL {
           select
-            .from(Order as o)
-            .innerJoin(Product as p)
+            .from(Order.as(o))
+            .innerJoin(Product.as(p))
             .on(o.productId, p.id)
-            .leftJoin(Account as a)
+            .leftJoin(Account.as(a))
             .on(o.accountId, a.id)
             .where
             .eq(o.productId, 2)
@@ -270,14 +270,14 @@ class QueryInterfaceSpec
         // cross join query
         val ordersAndProducts = withSQL {
           select
-            .from(Order as o)
-            .crossJoin(Product as p)
+            .from(Order.as(o))
+            .crossJoin(Product.as(p))
         }.map(Order(o, p)).list.apply()
 
         val productNum =
-          withSQL(select.from(Product as p)).map(Product(p)).list.apply().size
+          withSQL(select.from(Product.as(p))).map(Product(p)).list.apply().size
         val orderNum =
-          withSQL(select.from(Order as o)).map(Order(o)).list.apply().size
+          withSQL(select.from(Order.as(o))).map(Order(o)).list.apply().size
         ordersAndProducts.size should equal(productNum * orderNum)
         ordersAndProducts.head.id should equal(11)
         ordersAndProducts.head.productId should equal(1)
@@ -286,12 +286,12 @@ class QueryInterfaceSpec
 
         def findCookieOrder(accountRequired: Boolean) = withSQL {
           select
-            .from[Order](Order as o)
-            .innerJoin(Product as p)
+            .from[Order](Order.as(o))
+            .innerJoin(Product.as(p))
             .on(o.productId, p.id)
             .map { sql =>
               if (accountRequired)
-                sql.leftJoin(Account as a).on(o.accountId, a.id)
+                sql.leftJoin(Account.as(a)).on(o.accountId, a.id)
               else sql
             }
             .where
@@ -306,10 +306,10 @@ class QueryInterfaceSpec
 
         def findByOptionalAccountName(accountName: Option[String]) = withSQL {
           select
-            .from[Order](Order as o)
-            .innerJoin(Product as p)
+            .from[Order](Order.as(o))
+            .innerJoin(Product.as(p))
             .on(o.productId, p.id)
-            .innerJoin(accountName.map(_ => Account as a))
+            .innerJoin(accountName.map(_ => Account.as(a)))
             .on(o.accountId, a.id)
             .where(sqls.toAndConditionOpt(accountName.map(sqls.eq(a.name, _))))
         }.map { rs => Order(o, p)(rs) }.list.apply()
@@ -322,7 +322,7 @@ class QueryInterfaceSpec
           val accountId: Option[Int] = None
           val ids = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where(
                 sqls.toAndConditionOpt(
                   productId.map(id => sqls.eq(o.productId, id)),
@@ -337,7 +337,7 @@ class QueryInterfaceSpec
           val (productId, accountId) = (Some(1), Some(2))
           val ids = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where(
                 sqls.toAndConditionOpt(
                   productId.map(id => sqls.eq(o.productId, id)),
@@ -354,7 +354,7 @@ class QueryInterfaceSpec
           val id2: Option[Int] = Some(1)
           val ids = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .isNotNull(o.accountId)
               .and(
@@ -371,7 +371,7 @@ class QueryInterfaceSpec
           val (id1, id2) = (Some(1), Some(2))
           val ids = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .isNotNull(o.accountId)
               .and(
@@ -389,7 +389,9 @@ class QueryInterfaceSpec
         val sp = SubQuery.syntax("sp").include(p)
         val productId: Option[Int] = withSQL {
           select(sqls"${sp(p).id} id")
-            .from(select.from(Product as p).where.eq(p.price, Price(80)).as(sp))
+            .from(
+              select.from(Product.as(p)).where.eq(p.price, Price(80)).as(sp)
+            )
         }.map(_.int("id")).single.apply()
 
         productId should equal(Option(2))
@@ -401,8 +403,8 @@ class QueryInterfaceSpec
           select(sqls"${x(o).accountId} id", sqls"${sum(x(p).price)} amount")
             .from(
               select
-                .from(Order as o)
-                .innerJoin(Product as p)
+                .from(Order.as(o))
+                .innerJoin(Product.as(p))
                 .on(o.productId, p.id)
                 .as(x)
             )
@@ -417,7 +419,7 @@ class QueryInterfaceSpec
         // test withRoundBracket(ConditionSQLBuilder => ConditionSQLBuilder)
         val bracketTestResults = withSQL {
           select(o.result.id)
-            .from(Order as o)
+            .from(Order.as(o))
             .where
             .withRoundBracket {
               _.eq(o.productId, 1).and.isNotNull(o.accountId)
@@ -432,7 +434,7 @@ class QueryInterfaceSpec
         // test roundBracket(SQLSyntax)
         val bracketTestResults2 = withSQL {
           select(o.result.id)
-            .from(Order as o)
+            .from(Order.as(o))
             .where
             .roundBracket(sqls.eq(o.productId, 1).and.isNotNull(o.accountId))
             .or
@@ -446,7 +448,7 @@ class QueryInterfaceSpec
           val productId = Some(1)
           val withConditionsTestResults = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .withRoundBracket(sql =>
                 sqls
@@ -470,7 +472,7 @@ class QueryInterfaceSpec
           val productId = Some(1)
           val withConditionsTestResults = withSQL {
             select(o.result.id)
-              .from(Order as o)
+              .from(Order.as(o))
               .where(
                 sqls.toOrConditionOpt(
                   productId.map(i => sqls.eq(o.productId, i)),
@@ -487,7 +489,7 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in(o.id, Seq(1, 2, 14, 15, 16, 20, 21, 22))
               .orderBy(o.id)
@@ -497,7 +499,7 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in(o.id, Seq[Int]())
               .orderBy(o.id)
@@ -507,7 +509,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn(o.id, Seq(14, 15, 22, 23, 24, 25, 26))
               .orderBy(o.id)
@@ -517,7 +519,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn(o.id, Seq[Int]())
               .orderBy(o.id)
@@ -529,7 +531,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .not
               .in(o.id, Seq[Int]())
@@ -542,11 +544,11 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in(
                 o.id,
-                select(o.id).from(Order as o).where.between(o.id, 14, 16)
+                select(o.id).from(Order.as(o)).where.between(o.id, 14, 16)
               )
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
@@ -555,11 +557,11 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn(
                 o.id,
-                select(o.id).from(Order as o).where.between(o.id, 13, 30)
+                select(o.id).from(Order.as(o)).where.between(o.id, 13, 30)
               )
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
@@ -568,11 +570,11 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in(
                 o.id,
-                select(o.id).from(Order as o).where.notBetween(o.id, 14, 16)
+                select(o.id).from(Order.as(o)).where.notBetween(o.id, 14, 16)
               )
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
@@ -583,11 +585,11 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn(
                 o.id,
-                select(o.id).from(Order as o).where.notBetween(o.id, 13, 30)
+                select(o.id).from(Order.as(o)).where.notBetween(o.id, 13, 30)
               )
               .orderBy(o.id)
           }.map(Order(o)).list.apply()
@@ -599,7 +601,7 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in((o.id, o.productId), Seq((11, 1), (12, 2), (21, 2)))
               .orderBy(o.id)
@@ -609,7 +611,7 @@ class QueryInterfaceSpec
         {
           val inClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .in((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
@@ -619,7 +621,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn(
                 (o.id, o.productId),
@@ -634,7 +636,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .notIn((o.id, o.productId), Seq[(Int, Int)]())
               .orderBy(o.id)
@@ -646,7 +648,7 @@ class QueryInterfaceSpec
         {
           val notInClauseResults = withSQL {
             select
-              .from(Order as o)
+              .from(Order.as(o))
               .where
               .not
               .in((o.id, o.productId), Seq[(Int, Int)]())
@@ -661,7 +663,7 @@ class QueryInterfaceSpec
         {
           val results = withSQL {
             select
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .like(a.name, "%e%")
               .orderBy(a.id)
@@ -671,7 +673,7 @@ class QueryInterfaceSpec
         {
           val results = withSQL {
             select
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .notLike(a.name, "%e%")
               .orderBy(a.id)
@@ -682,9 +684,9 @@ class QueryInterfaceSpec
         // exists clause
         val existsClauseResults = withSQL {
           select(a.id)
-            .from(Account as a)
+            .from(Account.as(a))
             .where
-            .exists(select.from(Order as o).where.eq(o.accountId, a.id))
+            .exists(select.from(Order.as(o)).where.eq(o.accountId, a.id))
             .orderBy(a.id)
         }.map(_.int(1)).list.apply()
         existsClauseResults should equal(List(1, 2, 3))
@@ -693,10 +695,10 @@ class QueryInterfaceSpec
         {
           val notExistsClauseResults = withSQL {
             select(a.id)
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .not
-              .exists(select.from(Order as o).where.eq(o.accountId, a.id))
+              .exists(select.from(Order.as(o)).where.eq(o.accountId, a.id))
               .orderBy(a.id)
           }.map(_.int(1)).list.apply()
           notExistsClauseResults should equal(List(4))
@@ -704,10 +706,10 @@ class QueryInterfaceSpec
         {
           val notExistsClauseResults = withSQL {
             select(a.id)
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .notExists(
-                sqls"select ${o.id} from ${Order as o} where ${o.accountId} = ${a.id}"
+                sqls"select ${o.id} from ${Order.as(o)} where ${o.accountId} = ${a.id}"
               )
               .orderBy(a.id)
           }.map(_.int(1)).list.apply()
@@ -717,7 +719,7 @@ class QueryInterfaceSpec
         // distinct count
         import sqls.{ distinct, count }
         val productCount = withSQL {
-          select(count(distinct(o.productId))).from(Order as o)
+          select(count(distinct(o.productId))).from(Order.as(o))
         }.map(_.int(1)).single.apply().get
 
         productCount should equal(2)
@@ -729,10 +731,10 @@ class QueryInterfaceSpec
         val wildcardCounts = withSQL {
           // select(o.productId, count(p), count(a))
           select(o.productId, count(p.id), count(a.id))
-            .from(Order as o)
-            .innerJoin(Product as p)
+            .from(Order.as(o))
+            .innerJoin(Product.as(p))
             .on(o.productId, p.id)
-            .leftJoin(Account as a)
+            .leftJoin(Account.as(a))
             .on(o.accountId, a.id)
             .groupBy(o.productId)
         }.map(rs => (rs.int(1), rs.int(2), rs.int(3))).list.apply()
@@ -742,7 +744,7 @@ class QueryInterfaceSpec
         // group by after where clause
         val groupByAfterWhereClauseResults = withSQL {
           select(o.accountId, count)
-            .from(Order as o)
+            .from(Order.as(o))
             .where
             .isNotNull(o.accountId)
             .groupBy(o.accountId)
@@ -756,8 +758,8 @@ class QueryInterfaceSpec
         // union
         val unionResults = withSQL {
           select(sqls"${a.id} as id")
-            .from(Account as a)
-            .union(select(sqls"${p.id} as id").from(Product as p))
+            .from(Account.as(a))
+            .union(select(sqls"${p.id} as id").from(Product.as(p)))
             .orderBy(sqls"id")
             .desc
             .limit(3)
@@ -768,10 +770,10 @@ class QueryInterfaceSpec
         // union with order by
         val unionResultsWithOrderBy = withSQL {
           select(sqls"${a.id} as id")
-            .from(Account as a)
+            .from(Account.as(a))
             .union(
               select(sqls"${p.id} as id")
-                .from(Product as p)
+                .from(Product.as(p))
                 .orderBy(p.id)
             )
             .orderBy(sqls"id")
@@ -784,24 +786,24 @@ class QueryInterfaceSpec
         // union all
         val unionAllResults = withSQL {
           select(a.id)
-            .from(Account as a)
-            .unionAll(select(p.id).from(Product as p))
-            .unionAll(select(p.id).from(Product as p))
+            .from(Account.as(a))
+            .unionAll(select(p.id).from(Product.as(p)))
+            .unionAll(select(p.id).from(Product.as(p)))
         }.map(_.int(1)).list.apply()
         unionAllResults should equal(List(1, 2, 3, 4, 1, 2, 1, 2))
 
         // union all with order by
         val unionAllResultsWithOrderBy = withSQL {
           select(a.id)
-            .from(Account as a)
+            .from(Account.as(a))
             .unionAll(
               select(p.id)
-                .from(Product as p)
+                .from(Product.as(p))
                 .orderBy(p.id)
             )
             .unionAll(
               select(p.id)
-                .from(Product as p)
+                .from(Product.as(p))
                 .orderBy(p.id)
             )
         }.map(_.int(1)).list.apply()
@@ -812,18 +814,18 @@ class QueryInterfaceSpec
         if (!isMySQL) {
           val exceptResults = withSQL {
             select(sqls"${a.id} as id")
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .in(a.id, Seq(1, 2, 3))
               .unionAll(
                 select(sqls"${a.id} as id")
-                  .from(Account as a)
+                  .from(Account.as(a))
                   .where
                   .in(a.id, Seq(1))
               )
               .except(
                 select(sqls"${p.id} as id")
-                  .from(Product as p)
+                  .from(Product.as(p))
                   .where
                   .in(p.id, Seq(2))
               )
@@ -837,18 +839,18 @@ class QueryInterfaceSpec
         if (!isH2 && !isMySQL) {
           val exceptAllResults = withSQL {
             select(sqls"${a.id} as id")
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .in(a.id, Seq(1, 2, 3))
               .unionAll(
                 select(sqls"${a.id} as id")
-                  .from(Account as a)
+                  .from(Account.as(a))
                   .where
                   .in(a.id, Seq(1))
               )
               .exceptAll(
                 select(sqls"${p.id} as id")
-                  .from(Product as p)
+                  .from(Product.as(p))
                   .where
                   .in(p.id, Seq(2))
               )
@@ -861,12 +863,12 @@ class QueryInterfaceSpec
         if (!isMySQL) {
           val intersectResults = withSQL {
             select(sqls"${a.id} as id")
-              .from(Account as a)
+              .from(Account.as(a))
               .where
               .in(a.id, Seq(1, 2, 3))
               .intersect(
                 select(sqls"${p.id} as id")
-                  .from(Product as p)
+                  .from(Product.as(p))
                   .where
                   .in(p.id, Seq(1, 2))
               )
@@ -879,17 +881,17 @@ class QueryInterfaceSpec
         if (!isH2 && !isMySQL) {
           val intersectAllResults = withSQL {
             select(sqls"${p.id} as id")
-              .from(Product as p)
+              .from(Product.as(p))
               .where
               .in(p.id, Seq(1, 2))
               .intersectAll {
                 select(sqls"${a.id} as id")
-                  .from(Account as a)
+                  .from(Account.as(a))
                   .where
                   .in(a.id, Seq(1, 2, 3))
                   .unionAll(
                     select(sqls"${a.id} as id")
-                      .from(Account as a)
+                      .from(Account.as(a))
                       .where
                       .in(a.id, Seq(1))
                   )
@@ -901,13 +903,13 @@ class QueryInterfaceSpec
 
         // between
         val betweenResults = withSQL {
-          select(o.result.id).from(Order as o).where.between(o.id, 13, 22)
+          select(o.result.id).from(Order.as(o)).where.between(o.id, 13, 22)
         }.map(_.int(1)).list.apply()
 
         betweenResults should equal(List(13, 14, 15, 21, 22))
 
         val notBetweenResults = withSQL {
-          select(o.result.id).from(Order as o).where.notBetween(o.id, 13, 22)
+          select(o.result.id).from(Order.as(o)).where.notBetween(o.id, 13, 22)
         }.map(_.int(1)).list.apply()
 
         notBetweenResults should equal(List(11, 12, 23, 24, 25, 26))
@@ -931,7 +933,7 @@ class QueryInterfaceSpec
           update(Account).set(ac.name -> "Bob Marley").where.eq(ac.id, 2)
         ).update.apply()
 
-        val newName = withSQL { select.from(Account as a).where.eq(a.id, 2) }
+        val newName = withSQL { select.from(Account.as(a)).where.eq(a.id, 2) }
           .map(Account(a))
           .single
           .apply()
@@ -946,24 +948,24 @@ class QueryInterfaceSpec
         }.update.apply()
 
         val noAccountIdOrderCount = withSQL {
-          select(count).from(Order as o).where.isNull(o.accountId)
+          select(count).from(Order.as(o)).where.isNull(o.accountId)
         }.map(_.long(1)).single.apply().get
         noAccountIdOrderCount should equal(0)
 
         val stmt1 = select(count)
-          .from(Order as o)
+          .from(Order.as(o))
           .where
           .isNull(o.accountId)
           .toSQL
           .statement
         val stmt2 = select(count)
-          .from(Order as o)
+          .from(Order.as(o))
           .where
           .eq(o.accountId, None)
           .toSQL
           .statement
         val stmt3 = select(count)
-          .from(Order as o)
+          .from(Order.as(o))
           .where
           .eq(o.accountId, null)
           .toSQL
@@ -972,7 +974,7 @@ class QueryInterfaceSpec
         stmt2 should equal(stmt3)
 
         val orders = withSQL {
-          QueryDSL.select.from(Order as o).where.isNotNull(o.accountId)
+          QueryDSL.select.from(Order.as(o)).where.isNotNull(o.accountId)
         }.map(Order(o)).list.apply()
         orders.size should be > 0
 
@@ -1019,8 +1021,8 @@ class QueryInterfaceSpec
 
       // for update query
       val o = Order.syntax("o")
-      DB localTx { implicit s =>
-        withSQL { select.from(Order as o).where.eq(o.id, 1).forUpdate }
+      DB.localTx { implicit s =>
+        withSQL { select.from(Order.as(o)).where.eq(o.id, 1).forUpdate }
           .map(Order(o))
           .single
           .apply()
@@ -1031,7 +1033,7 @@ class QueryInterfaceSpec
         e.printStackTrace
         throw e
     } finally {
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         try {
           sql"drop table ${Order.table}".execute.apply()
           sql"drop table ${LegacyProduct.table}".execute.apply()
@@ -1057,7 +1059,7 @@ class QueryInterfaceSpec
   }
 
   "insert.namedValues" should "accept None under nested AsIsParameterBinder" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try sql"drop table ${Account.table}".execute.apply()
       catch { case e: Exception => }
       sql"create table ${Account.table} (id int not null, name varchar(256))".execute
@@ -1079,9 +1081,9 @@ class QueryInterfaceSpec
       )
       query.parameters should equal(Seq(123, None))
 
-      DB autoCommit { implicit s => query.update.apply() }
+      DB.autoCommit { implicit s => query.update.apply() }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         try sql"drop table ${Account.table}".execute.apply()
         catch { case e: Exception => }
       }
@@ -1102,7 +1104,7 @@ class QueryInterfaceSpec
       "to_char(time, 'YYYY-MM-DD HH24:MI:SS')"
     }
 
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try sql"drop table ${TimeHolder.table}".execute.apply()
       catch { case e: Exception => }
       sql"create table ${TimeHolder.table} (id int, time timestamp)".execute
@@ -1111,7 +1113,7 @@ class QueryInterfaceSpec
 
     try {
       // execute with Asia/Tokyo timezone
-      DB autoCommit { session =>
+      DB.autoCommit { session =>
         implicit val jstSession = DBSession(
           conn = session.conn,
           connectionAttributes =
@@ -1132,13 +1134,13 @@ class QueryInterfaceSpec
         jstString should equal(time.toString("yyyy-MM-dd HH:mm:ss"))
 
         val expectedTime1 = withSQL(
-          selectFrom(TimeHolder as t).where.eq(t.id, 1)
+          selectFrom(TimeHolder.as(t)).where.eq(t.id, 1)
         ).map(TimeHolder(t)(_)).single.apply().get.time
         expectedTime1.isEqual(time) should equal(true)
       }
 
       // execute with UTC timezone
-      DB autoCommit { session =>
+      DB.autoCommit { session =>
         implicit val utcSession = DBSession(
           conn = session.conn,
           connectionAttributes =
@@ -1163,12 +1165,12 @@ class QueryInterfaceSpec
         )
 
         val expectedTime2 = withSQL(
-          selectFrom(TimeHolder as t).where.eq(t.id, 2)
+          selectFrom(TimeHolder.as(t)).where.eq(t.id, 2)
         ).map(TimeHolder(t)(_)).single.apply().get.time
         expectedTime2.isEqual(time) should equal(true)
       }
     } finally {
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         try sql"drop table ${TimeHolder.table}".execute.apply()
         catch { case e: Exception => }
       }

@@ -71,7 +71,7 @@ class Tx(
    */
   def rollback(): Unit = {
     conn.rollback()
-    ignoring(classOf[SQLException]) apply {
+    ignoring(classOf[SQLException]).apply {
       conn.setAutoCommit(true)
     }
   }
@@ -80,10 +80,10 @@ class Tx(
    * Rolls this transaction back if this transaction is still active.
    */
   def rollbackIfActive(): Unit = {
-    ignoring(classOf[SQLException]) apply {
+    ignoring(classOf[SQLException]).apply {
       conn.rollback()
     }
-    ignoring(classOf[SQLException]) apply {
+    ignoring(classOf[SQLException]).apply {
       conn.setAutoCommit(true)
     }
   }

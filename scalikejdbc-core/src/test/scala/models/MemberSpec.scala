@@ -11,7 +11,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
 
   it should "be available" in {
 
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         SQL("drop table MEMBER").execute.apply()
       } catch {
@@ -56,7 +56,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
     newAlice.destroy()
 
     try {
-      DB localTx { implicit session =>
+      DB.localTx { implicit session =>
         Member.create(
           id = 999,
           name = "Rollback",
@@ -88,7 +88,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
 
   it should "be available with NamedDB" in {
 
-    NamedDB("named") autoCommit { implicit session =>
+    NamedDB("named").autoCommit { implicit session =>
       try {
         SQL("drop table NAMED_MEMBER").execute.apply()
       } catch {
@@ -129,7 +129,7 @@ class MemberSpec extends AnyFlatSpec with Matchers with Settings {
     newAlice.destroy()
 
     try {
-      NamedDB("named") localTx { implicit session =>
+      NamedDB("named").localTx { implicit session =>
         NamedMember.create(
           id = 999,
           name = "Rollback",

@@ -306,7 +306,7 @@ class DBSessionSpec
       TestUtils.initialize(tableName)
       GlobalSettings.loggingSQLAndTime =
         new LoggingSQLAndTimeSettings(enabled = false)
-      val batchTime: Long = DB localTx { session =>
+      val batchTime: Long = DB.localTx { session =>
         val before = System.currentTimeMillis()
         val paramsList = (10001 to 30000).map(i => Seq(i, "Name" + i))
         session.batch[List](
@@ -315,7 +315,7 @@ class DBSessionSpec
         )
         System.currentTimeMillis() - before
       }
-      val loopTime: Long = DB localTx { session =>
+      val loopTime: Long = DB.localTx { session =>
         val before = System.currentTimeMillis()
         (30001 to 40000) foreach { i =>
           session.update(
@@ -337,7 +337,7 @@ class DBSessionSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       try {
-        DB localTx { session =>
+        DB.localTx { session =>
           val paramsList = (1001 to 2000).map(i => Seq(i, "Name" + i))
           session.batch[List](
             "insert into " + tableName + " (id, name) values (?, ?)",
@@ -348,7 +348,7 @@ class DBSessionSpec
       } catch {
         case e: Exception =>
       }
-      val result = DB localTx { implicit session =>
+      val result = DB.localTx { implicit session =>
         SQL("select id from " + tableName + " where id = ?")
           .bind(1001)
           .map(_.long("id"))
@@ -391,7 +391,7 @@ class DBSessionSpec
   }
 
   it should "bind java.util.Date as java.sql.Timestamp" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         SQL(
           "create table dbsessionspec_judate (id integer primary key, date timestamp)"
@@ -407,7 +407,7 @@ class DBSessionSpec
   }
 
   it should "be able to get a generated key" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         // NOTE: id column should be the first one for PostgreSQL
         try {
@@ -476,7 +476,7 @@ class DBSessionSpec
   }
 
   it should "be able to updateAndReturnGeneratedKey" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -519,7 +519,7 @@ class DBSessionSpec
   }
 
   it should "be able to updateAndReturnGeneratedKey with key" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -592,7 +592,7 @@ class DBSessionSpec
 
     def execute(label: String, date: Any, time: Any, timestamp: Any): Unit = {
       log.warn("datetime check: " + label)
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         try {
           try {
             SQL("""
@@ -753,7 +753,7 @@ class DBSessionSpec
   }
 
   it should "work with short values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -788,7 +788,7 @@ class DBSessionSpec
   }
 
   it should "work with Scala BigDecimal values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -823,7 +823,7 @@ class DBSessionSpec
   }
 
   it should "work with Java BigDecimal values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -858,7 +858,7 @@ class DBSessionSpec
   }
 
   it should "work with Scala BigInt values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -893,7 +893,7 @@ class DBSessionSpec
   }
 
   it should "work with Java BigInteger values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -928,7 +928,7 @@ class DBSessionSpec
   }
 
   it should "work with optional wrapper class values" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL("""
@@ -1143,7 +1143,7 @@ class DBSessionSpec
   }
 
   it should "execute insert with InputStream values" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try {
         try {
           SQL("create table image_data (name varchar(255), data blob);").execute
@@ -1195,7 +1195,7 @@ class DBSessionSpec
   }
 
   it should "execute insert with byte array values" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try {
         try {
           SQL(
@@ -1250,7 +1250,7 @@ class DBSessionSpec
 
   // https://github.com/scalikejdbc/scalikejdbc/issues/218
   it should "expose StatementExecutor" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -1290,7 +1290,7 @@ class DBSessionSpec
   }
 
   it should "work with ParameterBinder" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
         try {
           SQL(
@@ -1337,7 +1337,7 @@ class DBSessionSpec
     }
 
     try {
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         try SQL("drop table zone_test").execute.apply()
         catch { case e: Exception => }
 
@@ -1348,7 +1348,7 @@ class DBSessionSpec
       /**
        * execute with Asia/Tokyo timezone
        */
-      DB autoCommit { session =>
+      DB.autoCommit { session =>
         implicit val jstSession = DBSession(
           conn = session.conn,
           connectionAttributes =
@@ -1377,7 +1377,7 @@ class DBSessionSpec
       /**
        * execute with UTC timezone
        */
-      DB autoCommit { session =>
+      DB.autoCommit { session =>
         implicit val utcSession = DBSession(
           conn = session.conn,
           connectionAttributes =
@@ -1404,7 +1404,7 @@ class DBSessionSpec
         expectedTime2.isEqual(time) should equal(true)
       }
     } finally {
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         try SQL("drop table zone_test").execute.apply()
         catch { case e: Exception => }
       }

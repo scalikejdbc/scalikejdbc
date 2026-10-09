@@ -28,7 +28,7 @@ class DB_ExecutableSQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
-        val idOpt = db autoCommit { implicit session =>
+        val idOpt = db.autoCommit { implicit session =>
           SQL("select id from " + tableName + " where id = /*'id*/123")
             .bindByName("id" -> 1)
             .map(_.int("id"))
@@ -44,7 +44,7 @@ class DB_ExecutableSQLOperationSpec
     val tableName = tableNamePrefix + "_query"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB readOnly { implicit session =>
+      DB.readOnly { implicit session =>
         intercept[Exception] {
           SQL(
             "select id from " + tableName + " where id = /*'id*/123 and name = /*'name*/'AAA'"
@@ -71,7 +71,7 @@ class DB_ExecutableSQLOperationSpec
       TestUtils.initialize(tableName)
 
       using(ConnectionPool.borrow()) { conn =>
-        val count = DB(conn) autoCommit { implicit session =>
+        val count = DB(conn).autoCommit { implicit session =>
           SQL(
             "update " + tableName + " set name = /* 'name */'Alice' where id = /* 'id */123"
           )
@@ -83,13 +83,13 @@ class DB_ExecutableSQLOperationSpec
       }
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = (DB(conn) autoCommit { implicit session =>
+        val name = DB(conn).autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = /* 'id */123")
             .bindByName("id" -> 1)
             .map(_.string("name"))
             .single
             .apply()
-        }).get
+        }.get
         name should equal("foo")
       }
     }

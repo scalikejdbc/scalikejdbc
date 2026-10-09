@@ -16,7 +16,7 @@ class TxSpec extends AnyFlatSpec with Matchers with Settings {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
-    } apply {
+    }.apply {
       tx should not be null
     }
   }
@@ -25,7 +25,7 @@ class TxSpec extends AnyFlatSpec with Matchers with Settings {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
-    } apply {
+    }.apply {
       tx.begin()
       tx.rollbackIfActive()
     }
@@ -35,7 +35,7 @@ class TxSpec extends AnyFlatSpec with Matchers with Settings {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
-    } apply {
+    }.apply {
       tx.begin()
       tx.commit()
     }
@@ -67,7 +67,7 @@ class TxSpec extends AnyFlatSpec with Matchers with Settings {
     val tx = new Tx(ConnectionPool.borrow())
     ultimately {
       tx.conn.close()
-    } apply {
+    }.apply {
       tx.begin()
       tx.rollback()
     }

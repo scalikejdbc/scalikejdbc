@@ -19,7 +19,7 @@ ThisBuild / version := "4.4.0-SNAPSHOT"
 ThisBuild / publishTo := {
   val centralSnapshots =
     "https://central.sonatype.com/repository/maven-snapshots/"
-  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  if (isSnapshot.value) Some("central-snapshots".at(centralSnapshots))
   else localStaging.value
 }
 

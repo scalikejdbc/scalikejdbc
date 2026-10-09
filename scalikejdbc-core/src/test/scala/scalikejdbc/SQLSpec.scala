@@ -298,7 +298,7 @@ class SQLSpec
         count should equal(1)
         db.rollback()
       }
-      DB readOnly { implicit session =>
+      DB.readOnly { implicit session =>
         val name = SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map { _.string("name") }
@@ -315,7 +315,7 @@ class SQLSpec
       TestUtils.initialize(tableName)
       GlobalSettings.nameBindingSQLValidator =
         NameBindingSQLValidatorSettings(globalsettings.NoCheckForIgnoredParams)
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         SQL("select 1 from " + tableName)
           .bindByName("foo" -> "bar")
           .map(_.toMap())
@@ -325,7 +325,7 @@ class SQLSpec
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(
         globalsettings.InfoLoggingForIgnoredParams
       )
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         SQL("select 1 from " + tableName)
           .bindByName("foo" -> "bar")
           .map(_.toMap())
@@ -335,7 +335,7 @@ class SQLSpec
       GlobalSettings.nameBindingSQLValidator = NameBindingSQLValidatorSettings(
         globalsettings.WarnLoggingForIgnoredParams
       )
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         SQL("select 1 from " + tableName)
           .bindByName("foo" -> "bar")
           .map(_.toMap())
@@ -346,7 +346,7 @@ class SQLSpec
         globalsettings.ExceptionForIgnoredParams
       )
       intercept[IllegalStateException] {
-        DB readOnly { implicit s =>
+        DB.readOnly { implicit s =>
           SQL("select 1 from " + tableName)
             .bindByName("foo" -> "bar")
             .map(_.toMap())
@@ -363,7 +363,7 @@ class SQLSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
 
-      val results: List[Map[String, Any]] = DB readOnly { implicit s =>
+      val results: List[Map[String, Any]] = DB.readOnly { implicit s =>
         SQL("select 1 from " + tableName).toMap.list.apply()
       }
       results.size should be > 0
@@ -431,7 +431,7 @@ class SQLSpec
   // Batch
 
   it should "be able to return generated keys when running batch API" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       ultimately(TestUtils.deleteTable("sqlspec_genkey")) {
         try {
           try {
