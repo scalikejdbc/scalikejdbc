@@ -212,13 +212,13 @@ object Binders {
     unwrapCastOption[Byte, java.lang.Byte]
   )
 
-  val string: Binders[String] = Binders(_ getString _)(_ getString _)(v =>
+  val string: Binders[String] = Binders(_.getString(_))(_.getString(_))(v =>
     (ps, idx) => ps.setString(idx, v)
   )
   val sqlArray: Binders[java.sql.Array] =
-    Binders(_ getArray _)(_ getArray _)(v => (ps, idx) => ps.setArray(idx, v))
+    Binders(_.getArray(_))(_.getArray(_))(v => (ps, idx) => ps.setArray(idx, v))
   val javaBigDecimal: Binders[java.math.BigDecimal] =
-    Binders(_ getBigDecimal _)(_ getBigDecimal _)(v =>
+    Binders(_.getBigDecimal(_))(_.getBigDecimal(_))(v =>
       (ps, idx) => ps.setBigDecimal(idx, v)
     )
   val bigDecimal: Binders[BigDecimal] =
@@ -230,19 +230,19 @@ object Binders {
   val bigInt: Binders[BigInt] =
     javaBigInteger.xmap(nullThrough(BigInt.apply), _.bigInteger)
   val sqlDate: Binders[java.sql.Date] =
-    Binders(_ getDate _)(_ getDate _)(v => (ps, idx) => ps.setDate(idx, v))
+    Binders(_.getDate(_))(_.getDate(_))(v => (ps, idx) => ps.setDate(idx, v))
   val sqlXml: Binders[java.sql.SQLXML] =
-    Binders(_ getSQLXML _)(_ getSQLXML _)(v =>
+    Binders(_.getSQLXML(_))(_.getSQLXML(_))(v =>
       (ps, idx) => ps.setSQLXML(idx, v)
     )
   val sqlTime: Binders[java.sql.Time] =
-    Binders(_ getTime _)(_ getTime _)(v => (ps, idx) => ps.setTime(idx, v))
+    Binders(_.getTime(_))(_.getTime(_))(v => (ps, idx) => ps.setTime(idx, v))
   val sqlTimestamp: Binders[java.sql.Timestamp] =
-    Binders(_ getTimestamp _)(_ getTimestamp _)(v =>
+    Binders(_.getTimestamp(_))(_.getTimestamp(_))(v =>
       (ps, idx) => ps.setTimestamp(idx, v)
     )
   val url: Binders[java.net.URL] =
-    Binders(_ getURL _)(_ getURL _)(v => (ps, idx) => ps.setURL(idx, v))
+    Binders(_.getURL(_))(_.getURL(_))(v => (ps, idx) => ps.setURL(idx, v))
   val utilDate: Binders[java.util.Date] =
     sqlTimestamp.xmap(identity, _.toSqlTimestamp)
 
@@ -278,23 +278,23 @@ object Binders {
   )
 
   val binaryStream: Binders[InputStream] =
-    Binders(_ getBinaryStream _)(_ getBinaryStream _)(v =>
+    Binders(_.getBinaryStream(_))(_.getBinaryStream(_))(v =>
       (ps, idx) => ps.setBinaryStream(idx, v)
     )
   val blob: Binders[java.sql.Blob] =
-    Binders(_ getBlob _)(_ getBlob _)(v => (ps, idx) => ps.setBlob(idx, v))
+    Binders(_.getBlob(_))(_.getBlob(_))(v => (ps, idx) => ps.setBlob(idx, v))
   val clob: Binders[java.sql.Clob] =
-    Binders(_ getClob _)(_ getClob _)(v => (ps, idx) => ps.setClob(idx, v))
+    Binders(_.getClob(_))(_.getClob(_))(v => (ps, idx) => ps.setClob(idx, v))
   val nClob: Binders[java.sql.NClob] =
-    Binders(_ getNClob _)(_ getNClob _)(v => (ps, idx) => ps.setNClob(idx, v))
+    Binders(_.getNClob(_))(_.getNClob(_))(v => (ps, idx) => ps.setNClob(idx, v))
   val ref: Binders[java.sql.Ref] =
-    Binders(_ getRef _)(_ getRef _)(v => (ps, idx) => ps.setRef(idx, v))
+    Binders(_.getRef(_))(_.getRef(_))(v => (ps, idx) => ps.setRef(idx, v))
   val rowId: Binders[java.sql.RowId] =
-    Binders(_ getRowId _)(_ getRowId _)(v => (ps, idx) => ps.setRowId(idx, v))
+    Binders(_.getRowId(_))(_.getRowId(_))(v => (ps, idx) => ps.setRowId(idx, v))
   val bytes: Binders[Array[Byte]] =
-    Binders(_ getBytes _)(_ getBytes _)(v => (ps, idx) => ps.setBytes(idx, v))
+    Binders(_.getBytes(_))(_.getBytes(_))(v => (ps, idx) => ps.setBytes(idx, v))
   val characterStream: Binders[java.io.Reader] =
-    Binders(_ getCharacterStream _)(_ getCharacterStream _)(v =>
+    Binders(_.getCharacterStream(_))(_.getCharacterStream(_))(v =>
       (ps, idx) => ps.setCharacterStream(idx, v)
     )
   val javaUtilCalendar: Binders[java.util.Calendar] = utilDate.xmap(
@@ -307,14 +307,14 @@ object Binders {
   )
 
   val asciiStream: Binders[java.io.InputStream] =
-    Binders(_ getAsciiStream _)(_ getAsciiStream _)(v =>
+    Binders(_.getAsciiStream(_))(_.getAsciiStream(_))(v =>
       (ps, idx) => ps.setAsciiStream(idx, v)
     )
   val nCharacterStream: Binders[java.io.Reader] =
-    Binders(_ getNCharacterStream _)(_ getNCharacterStream _)(v =>
+    Binders(_.getNCharacterStream(_))(_.getNCharacterStream(_))(v =>
       (ps, idx) => ps.setNCharacterStream(idx, v)
     )
-  val nString: Binders[String] = Binders(_ getNString _)(_ getNString _)(v =>
+  val nString: Binders[String] = Binders(_.getNString(_))(_.getNString(_))(v =>
     (ps, idx) => ps.setNString(idx, v)
   )
 
