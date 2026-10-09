@@ -42,7 +42,7 @@ class DatabasePublisherSpec
   // ------------------------------------------
 
   it should "be subscribed by SyncSubscriber" in {
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
       SQL(s"select id from $tableName").map(_.int("id")).iterator()
     }
 
@@ -72,13 +72,13 @@ class DatabasePublisherSpec
   }
 
   it should "emit elements in order" in {
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
       SQL(s"select id from $tableName order by id")
         .map(_.int("id"))
         .iterator()
     }
 
-    val expectedElements = (1 to totalRows)
+    val expectedElements = 1 to totalRows
     val actualElements = new ListBuffer[Int]
     val consumedCountPromise: Promise[ListBuffer[Int]] =
       Promise[ListBuffer[Int]]()
@@ -147,7 +147,7 @@ class DatabasePublisherSpec
   // ------------------------------------------
 
   it should "be subscribed by AsyncSubscriber" in {
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
       SQL(s"select id from $tableName").map(_.int("id")).iterator()
     }
 
@@ -188,7 +188,7 @@ class DatabasePublisherSpec
   }
 
   it should "be subscribed and cancelled by AsyncSubscriber" in {
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
       SQL(s"select id from $tableName").map(_.int("id")).iterator()
     }
 

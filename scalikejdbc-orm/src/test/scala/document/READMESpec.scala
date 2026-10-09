@@ -65,7 +65,7 @@ class READMESpec extends AnyFunSpec with Matchers {
       val m = Member.column
 
       // ### Insert rows ###
-      val ids = Seq("Alice", "Bob", "Chris") map { name =>
+      val ids = Seq("Alice", "Bob", "Chris").map { name =>
         // insert into member (name, created_at, updated_at) values ('Alice', '2024-05-11 14:52:27.13', '2024-05-11 14:52:27.13');
         Member.createWithNamedValues(m.name -> name)
       }

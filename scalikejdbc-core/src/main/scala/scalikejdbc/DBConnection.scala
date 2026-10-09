@@ -150,11 +150,11 @@ trait DBConnection
    * @return tx
    */
   def tx: Tx = {
-    handling(classOf[IllegalStateException]) by { e =>
+    (handling(classOf[IllegalStateException]) by { e =>
       throw new IllegalStateException(
         ErrorMessage.TRANSACTION_IS_NOT_ACTIVE + " If you want to start a new transaction, use #newTx instead."
       )
-    } apply currentTx
+    }).apply(currentTx)
   }
 
   /**
@@ -180,7 +180,7 @@ trait DBConnection
    * Begins a new transaction if the other one does not already start.
    */
   def beginIfNotYet(): Unit = {
-    ignoring(classOf[IllegalStateException]) apply {
+    ignoring(classOf[IllegalStateException]).apply {
       begin()
     }
   }
@@ -199,7 +199,7 @@ trait DBConnection
    * Rolls back the current transaction if the transaction is still active.
    */
   def rollbackIfActive(): Unit = {
-    ignoring(classOf[IllegalStateException]) apply {
+    ignoring(classOf[IllegalStateException]).apply {
       tx.rollbackIfActive()
     }
   }
@@ -216,7 +216,7 @@ trait DBConnection
       conn = conn,
       isReadOnly = true,
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings
+      settings = this.settingsProvider.merge(settings)
     )
   }
 
@@ -253,7 +253,7 @@ trait DBConnection
     DBSession(
       conn,
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings
+      settings = this.settingsProvider.merge(settings)
     )
   }
 
@@ -293,7 +293,7 @@ trait DBConnection
       conn = conn,
       tx = Some(tx),
       connectionAttributes = connectionAttributes,
-      settings = this.settingsProvider merge settings
+      settings = this.settingsProvider.merge(settings)
     )
   }
 

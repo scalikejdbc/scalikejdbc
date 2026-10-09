@@ -15,7 +15,7 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
 
   it should "be available" in {
 
-    NamedDB("MemberSpec") autoCommit { implicit session =>
+    NamedDB("MemberSpec").autoCommit { implicit session =>
       try {
         SQL("drop table member").execute.apply()
       } catch {
@@ -32,7 +32,7 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
              """).execute.apply()
     }
 
-    NamedDB("MemberSpec") localTx { implicit session =>
+    NamedDB("MemberSpec").localTx { implicit session =>
       // use model
       val alice = Member.create(
         id = 1,
@@ -57,7 +57,7 @@ class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
       newAlice.destroy()
 
       try {
-        NamedDB("MemberSpec") localTx { implicit session =>
+        NamedDB("MemberSpec").localTx { implicit session =>
           Member.create(
             id = 999,
             name = "Rollback",

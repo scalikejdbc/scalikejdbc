@@ -18,11 +18,11 @@ private[scalikejdbc] trait RelationalSQLResultSetOperations[Z] {
     op: DBSession => R[Z]
   ): R[Z] = try {
     session match {
-      case AutoSession | ReadOnlyAutoSession => DB readOnly op
+      case AutoSession | ReadOnlyAutoSession => DB.readOnly(op)
       case NamedAutoSession(name, _)         =>
-        NamedDB(name, session.settings) readOnly op
+        NamedDB(name, session.settings).readOnly(op)
       case ReadOnlyNamedAutoSession(name, _) =>
-        NamedDB(name, session.settings) readOnly op
+        NamedDB(name, session.settings).readOnly(op)
       case _ => op(session)
     }
   } catch { case e: Exception => OneToXSQL.handleException(e) }

@@ -19,8 +19,8 @@ object TestUtils {
   }
 
   def initialize(tableName: String): Unit = {
-    DB autoCommit { session =>
-      handling(classOf[Throwable]) by { t =>
+    DB.autoCommit { session =>
+      (handling(classOf[Throwable]) by { t =>
         try {
           session.execute(
             "create table " + tableName + " (id integer primary key, name varchar(30))"
@@ -32,7 +32,7 @@ object TestUtils {
             )
         }
         initializeEmpRecords(session, tableName)
-      } apply {
+      }).apply {
         session.single("select count(1) from " + tableName)(_.int(1))
         initializeEmpRecords(session, tableName)
       }
@@ -41,7 +41,7 @@ object TestUtils {
 
   def deleteTable(tableName: String): Unit = {
     ignoring(classOf[Throwable]) {
-      DB autoCommit { _.execute("drop table " + tableName) }
+      DB.autoCommit { _.execute("drop table " + tableName) }
     }
   }
 

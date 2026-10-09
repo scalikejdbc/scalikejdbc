@@ -451,7 +451,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
 
   def using[R <: AutoCloseable, A](resource: R)(f: R => A): A =
     ultimately {
-      ignoring(classOf[Throwable]) apply resource.close()
-    } apply f(resource)
+      ignoring(classOf[Throwable]).apply(resource.close())
+    }.apply(f(resource))
 
 }

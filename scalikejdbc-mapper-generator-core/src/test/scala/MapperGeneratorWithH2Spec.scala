@@ -17,7 +17,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   val srcDir = "scalikejdbc-mapper-generator-core/target/generated_src"
 
   it should "work fine with member_group" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table member_group (
           id int generated always as identity,
@@ -59,7 +59,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "work fine with member" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table member (
           id int
@@ -145,7 +145,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
   it should "work fine with large table" in {
 
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table un_normalized (
           id bigint generated always as identity,
@@ -192,7 +192,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "work fine with without_pk" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table without_pk (
           aaa varchar(30) not null,
@@ -214,7 +214,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "skip the table if skip settings contain the name of table" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       // Here is an example of flyway metadata table.
       SQL("""
         create table schema_version (
@@ -261,7 +261,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "retain underscores _[d] on table names with _[d]" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table table_with_digits_1_2 (
           x_column_with_digits_3_4 varchar(30) not null,
@@ -288,7 +288,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "ok if specific Instant as time class" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table table_with_instant (
           x_column_with_digits_3_4 varchar(30) not null,
@@ -316,7 +316,7 @@ class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
   }
 
   it should "work fine with tableName_same_to_metatable" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       SQL("""
         create table "TABLES" (
           SCALIKEJDBC varchar(30) not null

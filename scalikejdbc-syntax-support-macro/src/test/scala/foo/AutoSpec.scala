@@ -34,7 +34,7 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
   behavior of "autoConstruct"
 
   it should "execute" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try {
         try sql"drop table issue".execute.apply()
         catch { case ignore: Exception => }
@@ -94,24 +94,24 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
         val (i, o, p) =
           (IssueTable.syntax("i"), Organization.syntax("o"), Person.syntax("p"))
 
-        val i1 = withSQL { select.from(IssueTable as i).where.eq(i.id, 1) }
+        val i1 = withSQL { select.from(IssueTable.as(i)).where.eq(i.id, 1) }
           .map(IssueTable(i))
           .single
           .apply()
         i1 should equal(Some(issue1))
-        val i2 = withSQL { select.from(IssueTable as i).where.eq(i.id, 2) }
+        val i2 = withSQL { select.from(IssueTable.as(i)).where.eq(i.id, 2) }
           .map(IssueTable(i.resultName))
           .single
           .apply()
         i2 should equal(Some(issue2))
 
-        val o1 = withSQL { select.from(Organization as o).where.eq(o.id, 1) }
+        val o1 = withSQL { select.from(Organization.as(o)).where.eq(o.id, 1) }
           .map(Organization(o))
           .single
           .apply()
         o1.map(_.id) should equal(Some(org1.id))
         o1.map(_.websiteUrl) should equal(Some(org1.websiteUrl))
-        val o2 = withSQL { select.from(Organization as o).where.eq(o.id, 2) }
+        val o2 = withSQL { select.from(Organization.as(o)).where.eq(o.id, 2) }
           .map(Organization(o.resultName))
           .single
           .apply()
@@ -120,8 +120,8 @@ class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
 
         val p1 = withSQL {
           select
-            .from(Person as p)
-            .leftJoin(Organization as o)
+            .from(Person.as(p))
+            .leftJoin(Organization.as(o))
             .on(p.organizationId, o.id)
             .where
             .eq(p.id, 1)

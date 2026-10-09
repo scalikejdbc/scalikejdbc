@@ -18,7 +18,7 @@ class RelationalSQLSpec
   it should "execute one-to-one queries" in {
     val suffix = "_onetoone_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(
           "create table users_" + suffix + " (id int not null, group_id int)"
         ).execute.apply()
@@ -53,7 +53,7 @@ class RelationalSQLSpec
 
           users.size should equal(6)
           users.foreach { user =>
-            user.group should not be (Some)
+            user.group should not be Some
           }
           users(0).id should equal(1)
           users(1).id should equal(2)
@@ -77,7 +77,7 @@ class RelationalSQLSpec
 
           users.size should equal(6)
           users.foreach { user =>
-            user.group should not be (Some)
+            user.group should not be Some
           }
         }
 
@@ -160,7 +160,7 @@ class RelationalSQLSpec
 
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table users_" + suffix)
         SQL("drop table groups_" + suffix)
       }
@@ -170,7 +170,7 @@ class RelationalSQLSpec
   it should "execute one-to-many queries" in {
     val suffix = "_onetomany_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("create table users_" + suffix + " (id int not null)").execute
           .apply()
         SQL(
@@ -325,7 +325,7 @@ class RelationalSQLSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table users_" + suffix)
         SQL("drop table groups_" + suffix)
         SQL("drop table group_membergs_" + suffix)
@@ -336,7 +336,7 @@ class RelationalSQLSpec
   it should "execute one-to-manies2 queries" in {
     val suffix = "_onetomanies2_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("create table groups_" + suffix + " (id int not null)").execute
           .apply()
         SQL(
@@ -476,7 +476,7 @@ class RelationalSQLSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table groups_" + suffix)
         SQL("drop table members_" + suffix)
         SQL("drop table sponsors_" + suffix)
@@ -487,7 +487,7 @@ class RelationalSQLSpec
   it should "execute one-to-manies3 queries" in {
     val suffix = "_onetomanies3_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(
           "create table groups_" + suffix + " (id int not null, owner_id int not null)"
         ).execute.apply()
@@ -661,7 +661,7 @@ class RelationalSQLSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table groups_" + suffix)
         SQL("drop table owners_" + suffix)
         SQL("drop table members_" + suffix)
@@ -673,7 +673,7 @@ class RelationalSQLSpec
   it should "execute one-to-manies4 queries" in {
     val suffix = "_onetomanies4_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(
           "create table groups_" + suffix + " (id int not null, owner_id int not null)"
         ).execute.apply()
@@ -874,7 +874,7 @@ class RelationalSQLSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table groups_" + suffix)
         SQL("drop table owners_" + suffix)
         SQL("drop table events_" + suffix)
@@ -887,7 +887,7 @@ class RelationalSQLSpec
   it should "execute one-to-manies5 queries" in {
     val suffix = "_onetomanies5_" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(
           "create table groups_" + suffix + " (id int not null, owner_id int not null)"
         ).execute.apply()
@@ -1129,7 +1129,7 @@ class RelationalSQLSpec
       }
 
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL("drop table groups_" + suffix).execute.apply()
         SQL("drop table owners_" + suffix).execute.apply()
         SQL("drop table events_" + suffix).execute.apply()

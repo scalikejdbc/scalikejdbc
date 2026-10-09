@@ -22,7 +22,7 @@ class InformationSchemaSpec
   }
 
   it should "work" in {
-    val roles: collection.Seq[Role] = DB autoCommit { implicit s =>
+    val roles: collection.Seq[Role] = DB.autoCommit { implicit s =>
       try {
         sql"drop table roles if exists".execute.apply()
       } catch { case e: Exception => }
@@ -33,7 +33,7 @@ class InformationSchemaSpec
       } catch { case e: Exception => }
 
       val r = Roles.syntax("r")
-      withSQL { select.from(Roles as r) }.map(Roles(r)).list.apply()
+      withSQL { select.from(Roles.as(r)) }.map(Roles(r)).list.apply()
     }
     roles.size should equal(1)
   }

@@ -38,7 +38,7 @@ private[scalikejdbc] trait OneToManyExtractor[A, B, E <: WithExtractor, Z]
       .foldLeft(statement, rawParameters.toSeq*)(
         LinkedHashMap[A, scala.collection.Seq[B]]()
       )(processResultSet)
-      .map { case (one, (to)) =>
+      .map { case (one, to) =>
         zExtractor(one, to)
       }
   }

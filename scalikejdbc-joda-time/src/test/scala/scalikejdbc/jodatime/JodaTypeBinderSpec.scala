@@ -93,7 +93,7 @@ class JodaTypeBinderSpec extends AnyFlatSpec with Matchers with MockitoSugar {
       values
     }
 
-    valuesDefault notEqualAll valuesAnother
+    valuesDefault.notEqualAll(valuesAnother)
 
     val valuesExplicitDefault = locally {
       implicit val overwrittenZone: OverwrittenZoneId =

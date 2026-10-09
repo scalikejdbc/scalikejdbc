@@ -16,7 +16,7 @@ class OneToManies9SQLSpec
   it should "execute one-to-manies queries" in {
     val suffix = "_OneToManies9SQLSpec" + System.currentTimeMillis()
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(
           s"create table groups_${suffix} (id int not null, owner_id int not null)"
         ).execute.apply()
@@ -338,7 +338,7 @@ class OneToManies9SQLSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         SQL(s"drop table groups_${suffix}").execute.apply()
         SQL(s"drop table owners_${suffix}").execute.apply()
         SQL(s"drop table events_${suffix}").execute.apply()

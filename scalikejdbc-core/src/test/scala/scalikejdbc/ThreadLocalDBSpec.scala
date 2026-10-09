@@ -63,7 +63,7 @@ class ThreadLocalDBSpec
 
       ThreadLocalDB.create(ConnectionPool.borrow())
       using(ThreadLocalDB.load()) { db =>
-        val name = db autoCommit { session =>
+        val name = db.autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )

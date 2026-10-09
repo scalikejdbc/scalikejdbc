@@ -42,7 +42,7 @@ class DatabasePublisherTckTest(
         "DatabasePublisher doesn't support infinite streaming."
       )
 
-    DB readOnlyStream {
+    DB.readOnlyStream {
       SQL(s"select id from $tableName limit $elements")
         .map(r => User(r.int("id")))
         .iterator()
@@ -50,7 +50,7 @@ class DatabasePublisherTckTest(
   }
 
   override def createFailedPublisher(): Publisher[User] = {
-    DB readOnlyStream {
+    DB.readOnlyStream {
       SQL(s"select id from $tableName")
         .map[User](_ => throw new RuntimeException("this is failed publisher."))
         .iterator()

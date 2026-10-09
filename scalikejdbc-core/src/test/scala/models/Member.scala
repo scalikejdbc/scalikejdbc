@@ -333,7 +333,7 @@ object MemberSQLTemplate {
   import Member._
 
   def find(): Option[Member] = {
-    DB readOnly { implicit session =>
+    DB.readOnly { implicit session =>
       SQL("""SELECT * FROM MEMBER WHERE ID = /*'id*/123""")
         .map(*)
         .single
@@ -342,13 +342,13 @@ object MemberSQLTemplate {
   }
 
   def findAll(): List[Member] = {
-    DB readOnly { implicit session =>
+    DB.readOnly { implicit session =>
       SQL("""SELECT * FROM MEMBER""").map(*).list.apply()
     }
   }
 
   def countAll(): Long = {
-    DB readOnly { implicit session =>
+    DB.readOnly { implicit session =>
       SQL("""SELECT COUNT(1) FROM MEMBER""")
         .map(_.long(1))
         .single
@@ -358,7 +358,7 @@ object MemberSQLTemplate {
   }
 
   def create(): Member = {
-    DB localTx { implicit session =>
+    DB.localTx { implicit session =>
       SQL("""
         INSERT INTO MEMBER (
           ID,
@@ -379,7 +379,7 @@ object MemberSQLTemplate {
   }
 
   def save(): Member = {
-    DB localTx { implicit session =>
+    DB.localTx { implicit session =>
       SQL("""
         UPDATE
           MEMBER
@@ -397,7 +397,7 @@ object MemberSQLTemplate {
   }
 
   def delete(): Unit = {
-    DB localTx { implicit session =>
+    DB.localTx { implicit session =>
       SQL("""DELETE FROM MEMBER WHERE ID = /*'id*/123""").update.apply()
     }
   }

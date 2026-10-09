@@ -42,7 +42,7 @@ class SQLInterpolationSpec
   )
 
   it should "be available with here document values" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users (id int, name varchar(256))""".execute
           .apply()
@@ -67,7 +67,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available with option values" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"create table interpolation_users (id int not null, name varchar(256))".execute
           .apply()
@@ -94,7 +94,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available with the IN statement" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"create table interpolation_users (id int not null, name varchar(256))".execute
           .apply()
@@ -122,7 +122,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available with sql syntax" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"create table interpolation_users (id int not null, name varchar(256))".execute
           .apply()
@@ -153,12 +153,12 @@ class SQLInterpolationSpec
   it should "support some syntax" in {
     import scalikejdbc.interpolation.SQLSyntax._
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         sql"create table sqlsyntax_spec (id int not null, name varchar(256))".execute
           .apply()
         sql"insert into sqlsyntax_spec values (1, ${"Alice"})".execute.apply()
       }
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         // abs
         {
           val v = sqls"${123}"
@@ -270,7 +270,7 @@ class SQLInterpolationSpec
         }
       }
     } finally {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         sql"drop table sqlsyntax_spec".execute.apply()
       }
     }
@@ -278,7 +278,7 @@ class SQLInterpolationSpec
 
   // issue #215 https://github.com/scalikejdbc/scalikejdbc/issues/215
   it should "work with toSeq (#215)" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users (id int, name varchar(256))""".execute
           .apply()
@@ -304,7 +304,7 @@ class SQLInterpolationSpec
   }
 
   it should "work with toList (#215)" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users (id int, name varchar(256))""".execute
           .apply()
@@ -331,7 +331,7 @@ class SQLInterpolationSpec
   }
 
   it should "accept Traversable[SQLSyntax] (#216)" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users_216 (id int, name varchar(256))""".execute
           .apply()
@@ -362,7 +362,7 @@ class SQLInterpolationSpec
   }
 
   it should "interpolate a Set using the correct number of placeholders" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users_set (id int, name varchar(256))""".execute
           .apply()

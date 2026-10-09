@@ -92,9 +92,9 @@ trait SQLSyntaxSupportFeature { self: SQLInterpolationFeature =>
         .withFilter { case (cp, _) => cp == connectionPoolName }
         .foreach { case (cp, table) =>
           cachedColumns.get((cp, table)).foreach {
-            _.foreach({ case (_, cache: TrieMap[String, SQLSyntax]) =>
+            _.foreach { case (_, cache: TrieMap[String, SQLSyntax]) =>
               cache.clear()
-            })
+            }
           }
         }
     }

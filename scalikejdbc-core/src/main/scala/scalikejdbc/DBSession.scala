@@ -290,7 +290,7 @@ trait DBSession extends LogSupport with LoanPattern with AutoCloseable {
         connectionAttributes
       )
       val resultSet = new ResultSetIterator(proxy)
-      val rows = (resultSet map extract).toList
+      val rows = resultSet.map(extract).toList
       rows match {
         case Nil        => None
         case one :: Nil => Option(one)

@@ -86,7 +86,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     val tableName = tableNamePrefix + "_autoCommit"
 
     // get a connection and create DB instance
-    DB autoCommit { session =>
+    DB.autoCommit { session =>
       ignoring(classOf[Throwable]) {
         session.execute("drop table " + tableName)
       }
@@ -96,7 +96,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     }
 
     // connect and begin a block (ConnectionPool required)
-    DB autoCommit { session =>
+    DB.autoCommit { session =>
       session.update(
         "insert into " + tableName + " (id, name, created_at) values (?, ? ,?)",
         1,
@@ -112,7 +112,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     }
 
     // named datasources
-    NamedDB("named") autoCommit { session =>
+    NamedDB("named").autoCommit { session =>
       session.list("select * from " + tableName)(_.int("id"))
     }
 
@@ -135,12 +135,12 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
 
-      val emp: Option[Emp] = DB readOnly { session =>
+      val emp: Option[Emp] = DB.readOnly { session =>
         session.single("select * from " + tableName + " where id = ?", 1) {
           rs => Emp(rs.int("id"), rs.string("name"))
         }
       }
-      val emps: List[Emp] = DB readOnly { session =>
+      val emps: List[Emp] = DB.readOnly { session =>
         session.list("select * from " + tableName) { rs =>
           Emp(rs.int("id"), rs.string("name"))
         }
@@ -159,7 +159,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     try {
       TestUtils.initialize(tableName)
 
-      DB localTx { session =>
+      DB.localTx { session =>
         val emp: Option[Emp] =
           session.single("select * from " + tableName + " where id = ?", 1) {
             rs => Emp(rs.int("id"), rs.string("name"))
@@ -181,7 +181,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
       try {
         db.begin()
         // with implicit DB instance
-        DB withinTx { session =>
+        DB.withinTx { session =>
           val emp: Option[Emp] =
             session.single("select * from " + tableName + " where id = ?", 1)(
               rs => Emp(rs.int("id"), rs.string("name"))
@@ -204,7 +204,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
       try {
         TestUtils.initialize("emp_BasicUsageSpec_SQL")
 
-        val eopt: Option[Emp] = DB readOnly { implicit session =>
+        val eopt: Option[Emp] = DB.readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL where id = ?")
             .bind(1)
             .map(rs => Emp(rs.int("id"), rs.string("name")))
@@ -213,7 +213,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         }
         eopt.isDefined should be(true)
 
-        val ehead: Option[Emp] = DB readOnly { implicit session =>
+        val ehead: Option[Emp] = DB.readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name")))
             .first
@@ -221,7 +221,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         }
         ehead.isDefined should be(true)
 
-        val es: List[Emp] = DB readOnly { implicit session =>
+        val es: List[Emp] = DB.readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name")))
             .list
@@ -229,7 +229,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
         }
         es.size should equal(2)
 
-        val tr: Iterable[Emp] = DB readOnly { implicit session =>
+        val tr: Iterable[Emp] = DB.readOnly { implicit session =>
           SQL("select * from emp_BasicUsageSpec_SQL")
             .map(rs => Emp(rs.int("id"), rs.string("name")))
             .iterable
@@ -263,7 +263,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 
       // SQL instances are reusable
       val get10EmpSQL: SQL[Emp, HasExtractor] = {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           try {
             val sql =
               SQL("select * from emp order by id limit 10").map(empMapper)
@@ -284,7 +284,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
       val get10EmpAllSQL: SQLToList[Emp, HasExtractor] =
         get10EmpSQL.list // or #toList
 
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         // internally PreparedStatement#executeQuery()
         val emps: List[Emp] = get10EmpAllSQL.apply()
         emps.size should be <= 10
@@ -368,7 +368,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
   }
 
   "Logging SQL and timing" should "be available" in {
-    DB autoCommit { implicit session =>
+    DB.autoCommit { implicit session =>
       try {
 
         // default settings
@@ -415,7 +415,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     try {
       TestUtils.initialize(tableName)
 
-      DB localTx { implicit session =>
+      DB.localTx { implicit session =>
         val params1: Seq[Seq[Any]] = (1001 to 2000).map { i =>
           Seq(i, "name" + i)
         }
@@ -440,7 +440,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 
       }
 
-      DB readOnly { implicit s =>
+      DB.readOnly { implicit s =>
         val count: Long = SQL("select count(1) from " + tableName)
           .map(_.long(1))
           .single
@@ -456,7 +456,7 @@ class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
     val tableName = tableNamePrefix + "_batch_with_empty_params"
     try {
       TestUtils.initialize(tableName)
-      DB localTx { implicit session =>
+      DB.localTx { implicit session =>
         SQL("insert into " + tableName + " (id, name) values (999, 'Alice')")
           .batchByName(Seq.empty[Seq[(String, Any)]]*)
           .apply[List]()

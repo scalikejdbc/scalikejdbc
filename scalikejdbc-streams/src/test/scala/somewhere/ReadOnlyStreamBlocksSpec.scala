@@ -10,14 +10,14 @@ import org.scalatest.matchers.should.Matchers
 class ReadOnlyStreamBlocksSpec extends AnyFlatSpec with Matchers {
 
   "DB.readOnlyStream" should "create DatabasePublisher" in {
-    val publisher: DatabasePublisher[Int] = DB readOnlyStream {
+    val publisher: DatabasePublisher[Int] = DB.readOnlyStream {
       sql"select id from users".map(_.int("id")).iterator()
     }
     publisher shouldBe a[DatabasePublisher[?]]
   }
 
   "NamedDB.readOnlyStream" should "create DatabasePublisher" in {
-    val publisher: DatabasePublisher[Long] = NamedDB("default") readOnlyStream {
+    val publisher: DatabasePublisher[Long] = NamedDB("default").readOnlyStream {
       sql"select id from users".map(_.long("id")).iterator()
     }
     publisher shouldBe a[DatabasePublisher[?]]

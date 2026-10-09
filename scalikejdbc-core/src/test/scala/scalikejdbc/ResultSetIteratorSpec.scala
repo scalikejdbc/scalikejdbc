@@ -13,7 +13,7 @@ class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
 
   behavior of "ResultSetIterator"
 
-  it can "call hasNext many times" in {
+  it.can("call hasNext many times") in {
     val tableName = tableNamePrefix + "_hasNext_many_times"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)

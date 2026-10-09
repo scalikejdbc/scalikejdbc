@@ -134,7 +134,7 @@ class SQLInterpolationSpec
   }
 
   it should "load column names from NamedDB" in {
-    NamedDB("yetanother") autoCommit { implicit s =>
+    NamedDB("yetanother").autoCommit { implicit s =>
       try
         sql"select count(1) from named_db_entity"
           .map(_.toMap())
@@ -149,7 +149,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available with SQLSyntaxSupport" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try {
         try sql"drop table users".execute.apply()
         catch { case e: Exception => }
@@ -207,8 +207,8 @@ class SQLInterpolationSpec
         // Query Interface using toSQL
         val user2 = select
           .all(u, g)
-          .from(User as u)
-          .leftJoin(Group as g)
+          .from(User.as(u))
+          .leftJoin(Group.as(g))
           .on(u.groupId, g.id)
           .where
           .eq(u.id, 3)
@@ -228,8 +228,8 @@ class SQLInterpolationSpec
         val user3: User = withSQL {
           select
             .all(u, g)
-            .from(User as u)
-            .leftJoin(Group as g)
+            .from(User.as(u))
+            .leftJoin(Group.as(g))
             .on(u.groupId, g.id)
             .where
             .eq(u.id, 3)
@@ -305,10 +305,10 @@ class SQLInterpolationSpec
           val groupWithMembers: Option[Group] = withSQL {
             select
               .all(u, g)
-              .from(GroupMember as gm)
-              .innerJoin(Group as g)
+              .from(GroupMember.as(gm))
+              .innerJoin(Group.as(g))
               .on(gm.groupId, g.id)
-              .innerJoin(User as u)
+              .innerJoin(User.as(u))
               .on(gm.userId, u.id)
               .where
               .eq(g.id, 1)
@@ -366,10 +366,10 @@ class SQLInterpolationSpec
           val groupsWithMembers: List[Group] = withSQL {
             select
               .all(u, g)
-              .from(GroupMember as gm)
-              .innerJoin(Group as g)
+              .from(GroupMember.as(gm))
+              .innerJoin(Group.as(g))
               .on(gm.groupId, g.id)
-              .innerJoin(User as u)
+              .innerJoin(User.as(u))
               .on(gm.userId, u.id)
               .orderBy(g.id, u.id)
           }.one(rs => Group(rs, g.resultName))
@@ -445,7 +445,7 @@ class SQLInterpolationSpec
             select
               ${u.result.*}
             from
-              ${User as u}
+              ${User.as(u)}
             ${userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls""}
             order by ${u.id}
             """
@@ -461,7 +461,7 @@ class SQLInterpolationSpec
           val users: List[User] = withSQL {
             select
               .all(u)
-              .from(User as u)
+              .from(User.as(u))
               .append(
                 userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls""
               )
@@ -478,7 +478,7 @@ class SQLInterpolationSpec
             select
               ${u.result.*}
             from
-              ${User as u}
+              ${User.as(u)}
             ${userId.map(id => sqls"where ${u.id} = ${id}") getOrElse sqls""}
             order by ${u.id}
             """
@@ -525,7 +525,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available for empty relation" in {
-    DB autoCommit { implicit s =>
+    DB.autoCommit { implicit s =>
       try {
         sql"create table issue (id int not null, body varchar(256) not null)".execute
           .apply()
@@ -536,7 +536,7 @@ class SQLInterpolationSpec
       } catch { case e: Exception => }
     }
     try {
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         sql"insert into issue values (1, ${"Alice"})".update.apply()
         sql"insert into issue values (2, ${"Bob"})".update.apply()
         sql"insert into issue values (3, ${"Chris"})".update.apply()
@@ -583,10 +583,10 @@ class SQLInterpolationSpec
           val issue: Option[Issue] = withSQL {
             select
               .all(i, t)
-              .from(Issue as i)
-              .leftJoin(IssueTag as it)
+              .from(Issue.as(i))
+              .leftJoin(IssueTag.as(it))
               .on(it.issueId, i.id)
-              .leftJoin(Tag as t)
+              .leftJoin(Tag.as(t))
               .on(t.id, it.tagId)
               .where
               .eq(i.id, 1)
@@ -654,7 +654,7 @@ class SQLInterpolationSpec
           val sq = SubQuery.syntax("sq", i.resultName)
           val summary: IssueSummary = withSQL {
             select(is.result(idCount).count, is.result(idSum).sum)
-              .from(select(i.result.id).from(Issue as i).as(sq))
+              .from(select(i.result.id).from(Issue.as(i)).as(sq))
           }.map(IssueSummary(is.resultName)).single.apply().get
           summary.count should equal(4)
           summary.sum should equal(10)
@@ -707,7 +707,7 @@ class SQLInterpolationSpec
 
   it should "be available for sub-queries with SQLSyntaxSupport" in {
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         sql"create table customers (id int not null, name varchar(256) not null, group_id int)".execute
           .apply()
         sql"create table customer_group (id int not null, name varchar(256) not null)".execute
@@ -718,7 +718,7 @@ class SQLInterpolationSpec
           .apply()
       }
     } catch { case e: Exception => }
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"insert into customers values (1, ${"Alice"}, null)".update.apply()
         sql"insert into customers values (2, ${"Bob"}, 1)".update.apply()
@@ -779,8 +779,8 @@ class SQLInterpolationSpec
           val customers: List[Customer] = withSQL {
             select
               .all(sq, cg)
-              .from(select.all(c).from(Customer as c).limit(5).as(sq))
-              .leftJoin(CustomerGroup as cg)
+              .from(select.all(c).from(Customer.as(c)).limit(5).as(sq))
+              .leftJoin(CustomerGroup.as(cg))
               .on(sq(c).groupId, cg.id)
               .where
               .gt(sq(c).id, 3)
@@ -943,7 +943,7 @@ class SQLInterpolationSpec
   }
 
   it should "be available with shortened names" in {
-    DB localTx { implicit s =>
+    DB.localTx { implicit s =>
       try {
         sql"create table users (id int not null, first_name varchar(256), full_name varchar(256))".execute
           .apply()
@@ -996,11 +996,11 @@ class SQLInterpolationSpec
 
   it should "be available with names such as x1, x2" in {
     try {
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         sql"create table x_names (x1 varchar(256), x2 varchar(256))".execute
           .apply()
       }
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         val (xn, c) = (XNames.syntax("xn"), XNames.column)
         Seq(("Alice", "Alice Cooper"), ("Bob", "Bob Lee")) foreach {
           case (x1, x2) =>
@@ -1008,7 +1008,7 @@ class SQLInterpolationSpec
               .apply()
         }
         val found =
-          sql"select ${xn.result.*} from ${XNames as xn} where ${xn.x1} = 'Alice'"
+          sql"select ${xn.result.*} from ${XNames.as(xn)} where ${xn.x1} = 'Alice'"
             .map(XNames(xn.resultName))
             .single
             .apply()
@@ -1017,7 +1017,7 @@ class SQLInterpolationSpec
         found.get.x2 should equal("Alice Cooper")
       }
     } finally {
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         try sql"drop table x_names".execute.apply()
         catch { case e: Exception => }
       }
@@ -1037,13 +1037,13 @@ class SQLInterpolationSpec
 
   it should "be available with duplicated shorten names" in {
     try {
-      DB autoCommit { implicit s =>
+      DB.autoCommit { implicit s =>
         try sql"drop table names".execute.apply()
         catch { case e: Exception => }
         sql"create table names (full_name varchar(256), first_name varchar(256), last_name varchar(256))".execute
           .apply()
       }
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         val (n, c) = (Names.syntax("n"), Names.column)
         Seq(
           ("Alice Cooper", "Alice", "Cooper"),
@@ -1053,7 +1053,7 @@ class SQLInterpolationSpec
             .apply()
         }
         val found =
-          sql"select ${n.result.*} from ${Names as n} where ${n.firstName} = 'Alice'"
+          sql"select ${n.result.*} from ${Names.as(n)} where ${n.firstName} = 'Alice'"
             .map(Names(n.resultName))
             .single
             .apply()
@@ -1065,7 +1065,7 @@ class SQLInterpolationSpec
         val found2: Option[Names] = withSQL {
           select
             .all(n)
-            .from(Names as n)
+            .from(Names.as(n))
             .where
             .eq(n.firstName, "Alice")
             .append(sqls"order by ${n.firstName}")
@@ -1079,7 +1079,7 @@ class SQLInterpolationSpec
           val names = withSQL {
             select
               .all(n)
-              .from(Names as n)
+              .from(Names.as(n))
               .where
               .in(n.firstName, Seq("Alice", "Bob", "Chris"))
           }.map(Names(n.resultName)).list.apply()
@@ -1088,14 +1088,14 @@ class SQLInterpolationSpec
         {
           val groupByResult = withSQL {
             select(n.result.firstName, sqls"count(1)")
-              .from(Names as n)
+              .from(Names.as(n))
               .groupBy(n.firstName)
           }.map(_.toMap()).list.apply()
           groupByResult.size should equal(2)
         }
       }
     } finally {
-      DB localTx { implicit s =>
+      DB.localTx { implicit s =>
         try sql"drop table names".execute.apply()
         catch { case e: Exception => }
       }
@@ -1269,7 +1269,7 @@ class SQLInterpolationSpec
           resultName.groupId.value shouldBe "GI_Z_U"
         }
         val end = System.currentTimeMillis()
-        (end - start)
+        end - start
       }
       .find(_ < 100L)
     millis.get should be < 100L

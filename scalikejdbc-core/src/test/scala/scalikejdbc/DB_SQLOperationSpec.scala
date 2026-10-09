@@ -32,7 +32,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_queryInReadOnlyBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB readOnly { implicit session =>
+      DB.readOnly { implicit session =>
         GlobalSettings.loggingSQLAndTime =
           LoggingSQLAndTimeSettings(enabled = true, logLevel = "info")
         val result = SQL(
@@ -71,7 +71,7 @@ class DB_SQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[SQLException] {
-        DB readOnly { implicit session =>
+        DB.readOnly { implicit session =>
           SQL("update " + tableName + " set name = ?")
             .bind("xxx")
             .executeUpdate
@@ -88,7 +88,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_queryInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit { implicit session =>
+      val result = DB.autoCommit { implicit session =>
         SQL("select * from " + tableName + "")
           .map(rs => Some(rs.string("name")))
           .toList
@@ -120,7 +120,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_singleInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit { implicit session =>
+      val result = DB.autoCommit { implicit session =>
         SQL("select id from " + tableName + " where id = ?")
           .bind(1)
           .map(_.int("id"))
@@ -136,7 +136,7 @@ class DB_SQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       intercept[TooManyRowsException] {
-        DB autoCommit { implicit session =>
+        DB.autoCommit { implicit session =>
           SQL("select id from " + tableName + "")
             .map(rs => Some(rs.int("id")))
             .toOption
@@ -151,7 +151,7 @@ class DB_SQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       val extractName = (rs: WrappedResultSet) => rs.string("name")
-      val name: Option[String] = DB readOnly { implicit session =>
+      val name: Option[String] = DB.readOnly { implicit session =>
         SQL("select * from " + tableName + " where id = ?")
           .bind(1)
           .map(extractName)
@@ -166,7 +166,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_listInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB autoCommit { implicit session =>
+      val result = DB.autoCommit { implicit session =>
         SQL("select id from " + tableName + "")
           .map(rs => Some(rs.int("id")))
           .toList
@@ -180,7 +180,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_asIterInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         SQL("select id from " + tableName + "")
           .map(_.int("id"))
           .toIterable
@@ -196,14 +196,14 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB autoCommit { implicit session =>
+      val count = DB.autoCommit { implicit session =>
         SQL("update " + tableName + " set name = ? where id = ?")
           .bind("foo", 1)
           .executeUpdate
           .apply()
       }
       count should equal(1)
-      val name = DB autoCommit { implicit session =>
+      val name = DB.autoCommit { implicit session =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -219,7 +219,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_updateInAutoCommitBlockAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = DB readOnly { implicit s =>
+      val name = DB.readOnly { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -228,7 +228,7 @@ class DB_SQLOperationSpec
           .get
       }
       name should equal("name1")
-      val count = DB autoCommit { implicit s =>
+      val count = DB.autoCommit { implicit s =>
         SQL("update " + tableName + " set name = ? where id = ?")
           .bind("foo", 1)
           .executeUpdate
@@ -243,7 +243,7 @@ class DB_SQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       try {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?")
             .bind("foo", 1)
             .executeUpdate
@@ -253,7 +253,7 @@ class DB_SQLOperationSpec
       } catch { case e: Exception => }
 
       // should be committed
-      val name = DB readOnly { implicit s =>
+      val name = DB.readOnly { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -272,7 +272,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx { implicit s =>
+      val result = DB.localTx { implicit s =>
         SQL("select id from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("id"))
@@ -287,7 +287,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx { implicit s =>
+      val result = DB.localTx { implicit s =>
         SQL("select id from " + tableName + "")
           .map(rs => Some(rs.string("id")))
           .toList
@@ -301,14 +301,14 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB localTx { implicit s =>
+      val count = DB.localTx { implicit s =>
         SQL("update " + tableName + " set name = ? where id = ?")
           .bind("foo", 1)
           .executeUpdate
           .apply()
       }
       count should equal(1)
-      val name = DB localTx { implicit s =>
+      val name = DB.localTx { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -327,7 +327,7 @@ class DB_SQLOperationSpec
 
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val count = db localTx { implicit s =>
+        val count = db.localTx { implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?")
             .bind("foo", 1)
             .executeUpdate
@@ -337,7 +337,7 @@ class DB_SQLOperationSpec
         db.rollbackIfActive()
       }
 
-      val name = DB localTx { implicit s =>
+      val name = DB.localTx { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -354,7 +354,7 @@ class DB_SQLOperationSpec
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
       try {
-        DB localTx { implicit s =>
+        DB.localTx { implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?")
             .bind("foo", 1)
             .executeUpdate
@@ -364,7 +364,7 @@ class DB_SQLOperationSpec
       } catch { case e: Exception => }
 
       // should not be committed
-      val name = DB readOnly { implicit s =>
+      val name = DB.readOnly { implicit s =>
         SQL("select name from " + tableName + " where id = ?")
           .bind(1)
           .map(_.string("name"))
@@ -385,7 +385,7 @@ class DB_SQLOperationSpec
       TestUtils.initialize(tableName)
       intercept[IllegalStateException] {
         using(DB(ConnectionPool.borrow())) { db =>
-          db withinTx { implicit session =>
+          db.withinTx { implicit session =>
             SQL("select * from " + tableName + "")
               .map(rs => Some(rs.string("name")))
               .list
@@ -403,7 +403,7 @@ class DB_SQLOperationSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx { implicit session =>
+        val result = db.withinTx { implicit session =>
           SQL("select * from " + tableName + "")
             .map(rs => Some(rs.string("name")))
             .list
@@ -444,7 +444,7 @@ class DB_SQLOperationSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx { implicit s =>
+        val result = db.withinTx { implicit s =>
           SQL("select id from " + tableName + " where id = ?")
             .bind(1)
             .map(_.string("id"))
@@ -464,7 +464,7 @@ class DB_SQLOperationSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val result = db withinTx { implicit s =>
+        val result = db.withinTx { implicit s =>
           SQL("select id from " + tableName + "")
             .map(rs => Some(rs.string("id")))
             .list
@@ -483,20 +483,20 @@ class DB_SQLOperationSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val count = db withinTx { implicit s =>
+        val count = db.withinTx { implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?")
             .bind("foo", 1)
             .executeUpdate
             .apply()
         }
         count should equal(1)
-        val name = (db withinTx { implicit s =>
+        val name = db.withinTx { implicit s =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
             .map(_.string("name"))
             .single
             .apply()
-        }).get
+        }.get
         name should equal("foo")
         db.rollback()
       }
@@ -509,7 +509,7 @@ class DB_SQLOperationSpec
       TestUtils.initialize(tableName)
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val count = db withinTx { implicit s =>
+        val count = db.withinTx { implicit s =>
           SQL("update " + tableName + " set name = ? where id = ?")
             .bind("foo", 1)
             .executeUpdate
@@ -518,13 +518,13 @@ class DB_SQLOperationSpec
         count should equal(1)
         db.rollback()
         db.begin()
-        val name = (db withinTx { implicit s =>
+        val name = db.withinTx { implicit s =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
             .map(_.string("name"))
             .single
             .apply()
-        }).get
+        }.get
         name should equal("name1")
       }
     }
@@ -537,7 +537,7 @@ class DB_SQLOperationSpec
 
       using(DB(ConnectionPool.borrow())) { db =>
         db.begin()
-        val count1 = db withinTx { implicit s =>
+        val count1 = db.withinTx { implicit s =>
           val params: Seq[Seq[Any]] = (1001 to 2000).map { i =>
             Seq(i, "name" + i.toString)
           }
@@ -547,7 +547,7 @@ class DB_SQLOperationSpec
         }
         count1.size should equal(1000)
 
-        val count2 = db withinTx { implicit s =>
+        val count2 = db.withinTx { implicit s =>
           // https://github.com/scalikejdbc/scalikejdbc/issues/481
           SQL("insert into " + tableName + " (id, name) values ({id}, {name})")
             .batchByName(Seq.empty[Seq[(String, Any)]]*)
@@ -649,7 +649,7 @@ class DB_SQLOperationSpec
       Thread.sleep(2000L)
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = DB(conn) autoCommit { implicit session =>
+        val name = DB(conn).autoCommit { implicit session =>
           SQL("select name from " + tableName + " where id = ?")
             .bind(1)
             .map(_.string("name"))
@@ -665,7 +665,7 @@ class DB_SQLOperationSpec
     GlobalSettings.loggingSQLAndTime =
       new LoggingSQLAndTimeSettings(enabled = true, logLevel = "info")
     try {
-      DB autoCommit { implicit session =>
+      DB.autoCommit { implicit session =>
         try {
           SQL("drop table issue30;").execute.apply()
         } catch { case e: Exception => }
@@ -684,7 +684,7 @@ class DB_SQLOperationSpec
       }
     } finally {
       try {
-        DB autoCommit { implicit s =>
+        DB.autoCommit { implicit s =>
           SQL("drop table issue30;").execute.apply()
         }
       } catch { case e: Exception => }
@@ -696,7 +696,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_toMap"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx { implicit s =>
+      val result = DB.localTx { implicit s =>
         SQL("insert into " + tableName + " values (?, ?)")
           .bind(4, Option(null))
           .update
@@ -723,7 +723,7 @@ class DB_SQLOperationSpec
     val tableName = tableNamePrefix + "_toMap"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx { implicit s =>
+      val result = DB.localTx { implicit s =>
         SQL("insert into " + tableName + " values (?, ?)")
           .bind(4, Option(null))
           .update

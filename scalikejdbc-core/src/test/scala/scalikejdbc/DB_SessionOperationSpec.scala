@@ -71,7 +71,7 @@ class DB_SessionOperationSpec
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db readOnly { session =>
+        val result = db.readOnly { session =>
           session.list("select * from " + tableName + "")(rs =>
             Some(rs.string("name"))
           )
@@ -105,7 +105,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[SQLException] {
-          db readOnly {
+          db.readOnly {
             _.update("update " + tableName + " set name = ?", "xxx")
           }
         }
@@ -122,7 +122,7 @@ class DB_SessionOperationSpec
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db autoCommit { session =>
+        val result = db.autoCommit { session =>
           session.list("select * from " + tableName + "")(rs =>
             Some(rs.string("name"))
           )
@@ -157,7 +157,7 @@ class DB_SessionOperationSpec
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db autoCommit {
+        val result = db.autoCommit {
           _.single("select id from " + tableName + " where id = ?", 1)(
             _.int("id")
           )
@@ -174,7 +174,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[TooManyRowsException] {
-          db autoCommit {
+          db.autoCommit {
             _.single("select id from " + tableName + "")(rs =>
               Some(rs.int("id"))
             )
@@ -191,7 +191,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         val extractName = (rs: WrappedResultSet) => rs.string("name")
-        val name: Option[String] = db readOnly {
+        val name: Option[String] = db.readOnly {
           _.single("select * from " + tableName + " where id = ?", 1)(
             extractName
           )
@@ -207,7 +207,7 @@ class DB_SessionOperationSpec
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        val result = db autoCommit {
+        val result = db.autoCommit {
           _.list("select id from " + tableName + "")(rs => Some(rs.int("id")))
         }
         result.size should equal(2)
@@ -221,7 +221,7 @@ class DB_SessionOperationSpec
       TestUtils.initialize(tableName)
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
-        db autoCommit {
+        db.autoCommit {
           _.foreach("select id from " + tableName + "")(rs =>
             println(rs.int("id"))
           )
@@ -234,15 +234,15 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_updateInAutoCommitBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB autoCommit {
+      val count = DB.autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB autoCommit {
+      val name = DB.autoCommit {
         _.single("select name from " + tableName + " where id = ?", 1)(
           _.string("name")
         )
-      }).get
+      }.get
       name should equal("foo")
     }
   }
@@ -251,13 +251,13 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_updateAfterReadOnly"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val name = (DB readOnly {
+      val name = DB.readOnly {
         _.single("select name from " + tableName + " where id = ?", 1)(
           _.string("name")
         )
-      }).get
+      }.get
       name should equal("name1")
-      val count = DB autoCommit {
+      val count = DB.autoCommit {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
@@ -271,7 +271,7 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_singleInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = DB.localTx {
         _.single("select id from " + tableName + " where id = ?", 1)(
           _.string("id")
         )
@@ -284,7 +284,7 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_listInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val result = DB localTx {
+      val result = DB.localTx {
         _.list("select id from " + tableName + "")(rs => Some(rs.string("id")))
       }
       result.size should equal(2)
@@ -295,15 +295,17 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_updateInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB localTx {
+      val count = DB.localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(
-          _.string("name")
-        )
-      }).getOrElse("---")
+      val name = DB
+        .localTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
+          )
+        }
+        .getOrElse("---")
       name should equal("foo")
     }
   }
@@ -312,15 +314,17 @@ class DB_SessionOperationSpec
     val tableName = tableNamePrefix + "_rollbackInLocalTxBlock"
     ultimately(TestUtils.deleteTable(tableName)) {
       TestUtils.initialize(tableName)
-      val count = DB localTx {
+      val count = DB.localTx {
         _.update("update " + tableName + " set name = ? where id = ?", "foo", 1)
       }
       count should equal(1)
-      val name = (DB localTx {
-        _.single("select name from " + tableName + " where id = ?", 1)(
-          _.string("name")
-        )
-      }).getOrElse("---")
+      val name = DB
+        .localTx {
+          _.single("select name from " + tableName + " where id = ?", 1)(
+            _.string("name")
+          )
+        }
+        .getOrElse("---")
       name should equal("foo")
     }
   }
@@ -335,7 +339,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         intercept[IllegalStateException] {
-          db withinTx { session =>
+          db.withinTx { session =>
             session.list("select * from " + tableName + "")(rs =>
               Some(rs.string("name"))
             )
@@ -352,7 +356,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val result = db withinTx { session =>
+        val result = db.withinTx { session =>
           session.list("select * from " + tableName + "")(rs =>
             Some(rs.string("name"))
           )
@@ -389,7 +393,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val result = db withinTx {
+        val result = db.withinTx {
           _.single("select id from " + tableName + " where id = ?", 1)(
             _.string("id")
           )
@@ -407,7 +411,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val result = db withinTx {
+        val result = db.withinTx {
           _.list("select id from " + tableName + "")(rs =>
             Some(rs.string("id"))
           )
@@ -425,7 +429,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val count = db withinTx {
+        val count = db.withinTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",
             "foo",
@@ -433,11 +437,11 @@ class DB_SessionOperationSpec
           )
         }
         count should equal(1)
-        val name = (db withinTx {
+        val name = db.withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )
-        }).get
+        }.get
         name should equal("foo")
         db.rollback()
       }
@@ -451,7 +455,7 @@ class DB_SessionOperationSpec
       using(ConnectionPool.borrow()) { conn =>
         val db = DB(conn)
         db.begin()
-        val count = db withinTx {
+        val count = db.withinTx {
           _.update(
             "update " + tableName + " set name = ? where id = ?",
             "foo",
@@ -461,11 +465,11 @@ class DB_SessionOperationSpec
         count should equal(1)
         db.rollback()
         db.begin()
-        val name = (db withinTx {
+        val name = db.withinTx {
           _.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )
-        }).get
+        }.get
         name should equal("name1")
       }
     }
@@ -520,7 +524,7 @@ class DB_SessionOperationSpec
       Thread.sleep(2000L)
 
       using(ConnectionPool.borrow()) { conn =>
-        val name = DB(conn) autoCommit { session =>
+        val name = DB(conn).autoCommit { session =>
           session.single("select name from " + tableName + " where id = ?", 1)(
             _.string("name")
           )

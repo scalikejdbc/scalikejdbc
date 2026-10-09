@@ -13,7 +13,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
     describe("#setup") {
       it("should setup default connection with no argument") {
         DBs.setup()
-        val res = DB readOnly { implicit session =>
+        val res = DB.readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -21,7 +21,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
       }
       it("should setup a connection pool") {
         DBs.setup("foo")
-        val res = NamedDB("foo") readOnly { implicit session =>
+        val res = NamedDB("foo").readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -29,7 +29,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
       }
       it("should setup env & top level config") {
         DBs.setup("topLevelDefaults")
-        val res = NamedDB("topLevelDefaults") readOnly { implicit session =>
+        val res = NamedDB("topLevelDefaults").readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -47,11 +47,11 @@ class DBsSpec extends AnyFunSpec with Matchers {
     describe("#setupAll") {
       it("should read application.conf and setup all connection pool") {
         DBs.setupAll()
-        val res = NamedDB("foo") readOnly { implicit session =>
+        val res = NamedDB("foo").readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
-        val res2 = NamedDB("bar") readOnly { implicit session =>
+        val res2 = NamedDB("bar").readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res2 should be(Some(1))
@@ -59,7 +59,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
       }
       it("should read application.conf with env (dev)") {
         DBsWithEnv("dev").setupAll()
-        val res = DB readOnly { implicit session =>
+        val res = DB.readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -67,7 +67,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
       }
       it("should read application.conf with env (dev2)") {
         DBsWithEnv("dev2").setupAll()
-        val res = NamedDB("hocon") readOnly { implicit session =>
+        val res = NamedDB("hocon").readOnly { implicit session =>
           SQL("SELECT 1 as one").map(_.int("one")).single.apply()
         }
         res should be(Some(1))
@@ -82,11 +82,11 @@ class DBsSpec extends AnyFunSpec with Matchers {
           DBs.setup("foo")
           DBs.close()
           intercept[IllegalStateException] {
-            DB readOnly { implicit session =>
+            DB.readOnly { implicit session =>
               SQL("SELECT 1 as one").map(_.int("one")).single.apply()
             }
           }
-          val res = NamedDB("foo") readOnly { implicit session =>
+          val res = NamedDB("foo").readOnly { implicit session =>
             SQL("SELECT 1 as one").map(_.int("one")).single.apply()
           }
           res should be(Some(1))
@@ -98,7 +98,7 @@ class DBsSpec extends AnyFunSpec with Matchers {
         DBs.setup("foo")
         DBs.close("foo")
         intercept[IllegalStateException] {
-          NamedDB("foo") readOnly { implicit session =>
+          NamedDB("foo").readOnly { implicit session =>
             SQL("SELECT 1 as one").map(_.int("one")).single.apply()
           }
         }
@@ -111,12 +111,12 @@ class DBsSpec extends AnyFunSpec with Matchers {
         DBs.setup("bar")
         DBs.closeAll()
         intercept[IllegalStateException] {
-          NamedDB("foo") readOnly { implicit session =>
+          NamedDB("foo").readOnly { implicit session =>
             SQL("SELECT 1 as one").map(_.int("one")).single.apply()
           }
         }
         intercept[IllegalStateException] {
-          NamedDB("bar") readOnly { implicit session =>
+          NamedDB("bar").readOnly { implicit session =>
             SQL("SELECT 1 as one").map(_.int("one")).single.apply()
           }
         }

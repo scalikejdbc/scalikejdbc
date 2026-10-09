@@ -556,8 +556,7 @@ create table table2 (
 
           // depends on default ordering
           member.get.id should (
-            equal(member1Id) or
-              equal(member2Id)
+            equal(member1Id).or(equal(member2Id))
           )
         }
 
@@ -844,14 +843,14 @@ create table table2 (
           val minutes = java.util.TimeZone.getDefault.getRawOffset / 1000 / 60
           val prefix = if (minutes >= 0) "+" else "-"
           val timeZone = prefix + "%02d:%02d".format(
-            (math.abs(minutes) / 60),
-            (math.abs(minutes) % 60)
+            math.abs(minutes) / 60,
+            math.abs(minutes) % 60
           )
           val minus2hours = minutes - 120
           val minus2hoursPrefix = if (minus2hours >= 0) "+" else "-"
           val minus2hoursTimeZone = minus2hoursPrefix + "%02d:%02d".format(
-            (math.abs(minus2hours) / 60),
-            (math.abs(minus2hours) % 60)
+            math.abs(minus2hours) / 60,
+            math.abs(minus2hours) % 60
           )
           Seq(
             s"2013-01-02T03:04:05${timeZone}",
