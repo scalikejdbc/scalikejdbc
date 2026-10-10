@@ -1,11 +1,11 @@
 package scalikejdbc.scalatest
 
-import scalikejdbc._
 import org.joda.time.DateTime
-import scalikejdbc.NamedDB
-import unit._
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.NamedDB
+import scalikejdbc._
+import unit._
 
 trait FlatSpecWithCommonTraits
   extends FixtureAnyFlatSpec

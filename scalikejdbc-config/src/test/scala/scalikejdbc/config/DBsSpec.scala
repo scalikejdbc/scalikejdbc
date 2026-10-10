@@ -1,8 +1,8 @@
 package scalikejdbc.config
 
-import scalikejdbc._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc._
 
 class DBsSpec extends AnyFunSpec with Matchers {
 

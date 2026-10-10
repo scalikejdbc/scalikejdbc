@@ -1,10 +1,9 @@
 package scalikejdbc
 
-import org.slf4j.LoggerFactory
-
-import scala.util.control.NonFatal
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.LoggerFactory
+import scala.util.control.NonFatal
 
 class PostgreSQL_JSON_Objects_Spec
   extends AnyFlatSpec

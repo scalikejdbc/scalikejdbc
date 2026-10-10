@@ -2,7 +2,6 @@ package scalikejdbc.orm.basic
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.Alias
 import scalikejdbc.orm.finder.FinderFeatureWithId
 import scalikejdbc.orm.querying.QueryingFeatureWithId

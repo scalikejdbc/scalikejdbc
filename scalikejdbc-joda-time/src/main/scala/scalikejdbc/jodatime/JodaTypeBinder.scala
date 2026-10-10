@@ -1,11 +1,11 @@
 package scalikejdbc
 package jodatime
 
+import JodaUnixTimeInMillisConverterImplicits._
 import org.joda.time.{ DateTime => JodaDateTime }
 import org.joda.time.{ LocalDate => JodaLocalDate }
-import org.joda.time.{ LocalTime => JodaLocalTime }
 import org.joda.time.{ LocalDateTime => JodaLocalDateTime }
-import JodaUnixTimeInMillisConverterImplicits._
+import org.joda.time.{ LocalTime => JodaLocalTime }
 
 /**
  * Type binder for java.sql.ResultSet.

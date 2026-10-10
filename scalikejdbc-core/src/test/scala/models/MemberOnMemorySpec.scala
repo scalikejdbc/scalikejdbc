@@ -1,10 +1,9 @@
 package models
 
-import scalikejdbc._
 import java.time._
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc._
 
 class MemberOnMemorySpec extends AnyFlatSpec with Matchers {
 

@@ -1,8 +1,8 @@
 package scalikejdbc
 
+import java.sql.Connection
 import java.sql.Connection._
-import java.sql.{ Connection, SQLException }
-
+import java.sql.SQLException
 import scala.util.control.Exception._
 import scala.util.control.NonFatal
 

@@ -1,7 +1,7 @@
 package scalikejdbc
 
-import scalikejdbc.interpolation.SQLSyntax
 import scala.quoted.*
+import scalikejdbc.interpolation.SQLSyntax
 
 trait SelectDynamicMacro[A] {
   self: SQLSyntaxSupportFeature#SQLSyntaxProvider[A] =>

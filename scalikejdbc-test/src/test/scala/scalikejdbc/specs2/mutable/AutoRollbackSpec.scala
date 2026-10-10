@@ -1,11 +1,10 @@
 package scalikejdbc.specs2.mutable
 
 import java.sql.SQLException
-
-import org.specs2.mutable.Specification
-import scalikejdbc._
 import org.joda.time.DateTime
+import org.specs2.mutable.Specification
 import scalikejdbc.NamedDB
+import scalikejdbc._
 import unit._
 
 class AutoRollbackSpec

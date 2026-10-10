@@ -1,13 +1,16 @@
 package scalikejdbc
 
-import java.sql.{ DatabaseMetaData, Connection, ResultSet }
-import scalikejdbc.metadata._
+import java.sql.Connection
+import java.sql.DatabaseMetaData
+import java.sql.ResultSet
+import java.util.Locale.{ ENGLISH => en }
 import scala.collection.compat._
 import scala.collection.compat.immutable.LazyList
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.control.Exception._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.util.control.ControlThrowable
-import java.util.Locale.{ ENGLISH => en }
+import scala.util.control.Exception._
+import scalikejdbc.metadata._
 
 /**
  * Basic Database Accessor which holds a JDBC connection.

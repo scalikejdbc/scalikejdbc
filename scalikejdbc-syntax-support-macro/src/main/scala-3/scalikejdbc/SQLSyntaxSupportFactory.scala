@@ -1,7 +1,8 @@
 package scalikejdbc
 
-import scalikejdbc.{ SQLSyntaxSupportImpl, TypeBinder }
 import scala.quoted._
+import scalikejdbc.SQLSyntaxSupportImpl
+import scalikejdbc.TypeBinder
 
 object SQLSyntaxSupportFactory {
 

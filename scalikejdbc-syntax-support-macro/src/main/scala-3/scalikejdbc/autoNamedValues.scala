@@ -1,7 +1,8 @@
 package scalikejdbc
 
 import scala.quoted._
-import scalikejdbc.{ ParameterBinderFactory, ParameterBinder }
+import scalikejdbc.ParameterBinder
+import scalikejdbc.ParameterBinderFactory
 
 object autoNamedValues {
 

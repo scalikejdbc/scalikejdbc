@@ -2,19 +2,15 @@ package scalikejdbc.orm.finder
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.Pagination
-import scalikejdbc.orm.associations.{ AssociationsFeature, JoinsFeature }
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  IdFeature,
-  SQLSyntaxSupportBase
-}
-import scalikejdbc.orm.eagerloading.{
-  IncludesFeatureWithId,
-  IncludesQueryRepository
-}
+import scalikejdbc.orm.associations.AssociationsFeature
+import scalikejdbc.orm.associations.JoinsFeature
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.IdFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
+import scalikejdbc.orm.eagerloading.IncludesFeatureWithId
+import scalikejdbc.orm.eagerloading.IncludesQueryRepository
 
 /**
   * Provides #find something APIs.

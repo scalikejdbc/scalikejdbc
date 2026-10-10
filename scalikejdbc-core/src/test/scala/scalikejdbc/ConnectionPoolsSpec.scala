@@ -1,8 +1,8 @@
 package scalikejdbc
 
+import com.zaxxer.hikari.HikariDataSource
 import java.util.Properties
 import javax.sql.DataSource
-import com.zaxxer.hikari.HikariDataSource
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

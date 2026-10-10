@@ -1,7 +1,8 @@
 package models
 
+import java.time.LocalDate
+import java.time.LocalDateTime
 import scalikejdbc._
-import java.time.{ LocalDate, LocalDateTime }
 
 case class Member(
   id: Long,

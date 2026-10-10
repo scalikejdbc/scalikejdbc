@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import java.util.Locale.{ ENGLISH => en }
-import scalikejdbc.interpolation.SQLSyntax
-
 import scala.collection.concurrent.TrieMap
 import scala.language.dynamics
+import scalikejdbc.interpolation.SQLSyntax
 
 /**
  * SQLSyntaxSupport feature

@@ -3,24 +3,18 @@ package basic_test.accounts
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import scalikejdbc._
-import scalikejdbc.orm.{
-  Alias,
-  CRUDMapper,
-  CRUDMapperWithId,
-  DataMapper,
-  JoinTable,
-  NoIdCRUDMapper,
-  NoIdDataMapper
-}
+import scalikejdbc.orm.Alias
+import scalikejdbc.orm.CRUDMapper
+import scalikejdbc.orm.CRUDMapperWithId
+import scalikejdbc.orm.DataMapper
+import scalikejdbc.orm.JoinTable
+import scalikejdbc.orm.NoIdCRUDMapper
+import scalikejdbc.orm.NoIdDataMapper
 import scalikejdbc.orm.associations.Association
-import scalikejdbc.orm.optimisticlock.{
-  OptimisticLockWithTimestampFeature,
-  OptimisticLockWithVersionFeature
-}
-import scalikejdbc.orm.softdeletion.{
-  SoftDeleteWithBooleanFeature,
-  SoftDeleteWithTimestampFeature
-}
+import scalikejdbc.orm.optimisticlock.OptimisticLockWithTimestampFeature
+import scalikejdbc.orm.optimisticlock.OptimisticLockWithVersionFeature
+import scalikejdbc.orm.softdeletion.SoftDeleteWithBooleanFeature
+import scalikejdbc.orm.softdeletion.SoftDeleteWithTimestampFeature
 import scalikejdbc.orm.timstamps.TimestampsFeature
 
 case class Member(

@@ -1,8 +1,8 @@
 package scalikejdbc.scalatest
 
-import org.scalatest.FutureOutcome
 import org.scalatest.AsyncTestSuite
 import org.scalatest.AsyncTestSuiteMixin
+import org.scalatest.FutureOutcome
 import scala.collection.mutable.ListBuffer
 
 trait AsyncBufferMixin extends AsyncTestSuiteMixin { this: AsyncTestSuite =>

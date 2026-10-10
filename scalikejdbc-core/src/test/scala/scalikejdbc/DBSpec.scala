@@ -1,21 +1,18 @@
 package scalikejdbc
 
 import java.sql.Connection
-
-import org.scalatest._
 import java.sql.SQLException
-
-import org.slf4j.LoggerFactory
-
-import scala.util.control.Exception._
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.concurrent.duration._
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import scalikejdbc.iomonads.MyIO
-
-import ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.LoggerFactory
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.util.control.Exception._
+import scalikejdbc.iomonads.MyIO
 
 class DBSpec
   extends AnyFlatSpec

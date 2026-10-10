@@ -1,11 +1,11 @@
 package scalikejdbc
 
-import util.control.Exception._
 import java.sql.ResultSet
 import java.util.NoSuchElementException
-import scalikejdbc.LoanPattern._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
+import scalikejdbc.LoanPattern._
 
 class ResultSetIteratorSpec extends AnyFlatSpec with Matchers with Settings {
 

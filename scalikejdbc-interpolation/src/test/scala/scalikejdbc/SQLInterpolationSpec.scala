@@ -1,13 +1,12 @@
 package scalikejdbc
 
-import org.scalatest._
 import java.time._
-import org.slf4j._
-
-import scala.collection.concurrent.TrieMap
-import scala.util.control.NonFatal
+import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j._
+import scala.collection.concurrent.TrieMap
+import scala.util.control.NonFatal
 
 class SQLInterpolationSpec
   extends AnyFlatSpec

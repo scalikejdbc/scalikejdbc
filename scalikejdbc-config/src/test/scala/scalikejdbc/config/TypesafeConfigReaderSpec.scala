@@ -1,9 +1,9 @@
 package scalikejdbc.config
 
-import scalikejdbc._
 import com.typesafe.config._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc._
 
 class TypesafeConfigReaderSpec extends AnyFunSpec with Matchers {
 

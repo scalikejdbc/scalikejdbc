@@ -1,7 +1,7 @@
 package scalikejdbc.scalatest
 
-import scalikejdbc._
 import org.joda.time.DateTime
+import scalikejdbc._
 
 object ScalaTestMember2 {
 

@@ -1,9 +1,8 @@
-import sbt._, Keys._
+import com.typesafe.tools.mima.plugin.MimaKeys.mimaPreviousArtifacts
+import com.typesafe.tools.mima.plugin.MimaKeys.mimaReportBinaryIssues
 import com.typesafe.tools.mima.plugin.MimaPlugin
-import com.typesafe.tools.mima.plugin.MimaKeys.{
-  mimaPreviousArtifacts,
-  mimaReportBinaryIssues
-}
+import sbt.Keys._
+import sbt._
 
 /*
  * MiMa settings of ScalikeJDBC libs.

@@ -3,9 +3,9 @@ package scalikejdbc
 import java.io.InputStream
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
+import org.scalatest.flatspec.AnyFlatSpec
 import scalikejdbc.JavaUtilDateConverterImplicits._
 import scalikejdbc.interpolation.SQLSyntax
-import org.scalatest.flatspec.AnyFlatSpec
 
 class ParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 

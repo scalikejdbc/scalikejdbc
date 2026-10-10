@@ -2,7 +2,6 @@ package scalikejdbc.orm.optimisticlock
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.crud.CRUDFeatureWithId
 import scalikejdbc.orm.exception.OptimisticLockException
 

@@ -3,9 +3,9 @@ package jodatime
 
 import java.sql.PreparedStatement
 import org.mockito.Mockito._
-import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
-import scalikejdbc.jodatime.JodaParameterBinderFactory._
 import org.scalatest.flatspec.AnyFlatSpec
+import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 
 class JodaParameterBinderFactorySpec extends AnyFlatSpec with MockitoSugar {
 

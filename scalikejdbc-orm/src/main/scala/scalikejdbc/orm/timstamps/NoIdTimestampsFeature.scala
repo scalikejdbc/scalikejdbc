@@ -1,9 +1,10 @@
 package scalikejdbc.orm.timstamps
 
 import org.joda.time.DateTime
-import scalikejdbc.orm.strongparameters.PermittedStrongParameters
+import scalikejdbc.DBSession
+import scalikejdbc.SQLSyntax
 import scalikejdbc.orm.crud.NoIdCUDFeature
-import scalikejdbc.{ DBSession, SQLSyntax }
+import scalikejdbc.orm.strongparameters.PermittedStrongParameters
 
 trait NoIdTimestampsFeature[Entity]
   extends NoIdCUDFeature[Entity]

@@ -1,8 +1,8 @@
 package scalikejdbc
 
-import scala.util.control.Exception.ultimately
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception.ultimately
 
 class DBSessionWrapperSpec extends AnyFlatSpec with Matchers {
 

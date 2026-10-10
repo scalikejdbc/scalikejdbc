@@ -1,9 +1,9 @@
 package scalikejdbc
 
 import org.joda.time._
-import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
 
 class SQLInterpolationSpec
   extends AnyFlatSpec

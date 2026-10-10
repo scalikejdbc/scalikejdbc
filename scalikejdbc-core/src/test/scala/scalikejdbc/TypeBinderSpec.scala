@@ -1,8 +1,8 @@
 package scalikejdbc
 
-import org.mockito.Mockito._
 import java.sql.ResultSet
 import java.time._
+import org.mockito.Mockito._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

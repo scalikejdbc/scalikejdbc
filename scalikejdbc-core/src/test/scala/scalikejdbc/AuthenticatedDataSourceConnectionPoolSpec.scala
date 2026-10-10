@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import javax.sql.DataSource
-
 import org.mockito.Mockito.mock
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -1,16 +1,15 @@
 package scalikejdbc
 
 import java.sql.DriverManager
-
-import org.mockito.Mockito.{ mock, verify }
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.scalatest.concurrent.ScalaFutures
-import org.slf4j.Logger
-
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.concurrent.duration._
-import ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.Logger
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class LoanPatternSpec
   extends AnyFlatSpec

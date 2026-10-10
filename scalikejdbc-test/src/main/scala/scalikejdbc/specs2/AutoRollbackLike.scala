@@ -1,9 +1,8 @@
 package scalikejdbc.specs2
 
-import scalikejdbc._
 import org.specs2.specification.After
-
 import scala.util.control.NonFatal
+import scalikejdbc._
 
 /**
  * AutoRollback support for specs2

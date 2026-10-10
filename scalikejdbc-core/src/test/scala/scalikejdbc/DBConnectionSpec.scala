@@ -1,7 +1,10 @@
 package scalikejdbc
 
 import java.sql.Connection
-import org.mockito.Mockito.{ mock, verify, times, when }
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

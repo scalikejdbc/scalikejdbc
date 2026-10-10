@@ -1,8 +1,8 @@
 package scalikejdbc
 
 import java.sql.Timestamp
-import java.util.{ Calendar, TimeZone }
-
+import java.util.Calendar
+import java.util.TimeZone
 import scala.collection.concurrent.TrieMap
 
 /**

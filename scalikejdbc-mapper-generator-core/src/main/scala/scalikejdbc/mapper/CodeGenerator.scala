@@ -1,7 +1,7 @@
 package scalikejdbc.mapper
 
-import scalikejdbc._
 import scala.language.implicitConversions
+import scalikejdbc._
 
 /**
  * Active Record like template generator
@@ -18,8 +18,10 @@ class CodeGenerator(table: Table, specifiedClassName: Option[String] = None)(
       "implicit"
   }
 
+  import java.io.File
+  import java.io.FileOutputStream
+  import java.io.OutputStreamWriter
   import java.sql.{ JDBCType => JavaSqlTypes }
-  import java.io.{ OutputStreamWriter, FileOutputStream, File }
 
   private val packageName = config.packageName
   private val className =

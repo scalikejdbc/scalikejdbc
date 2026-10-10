@@ -1,8 +1,8 @@
 package scalikejdbc.orm.associations
 
-import scalikejdbc.orm._
-import scalikejdbc._
 import org.slf4j.LoggerFactory
+import scalikejdbc._
+import scalikejdbc.orm._
 
 /**
   * Join definition.

@@ -1,11 +1,11 @@
 package scalikejdbc
 
+import java.sql.Connection
 import java.util.Properties
 import javax.sql.DataSource
-import java.sql.Connection
-import scalikejdbc.LoanPattern._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.LoanPattern._
 
 class ConnectionPoolSpec extends AnyFlatSpec with Matchers {
 

@@ -1,15 +1,17 @@
 package somewhere
 
 import org.reactivestreams.Publisher
-import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
+import org.reactivestreams.tck.PublisherVerification
+import org.reactivestreams.tck.TestEnvironment
 import org.scalatestplus.testng.TestNGSuiteLike
 import org.testng.SkipException
-import org.testng.annotations.{ AfterClass, BeforeClass, Test }
+import org.testng.annotations.AfterClass
+import org.testng.annotations.BeforeClass
+import org.testng.annotations.Test
+import scala.concurrent.ExecutionContext.Implicits.global
 import scalikejdbc._
 import scalikejdbc.streams._
 import somewhere.DatabasePublisherTckTest.User
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class DatabasePublisherTckTest(
   env: TestEnvironment,

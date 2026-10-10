@@ -1,12 +1,13 @@
 package scalikejdbc
 
 import java.sql.Connection
-
-import org.mockito.Mockito.{ mock, times, verify, when }
-
-import scala.util.control.Exception._
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
 
 class TxSpec extends AnyFlatSpec with Matchers with Settings {
 

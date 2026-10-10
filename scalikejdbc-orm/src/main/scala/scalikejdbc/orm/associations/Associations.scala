@@ -1,8 +1,7 @@
 package scalikejdbc.orm.associations
 
-import scala.language.existentials
-
 import scala.collection.mutable
+import scala.language.existentials
 
 /**
   * Association.

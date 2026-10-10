@@ -4,8 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{ Tag => _ }
 import scalikejdbc._
+import scalikejdbc.orm.CRUDMapper
+import scalikejdbc.orm.NoIdCRUDMapper
 import scalikejdbc.orm.exception.IllegalAssociationException
-import scalikejdbc.orm.{ CRUDMapper, NoIdCRUDMapper }
 import util.DBSeeds
 
 class Test003Spec extends AnyFunSpec with Matchers with DBSeeds {

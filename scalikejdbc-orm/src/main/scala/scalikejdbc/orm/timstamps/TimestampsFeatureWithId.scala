@@ -1,10 +1,8 @@
 package scalikejdbc.orm.timstamps
 
 import org.joda.time.DateTime
-
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.crud.CRUDFeatureWithId
 import scalikejdbc.orm.strongparameters.PermittedStrongParameters
 

@@ -1,12 +1,13 @@
 package scalikejdbc
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.sql.Connection
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
-import javax.sql.DataSource
-import java.sql.Connection
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
-import scala.concurrent.{ ExecutionContextExecutor, ExecutionContext }
+import javax.sql.DataSource
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutor
 
 /**
  * Connection Pool

@@ -1,11 +1,10 @@
 package somewhere
 
-import scalikejdbc._
-import scalikejdbc.streams._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.ExecutionContext.Implicits.global
+import scalikejdbc._
+import scalikejdbc.streams._
 
 class ReadOnlyStreamBlocksSpec extends AnyFlatSpec with Matchers {
 

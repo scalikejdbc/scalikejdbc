@@ -1,10 +1,9 @@
 package util
 
-import scalikejdbc._
 import com.typesafe.config.ConfigFactory
-
-import scala.jdk.CollectionConverters._
 import org.slf4j.LoggerFactory
+import scala.jdk.CollectionConverters._
+import scalikejdbc._
 import scalikejdbc.orm.crud.CRUDFeatureWithId
 import scalikejdbc.orm.internals.JavaReflectionUtil
 

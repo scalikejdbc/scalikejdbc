@@ -5,15 +5,14 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{ Tag => _ }
 import scalikejdbc._
-import scalikejdbc.orm.Pagination
 import scalikejdbc.orm.JodaTimeImplicits._
+import scalikejdbc.orm.Pagination
 import scalikejdbc.orm.exception.OptimisticLockException
-import scalikejdbc.orm.strongparameters.{
-  ParamType,
-  PermittedStrongParameters,
-  StrongParameters
-}
-import util.{ DBSeeds, LightFactoryGirl }
+import scalikejdbc.orm.strongparameters.ParamType
+import scalikejdbc.orm.strongparameters.PermittedStrongParameters
+import scalikejdbc.orm.strongparameters.StrongParameters
+import util.DBSeeds
+import util.LightFactoryGirl
 
 class AccountDatabaseSpec extends AnyFunSpec with Matchers with DBSeeds {
 

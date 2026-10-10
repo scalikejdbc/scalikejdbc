@@ -1,8 +1,8 @@
 package util
 
-import scalikejdbc.{ ParameterBinderWithValue, _ }
-
 import scala.annotation.tailrec
+import scalikejdbc.ParameterBinderWithValue
+import scalikejdbc._
 
 trait ParameterBinderOps {
 

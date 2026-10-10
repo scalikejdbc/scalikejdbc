@@ -1,8 +1,8 @@
 package foo
 
-import scalikejdbc._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc._
 
 class AutoSpec extends AnyFlatSpec with Matchers with DBSettings {
 

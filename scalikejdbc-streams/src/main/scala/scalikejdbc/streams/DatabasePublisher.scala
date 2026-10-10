@@ -1,9 +1,9 @@
 package scalikejdbc.streams
 
-import org.reactivestreams.{ Publisher, Subscriber }
-import scalikejdbc.LogSupport
-
+import org.reactivestreams.Publisher
+import org.reactivestreams.Subscriber
 import scala.util.control.NonFatal
+import scalikejdbc.LogSupport
 
 /**
  * A database backend Publisher in the fashion of Reactive Streams

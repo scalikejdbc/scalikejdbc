@@ -1,6 +1,7 @@
 package scalikejdbc.scalatest
 
-import org.scalatest.{ FixtureAsyncTestSuite, FutureOutcome }
+import org.scalatest.FixtureAsyncTestSuite
+import org.scalatest.FutureOutcome
 import scalikejdbc._
 
 /**

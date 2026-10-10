@@ -1,12 +1,12 @@
 package scalikejdbc
 
-import javax.sql.DataSource
 import java.sql.Connection
 import java.time.Duration
-import org.apache.commons.dbcp2.PoolingDataSource
+import javax.sql.DataSource
+import org.apache.commons.dbcp2.DriverManagerConnectionFactory
 import org.apache.commons.dbcp2.PoolableConnection
 import org.apache.commons.dbcp2.PoolableConnectionFactory
-import org.apache.commons.dbcp2.DriverManagerConnectionFactory
+import org.apache.commons.dbcp2.PoolingDataSource
 import org.apache.commons.pool2.impl.GenericObjectPool
 
 /**

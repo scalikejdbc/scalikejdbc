@@ -1,10 +1,9 @@
 package scalikejdbc
 
 import org.scalatest._
-
-import scala.util.control.NonFatal
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.NonFatal
 
 trait SyntaxProviderTestSupport extends TestSuiteMixin with SQLInterpolation {
   self: TestSuite =>

@@ -3,7 +3,8 @@ package basic_test
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{ Tag => _ }
-import scalikejdbc.orm.settings.{ DBSettingsInitializer, ORMEnv }
+import scalikejdbc.orm.settings.DBSettingsInitializer
+import scalikejdbc.orm.settings.ORMEnv
 
 class SettingsSpec extends AnyFunSpec with Matchers with DBSettingsInitializer {
 

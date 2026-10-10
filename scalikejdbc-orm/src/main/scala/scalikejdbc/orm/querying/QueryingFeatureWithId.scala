@@ -2,18 +2,13 @@ package scalikejdbc.orm.querying
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.Pagination
 import scalikejdbc.orm.associations.AssociationsFeature
-import scalikejdbc.orm.eagerloading.{
-  IncludesFeatureWithId,
-  IncludesQueryRepository
-}
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  SQLSyntaxSupportBase
-}
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
+import scalikejdbc.orm.eagerloading.IncludesFeatureWithId
+import scalikejdbc.orm.eagerloading.IncludesQueryRepository
 
 /**
   * Querying APIs feature.

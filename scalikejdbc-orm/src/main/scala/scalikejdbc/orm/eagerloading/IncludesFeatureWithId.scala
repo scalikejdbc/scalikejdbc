@@ -4,11 +4,12 @@ package scalikejdbc.orm.eagerloading
 import scalikejdbc._
 import scalikejdbc.orm.Alias
 import scalikejdbc.orm.associations._
-import scalikejdbc.orm.basic.{ IdFeature, SQLSyntaxSupportBase }
-import scalikejdbc.orm.finder.FinderFeatureWithId
-import scalikejdbc.orm.querying.QueryingFeatureWithId
+import scalikejdbc.orm.basic.IdFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 import scalikejdbc.orm.exception.AssociationSettingsException
+import scalikejdbc.orm.finder.FinderFeatureWithId
 import scalikejdbc.orm.internals.JavaReflectionUtil
+import scalikejdbc.orm.querying.QueryingFeatureWithId
 
 /**
   * Provides #includes APIs.

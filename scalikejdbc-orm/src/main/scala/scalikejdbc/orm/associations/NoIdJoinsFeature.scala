@@ -1,17 +1,15 @@
 package scalikejdbc.orm.associations
 
+import scalikejdbc.HasExtractor
+import scalikejdbc.NoExtractor
+import scalikejdbc.ResultName
+import scalikejdbc.SQL
+import scalikejdbc.WrappedResultSet
 import scalikejdbc.orm.Alias
 import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 import scalikejdbc.orm.eagerloading.IncludesQueryRepository
 import scalikejdbc.orm.finder.NoIdFinderFeature
 import scalikejdbc.orm.querying.NoIdQueryingFeature
-import scalikejdbc.{
-  HasExtractor,
-  NoExtractor,
-  ResultName,
-  SQL,
-  WrappedResultSet
-}
 
 /**
  * Provides #joins APIs.

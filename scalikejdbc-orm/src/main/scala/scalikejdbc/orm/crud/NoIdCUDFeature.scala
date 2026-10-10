@@ -1,19 +1,13 @@
 package scalikejdbc.orm.crud
 
+import scala.collection.mutable
 // Don't change this import
 import scalikejdbc._
-
-import scalikejdbc.orm.strongparameters.{
-  PermittedStrongParameters,
-  StrongParametersFeature
-}
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  SQLSyntaxSupportBase
-}
-
-import scala.collection.mutable
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
+import scalikejdbc.orm.strongparameters.PermittedStrongParameters
+import scalikejdbc.orm.strongparameters.StrongParametersFeature
 
 trait NoIdCUDFeature[Entity]
   extends SQLSyntaxSupportBase[Entity]

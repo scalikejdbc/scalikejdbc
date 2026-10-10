@@ -1,9 +1,9 @@
 package scalikejdbc
 
 import org.scalatest.concurrent.ScalaFutures
-import scalikejdbc.iomonads.MyIO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.iomonads.MyIO
 
 class MyIOTxBoundarySpec extends AnyFlatSpec with Matchers with ScalaFutures {
 

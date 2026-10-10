@@ -1,7 +1,7 @@
 package scalikejdbc
 
-import javax.sql.DataSource
 import java.sql.Connection
+import javax.sql.DataSource
 
 /**
  * Commons DBCP Connection Pool
@@ -15,12 +15,10 @@ class CommonsConnectionPool(
   override val settings: ConnectionPoolSettings = ConnectionPoolSettings()
 ) extends ConnectionPool(url, user, password, settings) {
 
+  import org.apache.commons.dbcp.DriverManagerConnectionFactory
+  import org.apache.commons.dbcp.PoolableConnectionFactory
+  import org.apache.commons.dbcp.PoolingDataSource
   import org.apache.commons.pool.impl.GenericObjectPool
-  import org.apache.commons.dbcp.{
-    PoolingDataSource,
-    PoolableConnectionFactory,
-    DriverManagerConnectionFactory
-  }
 
   private[this] val _pool = new GenericObjectPool(null)
   _pool.setMinIdle(settings.initialSize)

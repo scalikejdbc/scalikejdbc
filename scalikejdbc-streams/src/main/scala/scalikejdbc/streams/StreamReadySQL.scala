@@ -1,7 +1,7 @@
 package scalikejdbc.streams
 
-import scalikejdbc._
 import StreamReadySQL._
+import scalikejdbc._
 
 /**
  * Streaming-ready SQL object.

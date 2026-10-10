@@ -1,8 +1,7 @@
 package scalikejdbc.streams
 
-import scalikejdbc.LogSupport
-
 import scala.concurrent.ExecutionContext
+import scalikejdbc.LogSupport
 
 /**
  * Executes asynchronous operations.

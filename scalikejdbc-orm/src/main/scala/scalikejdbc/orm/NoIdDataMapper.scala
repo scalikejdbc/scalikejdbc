@@ -1,19 +1,15 @@
 package scalikejdbc.orm
 
-import scalikejdbc.orm.associations.{
-  AssociationsFeature,
-  HasOneAssociation,
-  NoIdAssociationsFeature
-}
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  SQLSyntaxSupportBase
-}
+import scalikejdbc.orm.associations.AssociationsFeature
+import scalikejdbc.orm.associations.HasOneAssociation
+import scalikejdbc.orm.associations.NoIdAssociationsFeature
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
+import scalikejdbc.orm.exception.IllegalAssociationException
 import scalikejdbc.orm.finder.NoIdFinderFeature
 import scalikejdbc.orm.querying.NoIdQueryingFeature
 import scalikejdbc.orm.strongparameters.StrongParametersFeature
-import scalikejdbc.orm.exception.IllegalAssociationException
 
 /**
  * Basic mapper for tables that don't have single primary key.

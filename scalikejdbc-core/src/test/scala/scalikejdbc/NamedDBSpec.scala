@@ -1,17 +1,17 @@
 package scalikejdbc
 
-import org.scalatest._
-import org.scalatest.BeforeAndAfter
 import java.sql.SQLException
-import util.control.Exception._
-import scala.concurrent.{ Await, ExecutionContext, Future }
-import scala.concurrent.duration._
+import org.scalatest.BeforeAndAfter
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import scalikejdbc.iomonads.MyIO
-
-import ExecutionContext.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.util.control.Exception._
+import scalikejdbc.iomonads.MyIO
 
 class NamedDBSpec
   extends AnyFlatSpec

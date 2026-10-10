@@ -1,10 +1,10 @@
-import scalikejdbc._
-import mapper._
-import mapper.CodeGenerator
-import mapper.GeneratorConfig
-import mapper.Model
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc._
+import scalikejdbc.mapper.CodeGenerator
+import scalikejdbc.mapper.GeneratorConfig
+import scalikejdbc.mapper.Model
+import scalikejdbc.mapper._
 
 class MapperGeneratorWithH2Spec extends AnyFlatSpec with Matchers {
 
