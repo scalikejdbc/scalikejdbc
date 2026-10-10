@@ -1,6 +1,6 @@
 package scalikejdbc
 
-import util.control.Exception._
+import scala.util.control.Exception._
 
 object TestUtils {
 

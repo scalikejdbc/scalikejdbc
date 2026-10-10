@@ -1,10 +1,8 @@
 package scalikejdbc.orm.strongparameters
 
-import org.joda.time.{
-  DateTime => JDateTime,
-  LocalDate => JLocalDate,
-  LocalTime => JLocalTime
-}
+import org.joda.time.{ DateTime => JDateTime }
+import org.joda.time.{ LocalDate => JLocalDate }
+import org.joda.time.{ LocalTime => JLocalTime }
 import scalikejdbc.orm.internals.DateTimeUtil
 
 /**

@@ -1,7 +1,11 @@
 package scalikejdbc
 
-import scala.concurrent.{ Promise, ExecutionContext, Future }
-import scala.util.{ Try, Failure, Success }
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.concurrent.Promise
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 /**
  * This type class enable users to customize the behavior of transaction boundary(commit/rollback).

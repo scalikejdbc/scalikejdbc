@@ -1,7 +1,7 @@
 package scalikejdbc
 
-import util.DynamicVariable
 import java.sql.Connection
+import scala.util.DynamicVariable
 
 /**
  * Thread-local DB.

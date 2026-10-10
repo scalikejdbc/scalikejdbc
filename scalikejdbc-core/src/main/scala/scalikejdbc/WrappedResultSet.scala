@@ -1,7 +1,7 @@
 package scalikejdbc
 
-import java.time._
 import java.sql.ResultSet
+import java.time._
 import java.util.Calendar
 import scala.jdk.CollectionConverters._
 

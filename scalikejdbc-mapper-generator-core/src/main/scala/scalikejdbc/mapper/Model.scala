@@ -2,7 +2,6 @@ package scalikejdbc.mapper
 
 import java.sql.JDBCType
 import java.util.UUID
-
 import scalikejdbc._
 
 case class Model(url: String, username: String, password: String)

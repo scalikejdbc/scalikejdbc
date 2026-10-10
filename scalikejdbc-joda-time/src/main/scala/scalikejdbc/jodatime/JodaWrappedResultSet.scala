@@ -1,15 +1,14 @@
 package scalikejdbc
 package jodatime
 
+import JodaTypeBinder._
 import java.sql.ResultSet
 import org.joda.time.{
+  LocalDate => JodaLocalDate,
   LocalDateTime => JodaLocalDateTime,
   LocalTime => JodaLocalTime,
-  LocalDate => JodaLocalDate,
   _
 }
-
-import JodaTypeBinder._
 import scala.language.implicitConversions
 
 /**

@@ -1,18 +1,18 @@
 package somewhere
 
-import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger }
 import java.util.concurrent._
-
-import org.reactivestreams.example.unicast.{ AsyncSubscriber, SyncSubscriber }
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import org.reactivestreams.example.unicast.AsyncSubscriber
+import org.reactivestreams.example.unicast.SyncSubscriber
 import org.scalatest._
-import org.slf4j.LoggerFactory
-import scalikejdbc._
-import scalikejdbc.streams._
-
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Promise
 import org.scalatest.flatspec.AsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.slf4j.LoggerFactory
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.Promise
+import scalikejdbc._
+import scalikejdbc.streams._
 
 class DatabasePublisherSpec
   extends AsyncFlatSpec

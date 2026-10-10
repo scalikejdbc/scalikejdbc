@@ -2,7 +2,6 @@ package scalikejdbc.orm
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.associations.AssociationsFeature
 import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 import scalikejdbc.orm.crud.NoIdCUDFeature

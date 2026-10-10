@@ -1,7 +1,7 @@
 package scalikejdbc
 
-import javax.sql.DataSource
 import java.sql.Connection
+import javax.sql.DataSource
 
 /**
  * Connection Pool using external DataSource

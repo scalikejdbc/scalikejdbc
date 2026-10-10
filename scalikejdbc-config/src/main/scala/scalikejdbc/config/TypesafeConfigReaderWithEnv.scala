@@ -1,6 +1,7 @@
 package scalikejdbc.config
 
-import com.typesafe.config.{ ConfigFactory, Config }
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 
 /**
  * Typesafe config reader with env prefix.

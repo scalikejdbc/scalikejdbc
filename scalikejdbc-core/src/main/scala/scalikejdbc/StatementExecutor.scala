@@ -1,12 +1,11 @@
 package scalikejdbc
 
+import JavaUtilDateConverterImplicits._
 import java.sql.PreparedStatement
-
 import org.slf4j.LoggerFactory
 import scala.collection.compat._
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
-import JavaUtilDateConverterImplicits._
 
 /**
  * Companion object.

@@ -1,8 +1,7 @@
 package scalikejdbc.streams
 
-import scalikejdbc._
-
 import scala.util.control.Exception.ignoring
+import scalikejdbc._
 
 trait TestDBSettings {
 

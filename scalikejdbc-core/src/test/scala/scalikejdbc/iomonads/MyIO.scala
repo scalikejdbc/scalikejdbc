@@ -1,6 +1,7 @@
 package scalikejdbc.iomonads
 
-import scalikejdbc.{ Tx, TxBoundary }
+import scalikejdbc.Tx
+import scalikejdbc.TxBoundary
 
 sealed abstract class MyIO[+A] {
   import MyIO._

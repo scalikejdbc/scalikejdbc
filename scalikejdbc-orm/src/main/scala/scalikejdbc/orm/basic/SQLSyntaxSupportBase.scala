@@ -2,7 +2,8 @@ package scalikejdbc.orm.basic
 
 // Don't change this import
 import scalikejdbc._
-import scalikejdbc.orm.{ Alias, JodaTimeImplicits }
+import scalikejdbc.orm.Alias
+import scalikejdbc.orm.JodaTimeImplicits
 
 /**
  * DataMapper base.

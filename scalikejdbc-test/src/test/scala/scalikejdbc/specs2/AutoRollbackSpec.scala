@@ -1,8 +1,8 @@
 package scalikejdbc.specs2
 
+import org.joda.time.DateTime
 import org.specs2.Specification
 import scalikejdbc._
-import org.joda.time.DateTime
 import unit._
 
 class AutoRollbackSpec

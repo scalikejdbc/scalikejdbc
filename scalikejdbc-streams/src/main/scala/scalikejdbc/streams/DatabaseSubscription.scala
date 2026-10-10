@@ -1,13 +1,14 @@
 package scalikejdbc.streams
 
-import java.util.concurrent.atomic.{ AtomicBoolean, AtomicLong }
-
-import org.reactivestreams.{ Subscriber, Subscription }
-import scalikejdbc._
-
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import org.reactivestreams.Subscriber
+import org.reactivestreams.Subscription
 import scala.concurrent.Promise
-import scala.util.{ Failure, Success }
+import scala.util.Failure
+import scala.util.Success
 import scala.util.control.NonFatal
+import scalikejdbc._
 
 /**
  * A DatabaseSubscription represents a one-to-one lifecycle of a Subscriber subscribing to a DatabasePublisher.

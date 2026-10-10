@@ -1,13 +1,12 @@
 package scalikejdbc.scalatest
 
-import scalikejdbc._
 import org.joda.time.DateTime
-import scalikejdbc.NamedDB
-import unit._
-
-import scala.concurrent.Future
 import org.scalatest.flatspec.FixtureAsyncFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.Future
+import scalikejdbc.NamedDB
+import scalikejdbc._
+import unit._
 
 trait AsyncFlatSpecWithCommonTraits
   extends FixtureAsyncFlatSpec

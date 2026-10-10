@@ -4,8 +4,8 @@ import java.time._
 import org.scalatest.flatspec.FixtureAnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import scala.util.Random
-import scalikejdbc.scalatest.AutoRollback
 import scalikejdbc._
+import scalikejdbc.scalatest.AutoRollback
 
 class ProgrammersTest
   extends FixtureAnyFlatSpec

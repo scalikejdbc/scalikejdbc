@@ -1,8 +1,8 @@
 import java.time.LocalDateTime
-import util.control.Exception._
-import scalikejdbc._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
+import scalikejdbc._
 
 class BasicUsageSpec extends AnyFlatSpec with Matchers with LoanPattern {
 

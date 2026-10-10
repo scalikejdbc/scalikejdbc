@@ -31,9 +31,9 @@
 package scalikejdbc.orm.logging
 
 import org.slf4j.{ Logger => SLF4JLogger }
-
 import scala.language.implicitConversions
-import scala.reflect.{ ClassTag, classTag }
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 /**
  * A factory for retrieving an SLF4JLogger.

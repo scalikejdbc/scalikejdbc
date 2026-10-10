@@ -1,6 +1,9 @@
 package scalikejdbc
 
-import org.joda.time.{ DateTime, LocalDate, LocalDateTime, LocalTime }
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import org.joda.time.LocalDateTime
+import org.joda.time.LocalTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

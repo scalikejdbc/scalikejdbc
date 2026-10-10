@@ -1,8 +1,8 @@
 package scalikejdbc
 package jodatime
 
-import java.time.ZoneId
 import JodaUnixTimeInMillisConverter.zoneIdToJodaTimeZone
+import java.time.ZoneId
 
 /**
  * Unix Time Converter to several types.

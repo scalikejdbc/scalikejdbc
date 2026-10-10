@@ -1,9 +1,9 @@
 package scalikejdbc.orm.eagerloading
 
-import scalikejdbc.orm.associations.{ BelongsToExtractor, HasOneExtractor }
-import scalikejdbc.orm.associations.HasManyExtractor
-
 import scala.collection.mutable
+import scalikejdbc.orm.associations.BelongsToExtractor
+import scalikejdbc.orm.associations.HasManyExtractor
+import scalikejdbc.orm.associations.HasOneExtractor
 
 /**
   * Entity repository for includes queries.

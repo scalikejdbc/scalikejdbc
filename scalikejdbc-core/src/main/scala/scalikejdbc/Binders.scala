@@ -1,9 +1,10 @@
 package scalikejdbc
 
-import java.io.InputStream
-import java.sql.{ PreparedStatement, ResultSet }
-import java.time.ZoneId
 import JavaUtilDateConverterImplicits._
+import java.io.InputStream
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.time.ZoneId
 
 /**
  * Provides both of TypeBinder and ParameterBinderFactory for the specified type A.

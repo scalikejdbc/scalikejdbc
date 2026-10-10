@@ -1,8 +1,8 @@
 package scalikejdbc
 
-import org.mockito.Mockito.{ mock, when }
-
 import java.sql._
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

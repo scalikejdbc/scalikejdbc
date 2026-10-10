@@ -1,13 +1,13 @@
 package scalikejdbc.mapper
 
-import scalikejdbc.mapper.ScalikejdbcPluginCompat._
-import sbt.{ given, _ }
-import sbt.Keys._
-import sbt.complete.EditDistance
-import scala.util.control.Exception._
 import java.io.FileNotFoundException
 import java.util.Locale.{ ENGLISH => en }
 import java.util.Properties
+import sbt.Keys._
+import sbt.complete.EditDistance
+import sbt.{ given, _ }
+import scala.util.control.Exception._
+import scalikejdbc.mapper.ScalikejdbcPluginCompat._
 
 object ScalikejdbcPlugin extends AutoPlugin {
 
@@ -71,6 +71,7 @@ object ScalikejdbcPlugin extends AutoPlugin {
   }
 
   import autoImport._
+  import complete.DefaultParsers._
 
   private[this] def getString(props: Properties, key: String): Option[String] =
     Option(props.get(key)).map { value =>
@@ -334,8 +335,6 @@ object ScalikejdbcPlugin extends AutoPlugin {
       Option[String],
       GenTaskParameter
     ]
-
-  import complete.DefaultParsers._
 
   private def genTaskParser(
     keyName: String

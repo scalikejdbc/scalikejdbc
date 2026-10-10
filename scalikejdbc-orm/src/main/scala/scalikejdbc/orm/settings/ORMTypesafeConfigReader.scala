@@ -1,12 +1,11 @@
 package scalikejdbc.orm.settings
 
-import com.typesafe.config.impl.ConfigImpl
 import com.typesafe.config._
-
+import com.typesafe.config.impl.ConfigImpl
 import java.io.File
 import java.net.URI
-import scala.util.Try
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 object ORMTypesafeConfigReader {
 

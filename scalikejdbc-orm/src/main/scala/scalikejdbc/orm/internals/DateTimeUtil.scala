@@ -1,11 +1,12 @@
 package scalikejdbc.orm.internals
 
-import scala.language.implicitConversions
-import org.joda.time.{ DateTime, LocalDate, LocalTime }
-import scalikejdbc.orm.strongparameters.ParamType
-
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import org.joda.time.LocalTime
 import scala.collection.compat.*
+import scala.language.implicitConversions
 import scala.util.Try
+import scalikejdbc.orm.strongparameters.ParamType
 
 /**
  * DateTime utility.

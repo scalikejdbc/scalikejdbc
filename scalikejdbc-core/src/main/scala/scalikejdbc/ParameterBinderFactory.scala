@@ -2,10 +2,8 @@ package scalikejdbc
 
 import java.io.InputStream
 import java.sql.PreparedStatement
-
-import scalikejdbc.interpolation.SQLSyntax
-
 import scala.annotation.implicitNotFound
+import scalikejdbc.interpolation.SQLSyntax
 
 @implicitNotFound("""
 --------------------------------------------------------

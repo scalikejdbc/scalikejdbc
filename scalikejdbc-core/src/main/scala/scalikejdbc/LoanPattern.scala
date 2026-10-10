@@ -1,9 +1,9 @@
 package scalikejdbc
 
 import org.slf4j.LoggerFactory
-
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
 object LoanPattern extends LoanPattern

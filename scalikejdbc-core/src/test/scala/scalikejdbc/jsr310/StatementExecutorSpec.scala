@@ -1,11 +1,11 @@
 package scalikejdbc
 package jsr310
 
-import scalikejdbc.interpolation.Implicits._
 import java.time._
 import java.time.temporal.ChronoUnit
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.interpolation.Implicits._
 
 class StatementExecutorSpec extends AnyFunSpec with Matchers with Settings {
 

@@ -1,9 +1,11 @@
 package scalikejdbc
 package jodatime
 
-import scala.language.implicitConversions
-import java.sql.{ Date => sqlDate, Time => sqlTime, Timestamp => sqlTimestamp }
+import java.sql.{ Date => sqlDate }
+import java.sql.{ Time => sqlTime }
+import java.sql.{ Timestamp => sqlTimestamp }
 import java.util.{ Date => utilDate }
+import scala.language.implicitConversions
 
 /**
  * Implicit conversions for date time values.

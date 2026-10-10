@@ -1,9 +1,11 @@
 package scalikejdbc.orm
 
-import scalikejdbc.jodatime.{ JodaBinders, JodaWrappedResultSet }
-import scalikejdbc.{ ParameterBinderFactory, TypeBinder, WrappedResultSet }
-
 import scala.language.implicitConversions
+import scalikejdbc.ParameterBinderFactory
+import scalikejdbc.TypeBinder
+import scalikejdbc.WrappedResultSet
+import scalikejdbc.jodatime.JodaBinders
+import scalikejdbc.jodatime.JodaWrappedResultSet
 
 trait JodaTimeImplicits {
 
@@ -21,12 +23,10 @@ trait JodaTimeImplicits {
     : ParameterBinderFactory[org.joda.time.LocalTime] =
     JodaBinders.jodaLocalTime
 
-  import org.joda.time.{
-    DateTime => JodaDateTime,
-    LocalDate => JodaLocalDate,
-    LocalDateTime => JodaLocalDateTime,
-    LocalTime => JodaLocalTime
-  }
+  import org.joda.time.{ DateTime => JodaDateTime }
+  import org.joda.time.{ LocalDate => JodaLocalDate }
+  import org.joda.time.{ LocalDateTime => JodaLocalDateTime }
+  import org.joda.time.{ LocalTime => JodaLocalTime }
 
   implicit val jodaDateTimeTypeBinder: TypeBinder[JodaDateTime] =
     JodaBinders.jodaDateTime

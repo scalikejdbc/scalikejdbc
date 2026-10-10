@@ -1,10 +1,10 @@
 package scalikejdbc
 
 import org.joda.time._
-import scalikejdbc.jodatime.JodaWrappedResultSet._
-import scalikejdbc.jodatime.JodaParameterBinderFactory._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scalikejdbc.jodatime.JodaParameterBinderFactory._
+import scalikejdbc.jodatime.JodaWrappedResultSet._
 
 class QueryInterfaceSpec
   extends AnyFlatSpec

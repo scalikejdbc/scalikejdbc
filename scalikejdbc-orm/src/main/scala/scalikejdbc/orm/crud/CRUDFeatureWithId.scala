@@ -2,25 +2,20 @@ package scalikejdbc.orm.crud
 
 // Don't change this import
 import scalikejdbc._
-
-import scalikejdbc.orm.strongparameters.PermittedStrongParameters
-import scalikejdbc.orm.associations.{
-  Association,
-  AssociationsWithIdFeature,
-  JoinsFeature
-}
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  DynamicTableNameFeatureWithId,
-  IdFeature,
-  SQLSyntaxSupportBase
-}
+import scalikejdbc.orm.Alias
+import scalikejdbc.orm.associations.Association
+import scalikejdbc.orm.associations.AssociationsWithIdFeature
+import scalikejdbc.orm.associations.JoinsFeature
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.DynamicTableNameFeatureWithId
+import scalikejdbc.orm.basic.IdFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 import scalikejdbc.orm.eagerloading.IncludesFeatureWithId
 import scalikejdbc.orm.finder.FinderFeatureWithId
 import scalikejdbc.orm.querying.QueryingFeatureWithId
+import scalikejdbc.orm.strongparameters.PermittedStrongParameters
 import scalikejdbc.orm.strongparameters.StrongParametersFeature
-import scalikejdbc.orm.Alias
 
 /**
  * Provides auto-generated CRUD feature.

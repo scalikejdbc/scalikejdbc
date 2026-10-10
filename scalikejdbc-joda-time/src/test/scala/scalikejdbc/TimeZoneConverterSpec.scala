@@ -2,7 +2,6 @@ package scalikejdbc
 
 import java.time.temporal.ChronoUnit
 import java.util.TimeZone
-
 import org.joda.time.DateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

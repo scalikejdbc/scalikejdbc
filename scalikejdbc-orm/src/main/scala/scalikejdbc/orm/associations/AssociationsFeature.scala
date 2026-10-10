@@ -1,22 +1,19 @@
 package scalikejdbc.orm.associations
 
+import scala.collection.mutable
+import scala.language.existentials
+import scala.util.Try
 // Don't change this import
 import scalikejdbc._
 import scalikejdbc.orm.Alias
-import scalikejdbc.orm.basic.{
-  AutoSessionFeature,
-  ConnectionPoolFeature,
-  IdFeature,
-  SQLSyntaxSupportBase
-}
+import scalikejdbc.orm.basic.AutoSessionFeature
+import scalikejdbc.orm.basic.ConnectionPoolFeature
+import scalikejdbc.orm.basic.IdFeature
+import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 import scalikejdbc.orm.eagerloading.IncludesQueryRepository
 import scalikejdbc.orm.exception.AssociationSettingsException
 import scalikejdbc.orm.internals.JavaReflectionUtil
 import scalikejdbc.orm.logging.LoggerProvider
-
-import scala.collection.mutable
-import scala.language.existentials
-import scala.util.Try
 
 object AssociationsFeature {
 

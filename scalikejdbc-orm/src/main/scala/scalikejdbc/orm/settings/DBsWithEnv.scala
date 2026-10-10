@@ -1,11 +1,9 @@
 package scalikejdbc.orm.settings
 
-import scalikejdbc.config.{
-  DBs,
-  NoEnvPrefix,
-  TypesafeConfig,
-  TypesafeConfigReader
-}
+import scalikejdbc.config.DBs
+import scalikejdbc.config.NoEnvPrefix
+import scalikejdbc.config.TypesafeConfig
+import scalikejdbc.config.TypesafeConfigReader
 
 /**
  * DB setup executor with default settings

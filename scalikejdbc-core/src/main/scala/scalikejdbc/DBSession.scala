@@ -1,8 +1,8 @@
 package scalikejdbc
 
 import java.sql._
-import util.control.Exception._
 import scala.collection.compat._
+import scala.util.control.Exception._
 
 /**
  * DB Session

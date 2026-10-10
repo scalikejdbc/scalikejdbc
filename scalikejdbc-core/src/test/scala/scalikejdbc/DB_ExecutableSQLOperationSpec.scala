@@ -1,10 +1,10 @@
 package scalikejdbc
 
 import org.scalatest._
-import util.control.Exception._
-import scalikejdbc.LoanPattern._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
+import scalikejdbc.LoanPattern._
 
 class DB_ExecutableSQLOperationSpec
   extends AnyFlatSpec

@@ -1,7 +1,7 @@
 package scalikejdbc.specs2
 
-import scalikejdbc._
 import org.joda.time.DateTime
+import scalikejdbc._
 
 object Member {
 

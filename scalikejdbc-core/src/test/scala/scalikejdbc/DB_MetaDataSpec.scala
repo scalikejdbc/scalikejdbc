@@ -1,10 +1,12 @@
 package scalikejdbc
 
-import org.scalatest.OptionValues._
 import java.util.Locale.{ ENGLISH => en }
+import org.scalatest.OptionValues._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import scalikejdbc.metadata.{ Index, IndexType, Table }
+import scalikejdbc.metadata.Index
+import scalikejdbc.metadata.IndexType
+import scalikejdbc.metadata.Table
 
 class DB_MetaDataSpec
   extends AnyFlatSpec

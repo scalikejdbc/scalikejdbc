@@ -1,16 +1,16 @@
 package scalikejdbc
 
-import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
-import scalikejdbc.jodatime.JodaWrappedResultSet._
-import scala.util.control.Exception._
-import org.scalatest._
-import org.scalatest.BeforeAndAfter
-import org.joda.time.DateTime
-import java.sql._
-import scala.concurrent.ExecutionContext
 import java.io.ByteArrayInputStream
+import java.sql._
+import org.joda.time.DateTime
+import org.scalatest.BeforeAndAfter
+import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.ExecutionContext
+import scala.util.control.Exception._
+import scalikejdbc.jodatime.JodaUnixTimeInMillisConverterImplicits._
+import scalikejdbc.jodatime.JodaWrappedResultSet._
 
 class DBSessionSpec
   extends AnyFlatSpec

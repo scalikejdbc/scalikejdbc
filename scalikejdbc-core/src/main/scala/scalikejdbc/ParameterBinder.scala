@@ -1,7 +1,6 @@
 package scalikejdbc
 
 import java.sql.PreparedStatement
-
 import scalikejdbc.interpolation.SQLSyntax
 
 // ------------------------------------------------------------------------------

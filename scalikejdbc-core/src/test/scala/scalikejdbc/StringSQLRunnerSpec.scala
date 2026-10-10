@@ -1,9 +1,9 @@
 package scalikejdbc
 
-import scala.util.control.Exception._
 import java.util.NoSuchElementException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
 
 class StringSQLRunnerSpec extends AnyFlatSpec with Matchers with Settings {
 

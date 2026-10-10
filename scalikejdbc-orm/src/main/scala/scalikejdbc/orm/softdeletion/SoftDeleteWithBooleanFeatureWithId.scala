@@ -2,7 +2,6 @@ package scalikejdbc.orm.softdeletion
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm._
 import scalikejdbc.orm.crud.CRUDFeatureWithId
 

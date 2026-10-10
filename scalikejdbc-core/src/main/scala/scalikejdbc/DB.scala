@@ -1,9 +1,10 @@
 package scalikejdbc
 
 import java.sql.Connection
-import scalikejdbc.metadata._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.util.Try
+import scalikejdbc.metadata._
 
 /**
  * Basic Database Accessor

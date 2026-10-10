@@ -1,8 +1,7 @@
 package scalikejdbc
 
-import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
-
 import scala.concurrent.ExecutionContext
+import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
 
 /**
  * Reactive Streams support.

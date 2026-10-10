@@ -5,10 +5,10 @@ import org.scalatest.matchers.should.Matchers
 
 class READMESpec extends AnyFunSpec with Matchers {
 
+  import java.time.ZonedDateTime
   import scalikejdbc.*
   import scalikejdbc.orm.*
   import scalikejdbc.orm.timstamps.TimestampsFeature
-  import java.time.ZonedDateTime
 
   case class Email(
     id: Long,

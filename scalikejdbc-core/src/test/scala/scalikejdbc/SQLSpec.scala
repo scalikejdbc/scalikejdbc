@@ -1,11 +1,12 @@
 package scalikejdbc
 
-import util.control.Exception._
-import org.scalatest._
+import java.sql.PreparedStatement
+import java.sql.SQLException
 import org.scalatest.BeforeAndAfter
-import java.sql.{ SQLException, PreparedStatement }
+import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import scala.util.control.Exception._
 
 class SQLSpec
   extends AnyFlatSpec

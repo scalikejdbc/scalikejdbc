@@ -2,7 +2,6 @@ package scalikejdbc.orm.calculation
 
 // Don't change this import
 import scalikejdbc._
-
 import scalikejdbc.orm.basic.SQLSyntaxSupportBase
 
 /**
