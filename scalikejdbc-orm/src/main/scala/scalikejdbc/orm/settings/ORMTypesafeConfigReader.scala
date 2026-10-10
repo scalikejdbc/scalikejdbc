@@ -6,7 +6,7 @@ import com.typesafe.config._
 import java.io.File
 import java.net.URI
 import scala.util.Try
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object ORMTypesafeConfigReader {
 
