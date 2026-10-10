@@ -330,7 +330,7 @@ class SQLInterpolationSpec
     }
   }
 
-  it should "accept Traversable[SQLSyntax] (#216)" in {
+  it should "accept Iterable[SQLSyntax] (#216)" in {
     DB.localTx { implicit s =>
       try {
         sql"""create table interpolation_users_216 (id int, name varchar(256))""".execute
