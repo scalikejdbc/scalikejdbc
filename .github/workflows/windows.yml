@@ -15,5 +15,4 @@ jobs:
     - uses: coursier/cache-action@v8
     - uses: sbt/setup-sbt@v1
     - run: rm project/sbt-pgp.sbt
-    - shell: bash
-      run: sbt -v testFull
+    - run: sbt -v testFull
