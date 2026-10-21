@@ -55,7 +55,7 @@ lazy val mockitoVersion = "5.24.0"
 val specs2 = "org.specs2" %% "specs2-core" % "4.23.0" % "provided"
 
 val mysqlConnectorJ =
-  ("com.mysql" % "mysql-connector-j" % "26.7.0" % Test).exclude(
+  ("com.mysql" % "mysql-connector-j" % "26.10.0" % Test).exclude(
     "com.google.protobuf" % "protobuf-java"
   )
 
