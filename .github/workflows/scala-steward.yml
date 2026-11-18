@@ -13,12 +13,12 @@ jobs:
     steps:
     - name: Generate token
       id: generate_token
-      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      uses: actions/create-github-app-token@v3.3.0
       with:
         client-id: 89631
         private-key: ${{ secrets.SCALIKEJDBC_BOT_KEY }}
     - name: Launch Scala Steward
-      uses: scala-steward-org/scala-steward-action@3e5cae868160200afda12b57c150e56cede989ab # v2.97.0
+      uses: scala-steward-org/scala-steward-action@v2.97.0
       with:
         github-token: ${{ steps.generate_token.outputs.token }}
         author-email: "74833019+scalikejdbc-bot[bot]@users.noreply.github.com"
