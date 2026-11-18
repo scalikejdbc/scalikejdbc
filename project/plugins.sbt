@@ -1,6 +1,6 @@
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.6.2")
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.2.1")
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.13.2")
+addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.14.0")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.2")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
