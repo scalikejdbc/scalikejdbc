@@ -15,7 +15,7 @@ import scalikejdbc.orm.optimisticlock.OptimisticLockWithTimestampFeature
 import scalikejdbc.orm.optimisticlock.OptimisticLockWithVersionFeature
 import scalikejdbc.orm.softdeletion.SoftDeleteWithBooleanFeature
 import scalikejdbc.orm.softdeletion.SoftDeleteWithTimestampFeature
-import scalikejdbc.orm.timstamps.TimestampsFeature
+import scalikejdbc.orm.timestamps.TimestampsFeature
 
 case class Member(
   id: Long,

@@ -8,7 +8,7 @@ class READMESpec extends AnyFunSpec with Matchers {
   import java.time.ZonedDateTime
   import scalikejdbc.*
   import scalikejdbc.orm.*
-  import scalikejdbc.orm.timstamps.TimestampsFeature
+  import scalikejdbc.orm.timestamps.TimestampsFeature
 
   case class Email(
     id: Long,
