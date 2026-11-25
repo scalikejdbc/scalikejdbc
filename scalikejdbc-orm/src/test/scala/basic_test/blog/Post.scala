@@ -3,7 +3,7 @@ package basic_test.blog
 import org.joda.time._
 import scalikejdbc._
 import scalikejdbc.orm.CRUDMapper
-import scalikejdbc.orm.timstamps.TimestampsFeature
+import scalikejdbc.orm.timestamps.TimestampsFeature
 
 case class Post(
   id: Long,

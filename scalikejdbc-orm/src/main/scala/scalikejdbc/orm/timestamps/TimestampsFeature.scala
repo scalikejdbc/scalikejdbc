@@ -1,4 +1,4 @@
-package scalikejdbc.orm.timstamps
+package scalikejdbc.orm.timestamps
 
 /**
   * ActiveRecord timestamps feature.

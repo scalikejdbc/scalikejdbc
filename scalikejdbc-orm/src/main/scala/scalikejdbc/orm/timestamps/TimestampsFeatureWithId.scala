@@ -1,4 +1,4 @@
-package scalikejdbc.orm.timstamps
+package scalikejdbc.orm.timestamps
 
 import org.joda.time.DateTime
 // Don't change this import

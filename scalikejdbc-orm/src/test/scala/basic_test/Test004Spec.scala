@@ -8,7 +8,7 @@ import scalikejdbc._
 import scalikejdbc.orm.CRUDMapper
 import scalikejdbc.orm.NoIdCRUDMapper
 import scalikejdbc.orm.exception.IllegalAssociationException
-import scalikejdbc.orm.timstamps.TimestampsFeature
+import scalikejdbc.orm.timestamps.TimestampsFeature
 import util.DBSeeds
 
 class Test004Spec extends AnyFunSpec with Matchers with DBSeeds {
