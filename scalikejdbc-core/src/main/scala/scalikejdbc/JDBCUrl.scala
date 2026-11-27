@@ -21,7 +21,7 @@ object JDBCUrl {
       hostAndPort.head,
       hostAndPort.tail.headOption.map(_.toInt).getOrElse(defaultPort(url))
     )
-    val database = urlParts(3)
+    val database = urlParts(3).takeWhile(_ != '?')
 
     JDBCUrl(host = host, port = port, database = database)
   } catch {
